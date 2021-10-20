@@ -5,7 +5,7 @@ const { mergeBatchResults } = require('../../../src/bulk/common');
 const { Timestamp, Long } = require('../../../src/bson');
 
 describe('bulk/common', function () {
-  describe('#mergeBatchResults', function () {
+  describe.only('#mergeBatchResults', function () {
     let opTime;
     let lastOp;
     const bulkResult = {
@@ -41,13 +41,13 @@ describe('bulk/common', function () {
         before(function () {
           lastOp = { ts: 7020546605669417496, t: 10 };
           opTime = Timestamp.fromNumber(8020546605669417496);
-          bulkResult.lastOp = lastOp;
+          bulkResult.opTime = lastOp;
           result.opTime = opTime;
         });
 
-        it('replaces the lastOp with the properly formatted object', function () {
+        it('replaces the opTime with the properly formatted object', function () {
           mergeBatchResults(batch, bulkResult, null, result);
-          expect(bulkResult.lastOp).to.deep.equal({ ts: opTime, t: Long.ZERO });
+          expect(bulkResult.opTime).to.deep.equal({ ts: opTime, t: Long.ZERO });
         });
       });
 
@@ -56,13 +56,13 @@ describe('bulk/common', function () {
           before(function () {
             lastOp = { ts: 7020546605669417496, t: 10 };
             opTime = { ts: 7020546605669417497, t: 10 };
-            bulkResult.lastOp = lastOp;
+            bulkResult.opTime = lastOp;
             result.opTime = opTime;
           });
 
           it('replaces the lastOp with the new opTime', function () {
             mergeBatchResults(batch, bulkResult, null, result);
-            expect(bulkResult.lastOp).to.deep.equal(opTime);
+            expect(bulkResult.opTime).to.deep.equal(opTime);
           });
         });
 
@@ -71,13 +71,13 @@ describe('bulk/common', function () {
             before(function () {
               lastOp = { ts: 7020546605669417496, t: 10 };
               opTime = { ts: 7020546605669417496, t: 20 };
-              bulkResult.lastOp = lastOp;
+              bulkResult.opTime = lastOp;
               result.opTime = opTime;
             });
 
             it('replaces the lastOp with the new opTime', function () {
               mergeBatchResults(batch, bulkResult, null, result);
-              expect(bulkResult.lastOp).to.deep.equal(opTime);
+              expect(bulkResult.opTime).to.deep.equal(opTime);
             });
           });
 
@@ -85,13 +85,13 @@ describe('bulk/common', function () {
             before(function () {
               lastOp = { ts: 7020546605669417496, t: 10 };
               opTime = { ts: 7020546605669417496, t: 10 };
-              bulkResult.lastOp = lastOp;
+              bulkResult.opTime = lastOp;
               result.opTime = opTime;
             });
 
             it('does not replace the lastOp with the new opTime', function () {
               mergeBatchResults(batch, bulkResult, null, result);
-              expect(bulkResult.lastOp).to.deep.equal(lastOp);
+              expect(bulkResult.opTime).to.deep.equal(lastOp);
             });
           });
 
@@ -99,13 +99,13 @@ describe('bulk/common', function () {
             before(function () {
               lastOp = { ts: 7020546605669417496, t: 10 };
               opTime = { ts: 7020546605669417496, t: 5 };
-              bulkResult.lastOp = lastOp;
+              bulkResult.opTime = lastOp;
               result.opTime = opTime;
             });
 
             it('does not replace the lastOp with the new opTime', function () {
               mergeBatchResults(batch, bulkResult, null, result);
-              expect(bulkResult.lastOp).to.deep.equal(lastOp);
+              expect(bulkResult.opTime).to.deep.equal(lastOp);
             });
           });
         });
@@ -114,13 +114,13 @@ describe('bulk/common', function () {
           before(function () {
             lastOp = { ts: 7020546605669417496, t: 10 };
             opTime = { ts: 7020546605669417495, t: 10 };
-            bulkResult.lastOp = lastOp;
+            bulkResult.opTime = lastOp;
             result.opTime = opTime;
           });
 
           it('does not replace the lastOp with the new opTime', function () {
             mergeBatchResults(batch, bulkResult, null, result);
-            expect(bulkResult.lastOp).to.deep.equal(lastOp);
+            expect(bulkResult.opTime).to.deep.equal(lastOp);
           });
         });
       });
