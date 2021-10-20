@@ -2,7 +2,11 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const BulkWriteResult = require('../../lib/bulk/common').BulkWriteResult;
+const Long = require('../../lib/core').BSON.Long;
+const Timestamp = require('../../lib/core').BSON.Timestamp;
+const common = require('../../lib/bulk/common');
+const BulkWriteResult = common.BulkWriteResult;
+const mergeBatchResults = common.mergeBatchResults;
 
 describe('Bulk Writes', function() {
   const test = {};
@@ -130,5 +134,127 @@ describe('Bulk Writes', function() {
     // or either cached object then they will throw in these expects:
 
     expect(() => result.insertedIds).to.not.throw();
+  });
+
+  describe('#mergeBatchResults', function() {
+    let opTime;
+    let lastOp;
+    const bulkResult = {
+      ok: 1,
+      writeErrors: [],
+      writeConcernErrors: [],
+      insertedIds: [],
+      nInserted: 0,
+      nUpserted: 0,
+      nMatched: 0,
+      nModified: 0,
+      nRemoved: 1,
+      upserted: []
+    };
+    const result = {
+      n: 8,
+      nModified: 8,
+      electionId: '7fffffff0000000000000028',
+      ok: 1,
+      $clusterTime: {
+        clusterTime: '7020546605669417498',
+        signature: {
+          hash: 'AAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+          keyId: 0
+        }
+      },
+      operationTime: '7020546605669417498'
+    };
+    const batch = [];
+
+    context('when lastOp is an object', function() {
+      context('when the opTime is a Timestamp', function() {
+        before(function() {
+          lastOp = { ts: 7020546605669417496, t: 10 };
+          opTime = Timestamp.fromNumber(8020546605669417496);
+          bulkResult.lastOp = lastOp;
+          result.opTime = opTime;
+        });
+
+        it('replaces the lastOp with the properly formatted object', function() {
+          mergeBatchResults(batch, bulkResult, null, result);
+          expect(bulkResult.lastOp).to.deep.equal({ ts: opTime, t: Long.ZERO });
+        });
+      });
+
+      context('when the opTime is an object', function() {
+        context('when the ts is greater', function() {
+          before(function() {
+            lastOp = { ts: 7020546605669417496, t: 10 };
+            opTime = { ts: 7020546605669417497, t: 10 };
+            bulkResult.lastOp = lastOp;
+            result.opTime = opTime;
+          });
+
+          it('replaces the lastOp with the new opTime', function() {
+            mergeBatchResults(batch, bulkResult, null, result);
+            expect(bulkResult.lastOp).to.deep.equal(opTime);
+          });
+        });
+
+        context('when the ts is equal', function() {
+          context('when the t is greater', function() {
+            before(function() {
+              lastOp = { ts: 7020546605669417496, t: 10 };
+              opTime = { ts: 7020546605669417496, t: 20 };
+              bulkResult.lastOp = lastOp;
+              result.opTime = opTime;
+            });
+
+            it('replaces the lastOp with the new opTime', function() {
+              mergeBatchResults(batch, bulkResult, null, result);
+              expect(bulkResult.lastOp).to.deep.equal(opTime);
+            });
+          });
+
+          context('when the t is equal', function() {
+            before(function() {
+              lastOp = { ts: 7020546605669417496, t: 10 };
+              opTime = { ts: 7020546605669417496, t: 10 };
+              bulkResult.lastOp = lastOp;
+              result.opTime = opTime;
+            });
+
+            it('does not replace the lastOp with the new opTime', function() {
+              mergeBatchResults(batch, bulkResult, null, result);
+              expect(bulkResult.lastOp).to.deep.equal(lastOp);
+            });
+          });
+
+          context('when the t is less', function() {
+            before(function() {
+              lastOp = { ts: 7020546605669417496, t: 10 };
+              opTime = { ts: 7020546605669417496, t: 5 };
+              bulkResult.lastOp = lastOp;
+              result.opTime = opTime;
+            });
+
+            it('does not replace the lastOp with the new opTime', function() {
+              mergeBatchResults(batch, bulkResult, null, result);
+              expect(bulkResult.lastOp).to.deep.equal(lastOp);
+            });
+          });
+        });
+
+        context('when the ts is less', function() {
+          before(function() {
+            lastOp = { ts: 7020546605669417496, t: 10 };
+            opTime = { ts: 7020546605669417495, t: 10 };
+            bulkResult.lastOp = lastOp;
+            result.opTime = opTime;
+          });
+
+          it('does not replace the lastOp with the new opTime', function() {
+            mergeBatchResults(batch, bulkResult, null, result);
+            expect(bulkResult.lastOp).to.deep.equal(lastOp);
+          });
+        });
+      });
+    });
   });
 });
