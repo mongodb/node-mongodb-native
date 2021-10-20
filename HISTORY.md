@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.7.3](https://github.com/mongodb/node-mongodb-native/compare/v3.7.2...v3.7.3) (2021-10-20)
+
+
+### Bug Fixes
+
+* **NODE-3515:** do proper opTime merging in bulk results ([#3011](https://github.com/mongodb/node-mongodb-native/issues/3011)) ([428e6d3](https://github.com/mongodb/node-mongodb-native/commit/428e6d33562e275234ad60031aa0923ea9fe4063))
+
 ### [3.7.2](https://github.com/mongodb/node-mongodb-native/compare/v3.7.1...v3.7.2) (2021-10-05)
 
 ### [3.7.1](https://github.com/mongodb/node-mongodb-native/compare/v3.7.0...v3.7.1) (2021-09-14)
