@@ -198,9 +198,9 @@ export type ChangeStreamEvents<TSchema extends Document = Document> = {
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  * @public
  */
-export class ChangeStream<
-  TSchema extends Document = Document
-> extends TypedEventEmitter<ChangeStreamEvents<TSchema>> {
+export class ChangeStream<TSchema extends Document = Document> extends TypedEventEmitter<
+  ChangeStreamEvents<TSchema>
+> {
   pipeline: Document[];
   options: ChangeStreamOptions;
   parent: MongoClient | Db | Collection;
