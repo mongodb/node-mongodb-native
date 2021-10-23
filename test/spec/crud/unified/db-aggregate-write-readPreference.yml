@@ -1,0 +1,145 @@
+description: db-aggregate-write-readPreference
+
+schemaVersion: '1.4'
+
+runOnRequirements:
+  # 3.6+ non-standalone is needed to utilize $readPreference in OP_MSG.
+  # Serverless does not support $listLocalSessions and $currentOp stages, and
+  # mongos does not allow combining them with $out or $merge.
+  - minServerVersion: "3.6"
+    topologies: [ replicaset ]
+    serverless: forbid
+
+_yamlAnchors:
+  readConcern: &readConcern
+    level: &readConcernLevel "local"
+  writeConcern: &writeConcern
+    w: &writeConcernW 1
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+      # Used to test that read and write concerns are still inherited
+      uriOptions:
+        readConcernLevel: *readConcernLevel
+        w: *writeConcernW
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name db0
+      databaseOptions:
+        readPreference: &readPreference
+          # secondaryPreferred is specified for compatibility with clusters that
+          # may not have a secondary (e.g. each shard is only a primary).
+          mode: secondaryPreferred
+          # maxStalenessSeconds is specified to ensure that drivers forward the
+          # read preference to mongos or a load balancer. That would not be the
+          # case with only secondaryPreferred.
+          maxStalenessSeconds: 600
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: "Database-level aggregate with $out includes read preference for 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - object: *database0
+        name: aggregate
+        arguments:
+          pipeline: &outPipeline
+            - { $listLocalSessions: {} }
+            - { $limit: 1 }
+            - { $addFields: { _id: 1 } }
+            - { $project: { _id: 1 } }
+            - { $out: *collection0Name }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: 1
+                pipeline: *outPipeline
+                $readPreference: *readPreference
+                readConcern: *readConcern
+                writeConcern: *writeConcern
+    outcome: &outcome
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+
+  - description: "Database-level aggregate with $out omits read preference for pre-5.0 server"
+    runOnRequirements:
+      - maxServerVersion: "4.4.99"
+    operations:
+      - object: *database0
+        name: aggregate
+        arguments:
+          pipeline: *outPipeline
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: 1
+                pipeline: *outPipeline
+                $readPreference: { $$exists: false }
+                readConcern: *readConcern
+                writeConcern: *writeConcern
+    outcome: *outcome
+
+  - description: "Database-level aggregate with $merge includes read preference for 5.0+ server"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - object: *database0
+        name: aggregate
+        arguments:
+          pipeline: &mergePipeline
+            - { $listLocalSessions: {} }
+            - { $limit: 1 }
+            - { $addFields: { _id: 1 } }
+            - { $project: { _id: 1 } }
+            - { $merge: { into: *collection0Name } }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: 1
+                pipeline: *mergePipeline
+                $readPreference: *readPreference
+                readConcern: *readConcern
+                writeConcern: *writeConcern
+    outcome: *outcome
+
+  - description: "Database-level aggregate with $merge omits read preference for pre-5.0 server"
+    runOnRequirements:
+      - minServerVersion: "4.2"
+        maxServerVersion: "4.4.99"
+    operations:
+      - object: *database0
+        name: aggregate
+        arguments:
+          pipeline: *mergePipeline
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: 1
+                pipeline: *mergePipeline
+                $readPreference: { $$exists: false }
+                readConcern: *readConcern
+                writeConcern: *writeConcern
+    outcome: *outcome

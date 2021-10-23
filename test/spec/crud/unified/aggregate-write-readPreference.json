@@ -1,0 +1,457 @@
+{
+  "description": "aggregate-write-readPreference",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.6",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "_yamlAnchors": {
+    "readConcern": {
+      "level": "local"
+    },
+    "writeConcern": {
+      "w": 1
+    }
+  },
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "uriOptions": {
+          "readConcernLevel": "local",
+          "w": 1
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "db0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0",
+        "collectionOptions": {
+          "readPreference": {
+            "mode": "secondaryPreferred",
+            "maxStalenessSeconds": 600
+          }
+        }
+      }
+    },
+    {
+      "collection": {
+        "id": "collection1",
+        "database": "database0",
+        "collectionName": "coll1"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "db0",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    },
+    {
+      "collectionName": "coll1",
+      "databaseName": "db0",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Aggregate with $out includes read preference for 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              },
+              {
+                "$sort": {
+                  "x": 1
+                }
+              },
+              {
+                "$out": "coll1"
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      }
+                    },
+                    {
+                      "$sort": {
+                        "x": 1
+                      }
+                    },
+                    {
+                      "$out": "coll1"
+                    }
+                  ],
+                  "$readPreference": {
+                    "mode": "secondaryPreferred",
+                    "maxStalenessSeconds": 600
+                  },
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "w": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll1",
+          "databaseName": "db0",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $out omits read preference for pre-5.0 server",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              },
+              {
+                "$sort": {
+                  "x": 1
+                }
+              },
+              {
+                "$out": "coll1"
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      }
+                    },
+                    {
+                      "$sort": {
+                        "x": 1
+                      }
+                    },
+                    {
+                      "$out": "coll1"
+                    }
+                  ],
+                  "$readPreference": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "w": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll1",
+          "databaseName": "db0",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $merge includes read preference for 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              },
+              {
+                "$sort": {
+                  "x": 1
+                }
+              },
+              {
+                "$merge": {
+                  "into": "coll1"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      }
+                    },
+                    {
+                      "$sort": {
+                        "x": 1
+                      }
+                    },
+                    {
+                      "$merge": {
+                        "into": "coll1"
+                      }
+                    }
+                  ],
+                  "$readPreference": {
+                    "mode": "secondaryPreferred",
+                    "maxStalenessSeconds": 600
+                  },
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "w": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll1",
+          "databaseName": "db0",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $merge omits read preference for pre-5.0 server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": {
+                    "$gt": 1
+                  }
+                }
+              },
+              {
+                "$sort": {
+                  "x": 1
+                }
+              },
+              {
+                "$merge": {
+                  "into": "coll1"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "coll0",
+                  "pipeline": [
+                    {
+                      "$match": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      }
+                    },
+                    {
+                      "$sort": {
+                        "x": 1
+                      }
+                    },
+                    {
+                      "$merge": {
+                        "into": "coll1"
+                      }
+                    }
+                  ],
+                  "$readPreference": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "w": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll1",
+          "databaseName": "db0",
+          "documents": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

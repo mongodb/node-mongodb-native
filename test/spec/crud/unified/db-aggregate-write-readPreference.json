@@ -1,0 +1,443 @@
+{
+  "description": "db-aggregate-write-readPreference",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.6",
+      "topologies": [
+        "replicaset"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "_yamlAnchors": {
+    "readConcern": {
+      "level": "local"
+    },
+    "writeConcern": {
+      "w": 1
+    }
+  },
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "uriOptions": {
+          "readConcernLevel": "local",
+          "w": 1
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "db0",
+        "databaseOptions": {
+          "readPreference": {
+            "mode": "secondaryPreferred",
+            "maxStalenessSeconds": 600
+          }
+        }
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "db0",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Database-level aggregate with $out includes read preference for 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "database0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$listLocalSessions": {}
+              },
+              {
+                "$limit": 1
+              },
+              {
+                "$addFields": {
+                  "_id": 1
+                }
+              },
+              {
+                "$project": {
+                  "_id": 1
+                }
+              },
+              {
+                "$out": "coll0"
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1,
+                  "pipeline": [
+                    {
+                      "$listLocalSessions": {}
+                    },
+                    {
+                      "$limit": 1
+                    },
+                    {
+                      "$addFields": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$project": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$out": "coll0"
+                    }
+                  ],
+                  "$readPreference": {
+                    "mode": "secondaryPreferred",
+                    "maxStalenessSeconds": 600
+                  },
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "w": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "db0",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Database-level aggregate with $out omits read preference for pre-5.0 server",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "database0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$listLocalSessions": {}
+              },
+              {
+                "$limit": 1
+              },
+              {
+                "$addFields": {
+                  "_id": 1
+                }
+              },
+              {
+                "$project": {
+                  "_id": 1
+                }
+              },
+              {
+                "$out": "coll0"
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1,
+                  "pipeline": [
+                    {
+                      "$listLocalSessions": {}
+                    },
+                    {
+                      "$limit": 1
+                    },
+                    {
+                      "$addFields": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$project": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$out": "coll0"
+                    }
+                  ],
+                  "$readPreference": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "w": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "db0",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Database-level aggregate with $merge includes read preference for 5.0+ server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "database0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$listLocalSessions": {}
+              },
+              {
+                "$limit": 1
+              },
+              {
+                "$addFields": {
+                  "_id": 1
+                }
+              },
+              {
+                "$project": {
+                  "_id": 1
+                }
+              },
+              {
+                "$merge": {
+                  "into": "coll0"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1,
+                  "pipeline": [
+                    {
+                      "$listLocalSessions": {}
+                    },
+                    {
+                      "$limit": 1
+                    },
+                    {
+                      "$addFields": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$project": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$merge": {
+                        "into": "coll0"
+                      }
+                    }
+                  ],
+                  "$readPreference": {
+                    "mode": "secondaryPreferred",
+                    "maxStalenessSeconds": 600
+                  },
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "w": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "db0",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Database-level aggregate with $merge omits read preference for pre-5.0 server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "database0",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$listLocalSessions": {}
+              },
+              {
+                "$limit": 1
+              },
+              {
+                "$addFields": {
+                  "_id": 1
+                }
+              },
+              {
+                "$project": {
+                  "_id": 1
+                }
+              },
+              {
+                "$merge": {
+                  "into": "coll0"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1,
+                  "pipeline": [
+                    {
+                      "$listLocalSessions": {}
+                    },
+                    {
+                      "$limit": 1
+                    },
+                    {
+                      "$addFields": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$project": {
+                        "_id": 1
+                      }
+                    },
+                    {
+                      "$merge": {
+                        "into": "coll0"
+                      }
+                    }
+                  ],
+                  "$readPreference": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "w": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "db0",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
