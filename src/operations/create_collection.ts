@@ -37,7 +37,7 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
 export interface TimeSeriesCollectionOptions extends Document {
   timeField: string;
   metaField?: string;
-  granularity?: string;
+  granularity?: 'seconds' | 'minutes' | 'hours' | string;
 }
 
 /** @public */
