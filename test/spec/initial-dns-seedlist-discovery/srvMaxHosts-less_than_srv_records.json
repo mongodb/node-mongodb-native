@@ -1,0 +1,9 @@
+{
+  "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=1",
+  "numSeeds": 1,
+  "numHosts": 1,
+  "options": {
+    "srvMaxHosts": 1,
+    "ssl": true
+  }
+}

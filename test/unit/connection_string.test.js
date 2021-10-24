@@ -235,7 +235,8 @@ describe('Connection String', function () {
           test[1].comment = test[0];
         }
 
-        it(test[1].comment, {
+        // TODO: NODE-3467: Implement maxSrvHosts work.
+        it.skip(test[1].comment, {
           metadata: { requires: { topology: ['single'] } },
           test: function (done) {
             try {

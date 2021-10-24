@@ -1,0 +1,13 @@
+# The TXT record for test20.test.build.10gen.cc contains loadBalanced=true.
+# DRIVERS-1721 introduced this test as passing.
+uri: "mongodb+srv://test20.test.build.10gen.cc/?directConnection=false"
+seeds:
+    - localhost.test.build.10gen.cc:27017
+hosts:
+    # In LB mode, the driver does not do server discovery, so the hostname does
+    # not get resolved to localhost:27017.
+    - localhost.test.build.10gen.cc:27017
+options:
+    loadBalanced: true
+    ssl: true
+    directConnection: false

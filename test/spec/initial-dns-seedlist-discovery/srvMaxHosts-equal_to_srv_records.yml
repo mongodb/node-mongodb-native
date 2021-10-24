@@ -1,0 +1,13 @@
+# When srvMaxHosts equals the number of SRV records, all hosts are added to the
+# seed list.
+uri: "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=2"
+numSeeds: 2
+seeds:
+    - localhost.test.build.10gen.cc:27017
+    - localhost.test.build.10gen.cc:27018
+hosts:
+    - localhost.test.build.10gen.cc:27017
+    - localhost.test.build.10gen.cc:27018
+options:
+    srvMaxHosts: 2
+    ssl: true
