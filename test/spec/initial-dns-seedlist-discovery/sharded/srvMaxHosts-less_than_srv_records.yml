@@ -1,0 +1,10 @@
+# When srvMaxHosts is less than the number of SRV records, a random subset of
+# hosts are added to the seed list. We cannot anticipate which hosts will be
+# selected, so this test uses numSeeds and numHosts instead of seeds and hosts,
+# respectively.
+uri: "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=1"
+numSeeds: 1
+numHosts: 1
+options:
+    srvMaxHosts: 1
+    ssl: true
