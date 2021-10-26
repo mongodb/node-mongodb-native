@@ -1,0 +1,28 @@
+# Clients ignore Unknown/PossiblePrimary servers even when read preference has maxStalenessSeconds
+topology_description:
+  type: ReplicaSetNoPrimary
+  servers:
+  - &1
+    address: a:27017
+    type: PossiblePrimary
+    avg_rtt_ms: 5
+    maxWireVersion: 0
+  - &2
+    address: b:27017
+    type: Unknown
+    avg_rtt_ms: 5
+    maxWireVersion: 0
+  - &3
+    address: c:27017
+    type: RSSecondary
+    maxWireVersion: 6
+    avg_rtt_ms: 5
+    lastWrite: {lastWriteDate: {$numberLong: "1"}}
+read_preference:
+  mode: Nearest
+  maxStalenessSeconds: 120
+suitable_servers:
+- *3
+in_latency_window:
+- *3
+

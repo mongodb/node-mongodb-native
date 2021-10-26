@@ -61,9 +61,9 @@ Each test specifies that it expects an error, or specifies two sets of servers:
   tests pass or fail deterministically.
 
 If the file contains ``error: true``, drivers MUST test that they throw an
-error during server selection, due to an invalid read preference or
-incompatible wire versions. For other files, drivers MUST test that they
-correctly select the set of servers in ``in_latency_window``.
+error during server selection due to an invalid read preference. For other
+files, drivers MUST test that they correctly select the set of servers in
+``in_latency_window``.
 
 Drivers MAY also test that before filtration by latency, they select the
 specified set of "suitable" servers.

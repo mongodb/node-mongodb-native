@@ -111,7 +111,6 @@ function collectStalenessTests(specDir) {
         return result;
       });
   });
-
   return tests;
 }
 
