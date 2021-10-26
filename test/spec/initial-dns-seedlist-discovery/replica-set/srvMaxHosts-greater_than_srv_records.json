@@ -1,0 +1,16 @@
+{
+  "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=3",
+  "seeds": [
+    "localhost.test.build.10gen.cc:27017",
+    "localhost.test.build.10gen.cc:27018"
+  ],
+  "hosts": [
+    "localhost:27017",
+    "localhost:27018",
+    "localhost:27019"
+  ],
+  "options": {
+    "srvMaxHosts": 3,
+    "ssl": true
+  }
+}
