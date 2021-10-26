@@ -19,126 +19,28 @@ version requirements as noted by the ``runOn`` section, if provided.
 Subdirectories for Test Formats
 -------------------------------
 
-This document describes a current test format, which should be used for any new
-CRUD tests. Additionally, it refers to a "legacy" format, which dates back to
-the initial version of the CRUD specification. Until such time that all original
-tests have been ported to the current format, tests in each format will be
-grouped in their own subdirectory:
+This document describes a legacy format for CRUD tests: legacy-v1, which dates back
+to the first version of the CRUD specification. New CRUD tests should be written
+in the `unified test format <../../unified-test-format/unified-test-format.rst>`_
+and placed under ``unified/``. Until such time that all original tests have been ported
+to the unified test format, tests in each format will be grouped in their own subdirectory:
 
-- ``v1/``: Legacy format tests
-- ``v2/``: Current format tests
+- ``v1/``: Legacy-v1 format tests
+- ``unified/``: Tests using the `unified test format <../../unified-test-format/unified-test-format.rst>`_
 
 Since some drivers may not have a unified test runner capable of executing tests
-in both formats, segregating tests in this manner will make it easier for
+in all two formats, segregating tests in this manner will make it easier for
 drivers to sync and feed test files to different test runners.
 
-Test Format
-===========
-
-*Note: this section pertains to test files in the "v2" directory.*
-
-Each YAML file has the following keys:
-
-- ``runOn`` (optional): An array of server version and/or topology requirements
-  for which the tests can be run. If the test environment satisfies one or more
-  of these requirements, the tests may be executed; otherwise, this file should
-  be skipped. If this field is omitted, the tests can be assumed to have no
-  particular requirements and should be executed. Each element will have some or
-  all of the following fields:
-
-  - ``minServerVersion`` (optional): The minimum server version (inclusive)
-    required to successfully run the tests. If this field is omitted, it should
-    be assumed that there is no lower bound on the required server version.
-
-  - ``maxServerVersion`` (optional): The maximum server version (inclusive)
-    against which the tests can be run successfully. If this field is omitted,
-    it should be assumed that there is no upper bound on the required server
-    version.
-
-  - ``topology`` (optional): An array of server topologies against which the
-    tests can be run successfully. Valid topologies are "single", "replicaset",
-    and "sharded". If this field is omitted, the default is all topologies (i.e.
-    ``["single", "replicaset", "sharded"]``).
-
-- ``collection_name`` (optional): The collection to use for testing.
-
-- ``database_name`` (optional): The database to use for testing.
-
-- ``data`` (optional): The data that should exist in the collection under test before each
-  test run.
-
-- ``tests``: An array of tests that are to be run independently of each other.
-  Each test will have some or all of the following fields:
-
-  - ``description``: The name of the test.
-
-  - ``skipReason`` (optional): If present, the test should be skipped and the
-    string value will specify a reason.
-
-  - ``failPoint`` (optional): The ``configureFailPoint`` command document to run
-    to configure a fail point on the primary server.
-
-  - ``clientOptions`` (optional): Names and values of options used to construct
-    the MongoClient for this test.
-
-  - ``operations``: Array of documents, each describing an operation to be
-    executed. Each document has the following fields:
-
-    - ``object`` (optional): The name of the object to perform the operation on. Can be
-      "database" or "collection". Defaults to "collection" if undefined.
-
-    - ``collectionOptions`` (optional): Names and values of options used to
-      construct the collection object for this test.
-
-    - ``name``: The name of the operation as defined in the specification.
-
-    - ``arguments``: The names and values of arguments from the specification.
-
-    - ``error`` (optional): If ``true``, the test should expect the operation
-      to emit an error or exception. If ``false`` or omitted, drivers MUST
-      assert that no error occurred.
-
-    - ``result`` (optional): The result of executing the operation. This will
-      correspond to operation's return value as defined in the specification.
-      This field may be omitted if ``error`` is ``true``. If this field is
-      present and ``error`` is ``true`` (generally for multi-statement tests),
-      the result reports information about statements that succeeded before an
-      unrecoverable failure. In that case, drivers may choose to check the
-      result object if their BulkWriteException (or equivalent) provides access
-      to a write result object.
-
-  - ``expectations`` (optional): Array of documents, each describing a
-    `CommandStartedEvent <../../command-monitoring/command-monitoring.rst#api>`_
-    from the
-    `Command Monitoring <../../command-monitoring/command-monitoring.rst>`_
-    specification. If present, drivers should use command monitoring to observe
-    events emitted during execution of the test operation(s) and assert that
-    they match the expected CommandStartedEvent(s). Each document will have the
-    following field:
-
-    - ``command_started_event``: Document corresponding to an expected
-      `CommandStartedEvent <../../command-monitoring/command-monitoring.rst#api>`_.
-
-  - ``outcome`` (optional): Document describing the expected state of the
-    collection after the operation is executed. Contains the following fields:
-
-    - ``collection``:
-
-      - ``name`` (optional): The name of the collection to verify. If this isn't
-        present then use the collection under test.
-
-      - ``data``: The data that should exist in the collection after the
-        operation has been run, sorted by "_id".
-
-Legacy Test Format for Single Operations
-----------------------------------------
+Legacy-v1 Test Format for Single Operations
+-------------------------------------------
 
 *Note: this section pertains to test files in the "v1" directory.*
 
 The test format above supports both multiple operations and APM expectations,
 and is consistent with the formats used by other specifications. Previously, the
 CRUD spec tests used a simplified format that only allowed for executing a
-single operation. Notable differences from the current format are as follows:
+single operation. Notable differences from the legacy-v2 format are as follows:
 
 - Instead of a ``tests[i].operations`` array, a single operation was defined as
   a document in ``tests[i].operation``. That document consisted of only the
@@ -150,15 +52,17 @@ single operation. Notable differences from the current format are as follows:
   fields.
 
 - Instead of a top-level ``runOn`` field, server requirements are denoted by
-  separate top-level ``minServerVersion`` and ``maxServerVersion`` fields. The
-  minimum server version is an inclusive lower bound for running the test. The
-  maximum server version is an exclusive upper bound for running the test. If a
-  field is not present, it should be assumed that there is no corresponding bound
-  on the required server version.
+  separate top-level ``minServerVersion``, ``maxServerVersion``, and
+  ``serverless`` fields. The minimum server version is an inclusive lower bound
+  for running the test. The maximum server version is an exclusive upper bound
+  for running the test. If a field is not present, it should be assumed that
+  there is no corresponding bound on the required server version. The
+  ``serverless`` requirement behaves the same as the ``serverless`` field of the
+  `unified test format's runOnRequirement <../../unified-test-format/unified-test-format.rst#runonrequirement>`_.
 
-The legacy format should not conflict with the newer, multi-operation format
+The legacy-v1 format should not conflict with the newer, multi-operation format
 used by other specs (e.g. Transactions). It is possible to create a unified test
-runner capable of executing both formats (as some drivers do).
+runner capable of executing both legacy formats (as some drivers do).
 
 Error Assertions for Bulk Write Operations
 ==========================================
@@ -172,7 +76,9 @@ messages into the bulk write exception's top-level message.
 Test Runner Implementation
 ==========================
 
-This section provides guidance for implementing a test runner.
+This section provides guidance for implementing a test runner for legacy-v1
+tests. See the `unified test format spec <../../../../unified-test-format/unified-test-format.rst>`_ for how to run tests under
+``unified/``.
 
 Before running the tests:
 
@@ -216,8 +122,8 @@ For each test file:
 
   - Activate command monitoring for ``localMongoClient`` and begin capturing
     events. Note that some events may need to be filtered out if the driver
-    uses global listeners or reports internal commands (e.g. ``isMaster``,
-    authentication).
+    uses global listeners or reports internal commands (e.g. ``hello``, legacy
+    hello, authentication).
 
   - For each element in the ``operations`` array:
 
@@ -310,9 +216,13 @@ Prose Tests
 
 The following tests have not yet been automated, but MUST still be tested.
 
-"errInfo" is propagated
------------------------
-Test that a writeConcernError "errInfo" is propagated to the user in whatever way is idiomatic to the driver (exception, error object, etc.). Using a 4.0+ server, set the following failpoint:
+1. WriteConcernError.details exposes writeConcernError.errInfo
+--------------------------------------------------------------
+
+Test that ``writeConcernError.errInfo`` in a command response is propagated as
+``WriteConcernError.details`` (or equivalent) in the driver.
+
+Using a 4.0+ server, set the following failpoint:
 
 .. code:: javascript
 
@@ -335,4 +245,34 @@ Test that a writeConcernError "errInfo" is propagated to the user in whatever wa
      },
      "mode": { "times": 1 }
    }
-Then, perform an insert on the same database. Assert that an error occurs and that the "errInfo" is accessible and matches the one set in the failpoint.
+
+Then, perform an insert operation and assert that a WriteConcernError occurs and
+that its ``details`` property is both accessible and matches the ``errInfo``
+object from the failpoint.
+
+2. WriteError.details exposes writeErrors[].errInfo
+---------------------------------------------------
+
+Test that ``writeErrors[].errInfo`` in a command response is propagated as
+``WriteError.details`` (or equivalent) in the driver.
+
+Using a 5.0+ server, create a collection with
+`document validation <https://docs.mongodb.com/manual/core/schema-validation/>`_
+like so:
+
+.. code:: javascript
+
+   {
+     "create": "test",
+     "validator": {
+       "x": { $type: "string" }
+     }
+   }
+
+Enable `command monitoring <../../command-monitoring/command-monitoring.rst>`_
+to observe CommandSucceededEvents. Then, insert an invalid document (e.g.
+``{x: 1}``) and assert that a WriteError occurs, that its code is ``121``
+(i.e. DocumentValidationFailure), and that its ``details`` property is
+accessible. Additionally, assert that a CommandSucceededEvent was observed and
+that the ``writeErrors[0].errInfo`` field in the response document matches the
+WriteError's ``details`` property.
