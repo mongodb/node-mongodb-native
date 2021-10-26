@@ -157,6 +157,7 @@
       "description": "Database-level aggregate with $out omits read preference for pre-5.0 server",
       "runOnRequirements": [
         {
+          "minServerVersion": "4.2",
           "maxServerVersion": "4.4.99"
         }
       ],
