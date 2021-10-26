@@ -15,7 +15,7 @@
       "description": "Non-SRV URI with custom srvServiceName",
       "uri": "mongodb://example.com/?srvServiceName=customname",
       "valid": false,
-      "warning": true,
+      "warning": false,
       "hosts": null,
       "auth": null,
       "options": {}
@@ -34,7 +34,7 @@
     {
       "description": "SRV URI with negative integer for srvMaxHosts",
       "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=-1",
-      "valid": false,
+      "valid": true,
       "warning": true,
       "hosts": null,
       "auth": null,
@@ -43,7 +43,7 @@
     {
       "description": "SRV URI with invalid type for srvMaxHosts",
       "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=foo",
-      "valid": false,
+      "valid": true,
       "warning": true,
       "hosts": null,
       "auth": null,
@@ -53,7 +53,7 @@
       "description": "Non-SRV URI with srvMaxHosts",
       "uri": "mongodb://example.com/?srvMaxHosts=2",
       "valid": false,
-      "warning": true,
+      "warning": false,
       "hosts": null,
       "auth": null,
       "options": {}
@@ -62,7 +62,7 @@
       "description": "SRV URI with positive srvMaxHosts and replicaSet",
       "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=2&replicaSet=foo",
       "valid": false,
-      "warning": true,
+      "warning": false,
       "hosts": null,
       "auth": null,
       "options": {}
@@ -71,7 +71,7 @@
       "description": "SRV URI with positive srvMaxHosts and loadBalanced=true",
       "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=2&loadBalanced=true",
       "valid": false,
-      "warning": true,
+      "warning": false,
       "hosts": null,
       "auth": null,
       "options": {}
