@@ -21,7 +21,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -57,7 +57,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -95,7 +95,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -131,7 +131,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -172,7 +172,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -208,7 +208,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -246,7 +246,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -282,7 +282,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -320,7 +320,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -356,7 +356,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -469,7 +469,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -624,7 +624,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER_36)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
