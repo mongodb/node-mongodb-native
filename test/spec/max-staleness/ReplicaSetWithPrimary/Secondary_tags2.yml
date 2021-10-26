@@ -12,14 +12,14 @@ topology_description:
     avg_rtt_ms: 5
     lastUpdateTime: 0
     lastWrite: {lastWriteDate: {$numberLong: "125002"}}
-    maxWireVersion: 5
+    maxWireVersion: 6
   - &2
     address: b:27017
     type: RSSecondary
     avg_rtt_ms: 5
     lastUpdateTime: 0
     lastWrite: {lastWriteDate: {$numberLong: "2"}}
-    maxWireVersion: 5
+    maxWireVersion: 6
     tags:
       data_center: tokyo
   - &3
@@ -28,7 +28,7 @@ topology_description:
     avg_rtt_ms: 5
     lastUpdateTime: 0
     lastWrite: {lastWriteDate: {$numberLong: "1"}}  # Too stale.
-    maxWireVersion: 5
+    maxWireVersion: 6
     tags:
       data_center: nyc
 read_preference:
