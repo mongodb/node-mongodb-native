@@ -26,7 +26,7 @@ describe('monitoring', function () {
     mockServer.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
