@@ -6,8 +6,8 @@ const { MongoServerSelectionError, MongoClient } = require('../../src');
 
 const minCompatErrMsg = `minimum wire version ${
   Number.MAX_SAFE_INTEGER - 1
-}, but this version of the Node.js Driver requires at most 13`;
-const maxCompatErrMsg = `reports maximum wire version 6, but this version of the Node.js Driver requires at least 6`;
+}, but this version of the Node.js Driver requires at most 14`;
+const maxCompatErrMsg = `reports maximum wire version 1, but this version of the Node.js Driver requires at least 6`;
 
 describe('Wire Protocol Version', () => {
   /** @type {mock.MockServer} */
@@ -35,7 +35,7 @@ describe('Wire Protocol Version', () => {
     await mock.cleanup();
   });
 
-  describe('minimum is greater than 13', () => {
+  describe('minimum is greater than 14', () => {
     it('should raise a compatibility error', async function () {
       setWireProtocolMessageHandler(Number.MAX_SAFE_INTEGER - 1, Number.MAX_SAFE_INTEGER);
 

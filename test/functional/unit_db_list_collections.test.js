@@ -12,7 +12,7 @@ describe('db.listCollections', function () {
         const doc = request.document;
 
         if (doc.ismaster || doc.hello) {
-          return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+          return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36));
         }
 
         if (doc.listCollections) {

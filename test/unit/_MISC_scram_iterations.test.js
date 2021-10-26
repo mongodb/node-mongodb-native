@@ -35,7 +35,7 @@ describe('SCRAM Iterations Tests', function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36));
       } else if (doc.saslStart) {
         return request.reply({
           ok: 1,

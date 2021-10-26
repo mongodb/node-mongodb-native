@@ -41,7 +41,7 @@ describe('Topology (unit)', function () {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
           ismasters.push(doc);
-          request.reply(mock.DEFAULT_ISMASTER);
+          request.reply(mock.DEFAULT_ISMASTER_36);
         } else {
           request.reply({ ok: 1 });
         }
@@ -110,7 +110,7 @@ describe('Topology (unit)', function () {
         setTimeout(() => {
           this.emit(
             'descriptionReceived',
-            new ServerDescription('someserver:27019', { ok: 1, maxWireVersion: 5 })
+            new ServerDescription('someserver:27019', { ok: 1, maxWireVersion: 6 })
           );
         }, 20);
       });
@@ -130,7 +130,7 @@ describe('Topology (unit)', function () {
         setTimeout(() => {
           this.emit(
             'descriptionReceived',
-            new ServerDescription(this.name, { ok: 1, msg: 'isdbgrid', maxWireVersion: 5 })
+            new ServerDescription(this.name, { ok: 1, msg: 'isdbgrid', maxWireVersion: 6 })
           );
         }, 20);
       });
@@ -188,7 +188,7 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
+          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'node is recovering', code: 11600 });
         } else {
@@ -225,7 +225,7 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
+          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'not master' });
         } else {
@@ -262,7 +262,7 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 9 }));
+          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.connection.destroy();
         } else {

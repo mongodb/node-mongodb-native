@@ -227,7 +227,7 @@ describe('Sessions - unit/core', function () {
             var doc = request.document;
             if (doc.ismaster || doc.hello) {
               request.reply(
-                Object.assign({}, mock.DEFAULT_ISMASTER, { logicalSessionTimeoutMinutes: 10 })
+                Object.assign({}, mock.DEFAULT_ISMASTER_36, { logicalSessionTimeoutMinutes: 10 })
               );
             }
           });
