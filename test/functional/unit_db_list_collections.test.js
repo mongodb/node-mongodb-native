@@ -71,6 +71,6 @@ describe('db.listCollections', function () {
       });
     }
 
-    it(config.description, { test: testFn, metadata: { requires: { mongodb: '>=3.6.0' } } });
+    it(config.description, { test: testFn, metadata: { requires: { mongodb: '>=2.7.6' } } });
   });
 });

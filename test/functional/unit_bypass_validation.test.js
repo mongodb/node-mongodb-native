@@ -16,12 +16,14 @@ describe('bypass document validation', function () {
   function testAggregate(testConfiguration, config, done) {
     const client = testConfiguration.newClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
+      console.log('close');
       close = () => {};
       client.close(() => done(e));
     };
 
     test.server.setMessageHandler(request => {
       const doc = request.document;
+      console.log('doc', doc);
       if (doc.aggregate) {
         try {
           expect(doc.bypassDocumentValidation).equal(config.expected);
