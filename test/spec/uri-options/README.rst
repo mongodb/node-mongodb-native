@@ -38,6 +38,11 @@ The ``valid`` and ``warning`` fields are boolean in order to keep the tests
 flexible. We are not concerned with asserting the format of specific error or
 warnings messages strings.
 
+Under normal circumstances, it should not be necessary to specify both
+``valid: false`` and ``warning: true``. Typically, a URI test case will either
+yield an error (e.g. options conflict) or a warning (e.g. invalid type or value
+for an option), but not both.
+
 Use as unit tests
 =================
 

@@ -1,0 +1,5 @@
+uri: "mongodb+srv://test3.test.build.10gen.cc/?loadBalanced=true&srvMaxHosts=1"
+seeds: []
+hosts: []
+error: true
+comment: Should fail because positive integer for srvMaxHosts conflicts with loadBalanced=true

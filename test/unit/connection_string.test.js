@@ -25,6 +25,8 @@ const skipTests = [
   'Deprecated (or unknown) options are ignored if replacement exists'
 ];
 
+const SPEC_PATHS = ['load-balanced', 'replica-set', 'sharded'];
+
 describe('Connection String', function () {
   it('should not support auth passed with user', function () {
     const optionsWithUser = {
@@ -222,71 +224,79 @@ describe('Connection String', function () {
       expect(options.srvHost).to.equal('test1.test.build.10gen.cc');
     });
 
-    describe('spec tests', function () {
-      const specPath = path.join(__dirname, '../spec', 'initial-dns-seedlist-discovery');
-      const testFiles = fs
-        .readdirSync(specPath)
-        .filter(x => x.indexOf('.json') !== -1)
-        .map(x => [x, fs.readFileSync(path.join(specPath, x), 'utf8')])
-        .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
+    SPEC_PATHS.forEach(function (folder) {
+      describe('spec tests', function () {
+        const specPath = path.join(__dirname, '../spec', 'initial-dns-seedlist-discovery', folder);
+        const testFiles = fs
+          .readdirSync(specPath)
+          .filter(x => x.indexOf('.json') !== -1)
+          .map(x => [x, fs.readFileSync(path.join(specPath, x), 'utf8')])
+          .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 
-      testFiles.forEach(test => {
-        if (!test[1].comment) {
-          test[1].comment = test[0];
-        }
+        testFiles.forEach(test => {
+          if (!test[1].comment) {
+            test[1].comment = test[0];
+          }
 
-        it(test[1].comment, {
-          metadata: { requires: { topology: ['single'] } },
-          test: function (done) {
-            try {
-              const options = parseOptions(test[1].uri);
-              resolveSRVRecord(options, (err, result) => {
-                if (test[1].error) {
-                  expect(err).to.exist;
-                  expect(result).to.not.exist;
-                } else {
-                  expect(err).to.not.exist;
-                  expect(result).to.exist;
-                  // Implicit SRV options must be set.
-                  expect(options.directConnection).to.be.false;
-                  const testOptions = test[1].options;
-                  if (testOptions && 'tls' in testOptions) {
-                    expect(options).to.have.property('tls', testOptions.tls);
-                  } else if (testOptions && 'ssl' in testOptions) {
-                    expect(options).to.have.property('tls', testOptions.ssl);
+          const comment = test[1].comment;
+          const skipTest = comment.search(/^(srvMaxHosts|srv-service-name)/) > -1;
+          const maybeIt = skipTest ? it.skip : it;
+          // TODO: NODE-3467: Implement maxSrvHosts work
+          maybeIt(comment, {
+            metadata: { requires: { topology: ['single'] } },
+            test: function (done) {
+              try {
+                const options = parseOptions(test[1].uri);
+                resolveSRVRecord(options, (err, result) => {
+                  if (test[1].error) {
+                    expect(err).to.exist;
+                    expect(result).to.not.exist;
                   } else {
-                    expect(options.tls).to.be.true;
+                    expect(err).to.not.exist;
+                    expect(result).to.exist;
+                    // Implicit SRV options must be set.
+                    expect(options.directConnection).to.be.false;
+                    const testOptions = test[1].options;
+                    if (testOptions && 'tls' in testOptions) {
+                      expect(options).to.have.property('tls', testOptions.tls);
+                    } else if (testOptions && 'ssl' in testOptions) {
+                      expect(options).to.have.property('tls', testOptions.ssl);
+                    } else {
+                      expect(options.tls).to.be.true;
+                    }
+                    if (testOptions && testOptions.replicaSet) {
+                      expect(options).to.have.property('replicaSet', testOptions.replicaSet);
+                    }
+                    if (testOptions && testOptions.authSource) {
+                      expect(options).to.have.property('credentials');
+                      expect(options.credentials.source).to.equal(testOptions.authSource);
+                    }
+                    if (testOptions && testOptions.loadBalanced) {
+                      expect(options).to.have.property('loadBalanced', testOptions.loadBalanced);
+                    }
+                    if (
+                      test[1].parsed_options &&
+                      test[1].parsed_options.user &&
+                      test[1].parsed_options.password
+                    ) {
+                      expect(options.credentials.username).to.equal(test[1].parsed_options.user);
+                      expect(options.credentials.password).to.equal(
+                        test[1].parsed_options.password
+                      );
+                    }
                   }
-                  if (testOptions && testOptions.replicaSet) {
-                    expect(options).to.have.property('replicaSet', testOptions.replicaSet);
-                  }
-                  if (testOptions && testOptions.authSource) {
-                    expect(options).to.have.property('credentials');
-                    expect(options.credentials.source).to.equal(testOptions.authSource);
-                  }
-                  if (testOptions && testOptions.loadBalanced) {
-                    expect(options).to.have.property('loadBalanced', testOptions.loadBalanced);
-                  }
-                  if (
-                    test[1].parsed_options &&
-                    test[1].parsed_options.user &&
-                    test[1].parsed_options.password
-                  ) {
-                    expect(options.credentials.username).to.equal(test[1].parsed_options.user);
-                    expect(options.credentials.password).to.equal(test[1].parsed_options.password);
-                  }
+                  done();
+                });
+              } catch (error) {
+                if (test[1].error) {
+                  expect(error).to.exist;
+                  done();
+                } else {
+                  throw error;
                 }
-                done();
-              });
-            } catch (error) {
-              if (test[1].error) {
-                expect(error).to.exist;
-                done();
-              } else {
-                throw error;
               }
             }
-          }
+          });
         });
       });
     });

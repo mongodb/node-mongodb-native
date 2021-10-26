@@ -1,0 +1,116 @@
+{
+  "tests": [
+    {
+      "description": "SRV URI with custom srvServiceName",
+      "uri": "mongodb+srv://test22.test.build.10gen.cc/?srvServiceName=customname",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "srvServiceName": "customname"
+      }
+    },
+    {
+      "description": "Non-SRV URI with custom srvServiceName",
+      "uri": "mongodb://example.com/?srvServiceName=customname",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "SRV URI with srvMaxHosts",
+      "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=2",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "srvMaxHosts": 2
+      }
+    },
+    {
+      "description": "SRV URI with negative integer for srvMaxHosts",
+      "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=-1",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "SRV URI with invalid type for srvMaxHosts",
+      "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=foo",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "Non-SRV URI with srvMaxHosts",
+      "uri": "mongodb://example.com/?srvMaxHosts=2",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "SRV URI with positive srvMaxHosts and replicaSet",
+      "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=2&replicaSet=foo",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "SRV URI with positive srvMaxHosts and loadBalanced=true",
+      "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=2&loadBalanced=true",
+      "valid": false,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "SRV URI with positive srvMaxHosts and loadBalanced=false",
+      "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=2&loadBalanced=false",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "loadBalanced": false,
+        "srvMaxHosts": 2
+      }
+    },
+    {
+      "description": "SRV URI with srvMaxHosts=0 and replicaSet",
+      "uri": "mongodb+srv://test1.test.build.10gen.cc/?srvMaxHosts=0&replicaSet=foo",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "replicaSet": "foo",
+        "srvMaxHosts": 0
+      }
+    },
+    {
+      "description": "SRV URI with srvMaxHosts=0 and loadBalanced=true",
+      "uri": "mongodb+srv://test3.test.build.10gen.cc/?srvMaxHosts=0&loadBalanced=true",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "loadBalanced": true,
+        "srvMaxHosts": 0
+      }
+    }
+  ]
+}

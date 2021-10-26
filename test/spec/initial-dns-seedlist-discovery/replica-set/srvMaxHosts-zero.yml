@@ -1,0 +1,15 @@
+# When srvMaxHosts is zero, all hosts are added to the seed list.
+#
+# replicaSet is permitted because srvMaxHosts is non-positive.
+uri: "mongodb+srv://test1.test.build.10gen.cc/?replicaSet=repl0&srvMaxHosts=0"
+seeds:
+    - localhost.test.build.10gen.cc:27017
+    - localhost.test.build.10gen.cc:27018
+hosts:
+    - localhost:27017
+    - localhost:27018
+    - localhost:27019
+options:
+    replicaSet: repl0
+    srvMaxHosts: 0
+    ssl: true
