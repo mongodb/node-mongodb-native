@@ -35,13 +35,13 @@ MULTI_ATLASPROXY_SERVERLESS_URI: xxx
 SINGLE_ATLASPROXY_SERVERLESS_URI: xxx
 ```
 
-Luckily, it is a flat yaml file, so you can run the following to get a source-able environment file:
+Since it's a flat yaml file, you can run the following to get a sourceable environment file:
 
 ```sh
 cat serverless-expansion.yml | sed 's/: /=/g' > serverless.env
 ```
 
-before sourcing `serverless.env`, make some adjustments that are equivalent to what our EVG does.
+Before sourcing `serverless.env`, make some adjustments that are equivalent to what our EVG does:
 
 - Change `MONGODB_URI` to be the same as `SINGLE_ATLASPROXY_SERVERLESS_URI`
 - Add `SINGLE_MONGOS_LB_URI` and `MULTI_MONGOS_LB_URI` and set them to `SINGLE_ATLASPROXY_SERVERLESS_URI`
@@ -50,9 +50,9 @@ Lastly, comment out the `source` of `install-dependencies.sh` command in `.everg
 
 ### Load Balanced
 
-You'll first need to start a sharded cluster, use your favorite MongoDB orchestration tool of choice.
+You'll first need to start a sharded cluster using your favorite MongoDB orchestration tool of choice.
 The tool should create a cluster with two mongos so you have a uri like `MONGODB_URI=mongodb://host1,host2/`
-Then you need to start a load balancer, you can install `haproxy` on macos via `brew` and use the script provided in drivers-evergreen-tools.
+Then you need to start a load balancer: you can install `haproxy` on macos via `brew` and use the script provided in drivers-evergreen-tools.
 
 ```sh
 $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh start
@@ -65,7 +65,7 @@ SINGLE_MONGOS_LB_URI: "mongodb://127.0.0.1:8000/?loadBalanced=true"
 MULTI_MONGOS_LB_URI: "mongodb://127.0.0.1:8001/?loadBalanced=true"
 ```
 
-Luckily, it is a flat yaml file, so you can run the following to get a source-able environment file:
+Since it's a flat yaml file, you can run the following to get a sourceable environment file:
 
 ```sh
 cat lb-expansion.yml | sed 's/: /=/g' > lb.env
@@ -84,7 +84,7 @@ With those variables sourced, you can run the whole test suite as you normally w
 npm run check:test
 ```
 
-Take note of the `[ topology type: load-balanced ]` print out from mocha to make sure it picked up the environment as expected.
+Take note of the `[ topology type: load-balanced ]` printout from mocha to make sure it picked up the environment as expected.
 
 When you are done testing you can shutdown the haproxy load balancer with:
 
@@ -94,7 +94,7 @@ $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
 
 ### CSFLE
 
-As long as certain environment variables are present, and mongodb-client-encryption is installed, FLE will run with a regular mocha execution: `npm run check:tests`.
+As long as certain environment variables are present and mongodb-client-encryption is installed, FLE will run with a regular mocha execution: `npm run check:test`.
 
 Define the following variables in your environment:
 
