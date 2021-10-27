@@ -37,7 +37,6 @@ beforeEach('Session Leak Before Each - setup session tracking', function () {
 
   const _startSession = Topology.prototype.startSession;
   sandbox.stub(Topology.prototype, 'startSession').callsFake(function () {
-    console.log('startSession');
     const session = _startSession.apply(this, arguments);
     const stackTrace = new Error().stack;
     const result = new Proxy(session, {
@@ -61,14 +60,12 @@ beforeEach('Session Leak Before Each - setup session tracking', function () {
   const _acquire = ServerSessionPool.prototype.acquire;
   sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function () {
     const session = _acquire.apply(this, arguments);
-    console.log('aquire', session.id);
     activeSessions.add(session);
     return session;
   });
 
   const _release = ServerSessionPool.prototype.release;
   sandbox.stub(ServerSessionPool.prototype, 'release').callsFake(function (session) {
-    console.log('release', session.id);
     activeSessions.delete(session);
     pooledSessions.add(session);
 
@@ -77,7 +74,6 @@ beforeEach('Session Leak Before Each - setup session tracking', function () {
 
   const _endAllPooledSessions = ServerSessionPool.prototype.endAllPooledSessions;
   sandbox.stub(ServerSessionPool.prototype, 'endAllPooledSessions').callsFake(function () {
-    console.log('endAllPooledSessions');
     pooledSessions.clear();
     return _endAllPooledSessions.apply(this, arguments);
   });
@@ -85,7 +81,6 @@ beforeEach('Session Leak Before Each - setup session tracking', function () {
   [Topology].forEach(topology => {
     const _endSessions = topology.prototype.endSessions;
     sandbox.stub(topology.prototype, 'endSessions').callsFake(function (sessions) {
-      console.log('endSessions');
       sessions = Array.isArray(sessions) ? sessions : [sessions];
       sessions.forEach(session => pooledSessions.delete(session));
       return _endSessions.apply(this, arguments);
@@ -94,7 +89,6 @@ beforeEach('Session Leak Before Each - setup session tracking', function () {
 
   const _close = MongoClient.prototype.close;
   sandbox.stub(MongoClient.prototype, 'close').callsFake(function () {
-    console.log('close');
     activeSessionsBeforeClose = new Set(activeSessions);
     return _close.apply(this, arguments);
   });

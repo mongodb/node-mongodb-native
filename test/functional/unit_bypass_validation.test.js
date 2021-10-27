@@ -34,6 +34,7 @@ describe('bypass document validation', function () {
             }
           });
         } catch (e) {
+          console.log('error', e);
           close(e);
         }
       }
@@ -87,6 +88,7 @@ describe('bypass document validation', function () {
             ok: 1
           });
         } catch (e) {
+          console.log('e', e);
           close(e);
         }
       }
