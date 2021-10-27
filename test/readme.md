@@ -2,7 +2,7 @@
 
 ## Special Environments
 
-There are a class of tests that test features requiring a specialized set of environment variables to be generated and set in order to run. Look below for the section that applies to the feature you are trying to test.
+There are collections of tests that test features requiring a specialized set of environment variables to be generated and set in order to run. Look below for the section that applies to the feature you are trying to test.
 
 ### Serverless
 
@@ -80,7 +80,7 @@ FAKE_MONGODB_SERVICE_ID="true"
 This enables logic in the driver to stick in a fake service id on responses since that's what a real LB deployment is required to do.
 With those variables sourced, you can run the whole test suite as you normally would.
 
-> Please note, `FAKE_MONGODB_SERVICE_ID` will no longer be change with the completion of [NODE-3431](https://jira.mongodb.org/browse/NODE-3431).
+> Please note, `FAKE_MONGODB_SERVICE_ID` will no longer be needed with the completion of [NODE-3431](https://jira.mongodb.org/browse/NODE-3431).
 
 ```sh
 npm run check:test

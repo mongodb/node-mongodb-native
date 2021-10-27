@@ -79,7 +79,7 @@ The MongoDB driver depends on several other packages. These are:
 - [kerberos](https://github.com/mongodb-js/kerberos)
 - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 
-Some of these packages include native C++ extensions, consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/native-extensions.md) if you run into issues.
+Some of these packages include native C++ extensions. Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/native-extensions.md) if you run into issues.
 
 ## Quick Start
 
