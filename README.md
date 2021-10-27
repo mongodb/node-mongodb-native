@@ -2,19 +2,20 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/CHANGES_4.0.0.md)!**
+**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/CHANGES_4.0.0.md)!**
 
 ## Quick Links
 
-| what          | where                                                                                                  |
-| ------------- | ------------------------------------------------------------------------------------------------------ |
-| documentation | [docs.mongodb.com/drivers/node](https://docs.mongodb.com/drivers/node)                                 |
-| api-doc       | [mongodb.github.io/node-mongodb-native/4.1/](https://mongodb.github.io/node-mongodb-native/4.1/)       |
-| npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                 |
-| source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)               |
-| mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                             |
-| changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/HISTORY.md)                       |
-| upgrade to v4 | [docs/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/CHANGES_4.0.0.md) |
+| what          | where                                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------- |
+| documentation | [docs.mongodb.com/drivers/node](https://docs.mongodb.com/drivers/node)                                  |
+| api-doc       | [mongodb.github.io/node-mongodb-native/4.1/](https://mongodb.github.io/node-mongodb-native/4.1/)        |
+| npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                  |
+| source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                |
+| mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                              |
+| changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                       |
+| upgrade to v4 | [docs/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/CHANGES_4.0.0.md) |
+| contributing  | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)             |
 
 ### Bugs / Feature Requests
 
@@ -34,7 +35,7 @@ For issues with, questions about, or feedback for the Node.js driver, please loo
 
 ### Change Log
 
-Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mongodb-native/blob/4.1/HISTORY.md).
+Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md).
 
 ### Compatibility
 
@@ -78,7 +79,7 @@ The MongoDB driver depends on several other packages. These are:
 - [kerberos](https://github.com/mongodb-js/kerberos)
 - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 
-Some of these packages include native C++ extensions, consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/native-extensions.md) if you run into issues.
+Some of these packages include native C++ extensions. Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/native-extensions.md) if you run into issues.
 
 ## Quick Start
 
@@ -239,7 +240,7 @@ For more detailed information, see the [indexing strategies page](https://docs.m
 
 ## Error Handling
 
-If you need to filter certain errors from our driver we have a helpful tree of errors described in [docs/errors.md](https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/errors.md).
+If you need to filter certain errors from our driver we have a helpful tree of errors described in [docs/errors.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/errors.md).
 
 It is our recommendation to use `instanceof` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code.
 We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
@@ -275,4 +276,4 @@ try {
 [Apache 2.0](LICENSE.md)
 
 © 2009-2012 Christian Amor Kvalheim
-© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/4.1/CONTRIBUTORS.md)
+© 2012-present MongoDB [Contributors](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTORS.md)
