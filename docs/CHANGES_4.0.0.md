@@ -174,6 +174,9 @@ Users should use `authMechanismProperties.SERVICE_NAME` like so:
 - In a URI query param: `?authMechanismProperties=SERVICE_NAME:alternateServiceName`
 - Or as an option: `{ authMechanismProperties: { SERVICE_NAME: 'alternateServiceName' } }`
 
+### Non-boolean types are no longer accepted for boolean options
+Previously, the driver would accept values that could be coerced to booleans (e.g. `0` and `1`) for  boolean options (for example, `UpdateOptions.upsert`). This is no longer the case; any option documented as being a boolean must be specified as a boolean value.
+
 ### db.collection no longer accepts a callback
 
 The only option that required the use of the callback was strict mode.
