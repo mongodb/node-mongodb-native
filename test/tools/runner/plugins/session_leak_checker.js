@@ -61,14 +61,14 @@ beforeEach('Session Leak Before Each - setup session tracking', function () {
   const _acquire = ServerSessionPool.prototype.acquire;
   sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function () {
     const session = _acquire.apply(this, arguments);
-    console.log('aquire', session);
+    console.log('aquire', session.id);
     activeSessions.add(session);
     return session;
   });
 
   const _release = ServerSessionPool.prototype.release;
   sandbox.stub(ServerSessionPool.prototype, 'release').callsFake(function (session) {
-    console.log('release', session);
+    console.log('release', session.id);
     activeSessions.delete(session);
     pooledSessions.add(session);
 
