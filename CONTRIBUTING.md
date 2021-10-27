@@ -54,6 +54,7 @@ If you just want to get formatting and linting working automatically use these s
 - Start a mongod standalone with our [cluster_setup.sh](test/tools/cluster_setup.sh) script
   - Usage: `./test/tools/cluster_setup.sh server`
 - Run the tests with `npm test`
+- Read further in [test/readme.md](test/readme.md) if you need to test a special environment like CSFLE, or Serverless.
 
 ### Tests FAQ
 

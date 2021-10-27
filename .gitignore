@@ -62,3 +62,7 @@ lib/
 output
 
 serverless-expansion.yml
+serverless.env
+
+lb-expansion.yml
+lb.env
