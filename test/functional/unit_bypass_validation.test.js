@@ -29,7 +29,7 @@ describe('bypass document validation', function () {
             ok: 1,
             cursor: {
               firstBatch: [{}],
-              id: 23,
+              id: 0,
               ns: 'test.test'
             }
           });
