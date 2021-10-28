@@ -14,7 +14,7 @@ phases:
             primary: "a:27017",
             hosts: [ "a:27017", "b:27017" ],
             minWireVersion: 0,
-            maxWireVersion: 4
+            maxWireVersion: 6
           }
     outcome:
       events:
