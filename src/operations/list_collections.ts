@@ -93,7 +93,7 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     return super.executeCommand(server, session, this.generateCommand(), callback);
   }
 
-  /** @internal */
+  /* This is here for the purpose of unit testing the final command that gets sent. */
   generateCommand(): Document {
     return {
       listCollections: 1,
