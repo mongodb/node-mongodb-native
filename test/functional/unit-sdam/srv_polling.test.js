@@ -299,7 +299,7 @@ describe('Mongos SRV Polling', function () {
         return records.map(r => `${r.name}:${r.port}`);
       }
 
-      const MONGOS_DEFAULT_ISMASTER = Object.assign({}, mock.DEFAULT_ISMASTER_36, {
+      const MONGOS_DEFAULT_ISMASTER = Object.assign({}, mock.HELLO, {
         msg: 'isdbgrid'
       });
 

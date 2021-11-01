@@ -23,7 +23,7 @@ describe('Sessions - unit/sessions', function () {
           const doc = request.document;
           if (doc.ismaster || doc.hello) {
             request.reply(
-              Object.assign({ logicalSessionTimeoutMinutes: 15 }, mock.DEFAULT_ISMASTER_36)
+              Object.assign({ logicalSessionTimeoutMinutes: 15 }, mock.HELLO)
             );
           } else if (doc.insert) {
             request.reply({ ok: 1, operationTime: insertOperationTime });
@@ -62,7 +62,7 @@ describe('Sessions - unit/sessions', function () {
         test.server.setMessageHandler(request => {
           const doc = request.document;
           if (doc.ismaster || doc.hello) {
-            request.reply(mock.DEFAULT_ISMASTER_36);
+            request.reply(mock.HELLO);
           } else if (doc.count || doc.aggregate || doc.endSessions) {
             request.reply({ ok: 1 });
           }

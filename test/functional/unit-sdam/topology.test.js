@@ -41,7 +41,7 @@ describe('Topology (unit)', function () {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
           ismasters.push(doc);
-          request.reply(mock.DEFAULT_ISMASTER_36);
+          request.reply(mock.HELLO);
         } else {
           request.reply({ ok: 1 });
         }
@@ -153,7 +153,7 @@ describe('Topology (unit)', function () {
 
         let initialIsMasterSent = false;
         if ((doc.ismaster || doc.hello) && !initialIsMasterSent) {
-          request.reply(mock.DEFAULT_ISMASTER_36);
+          request.reply(mock.HELLO);
           initialIsMasterSent = true;
         } else {
           // black hole all other operations
@@ -188,7 +188,7 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36, { maxWireVersion: 9 }));
+          request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'node is recovering', code: 11600 });
         } else {
@@ -225,7 +225,7 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36, { maxWireVersion: 9 }));
+          request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'not master' });
         } else {
@@ -262,7 +262,7 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36, { maxWireVersion: 9 }));
+          request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.connection.destroy();
         } else {

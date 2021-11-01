@@ -4,7 +4,7 @@ const {
   createServer: superCreateServer,
   cleanup,
   DEFAULT_ISMASTER,
-  DEFAULT_ISMASTER_36
+  HELLO
   // eslint-disable-next-line no-restricted-modules
 } = require('mongodb-mock-server');
 const { HostAddress } = require('../../src/utils');
@@ -71,5 +71,5 @@ module.exports = {
   createServer,
   cleanup,
   DEFAULT_ISMASTER,
-  DEFAULT_ISMASTER_36
+  HELLO
 };

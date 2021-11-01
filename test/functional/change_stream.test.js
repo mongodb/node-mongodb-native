@@ -2082,7 +2082,7 @@ describe('Change Streams', function () {
 
       ismaster() {
         const uri = this.server.uri();
-        return Object.assign({}, mock.DEFAULT_ISMASTER_36, {
+        return Object.assign({}, mock.HELLO, {
           ismaster: true,
           secondary: false,
           me: uri,
@@ -2828,7 +2828,7 @@ context('NODE-2626 - handle null changes without error', function () {
     mockServer.setMessageHandler(req => {
       const doc = req.document;
       if (doc.ismaster || doc.hello) {
-        return req.reply(mock.DEFAULT_ISMASTER_36);
+        return req.reply(mock.HELLO);
       }
       if (doc.aggregate) {
         return req.reply({

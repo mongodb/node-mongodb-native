@@ -18,7 +18,7 @@ describe('Wire Protocol Version', () => {
       const doc = req.document;
       if (doc.ismaster || doc.hello) {
         const hello = {
-          ...mock.DEFAULT_ISMASTER_36,
+          ...mock.HELLO,
           minWireVersion: min,
           maxWireVersion: max
         };

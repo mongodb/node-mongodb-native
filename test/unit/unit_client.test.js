@@ -21,7 +21,7 @@ describe('Client (unit)', function () {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
         handshake = doc;
-        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER_36));
+        request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
