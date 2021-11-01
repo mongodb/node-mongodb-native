@@ -22,9 +22,7 @@ describe('Sessions - unit/sessions', function () {
         test.server.setMessageHandler(request => {
           const doc = request.document;
           if (doc.ismaster || doc.hello) {
-            request.reply(
-              Object.assign({ logicalSessionTimeoutMinutes: 15 }, mock.HELLO)
-            );
+            request.reply(Object.assign({ logicalSessionTimeoutMinutes: 15 }, mock.HELLO));
           } else if (doc.insert) {
             request.reply({ ok: 1, operationTime: insertOperationTime });
           } else if (doc.find) {

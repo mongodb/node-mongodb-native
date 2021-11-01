@@ -217,10 +217,7 @@ describe('monitoring', function () {
           expect(docs[1]).to.have.property('hello', true);
           done();
         } else if (doc.ismaster || doc.hello) {
-          setTimeout(
-            () => request.reply(Object.assign({ helloOk: true }, mock.HELLO)),
-            250
-          );
+          setTimeout(() => request.reply(Object.assign({ helloOk: true }, mock.HELLO)), 250);
         }
       });
 

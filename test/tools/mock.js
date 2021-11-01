@@ -3,8 +3,8 @@
 const {
   createServer: superCreateServer,
   cleanup,
-  DEFAULT_ISMASTER as HELLO,
-  DEFAULT_ISMASTER_36 as LEGACY_HELLO
+  DEFAULT_ISMASTER,
+  DEFAULT_ISMASTER_36
   // eslint-disable-next-line no-restricted-modules
 } = require('mongodb-mock-server');
 const { HostAddress } = require('../../src/utils');
@@ -70,6 +70,6 @@ function createServer(port, host, options) {
 module.exports = {
   createServer,
   cleanup,
-  LEGACY_HELLO,
-  HELLO
+  LEGACY_HELLO: DEFAULT_ISMASTER,
+  HELLO: DEFAULT_ISMASTER_36
 };
