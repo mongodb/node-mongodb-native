@@ -65,7 +65,7 @@ expectType<void>(
   })
 );
 
-// ensure we can use the create collection in a callback based wrapper function
+// ensure we can use the bulk operation execute in a callback based wrapper function
 function extendedCallbackBasedBulkExecute(
   callback: Callback<BulkWriteResult>,
   optionalOptions?: BulkWriteOptions
