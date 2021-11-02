@@ -1216,9 +1216,15 @@ export abstract class BulkOperationBase {
     return batches;
   }
 
-  /** An internal helper method. Do not invoke directly. Will be going away in the future */
+  execute(options?: BulkWriteOptions): Promise<BulkWriteResult>;
+  execute(callback: Callback<BulkWriteResult>): void;
+  execute(options: BulkWriteOptions | undefined, callback: Callback<BulkWriteResult>): void;
   execute(
-    options?: BulkWriteOptions,
+    options?: BulkWriteOptions | Callback<BulkWriteResult>,
+    callback?: Callback<BulkWriteResult>
+  ): Promise<BulkWriteResult> | void;
+  execute(
+    options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
     if (typeof options === 'function') (callback = options), (options = {});
