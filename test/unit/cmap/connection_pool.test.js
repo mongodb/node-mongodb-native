@@ -45,7 +45,7 @@ describe('Connection Pool', function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(mock.DEFAULT_ISMASTER_36);
+        request.reply(mock.HELLO);
       } else {
         // destroy on any other command
         request.connection.destroy();
@@ -88,7 +88,7 @@ describe('Connection Pool', function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(mock.DEFAULT_ISMASTER_36);
+        request.reply(mock.HELLO);
       } else {
         // blackhole other requests
       }
@@ -118,7 +118,7 @@ describe('Connection Pool', function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(mock.DEFAULT_ISMASTER_36);
+        request.reply(mock.HELLO);
       }
     });
 
@@ -154,7 +154,7 @@ describe('Connection Pool', function () {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(mock.DEFAULT_ISMASTER_36);
+          request.reply(mock.HELLO);
         }
       });
 
@@ -209,7 +209,7 @@ describe('Connection Pool', function () {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(mock.DEFAULT_ISMASTER_36);
+          request.reply(mock.HELLO);
         }
       });
 
@@ -235,7 +235,7 @@ describe('Connection Pool', function () {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(mock.DEFAULT_ISMASTER_36);
+          request.reply(mock.HELLO);
         }
       });
 
@@ -407,7 +407,7 @@ describe('Connection Pool', function () {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(mock.DEFAULT_ISMASTER_36);
+          request.reply(mock.HELLO);
         }
       });
     });

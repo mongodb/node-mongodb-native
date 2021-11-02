@@ -38,7 +38,7 @@ describe('Compression', function () {
       server.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          return request.reply({ ...mock.DEFAULT_ISMASTER, compression: ['snappy'] });
+          return request.reply({ ...mock.HELLO, compression: ['snappy'] });
         }
         if (doc.insert === 'snappy') {
           return request.reply({ ok: 1 });

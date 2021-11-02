@@ -3,7 +3,7 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
-const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
+const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6'];
 const NODE_VERSIONS = ['erbium', 'fermium'];
 NODE_VERSIONS.sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
@@ -34,7 +34,7 @@ const OPERATING_SYSTEMS = [
     clientEncryption: false // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
   }
 ].map(osConfig => ({
-  mongoVersion: '>=2.6',
+  mongoVersion: '>=3.6',
   nodeVersion: LOWEST_LTS,
   auth: false, // TODO test auth?
   clientEncryption: true,
@@ -484,7 +484,7 @@ OPERATING_SYSTEMS.forEach(
     name: osName,
     display_name: osDisplayName,
     run_on,
-    mongoVersion = '>=2.6',
+    mongoVersion = '>=3.6',
     nodeVersions = NODE_VERSIONS,
     clientEncryption,
     msvsVersion

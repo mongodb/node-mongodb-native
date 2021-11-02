@@ -17,7 +17,7 @@ describe('Connection - unit/cmap', function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(mock.DEFAULT_ISMASTER_36);
+        request.reply(mock.HELLO);
       }
 
       // blackhole all other requests
@@ -40,7 +40,7 @@ describe('Connection - unit/cmap', function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(mock.DEFAULT_ISMASTER_36);
+        request.reply(mock.HELLO);
       }
 
       // blackhole all other requests
@@ -65,7 +65,7 @@ describe('Connection - unit/cmap', function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(mock.DEFAULT_ISMASTER_36);
+        request.reply(mock.HELLO);
       }
       // respond to no other requests to trigger timeout event
     });

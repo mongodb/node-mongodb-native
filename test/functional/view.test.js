@@ -13,7 +13,7 @@ describe('Views', function () {
       const configuration = this.configuration;
 
       // Default message fields
-      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER);
+      var defaultFields = Object.assign({}, mock.HELLO);
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];

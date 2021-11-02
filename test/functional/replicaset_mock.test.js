@@ -9,12 +9,12 @@ describe('ReplSet (mocks)', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     // Default message fields
-    const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
+    const defaultFields = Object.assign({}, mock.HELLO, {
       msg: 'isdbgrid'
     });
 
     // Default message fields
-    const defaultRSFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
+    const defaultRSFields = Object.assign({}, mock.HELLO, {
       setName: 'rs',
       setVersion: 1,
       electionId: new ObjectId(),

@@ -1,7 +1,7 @@
-export const MIN_SUPPORTED_SERVER_VERSION = '2.6';
-export const MAX_SUPPORTED_SERVER_VERSION = '5.0';
-export const MIN_SUPPORTED_WIRE_VERSION = 2;
-export const MAX_SUPPORTED_WIRE_VERSION = 13;
+export const MIN_SUPPORTED_SERVER_VERSION = '3.6';
+export const MAX_SUPPORTED_SERVER_VERSION = '5.1';
+export const MIN_SUPPORTED_WIRE_VERSION = 6;
+export const MAX_SUPPORTED_WIRE_VERSION = 14;
 export const OP_REPLY = 1;
 export const OP_UPDATE = 2001;
 export const OP_INSERT = 2002;

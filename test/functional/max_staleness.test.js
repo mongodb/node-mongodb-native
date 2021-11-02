@@ -11,7 +11,7 @@ describe('Max Staleness', function () {
     return mock.createServer().then(server => {
       test.server = server;
 
-      const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, { msg: 'isdbgrid' });
+      const defaultFields = Object.assign({}, mock.HELLO, { msg: 'isdbgrid' });
 
       // Primary server states
       const serverIsMaster = [Object.assign({}, defaultFields)];

@@ -26,7 +26,7 @@ describe('monitoring', function () {
     mockServer.setMessageHandler(request => {
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
@@ -65,7 +65,7 @@ describe('monitoring', function () {
 
       const doc = request.document;
       if (doc.ismaster || doc.hello) {
-        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
@@ -92,7 +92,7 @@ describe('monitoring', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+          request.reply(Object.assign({}, mock.HELLO));
         }
       });
 
@@ -109,7 +109,7 @@ describe('monitoring', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+          request.reply(Object.assign({}, mock.HELLO));
         }
       });
 
@@ -127,7 +127,7 @@ describe('monitoring', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (doc.ismaster || doc.hello) {
-          setTimeout(() => request.reply(Object.assign({}, mock.DEFAULT_ISMASTER)), 250);
+          setTimeout(() => request.reply(Object.assign({}, mock.HELLO)), 250);
         }
       });
 
@@ -177,7 +177,7 @@ describe('monitoring', function () {
             return;
           }
 
-          request.reply(mock.DEFAULT_ISMASTER_36);
+          request.reply(mock.HELLO);
         }
       });
 
@@ -217,10 +217,7 @@ describe('monitoring', function () {
           expect(docs[1]).to.have.property('hello', true);
           done();
         } else if (doc.ismaster || doc.hello) {
-          setTimeout(
-            () => request.reply(Object.assign({ helloOk: true }, mock.DEFAULT_ISMASTER)),
-            250
-          );
+          setTimeout(() => request.reply(Object.assign({ helloOk: true }, mock.HELLO)), 250);
         }
       });
 

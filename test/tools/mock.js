@@ -3,7 +3,6 @@
 const {
   createServer: superCreateServer,
   cleanup,
-  DEFAULT_ISMASTER,
   DEFAULT_ISMASTER_36
   // eslint-disable-next-line no-restricted-modules
 } = require('mongodb-mock-server');
@@ -70,6 +69,5 @@ function createServer(port, host, options) {
 module.exports = {
   createServer,
   cleanup,
-  DEFAULT_ISMASTER,
-  DEFAULT_ISMASTER_36
+  HELLO: DEFAULT_ISMASTER_36
 };

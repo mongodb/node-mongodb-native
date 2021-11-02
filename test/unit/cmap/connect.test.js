@@ -38,7 +38,7 @@ describe('Connect Tests', function () {
       if (doc.ismaster || doc.hello) {
         whatHappened.ismaster = true;
         request.reply(
-          Object.assign({}, mock.DEFAULT_ISMASTER, {
+          Object.assign({}, mock.HELLO, {
             $clusterTime
           })
         );
@@ -68,7 +68,7 @@ describe('Connect Tests', function () {
       if (doc.ismaster || doc.hello) {
         whatHappened.ismaster = true;
         request.reply(
-          Object.assign({}, mock.DEFAULT_ISMASTER, {
+          Object.assign({}, mock.HELLO, {
             $clusterTime,
             arbiterOnly: true
           })

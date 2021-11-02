@@ -35,7 +35,7 @@ describe.skip('Buffering Proxy', function () {
       var electionIds = [new ObjectId(0), new ObjectId(1)];
 
       // Default message fields
-      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.HELLO, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -252,7 +252,7 @@ describe.skip('Buffering Proxy', function () {
       var electionIds = [new ObjectId(0), new ObjectId(1)];
 
       // Default message fields
-      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.HELLO, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],

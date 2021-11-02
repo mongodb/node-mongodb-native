@@ -29,7 +29,7 @@ describe('bypass document validation', function () {
             ok: 1,
             cursor: {
               firstBatch: [{}],
-              id: 23,
+              id: 0,
               ns: 'test.test'
             }
           });
@@ -39,7 +39,7 @@ describe('bypass document validation', function () {
       }
 
       if (doc.ismaster || doc.hello) {
-        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
@@ -92,7 +92,7 @@ describe('bypass document validation', function () {
       }
 
       if (doc.ismaster || doc.hello) {
-        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
@@ -149,7 +149,7 @@ describe('bypass document validation', function () {
       }
 
       if (doc.ismaster || doc.hello) {
-        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }
@@ -198,7 +198,7 @@ describe('bypass document validation', function () {
       }
 
       if (doc.ismaster || doc.hello) {
-        request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
       }

@@ -16,7 +16,7 @@ class ReplSetFixture {
 
   setup(options) {
     options = options || {};
-    const ismaster = options.ismaster ? options.ismaster : mock.DEFAULT_ISMASTER_36;
+    const ismaster = options.ismaster ? options.ismaster : mock.HELLO;
 
     return Promise.all([
       mock.createServer(),
@@ -110,19 +110,6 @@ class ReplSetFixture {
   }
 }
 
-class MongosFixture {
-  setup(options) {
-    options = options || {};
-    const ismaster = options.ismaster ? options.ismaster : mock.DEFAULT_ISMASTER;
-    return Promise.all([mock.createServer(), mock.createServer()]).then(servers => {
-      this.servers = servers;
-      this.defaultFields = Object.assign({}, ismaster, {
-        msg: 'isdbgrid'
-      });
-    });
-  }
-}
-
 /**
  * Creates a cluster time for use in unit testing cluster time gossiping and
  * causal consistency.
@@ -160,7 +147,6 @@ function sessionCleanupHandler(session, sessionPool, done) {
 
 module.exports = {
   ReplSetFixture: ReplSetFixture,
-  MongosFixture: MongosFixture,
   genClusterTime: genClusterTime,
   sessionCleanupHandler
 };

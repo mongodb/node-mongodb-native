@@ -99,7 +99,7 @@ describe('Write Concern', function () {
   it('should pipe writeConcern from client down to API call', function () {
     server.setMessageHandler(request => {
       if (request.document && request.document.ismaster) {
-        return request.reply(mock.DEFAULT_ISMASTER);
+        return request.reply(mock.HELLO);
       }
       expect(request.document.writeConcern).to.exist;
       expect(request.document.writeConcern.w).to.equal('majority');

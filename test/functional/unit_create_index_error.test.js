@@ -20,7 +20,7 @@ describe('CreateIndexError', function () {
       const doc = request.document;
 
       if (doc.ismaster || doc.hello) {
-        return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        return request.reply(Object.assign({}, mock.HELLO));
       }
 
       if (doc.createIndexes) {

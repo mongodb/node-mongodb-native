@@ -21,7 +21,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -57,7 +57,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -95,7 +95,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -131,7 +131,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -172,7 +172,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -208,7 +208,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -246,7 +246,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -282,7 +282,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -320,7 +320,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -356,7 +356,7 @@ describe('Collation', function () {
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -393,83 +393,12 @@ describe('Collation', function () {
     }
   });
 
-  it('Fail due to no support for collation', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
-
-      testContext.server.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(primary[0]);
-        } else if (doc.find) {
-          request.reply({ ok: 1 });
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      return client.connect().then(() => {
-        const db = client.db(configuration.db);
-
-        return db
-          .collection('test')
-          .findOne({ a: 1 }, { collation: { caseLevel: true } })
-          .then(() => Promise.reject('this test should fail'))
-          .catch(err => {
-            expect(err).to.exist;
-            expect(err.message).to.match(/does not support collation/);
-            return client.close();
-          });
-      });
-    }
-  });
-
-  it('Fail command due to no support for collation', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
-
-      testContext.server.setMessageHandler(request => {
-        var doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(primary[0]);
-        } else if (doc.find) {
-          request.reply({ ok: 1 });
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      return client.connect().then(() => {
-        const db = client.db(configuration.db);
-
-        return db
-          .command({ count: 'test', query: {}, collation: { caseLevel: true } })
-          .then(() => Promise.reject('should not succeed'))
-          .catch(err => {
-            expect(err).to.exist;
-            expect(err.message).to.equal(
-              `Server ${testContext.server.uri()} does not support collation`
-            );
-
-            return client.close();
-          });
-      });
-    }
-  });
-
   it('Successfully pass through collation to bulkWrite command', {
     metadata: { requires: { generators: true, topology: 'single' } },
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -518,113 +447,12 @@ describe('Collation', function () {
     }
   });
 
-  it('Successfully fail bulkWrite due to unsupported collation in update', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
-
-      testContext.server.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(primary[0]);
-        } else if (doc.update) {
-          request.reply({ ok: 1 });
-        } else if (doc.delete) {
-          request.reply({ ok: 1 });
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      return client.connect().then(() => {
-        const db = client.db(configuration.db);
-
-        return db
-          .collection('test')
-          .bulkWrite(
-            [
-              {
-                updateOne: {
-                  filter: { a: 2 },
-                  update: { $set: { a: 2 } },
-                  upsert: true,
-                  collation: { caseLevel: true }
-                }
-              },
-              { deleteOne: { filter: { c: 1 } } }
-            ],
-            { ordered: true }
-          )
-          .then(() => {
-            throw new Error('should not succeed');
-          })
-          .catch(err => {
-            expect(err).to.exist;
-            expect(err.message).to.match(/does not support collation/);
-          })
-          .then(() => client.close());
-      });
-    }
-  });
-
-  it('Successfully fail bulkWrite due to unsupported collation in delete', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
-
-      testContext.server.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(primary[0]);
-        } else if (doc.update) {
-          request.reply({ ok: 1 });
-        } else if (doc.delete) {
-          request.reply({ ok: 1 });
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      return client.connect().then(() => {
-        const db = client.db(configuration.db);
-
-        return db
-          .collection('test')
-          .bulkWrite(
-            [
-              {
-                updateOne: {
-                  filter: { a: 2 },
-                  update: { $set: { a: 2 } },
-                  upsert: true
-                }
-              },
-              { deleteOne: { filter: { c: 1 }, collation: { caseLevel: true } } }
-            ],
-            { ordered: true }
-          )
-          .then(() => {
-            throw new Error('should not succeed');
-          })
-          .catch(err => {
-            expect(err).to.exist;
-            expect(err.message).to.match(/does not support collation/);
-          })
-          .then(() => client.close());
-      });
-    }
-  });
-
   it('Successfully create index with collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
     test: function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER)];
+      const primary = [Object.assign({}, mock.HELLO)];
 
       let commandResult;
       testContext.server.setMessageHandler(request => {
@@ -651,75 +479,6 @@ describe('Collation', function () {
               indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
             });
 
-            return client.close();
-          });
-      });
-    }
-  });
-
-  it('Fail to create index with collation due to no capabilities', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
-
-      testContext.server.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(primary[0]);
-        } else if (doc.createIndexes) {
-          request.reply({ ok: 1 });
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      return client.connect().then(() => {
-        const db = client.db(configuration.db);
-
-        return db
-          .collection('test')
-          .createIndex({ a: 1 }, { collation: { caseLevel: true } })
-          .then(() => Promise.reject('should not succeed'))
-          .catch(err => {
-            expect(err).to.exist;
-            expect(err.message).to.match(/does not support collation$/);
-          })
-          .then(() => client.close());
-      });
-    }
-  });
-
-  it('Fail to create indexs with collation due to no capabilities', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
-
-      testContext.server.setMessageHandler(request => {
-        const doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(primary[0]);
-        } else if (doc.createIndexes) {
-          request.reply({ ok: 1 });
-        } else if (doc.endSessions) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      return client.connect().then(() => {
-        const db = client.db(configuration.db);
-
-        return db
-          .collection('test')
-          .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }])
-          .then(() => Promise.reject('should not succeed'))
-          .catch(err => {
-            expect(err.message).to.match(/does not support collation$/);
             return client.close();
           });
       });

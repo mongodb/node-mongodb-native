@@ -50,7 +50,7 @@ phases:
             primary: "a:27017",
             hosts: [ "a:27017" ],
             minWireVersion: 0,
-            maxWireVersion: 4
+            maxWireVersion: 6
           }
       -
         - "b:27017"

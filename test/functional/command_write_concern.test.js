@@ -11,7 +11,7 @@ class WriteConcernTest {
     this.configuration = configuration;
     this.responseDecoration = {};
     const electionIds = [new ObjectId(), new ObjectId()];
-    const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
+    const defaultFields = Object.assign({}, mock.HELLO, {
       setName: 'rs',
       setVersion: 1,
       electionId: electionIds[0],

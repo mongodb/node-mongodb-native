@@ -20,7 +20,7 @@ describe('Sessions - client/unit', function () {
         test.server.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster || doc.hello) {
-            request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+            request.reply(Object.assign({}, mock.HELLO));
           } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
@@ -116,7 +116,7 @@ describe('Sessions - client/unit', function () {
           var doc = request.document;
           if (doc.ismaster || doc.hello) {
             request.reply(
-              Object.assign({}, mock.DEFAULT_ISMASTER, {
+              Object.assign({}, mock.HELLO, {
                 logicalSessionTimeoutMinutes: 10
               })
             );

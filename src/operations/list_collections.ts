@@ -90,14 +90,17 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
       return;
     }
 
-    const command = {
+    return super.executeCommand(server, session, this.generateCommand(), callback);
+  }
+
+  /* This is here for the purpose of unit testing the final command that gets sent. */
+  generateCommand(): Document {
+    return {
       listCollections: 1,
       filter: this.filter,
       cursor: this.batchSize ? { batchSize: this.batchSize } : {},
       nameOnly: this.nameOnly
     };
-
-    return super.executeCommand(server, session, command, callback);
   }
 }
 
