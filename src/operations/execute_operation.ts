@@ -17,6 +17,7 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { Document } from '../bson';
 import { supportsRetryableWrites } from '../utils';
+import { secondaryWritableServerSelector } from '../sdam/server_selection';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -181,8 +182,18 @@ function executeWithServerSelection(
       return;
     }
 
+    let selector;
+
+    // If operation should try to write to secondary use the custom server selector
+    // otherwise provide the read preference.
+    if (operation.trySecondaryWrite) {
+      selector = secondaryWritableServerSelector(topology.commonWireVersion, readPreference);
+    } else {
+      selector = readPreference;
+    }
+
     // select a new server, and attempt to retry the operation
-    topology.selectServer(readPreference, serverSelectionOptions, (e?: any, server?: any) => {
+    topology.selectServer(selector, serverSelectionOptions, (e?: any, server?: any) => {
       if (
         e ||
         (operation.hasAspect(Aspect.READ_OPERATION) && !supportsRetryableReads(server)) ||

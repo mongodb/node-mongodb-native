@@ -424,15 +424,11 @@ describe('CRUD spec v1', function () {
   }
 });
 
-// TODO: Unskip when implementing NODE-3083.
-const SKIP = ['aggregate-write-readPreference', 'db-aggregate-write-readPreference'];
-
 describe('CRUD unified', function () {
   for (const crudSpecTest of loadSpecTests('crud/unified')) {
     expect(crudSpecTest).to.exist;
     const testDescription = String(crudSpecTest.description);
-    const spec = SKIP.includes(testDescription) ? context.skip : context;
-    spec(testDescription, function () {
+    context(testDescription, function () {
       for (const test of crudSpecTest.tests) {
         it(String(test.description), {
           metadata: { sessions: { skipLeakTests: true } },

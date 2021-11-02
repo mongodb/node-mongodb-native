@@ -49,6 +49,7 @@ export abstract class AbstractOperation<TResult = any> {
   readPreference: ReadPreference;
   server!: Server;
   bypassPinningCheck: boolean;
+  trySecondaryWrite = false;
 
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
