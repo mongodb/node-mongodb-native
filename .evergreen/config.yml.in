@@ -87,7 +87,7 @@ functions:
       params:
         script: |
           ${PREPARE_SHELL}
-          git clone --depth 1 git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
+          git clone --depth 1 https://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
           echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" > $MONGO_ORCHESTRATION_HOME/orchestration.config
 
   "bootstrap mongo-orchestration":
