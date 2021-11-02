@@ -34,7 +34,6 @@ describe('bypass document validation', function () {
             }
           });
         } catch (e) {
-          console.log('error', e);
           close(e);
         }
       }

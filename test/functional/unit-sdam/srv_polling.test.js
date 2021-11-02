@@ -299,7 +299,7 @@ describe('Mongos SRV Polling', function () {
         return records.map(r => `${r.name}:${r.port}`);
       }
 
-      const MONGOS_LEGACY_HELLO = Object.assign({}, mock.HELLO, {
+      const MONGOS_HELLO = Object.assign({}, mock.HELLO, {
         msg: 'isdbgrid'
       });
 
@@ -329,7 +329,7 @@ describe('Mongos SRV Polling', function () {
             const doc = request.document;
 
             if (doc.ismaster || doc.hello) {
-              request.reply(Object.assign({}, MONGOS_LEGACY_HELLO));
+              request.reply(Object.assign({}, MONGOS_HELLO));
             }
           });
         });

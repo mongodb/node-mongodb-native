@@ -113,7 +113,7 @@ class ReplSetFixture {
 class MongosFixture {
   setup(options) {
     options = options || {};
-    const ismaster = options.ismaster ? options.ismaster : mock.LEGACY_HELLO;
+    const ismaster = options.ismaster ? options.ismaster : mock.HELLO;
     return Promise.all([mock.createServer(), mock.createServer()]).then(servers => {
       this.servers = servers;
       this.defaultFields = Object.assign({}, ismaster, {

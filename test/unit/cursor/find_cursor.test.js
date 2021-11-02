@@ -31,7 +31,7 @@ describe('Find Cursor', function () {
           const doc = request.document;
           if (doc.ismaster || doc.hello) {
             request.reply(
-              Object.assign({}, mock.LEGACY_HELLO, {
+              Object.assign({}, mock.HELLO, {
                 maxWireVersion: 6
               })
             );
