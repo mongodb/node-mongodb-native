@@ -90,5 +90,22 @@ describe('ServerSelector', function () {
         });
       });
     });
+
+    context('when a common wire version is not provided', function () {
+      const topologyDescription = new TopologyDescription(
+        TopologyType.ReplicaSetWithPrimary,
+        serverDescriptions,
+        'test',
+        MIN_SECONDARY_WRITE_WIRE_VERSION,
+        new ObjectId(),
+        MIN_SECONDARY_WRITE_WIRE_VERSION
+      );
+      const selector = secondaryWritableServerSelector();
+      const server = selector(topologyDescription, Array.from(serverDescriptions.values()));
+
+      it('selects a primary', function () {
+        expect(server).to.deep.equal([primary]);
+      });
+    });
   });
 });
