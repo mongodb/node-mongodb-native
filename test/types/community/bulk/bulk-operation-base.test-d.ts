@@ -42,7 +42,7 @@ expectType<Promise<BulkWriteResult>>(bulkOperation.execute());
 
 expectType<Promise<BulkWriteResult>>(bulkOperation.execute(options));
 
-// ensure we can use the create collection in a callback based wrapper function
+// ensure we can use the bulk operation execute in a callback based wrapper function
 function extendedPromiseBasedBulkExecute(
   optionalOptions?: BulkWriteOptions
 ): Promise<BulkWriteResult> {
