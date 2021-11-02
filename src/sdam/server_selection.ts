@@ -43,6 +43,8 @@ export function secondaryWritableServerSelector(
   // If server version >= 5.0...
   // - If read preference is supplied, use that.
   // - If no read preference is supplied, use primary.
+  /* eslint no-console: 0 */
+  console.log('select', readPreference, wireVersion);
   if (!readPreference || (wireVersion && wireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION)) {
     return readPreferenceServerSelector(ReadPreference.primary);
   }
