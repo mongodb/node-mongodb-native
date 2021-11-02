@@ -226,18 +226,17 @@ export class Db {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  createCollection<TSchema extends Document = Document>(name: string): Promise<Collection<TSchema>>;
+  createCollection<TSchema extends Document = Document>(
+    name: string,
+    options?: CreateCollectionOptions
+  ): Promise<Collection<TSchema>>;
   createCollection<TSchema extends Document = Document>(
     name: string,
     callback: Callback<Collection<TSchema>>
   ): void;
   createCollection<TSchema extends Document = Document>(
     name: string,
-    options: CreateCollectionOptions
-  ): Promise<Collection<TSchema>>;
-  createCollection<TSchema extends Document = Document>(
-    name: string,
-    options: CreateCollectionOptions,
+    options: CreateCollectionOptions | undefined,
     callback: Callback<Collection<TSchema>>
   ): void;
   createCollection<TSchema extends Document = Document>(
