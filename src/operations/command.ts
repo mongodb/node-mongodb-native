@@ -10,6 +10,7 @@ import type { Server } from '../sdam/server';
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { ReadConcernLike } from './../read_concern';
 import { Explain, ExplainOptions } from '../explain';
+import { MIN_SECONDARY_WRITE_WIRE_VERSION } from '../sdam/server_selection';
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
@@ -124,6 +125,10 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     if (this.readConcern && commandSupportsReadConcern(cmd) && !inTransaction) {
       Object.assign(cmd, { readConcern: this.readConcern });
+    }
+
+    if (this.trySecondaryWrite && serverWireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION) {
+      options.omitReadPreference = true;
     }
 
     if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {

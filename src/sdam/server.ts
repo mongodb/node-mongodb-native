@@ -299,6 +299,14 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     // Clone the options
     const finalOptions = Object.assign({}, options, { wireProtocolCommand: false });
 
+    // There are cases where we need to flag the read preference not to get sent in
+    // the command, such as pre-5.0 servers attempting to perform an aggregate write
+    // with a non-primary read preference. In this case the effective read preference
+    // (primary) is not the same as the provided and must be removed completely.
+    if (finalOptions.omitReadPreference) {
+      delete finalOptions.readPreference;
+    }
+
     // error if collation not supported
     if (collationNotSupported(this, cmd)) {
       callback(new MongoCompatibilityError(`Server ${this.name} does not support collation`));

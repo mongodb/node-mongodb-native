@@ -97,6 +97,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   session?: ClientSession;
   documentsReturnedIn?: string;
   noResponse?: boolean;
+  omitReadPreference?: boolean;
 
   // FIXME: NODE-2802
   willRetryWrite?: boolean;
