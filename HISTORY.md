@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.1.4](https://github.com/mongodb/node-mongodb-native/compare/v4.1.3...v4.1.4) (2021-11-03)
+
+
+### Bug Fixes
+
+* **NODE-3515:** do proper opTime merging in bulk results ([#3012](https://github.com/mongodb/node-mongodb-native/issues/3012)) ([43300c3](https://github.com/mongodb/node-mongodb-native/commit/43300c393a190c00f174bc5be0b3fc6d0906e970))
+* **NODE-3668:** compile error with OptionalId on TS 4.5 beta ([#3004](https://github.com/mongodb/node-mongodb-native/issues/3004)) ([ee7f095](https://github.com/mongodb/node-mongodb-native/commit/ee7f095e28aacf07014de8055ce75b16a92a8965))
+
 ### [4.1.3](https://github.com/mongodb/node-mongodb-native/compare/v4.1.2...v4.1.3) (2021-10-05)
 
 
