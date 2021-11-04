@@ -11,7 +11,7 @@ const { ServerDescription } = require('../../../src/sdam/server_description');
 const { TopologyDescription } = require('../../../src/sdam/topology_description');
 const { TopologyType } = require('../../../src/sdam/common');
 
-describe.only('server selection', function () {
+describe('server selection', function () {
   const primary = new ServerDescription('127.0.0.1:27017', {
     setName: 'test',
     isWritablePrimary: true,
