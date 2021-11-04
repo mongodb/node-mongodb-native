@@ -2,7 +2,6 @@
 const {
   eachAsync,
   executeLegacyOperation,
-  now,
   makeInterruptibleAsyncInterval,
   BufferPool
 } = require('../../src/utils');
@@ -41,133 +40,152 @@ describe('utils', function () {
     });
   });
 
-  context('makeInterruptibleAsyncInterval', function () {
-    before(function () {
-      this.clock = sinon.useFakeTimers();
+  describe('#makeInterruptibleAsyncInterval', function () {
+    let clock;
+
+    beforeEach(function () {
+      clock = sinon.useFakeTimers();
     });
 
-    after(function () {
-      this.clock.restore();
+    afterEach(function () {
+      clock.restore();
     });
 
-    it('should execute a method in an repeating interval', function (done) {
-      let lastTime = now();
-      const marks = [];
-      const executor = makeInterruptibleAsyncInterval(
-        callback => {
-          marks.push(now() - lastTime);
-          lastTime = now();
+    context('when the immediate option is provided', function () {
+      const fn = callback => {
+        callback();
+      };
+      const fnSpy = sinon.spy(fn);
+
+      it('executes the function immediately', function (done) {
+        const executor = makeInterruptibleAsyncInterval(fnSpy, { immediate: true, interval: 20 });
+        setTimeout(() => {
+          // The provided function should be called exactly once, since we wait 10ms
+          // to perform the assertion and the interval is 20ms, so the executor is
+          // stopped before the scheduled next call.
+          expect(fnSpy.calledOnce).to.be.true;
+          executor.stop();
+          done();
+        }, 10);
+        clock.tick(10);
+      });
+    });
+
+    context('when the immediate option is not provided', function () {
+      const fn = callback => {
+        callback();
+      };
+      const fnSpy = sinon.spy(fn);
+
+      it('executes the function on the provided interval', function (done) {
+        const executor = makeInterruptibleAsyncInterval(fnSpy, { interval: 10 });
+        setTimeout(() => {
+          // The provided function should be called exactly twice, since we wait 21ms
+          // to perform the assertion and the interval is 10ms, so the executor is
+          // stopped before the third call.
+          expect(fnSpy.calledTwice).to.be.true;
+          executor.stop();
+          done();
+        }, 21);
+        clock.tick(21);
+      });
+    });
+
+    describe('#wake', function () {
+      context('when the time until next call is negative', function () {
+        const fn = callback => {
           callback();
-        },
-        { interval: 10 }
-      );
+        };
+        const fnSpy = sinon.spy(fn);
 
-      setTimeout(() => {
-        expect(marks).to.eql([10, 10, 10, 10, 10]);
-        expect(marks.every(mark => marks[0] === mark)).to.be.true;
-        executor.stop();
-        done();
-      }, 51);
-
-      this.clock.tick(51);
-    });
-
-    it('should schedule execution sooner if requested within min interval threshold', function (done) {
-      let lastTime = now();
-      const marks = [];
-      const executor = makeInterruptibleAsyncInterval(
-        callback => {
-          marks.push(now() - lastTime);
-          lastTime = now();
-          callback();
-        },
-        { interval: 50, minInterval: 10 }
-      );
-
-      // immediately schedule execution
-      executor.wake();
-
-      setTimeout(() => {
-        expect(marks).to.eql([10, 50]);
-        executor.stop();
-        done();
-      }, 100);
-
-      this.clock.tick(100);
-    });
-
-    it('should debounce multiple requests to wake the interval sooner', function (done) {
-      let lastTime = now();
-      const marks = [];
-      const executor = makeInterruptibleAsyncInterval(
-        callback => {
-          marks.push(now() - lastTime);
-          lastTime = now();
-          callback();
-        },
-        { interval: 50, minInterval: 10 }
-      );
-
-      for (let i = 0; i < 100; ++i) {
-        executor.wake();
-      }
-
-      setTimeout(() => {
-        expect(marks).to.eql([10, 50, 50, 50, 50]);
-        executor.stop();
-        done();
-      }, 250);
-
-      this.clock.tick(250);
-    });
-
-    it('should immediately schedule if the clock is unreliable', function (done) {
-      let clockCalled = 0;
-      let lastTime = now();
-      const marks = [];
-      const executor = makeInterruptibleAsyncInterval(
-        callback => {
-          marks.push(now() - lastTime);
-          lastTime = now();
-          callback();
-        },
-        {
-          interval: 50,
-          minInterval: 10,
-          immediate: true,
-          clock() {
-            clockCalled += 1;
-
-            // needs to happen on the third call because `wake` checks
-            // the `currentTime` at the beginning of the function
-            // The value of now() is not actually negative in the case of
-            // the unreliable check so we force to a negative value now
-            // for this test.
-            if (clockCalled === 3) {
-              return -1;
+        it('calls the function immediately', function (done) {
+          const executor = makeInterruptibleAsyncInterval(fnSpy, {
+            interval: 10,
+            clock: () => {
+              // We have our fake clock return a value that will force
+              // the time until the next call to be a negative value,
+              // which will in turn force an immediate execution upon
+              // wake.
+              return 11;
             }
+          });
 
-            return now();
-          }
-        }
-      );
+          // This will reset the last call time to 0 and ensure the function has
+          // not been called yet.
+          executor.stop();
+          // Now we call our method under test with the expectation it will force
+          // an immediate execution.
+          executor.wake();
 
-      // force mark at 20ms, and then the unreliable system clock
-      // will report a very stale `lastCallTime` on this mark.
-      setTimeout(() => executor.wake(), 10);
+          setTimeout(() => {
+            // The provided function should be called exactly once in this section.
+            // This is because we immediately stopped the executor, then force woke
+            // it to get an immediate call with time until the next call being a
+            // negative value.
+            expect(fnSpy.calledOnce).to.be.true;
+            executor.stop();
+            done();
+          }, 10);
+          clock.tick(11);
+        });
+      });
 
-      // try to wake again in another `minInterval + immediate`, now
-      // using a very old `lastCallTime`. This should result in an
-      // immediate scheduling: 0ms (immediate), 20ms (wake with minIterval)
-      // and then 10ms for another immediate.
-      setTimeout(() => executor.wake(), 30);
+      context('when time since last wake is less than the minimum interval', function () {
+        const fn = callback => {
+          callback();
+        };
+        const fnSpy = sinon.spy(fn);
 
-      setTimeout(() => {
-        executor.stop();
-        expect(marks).to.eql([0, 20, 10, 50, 50, 50, 50]);
-        done();
-      }, 250);
-      this.clock.tick(250);
+        it('does not call the function', function (done) {
+          const executor = makeInterruptibleAsyncInterval(fnSpy, { interval: 10 });
+
+          // This will reset the last wake time to 0 and ensure the function has
+          // not been called yet.
+          executor.stop();
+          // Now we call our method under test with the expectation it will not be
+          // called immediately since our current time is still under the interval
+          // time.
+          executor.wake();
+
+          setTimeout(() => {
+            // The provided function should never be called in this case.
+            // This is because we immediately stopped the executor, then force woke
+            // it but the current time is still under the interval time.
+            expect(fnSpy.callCount).to.equal(0);
+            executor.stop();
+            done();
+          }, 9);
+          clock.tick(9);
+        });
+      });
+
+      context('when time since last call is greater than the minimum interval', function () {
+        const fn = callback => {
+          callback();
+        };
+        const fnSpy = sinon.spy(fn);
+
+        it('reschedules the function call for the minimum interval', function (done) {
+          const executor = makeInterruptibleAsyncInterval(fnSpy, {
+            interval: 50,
+            minInterval: 10
+          });
+
+          // Calling wake here will force the reschedule to happen at the minimum interval
+          // provided, which is 10ms.
+          executor.wake();
+
+          setTimeout(() => {
+            // We expect function calls to happen after 10ms, which is the minimum interval,
+            // and then in 50ms intervals after that. The second call would happen at 60ms
+            // time from the original call so we've stopped the executor before a third.
+            expect(fnSpy.calledTwice).to.be.true;
+            executor.stop();
+            done();
+          }, 61);
+          clock.tick(61);
+        });
+      });
     });
   });
 
