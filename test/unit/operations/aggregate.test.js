@@ -23,6 +23,16 @@ describe('AggregateOperation', function () {
       });
     });
 
+    context('when $out is not the last stage', function () {
+      const operation = new AggregateOperation(db, [{ $out: 'test' }, { $project: { name: 1 } }], {
+        dbName: db
+      });
+
+      it('sets trySecondaryWrite to false', function () {
+        expect(operation.trySecondaryWrite).to.be.false;
+      });
+    });
+
     context('when $merge is the last stage', function () {
       const operation = new AggregateOperation(db, [{ $merge: { into: 'test' } }], { dbName: db });
 
@@ -31,8 +41,28 @@ describe('AggregateOperation', function () {
       });
     });
 
-    context('when no writable stages', function () {
+    context('when $merge is not the last stage', function () {
+      const operation = new AggregateOperation(
+        db,
+        [{ $merge: { into: 'test' } }, { $project: { name: 1 } }],
+        { dbName: db }
+      );
+
+      it('sets trySecondaryWrite to false', function () {
+        expect(operation.trySecondaryWrite).to.be.false;
+      });
+    });
+
+    context('when no writable stages in empty pipeline', function () {
       const operation = new AggregateOperation(db, [], { dbName: db });
+
+      it('sets trySecondaryWrite to false', function () {
+        expect(operation.trySecondaryWrite).to.be.false;
+      });
+    });
+
+    context('when no writable stages', function () {
+      const operation = new AggregateOperation(db, [{ $project: { name: 1 } }], { dbName: db });
 
       it('sets trySecondaryWrite to false', function () {
         expect(operation.trySecondaryWrite).to.be.false;

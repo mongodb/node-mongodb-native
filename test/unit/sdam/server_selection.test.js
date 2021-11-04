@@ -11,7 +11,7 @@ const { ServerDescription } = require('../../../src/sdam/server_description');
 const { TopologyDescription } = require('../../../src/sdam/topology_description');
 const { TopologyType } = require('../../../src/sdam/common');
 
-describe('server selection', function () {
+describe.only('server selection', function () {
   const primary = new ServerDescription('127.0.0.1:27017', {
     setName: 'test',
     isWritablePrimary: true,
@@ -75,7 +75,7 @@ describe('server selection', function () {
           TopologyType.ReplicaSetWithPrimary,
           serverDescriptions,
           'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION - 1
         );
@@ -111,7 +111,7 @@ describe('server selection', function () {
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION
         );
-        const selector = secondaryWritableServerSelector();
+        const selector = secondaryWritableServerSelector(undefined, ReadPreference.secondary);
         const server = selector(topologyDescription, Array.from(serverDescriptions.values()));
 
         it('selects a primary', function () {

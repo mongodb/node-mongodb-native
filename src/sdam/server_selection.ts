@@ -43,7 +43,11 @@ export function secondaryWritableServerSelector(
   // If server version >= 5.0...
   // - If read preference is supplied, use that.
   // - If no read preference is supplied, use primary.
-  if (!readPreference || (wireVersion && wireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION)) {
+  if (
+    !readPreference ||
+    !wireVersion ||
+    (wireVersion && wireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION)
+  ) {
     return readPreferenceServerSelector(ReadPreference.primary);
   }
   return readPreferenceServerSelector(readPreference);
