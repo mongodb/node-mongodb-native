@@ -161,7 +161,7 @@ describe('server selection', function () {
           TopologyType.Sharded,
           serverDescriptions,
           'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION - 1
         );
@@ -247,7 +247,7 @@ describe('server selection', function () {
           TopologyType.LoadBalanced,
           serverDescriptions,
           'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION - 1
         );
@@ -333,7 +333,7 @@ describe('server selection', function () {
           TopologyType.Single,
           serverDescriptions,
           'test',
-          MIN_SECONDARY_WRITE_WIRE_VERSION - 1,
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
           new ObjectId(),
           MIN_SECONDARY_WRITE_WIRE_VERSION - 1
         );
