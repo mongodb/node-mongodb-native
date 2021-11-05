@@ -4,36 +4,32 @@ When contributing to this repository, please first discuss the change you wish
 to make via issue, pull request, or any other method with the owners of this
 repository before making a change.
 
-Please note we have a [code of conduct][code-of-conduct],
-please follow it in all your interactions with the project.
+Please follow the [code of conduct][code-of-conduct] in all your interactions with the project.
 
 ## Developer Startup Guide
 
+This section will walk you though how to get started working with the code.
 ### Runtime
 
-It's recommended you install Node Version Manager for [unix systems][nvm-unix] or [windows][nvm-windows].
-While it isn't required we have a minimum node version requirement (look in [package.json](./package.json) under the "engines" key) and we can't accept code that does not work on the minimum specified version.
+We recommend you install Node Version Manager for [UNIX systems][nvm-unix] or [Windows][nvm-windows].
+
+All code changes must work on the minimum Node version specified in [package.json](./package.json) under the "engines" key.
+
+### Get the Code
+
+Begin by cloning this repo.  Then run `npm install` to install necessary dependencies.
 
 ### MongoDB Helpers
 
-- For setting up a cluster to test against we recommend using [mtools][mtools-install].
+The following tools will help you manage MongoDB locally on your machine.
+- For setting up a cluster to test against, we recommend using [mtools][mtools-install].
 - For managing installed versions of MongoDB, we recommend using [m](https://github.com/aheckmann/m).
 
-### VSCode Setup
+### Visual Studio Code Setup
 
-- Save the the workspace file [mongodbNodeDriver.code-workspace][workspace-file] next to where you have the driver cloned to and open this in VSCode.
-  Double check that the `folders.path` at the top of the file's json is correct.
+One option to get up and running quickly is to use a preconfigured VS Code [workspace][workspace-file].  Save the the workspace file in a directory separate from the directory where you cloned this repo.  Open the workspace file in VS Code, and update `folders.path` to point to your local `driver` directory.
 
-- We recommended these extensions:
-  - [eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-  - [test-explorer](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-test-explorer)
-  - [mocha-test-adapter](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-mocha-test-adapter)
-  - [coverage-gutters](https://marketplace.visualstudio.com/items?itemName=ryanluker.vscode-coverage-gutters)
-  - [pull-request-github](https://marketplace.visualstudio.com/items?itemName=github.vscode-pull-request-github)
-  - [mongodb](https://marketplace.visualstudio.com/items?itemName=mongodb.mongodb-vscode)
-  - [gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
-
-If you just want to get formatting and linting working automatically use these settings:
+Alternatively, if you just want to get formatting and linting working automatically without using the workspace file, add these settings to your VS Code code workspace:
 
 ```jsonc
 "settings":{
@@ -49,29 +45,61 @@ If you just want to get formatting and linting working automatically use these s
 }
 ```
 
-### Running the tests
+We recommended these VS Code extensions:
+  - [eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+  - [test-explorer](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-test-explorer)
+  - [mocha-test-adapter](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-mocha-test-adapter)
+  - [coverage-gutters](https://marketplace.visualstudio.com/items?itemName=ryanluker.vscode-coverage-gutters)
+  - [pull-request-github](https://marketplace.visualstudio.com/items?itemName=github.vscode-pull-request-github)
+  - [mongodb](https://marketplace.visualstudio.com/items?itemName=mongodb.mongodb-vscode)
+  - [gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
 
-- Start a mongod standalone with our [cluster_setup.sh](test/tools/cluster_setup.sh) script
-  - Usage: `./test/tools/cluster_setup.sh server`
-- Run the tests with `npm test`
-- Read further in [test/readme.md](test/readme.md) if you need to test a special environment like CSFLE, or Serverless.
+
+
+### Running the Tests
+
+Start a mongod standalone with our [cluster_setup.sh](test/tools/cluster_setup.sh) script: `./test/tools/cluster_setup.sh server`
+
+Then run the tests: `npm test`
+
+See [test/readme.md](test/readme.md) for more information on testing in a special environment like CSFLE or Serverless.
 
 ### Tests FAQ
 
 - How can I run the tests against more than a standalone?
-  - You can use the `test/tools/cluster_setup.sh replica_set`
-  - You can prefix the npm test with a MONGODB_URI environment variable to point the tests to the correct deployment
-    - `env MONGODB_URI=mongodb://localhost:27017 npm test`
-  - If you are running against more than a standalone make sure your ulimit settings are in accordance with mongo's recommendations
-  - Changing the settings on the latest versions of macos can be tricky: [read here][macos-ulimt] (unless you know you need it you shouldn't have to do the complicated maxproc steps)
+
+  You can use `test/tools/cluster_setup.sh replica_set` to start a replica set.
+
+  If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with
+  [MongoDB's recommendations][mongodb-ulimit].
+  Changing the settings on the latest versions of macOS can be tricky.  See [this article][macos-ulimt]
+  for tips. (You likely don't need to do the complicated maxproc steps.)
+
+  You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment:
+  `env MONGODB_URI=mongodb://localhost:27017 npm test`
+
 - How can I run just one test?
-  - To run a single test, use mocha's grep flag: `npm run test -- -g 'test name'`
-  - If it's easier you can also isolate tests by adding `.only` Example: `it.only(‘cool test’, function() {})`
+
+  The easiest way to run a single test is by appending `.only()` to the suite or test you want to run.
+  For example, you could update a test function to be `it.only(‘cool test’, function() {})`.  Then
+  run the test using `npm run check:test` for a functional or integration test or
+  `npm run check:unit` for a unit test.  See [Mocha's documentation][mocha-only]
+  for more detailed information on `.only()`.
+
+  Another way to run a single test is to use Mocha's `grep` flag.  For functional or integration tests,
+  run `npm run check:test -- -g 'test name'`. For unit tests, run `npm run check:unit -- -g 'test name'`.
+  See the [Mocha documentation][mocha-grep] for information on the `grep` flag.
+
+- Why are some of the tests "pending"?
+
+  Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test
+  results.  See
+  [Mocha's documentation][mocha-skip] for more information.
 
 ### Commit messages
 
-Please follow the [conventional commit style][conventional-commit-style].
-The format should look something like this (note the blank lines):
+Please follow the [Conventional Commits specification][conventional-commit-style].
+The format should look something like the following (note the blank lines):
 
 ```txt
 <type>(<scope>): <subject>
@@ -79,7 +107,7 @@ The format should look something like this (note the blank lines):
 <body>
 ```
 
-If there is a relevant NODE ticket number it should be referenced in the scope portion of the commit.
+If there is a relevant [NODE Jira ticket][node-jira], reference the ticket number in the scope portion of the commit.
 
 Note that a BREAKING CHANGE commit should include an exclamation mark after the scope, for example:
 
@@ -96,7 +124,7 @@ These are the commit types we make use of:
 - **style:** Changes that do not affect the meaning of the code (e.g, formatting)
 - **refactor:** A code change that neither fixes a bug nor adds a feature
 - **perf:** A code change that improves performance
-- **test:** Adding missing or correcting existing tests
+- **test:** Adds missing or corrects existing test(s)
 - **chore:** Changes to the build process or auxiliary tools and libraries such as documentation generation
 
 ## Conventions Guide
@@ -106,11 +134,11 @@ Below are some conventions that aren't enforced by any of our tooling but we non
 - **Disallow `export default` syntax**
   - For our use case it is best if all imports / exports remain named.
 - **As of 4.0 all code in src is in Typescript**
-  - Typescript provides a nice developer experience
-    As a product of using TS we should be using es6 syntax features whenever possible.
+  - Typescript provides a nice developer experience.
+    As a product of using TS, we should be using ES6 syntax features whenever possible.
 - **Errors**
-  - Error messages should be sentence case, and have no periods at the end.
-  - Use driver-specific error types where possible (not just `Error`, but classes that extend `MongoError`, e.g. `MongoNetworkError`)
+  - Error messages should be sentence case and have no periods at the end.
+  - Use driver-specific error types where possible (not just `Error`, but classes that extend `MongoError`, e.g. `MongoNetworkError`).
 
 ## Pull Request Process
 
@@ -144,14 +172,14 @@ Reviewers should use the following questions to evaluate the implementation for 
      - better organized / easier to understand / clearer separation of concerns
      - easier to maintain (easier to change, harder to accidentally break)
 - Housekeeping
-  1. Does the title and description of the PR reference the correct jira ticket and does it use the correct conventional commit type (e.g., fix, feat, test, breaking change etc)?
+  1. Does the title and description of the PR reference the correct Jira ticket and does it use the correct conventional commit type (e.g., fix, feat, test, breaking change etc)?
      - If the change is breaking, ensure there is an exclamation mark after the scope (e.g., "fix(NODE-xxx)!: \<description\>" )
-  1. If there are new TODOs, has a related JIRA ticket been created?
+  1. If there are new TODOs, has a related Jira ticket been created?
   1. Are symbols correctly marked as internal or public?
   1. Do the Typescript types match expected runtime usage? Are there tests for new or updated types?
   1. Should any documentation be updated?
      - Has the relevant internal documentation been updated as part of the PR?
-     - Have the external documentation requirements been captured in jira?
+     - Have the external documentation requirements been captured in Jira?
 
 [conventional-commit-style]: https://www.conventionalcommits.org/en/v1.0.0/
 [code-of-conduct]: CODE_OF_CONDUCT.md
@@ -162,3 +190,9 @@ Reviewers should use the following questions to evaluate the implementation for 
 [nvm-unix]: https://github.com/nvm-sh/nvm#install--update-script
 [macos-ulimt]: https://wilsonmar.github.io/maximum-limits/
 [workspace-file]: https://gist.githubusercontent.com/nbbeeken/d831a3801b4c463648c077b27da5057b/raw/8e986843e5e28019f7c0cebe5c6fa72407bf8afb/node-mongodb-native.code-workspace
+[mongodb-ulimit]: https://docs.mongodb.com/manual/reference/ulimit/#recommended-ulimit-settings
+[mocha-only]: https://mochajs.org/#exclusive-tests
+[mocha-grep]: https://mochajs.org/#command-line-usage
+[mocha-ulimit]: https://docs.mongodb.com/manual/reference/ulimit/#recommended-ulimit-settings
+[mocha-skip]: https://mochajs.org/#inclusive-tests
+[node-jira]: https://jira.mongodb.org/browse/NODE
