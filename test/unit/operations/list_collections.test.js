@@ -51,16 +51,12 @@ describe('ListCollectionsOperation', function () {
       });
     });
 
-    context('when nameOnly is not provided', function () {
+    context('when no options are provided', function () {
       const operation = new ListCollectionsOperation(db, {}, { dbName: db });
 
       it('sets nameOnly to false', function () {
         expect(operation).to.have.property('nameOnly', false);
       });
-    });
-
-    context('when authorizedCollections is not provided', function () {
-      const operation = new ListCollectionsOperation(db, {}, { dbName: db });
 
       it('sets authorizedCollections to false', function () {
         expect(operation).to.have.property('authorizedCollections', false);
@@ -137,24 +133,10 @@ describe('ListCollectionsOperation', function () {
       });
     });
 
-    context('when nameOnly is not provided', function () {
+    context('when no options are provided', function () {
       const operation = new ListCollectionsOperation(db, {}, { dbName: db });
 
-      it('sets nameOnly to false', function () {
-        expect(operation.generateCommand()).to.deep.equal({
-          listCollections: 1,
-          cursor: {},
-          filter: {},
-          nameOnly: false,
-          authorizedCollections: false
-        });
-      });
-    });
-
-    context('when authorizedCollections is not provided', function () {
-      const operation = new ListCollectionsOperation(db, {}, { dbName: db });
-
-      it('sets authorizedCollections to false', function () {
+      it('sets nameOnly and authorizedCollections properties to false', function () {
         expect(operation.generateCommand()).to.deep.equal({
           listCollections: 1,
           cursor: {},
