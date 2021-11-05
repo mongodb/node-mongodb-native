@@ -64,7 +64,8 @@
       "description": "Database-level aggregate with $out includes read preference for 5.0+ server",
       "runOnRequirements": [
         {
-          "minServerVersion": "5.0"
+          "minServerVersion": "5.0",
+          "serverless": "forbid"
         }
       ],
       "operations": [
@@ -158,7 +159,8 @@
       "runOnRequirements": [
         {
           "minServerVersion": "4.2",
-          "maxServerVersion": "4.4.99"
+          "maxServerVersion": "4.4.99",
+          "serverless": "forbid"
         }
       ],
       "operations": [

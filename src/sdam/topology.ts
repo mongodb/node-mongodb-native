@@ -797,6 +797,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return result;
   }
 
+  get commonWireVersion(): number | undefined {
+    return this.description.commonWireVersion;
+  }
+
   get logicalSessionTimeoutMinutes(): number | undefined {
     return this.description.logicalSessionTimeoutMinutes;
   }

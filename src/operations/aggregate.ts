@@ -1,5 +1,4 @@
 import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
-import { ReadPreference } from '../read_preference';
 import { MongoInvalidArgumentError } from '../error';
 import { maxWireVersion, MongoDBNamespace } from '../utils';
 import { Aspect, defineAspects, Hint } from './operation';
@@ -65,7 +64,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
 
     if (this.hasWriteStage) {
-      this.readPreference = ReadPreference.primary;
+      this.trySecondaryWrite = true;
     }
 
     if (this.explain && this.writeConcern) {

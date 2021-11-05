@@ -8,6 +8,9 @@ import type { ServerDescription, TagSet } from './server_description';
 const IDLE_WRITE_PERIOD = 10000;
 const SMALLEST_MAX_STALENESS_SECONDS = 90;
 
+//  Minimum version to try writes on secondaries.
+export const MIN_SECONDARY_WRITE_WIRE_VERSION = 13;
+
 /** @public */
 export type ServerSelector = (
   topologyDescription: TopologyDescription,
@@ -26,6 +29,28 @@ export function writableServerSelector(): ServerSelector {
       topologyDescription,
       servers.filter((s: ServerDescription) => s.isWritable)
     );
+}
+
+/**
+ * Returns a server selector that uses a read preference to select a
+ * server potentially for a write on a secondary.
+ */
+export function secondaryWritableServerSelector(
+  wireVersion?: number,
+  readPreference?: ReadPreference
+): ServerSelector {
+  // If server version < 5.0, read preference always primary.
+  // If server version >= 5.0...
+  // - If read preference is supplied, use that.
+  // - If no read preference is supplied, use primary.
+  if (
+    !readPreference ||
+    !wireVersion ||
+    (wireVersion && wireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION)
+  ) {
+    return readPreferenceServerSelector(ReadPreference.primary);
+  }
+  return readPreferenceServerSelector(readPreference);
 }
 
 /**

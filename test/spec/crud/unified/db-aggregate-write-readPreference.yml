@@ -52,6 +52,7 @@ tests:
   - description: "Database-level aggregate with $out includes read preference for 5.0+ server"
     runOnRequirements:
       - minServerVersion: "5.0"
+        serverless: "forbid"
     operations:
       - object: *database0
         name: aggregate
@@ -85,6 +86,7 @@ tests:
       # drivers may avoid inheriting a client-level read concern for pre-4.2.
       - minServerVersion: "4.2"
         maxServerVersion: "4.4.99"
+        serverless: "forbid"
     operations:
       - object: *database0
         name: aggregate
