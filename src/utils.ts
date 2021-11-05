@@ -954,7 +954,7 @@ export function makeInterruptibleAsyncInterval(
 ): InterruptibleAsyncInterval {
   let timerId: NodeJS.Timeout | undefined;
   let lastCallTime: number;
-  let lastWakeTime: number;
+  let cannotBeExpedited = false;
   let stopped = false;
 
   options = options ?? {};
@@ -965,10 +965,8 @@ export function makeInterruptibleAsyncInterval(
 
   function wake() {
     const currentTime = clock();
-    const timeSinceLastWake = currentTime - lastWakeTime;
-    const timeSinceLastCall = currentTime - lastCallTime;
-    const timeUntilNextCall = interval - timeSinceLastCall;
-    lastWakeTime = currentTime;
+    const nextScheduledCallTime = lastCallTime + interval;
+    const timeUntilNextCall = nextScheduledCallTime - currentTime;
 
     // For the streaming protocol: there is nothing obviously stopping this
     // interval from being woken up again while we are waiting "infinitely"
@@ -986,7 +984,7 @@ export function makeInterruptibleAsyncInterval(
     }
 
     // debounce multiple calls to wake within the `minInterval`
-    if (timeSinceLastWake < minInterval) {
+    if (cannotBeExpedited) {
       return;
     }
 
@@ -994,6 +992,7 @@ export function makeInterruptibleAsyncInterval(
     // faster than the `minInterval`
     if (timeUntilNextCall > minInterval) {
       reschedule(minInterval);
+      cannotBeExpedited = true;
     }
   }
 
@@ -1005,7 +1004,7 @@ export function makeInterruptibleAsyncInterval(
     }
 
     lastCallTime = 0;
-    lastWakeTime = 0;
+    cannotBeExpedited = false;
   }
 
   function reschedule(ms?: number) {
@@ -1018,7 +1017,7 @@ export function makeInterruptibleAsyncInterval(
   }
 
   function executeAndReschedule() {
-    lastWakeTime = 0;
+    cannotBeExpedited = false;
     lastCallTime = clock();
 
     fn(err => {
