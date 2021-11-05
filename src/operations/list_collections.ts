@@ -15,6 +15,8 @@ const LIST_COLLECTIONS_WIRE_VERSION = 3;
 export interface ListCollectionsOptions extends CommandOperationOptions {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
+  /** Since 4.0: If true and nameOnly is true, allows a user without the required privilege (i.e. listCollections action on the database) to run the command when access control is enforced. */
+  authorizedCollections?: boolean;
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
 }
@@ -25,6 +27,7 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
   db: Db;
   filter: Document;
   nameOnly: boolean;
+  authorizedCollections: boolean;
   batchSize?: number;
 
   constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
@@ -34,6 +37,7 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     this.db = db;
     this.filter = filter;
     this.nameOnly = !!this.options.nameOnly;
+    this.authorizedCollections = !!this.options.authorizedCollections;
 
     if (typeof this.options.batchSize === 'number') {
       this.batchSize = this.options.batchSize;
@@ -99,7 +103,8 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
       listCollections: 1,
       filter: this.filter,
       cursor: this.batchSize ? { batchSize: this.batchSize } : {},
-      nameOnly: this.nameOnly
+      nameOnly: this.nameOnly,
+      authorizedCollections: this.authorizedCollections
     };
   }
 }
