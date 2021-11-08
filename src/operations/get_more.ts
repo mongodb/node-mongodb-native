@@ -6,7 +6,6 @@ import type { ClientSession } from '../sessions';
 
 /**
  * @public
- * @typeParam TSchema - Unused schema definition, deprecated usage, only specify `FindOptions` with no generic
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface GetMoreOptions<TSchema extends Document = Document> extends OperationOptions {
