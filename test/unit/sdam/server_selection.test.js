@@ -75,6 +75,23 @@ describe('server selection', function () {
         expect(servers).to.deep.equal([primary]);
       });
     });
+
+    context('when no server description provided', function () {
+      const topologyDescription = new TopologyDescription(
+        TopologyType.ReplicaSetWithPrimary,
+        serverDescriptions,
+        'test',
+        MIN_SECONDARY_WRITE_WIRE_VERSION,
+        new ObjectId(),
+        MIN_SECONDARY_WRITE_WIRE_VERSION
+      );
+      const selector = sameServerSelector();
+      const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+
+      it('returns an empty array', function () {
+        expect(servers).to.be.empty;
+      });
+    });
   });
 
   describe('#secondaryWritableServerSelector', function () {

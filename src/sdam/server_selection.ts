@@ -35,11 +35,12 @@ export function writableServerSelector(): ServerSelector {
  * The purpose of this selector is to select the same server, only
  * if it is in a state that it can have commands sent to it.
  */
-export function sameServerSelector(description: ServerDescription): ServerSelector {
+export function sameServerSelector(description?: ServerDescription): ServerSelector {
   return (
     topologyDescription: TopologyDescription,
     servers: ServerDescription[]
   ): ServerDescription[] => {
+    if (!description) return [];
     // Filter the servers to match the provided description only if
     // the type is not unknown.
     return servers.filter((s: ServerDescription) => {

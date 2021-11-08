@@ -17,7 +17,11 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { Document } from '../bson';
 import { supportsRetryableWrites } from '../utils';
-import { secondaryWritableServerSelector, ServerSelector } from '../sdam/server_selection';
+import {
+  sameServerSelector,
+  secondaryWritableServerSelector,
+  ServerSelector
+} from '../sdam/server_selection';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
@@ -153,9 +157,14 @@ function executeWithServerSelection(
 
   let selector: ReadPreference | ServerSelector;
 
-  // If operation should try to write to secondary use the custom server selector
-  // otherwise provide the read preference.
-  if (operation.trySecondaryWrite) {
+  if (operation.hasAspect(Aspect.CURSOR_ITERATING)) {
+    // Get more operations must always select the same server, but run through
+    // server selection to potentially force monitor checks if the server is
+    // in an unknown state.
+    selector = sameServerSelector(operation.server?.description);
+  } else if (operation.trySecondaryWrite) {
+    // If operation should try to write to secondary use the custom server selector
+    // otherwise provide the read preference.
     selector = secondaryWritableServerSelector(topology.commonWireVersion, readPreference);
   } else {
     selector = readPreference;
