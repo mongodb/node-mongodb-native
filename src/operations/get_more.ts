@@ -22,17 +22,21 @@ export interface GetMoreOptions<TSchema extends Document = Document> extends Ope
 export class GetMoreOperation extends AbstractOperation {
   cursorId: Long;
   options: GetMoreOptions;
+  server: Server;
 
-  constructor(ns: MongoDBNamespace, cursorId: Long, options: GetMoreOptions = {}) {
+  constructor(ns: MongoDBNamespace, cursorId: Long, server: Server, options: GetMoreOptions = {}) {
     super(options);
     this.options = options;
     this.ns = ns;
     this.cursorId = cursorId;
+    this.server = server;
   }
 
+  /**
+   * Although there is a server already associated with the get more operation, the signature
+   * for execute passes a server so we will just use that one.
+   */
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
-    this.server = server;
-
     server.getMore(
       this.ns,
       this.cursorId,
