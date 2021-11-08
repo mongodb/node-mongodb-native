@@ -32,6 +32,23 @@ export function writableServerSelector(): ServerSelector {
 }
 
 /**
+ * The purpose of this selector is to select the same server, only
+ * if it is in a state that it can have commands sent to it.
+ */
+export function sameServerSelector(description: ServerDescription): ServerSelector {
+  return (
+    topologyDescription: TopologyDescription,
+    servers: ServerDescription[]
+  ): ServerDescription[] => {
+    // Filter the servers to match the provided description only if
+    // the type is not unknown.
+    return servers.filter((s: ServerDescription) => {
+      return s.address === description.address && s.type !== ServerType.Unknown;
+    });
+  };
+}
+
+/**
  * Returns a server selector that uses a read preference to select a
  * server potentially for a write on a secondary.
  */
