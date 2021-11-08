@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { promisify } = require('util');
 const { MongoParseError, MongoDriverError, MongoInvalidArgumentError } = require('../../src/error');
 const { loadSpecTests } = require('../spec');
 const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
@@ -224,8 +225,8 @@ describe('Connection String', function () {
       expect(options.srvHost).to.equal('test1.test.build.10gen.cc');
     });
 
-    SPEC_PATHS.forEach(function (folder) {
-      describe('spec tests', function () {
+    for (const folder of SPEC_PATHS) {
+      describe(`spec tests ${folder}`, function () {
         const specPath = path.join(__dirname, '../spec', 'initial-dns-seedlist-discovery', folder);
         const testFiles = fs
           .readdirSync(specPath)
@@ -233,72 +234,87 @@ describe('Connection String', function () {
           .map(x => [x, fs.readFileSync(path.join(specPath, x), 'utf8')])
           .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 
-        testFiles.forEach(test => {
-          if (!test[1].comment) {
-            test[1].comment = test[0];
+        for (const [fileName, test] of testFiles) {
+          if (!test.comment) {
+            test.comment = fileName;
           }
 
-          const comment = test[1].comment;
-          const skipTest = comment.search(/^(srvMaxHosts|srv-service-name)/) > -1;
-          const maybeIt = skipTest ? it.skip : it;
-          // TODO: NODE-3467: Implement maxSrvHosts work
-          maybeIt(comment, {
+          const comment = test.comment;
+          it(comment, {
             metadata: { requires: { topology: ['single'] } },
-            test: function (done) {
+            async test() {
+              let thrownError;
+              let options;
+              let hosts;
               try {
-                const options = parseOptions(test[1].uri);
-                resolveSRVRecord(options, (err, result) => {
-                  if (test[1].error) {
-                    expect(err).to.exist;
-                    expect(result).to.not.exist;
-                  } else {
-                    expect(err).to.not.exist;
-                    expect(result).to.exist;
-                    // Implicit SRV options must be set.
-                    expect(options.directConnection).to.be.false;
-                    const testOptions = test[1].options;
-                    if (testOptions && 'tls' in testOptions) {
-                      expect(options).to.have.property('tls', testOptions.tls);
-                    } else if (testOptions && 'ssl' in testOptions) {
-                      expect(options).to.have.property('tls', testOptions.ssl);
-                    } else {
-                      expect(options.tls).to.be.true;
-                    }
-                    if (testOptions && testOptions.replicaSet) {
-                      expect(options).to.have.property('replicaSet', testOptions.replicaSet);
-                    }
-                    if (testOptions && testOptions.authSource) {
-                      expect(options).to.have.property('credentials');
-                      expect(options.credentials.source).to.equal(testOptions.authSource);
-                    }
-                    if (testOptions && testOptions.loadBalanced) {
-                      expect(options).to.have.property('loadBalanced', testOptions.loadBalanced);
-                    }
-                    if (
-                      test[1].parsed_options &&
-                      test[1].parsed_options.user &&
-                      test[1].parsed_options.password
-                    ) {
-                      expect(options.credentials.username).to.equal(test[1].parsed_options.user);
-                      expect(options.credentials.password).to.equal(
-                        test[1].parsed_options.password
-                      );
-                    }
-                  }
-                  done();
-                });
+                options = parseOptions(test.uri);
+                hosts = await promisify(resolveSRVRecord)(options);
               } catch (error) {
-                if (test[1].error) {
-                  expect(error).to.exist;
-                  done();
-                } else {
-                  throw error;
-                }
+                thrownError = error;
               }
+
+              if (test.error) {
+                expect(thrownError).to.exist;
+                expect(hosts).to.not.exist;
+                return; // Nothing more to test...
+              }
+
+              expect(thrownError).to.not.exist;
+              expect(options).to.exist;
+
+              // Implicit SRV options must be set.
+              expect(options.directConnection).to.be.false;
+              const testOptions = test.options;
+              if (testOptions && 'tls' in testOptions) {
+                expect(options).to.have.property('tls', testOptions.tls);
+              } else if (testOptions && 'ssl' in testOptions) {
+                expect(options).to.have.property('tls', testOptions.ssl);
+              } else {
+                expect(options.tls).to.be.true;
+              }
+              if (testOptions && testOptions.replicaSet) {
+                expect(options).to.have.property('replicaSet', testOptions.replicaSet);
+              }
+              if (testOptions && testOptions.authSource) {
+                expect(options).to.have.property('credentials');
+                expect(options.credentials.source).to.equal(testOptions.authSource);
+              }
+              if (testOptions && testOptions.loadBalanced) {
+                expect(options).to.have.property('loadBalanced', testOptions.loadBalanced);
+              }
+              if (test.parsed_options && test.parsed_options.user && test.parsed_options.password) {
+                expect(options.credentials.username).to.equal(test.parsed_options.user);
+                expect(options.credentials.password).to.equal(test.parsed_options.password);
+              }
+
+              // TODO(): srvMaxHost limiting happens in the callback given to resolveSRVRecord inside the driver
+              // How can we test this in unit test?
+
+              // if (options.srvHost && comment.includes('srvMaxHosts')) {
+              //   if (typeof test.numSeeds === 'number' && typeof test.numHosts === 'number') {
+              //     // Driver should limit the hosts to a random selection, so we just assert counts
+              //     expect(hosts).to.have.lengthOf(test.numSeeds);
+              //     expect(options.srvMaxHosts).to.be.lessThan(hosts.length);
+              //     const selectedHosts = shuffle(hosts, options.srvMaxHosts);
+              //     expect(selectedHosts).to.have.lengthOf(test.numHosts);
+              //   } else {
+              //     // Tests that can assert exact host lists
+              //     const hostsAsStrings = hosts.map(h => h.toString());
+              //     expect(hostsAsStrings).to.have.lengthOf(test.seeds.length);
+              //     expect(hostsAsStrings, 'test.seeds').to.deep.equal(test.seeds);
+
+              //     if (test.options.srvMaxHosts !== 0) {
+              //       expect(hostsAsStrings).to.have.lengthOf(test.options.srvMaxHosts);
+              //     } else {
+              //       expect(hostsAsStrings).to.have.lengthOf(test.hosts.length);
+              //     }
+              //     // expect(hostsAsStrings, 'test.hosts').to.deep.equal(test.hosts);
+              //   }
+              // }
             }
           });
-        });
+        }
       });
-    });
+    }
   });
 });

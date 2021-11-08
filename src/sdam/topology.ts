@@ -140,6 +140,9 @@ export interface TopologyPrivate {
 
 /** @public */
 export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
+  srvMaxHosts: number;
+  srvServiceName: string;
+  rescanSrvIntervalMS: number;
   hosts: HostAddress[];
   retryWrites: boolean;
   retryReads: boolean;
@@ -339,7 +342,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         options.srvPoller ??
         new SrvPoller({
           heartbeatFrequencyMS: this.s.heartbeatFrequencyMS,
-          srvHost: options.srvHost
+          srvHost: options.srvHost,
+          srvMaxHosts: options.srvMaxHosts,
+          srvServiceName: options.srvServiceName,
+          rescanSrvIntervalMS: options.rescanSrvIntervalMS
         });
 
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
@@ -363,7 +369,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   private detectSrvRecords(ev: SrvPollingEvent) {
     const previousTopologyDescription = this.s.description;
-    this.s.description = this.s.description.updateFromSrvPollingEvent(ev);
+    this.s.description = this.s.description.updateFromSrvPollingEvent(
+      ev,
+      this.s.options.srvMaxHosts
+    );
     if (this.s.description === previousTopologyDescription) {
       // Nothing changed, so return
       return;

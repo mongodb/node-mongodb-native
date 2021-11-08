@@ -34,7 +34,13 @@ import { PromiseProvider } from './promise_provider';
 import { Encrypter } from './encrypter';
 import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 
-const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
+const VALID_TXT_RECORDS = [
+  'authSource',
+  'replicaSet',
+  'loadBalanced',
+  'srvMaxHosts',
+  'srvServiceName'
+];
 
 const LB_SINGLE_HOST_ERROR = 'loadBalanced option only supported with a single host in the URI';
 const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSet option';
@@ -75,7 +81,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
   const lookupAddress = options.srvHost;
-  dns.resolveSrv(`_mongodb._tcp.${lookupAddress}`, (err, addresses) => {
+  dns.resolveSrv(`_${options.srvServiceName}._tcp.${lookupAddress}`, (err, addresses) => {
     if (err) return callback(err);
 
     if (addresses.length === 0) {
@@ -116,12 +122,22 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
           );
         }
 
+        if (VALID_TXT_RECORDS.some(option => txtRecordOptions.get(option) === '')) {
+          return callback(new MongoParseError('Cannot have empty URI params in DNS TXT Record'));
+        }
+
         const source = txtRecordOptions.get('authSource') ?? undefined;
         const replicaSet = txtRecordOptions.get('replicaSet') ?? undefined;
         const loadBalanced = txtRecordOptions.get('loadBalanced') ?? undefined;
+        const srvMaxHostsString = txtRecordOptions.get('srvMaxHosts') ?? undefined;
+        // const srvServiceName = txtRecordOptions.get('srvServiceName') ?? undefined;
 
-        if (source === '' || replicaSet === '') {
-          return callback(new MongoParseError('Cannot have empty URI params in DNS TXT Record'));
+        if (srvMaxHostsString) {
+          try {
+            options.srvMaxHosts = getUint('srvMaxHosts', txtRecordOptions.get('srvMaxHosts'));
+          } catch (error) {
+            return callback(error);
+          }
         }
 
         if (!options.userSpecifiedAuthSource && source) {
@@ -130,6 +146,14 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
 
         if (!options.userSpecifiedReplicaSet && replicaSet) {
           options.replicaSet = replicaSet;
+        }
+
+        if (
+          options.replicaSet &&
+          typeof options.srvMaxHosts === 'number' &&
+          options.srvMaxHosts !== 0
+        ) {
+          return callback(new MongoParseError('Cannot combine replicaSet option with srvMaxHosts'));
         }
 
         if (loadBalanced === 'true') {
@@ -254,9 +278,6 @@ export function parseOptions(
   if (isSRV) {
     // SRV Record is resolved upon connecting
     mongoOptions.srvHost = hosts[0];
-    if (!url.searchParams.has('tls') && !url.searchParams.has('ssl')) {
-      options.tls = true;
-    }
   }
 
   const urlOptions = new CaseInsensitiveMap();
@@ -315,6 +336,13 @@ export function parseOptions(
 
   const allOptions = new CaseInsensitiveMap();
 
+  if (isSRV) {
+    // SRV turns on TLS by default, but users can override and turn it off
+    if (!objectOptions.has('tls') && !urlOptions.has('ssl')) {
+      objectOptions.set('tls', true);
+    }
+  }
+
   const allKeys = new Set<string>([
     ...urlOptions.keys(),
     ...objectOptions.keys(),
@@ -364,6 +392,14 @@ export function parseOptions(
     const values = allOptions.get(key);
     if (!values || values.length === 0) continue;
     setOption(mongoOptions, key, descriptor, values);
+  }
+
+  if (
+    typeof mongoOptions.srvMaxHosts === 'number' &&
+    mongoOptions.srvMaxHosts !== 0 &&
+    typeof mongoOptions.replicaSet === 'string'
+  ) {
+    throw new MongoParseError('Cannot combine replicaSet option and maxSrvHosts');
   }
 
   if (mongoOptions.credentials) {
@@ -438,6 +474,10 @@ function validateLoadBalancedOptions(
     }
     if (mongoOptions.directConnection) {
       return new MongoParseError(LB_DIRECT_CONNECTION_ERROR);
+    }
+
+    if (mongoOptions.srvHost && mongoOptions.srvMaxHosts) {
+      return new MongoParseError('Cannot limit srv hosts with loadBalanced enabled');
     }
   }
 }
@@ -902,6 +942,7 @@ export const OPTIONS = {
   replicaSet: {
     type: 'string'
   },
+  rescanSrvIntervalMS: { type: 'uint', default: 60000 },
   retryReads: {
     default: true,
     type: 'boolean'
@@ -923,6 +964,13 @@ export const OPTIONS = {
   socketTimeoutMS: {
     default: 0,
     type: 'uint'
+  },
+  srvMaxHosts: {
+    type: 'uint'
+  },
+  srvServiceName: {
+    type: 'string',
+    default: 'mongodb'
   },
   ssl: {
     target: 'tls',

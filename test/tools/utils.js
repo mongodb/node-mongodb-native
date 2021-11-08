@@ -337,7 +337,10 @@ const runLater = (fn, ms) => {
   });
 };
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 module.exports = {
+  sleep,
   runLater,
   ejson,
   EventCollector,

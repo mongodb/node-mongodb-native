@@ -1,7 +1,7 @@
 import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
 import { Topology, TOPOLOGY_EVENTS } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
-import type { Callback } from '../utils';
+import { Callback, shuffle } from '../utils';
 import type { MongoClient, MongoOptions } from '../mongo_client';
 import { CMAP_EVENTS } from '../cmap/connection_pool';
 import { APM_EVENTS } from '../cmap/connection';
@@ -51,7 +51,13 @@ export function connect(
   if (typeof options.srvHost === 'string') {
     return resolveSRVRecord(options, (err, hosts) => {
       if (err || !hosts) return callback(err);
-      for (const [index, host] of hosts.entries()) {
+
+      const selectedHosts =
+        options.srvMaxHosts === 0 || options.srvMaxHosts >= hosts.length
+          ? hosts
+          : shuffle(hosts, options.srvMaxHosts);
+
+      for (const [index, host] of selectedHosts.entries()) {
         options.hosts[index] = host;
       }
 

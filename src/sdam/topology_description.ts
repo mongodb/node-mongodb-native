@@ -4,6 +4,7 @@ import { TopologyType, ServerType } from './common';
 import type { ObjectId, Document } from '../bson';
 import type { SrvPollingEvent } from './srv_polling';
 import { MongoError, MongoRuntimeError } from '../error';
+import { shuffle } from '../utils';
 
 // constants related to compatibility checks
 const MIN_SUPPORTED_SERVER_VERSION = WIRE_CONSTANTS.MIN_SUPPORTED_SERVER_VERSION;
@@ -139,23 +140,51 @@ export class TopologyDescription {
    * Returns a new TopologyDescription based on the SrvPollingEvent
    * @internal
    */
-  updateFromSrvPollingEvent(ev: SrvPollingEvent): TopologyDescription {
-    const newAddresses = ev.addresses();
-    const serverDescriptions = new Map(this.servers);
-    for (const address of this.servers.keys()) {
-      if (newAddresses.has(address)) {
-        newAddresses.delete(address);
-      } else {
-        serverDescriptions.delete(address);
+  updateFromSrvPollingEvent(ev: SrvPollingEvent, srvMaxHosts: number): TopologyDescription {
+    /** The SRV addresses defines the set of addresses we should be using */
+    const incomingHostnames = ev.hostnames();
+    const currentHostnames = new Set(this.servers.keys());
+
+    const hostnamesToRemove = new Set<string>();
+    for (const hostname of currentHostnames) {
+      if (!incomingHostnames.has(hostname)) {
+        // If the SRV Records no longer include this hostname
+        // we have to stop using it
+        hostnamesToRemove.add(hostname);
       }
     }
 
-    if (serverDescriptions.size === this.servers.size && newAddresses.size === 0) {
+    const hostnamesToAdd = new Set<string>();
+    for (const hostname of incomingHostnames) {
+      if (!currentHostnames.has(hostname)) {
+        // There are new hosts in the SRV Record!
+        hostnamesToAdd.add(hostname);
+      }
+    }
+
+    if (hostnamesToAdd.size === 0 && hostnamesToRemove.size === 0) {
+      // No new hosts to add and none to remove
       return this;
     }
 
-    for (const [address, host] of newAddresses) {
-      serverDescriptions.set(address, new ServerDescription(host));
+    const serverDescriptions = new Map(this.servers);
+    for (const removedHost of hostnamesToRemove) {
+      serverDescriptions.delete(removedHost);
+    }
+
+    if (hostnamesToAdd.size > 0) {
+      if (srvMaxHosts === 0) {
+        // Add all!
+        for (const hostToAdd of hostnamesToAdd) {
+          serverDescriptions.set(hostToAdd, new ServerDescription(hostToAdd));
+        }
+      } else if (serverDescriptions.size < srvMaxHosts) {
+        // Add only the amount needed to get us back to srvMaxHosts
+        const selectedHosts = shuffle(hostnamesToAdd, srvMaxHosts - serverDescriptions.size);
+        for (const selectedHostToAdd of selectedHosts) {
+          serverDescriptions.set(selectedHostToAdd, new ServerDescription(selectedHostToAdd));
+        }
+      }
     }
 
     return new TopologyDescription(

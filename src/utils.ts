@@ -28,6 +28,7 @@ import type { CommandOperationOptions, OperationParent } from './operations/comm
 import { ReadPreference } from './read_preference';
 import { URL } from 'url';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
+import type { SrvRecord } from 'dns';
 
 /**
  * MongoDB Driver style callback
@@ -1095,8 +1096,9 @@ export function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]): boo
   return true;
 }
 
-export function setDifference(setA: Iterable<any>, setB: Iterable<any>): Set<any> {
-  const difference = new Set(setA);
+/** Returns the items that are uniquely in setA */
+export function setDifference<T>(setA: Iterable<T>, setB: Iterable<T>): Set<T> {
+  const difference = new Set<T>(setA);
   for (const elem of setB) {
     difference.delete(elem);
   }
@@ -1319,6 +1321,23 @@ export class HostAddress {
     Object.freeze(this);
   }
 
+  equals(other: HostAddress): boolean {
+    return (
+      this.host === other.host &&
+      this.port === other.port &&
+      this.socketPath === other.socketPath &&
+      this.isIPv6 === other.isIPv6
+    );
+  }
+
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return `new HostAddress('${this.toString(true)}')`;
+  }
+
   /**
    * @param ipv6Brackets - optionally request ipv6 bracket notation required for connection strings
    */
@@ -1334,6 +1353,10 @@ export class HostAddress {
 
   static fromString(s: string): HostAddress {
     return new HostAddress(s);
+  }
+
+  static fromSrvRecord({ name, port }: SrvRecord): HostAddress {
+    return HostAddress.fromString(`${name}:${port}`);
   }
 }
 
@@ -1404,4 +1427,33 @@ export function parsePackageVersion({ version }: { version: string }): {
 } {
   const [major, minor, patch] = version.split('.').map((n: string) => Number.parseInt(n, 10));
   return { major, minor, patch };
+}
+
+/**
+ * Fisher–Yates Shuffle
+ *
+ * Reference: https://bost.ocks.org/mike/shuffle/
+ * @param sequence - items to be shuffled
+ * @param limit - the number of ite
+ */
+export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
+  const items = Array.isArray(sequence) ? sequence : Array.from(sequence);
+
+  if (limit > items.length) {
+    throw new MongoInvalidArgumentError('Limit must be less than the number of items');
+  }
+
+  let remainingItemsToShuffle = items.length;
+  while (remainingItemsToShuffle !== 0) {
+    // Pick a remaining element
+    const randomIndex = Math.floor(Math.random() * remainingItemsToShuffle);
+    remainingItemsToShuffle -= 1;
+
+    // And swap it with the current element
+    const swapHold = items[remainingItemsToShuffle];
+    items[remainingItemsToShuffle] = items[randomIndex];
+    items[randomIndex] = swapHold;
+  }
+
+  return limit === 0 ? items : items.slice(0, limit);
 }

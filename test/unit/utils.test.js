@@ -3,10 +3,12 @@ const {
   eachAsync,
   executeLegacyOperation,
   makeInterruptibleAsyncInterval,
-  BufferPool
+  BufferPool,
+  shuffle
 } = require('../../src/utils');
 const { expect } = require('chai');
 const sinon = require('sinon');
+const { MongoInvalidArgumentError } = require('../../src/error');
 
 describe('utils', function () {
   context('eachAsync', function () {
@@ -454,6 +456,33 @@ describe('utils', function () {
       return executeLegacyOperation(topology, operation, [{}, null], options).then(null, err => {
         expect(err).to.equal(expectedError);
       });
+    });
+  });
+
+  describe('shuffler function', () => {
+    it('should support iterables', function () {
+      // Kind of an implicit test, we should not throw/crash here.
+      const input = new Set(['a', 'b', 'c']);
+      const output = shuffle(input);
+      expect(Array.isArray(output)).to.be.true;
+    });
+    it('should give a random subset if limit is less than the input length', () => {
+      const input = ['a', 'b', 'c', 'd', 'e'];
+      const output = shuffle(input, 3);
+      expect(output).to.have.lengthOf(3);
+    });
+
+    it('should give a random shuffling of the input', () => {
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+      const output = shuffle(input);
+      // Of course it is possible a shuffle returns exactly the same as the input
+      // but it is so improbable it is worth the flakiness in my opinion
+      expect(output).to.not.deep.equal(input);
+      expect(output).to.have.lengthOf(input.length);
+    });
+
+    it('should throw if limit is larger than input size', () => {
+      expect(() => shuffle([], 100)).to.throw(MongoInvalidArgumentError);
     });
   });
 });

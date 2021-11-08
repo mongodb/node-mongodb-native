@@ -49,9 +49,9 @@ const { HostAddress } = require('../../src/utils');
 /**
  * Make a mock mongodb server.
  *
- * @param {number} port - port number
- * @param {string} host - address
- * @param {object} options - options
+ * @param {number} [port] - port number
+ * @param {string} [host] - address
+ * @param {object} [options] - options
  * @returns {Promise<MockServer>}
  */
 function createServer(port, host, options) {
