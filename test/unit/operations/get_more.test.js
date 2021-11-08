@@ -6,11 +6,17 @@ const { Long } = require('../../../src/bson');
 const { GetMoreOperation } = require('../../../src/operations/get_more');
 const { Server } = require('../../../src/sdam/server');
 const { ClientSession } = require('../../../src/sessions');
+const { ReadPreference } = require('../../../src/read_preference');
 
 describe('GetMoreOperation', function () {
   const ns = 'db.coll';
   const cursorId = Long.fromNumber(1);
-  const options = { batchSize: 100, comment: 'test', maxTimeMS: 500 };
+  const options = {
+    batchSize: 100,
+    comment: 'test',
+    maxTimeMS: 500,
+    readPreference: ReadPreference.primary
+  };
 
   describe('#constructor', function () {
     const server = sinon.createStubInstance(Server, {});
@@ -39,7 +45,8 @@ describe('GetMoreOperation', function () {
       getMore: getMoreStub
     });
     const session = sinon.createStubInstance(ClientSession);
-    const operation = new GetMoreOperation(ns, cursorId, server, options);
+    const opts = { ...options, session };
+    const operation = new GetMoreOperation(ns, cursorId, server, opts);
 
     it('executes a getmore on the provided server', function (done) {
       const callback = () => {
@@ -47,7 +54,7 @@ describe('GetMoreOperation', function () {
         expect(getMoreStub.calledOnce).to.be.true;
         expect(call.args[0]).to.equal(ns);
         expect(call.args[1]).to.equal(cursorId);
-        expect(call.args[2]).to.deep.equal({ ...options, session });
+        expect(call.args[2]).to.deep.equal(opts);
         done();
       };
       operation.execute(server, session, callback);

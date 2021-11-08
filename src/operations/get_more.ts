@@ -37,16 +37,8 @@ export class GetMoreOperation extends AbstractOperation {
    * for execute passes a server so we will just use that one.
    */
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
-    server.getMore(
-      this.ns,
-      this.cursorId,
-      {
-        ...this.options,
-        session: session
-      },
-      callback
-    );
+    server.getMore(this.ns, this.cursorId, this.options, callback);
   }
 }
 
-defineAspects(GetMoreOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE, Aspect.CURSOR_ITERATING]);
+defineAspects(GetMoreOperation, [Aspect.READ_OPERATION, Aspect.CURSOR_ITERATING]);

@@ -65,6 +65,7 @@ describe('Change Stream Spec - v1', function () {
             ctx.database = ctx.client.db(sDB);
             ctx.collection = ctx.database.collection(sColl);
             ctx.client.on('commandStarted', e => {
+              console.log(e);
               if (e.commandName !== 'ismaster') _events.push(e);
             });
           });
@@ -170,6 +171,7 @@ describe('Change Stream Spec - v1', function () {
     const expectedEvents = test.expectations || [];
 
     return function testAPM(ctx, events) {
+      console.log('events', events);
       expectedEvents
         .map(e => e.command_started_event)
         .map(normalizeAPMEvent)
