@@ -3,6 +3,7 @@ const { withClient, setupDatabase } = require('./shared');
 const test = require('./shared').assert;
 const { expect } = require('chai');
 const { ServerHeartbeatStartedEvent, MongoClient } = require('../../src');
+const { Topology } = require('../../src/sdam/topology');
 
 describe('Connection - functional', function () {
   before(function () {
@@ -68,6 +69,21 @@ describe('Connection - functional', function () {
         );
       });
     }
+  });
+
+  it('topology "open" event should only pass topology (and not error)', function (done) {
+    var configuration = this.configuration;
+    var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+
+    client.on('topologyOpening', () => {
+      client.topology.on('open', (...args) => {
+        expect(args.length).to.equal(1);
+        expect(args[0]).to.be.instanceOf(Topology);
+        client.close(done);
+      });
+    });
+
+    client.connect();
   });
 
   it('should correctly connect to server using just events', function (done) {
