@@ -7,6 +7,7 @@ const { GetMoreOperation } = require('../../../src/operations/get_more');
 const { Server } = require('../../../src/sdam/server');
 const { ClientSession } = require('../../../src/sessions');
 const { ReadPreference } = require('../../../src/read_preference');
+const { Aspect } = require('../../../src/operations/operation');
 
 describe('GetMoreOperation', function () {
   const ns = 'db.coll';
@@ -58,6 +59,35 @@ describe('GetMoreOperation', function () {
         done();
       };
       operation.execute(server, session, callback);
+    });
+  });
+
+  describe('#hasAspect', function () {
+    const server = sinon.createStubInstance(Server, {});
+    const operation = new GetMoreOperation(ns, cursorId, server, options);
+
+    context('when the aspect is cursor iterating', function () {
+      it('returns true', function () {
+        expect(operation.hasAspect(Aspect.CURSOR_ITERATING)).to.be.true;
+      });
+    });
+
+    context('when the aspect is read', function () {
+      it('returns true', function () {
+        expect(operation.hasAspect(Aspect.READ_OPERATION)).to.be.true;
+      });
+    });
+
+    context('when the aspect is write', function () {
+      it('returns false', function () {
+        expect(operation.hasAspect(Aspect.WRITE_OPERATION)).to.be.false;
+      });
+    });
+
+    context('when the aspect is retryable', function () {
+      it('returns false', function () {
+        expect(operation.hasAspect(Aspect.RETRYABLE)).to.be.false;
+      });
     });
   });
 });
