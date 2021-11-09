@@ -1,3 +1,4 @@
+import type * as dns from 'dns';
 import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
 import { Topology, TOPOLOGY_EVENTS } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
@@ -49,8 +50,10 @@ export function connect(
   };
 
   if (typeof options.srvHost === 'string') {
-    return resolveSRVRecord(options, (err, hosts) => {
-      if (err || !hosts) return callback(err);
+    return resolveSRVRecord(options, (err, res) => {
+      if (err || !res) return callback(err);
+
+      const { hosts, records } = res;
 
       const selectedHosts =
         options.srvMaxHosts === 0 || options.srvMaxHosts >= hosts.length
@@ -61,7 +64,11 @@ export function connect(
         options.hosts[index] = host;
       }
 
-      return createTopology(mongoClient, options, connectCallback);
+      return createTopology(
+        mongoClient,
+        { ...options, initialSrvResults: records },
+        connectCallback
+      );
     });
   }
 
@@ -70,7 +77,7 @@ export function connect(
 
 function createTopology(
   mongoClient: MongoClient,
-  options: MongoOptions,
+  options: MongoOptions & { initialSrvResults?: dns.SrvRecord[] },
   callback: Callback<Topology>
 ) {
   // Create the topology

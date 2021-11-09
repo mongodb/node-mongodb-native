@@ -34,13 +34,7 @@ import { PromiseProvider } from './promise_provider';
 import { Encrypter } from './encrypter';
 import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 
-const VALID_TXT_RECORDS = [
-  'authSource',
-  'replicaSet',
-  'loadBalanced',
-  'srvMaxHosts',
-  'srvServiceName'
-];
+const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced', 'srvMaxHosts'];
 
 const LB_SINGLE_HOST_ERROR = 'loadBalanced option only supported with a single host in the URI';
 const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSet option';
@@ -69,7 +63,10 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  * @param uri - The connection string to parse
  * @param options - Optional user provided connection string options
  */
-export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostAddress[]>): void {
+export function resolveSRVRecord(
+  options: MongoOptions,
+  callback: Callback<{ hosts: HostAddress[]; records: dns.SrvRecord[] }>
+): void {
   if (typeof options.srvHost !== 'string') {
     return callback(new MongoAPIError('Option "srvHost" must not be empty'));
   }
@@ -130,7 +127,6 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
         const replicaSet = txtRecordOptions.get('replicaSet') ?? undefined;
         const loadBalanced = txtRecordOptions.get('loadBalanced') ?? undefined;
         const srvMaxHostsString = txtRecordOptions.get('srvMaxHosts') ?? undefined;
-        // const srvServiceName = txtRecordOptions.get('srvServiceName') ?? undefined;
 
         if (srvMaxHostsString) {
           try {
@@ -166,7 +162,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
         }
       }
 
-      callback(undefined, hostAddresses);
+      callback(undefined, { hosts: hostAddresses, records: addresses });
     });
   });
 }

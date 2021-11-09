@@ -32,6 +32,21 @@ export class SrvPollingEvent {
   hostnames(): Set<string> {
     return new Set(this.srvRecords.map(r => HostAddress.fromSrvRecord(r).toString()));
   }
+
+  equals(other: SrvPollingEvent): boolean {
+    return (
+      this.srvRecords.length !== 0 &&
+      other.srvRecords.length !== 0 &&
+      this.srvRecords.length === other.srvRecords.length &&
+      this.srvRecords.every(
+        (record, index) =>
+          record.name === other.srvRecords[index].name &&
+          record.port === other.srvRecords[index].port &&
+          record.weight === other.srvRecords[index].weight &&
+          record.priority === other.srvRecords[index].priority
+      )
+    );
+  }
 }
 
 /** @internal */
@@ -41,6 +56,8 @@ export interface SrvPollerOptions extends LoggerOptions {
   srvMaxHosts: number;
   srvHost: string;
   heartbeatFrequencyMS: number;
+
+  initialSrvResults?: dns.SrvRecord[];
 }
 
 /** @internal */
@@ -58,6 +75,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   generation: number;
   srvMaxHosts: number;
   srvServiceName: string;
+  lastSrvPollingEvent?: SrvPollingEvent;
   _timeout?: NodeJS.Timeout;
 
   /** @event */
@@ -75,6 +93,9 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     this.srvServiceName = options.srvServiceName ?? 'mongodb';
     this.rescanSrvIntervalMS = options.rescanSrvIntervalMS ?? 60000;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 10000;
+    this.lastSrvPollingEvent = Array.isArray(options.initialSrvResults)
+      ? new SrvPollingEvent(options.initialSrvResults)
+      : undefined;
     this.logger = new Logger('srvPoller', options);
 
     this.haMode = false;
@@ -116,7 +137,11 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   success(srvRecords: dns.SrvRecord[]): void {
     this.haMode = false;
     this.schedule();
-    this.emit(SrvPoller.SRV_RECORD_DISCOVERY, new SrvPollingEvent(srvRecords));
+    const event = new SrvPollingEvent(srvRecords);
+    if (!this.lastSrvPollingEvent?.equals(event)) {
+      this.emit(SrvPoller.SRV_RECORD_DISCOVERY, event);
+    }
+    this.lastSrvPollingEvent = event;
   }
 
   failure(message: string, obj?: NodeJS.ErrnoException): void {
