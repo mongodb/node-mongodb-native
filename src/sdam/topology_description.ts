@@ -140,7 +140,7 @@ export class TopologyDescription {
    * Returns a new TopologyDescription based on the SrvPollingEvent
    * @internal
    */
-  updateFromSrvPollingEvent(ev: SrvPollingEvent, srvMaxHosts: number): TopologyDescription {
+  updateFromSrvPollingEvent(ev: SrvPollingEvent, srvMaxHosts = 0): TopologyDescription {
     /** The SRV addresses defines the set of addresses we should be using */
     const incomingHostnames = ev.hostnames();
     const currentHostnames = new Set(this.servers.keys());

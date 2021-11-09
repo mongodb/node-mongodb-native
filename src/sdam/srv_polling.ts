@@ -71,8 +71,8 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
 
     this.srvHost = options.srvHost;
-    this.srvMaxHosts = options.srvMaxHosts;
-    this.srvServiceName = options.srvServiceName;
+    this.srvMaxHosts = options.srvMaxHosts ?? 0;
+    this.srvServiceName = options.srvServiceName ?? 'mongodb';
     this.rescanSrvIntervalMS = options.rescanSrvIntervalMS ?? 60000;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 10000;
     this.logger = new Logger('srvPoller', options);
