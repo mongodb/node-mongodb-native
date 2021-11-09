@@ -6,6 +6,8 @@ import type { FindCursor } from '../../src/cursor/find_cursor';
 import type { Document } from 'bson';
 import { Db } from '../../src';
 import { Topology } from '../../src/sdam/topology';
+import type { ClientSession } from '../../src/sessions';
+import { ReadConcern, ReadConcernLevel } from '../../src/read_concern';
 import * as MongoDBDriver from '../../src';
 
 // We wish to keep these APIs but continue to ensure they are marked as deprecated.
@@ -38,6 +40,14 @@ const composedMap = mappedAgg.map<string>(x => x.toString());
 expectType<AggregationCursor<string>>(composedMap);
 expectType<string | null>(await composedMap.next());
 expectType<string[]>(await composedMap.toArray());
+expectType<ClientSession>(
+  client.startSession({ defaultTransactionOptions: { readConcern: { level: 'snapshot' } } })
+);
+expectType<ClientSession>(
+  client.startSession({
+    defaultTransactionOptions: { readConcern: new ReadConcern(ReadConcernLevel.local) }
+  })
+);
 
 const builtCursor = coll.aggregate();
 // should allow string values for the out helper
