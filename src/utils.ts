@@ -1437,7 +1437,7 @@ export function parsePackageVersion({ version }: { version: string }): {
  * @param limit - the number of ite
  */
 export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
-  const items = Array.isArray(sequence) ? sequence : Array.from(sequence);
+  const items = Array.from(sequence); // shallow copy in order to never shuffle the input
 
   if (limit > items.length) {
     throw new MongoInvalidArgumentError('Limit must be less than the number of items');

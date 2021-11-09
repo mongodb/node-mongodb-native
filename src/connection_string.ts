@@ -338,8 +338,11 @@ export function parseOptions(
 
   if (isSRV) {
     // SRV turns on TLS by default, but users can override and turn it off
-    if (!objectOptions.has('tls') && !urlOptions.has('ssl')) {
+    const noUserSpecifiedTLS = !objectOptions.has('tls') && !urlOptions.has('tls');
+    const noUserSpecifiedSSL = !objectOptions.has('ssl') && !urlOptions.has('ssl');
+    if (noUserSpecifiedTLS && noUserSpecifiedSSL) {
       objectOptions.set('tls', true);
+      objectOptions.set('ssl', true);
     }
   }
 
