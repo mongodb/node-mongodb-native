@@ -1321,15 +1321,6 @@ export class HostAddress {
     Object.freeze(this);
   }
 
-  equals(other: HostAddress): boolean {
-    return (
-      this.host === other.host &&
-      this.port === other.port &&
-      this.socketPath === other.socketPath &&
-      this.isIPv6 === other.isIPv6
-    );
-  }
-
   [Symbol.for('nodejs.util.inspect.custom')](): string {
     return this.inspect();
   }
@@ -1440,7 +1431,7 @@ export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
   const items = Array.from(sequence); // shallow copy in order to never shuffle the input
 
   if (limit > items.length) {
-    throw new MongoInvalidArgumentError('Limit must be less than the number of items');
+    throw new MongoRuntimeError('Limit must be less than the number of items');
   }
 
   let remainingItemsToShuffle = items.length;

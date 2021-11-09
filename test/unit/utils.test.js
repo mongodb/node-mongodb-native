@@ -8,7 +8,7 @@ const {
 } = require('../../src/utils');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { MongoInvalidArgumentError } = require('../../src/error');
+const { MongoRuntimeError } = require('../../src/error');
 
 describe('utils', function () {
   context('eachAsync', function () {
@@ -466,13 +466,34 @@ describe('utils', function () {
       const output = shuffle(input);
       expect(Array.isArray(output)).to.be.true;
     });
+
+    it('should not mutate the original input', function () {
+      const input = Object.freeze(['a', 'b', 'c', 'd', 'e']);
+      const output = shuffle(input); // This will throw if shuffle tries to edit the input
+      expect(output).to.not.deep.equal(input);
+      expect(output).to.have.lengthOf(input.length);
+    });
+
     it('should give a random subset if limit is less than the input length', () => {
       const input = ['a', 'b', 'c', 'd', 'e'];
       const output = shuffle(input, 3);
       expect(output).to.have.lengthOf(3);
     });
 
-    it('should give a random shuffling of the input', () => {
+    const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+    for (let n = 1; n <= input.length; n++) {
+      it(`should give a random subset of length ${n}`, function () {
+        const output = shuffle(input, n);
+        if (n > 2) {
+          // This expectation fails more at n values below 3
+          // sparing us the flake
+          expect(output).to.not.deep.equal(input.slice(0, n));
+        }
+        expect(output).to.have.lengthOf(n);
+      });
+    }
+
+    it('should give a random shuffling of the entire input when no limit provided', () => {
       const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
       const output = shuffle(input);
       // Of course it is possible a shuffle returns exactly the same as the input
@@ -481,8 +502,22 @@ describe('utils', function () {
       expect(output).to.have.lengthOf(input.length);
     });
 
+    it('should handle empty array', function () {
+      expect(shuffle([])).to.deep.equal([]);
+      expect(shuffle([], 0)).to.deep.equal([]);
+    });
+
+    it('should handle limit set to 0', function () {
+      expect(shuffle(['a', 'b'])).to.have.lengthOf(2);
+      expect(shuffle(['a', 'b'], 0)).to.have.lengthOf(2);
+    });
+
+    it('should throw if limit is greater than zero and empty array', function () {
+      expect(() => shuffle([], 2)).to.throw(MongoRuntimeError);
+    });
+
     it('should throw if limit is larger than input size', () => {
-      expect(() => shuffle([], 100)).to.throw(MongoInvalidArgumentError);
+      expect(() => shuffle(['a', 'b'], 3)).to.throw(MongoRuntimeError);
     });
   });
 });
