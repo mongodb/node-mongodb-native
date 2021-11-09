@@ -3,6 +3,7 @@ import { MongoClient } from '../../src/mongo_client';
 import { Collection } from '../../src/collection';
 import { AggregationCursor } from '../../src/cursor/aggregation_cursor';
 import type { FindCursor } from '../../src/cursor/find_cursor';
+import type { ChangeStream, ChangeStreamDocument } from '../../src/change_stream';
 import type { Document } from 'bson';
 import { Db } from '../../src';
 import { Topology } from '../../src/sdam/topology';
@@ -38,6 +39,16 @@ const composedMap = mappedAgg.map<string>(x => x.toString());
 expectType<AggregationCursor<string>>(composedMap);
 expectType<string | null>(await composedMap.next());
 expectType<string[]>(await composedMap.toArray());
+const changeStream = coll.watch();
+changeStream.on('init', (doc) => {
+  expectType<Document>(doc);
+});
+changeStream.on('more', (doc) => {
+  expectType<Document | undefined>(doc);
+});
+changeStream.on('change', (doc) => {
+  expectType<ChangeStreamDocument<Document>>(doc);
+});
 
 const builtCursor = coll.aggregate();
 // should allow string values for the out helper
