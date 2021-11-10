@@ -21,7 +21,7 @@ expectDeprecated(MongoDBDriver.ObjectID);
 expectNotDeprecated(MongoDBDriver.ObjectId);
 
 interface TSchema extends Document {
-  name?: string;
+  name: string;
 }
 
 // test mapped cursor types
