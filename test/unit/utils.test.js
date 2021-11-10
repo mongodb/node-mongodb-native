@@ -532,11 +532,6 @@ describe('driver utils', function () {
       expect(shuffle([], 0)).to.deep.equal([]);
     });
 
-    it('should handle limit set to 0', function () {
-      expect(shuffle(['a', 'b'])).to.have.lengthOf(2);
-      expect(shuffle(['a', 'b'], 0)).to.have.lengthOf(2);
-    });
-
     it('should throw if limit is greater than zero and empty array', function () {
       expect(() => shuffle([], 2)).to.throw(MongoRuntimeError);
       expect(() => shuffle([], 1)).to.throw(MongoRuntimeError);
