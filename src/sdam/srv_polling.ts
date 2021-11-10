@@ -32,21 +32,6 @@ export class SrvPollingEvent {
   hostnames(): Set<string> {
     return new Set(this.srvRecords.map(r => HostAddress.fromSrvRecord(r).toString()));
   }
-
-  equals(other: SrvPollingEvent): boolean {
-    return (
-      this.srvRecords.length !== 0 &&
-      other.srvRecords.length !== 0 &&
-      this.srvRecords.length === other.srvRecords.length &&
-      this.srvRecords.every(
-        (record, index) =>
-          record.name === other.srvRecords[index].name &&
-          record.port === other.srvRecords[index].port &&
-          record.weight === other.srvRecords[index].weight &&
-          record.priority === other.srvRecords[index].priority
-      )
-    );
-  }
 }
 
 /** @internal */
