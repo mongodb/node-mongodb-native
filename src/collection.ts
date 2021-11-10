@@ -1415,6 +1415,7 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
    *
+   * @deprecated collection.mapReduce is deprecated. Use the aggregation pipeline instead. Visit https://docs.mongodb.com/manual/reference/map-reduce-to-aggregation-pipeline for more information on how to translate map-reduce operations to the aggregation pipeline.
    * @param map - The mapping function.
    * @param reduce - The reduce function.
    * @param options - Optional settings for the command
@@ -1446,6 +1447,9 @@ export class Collection<TSchema extends Document = Document> {
     options?: MapReduceOptions<TKey, TValue> | Callback<Document | Document[]>,
     callback?: Callback<Document | Document[]>
   ): Promise<Document | Document[]> | void {
+    emitWarningOnce(
+      'collection.mapReduce is deprecated. Use the aggregation pipeline instead. Visit https://docs.mongodb.com/manual/reference/map-reduce-to-aggregation-pipeline for more information on how to translate map-reduce operations to the aggregation pipeline.'
+    );
     if ('function' === typeof options) (callback = options), (options = {});
     // Out must always be defined (make sure we don't break weirdly on pre 1.8+ servers)
     // TODO NODE-3339: Figure out if this is still necessary given we no longer officially support pre-1.8
