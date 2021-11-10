@@ -3,6 +3,7 @@ import { MongoClient } from '../../src/mongo_client';
 import { Collection } from '../../src/collection';
 import { AggregationCursor } from '../../src/cursor/aggregation_cursor';
 import type { FindCursor } from '../../src/cursor/find_cursor';
+import type { ChangeStreamDocument } from '../../src/change_stream';
 import type { Document } from 'bson';
 import { Db } from '../../src';
 import { Topology } from '../../src/sdam/topology';
@@ -19,9 +20,14 @@ expectDeprecated(Db.prototype.unref);
 expectDeprecated(MongoDBDriver.ObjectID);
 expectNotDeprecated(MongoDBDriver.ObjectId);
 
+interface TSchema extends Document {
+  name: string;
+}
+
 // test mapped cursor types
 const client = new MongoClient('');
-const coll = client.db('test').collection('test');
+const db = client.db('test');
+const coll = db.collection('test');
 const findCursor = coll.find();
 expectType<Document | null>(await findCursor.next());
 const mappedFind = findCursor.map<number>(obj => Object.keys(obj).length);
@@ -38,6 +44,17 @@ const composedMap = mappedAgg.map<string>(x => x.toString());
 expectType<AggregationCursor<string>>(composedMap);
 expectType<string | null>(await composedMap.next());
 expectType<string[]>(await composedMap.toArray());
+const tschemaColl = db.collection<TSchema>('test');
+const changeStream = tschemaColl.watch();
+changeStream.on('init', doc => {
+  expectType<TSchema>(doc);
+});
+changeStream.on('more', doc => {
+  expectType<TSchema | undefined>(doc);
+});
+changeStream.on('change', doc => {
+  expectType<ChangeStreamDocument<TSchema>>(doc);
+});
 
 const builtCursor = coll.aggregate();
 // should allow string values for the out helper

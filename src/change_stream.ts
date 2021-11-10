@@ -184,23 +184,23 @@ export interface UpdateDescription<TSchema extends Document = Document> {
 }
 
 /** @public */
-export type ChangeStreamEvents = {
+export type ChangeStreamEvents<TSchema extends Document = Document> = {
   resumeTokenChanged(token: ResumeToken): void;
-  init(response: Document): void;
-  more(response?: Document | undefined): void;
+  init(response: TSchema): void;
+  more(response?: TSchema | undefined): void;
   response(): void;
   end(): void;
   error(error: Error): void;
-  change(change: ChangeStreamDocument): void;
+  change(change: ChangeStreamDocument<TSchema>): void;
 } & AbstractCursorEvents;
 
 /**
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  * @public
  */
-export class ChangeStream<
-  TSchema extends Document = Document
-> extends TypedEventEmitter<ChangeStreamEvents> {
+export class ChangeStream<TSchema extends Document = Document> extends TypedEventEmitter<
+  ChangeStreamEvents<TSchema>
+> {
   pipeline: Document[];
   options: ChangeStreamOptions;
   parent: MongoClient | Db | Collection;
