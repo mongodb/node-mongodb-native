@@ -474,14 +474,14 @@ describe('driver utils', function () {
       expect(output).to.have.lengthOf(input.length);
     });
 
-    it(`should give a random subset of length input.length - 1`, function () {
+    it(`should give a random subset of length equal to limit when limit is less than the input length`, function () {
       const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
       const output = shuffle(input, input.length - 1);
       expect(output).to.not.deep.equal(input);
       expect(output).to.have.lengthOf(input.length - 1);
     });
 
-    it(`should give a random subset of length input.length`, function () {
+    it(`should give a random shuffling of the entire input when limit is equal to input length`, function () {
       const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
       const output = shuffle(input, input.length);
       expect(output).to.not.deep.equal(input);
@@ -500,7 +500,7 @@ describe('driver utils', function () {
       }
     });
 
-    it(`should return a different item on every call of limit 1`, function () {
+    it(`should return a random item on every call of limit 1`, function () {
       const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
       const outputs = new Set();
       for (let i = 0; i < 5; i++) {
