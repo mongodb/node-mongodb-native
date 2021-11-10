@@ -56,8 +56,6 @@ export interface SrvPollerOptions extends LoggerOptions {
   srvMaxHosts: number;
   srvHost: string;
   heartbeatFrequencyMS: number;
-
-  initialSrvResults?: dns.SrvRecord[];
 }
 
 /** @internal */
@@ -75,7 +73,6 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   generation: number;
   srvMaxHosts: number;
   srvServiceName: string;
-  lastSrvPollingEvent?: SrvPollingEvent;
   _timeout?: NodeJS.Timeout;
 
   /** @event */
@@ -93,9 +90,6 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     this.srvServiceName = options.srvServiceName ?? 'mongodb';
     this.rescanSrvIntervalMS = options.rescanSrvIntervalMS ?? 60000;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 10000;
-    this.lastSrvPollingEvent = Array.isArray(options.initialSrvResults)
-      ? new SrvPollingEvent(options.initialSrvResults)
-      : undefined;
     this.logger = new Logger('srvPoller', options);
 
     this.haMode = false;
@@ -137,11 +131,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   success(srvRecords: dns.SrvRecord[]): void {
     this.haMode = false;
     this.schedule();
-    const event = new SrvPollingEvent(srvRecords);
-    if (!this.lastSrvPollingEvent?.equals(event)) {
-      this.emit(SrvPoller.SRV_RECORD_DISCOVERY, event);
-    }
-    this.lastSrvPollingEvent = event;
+    this.emit(SrvPoller.SRV_RECORD_DISCOVERY, new SrvPollingEvent(srvRecords));
   }
 
   failure(message: string, obj?: NodeJS.ErrnoException): void {

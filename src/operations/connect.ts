@@ -50,10 +50,8 @@ export function connect(
   };
 
   if (typeof options.srvHost === 'string') {
-    return resolveSRVRecord(options, (err, res) => {
-      if (err || !res) return callback(err);
-
-      const { hosts, records } = res;
+    return resolveSRVRecord(options, (err, hosts) => {
+      if (err || !hosts) return callback(err);
 
       const selectedHosts =
         options.srvMaxHosts === 0 || options.srvMaxHosts >= hosts.length
@@ -64,11 +62,7 @@ export function connect(
         options.hosts[index] = host;
       }
 
-      return createTopology(
-        mongoClient,
-        { ...options, initialSrvResults: records },
-        connectCallback
-      );
+      return createTopology(mongoClient, options, connectCallback);
     });
   }
 
@@ -77,7 +71,7 @@ export function connect(
 
 function createTopology(
   mongoClient: MongoClient,
-  options: MongoOptions & { initialSrvResults?: dns.SrvRecord[] },
+  options: MongoOptions,
   callback: Callback<Topology>
 ) {
   // Create the topology

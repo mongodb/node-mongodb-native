@@ -1425,7 +1425,7 @@ export function parsePackageVersion({ version }: { version: string }): {
  *
  * Reference: https://bost.ocks.org/mike/shuffle/
  * @param sequence - items to be shuffled
- * @param limit - the number of ite
+ * @param limit - if nonzero shuffle will slice the randomized array e.g, `.slice(0, limit)`
  */
 export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
   const items = Array.from(sequence); // shallow copy in order to never shuffle the input

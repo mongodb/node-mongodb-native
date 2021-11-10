@@ -144,7 +144,6 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   srvMaxHosts: number;
   srvServiceName: string;
   rescanSrvIntervalMS: number;
-  initialSrvResults?: dns.SrvRecord[];
   hosts: HostAddress[];
   retryWrites: boolean;
   retryReads: boolean;
@@ -347,8 +346,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           srvHost: options.srvHost,
           srvMaxHosts: options.srvMaxHosts,
           srvServiceName: options.srvServiceName,
-          rescanSrvIntervalMS: options.rescanSrvIntervalMS,
-          initialSrvResults: options.initialSrvResults
+          rescanSrvIntervalMS: options.rescanSrvIntervalMS
         });
 
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);

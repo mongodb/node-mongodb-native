@@ -63,10 +63,7 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  * @param uri - The connection string to parse
  * @param options - Optional user provided connection string options
  */
-export function resolveSRVRecord(
-  options: MongoOptions,
-  callback: Callback<{ hosts: HostAddress[]; records: dns.SrvRecord[] }>
-): void {
+export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostAddress[]>): void {
   if (typeof options.srvHost !== 'string') {
     return callback(new MongoAPIError('Option "srvHost" must not be empty'));
   }
@@ -162,7 +159,7 @@ export function resolveSRVRecord(
         }
       }
 
-      callback(undefined, { hosts: hostAddresses, records: addresses });
+      callback(undefined, hostAddresses);
     });
   });
 }
