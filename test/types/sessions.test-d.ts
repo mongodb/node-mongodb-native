@@ -14,4 +14,4 @@ expectType<ClientSession>(
     defaultTransactionOptions: { readConcern: new ReadConcern(ReadConcernLevel.local) }
   })
 );
-expectError(client.startSession({ defaultTransactionOptions: { readConcern: 1 }}));
+expectError(client.startSession({ defaultTransactionOptions: { readConcern: 1 } }));
