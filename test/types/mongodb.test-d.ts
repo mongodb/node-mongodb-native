@@ -21,11 +21,13 @@ expectDeprecated(MongoDBDriver.ObjectID);
 expectNotDeprecated(MongoDBDriver.ObjectId);
 
 interface TSchema extends Document {
+  name?: string;
 }
 
 // test mapped cursor types
 const client = new MongoClient('');
-const coll = client.db('test').collection('test');
+const db = client.db('test');
+const coll = db.collection('test');
 const findCursor = coll.find();
 expectType<Document | null>(await findCursor.next());
 const mappedFind = findCursor.map<number>(obj => Object.keys(obj).length);
@@ -42,7 +44,8 @@ const composedMap = mappedAgg.map<string>(x => x.toString());
 expectType<AggregationCursor<string>>(composedMap);
 expectType<string | null>(await composedMap.next());
 expectType<string[]>(await composedMap.toArray());
-const changeStream = coll.watch();
+const tschemaColl = db.collection<TSchema>('test');
+const changeStream = tschemaColl.watch();
 changeStream.on('init', doc => {
   expectType<TSchema>(doc);
 });
