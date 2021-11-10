@@ -1,4 +1,3 @@
-import type * as dns from 'dns';
 import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
 import { Topology, TOPOLOGY_EVENTS } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';

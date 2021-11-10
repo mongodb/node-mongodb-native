@@ -1,5 +1,4 @@
 import Denque = require('denque');
-import type * as dns from 'dns';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import { TopologyDescription } from './topology_description';
