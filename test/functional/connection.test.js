@@ -72,8 +72,8 @@ describe('Connection - functional', function () {
   });
 
   it('should only pass one argument (topology and not error) for topology "open" events', function (done) {
-    var configuration = this.configuration;
-    var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
     client.on('topologyOpening', () => {
       client.topology.on('open', (...args) => {
