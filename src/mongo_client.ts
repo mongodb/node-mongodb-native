@@ -142,8 +142,6 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * Querying this DNS URI is expected to respond with SRV records
    */
   srvServiceName?: string;
-  /** Frequency with which to scan SRV record changes */
-  rescanSrvIntervalMS?: number;
   /** The maximum number of connections in the connection pool. */
   maxPoolSize?: number;
   /** The minimum number of connections in the connection pool. */
@@ -660,7 +658,6 @@ export interface MongoOptions
         | 'tlsAllowInvalidCertificates'
         | 'tlsAllowInvalidHostnames'
         | 'tlsInsecure'
-        | 'rescanSrvIntervalMS'
         | 'waitQueueTimeoutMS'
         | 'zlibCompressionLevel'
       >

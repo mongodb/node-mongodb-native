@@ -142,7 +142,6 @@ export interface TopologyPrivate {
 export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   srvMaxHosts: number;
   srvServiceName: string;
-  rescanSrvIntervalMS: number;
   hosts: HostAddress[];
   retryWrites: boolean;
   retryReads: boolean;
@@ -344,8 +343,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           heartbeatFrequencyMS: this.s.heartbeatFrequencyMS,
           srvHost: options.srvHost,
           srvMaxHosts: options.srvMaxHosts,
-          srvServiceName: options.srvServiceName,
-          rescanSrvIntervalMS: options.rescanSrvIntervalMS
+          srvServiceName: options.srvServiceName
         });
 
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);

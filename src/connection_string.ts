@@ -34,7 +34,7 @@ import { PromiseProvider } from './promise_provider';
 import { Encrypter } from './encrypter';
 import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 
-const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced', 'srvMaxHosts'];
+const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
 
 const LB_SINGLE_HOST_ERROR = 'loadBalanced option only supported with a single host in the URI';
 const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSet option';
@@ -123,15 +123,6 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
         const source = txtRecordOptions.get('authSource') ?? undefined;
         const replicaSet = txtRecordOptions.get('replicaSet') ?? undefined;
         const loadBalanced = txtRecordOptions.get('loadBalanced') ?? undefined;
-        const srvMaxHostsString = txtRecordOptions.get('srvMaxHosts') ?? undefined;
-
-        if (srvMaxHostsString) {
-          try {
-            options.srvMaxHosts = getUint('srvMaxHosts', txtRecordOptions.get('srvMaxHosts'));
-          } catch (error) {
-            return callback(error);
-          }
-        }
 
         if (!options.userSpecifiedAuthSource && source) {
           options.credentials = MongoCredentials.merge(options.credentials, { source });
@@ -141,16 +132,16 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
           options.replicaSet = replicaSet;
         }
 
+        if (loadBalanced === 'true') {
+          options.loadBalanced = true;
+        }
+
         if (
-          options.replicaSet &&
+          (options.loadBalanced || options.replicaSet) &&
           typeof options.srvMaxHosts === 'number' &&
           options.srvMaxHosts !== 0
         ) {
           return callback(new MongoParseError('Cannot combine replicaSet option with srvMaxHosts'));
-        }
-
-        if (loadBalanced === 'true') {
-          options.loadBalanced = true;
         }
 
         const lbError = validateLoadBalancedOptions(hostAddresses, options);
@@ -938,7 +929,6 @@ export const OPTIONS = {
   replicaSet: {
     type: 'string'
   },
-  rescanSrvIntervalMS: { type: 'uint', default: 60000 },
   retryReads: {
     default: true,
     type: 'boolean'

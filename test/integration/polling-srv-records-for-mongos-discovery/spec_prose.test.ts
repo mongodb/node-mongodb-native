@@ -41,8 +41,17 @@ describe(path.basename(__dirname), () => {
     let resolveSrvStub: sinon.SinonStub;
     let lookupStub: sinon.SinonStub;
     let client: MongoClient;
+    let clock: sinon.SinonFakeTimers;
     let dnsRecordsForTest1;
     //let dnsRecordsForTest3;
+
+    before(() => {
+      clock = sinon.useFakeTimers();
+    });
+
+    after(() => {
+      clock.restore();
+    });
 
     beforeEach(async () => {
       const mongoses = [
@@ -148,8 +157,7 @@ describe(path.basename(__dirname), () => {
       client = new MongoClient(SRV_CONNECTION_STRING, {
         tls: false,
         srvMaxHosts: 0,
-        serverSelectionTimeoutMS: 5000,
-        rescanSrvIntervalMS: 60
+        serverSelectionTimeoutMS: 5000
       });
       await client.connect();
 
@@ -159,7 +167,7 @@ describe(path.basename(__dirname), () => {
         dnsRecordsForTest1.map(({ name }) => name)
       );
 
-      await sleep(2 * client.topology.s.srvPoller.intervalMS);
+      clock.tick(2 * client.topology.s.srvPoller.intervalMS);
 
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
@@ -179,8 +187,7 @@ describe(path.basename(__dirname), () => {
       client = new MongoClient(SRV_CONNECTION_STRING, {
         tls: false,
         srvMaxHosts: 2,
-        serverSelectionTimeoutMS: 5000,
-        rescanSrvIntervalMS: 60
+        serverSelectionTimeoutMS: 5000
       });
       await client.connect();
 
@@ -190,7 +197,7 @@ describe(path.basename(__dirname), () => {
         dnsRecordsForTest1.map(({ name }) => name)
       );
 
-      await sleep(2 * client.topology.s.srvPoller.intervalMS);
+      clock.tick(2 * client.topology.s.srvPoller.intervalMS);
 
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
@@ -211,8 +218,7 @@ describe(path.basename(__dirname), () => {
       client = new MongoClient(SRV_CONNECTION_STRING, {
         tls: false,
         srvMaxHosts: 2,
-        serverSelectionTimeoutMS: 5000,
-        rescanSrvIntervalMS: 60
+        serverSelectionTimeoutMS: 5000
       });
       await client.connect();
 
@@ -222,7 +228,7 @@ describe(path.basename(__dirname), () => {
         dnsRecordsForTest1.map(({ name }) => name)
       );
 
-      await sleep(2 * client.topology.s.srvPoller.intervalMS);
+      clock.tick(2 * client.topology.s.srvPoller.intervalMS);
 
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
@@ -243,15 +249,14 @@ describe(path.basename(__dirname), () => {
       client = new MongoClient(SRV_CONNECTION_STRING, {
         tls: false,
         srvServiceName: 'myFancySrvServiceName',
-        serverSelectionTimeoutMS: 5000,
-        rescanSrvIntervalMS: 60
+        serverSelectionTimeoutMS: 5000
       });
 
       makeStubs({ srvServiceName: 'myFancySrvServiceName' });
 
       await client.connect();
 
-      await sleep(2 * client.topology.s.srvPoller.intervalMS);
+      clock.tick(2 * client.topology.s.srvPoller.intervalMS);
 
       const resolveSrvCalls = resolveSrvStub.getCalls();
       expect(resolveSrvCalls).to.have.lengthOf(2);
