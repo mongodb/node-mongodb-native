@@ -3,7 +3,7 @@ import * as dns from 'dns';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
 import { MongoClient } from '../../../src';
-import { sleep } from '../../tools/utils';
+import { processTick } from '../../tools/utils';
 import { it } from 'mocha';
 import * as mock from '../../tools/mock';
 
@@ -45,12 +45,15 @@ describe(path.basename(__dirname), () => {
     let dnsRecordsForTest1;
     //let dnsRecordsForTest3;
 
-    before(() => {
+    beforeEach(() => {
       clock = sinon.useFakeTimers();
     });
 
-    after(() => {
-      clock.restore();
+    afterEach(() => {
+      if (clock) {
+        clock.restore();
+        clock = undefined;
+      }
     });
 
     beforeEach(async () => {
@@ -168,6 +171,7 @@ describe(path.basename(__dirname), () => {
       );
 
       clock.tick(2 * client.topology.s.srvPoller.intervalMS);
+      await processTick();
 
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
@@ -198,6 +202,7 @@ describe(path.basename(__dirname), () => {
       );
 
       clock.tick(2 * client.topology.s.srvPoller.intervalMS);
+      await processTick();
 
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
@@ -229,6 +234,7 @@ describe(path.basename(__dirname), () => {
       );
 
       clock.tick(2 * client.topology.s.srvPoller.intervalMS);
+      await processTick();
 
       const polledServerAddresses = Array.from(client.topology.description.servers.keys());
       polledServerAddresses.sort();
@@ -257,6 +263,7 @@ describe(path.basename(__dirname), () => {
       await client.connect();
 
       clock.tick(2 * client.topology.s.srvPoller.intervalMS);
+      // No need to await process tick, since we're not checking DNS lookups
 
       const resolveSrvCalls = resolveSrvStub.getCalls();
       expect(resolveSrvCalls).to.have.lengthOf(2);

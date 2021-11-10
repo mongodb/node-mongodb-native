@@ -719,4 +719,19 @@ describe('MongoOptions', function () {
       expect(parse).to.throw(/URI/);
     });
   });
+
+  it('srvServiceName and srvMaxHosts cannot be used on a non-srv connection string', () => {
+    expect(() => {
+      new MongoClient('mongodb://localhost?srvMaxHosts=2');
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost?srvServiceName=abc');
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost', { srvMaxHosts: 2 });
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost', { srvServiceName: 'abc' });
+    }).to.throw(MongoParseError);
+  });
 });

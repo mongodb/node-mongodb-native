@@ -137,7 +137,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
         }
 
         if (
-          (options.loadBalanced || options.replicaSet) &&
+          options.replicaSet &&
           typeof options.srvMaxHosts === 'number' &&
           options.srvMaxHosts !== 0
         ) {
@@ -375,18 +375,22 @@ export function parseOptions(
     );
   }
 
+  if (
+    isSRV === false &&
+    (objectOptions.has('srvMaxHosts') ||
+      urlOptions.has('srvMaxHosts') ||
+      objectOptions.has('srvServiceName') ||
+      urlOptions.has('srvServiceName'))
+  ) {
+    throw new MongoParseError(
+      'Cannot use maxSrvHosts nor srvServiceName with a non-srv connection string'
+    );
+  }
+
   for (const [key, descriptor] of Object.entries(OPTIONS)) {
     const values = allOptions.get(key);
     if (!values || values.length === 0) continue;
     setOption(mongoOptions, key, descriptor, values);
-  }
-
-  if (
-    typeof mongoOptions.srvMaxHosts === 'number' &&
-    mongoOptions.srvMaxHosts !== 0 &&
-    typeof mongoOptions.replicaSet === 'string'
-  ) {
-    throw new MongoParseError('Cannot combine replicaSet option and maxSrvHosts');
   }
 
   if (mongoOptions.credentials) {
