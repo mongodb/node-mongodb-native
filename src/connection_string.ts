@@ -342,7 +342,7 @@ export function parseOptions(
   }
 
   if (nonZeroSrvMaxHosts) {
-    if (urlOptions.has('loadBalanced')) {
+    if (urlOptions.get('loadBalanced') === true) {
       throw new MongoParseError('Cannot use srvMaxHosts option with loadBalanced');
     }
     if (urlOptions.has('replicaSet') || objectOptions.has('replicaSet')) {
