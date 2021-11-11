@@ -7,6 +7,7 @@ const { Topology } = require('../../src/sdam/topology');
 
 describe('Connection - functional', function () {
   let client;
+  let testClient;
 
   before(function () {
     return setupDatabase(this.configuration);
@@ -14,15 +15,19 @@ describe('Connection - functional', function () {
 
   afterEach(done => {
     if (client) {
-      client.close(done);
+      client.close();
     }
+    if (testClient) {
+      testClient.close();
+    }
+    done();
   });
 
   it('should correctly start monitoring for single server connection', {
     metadata: { requires: { topology: 'single', os: '!win32' } },
-    test() {
+    test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(
+      client = configuration.newClient(
         `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
         {
           maxPoolSize: 1,
@@ -36,12 +41,12 @@ describe('Connection - functional', function () {
         isMonitoring = event instanceof ServerHeartbeatStartedEvent;
       });
 
-      return client
+      client
         .connect()
         .then(() => {
           expect(isMonitoring);
         })
-        .finally(() => client.close());
+        .finally(done);
     }
   });
 
@@ -50,7 +55,7 @@ describe('Connection - functional', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(
+      client = configuration.newClient(
         `mongodb://${encodeURIComponent('/tmp/mongodb-27017.sock')}?w=1`,
         { maxPoolSize: 1 }
       );
@@ -71,7 +76,7 @@ describe('Connection - functional', function () {
                 expect(err).to.not.exist;
                 test.equal(1, items.length);
 
-                client.close(done);
+                done();
               });
           }
         );
@@ -96,12 +101,12 @@ describe('Connection - functional', function () {
 
   it('should correctly connect to server using just events', function (done) {
     var configuration = this.configuration;
-    var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+    client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
     client.on('open', clientFromEvent => {
       expect(clientFromEvent).to.be.instanceOf(MongoClient);
       expect(clientFromEvent).to.equal(client);
-      clientFromEvent.close(done);
+      done();
     });
 
     client.connect();
@@ -114,9 +119,9 @@ describe('Connection - functional', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 2000 });
+      client = configuration.newClient({ w: 1 }, { maxPoolSize: 2000 });
       client.on('open', function () {
-        client.close(done);
+        done();
       });
 
       client.connect();
@@ -154,11 +159,11 @@ describe('Connection - functional', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient();
+      client = configuration.newClient();
 
       client.connect(
         connectionTester(configuration, 'testConnectNoOptions', function (client) {
-          client.close(done);
+          done();
         })
       );
     }
@@ -172,24 +177,24 @@ describe('Connection - functional', function () {
       const username = 'testConnectGoodAuth';
       const password = 'password';
 
-      const setupClient = configuration.newClient();
+      client = configuration.newClient();
 
       // First add a user.
-      setupClient.connect(function (err, client) {
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         db.addUser(username, password, function (err) {
           expect(err).to.not.exist;
-          client.close(restOfTest);
+          restOfTest();
         });
       });
 
       function restOfTest() {
-        const testClient = configuration.newClient(configuration.url({ username, password }));
+        testClient = configuration.newClient(configuration.url({ username, password }));
         testClient.connect(
-          connectionTester(configuration, 'testConnectGoodAuth', function (client) {
-            client.close(done);
+          connectionTester(configuration, 'testConnectGoodAuth', function () {
+            done();
           })
         );
       }
@@ -205,25 +210,25 @@ describe('Connection - functional', function () {
       const password = 'password';
 
       // First add a user.
-      const setupClient = configuration.newClient();
-      setupClient.connect(function (err, client) {
+      const client = configuration.newClient();
+      client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
 
         db.addUser(username, password, { roles: ['read'] }, function (err) {
           expect(err).to.not.exist;
-          client.close(restOfTest);
+          restOfTest();
         });
       });
 
       function restOfTest() {
         var opts = { auth: { username, password }, authSource: configuration.db };
 
-        const testClient = configuration.newClient(opts);
+        testClient = configuration.newClient(opts);
 
         testClient.connect(
           connectionTester(configuration, 'testConnectGoodAuthAsOption', function (client) {
-            client.close(done);
+            done();
           })
         );
       }
@@ -235,7 +240,7 @@ describe('Connection - functional', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      const client = configuration.newClient(
+      client = configuration.newClient(
         configuration.url({ username: 'slithy', password: 'toves' })
       );
       client.connect(function (err, client) {
