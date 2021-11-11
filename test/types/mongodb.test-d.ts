@@ -14,6 +14,7 @@ expectDeprecated(Collection.prototype.insert);
 expectDeprecated(Collection.prototype.update);
 expectDeprecated(Collection.prototype.remove);
 expectDeprecated(Collection.prototype.count);
+expectDeprecated(Collection.prototype.mapReduce);
 expectDeprecated(AggregationCursor.prototype.geoNear);
 expectDeprecated(Topology.prototype.unref);
 expectDeprecated(Db.prototype.unref);
