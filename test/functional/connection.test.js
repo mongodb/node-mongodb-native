@@ -219,7 +219,7 @@ describe('Connection - functional', function () {
       const password = 'password';
 
       // First add a user.
-      const client = configuration.newClient();
+      client = configuration.newClient();
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
