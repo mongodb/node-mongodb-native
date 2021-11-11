@@ -6,8 +6,16 @@ const { ServerHeartbeatStartedEvent, MongoClient } = require('../../src');
 const { Topology } = require('../../src/sdam/topology');
 
 describe('Connection - functional', function () {
+  let client;
+
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  afterEach(done => {
+    if (client) {
+      client.close(done);
+    }
   });
 
   it('should correctly start monitoring for single server connection', {
@@ -73,13 +81,13 @@ describe('Connection - functional', function () {
 
   it('should only pass one argument (topology and not error) for topology "open" events', function (done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+    client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
     client.on('topologyOpening', () => {
       client.topology.on('open', (...args) => {
-        expect(args.length).to.equal(1);
+        expect(args).to.have.lengthOf(1);
         expect(args[0]).to.be.instanceOf(Topology);
-        client.close(done);
+        done();
       });
     });
 
