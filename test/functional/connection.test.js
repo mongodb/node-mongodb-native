@@ -13,14 +13,25 @@ describe('Connection - functional', function () {
     return setupDatabase(this.configuration);
   });
 
-  afterEach(done => {
+  afterEach(async () => {
+    let savedError;
     if (client) {
-      client.close();
+      try {
+        await client.close();
+      } catch (err) {
+        savedError = err;
+      }
     }
     if (testClient) {
-      testClient.close();
+      try {
+        await testClient.close();
+      } catch (err) {
+        savedError = err;
+      }
     }
-    done();
+    if (savedError) {
+      throw savedError;
+    }
   });
 
   it('should correctly start monitoring for single server connection', {
@@ -41,12 +52,10 @@ describe('Connection - functional', function () {
         isMonitoring = event instanceof ServerHeartbeatStartedEvent;
       });
 
-      client
-        .connect()
-        .then(() => {
-          expect(isMonitoring);
-        })
-        .finally(done);
+      client.connect().then(() => {
+        expect(isMonitoring);
+        done();
+      });
     }
   });
 
@@ -162,7 +171,7 @@ describe('Connection - functional', function () {
       client = configuration.newClient();
 
       client.connect(
-        connectionTester(configuration, 'testConnectNoOptions', function (client) {
+        connectionTester(configuration, 'testConnectNoOptions', function () {
           done();
         })
       );
@@ -227,7 +236,7 @@ describe('Connection - functional', function () {
         testClient = configuration.newClient(opts);
 
         testClient.connect(
-          connectionTester(configuration, 'testConnectGoodAuthAsOption', function (client) {
+          connectionTester(configuration, 'testConnectGoodAuthAsOption', function () {
             done();
           })
         );
