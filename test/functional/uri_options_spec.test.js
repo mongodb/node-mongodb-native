@@ -10,7 +10,7 @@ const { loadSpecTests } = require('../spec');
 describe('URI Options (spec)', function () {
   const uriSpecs = loadSpecTests('uri-options');
 
-  uriSpecs.forEach(suite => {
+  for (const suite of uriSpecs) {
     describe(suite.name, () => {
       for (const test of suite.tests) {
         const itFn = test.warning ? it.skip : it;
@@ -35,7 +35,7 @@ describe('URI Options (spec)', function () {
         });
       }
     });
-  });
+  }
 
   describe('srvMaxHost manual testing', function () {
     const srvMaxHostTests = uriSpecs.find(testFolder => testFolder.name === 'srv-options').tests;

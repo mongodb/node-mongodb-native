@@ -11,7 +11,7 @@ const sinon = require('sinon');
 const { MongoRuntimeError } = require('../../src/error');
 
 describe('driver utils', function () {
-  context('eachAsync function', function () {
+  context('eachAsync()', function () {
     it('should callback with an error', function (done) {
       eachAsync(
         [{ error: false }, { error: true }],
@@ -329,7 +329,7 @@ describe('driver utils', function () {
     });
   });
 
-  context('BufferPool class', function () {
+  context('new BufferPool()', function () {
     it('should report the correct length', function () {
       const buffer = new BufferPool();
       buffer.append(Buffer.from([0, 1]));
@@ -416,7 +416,7 @@ describe('driver utils', function () {
     });
   });
 
-  context('executeLegacyOperation function', function () {
+  context('executeLegacyOperation()', function () {
     it('should call callback with errors on throw errors, and rethrow error', function () {
       const expectedError = new Error('THIS IS AN ERROR');
       let callbackError, caughtError;
@@ -459,7 +459,7 @@ describe('driver utils', function () {
     });
   });
 
-  describe('shuffle function', () => {
+  describe('shuffle()', () => {
     it('should support iterables', function () {
       // Kind of an implicit test, we should not throw/crash here.
       const input = new Set(['a', 'b', 'c']);

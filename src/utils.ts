@@ -1435,7 +1435,7 @@ export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
   }
 
   let remainingItemsToShuffle = items.length;
-  while (remainingItemsToShuffle !== 0) {
+  while (remainingItemsToShuffle > 1) {
     // Pick a remaining element
     const randomIndex = Math.floor(Math.random() * remainingItemsToShuffle);
     remainingItemsToShuffle -= 1;

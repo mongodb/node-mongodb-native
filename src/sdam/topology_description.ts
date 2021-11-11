@@ -145,20 +145,15 @@ export class TopologyDescription {
     const incomingHostnames = ev.hostnames();
     const currentHostnames = new Set(this.servers.keys());
 
+    const hostnamesToAdd = new Set<string>(incomingHostnames);
     const hostnamesToRemove = new Set<string>();
     for (const hostname of currentHostnames) {
+      // filter hostnamesToAdd (made from incomingHostnames) down to what is *not* present in currentHostnames
+      hostnamesToAdd.delete(hostname);
       if (!incomingHostnames.has(hostname)) {
         // If the SRV Records no longer include this hostname
         // we have to stop using it
         hostnamesToRemove.add(hostname);
-      }
-    }
-
-    const hostnamesToAdd = new Set<string>();
-    for (const hostname of incomingHostnames) {
-      if (!currentHostnames.has(hostname)) {
-        // There are new hosts in the SRV Record!
-        hostnamesToAdd.add(hostname);
       }
     }
 

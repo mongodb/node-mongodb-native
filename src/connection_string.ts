@@ -136,11 +136,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
           options.loadBalanced = true;
         }
 
-        if (
-          options.replicaSet &&
-          typeof options.srvMaxHosts === 'number' &&
-          options.srvMaxHosts !== 0
-        ) {
+        if (options.replicaSet && options.srvMaxHosts > 0) {
           return callback(new MongoParseError('Cannot combine replicaSet option with srvMaxHosts'));
         }
 
@@ -259,10 +255,6 @@ export function parseOptions(
 
   const mongoOptions = Object.create(null);
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
-  if (isSRV) {
-    // SRV Record is resolved upon connecting
-    mongoOptions.srvHost = hosts[0];
-  }
 
   const urlOptions = new CaseInsensitiveMap();
 
@@ -294,12 +286,6 @@ export function parseOptions(
       throw new MongoAPIError('URI cannot contain options with no value');
     }
 
-    if (key.toLowerCase() === 'serverapi') {
-      throw new MongoParseError(
-        'URI cannot contain `serverApi`, it can only be passed to the client'
-      );
-    }
-
     if (key.toLowerCase() === 'authsource' && urlOptions.has('authSource')) {
       // If authSource is an explicit key in the urlOptions we need to remove the implicit dbName
       urlOptions.delete('authSource');
@@ -314,13 +300,32 @@ export function parseOptions(
     Object.entries(options).filter(([, v]) => v != null)
   );
 
+  // Validate options that can only be provided by one of uri or object
+
+  if (urlOptions.has('serverApi')) {
+    throw new MongoParseError(
+      'URI cannot contain `serverApi`, it can only be passed to the client'
+    );
+  }
+
   if (objectOptions.has('loadBalanced')) {
     throw new MongoParseError('loadBalanced is only a valid option in the URI');
   }
 
-  const allOptions = new CaseInsensitiveMap();
+  // SRV connection string validations
+
+  const nonZeroSrvMaxHosts =
+    objectOptions.get('srvMaxHosts') > 0 || urlOptions.get('srvMaxHosts') > 0;
+
+  const srvSpecificOptionsSpecified =
+    objectOptions.has('srvMaxHosts') ||
+    urlOptions.has('srvMaxHosts') ||
+    objectOptions.has('srvServiceName') ||
+    urlOptions.has('srvServiceName');
 
   if (isSRV) {
+    // SRV Record is resolved upon connecting
+    mongoOptions.srvHost = hosts[0];
     // SRV turns on TLS by default, but users can override and turn it off
     const noUserSpecifiedTLS = !objectOptions.has('tls') && !urlOptions.has('tls');
     const noUserSpecifiedSSL = !objectOptions.has('ssl') && !urlOptions.has('ssl');
@@ -328,7 +333,26 @@ export function parseOptions(
       objectOptions.set('tls', true);
       objectOptions.set('ssl', true);
     }
+  } else {
+    if (srvSpecificOptionsSpecified) {
+      throw new MongoParseError(
+        'Cannot use maxSrvHosts nor srvServiceName with a non-srv connection string'
+      );
+    }
   }
+
+  if (nonZeroSrvMaxHosts) {
+    if (urlOptions.has('loadBalanced')) {
+      throw new MongoParseError('Cannot use srvMaxHosts option with loadBalanced');
+    }
+    if (urlOptions.has('replicaSet') || objectOptions.has('replicaSet')) {
+      throw new MongoParseError('Cannot use srvMaxHosts option with replicaSet');
+    }
+  }
+
+  // All option collection
+
+  const allOptions = new CaseInsensitiveMap();
 
   const allKeys = new Set<string>([
     ...urlOptions.keys(),
@@ -375,17 +399,7 @@ export function parseOptions(
     );
   }
 
-  if (
-    isSRV === false &&
-    (objectOptions.has('srvMaxHosts') ||
-      urlOptions.has('srvMaxHosts') ||
-      objectOptions.has('srvServiceName') ||
-      urlOptions.has('srvServiceName'))
-  ) {
-    throw new MongoParseError(
-      'Cannot use maxSrvHosts nor srvServiceName with a non-srv connection string'
-    );
-  }
+  // Option parsing and setting
 
   for (const [key, descriptor] of Object.entries(OPTIONS)) {
     const values = allOptions.get(key);
@@ -467,7 +481,7 @@ function validateLoadBalancedOptions(
       return new MongoParseError(LB_DIRECT_CONNECTION_ERROR);
     }
 
-    if (mongoOptions.srvHost && mongoOptions.srvMaxHosts) {
+    if (mongoOptions.srvHost && mongoOptions.srvMaxHosts > 0) {
       return new MongoParseError('Cannot limit srv hosts with loadBalanced enabled');
     }
   }
@@ -956,7 +970,8 @@ export const OPTIONS = {
     type: 'uint'
   },
   srvMaxHosts: {
-    type: 'uint'
+    type: 'uint',
+    default: 0
   },
   srvServiceName: {
     type: 'string',
