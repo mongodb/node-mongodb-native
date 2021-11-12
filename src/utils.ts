@@ -1435,7 +1435,7 @@ export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
   }
 
   let remainingItemsToShuffle = items.length;
-  const lowerBound = limit === 0 ? 1 : items.length - limit;
+  const lowerBound = limit % items.length === 0 ? 1 : items.length - limit;
   while (remainingItemsToShuffle > lowerBound) {
     // Pick a remaining element
     const randomIndex = Math.floor(Math.random() * remainingItemsToShuffle);
@@ -1447,5 +1447,5 @@ export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
     items[randomIndex] = swapHold;
   }
 
-  return limit === 0 ? items : items.slice(lowerBound);
+  return limit === 0 || limit === items.length ? items : items.slice(lowerBound);
 }

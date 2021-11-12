@@ -286,10 +286,7 @@ export function parseOptions(
       throw new MongoAPIError('URI cannot contain options with no value');
     }
 
-    if (key.toLowerCase() === 'authsource' && urlOptions.has('authSource')) {
-      // If authSource is an explicit key in the urlOptions we need to remove the implicit dbName
-      urlOptions.delete('authSource');
-    }
+
 
     if (!urlOptions.has(key)) {
       urlOptions.set(key, values);

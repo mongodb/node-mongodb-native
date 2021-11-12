@@ -2,8 +2,9 @@
 const os = require('os');
 const fs = require('fs');
 const { expect } = require('chai');
+const { promisify } = require('util');
 const { getSymbolFrom } = require('../tools/utils');
-const { parseOptions } = require('../../src/connection_string');
+const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
 const { ReadConcern } = require('../../src/read_concern');
 const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
@@ -733,5 +734,30 @@ describe('MongoOptions', function () {
     expect(() => {
       new MongoClient('mongodb://localhost', { srvServiceName: 'abc' });
     }).to.throw(MongoParseError);
+  });
+
+  it('srvServiceName should error if it is too long', async () => {
+    let thrownError;
+    let options;
+    try {
+      options = parseOptions('mongodb+srv://localhost.a.com', { srvServiceName: 'a'.repeat(255) });
+      await promisify(resolveSRVRecord)(options);
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).to.have.property('code', 'EBADNAME');
+  });
+
+  it('srvServiceName should not error if it greater than 15 characters', async () => {
+    let thrownError;
+    let options;
+    try {
+      options = parseOptions('mongodb+srv://localhost.a.com', { srvServiceName: 'a'.repeat(16) });
+      await promisify(resolveSRVRecord)(options);
+    } catch (error) {
+      thrownError = error;
+    }
+    // Nothing wrong with the name, just DNE
+    expect(thrownError).to.have.property('code', 'ENOTFOUND');
   });
 });
