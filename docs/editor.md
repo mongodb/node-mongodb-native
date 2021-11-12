@@ -76,5 +76,37 @@ Here's a quick description of each:
         ]
     }
 }
+```
 
+## Native Extensions
+
+I've highlighted the two non-default things with `CHANGE THIS` comments
+
+You need to add `node_modules/node-addon-api` to the include path to find `napi.h`. (For libmongocrypt the path might be: `bindings/node/node_modules/node-addon-api` depending on your workspace root)
+
+And, lastly, bump up the cpp standard to `c++14`.
+
+In VSCode install `ms-vscode.cpptools` and in a `.vscode/c_cpp_properties.json` file add:
+
+```jsonc
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${default}",
+                "node_modules/node-addon-api" // CHANGE THIS
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14", // CHANGE THIS
+            "intelliSenseMode": "macos-clang-x64"
+        }
+    ],
+    "version": 4
+}
 ```
