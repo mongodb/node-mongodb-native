@@ -182,8 +182,8 @@ export type TopologyEvents = {
   topologyOpening(event: TopologyOpeningEvent): void;
   topologyDescriptionChanged(event: TopologyDescriptionChangedEvent): void;
   error(error: Error): void;
-  /** TODO(NODE-3273) - remove error @internal */
-  open(error: undefined, topology: Topology): void;
+  /** @internal */
+  open(topology: Topology): void;
   close(): void;
   timeout(): void;
 } & Omit<ServerEvents, 'connect'> &
@@ -456,8 +456,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           }
 
           stateTransition(this, STATE_CONNECTED);
-          // TODO(NODE-3273) - remove err
-          this.emit(Topology.OPEN, err, this);
+          this.emit(Topology.OPEN, this);
           this.emit(Topology.CONNECT, this);
 
           if (typeof callback === 'function') callback(undefined, this);
@@ -467,8 +466,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
 
       stateTransition(this, STATE_CONNECTED);
-      // TODO(NODE-3273) - remove err
-      this.emit(Topology.OPEN, err, this);
+      this.emit(Topology.OPEN, this);
       this.emit(Topology.CONNECT, this);
 
       if (typeof callback === 'function') callback(undefined, this);
