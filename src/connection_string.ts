@@ -333,7 +333,7 @@ export function parseOptions(
   } else {
     if (srvSpecificOptionsSpecified) {
       throw new MongoParseError(
-        'Cannot use maxSrvHosts nor srvServiceName with a non-srv connection string'
+        'Cannot use srvMaxHosts or srvServiceName with a non-srv connection string'
       );
     }
   }
