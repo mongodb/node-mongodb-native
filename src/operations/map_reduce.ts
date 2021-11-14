@@ -17,6 +17,7 @@ import type { ObjectId } from '../bson';
 import { Aspect, defineAspects } from './operation';
 import type { ClientSession } from '../sessions';
 import { Db } from '../db';
+import type { WithId } from "../mongo_types"
 
 const exclusionList = [
   'explain',
@@ -37,7 +38,7 @@ const exclusionList = [
 ];
 
 /** @public */
-export type MapFunction<TSchema = Document> = (this: TSchema) => void;
+export type MapFunction<TSchema = Document> = (this: WithId<TSchema>) => void;
 /** @public */
 export type ReduceFunction<TKey = ObjectId, TValue = any> = (key: TKey, values: TValue[]) => TValue;
 /** @public */

@@ -94,7 +94,7 @@
   },
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
-    "build:ts": "rimraf lib && ./node_modules/typescript/bin/tsc",
+    "build:ts": "rimraf lib && node ./node_modules/typescript/bin/tsc",
     "build:dts": "npm run build:ts && api-extractor run && rimraf 'lib/**/*.d.ts*' && downlevel-dts mongodb.d.ts mongodb.ts34.d.ts",
     "build:docs": "typedoc",
     "check:bench": "node test/benchmarks/driverBench",

@@ -16,7 +16,7 @@ import type { Topology } from '../sdam/topology';
 import { Readable, Transform } from 'stream';
 import type { ExecutionResult } from '../operations/execute_operation';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
-import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
+import { TODO_NODE_3286, TypedEventEmitter, WithId } from '../mongo_types';
 
 /** @internal */
 const kId = Symbol('id');
@@ -112,11 +112,11 @@ export abstract class AbstractCursor<
   /** @internal */
   [kNamespace]: MongoDBNamespace;
   /** @internal */
-  [kDocuments]: TSchema[];
+  [kDocuments]: WithId<TSchema>[];
   /** @internal */
   [kTopology]: Topology;
   /** @internal */
-  [kTransform]?: (doc: TSchema) => Document;
+  [kTransform]?: (doc: WithId<TSchema>) => Document;
   /** @internal */
   [kInitialized]: boolean;
   /** @internal */
@@ -231,11 +231,11 @@ export abstract class AbstractCursor<
   }
 
   /** Returns current buffered documents */
-  readBufferedDocuments(number?: number): TSchema[] {
+  readBufferedDocuments(number?: number): WithId<TSchema>[] {
     return this[kDocuments].splice(0, number ?? this[kDocuments].length);
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
+  [Symbol.asyncIterator](): AsyncIterator<WithId<TSchema>, void> {
     return {
       next: () =>
         this.next().then(value =>
@@ -280,7 +280,7 @@ export abstract class AbstractCursor<
         return done(undefined, true);
       }
 
-      next<TSchema>(this, true, (err, doc) => {
+      next<WithId<TSchema>>(this, true, (err, doc) => {
         if (err) return done(err);
 
         if (doc) {
@@ -295,10 +295,10 @@ export abstract class AbstractCursor<
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
-  next(): Promise<TSchema | null>;
-  next(callback: Callback<TSchema | null>): void;
-  next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void;
-  next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
+  next(): Promise<WithId<TSchema> | null>;
+  next(callback: Callback<WithId<TSchema> | null>): void;
+  next(callback?: Callback<WithId<TSchema> | null>): Promise<WithId<TSchema> | null> | void;
+  next(callback?: Callback<WithId<TSchema> | null>): Promise<WithId<TSchema> | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
         return done(new MongoCursorExhaustedError());
@@ -311,9 +311,9 @@ export abstract class AbstractCursor<
   /**
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
-  tryNext(): Promise<TSchema | null>;
-  tryNext(callback: Callback<TSchema | null>): void;
-  tryNext(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
+  tryNext(): Promise<WithId<TSchema> | null>;
+  tryNext(callback: Callback<WithId<TSchema> | null>): void;
+  tryNext(callback?: Callback<WithId<TSchema> | null>): Promise<WithId<TSchema> | null> | void {
     return maybePromise(callback, done => {
       if (this[kId] === Long.ZERO) {
         return done(new MongoCursorExhaustedError());
@@ -329,10 +329,10 @@ export abstract class AbstractCursor<
    * @param iterator - The iteration callback.
    * @param callback - The end callback.
    */
-  forEach(iterator: (doc: TSchema) => boolean | void): Promise<void>;
-  forEach(iterator: (doc: TSchema) => boolean | void, callback: Callback<void>): void;
+  forEach(iterator: (doc: WithId<TSchema>) => boolean | void): Promise<void>;
+  forEach(iterator: (doc: WithId<TSchema>) => boolean | void, callback: Callback<void>): void;
   forEach(
-    iterator: (doc: TSchema) => boolean | void,
+    iterator: (doc: WithId<TSchema>) => boolean | void,
     callback?: Callback<void>
   ): Promise<void> | void {
     if (typeof iterator !== 'function') {
@@ -341,7 +341,7 @@ export abstract class AbstractCursor<
     return maybePromise(callback, done => {
       const transform = this[kTransform];
       const fetchDocs = () => {
-        next<TSchema>(this, true, (err, doc) => {
+        next<WithId<TSchema>>(this, true, (err, doc) => {
           if (err || doc == null) return done(err);
           let result;
           // NOTE: no need to transform because `next` will do this automatically
@@ -358,7 +358,7 @@ export abstract class AbstractCursor<
           for (let i = 0; i < internalDocs.length; ++i) {
             try {
               result = iterator(
-                (transform ? transform(internalDocs[i]) : internalDocs[i]) as TSchema // TODO(NODE-3283): Improve transform typing
+                (transform ? transform(internalDocs[i]) : internalDocs[i]) as WithId<TSchema> // TODO(NODE-3283): Improve transform typing
               );
             } catch (error) {
               return done(error);
@@ -402,15 +402,15 @@ export abstract class AbstractCursor<
    *
    * @param callback - The result callback.
    */
-  toArray(): Promise<TSchema[]>;
-  toArray(callback: Callback<TSchema[]>): void;
-  toArray(callback?: Callback<TSchema[]>): Promise<TSchema[]> | void {
+  toArray(): Promise<WithId<TSchema>[]>;
+  toArray(callback: Callback<WithId<TSchema>[]>): void;
+  toArray(callback?: Callback<WithId<TSchema>[]>): Promise<WithId<TSchema>[]> | void {
     return maybePromise(callback, done => {
-      const docs: TSchema[] = [];
+      const docs: WithId<TSchema>[] = [];
       const transform = this[kTransform];
       const fetchDocs = () => {
         // NOTE: if we add a `nextBatch` then we should use it here
-        next<TSchema>(this, true, (err, doc) => {
+        next<WithId<TSchema>>(this, true, (err, doc) => {
           if (err) return done(err);
           if (doc == null) return done(undefined, docs);
 
@@ -422,7 +422,7 @@ export abstract class AbstractCursor<
             transform
               ? this[kDocuments].splice(0, this[kDocuments].length).map(transform)
               : this[kDocuments].splice(0, this[kDocuments].length)
-          ) as TSchema[]; // TODO(NODE-3283): Improve transform typing
+          ) as WithId<TSchema>[]; // TODO(NODE-3283): Improve transform typing
 
           if (internalDocs) {
             docs.push(...internalDocs);
@@ -475,9 +475,9 @@ export abstract class AbstractCursor<
    * ```
    * @param transform - The mapping transformation method.
    */
-  map<T = any>(transform: (doc: TSchema) => T): AbstractCursor<T> {
+  map<T = any>(transform: (doc: WithId<TSchema>) => T): AbstractCursor<T> {
     assertUninitialized(this);
-    const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-3283): Improve transform typing
+    const oldTransform = this[kTransform] as (doc: WithId<TSchema>) => WithId<TSchema>; // TODO(NODE-3283): Improve transform typing
     if (oldTransform) {
       this[kTransform] = doc => {
         return transform(oldTransform(doc));

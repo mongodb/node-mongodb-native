@@ -12,6 +12,7 @@ import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
+import type { WithId } from "../mongo_types"
 
 /** @internal */
 const kFilter = Symbol('filter');
@@ -64,7 +65,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     });
   }
 
-  map<T>(transform: (doc: TSchema) => T): FindCursor<T> {
+  map<T>(transform: (doc: WithId<TSchema>) => T): FindCursor<T> {
     return super.map(transform) as FindCursor<T>;
   }
 
