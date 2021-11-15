@@ -39,10 +39,10 @@ describe('Polling Srv Records for Mongos Discovery', () => {
   let lookupStub: sinon.SinonStub;
   let client: MongoClient;
   let clock: sinon.SinonFakeTimers;
-  const initialRecords = [
+  const initialRecords = Object.freeze([
     { name: 'localhost.test.mock.test.build.10gen.cc', port: 2017 },
     { name: 'localhost.test.mock.test.build.10gen.cc', port: 2018 }
-  ];
+  ]);
 
   beforeEach(() => {
     clock = sinon.useFakeTimers();
