@@ -721,6 +721,21 @@ describe('MongoOptions', function () {
     });
   });
 
+  it('srvMaxHosts cannot be combined with LB or ReplicaSet', () => {
+    expect(() => {
+      new MongoClient('mongodb+srv://localhost?srvMaxHosts=2&replicaSet=repl');
+    }).to.throw(MongoParseError, 'Cannot use srvMaxHosts option with replicaSet');
+    expect(() => {
+      new MongoClient('mongodb+srv://localhost?srvMaxHosts=2&loadBalanced=true');
+    }).to.throw(MongoParseError, 'Cannot limit srv hosts with loadBalanced enabled');
+    expect(() => {
+      new MongoClient('mongodb+srv://localhost', { srvMaxHosts: 2, replicaSet: 'blah' });
+    }).to.throw(MongoParseError, 'Cannot use srvMaxHosts option with replicaSet');
+    expect(() => {
+      new MongoClient('mongodb+srv://localhost?loadBalanced=true', { srvMaxHosts: 2 });
+    }).to.throw(MongoParseError, 'Cannot limit srv hosts with loadBalanced enabled');
+  });
+
   it('srvServiceName and srvMaxHosts cannot be used on a non-srv connection string', () => {
     expect(() => {
       new MongoClient('mongodb://localhost?srvMaxHosts=2');

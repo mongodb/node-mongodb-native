@@ -92,7 +92,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
       HostAddress.fromString(`${r.name}:${r.port ?? 27017}`)
     );
 
-    const lbError = validateLoadBalancedOptions(hostAddresses, options);
+    const lbError = validateLoadBalancedOptions(hostAddresses, options, true);
     if (lbError) {
       return callback(lbError);
     }
@@ -140,7 +140,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
           return callback(new MongoParseError('Cannot combine replicaSet option with srvMaxHosts'));
         }
 
-        const lbError = validateLoadBalancedOptions(hostAddresses, options);
+        const lbError = validateLoadBalancedOptions(hostAddresses, options, true);
         if (lbError) {
           return callback(lbError);
         }
@@ -286,11 +286,14 @@ export function parseOptions(
       throw new MongoAPIError('URI cannot contain options with no value');
     }
 
-
-
     if (!urlOptions.has(key)) {
       urlOptions.set(key, values);
     }
+  }
+
+  if (urlOptions.has('authSource')) {
+    // If authSource is an explicit key in the urlOptions we need to remove the dbName
+    urlOptions.delete('dbName');
   }
 
   const objectOptions = new CaseInsensitiveMap(
@@ -307,44 +310,6 @@ export function parseOptions(
 
   if (objectOptions.has('loadBalanced')) {
     throw new MongoParseError('loadBalanced is only a valid option in the URI');
-  }
-
-  // SRV connection string validations
-
-  const nonZeroSrvMaxHosts =
-    objectOptions.get('srvMaxHosts') > 0 || urlOptions.get('srvMaxHosts') > 0;
-
-  const srvSpecificOptionsSpecified =
-    objectOptions.has('srvMaxHosts') ||
-    urlOptions.has('srvMaxHosts') ||
-    objectOptions.has('srvServiceName') ||
-    urlOptions.has('srvServiceName');
-
-  if (isSRV) {
-    // SRV Record is resolved upon connecting
-    mongoOptions.srvHost = hosts[0];
-    // SRV turns on TLS by default, but users can override and turn it off
-    const noUserSpecifiedTLS = !objectOptions.has('tls') && !urlOptions.has('tls');
-    const noUserSpecifiedSSL = !objectOptions.has('ssl') && !urlOptions.has('ssl');
-    if (noUserSpecifiedTLS && noUserSpecifiedSSL) {
-      objectOptions.set('tls', true);
-      objectOptions.set('ssl', true);
-    }
-  } else {
-    if (srvSpecificOptionsSpecified) {
-      throw new MongoParseError(
-        'Cannot use srvMaxHosts or srvServiceName with a non-srv connection string'
-      );
-    }
-  }
-
-  if (nonZeroSrvMaxHosts) {
-    if (urlOptions.get('loadBalanced') === true) {
-      throw new MongoParseError('Cannot use srvMaxHosts option with loadBalanced');
-    }
-    if (urlOptions.has('replicaSet') || objectOptions.has('replicaSet')) {
-      throw new MongoParseError('Cannot use srvMaxHosts option with replicaSet');
-    }
   }
 
   // All option collection
@@ -439,25 +404,47 @@ export function parseOptions(
 
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
-  if (mongoOptions.directConnection && typeof mongoOptions.srvHost === 'string') {
-    throw new MongoAPIError('SRV URI does not support directConnection');
-  }
-
-  const lbError = validateLoadBalancedOptions(hosts, mongoOptions);
+  const lbError = validateLoadBalancedOptions(hosts, mongoOptions, isSRV);
   if (lbError) {
     throw lbError;
   }
+  if (mongoClient && mongoOptions.autoEncryption) {
+    Encrypter.checkForMongoCrypt();
+    mongoOptions.encrypter = new Encrypter(mongoClient, uri, options);
+    mongoOptions.autoEncrypter = mongoOptions.encrypter.autoEncrypter;
+  }
 
-  // Potential SRV Overrides
+  // Potential SRV Overrides and SRV connection string validations
+
   mongoOptions.userSpecifiedAuthSource =
     objectOptions.has('authSource') || urlOptions.has('authSource');
   mongoOptions.userSpecifiedReplicaSet =
     objectOptions.has('replicaSet') || urlOptions.has('replicaSet');
 
-  if (mongoClient && mongoOptions.autoEncryption) {
-    Encrypter.checkForMongoCrypt();
-    mongoOptions.encrypter = new Encrypter(mongoClient, uri, options);
-    mongoOptions.autoEncrypter = mongoOptions.encrypter.autoEncrypter;
+  if (isSRV) {
+    // SRV Record is resolved upon connecting
+    mongoOptions.srvHost = hosts[0];
+
+    if (mongoOptions.directConnection) {
+      throw new MongoAPIError('SRV URI does not support directConnection');
+    }
+
+    if (mongoOptions.srvMaxHosts > 0 && typeof mongoOptions.replicaSet === 'string') {
+      throw new MongoParseError('Cannot use srvMaxHosts option with replicaSet');
+    }
+
+    // SRV turns on TLS by default, but users can override and turn it off
+    const noUserSpecifiedTLS = !objectOptions.has('tls') && !urlOptions.has('tls');
+    const noUserSpecifiedSSL = !objectOptions.has('ssl') && !urlOptions.has('ssl');
+    if (noUserSpecifiedTLS && noUserSpecifiedSSL) {
+      mongoOptions.tls = true;
+    }
+  } else {
+    if (mongoOptions.srvMaxHosts > 0 || mongoOptions.srvServiceName !== 'mongodb') {
+      throw new MongoParseError(
+        'Cannot use srvMaxHosts or srvServiceName with a non-srv connection string'
+      );
+    }
   }
 
   return mongoOptions;
@@ -465,7 +452,8 @@ export function parseOptions(
 
 function validateLoadBalancedOptions(
   hosts: HostAddress[] | string[],
-  mongoOptions: MongoOptions
+  mongoOptions: MongoOptions,
+  isSrv: boolean
 ): MongoParseError | undefined {
   if (mongoOptions.loadBalanced) {
     if (hosts.length > 1) {
@@ -478,7 +466,7 @@ function validateLoadBalancedOptions(
       return new MongoParseError(LB_DIRECT_CONNECTION_ERROR);
     }
 
-    if (mongoOptions.srvHost && mongoOptions.srvMaxHosts > 0) {
+    if (isSrv && mongoOptions.srvMaxHosts > 0) {
       return new MongoParseError('Cannot limit srv hosts with loadBalanced enabled');
     }
   }

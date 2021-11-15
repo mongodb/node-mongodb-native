@@ -27,7 +27,8 @@ import {
   HostAddress,
   ns,
   emitWarning,
-  EventEmitterWithState
+  EventEmitterWithState,
+  shuffle
 } from '../utils';
 import {
   TopologyType,
@@ -292,8 +293,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const topologyType = topologyTypeFromOptions(options);
     const topologyId = globalTopologyCounter++;
 
+    const selectedHosts =
+      options.srvMaxHosts === 0 || options.srvMaxHosts >= seedlist.length
+        ? seedlist
+        : shuffle(seedlist, options.srvMaxHosts);
+
     const serverDescriptions = new Map();
-    for (const hostAddress of seedlist) {
+    for (const hostAddress of selectedHosts) {
       serverDescriptions.set(hostAddress.toString(), new ServerDescription(hostAddress));
     }
 

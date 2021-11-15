@@ -2,12 +2,15 @@
 
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
 const { promisify } = require('util');
 const { MongoParseError, MongoDriverError, MongoInvalidArgumentError } = require('../../src/error');
 const { loadSpecTests } = require('../spec');
 const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
 const { AuthMechanism } = require('../../src/cmap/auth/defaultAuthProviders');
 const { expect } = require('chai');
+const { Topology } = require('../../src/sdam/topology');
+const { HostAddress } = require('../../src/utils');
 
 // NOTE: These are cases we could never check for unless we write our own
 //       url parser. The node parser simply won't let these through, so we
@@ -287,30 +290,46 @@ describe('Connection String', function () {
                 expect(options.credentials.password).to.equal(test.parsed_options.password);
               }
 
-              // TODO(): srvMaxHost limiting happens in the callback given to resolveSRVRecord inside the driver
-              // How can we test this in unit test?
+              // srvMaxHost limiting happens in the topology constructor
+              if (options.srvHost && comment.includes('srvMaxHosts')) {
+                return this.skip(); // REMOVE ME!!!!
+                // const topology = new Topology(hosts, options);
+                // const initialSeedlist = hosts.map(h => h.toString());
+                // const selectedHosts = Array.from(topology.s.description.servers.keys());
 
-              // if (options.srvHost && comment.includes('srvMaxHosts')) {
-              //   if (typeof test.numSeeds === 'number' && typeof test.numHosts === 'number') {
-              //     // Driver should limit the hosts to a random selection, so we just assert counts
-              //     expect(hosts).to.have.lengthOf(test.numSeeds);
-              //     expect(options.srvMaxHosts).to.be.lessThan(hosts.length);
-              //     const selectedHosts = shuffle(hosts, options.srvMaxHosts);
-              //     expect(selectedHosts).to.have.lengthOf(test.numHosts);
-              //   } else {
-              //     // Tests that can assert exact host lists
-              //     const hostsAsStrings = hosts.map(h => h.toString());
-              //     expect(hostsAsStrings).to.have.lengthOf(test.seeds.length);
-              //     expect(hostsAsStrings, 'test.seeds').to.deep.equal(test.seeds);
+                // if (typeof test.numSeeds === 'number') {
+                //   // numSeeds: the expected number of initial seeds discovered from the SRV record.
+                //   expect(initialSeedlist).to.have.lengthOf(test.numSeeds);
+                // }
+                // if (typeof test.numHosts === 'number') {
+                //   // numHosts: the expected number of hosts discovered once SDAM completes a scan.
+                //   // (In our case, its the Topology constructor, but not actual SDAM)
+                //   expect(selectedHosts).to.have.lengthOf(test.numHosts);
+                // }
 
-              //     if (test.options.srvMaxHosts !== 0) {
-              //       expect(hostsAsStrings).to.have.lengthOf(test.options.srvMaxHosts);
-              //     } else {
-              //       expect(hostsAsStrings).to.have.lengthOf(test.hosts.length);
-              //     }
-              //     // expect(hostsAsStrings, 'test.hosts').to.deep.equal(test.hosts);
-              //   }
-              // }
+                // if (Array.isArray(test.seeds)) {
+                //   // verify that the set of hosts in the client's initial seedlist
+                //   // matches the list in seeds
+                //   expect(initialSeedlist).to.deep.equal(test.seeds);
+                // }
+                // if (Array.isArray(test.hosts)) {
+                //   // verify that the set of ServerDescriptions in the client's TopologyDescription
+                //   // eventually matches the list in hosts
+                //   const actualAddresses = await Promise.all(
+                //     selectedHosts
+                //       .map(async hn => await promisify(dns.lookup)(HostAddress.fromString(hn).host))
+                //       .map(async (addr, i) => {
+                //         let address = (await addr).address;
+                //         address = address === '127.0.0.1' ? 'localhost' : address;
+                //         return HostAddress.fromString(
+                //           `${address}:${HostAddress.fromString(selectedHosts[i]).port}`
+                //         ).toString();
+                //       })
+                //   );
+
+                //   expect(actualAddresses).to.deep.equal(test.hosts);
+                // }
+              }
             }
           });
         }
