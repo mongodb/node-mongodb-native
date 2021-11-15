@@ -82,9 +82,9 @@ Here's a quick description of each:
 
 The two non-default things in the configuration are marked with `CHANGE THIS` comments.
 
-You need to add `node_modules/node-addon-api` to the include path to find `napi.h`. (For libmongocrypt the path might be: `bindings/node/node_modules/node-addon-api` depending on your workspace root).
-
-And, lastly, bump up the cpp standard to `c++14`.
+- You need to add `node_modules/node-addon-api` to the include path to find `napi.h`.
+  - For libmongocrypt the path might be: `bindings/node/node_modules/node-addon-api` depending on your workspace root
+- Bump up the cpp standard to whatever the relevant standard is
 
 In VSCode install `ms-vscode.cpptools` and in a `.vscode/c_cpp_properties.json` file add:
 
