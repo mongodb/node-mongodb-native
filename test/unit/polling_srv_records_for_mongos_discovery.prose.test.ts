@@ -8,9 +8,10 @@ import * as mock from '../tools/mock';
 
 /*
     The SRV Prose Tests make use of the following REAL DNS records.
+    CURRENTLY, WE DO NOT USE THESE. We have stubbed the methods to build our own fake data for testing.
     We use sinon to replace the results from resolveSrv to test hostname removals and insertions.
 
-    The prose tests assume you have a 4 node sharded cluster running on ports:
+    The actual spec prose assumes you have a 4 node sharded cluster running on ports:
     [27017, 27018, 27019, 27020]
 
     Record                                        TTL    Class   Address
