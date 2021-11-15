@@ -2,15 +2,15 @@
 
 const fs = require('fs');
 const path = require('path');
-const dns = require('dns');
 const { promisify } = require('util');
 const { MongoParseError, MongoDriverError, MongoInvalidArgumentError } = require('../../src/error');
 const { loadSpecTests } = require('../spec');
 const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
 const { AuthMechanism } = require('../../src/cmap/auth/defaultAuthProviders');
 const { expect } = require('chai');
-const { Topology } = require('../../src/sdam/topology');
-const { HostAddress } = require('../../src/utils');
+// const dns = require('dns');
+// const { Topology } = require('../../src/sdam/topology');
+// const { HostAddress } = require('../../src/utils');
 
 // NOTE: These are cases we could never check for unless we write our own
 //       url parser. The node parser simply won't let these through, so we
