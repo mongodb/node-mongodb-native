@@ -108,7 +108,6 @@ describe('Polling Srv Records for Mongos Discovery', () => {
     const mockRecords = shardedCluster.srvRecords;
     replacementRecords ??= mockRecords;
     initialRecords ??= mockRecords;
-    // for some reason the stub needs to be set up here.
     // first call is for the driver initial connection
     // second call will check the poller
     resolveSrvStub = sinon.stub(dns, 'resolveSrv').callsFake((address, callback) => {
