@@ -440,7 +440,13 @@ export function parseOptions(
       mongoOptions.tls = true;
     }
   } else {
-    if (mongoOptions.srvMaxHosts > 0 || mongoOptions.srvServiceName !== 'mongodb') {
+    const userSpecifiedSrvOptions =
+      urlOptions.has('srvMaxHosts') ||
+      objectOptions.has('srvMaxHosts') ||
+      urlOptions.has('srvServiceName') ||
+      objectOptions.has('srvServiceName');
+
+    if (userSpecifiedSrvOptions) {
       throw new MongoParseError(
         'Cannot use srvMaxHosts or srvServiceName with a non-srv connection string'
       );

@@ -51,9 +51,8 @@ export function connect(
   if (typeof options.srvHost === 'string') {
     return resolveSRVRecord(options, (err, hosts) => {
       if (err || !hosts) return callback(err);
-
-      for (let index = 0; index < hosts.length; index++) {
-        options.hosts[index] = hosts[index];
+      for (const [index, host] of hosts.entries()) {
+        options.hosts[index] = host;
       }
 
       return createTopology(mongoClient, options, connectCallback);

@@ -1,16 +1,10 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
 const { MongoParseError, MongoDriverError, MongoInvalidArgumentError } = require('../../src/error');
 const { loadSpecTests } = require('../spec');
-const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
+const { parseOptions } = require('../../src/connection_string');
 const { AuthMechanism } = require('../../src/cmap/auth/defaultAuthProviders');
 const { expect } = require('chai');
-// const dns = require('dns');
-// const { Topology } = require('../../src/sdam/topology');
-// const { HostAddress } = require('../../src/utils');
 
 // NOTE: These are cases we could never check for unless we write our own
 //       url parser. The node parser simply won't let these through, so we
@@ -28,8 +22,6 @@ const skipTests = [
   // We don't actually support `wtimeoutMS` which this test depends upon
   'Deprecated (or unknown) options are ignored if replacement exists'
 ];
-
-const SPEC_PATHS = ['load-balanced', 'replica-set', 'sharded'];
 
 describe('Connection String', function () {
   it('should not support auth passed with user', function () {
@@ -227,113 +219,5 @@ describe('Connection String', function () {
       expect(options.dbName).to.equal('somedb');
       expect(options.srvHost).to.equal('test1.test.build.10gen.cc');
     });
-
-    for (const folder of SPEC_PATHS) {
-      describe(`spec tests ${folder}`, function () {
-        const specPath = path.join(__dirname, '../spec', 'initial-dns-seedlist-discovery', folder);
-        const testFiles = fs
-          .readdirSync(specPath)
-          .filter(x => x.indexOf('.json') !== -1)
-          .map(x => [x, fs.readFileSync(path.join(specPath, x), 'utf8')])
-          .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
-
-        for (const [fileName, test] of testFiles) {
-          if (!test.comment) {
-            test.comment = fileName;
-          }
-
-          const comment = test.comment;
-          it(comment, {
-            metadata: { requires: { topology: ['single'] } },
-            async test() {
-              let thrownError;
-              let options;
-              let hosts;
-              try {
-                options = parseOptions(test.uri);
-                hosts = await promisify(resolveSRVRecord)(options);
-              } catch (error) {
-                thrownError = error;
-              }
-
-              if (test.error) {
-                expect(thrownError).to.exist;
-                expect(hosts).to.not.exist;
-                return; // Nothing more to test...
-              }
-
-              expect(thrownError).to.not.exist;
-              expect(options).to.exist;
-
-              // Implicit SRV options must be set.
-              expect(options.directConnection).to.be.false;
-              const testOptions = test.options;
-              if (testOptions && 'tls' in testOptions) {
-                expect(options).to.have.property('tls', testOptions.tls);
-              } else if (testOptions && 'ssl' in testOptions) {
-                expect(options).to.have.property('tls', testOptions.ssl);
-              } else {
-                expect(options.tls).to.be.true;
-              }
-              if (testOptions && testOptions.replicaSet) {
-                expect(options).to.have.property('replicaSet', testOptions.replicaSet);
-              }
-              if (testOptions && testOptions.authSource) {
-                expect(options).to.have.property('credentials');
-                expect(options.credentials.source).to.equal(testOptions.authSource);
-              }
-              if (testOptions && testOptions.loadBalanced) {
-                expect(options).to.have.property('loadBalanced', testOptions.loadBalanced);
-              }
-              if (test.parsed_options && test.parsed_options.user && test.parsed_options.password) {
-                expect(options.credentials.username).to.equal(test.parsed_options.user);
-                expect(options.credentials.password).to.equal(test.parsed_options.password);
-              }
-
-              // srvMaxHost limiting happens in the topology constructor
-              if (options.srvHost && comment.includes('srvMaxHosts')) {
-                return this.skip(); // REMOVE ME!!!!
-                // const topology = new Topology(hosts, options);
-                // const initialSeedlist = hosts.map(h => h.toString());
-                // const selectedHosts = Array.from(topology.s.description.servers.keys());
-
-                // if (typeof test.numSeeds === 'number') {
-                //   // numSeeds: the expected number of initial seeds discovered from the SRV record.
-                //   expect(initialSeedlist).to.have.lengthOf(test.numSeeds);
-                // }
-                // if (typeof test.numHosts === 'number') {
-                //   // numHosts: the expected number of hosts discovered once SDAM completes a scan.
-                //   // (In our case, its the Topology constructor, but not actual SDAM)
-                //   expect(selectedHosts).to.have.lengthOf(test.numHosts);
-                // }
-
-                // if (Array.isArray(test.seeds)) {
-                //   // verify that the set of hosts in the client's initial seedlist
-                //   // matches the list in seeds
-                //   expect(initialSeedlist).to.deep.equal(test.seeds);
-                // }
-                // if (Array.isArray(test.hosts)) {
-                //   // verify that the set of ServerDescriptions in the client's TopologyDescription
-                //   // eventually matches the list in hosts
-                //   const actualAddresses = await Promise.all(
-                //     selectedHosts
-                //       .map(async hn => await promisify(dns.lookup)(HostAddress.fromString(hn).host))
-                //       .map(async (addr, i) => {
-                //         let address = (await addr).address;
-                //         address = address === '127.0.0.1' ? 'localhost' : address;
-                //         return HostAddress.fromString(
-                //           `${address}:${HostAddress.fromString(selectedHosts[i]).port}`
-                //         ).toString();
-                //       })
-                //   );
-
-                //   expect(actualAddresses).to.deep.equal(test.hosts);
-                // }
-              }
-            }
-          });
-        }
-      });
-    }
   });
 });

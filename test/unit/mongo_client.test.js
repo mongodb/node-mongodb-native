@@ -734,11 +734,20 @@ describe('MongoOptions', function () {
     expect(() => {
       new MongoClient('mongodb+srv://localhost?loadBalanced=true', { srvMaxHosts: 2 });
     }).to.throw(MongoParseError, 'Cannot limit srv hosts with loadBalanced enabled');
+
+    // These should not throw.
+    new MongoClient('mongodb+srv://localhost?srvMaxHosts=0&replicaSet=repl');
+    new MongoClient('mongodb+srv://localhost', { srvMaxHosts: 0, replicaSet: 'blah' });
+    new MongoClient('mongodb+srv://localhost?srvMaxHosts=0&loadBalanced=true');
+    new MongoClient('mongodb+srv://localhost?loadBalanced=true', { srvMaxHosts: 0 });
   });
 
   it('srvServiceName and srvMaxHosts cannot be used on a non-srv connection string', () => {
     expect(() => {
       new MongoClient('mongodb://localhost?srvMaxHosts=2');
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost?srvMaxHosts=0');
     }).to.throw(MongoParseError);
     expect(() => {
       new MongoClient('mongodb://localhost?srvServiceName=abc');
