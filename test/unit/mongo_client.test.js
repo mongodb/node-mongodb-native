@@ -721,7 +721,7 @@ describe('MongoOptions', function () {
     });
   });
 
-  it('srvMaxHosts cannot be combined with LB or ReplicaSet', () => {
+  it('srvMaxHosts > 0 cannot be combined with LB or ReplicaSet', () => {
     expect(() => {
       new MongoClient('mongodb+srv://localhost?srvMaxHosts=2&replicaSet=repl');
     }).to.throw(MongoParseError, 'Cannot use srvMaxHosts option with replicaSet');
@@ -763,7 +763,7 @@ describe('MongoOptions', function () {
     expect(thrownError).to.have.property('code', 'EBADNAME');
   });
 
-  it('srvServiceName should not error if it greater than 15 characters', async () => {
+  it('srvServiceName should not error if it is greater than 15 characters as long as the DNS query limit is not surpassed', async () => {
     let thrownError;
     let options;
     try {

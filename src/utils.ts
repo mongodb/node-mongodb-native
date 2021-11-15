@@ -1447,5 +1447,5 @@ export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
     items[randomIndex] = swapHold;
   }
 
-  return limit === 0 || limit === items.length ? items : items.slice(lowerBound);
+  return limit % items.length === 0 ? items : items.slice(lowerBound);
 }
