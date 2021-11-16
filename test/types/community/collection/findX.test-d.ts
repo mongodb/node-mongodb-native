@@ -6,7 +6,8 @@ import {
   Document,
   Collection,
   Db,
-  WithId
+  WithId,
+  ObjectId
 } from '../../../../src';
 import type { Projection, ProjectionOperators } from '../../../../src';
 import type { PropExists } from '../../utility_types';
@@ -19,6 +20,10 @@ const collection = db.collection('test.find');
 // Locate all the entries using find
 collection.find({}).toArray((_err, fields) => {
   expectType<WithId<Document>[] | undefined>(fields);
+  if (fields) {
+    expectType<ObjectId>(fields[0]._id);
+    expectNotType<ObjectId | undefined>(fields[0]._id);
+  }
 });
 
 // test with collection type
@@ -257,3 +262,31 @@ typedDb.collection('people').findOne({}, function (_err, person) {
 typedDb.collection('things').findOne({}, function (_err, thing) {
   expectType<WithId<Thing> | null | undefined>(thing);
 });
+
+interface SchemaWithTypicalId {
+  _id: ObjectId;
+  name: string;
+}
+const schemaWithTypicalIdCol = db.collection<SchemaWithTypicalId>('a');
+expectType<WithId<SchemaWithTypicalId> | null>(await schemaWithTypicalIdCol.findOne());
+expectAssignable<SchemaWithTypicalId | null>(await schemaWithTypicalIdCol.findOne());
+
+interface SchemaWithOptionalTypicalId {
+  _id?: ObjectId;
+  name: string;
+}
+const schemaWithOptionalTypicalId = db.collection<SchemaWithOptionalTypicalId>('a');
+expectType<WithId<SchemaWithOptionalTypicalId> | null>(await schemaWithOptionalTypicalId.findOne());
+expectAssignable<SchemaWithOptionalTypicalId | null>(await schemaWithOptionalTypicalId.findOne());
+
+interface SchemaWithUserDefinedId {
+  _id: number;
+  name: string;
+}
+const schemaWithUserDefinedId = db.collection<SchemaWithUserDefinedId>('a');
+expectType<WithId<SchemaWithUserDefinedId> | null>(await schemaWithUserDefinedId.findOne());
+const result = await schemaWithUserDefinedId.findOne();
+if (result !== null) {
+  expectType<number>(result._id);
+}
+expectAssignable<SchemaWithUserDefinedId | null>(await schemaWithUserDefinedId.findOne());
