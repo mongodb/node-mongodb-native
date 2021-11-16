@@ -120,11 +120,11 @@ collectionT.find({ 'meta.deep.nested.level': 123 });
 collectionT.find({ meta: { deep: { nested: { level: 123 } } } }); // no impact on actual nesting
 collectionT.find({ 'friends.0.name': 'John' });
 collectionT.find({ 'playmates.0.name': 'John' });
+// supports arrays with primitive types
+collectionT.find({ 'treats.0': 'bone' });
 
-// There's an issue with the special BSON types
-collectionT.find({ 'numOfPats.__isLong__': true });
+// Handle special BSON types
 collectionT.find({ numOfPats: Long.fromBigInt(2n) });
-collectionT.find({ 'playTimePercent.bytes.BYTES_PER_ELEMENT': 1 });
 collectionT.find({ playTimePercent: new Decimal128('123.2') });
 
 // works with some extreme indexes
@@ -140,10 +140,12 @@ expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': true });
 expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': new Date() });
 expectNotType<Filter<PetModel>>({ 'friends.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
+expectNotType<Filter<PetModel>>({ 'treats.0': 123 });
+expectNotType<Filter<PetModel>>({ 'numOfPats.__isLong__': true });
+expectNotType<Filter<PetModel>>({ 'playTimePercent.bytes.BYTES_PER_ELEMENT': 1 });
 
 // Nested arrays aren't checked
-expectType<Filter<PetModel>>({ 'meta.deep.nestedArray.0': 'not a number' });
-expectNotType<Filter<PetModel>>({ 'meta.deep.nestedArray.23': 'not a number' });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nestedArray.0': 'not a number' });
 
 /// it should query __array__ fields by exact match
 await collectionT.find({ treats: ['kibble', 'bone'] }).toArray();

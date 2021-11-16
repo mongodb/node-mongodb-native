@@ -442,11 +442,13 @@ export type PropertyType<Type, Property extends string> = string extends Propert
   ? unknown
   : Property extends keyof Type
   ? Type[Property]
+  : Property extends `${number}`
+  ? Type extends ReadonlyArray<infer ArrayType>
+    ? ArrayType
+    : unknown
   : Property extends `${infer Key}.${infer Rest}`
   ? Key extends `${number}`
-    ? Type extends Array<infer ArrayType>
-      ? PropertyType<ArrayType, Rest>
-      : Type extends ReadonlyArray<infer ArrayType>
+    ? Type extends ReadonlyArray<infer ArrayType>
       ? PropertyType<ArrayType, Rest>
       : unknown
     : Key extends keyof Type
@@ -456,10 +458,20 @@ export type PropertyType<Type, Property extends string> = string extends Propert
 
 // We dont't support nested circular references
 /** @public */
-export type NestedPaths<Type> = Type extends string | number | boolean | Date | ObjectId
+export type NestedPaths<Type> = Type extends
+  | string
+  | number
+  | boolean
+  | BSONRegExp
+  | Binary
+  | Date
+  | Decimal128
+  | Double
+  | Int32
+  | Long
+  | ObjectId
+  | Timestamp
   ? []
-  : Type extends Array<infer ArrayType>
-  ? [number, ...NestedPaths<ArrayType>]
   : Type extends ReadonlyArray<infer ArrayType>
   ? [number, ...NestedPaths<ArrayType>]
   : // eslint-disable-next-line @typescript-eslint/ban-types
