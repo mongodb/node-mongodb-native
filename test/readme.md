@@ -2,21 +2,17 @@
 
 All of our test automation is powered by the [Mocha test framework](https://mochajs.org/).
 
+Below is a summary of the types of test automation in this repo.
+
 | Type of Test | Test Location | About the Tests | How to Run Tests |
-| ------------ | ------------- | ---------------- | ------------- |
+| ------------ | ------------- | --------------- | ---------------- |
 | Unit | `/test/unit` | The unit tests test individual units of code, typically functions. These tests do **not** interact with a real database, so mocks are used instead. | `npm run check:unit` |
 | Functional | `/test/functional` | The function tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. | `npm run check:test` |
-| Benchmark | `/test/benchmarks` | The benchmark tests report how long a designated set of tests take to run??? | `npm run check:bench` |
-| Integration | /test/integration | *Coming Soon* The integration tests test that pieces of the driver work together as expect. | `npm run check:test` |
-| Manual | `/test/manual` | The manual tests are functional tests that require specialized environment setups in Evergreen.  **Note**: "manual" does not refer to tests that should be run manually. These tests are automated. These tests require manual configuration in Evergreen. | There is no script for running all of the manual tests. Instead, you can run the appropriate script based on the specialized environment you want to use:
-`npm run check:atlas` to test Atlas connectivity
-`npm run check:adl` to test Atlas Data Lake
-`npm run check:ocsp` to test OSCP
-`npm run check:kerberos` to test Kerberos
-`npm run check:tls` to test TLS
-`npm run check:ldap` to test LDAP authorization
-| Spec | Test input and expected results: `/test/spec`. Test runners are in `/test/functional` with the the `_spec` postfix in the test file's name. Some spec tests are also in `/test/unit`. | All of the MongoDB drivers follow the same [specifications (aka specs)](https://github.com/mongodb/specifications). The specifications include prose (written, descriptive) tests.  The drivers can choose whether to manually run the prose spec tests or automate the prose spec tests.  The `test/spec` directory contains the JSON and YML files that describe the input and expected results for the prose spec tests. The test runners for these files are located in `test/functional` and `/test/unit`.
-| TypeScript Types |
+| Benchmark | `/test/benchmarks` | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance. | `npm run check:bench` |
+| Integration | `/test/integration` | *Coming Soon* The integration tests test that pieces of the driver work together as expect. | `npm run check:test` |
+| Manual | `/test/manual` | The manual tests are functional tests that require specialized environment setups in Evergreen. <br>**Note**: "manual" does not refer to tests that should be run manually. These tests are automated. These tests require manual configuration in Evergreen. | There is no script for running all of the manual tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas connectivity <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OSCP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization
+| Spec | Test input and expected results: `/test/spec`.  <br>Test runners are in `/test/functional` with  the `_spec` postfix in the test file's name.  <br>Some spec tests are also in `/test/unit`. | All of the MongoDB drivers follow the same [specifications (specs)](https://github.com/mongodb/specifications). The specs include prose (written, descriptive) tests.  The driver teams can choose whether to manually run the prose spec tests or automate the prose spec tests.  The `test/spec` directory contains the JSON and YAML files that describe the input and expected results for the prose spec tests. The JSON and YAML files contain the same content just formatted differently. The developer who implements the spec tests creates the YAML file and then uses a tool to convert the file to JSON. The test runners for the JSON and YAML files are located in `test/functional` and `/test/unit`. | `npm run check:test` to run all of the functional and integration tests (including the spec tests stored with those). `npm run check:unit` to run all of the unit tests (including the spec tests stored with those).
+| TypeScript Definition | `/test/types` | The TypeScript definition tests verify the type definitions are correct. | `npm run check:tsd` |
 
 
 
