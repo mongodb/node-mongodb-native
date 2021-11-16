@@ -242,16 +242,16 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       { name: 'localhost.test.mock.test.build.10gen.cc', port: 2020, weight: 0, priority: 0 }
     ];
 
-    client = new MongoClient(SRV_CONNECTION_STRING, {
-      tls: false,
-      srvServiceName: 'myFancySrvServiceName',
-      serverSelectionTimeoutMS: 5000
-    });
-
     makeStubs({
       initialRecords: [initialRecords[0]],
       replacementRecords,
       srvServiceName: 'myFancySrvServiceName'
+    });
+
+    client = new MongoClient(SRV_CONNECTION_STRING, {
+      tls: false,
+      srvServiceName: 'myFancySrvServiceName',
+      serverSelectionTimeoutMS: 5000
     });
 
     await client.connect();
