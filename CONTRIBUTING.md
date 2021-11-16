@@ -153,11 +153,5 @@ Reviewers should use the following questions to evaluate the implementation for 
 [mtools-install]: http://blog.rueckstiess.com/mtools/install.html
 [nvm-windows]: https://github.com/coreybutler/nvm-windows#installation--upgrades
 [nvm-unix]: https://github.com/nvm-sh/nvm#install--update-script
-[macos-ulimt]: https://wilsonmar.github.io/maximum-limits/
 [workspace-file]: https://gist.githubusercontent.com/nbbeeken/d831a3801b4c463648c077b27da5057b/raw/8e986843e5e28019f7c0cebe5c6fa72407bf8afb/node-mongodb-native.code-workspace
-[mongodb-ulimit]: https://docs.mongodb.com/manual/reference/ulimit/#recommended-ulimit-settings
-[mocha-only]: https://mochajs.org/#exclusive-tests
-[mocha-grep]: https://mochajs.org/#command-line-usage
-[mocha-ulimit]: https://docs.mongodb.com/manual/reference/ulimit/#recommended-ulimit-settings
-[mocha-skip]: https://mochajs.org/#inclusive-tests
 [node-jira]: https://jira.mongodb.org/browse/NODE
