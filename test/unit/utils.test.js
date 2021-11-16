@@ -468,21 +468,22 @@ describe('driver utils', function () {
     });
 
     it('should not mutate the original input', function () {
-      const input = Object.freeze(['a', 'b', 'c', 'd', 'e']);
+      const input = Object.freeze(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
       const output = shuffle(input); // This will throw if shuffle tries to edit the input
+      expect(output === input).to.be.false;
       expect(output).to.not.deep.equal(input);
       expect(output).to.have.lengthOf(input.length);
     });
 
     it(`should give a random subset of length equal to limit when limit is less than the input length`, function () {
-      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
       const output = shuffle(input, input.length - 1);
       expect(output).to.not.deep.equal(input);
       expect(output).to.have.lengthOf(input.length - 1);
     });
 
     it(`should give a random shuffling of the entire input when limit is equal to input length`, function () {
-      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
       const output = shuffle(input, input.length);
       expect(output).to.not.deep.equal(input);
       expect(output).to.have.lengthOf(input.length);
@@ -501,7 +502,7 @@ describe('driver utils', function () {
     });
 
     it(`should return a random item on every call of limit 1`, function () {
-      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
       const outputs = new Set();
       for (let i = 0; i < 5; i++) {
         const output = shuffle(input, 1);
@@ -513,7 +514,7 @@ describe('driver utils', function () {
     });
 
     it('should give a random shuffling of the entire input when no limit provided', () => {
-      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
       const output = shuffle(input);
       // Of course it is possible a shuffle returns exactly the same as the input
       // but it is so improbable it is worth the flakiness in my opinion
@@ -521,7 +522,7 @@ describe('driver utils', function () {
       expect(output).to.have.lengthOf(input.length);
     });
     it('should give a random shuffling of the entire input when limit is explicitly set to 0', () => {
-      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
       const output = shuffle(input, 0);
       expect(output).to.not.deep.equal(input);
       expect(output).to.have.lengthOf(input.length);
