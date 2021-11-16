@@ -54,6 +54,11 @@ running more than a standalone server, make sure your `ulimit` settings are in a
 [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS
 can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated maxproc steps.)
 
+The [cluster_setup.sh](test/tools/cluster_setup.sh) script automatically stores the files associated
+with the MongoDB server in the `data` directory. You can delete this directory if you want to ensure
+you're running a clean configuration. If you delete the directory, the associated database server
+will be stopped, and you will need to run the [cluster_setup.sh](test/tools/cluster_setup.sh) again.
+
 You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific
 deployment. For example, for a standalone server, you might use:
 `env MONGODB_URI=mongodb://localhost:27017 npm test`. For a replica set, you might use:
