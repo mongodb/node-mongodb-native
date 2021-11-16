@@ -27,7 +27,8 @@ import {
   HostAddress,
   ns,
   emitWarning,
-  EventEmitterWithState
+  EventEmitterWithState,
+  shuffle
 } from '../utils';
 import {
   TopologyType,
@@ -140,6 +141,8 @@ export interface TopologyPrivate {
 
 /** @public */
 export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
+  srvMaxHosts: number;
+  srvServiceName: string;
   hosts: HostAddress[];
   retryWrites: boolean;
   retryReads: boolean;
@@ -290,8 +293,15 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const topologyType = topologyTypeFromOptions(options);
     const topologyId = globalTopologyCounter++;
 
+    const selectedHosts =
+      options.srvMaxHosts == null ||
+      options.srvMaxHosts === 0 ||
+      options.srvMaxHosts >= seedlist.length
+        ? seedlist
+        : shuffle(seedlist, options.srvMaxHosts);
+
     const serverDescriptions = new Map();
-    for (const hostAddress of seedlist) {
+    for (const hostAddress of selectedHosts) {
       serverDescriptions.set(hostAddress.toString(), new ServerDescription(hostAddress));
     }
 
@@ -339,7 +349,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         options.srvPoller ??
         new SrvPoller({
           heartbeatFrequencyMS: this.s.heartbeatFrequencyMS,
-          srvHost: options.srvHost
+          srvHost: options.srvHost,
+          srvMaxHosts: options.srvMaxHosts,
+          srvServiceName: options.srvServiceName
         });
 
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
@@ -363,7 +375,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   private detectSrvRecords(ev: SrvPollingEvent) {
     const previousTopologyDescription = this.s.description;
-    this.s.description = this.s.description.updateFromSrvPollingEvent(ev);
+    this.s.description = this.s.description.updateFromSrvPollingEvent(
+      ev,
+      this.s.options.srvMaxHosts
+    );
     if (this.s.description === previousTopologyDescription) {
       // Nothing changed, so return
       return;

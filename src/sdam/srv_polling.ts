@@ -29,18 +29,15 @@ export class SrvPollingEvent {
     this.srvRecords = srvRecords;
   }
 
-  addresses(): Map<string, HostAddress> {
-    return new Map(
-      this.srvRecords.map(record => {
-        const host = new HostAddress(`${record.name}:${record.port}`);
-        return [host.toString(), host];
-      })
-    );
+  hostnames(): Set<string> {
+    return new Set(this.srvRecords.map(r => HostAddress.fromSrvRecord(r).toString()));
   }
 }
 
 /** @internal */
 export interface SrvPollerOptions extends LoggerOptions {
+  srvServiceName: string;
+  srvMaxHosts: number;
   srvHost: string;
   heartbeatFrequencyMS: number;
 }
@@ -58,6 +55,8 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   logger: Logger;
   haMode: boolean;
   generation: number;
+  srvMaxHosts: number;
+  srvServiceName: string;
   _timeout?: NodeJS.Timeout;
 
   /** @event */
@@ -71,8 +70,10 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
 
     this.srvHost = options.srvHost;
+    this.srvMaxHosts = options.srvMaxHosts ?? 0;
+    this.srvServiceName = options.srvServiceName ?? 'mongodb';
     this.rescanSrvIntervalMS = 60000;
-    this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 10000;
+    this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 10000;
     this.logger = new Logger('srvPoller', options);
 
     this.haMode = false;
@@ -82,7 +83,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   }
 
   get srvAddress(): string {
-    return `_mongodb._tcp.${this.srvHost}`;
+    return `_${this.srvServiceName}._tcp.${this.srvHost}`;
   }
 
   get intervalMS(): number {
@@ -143,13 +144,13 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
       }
 
       const finalAddresses: dns.SrvRecord[] = [];
-      srvRecords.forEach((record: dns.SrvRecord) => {
+      for (const record of srvRecords) {
         if (matchesParentDomain(record.name, this.srvHost)) {
           finalAddresses.push(record);
         } else {
           this.parentDomainMismatch(record);
         }
-      });
+      }
 
       if (!finalAddresses.length) {
         this.failure('No valid addresses found at host');

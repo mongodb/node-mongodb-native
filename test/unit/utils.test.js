@@ -3,13 +3,15 @@ const {
   eachAsync,
   executeLegacyOperation,
   makeInterruptibleAsyncInterval,
-  BufferPool
+  BufferPool,
+  shuffle
 } = require('../../src/utils');
 const { expect } = require('chai');
 const sinon = require('sinon');
+const { MongoRuntimeError } = require('../../src/error');
 
-describe('utils', function () {
-  context('eachAsync', function () {
+describe('driver utils', function () {
+  context('eachAsync()', function () {
     it('should callback with an error', function (done) {
       eachAsync(
         [{ error: false }, { error: true }],
@@ -327,7 +329,7 @@ describe('utils', function () {
     });
   });
 
-  context('BufferPool', function () {
+  context('new BufferPool()', function () {
     it('should report the correct length', function () {
       const buffer = new BufferPool();
       buffer.append(Buffer.from([0, 1]));
@@ -414,7 +416,7 @@ describe('utils', function () {
     });
   });
 
-  context('executeLegacyOperation', function () {
+  context('executeLegacyOperation()', function () {
     it('should call callback with errors on throw errors, and rethrow error', function () {
       const expectedError = new Error('THIS IS AN ERROR');
       let callbackError, caughtError;
@@ -454,6 +456,90 @@ describe('utils', function () {
       return executeLegacyOperation(topology, operation, [{}, null], options).then(null, err => {
         expect(err).to.equal(expectedError);
       });
+    });
+  });
+
+  describe('shuffle()', () => {
+    it('should support iterables', function () {
+      // Kind of an implicit test, we should not throw/crash here.
+      const input = new Set(['a', 'b', 'c']);
+      const output = shuffle(input);
+      expect(Array.isArray(output)).to.be.true;
+    });
+
+    it('should not mutate the original input', function () {
+      const input = Object.freeze(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']);
+      const output = shuffle(input); // This will throw if shuffle tries to edit the input
+      expect(output === input).to.be.false;
+      expect(output).to.not.deep.equal(input);
+      expect(output).to.have.lengthOf(input.length);
+    });
+
+    it(`should give a random subset of length equal to limit when limit is less than the input length`, function () {
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+      const output = shuffle(input, input.length - 1);
+      expect(output).to.not.deep.equal(input);
+      expect(output).to.have.lengthOf(input.length - 1);
+    });
+
+    it(`should give a random shuffling of the entire input when limit is equal to input length`, function () {
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+      const output = shuffle(input, input.length);
+      expect(output).to.not.deep.equal(input);
+      expect(output).to.have.lengthOf(input.length);
+    });
+
+    it(`should always return the same element when input is one item`, function () {
+      const input = ['a'];
+      for (let i = 0; i < 10; i++) {
+        const output = shuffle(input);
+        expect(output).to.deep.equal(input);
+      }
+      for (let i = 0; i < 10; i++) {
+        const output = shuffle(input, 1); // and with limit
+        expect(output).to.deep.equal(input);
+      }
+    });
+
+    it(`should return a random item on every call of limit 1`, function () {
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+      const outputs = new Set();
+      for (let i = 0; i < 5; i++) {
+        const output = shuffle(input, 1);
+        expect(output).to.have.lengthOf(1);
+        outputs.add(output[0]);
+      }
+      // Of the 5 shuffles we got at least 2 unique random items, this is to avoid flakiness
+      expect(outputs.size).is.greaterThanOrEqual(2);
+    });
+
+    it('should give a random shuffling of the entire input when no limit provided', () => {
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+      const output = shuffle(input);
+      // Of course it is possible a shuffle returns exactly the same as the input
+      // but it is so improbable it is worth the flakiness in my opinion
+      expect(output).to.not.deep.equal(input);
+      expect(output).to.have.lengthOf(input.length);
+    });
+    it('should give a random shuffling of the entire input when limit is explicitly set to 0', () => {
+      const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+      const output = shuffle(input, 0);
+      expect(output).to.not.deep.equal(input);
+      expect(output).to.have.lengthOf(input.length);
+    });
+
+    it('should handle empty array if limit is unspecified or 0', function () {
+      expect(shuffle([])).to.deep.equal([]);
+      expect(shuffle([], 0)).to.deep.equal([]);
+    });
+
+    it('should throw if limit is greater than zero and empty array', function () {
+      expect(() => shuffle([], 2)).to.throw(MongoRuntimeError);
+      expect(() => shuffle([], 1)).to.throw(MongoRuntimeError);
+    });
+
+    it('should throw if limit is larger than input size', () => {
+      expect(() => shuffle(['a', 'b'], 3)).to.throw(MongoRuntimeError);
     });
   });
 });

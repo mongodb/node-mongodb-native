@@ -2,8 +2,9 @@
 const os = require('os');
 const fs = require('fs');
 const { expect } = require('chai');
+const { promisify } = require('util');
 const { getSymbolFrom } = require('../tools/utils');
-const { parseOptions } = require('../../src/connection_string');
+const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
 const { ReadConcern } = require('../../src/read_concern');
 const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
@@ -718,5 +719,72 @@ describe('MongoOptions', function () {
       };
       expect(parse).to.throw(/URI/);
     });
+  });
+
+  it('srvMaxHosts > 0 cannot be combined with LB or ReplicaSet', () => {
+    expect(() => {
+      new MongoClient('mongodb+srv://localhost?srvMaxHosts=2&replicaSet=repl');
+    }).to.throw(MongoParseError, 'Cannot use srvMaxHosts option with replicaSet');
+    expect(() => {
+      new MongoClient('mongodb+srv://localhost?srvMaxHosts=2&loadBalanced=true');
+    }).to.throw(MongoParseError, 'Cannot limit srv hosts with loadBalanced enabled');
+    expect(() => {
+      new MongoClient('mongodb+srv://localhost', { srvMaxHosts: 2, replicaSet: 'blah' });
+    }).to.throw(MongoParseError, 'Cannot use srvMaxHosts option with replicaSet');
+    expect(() => {
+      new MongoClient('mongodb+srv://localhost?loadBalanced=true', { srvMaxHosts: 2 });
+    }).to.throw(MongoParseError, 'Cannot limit srv hosts with loadBalanced enabled');
+
+    // These should not throw.
+    new MongoClient('mongodb+srv://localhost?srvMaxHosts=0&replicaSet=repl');
+    new MongoClient('mongodb+srv://localhost', { srvMaxHosts: 0, replicaSet: 'blah' });
+    new MongoClient('mongodb+srv://localhost?srvMaxHosts=0&loadBalanced=true');
+    new MongoClient('mongodb+srv://localhost?loadBalanced=true', { srvMaxHosts: 0 });
+  });
+
+  it('srvServiceName and srvMaxHosts cannot be used on a non-srv connection string', () => {
+    expect(() => {
+      new MongoClient('mongodb://localhost?srvMaxHosts=2');
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost?srvMaxHosts=0');
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost', { srvMaxHosts: 0 });
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost?srvServiceName=abc');
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost', { srvMaxHosts: 2 });
+    }).to.throw(MongoParseError);
+    expect(() => {
+      new MongoClient('mongodb://localhost', { srvServiceName: 'abc' });
+    }).to.throw(MongoParseError);
+  });
+
+  it('srvServiceName should error if it is too long', async () => {
+    let thrownError;
+    let options;
+    try {
+      options = parseOptions('mongodb+srv://localhost.a.com', { srvServiceName: 'a'.repeat(255) });
+      await promisify(resolveSRVRecord)(options);
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).to.have.property('code', 'EBADNAME');
+  });
+
+  it('srvServiceName should not error if it is greater than 15 characters as long as the DNS query limit is not surpassed', async () => {
+    let thrownError;
+    let options;
+    try {
+      options = parseOptions('mongodb+srv://localhost.a.com', { srvServiceName: 'a'.repeat(16) });
+      await promisify(resolveSRVRecord)(options);
+    } catch (error) {
+      thrownError = error;
+    }
+    // Nothing wrong with the name, just DNE
+    expect(thrownError).to.have.property('code', 'ENOTFOUND');
   });
 });

@@ -337,7 +337,17 @@ const runLater = (fn, ms) => {
   });
 };
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * If you are using sinon fake timers, it can end up blocking queued IO from running
+ * awaiting a nextTick call will allow the event loop to process Networking/FS callbacks
+ */
+const processTick = () => new Promise(resolve => process.nextTick(resolve));
+
 module.exports = {
+  processTick,
+  sleep,
   runLater,
   ejson,
   EventCollector,

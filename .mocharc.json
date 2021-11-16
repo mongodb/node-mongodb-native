@@ -5,8 +5,8 @@
     "ts"
   ],
   "require": [
-    "ts-node/register",
     "source-map-support/register",
+    "ts-node/register",
     "test/tools/runner/chai-addons",
     "test/tools/runner/circular-dep-hack"
   ],
