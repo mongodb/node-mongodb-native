@@ -294,7 +294,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const topologyId = globalTopologyCounter++;
 
     const selectedHosts =
-      options.srvMaxHosts === 0 || options.srvMaxHosts >= seedlist.length
+      options.srvMaxHosts == null ||
+      options.srvMaxHosts === 0 ||
+      options.srvMaxHosts >= seedlist.length
         ? seedlist
         : shuffle(seedlist, options.srvMaxHosts);
 
