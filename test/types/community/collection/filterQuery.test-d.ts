@@ -1,4 +1,4 @@
-import { BSONRegExp, Decimal128, ObjectId } from 'bson';
+import { BSONRegExp, Decimal128, Long, ObjectId } from 'bson';
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 
 import { Filter, MongoClient, WithId } from '../../../../src';
@@ -31,6 +31,7 @@ interface PetModel {
   isCute: boolean; // boolean field
   bestFriend?: HumanModel; // object field (Embedded/Nested Documents)
   createdAt: Date; // date field
+  numOfPats: Long; // long field
   treats: string[]; // array of string
   playTimePercent: Decimal128; // bson Decimal128 type
   readonly friends?: ReadonlyArray<HumanModel>; // readonly array of objects
@@ -39,6 +40,7 @@ interface PetModel {
   meta?: {
     updatedAt?: Date;
     deep?: {
+      nestedArray: number[];
       nested?: {
         level?: number;
       };
@@ -59,6 +61,7 @@ const spot = {
   type: 'dog' as const,
   isCute: true,
   createdAt: new Date(),
+  numOfPats: Long.fromBigInt(100000000n),
   treats: ['kibble', 'bone'],
   playTimePercent: new Decimal128('0.999999')
 };
@@ -114,8 +117,20 @@ expectNotType<Filter<PetModel>>({ bestFriend: [{ name: 'Andersons' }] });
 /// it should query __nested document__ fields using dot-notation
 collectionT.find({ 'meta.updatedAt': new Date() });
 collectionT.find({ 'meta.deep.nested.level': 123 });
+collectionT.find({ meta: { deep: { nested: { level: 123 } } } }); // no impact on actual nesting
 collectionT.find({ 'friends.0.name': 'John' });
 collectionT.find({ 'playmates.0.name': 'John' });
+
+// There's an issue with the special BSON types
+collectionT.find({ 'numOfPats.__isLong__': true });
+collectionT.find({ numOfPats: Long.fromBigInt(2n) });
+collectionT.find({ 'playTimePercent.bytes.BYTES_PER_ELEMENT': 1 });
+collectionT.find({ playTimePercent: new Decimal128('123.2') });
+
+// works with some extreme indexes
+collectionT.find({ 'friends.4294967295.name': 'John' });
+collectionT.find({ 'friends.999999999999999999999999999999999999.name': 'John' });
+
 /// it should not accept wrong types for nested document fields
 expectNotType<Filter<PetModel>>({ 'meta.updatedAt': 123 });
 expectNotType<Filter<PetModel>>({ 'meta.updatedAt': true });
@@ -125,6 +140,10 @@ expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': true });
 expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': new Date() });
 expectNotType<Filter<PetModel>>({ 'friends.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
+
+// Nested arrays aren't checked
+expectType<Filter<PetModel>>({ 'meta.deep.nestedArray.0': 'not a number' });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nestedArray.23': 'not a number' });
 
 /// it should query __array__ fields by exact match
 await collectionT.find({ treats: ['kibble', 'bone'] }).toArray();
