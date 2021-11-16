@@ -3,13 +3,58 @@
 This repo contains a test automation suite with a variety of tests. In this readme, you'll learn
 about the types of tests and how to run them.
 
+## About the Tests
+
+All of our test automation is powered by the [Mocha test framework](https://mochajs.org/).
+
+Some of the tests require a particular topology (e.g., standalone server, replica set, or sharded cluster). These tests
+check the topology of the MongoDB server that is being used. If the topology does not match, the
+tests will be skipped.
+
+Below is a summary of the types of test automation in this repo.
+
+| Type of Test | Test Location | About the Tests | How to Run Tests |
+| ------------ | ------------- | --------------- | ---------------- |
+| Unit | `/test/unit` | The unit tests test individual pieces of code, typically functions. These tests do **not** interact with a real database, so mocks are used instead. | `npm run check:unit` |
+| Functional | `/test/functional` | The function tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. | `npm run check:test` |
+| Benchmark | `/test/benchmarks` | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance. | `npm run check:bench` |
+| Integration | `/test/integration` | *Coming Soon* The integration tests test that pieces of the driver work together as expected. | `npm run check:test` |
+| Manual | `/test/manual` | The manual tests are functional tests that require specialized environment setups in Evergreen. <br>**Note**: "manual" does not refer to tests that should be run manually. These tests are automated. These tests require manual configuration in Evergreen. | There is no script for running all of the manual tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas connectivity <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OSCP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization
+| Spec | Test input and expected results: `/test/spec`.  <br>Test runners are in `/test/functional` with  the `_spec` suffix in the test file's name.  <br>Some spec tests are also in `/test/unit`. | All of the MongoDB drivers follow the same [specifications (specs)](https://github.com/mongodb/specifications). Each spec has tests associated with it. Some of the tests are prose (written, descriptive) tests.  Other tests are written in JSON. The developers on the driver teams automate these tests. For prose tests, the tests are converted to automation and stored in the `test/unit` or `test/functional` as appropriate. For the JSON tests, a developer uses a tool to convert the JSON test file to YAML. Both the JSON and YAML files are stored in `test/spec`. The test runners for the JSON and YAML files are located in `test/functional` and `/test/unit`. | `npm run check:test` to run all of the functional and integration tests (including the spec tests stored with those). `npm run check:unit` to run all of the unit tests (including the spec tests stored with those).
+| TypeScript Definition | `/test/types` | The TypeScript definition tests verify the type definitions are correct. | `npm run check:tsd` |
+
+
 ## Run the Tests Locally
+
+The easiest way to get started running the tests locally is to start a standalone server and run all of the tests.
 
 Start a mongod standalone with our [cluster_setup.sh](test/tools/cluster_setup.sh) script: `./test/tools/cluster_setup.sh server`
 
 Then run the tests: `npm test`
 
 Note: this will run a subset of the tests that work with the standalone server topology.
+
+In the following subsections, we'll dig into the details of running the tests.
+
+### Testing Different MongoDB Topologies
+
+As we mentioned earlier, the tests check the topology of the MongoDB server being used and runs the
+tests associated with that topology.  Tests that don't have a matching topology will be skipped.
+
+In the steps above, we started a standalone server: `./test/tools/cluster_setup.sh server`.
+
+You can use the same [cluster_setup.sh](test/tools/cluster_setup.sh) script to start a replica set
+or sharded cluster by passing the appropriate option: `./test/tools/cluster_setup.sh replica_set` or
+`./test/tools/cluster_setup.sh sharded_cluster`.  If you are
+running more than a standalone server, make sure your `ulimit` settings are in accordance with
+[MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS
+can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated maxproc steps.)
+
+You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific
+deployment. For example, for a standalone server, you might use:
+`env MONGODB_URI=mongodb://localhost:27017 npm test`. For a replica set, you might use:
+`env MONGODB_URI=mongodb://localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs npm test`.
+******LAUREN STILL VERIFYING THIS******
 
 ## Run the Tests in Evergreen
 
@@ -55,25 +100,6 @@ Once you have the Evergreen CLI setup, you are ready to run a build.
    `evergreen patch -y -u -p mongo-node-driver --browse`
 1. In your browser, select the build variants and tasks to run.
 
-## About the Tests
-
-All of our test automation is powered by the [Mocha test framework](https://mochajs.org/).
-
-Some of the tests require a particular topology (e.g., standalone server, replica set, or sharded cluster). These tests
-check the topology of the MongoDB server that is being used. If the topology does not match, the
-tests will be skipped.
-
-Below is a summary of the types of test automation in this repo.
-
-| Type of Test | Test Location | About the Tests | How to Run Tests |
-| ------------ | ------------- | --------------- | ---------------- |
-| Unit | `/test/unit` | The unit tests test individual pieces of code, typically functions. These tests do **not** interact with a real database, so mocks are used instead. | `npm run check:unit` |
-| Functional | `/test/functional` | The function tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. | `npm run check:test` |
-| Benchmark | `/test/benchmarks` | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance. | `npm run check:bench` |
-| Integration | `/test/integration` | *Coming Soon* The integration tests test that pieces of the driver work together as expected. | `npm run check:test` |
-| Manual | `/test/manual` | The manual tests are functional tests that require specialized environment setups in Evergreen. <br>**Note**: "manual" does not refer to tests that should be run manually. These tests are automated. These tests require manual configuration in Evergreen. | There is no script for running all of the manual tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas connectivity <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OSCP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization
-| Spec | Test input and expected results: `/test/spec`.  <br>Test runners are in `/test/functional` with  the `_spec` suffix in the test file's name.  <br>Some spec tests are also in `/test/unit`. | All of the MongoDB drivers follow the same [specifications (specs)](https://github.com/mongodb/specifications). Each spec has tests associated with it. Some of the tests are prose (written, descriptive) tests.  Other tests are written in JSON. The developers on the driver teams automate these tests. For prose tests, the tests are converted to automation and stored in the `test/unit` or `test/functional` as appropriate. For the JSON tests, a developer uses a tool to convert the JSON test file to YAML. Both the JSON and YAML files are stored in `test/spec`. The test runners for the JSON and YAML files are located in `test/functional` and `/test/unit`. | `npm run check:test` to run all of the functional and integration tests (including the spec tests stored with those). `npm run check:unit` to run all of the unit tests (including the spec tests stored with those).
-| TypeScript Definition | `/test/types` | The TypeScript definition tests verify the type definitions are correct. | `npm run check:tsd` |
 
 ## Special Environments
 
@@ -196,15 +222,7 @@ Define the following variables in your environment:
 
 - How can I run the tests against more than a standalone?
 
-  You can use `test/tools/cluster_setup.sh replica_set` to start a replica set.
 
-  If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with
-  [MongoDB's recommendations][mongodb-ulimit].
-  Changing the settings on the latest versions of macOS can be tricky.  See [this article][macos-ulimt]
-  for tips. (You likely don't need to do the complicated maxproc steps.)
-
-  You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment:
-  `env MONGODB_URI=mongodb://localhost:27017 npm test`
 
 - How can I run just one test?
 
