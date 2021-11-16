@@ -1,6 +1,6 @@
 import { BSONRegExp, Decimal128, ObjectId } from 'bson';
 import { expectAssignable, expectNotType, expectType } from 'tsd';
-import { Filter, MongoClient } from '../../../../src';
+import { Filter, MongoClient, WithId } from '../../../../src';
 
 /**
  * test the Filter type using collection.find<T>() method
@@ -57,12 +57,16 @@ collectionT.find(spot); // a whole model definition is also a valid filter
  * test simple field queries e.g. `{ name: 'Spot' }`
  */
 /// it should query __string__ fields
-expectType<PetModel[]>(await collectionT.find({ name: 'Spot' }).toArray());
+expectType<WithId<PetModel>[]>(await collectionT.find({ name: 'Spot' }).toArray());
 // it should query string fields by regex
-expectType<PetModel[]>(await collectionT.find({ name: /Blu/i }).toArray());
+expectType<WithId<PetModel>[]>(await collectionT.find({ name: /Blu/i }).toArray());
 // it should query string fields by RegExp object, and bson regex
-expectType<PetModel[]>(await collectionT.find({ name: new RegExp('MrMeow', 'i') }).toArray());
-expectType<PetModel[]>(await collectionT.find({ name: new BSONRegExp('MrMeow', 'i') }).toArray());
+expectType<WithId<PetModel>[]>(
+  await collectionT.find({ name: new RegExp('MrMeow', 'i') }).toArray()
+);
+expectType<WithId<PetModel>[]>(
+  await collectionT.find({ name: new BSONRegExp('MrMeow', 'i') }).toArray()
+);
 /// it should not accept wrong types for string fields
 expectNotType<Filter<PetModel>>({ name: 23 });
 expectNotType<Filter<PetModel>>({ name: { suffix: 'Jr' } });
@@ -90,9 +94,9 @@ expectNotType<Filter<PetModel>>({ bestFriend: [{ family: 'Andersons' }] });
 /// it should query __array__ fields by exact match
 await collectionT.find({ treats: ['kibble', 'bone'] }).toArray();
 /// it should query __array__ fields by element type
-expectType<PetModel[]>(await collectionT.find({ treats: 'kibble' }).toArray());
-expectType<PetModel[]>(await collectionT.find({ treats: /kibble/i }).toArray());
-expectType<PetModel[]>(await collectionT.find({ friends: spot }).toArray());
+expectType<WithId<PetModel>[]>(await collectionT.find({ treats: 'kibble' }).toArray());
+expectType<WithId<PetModel>[]>(await collectionT.find({ treats: /kibble/i }).toArray());
+expectType<WithId<PetModel>[]>(await collectionT.find({ friends: spot }).toArray());
 /// it should not query array fields by wrong types
 expectNotType<Filter<PetModel>>({ treats: 12 });
 expectNotType<Filter<PetModel>>({ friends: { name: 'not a full model' } });
@@ -206,7 +210,7 @@ await collectionT.find({ $where: 'function() { return true }' }).toArray();
 await collectionT
   .find({
     $where: function () {
-      expectType<PetModel>(this);
+      expectType<WithId<PetModel>>(this);
       return this.name === 'MrMeow';
     }
   })
