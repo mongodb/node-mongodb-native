@@ -1,5 +1,14 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
-import { FindCursor, FindOptions, MongoClient, Document, Collection, Db } from '../../../../src';
+import {
+  FindCursor,
+  FindOptions,
+  MongoClient,
+  Document,
+  Collection,
+  Db,
+  WithId,
+  ObjectId
+} from '../../../../src';
 import type { Projection, ProjectionOperators } from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
@@ -10,7 +19,11 @@ const collection = db.collection('test.find');
 
 // Locate all the entries using find
 collection.find({}).toArray((_err, fields) => {
-  expectType<Document[] | undefined>(fields);
+  expectType<WithId<Document>[] | undefined>(fields);
+  if (fields) {
+    expectType<ObjectId>(fields[0]._id);
+    expectNotType<ObjectId | undefined>(fields[0]._id);
+  }
 });
 
 // test with collection type
@@ -26,7 +39,7 @@ collectionT.find({
   $and: [{ numberField: { $gt: 0 } }, { numberField: { $lt: 100 } }],
   readonlyFruitTags: { $all: ['apple', 'pear'] }
 });
-expectType<FindCursor<TestModel>>(collectionT.find({}));
+expectType<FindCursor<WithId<TestModel>>>(collectionT.find({}));
 
 await collectionT.findOne(
   {},
@@ -72,22 +85,24 @@ interface Bag {
 
 const collectionBag = db.collection<Bag>('bag');
 
-const cursor: FindCursor<Bag> = collectionBag.find({ color: 'black' });
+const cursor: FindCursor<WithId<Bag>> = collectionBag.find({ color: 'black' });
 
 cursor.toArray((_err, bags) => {
-  expectType<Bag[] | undefined>(bags);
+  expectType<WithId<Bag>[] | undefined>(bags);
 });
 
 cursor.forEach(
   bag => {
-    expectType<Bag>(bag);
+    expectType<WithId<Bag>>(bag);
   },
   () => {
     return null;
   }
 );
 
-expectType<Bag | null>(await collectionBag.findOne({ color: 'red' }, { projection: { cost: 1 } }));
+expectType<WithId<Bag> | null>(
+  await collectionBag.findOne({ color: 'red' }, { projection: { cost: 1 } })
+);
 
 const overrideFind = await collectionBag.findOne<{ cost: number }>(
   { color: 'white' },
@@ -150,40 +165,48 @@ const colorsFreeze: ReadonlyArray<string> = Object.freeze(['blue', 'red']);
 const colorsWritable: Array<string> = ['blue', 'red'];
 
 // Permitted Readonly fields
-expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: colorsFreeze } }));
-expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: colorsWritable } }));
-expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $nin: colorsFreeze } }));
-expectType<FindCursor<{ color: string }>>(
+expectType<FindCursor<WithId<{ color: string }>>>(
+  colorCollection.find({ color: { $in: colorsFreeze } })
+);
+expectType<FindCursor<WithId<{ color: string }>>>(
+  colorCollection.find({ color: { $in: colorsWritable } })
+);
+expectType<FindCursor<WithId<{ color: string }>>>(
+  colorCollection.find({ color: { $nin: colorsFreeze } })
+);
+expectType<FindCursor<WithId<{ color: string }>>>(
   colorCollection.find({ color: { $nin: colorsWritable } })
 );
 // $all and $elemMatch works against single fields (it's just redundant)
-expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $all: colorsFreeze } }));
-expectType<FindCursor<{ color: string }>>(
+expectType<FindCursor<WithId<{ color: string }>>>(
+  colorCollection.find({ color: { $all: colorsFreeze } })
+);
+expectType<FindCursor<WithId<{ color: string }>>>(
   colorCollection.find({ color: { $all: colorsWritable } })
 );
-expectType<FindCursor<{ color: string }>>(
+expectType<FindCursor<WithId<{ color: string }>>>(
   colorCollection.find({ color: { $elemMatch: colorsFreeze } })
 );
-expectType<FindCursor<{ color: string }>>(
+expectType<FindCursor<WithId<{ color: string }>>>(
   colorCollection.find({ color: { $elemMatch: colorsWritable } })
 );
 
 const countCollection = client.db('test_db').collection<{ count: number }>('test_collection');
-expectType<FindCursor<{ count: number }>>(
+expectType<FindCursor<WithId<{ count: number }>>>(
   countCollection.find({ count: { $bitsAnySet: Object.freeze([1, 0, 1]) } })
 );
-expectType<FindCursor<{ count: number }>>(
+expectType<FindCursor<WithId<{ count: number }>>>(
   countCollection.find({ count: { $bitsAnySet: [1, 0, 1] as number[] } })
 );
 
 const listsCollection = client.db('test_db').collection<{ lists: string[] }>('test_collection');
 await listsCollection.updateOne({}, { list: { $pullAll: Object.freeze(['one', 'two']) } });
-expectType<FindCursor<{ lists: string[] }>>(listsCollection.find({ lists: { $size: 1 } }));
+expectType<FindCursor<WithId<{ lists: string[] }>>>(listsCollection.find({ lists: { $size: 1 } }));
 
 const rdOnlyListsCollection = client
   .db('test_db')
   .collection<{ lists: ReadonlyArray<string> }>('test_collection');
-expectType<FindCursor<{ lists: ReadonlyArray<string> }>>(
+expectType<FindCursor<WithId<{ lists: ReadonlyArray<string> }>>>(
   rdOnlyListsCollection.find({ lists: { $size: 1 } })
 );
 
@@ -196,7 +219,9 @@ expectNotType<FindCursor<{ color: string | { $in: ReadonlyArray<string> } }>>(
 expectNotType<FindCursor<{ color: { $in: number } }>>(
   colorCollection.find({ color: { $in: 3 as any } }) // `as any` is to let us make this mistake and still show the result type isn't broken
 );
-expectType<FindCursor<{ color: string }>>(colorCollection.find({ color: { $in: 3 as any } }));
+expectType<FindCursor<WithId<{ color: string }>>>(
+  colorCollection.find({ color: { $in: 3 as any } })
+);
 
 // When you use the override, $in doesn't permit readonly
 colorCollection.find<{ color: string }>({ color: { $in: colorsFreeze } });
@@ -228,12 +253,40 @@ interface TypedDb extends Db {
 const typedDb = client.db('test2') as TypedDb;
 
 const person = typedDb.collection('people').findOne({});
-expectType<Promise<Person | null>>(person);
+expectType<Promise<WithId<Person> | null>>(person);
 
 typedDb.collection('people').findOne({}, function (_err, person) {
-  expectType<Person | null | undefined>(person); // null is if nothing is found, undefined is when there is an error defined
+  expectType<WithId<Person> | null | undefined>(person); // null is if nothing is found, undefined is when there is an error defined
 });
 
 typedDb.collection('things').findOne({}, function (_err, thing) {
-  expectType<Thing | null | undefined>(thing);
+  expectType<WithId<Thing> | null | undefined>(thing);
 });
+
+interface SchemaWithTypicalId {
+  _id: ObjectId;
+  name: string;
+}
+const schemaWithTypicalIdCol = db.collection<SchemaWithTypicalId>('a');
+expectType<WithId<SchemaWithTypicalId> | null>(await schemaWithTypicalIdCol.findOne());
+expectAssignable<SchemaWithTypicalId | null>(await schemaWithTypicalIdCol.findOne());
+
+interface SchemaWithOptionalTypicalId {
+  _id?: ObjectId;
+  name: string;
+}
+const schemaWithOptionalTypicalId = db.collection<SchemaWithOptionalTypicalId>('a');
+expectType<WithId<SchemaWithOptionalTypicalId> | null>(await schemaWithOptionalTypicalId.findOne());
+expectAssignable<SchemaWithOptionalTypicalId | null>(await schemaWithOptionalTypicalId.findOne());
+
+interface SchemaWithUserDefinedId {
+  _id: number;
+  name: string;
+}
+const schemaWithUserDefinedId = db.collection<SchemaWithUserDefinedId>('a');
+expectType<WithId<SchemaWithUserDefinedId> | null>(await schemaWithUserDefinedId.findOne());
+const result = await schemaWithUserDefinedId.findOne();
+if (result !== null) {
+  expectType<number>(result._id);
+}
+expectAssignable<SchemaWithUserDefinedId | null>(await schemaWithUserDefinedId.findOne());

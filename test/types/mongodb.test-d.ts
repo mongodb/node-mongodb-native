@@ -5,7 +5,7 @@ import { AggregationCursor } from '../../src/cursor/aggregation_cursor';
 import type { FindCursor } from '../../src/cursor/find_cursor';
 import type { ChangeStreamDocument } from '../../src/change_stream';
 import type { Document } from 'bson';
-import { Db } from '../../src';
+import { Db, WithId } from '../../src';
 import { Topology } from '../../src/sdam/topology';
 import * as MongoDBDriver from '../../src';
 
@@ -30,7 +30,7 @@ const client = new MongoClient('');
 const db = client.db('test');
 const coll = db.collection('test');
 const findCursor = coll.find();
-expectType<Document | null>(await findCursor.next());
+expectType<WithId<Document> | null>(await findCursor.next());
 const mappedFind = findCursor.map<number>(obj => Object.keys(obj).length);
 expectType<FindCursor<number>>(mappedFind);
 expectType<number | null>(await mappedFind.next());

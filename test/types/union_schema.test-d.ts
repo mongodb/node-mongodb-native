@@ -2,7 +2,7 @@ import { expectType, expectError, expectNotType, expectNotAssignable, expectAssi
 
 import type { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
-import type { Filter } from '../../src/mongo_types';
+import type { Filter, WithId } from '../../src/mongo_types';
 
 type InsertOneFirstParam<Schema> = Parameters<Collection<Schema>['insertOne']>[0];
 
@@ -31,7 +31,7 @@ expectAssignable<ShapeInsert>({ height: 4, width: 4 });
 expectAssignable<ShapeInsert>({ radius: 4 });
 
 const c: Collection<Shape> = null as never;
-expectType<Promise<Shape | null>>(c.findOne({ height: 4, width: 4 }));
+expectType<Promise<WithId<Shape> | null>>(c.findOne({ height: 4, width: 4 }));
 // collection API can only respect TSchema given, cannot pick a type inside a union
 expectNotType<Promise<Rectangle | null>>(c.findOne({ height: 4, width: 4 }));
 

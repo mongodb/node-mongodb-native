@@ -676,12 +676,16 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  findOne(): Promise<TSchema | null>;
-  findOne(callback: Callback<TSchema | null>): void;
-  findOne(filter: Filter<TSchema>): Promise<TSchema | null>;
-  findOne(filter: Filter<TSchema>, callback: Callback<TSchema | null>): void;
-  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<TSchema | null>;
-  findOne(filter: Filter<TSchema>, options: FindOptions, callback: Callback<TSchema | null>): void;
+  findOne(): Promise<WithId<TSchema> | null>;
+  findOne(callback: Callback<WithId<TSchema> | null>): void;
+  findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
+  findOne(filter: Filter<TSchema>, callback: Callback<WithId<TSchema> | null>): void;
+  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<WithId<TSchema> | null>;
+  findOne(
+    filter: Filter<TSchema>,
+    options: FindOptions,
+    callback: Callback<WithId<TSchema> | null>
+  ): void;
 
   // allow an override of the schema.
   findOne<T = TSchema>(): Promise<T | null>;
@@ -695,10 +699,10 @@ export class Collection<TSchema extends Document = Document> {
   ): void;
 
   findOne(
-    filter?: Filter<TSchema> | Callback<TSchema | null>,
-    options?: FindOptions | Callback<TSchema | null>,
-    callback?: Callback<TSchema | null>
-  ): Promise<TSchema | null> | void {
+    filter?: Filter<TSchema> | Callback<WithId<TSchema> | null>,
+    options?: FindOptions | Callback<WithId<TSchema> | null>,
+    callback?: Callback<WithId<TSchema> | null>
+  ): Promise<WithId<TSchema> | null> | void {
     if (callback != null && typeof callback !== 'function') {
       throw new MongoInvalidArgumentError(
         'Third parameter to `findOne()` must be a callback or undefined'
@@ -706,7 +710,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     if (typeof filter === 'function') {
-      callback = filter as Callback<TSchema | null>;
+      callback = filter as Callback<WithId<TSchema> | null>;
       filter = {};
       options = {};
     }
@@ -725,10 +729,10 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param filter - The filter predicate. If unspecified, then all documents in the collection will match the predicate
    */
-  find(): FindCursor<TSchema>;
-  find(filter: Filter<TSchema>, options?: FindOptions): FindCursor<TSchema>;
-  find<T>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
-  find(filter?: Filter<TSchema>, options?: FindOptions): FindCursor<TSchema> {
+  find(): FindCursor<WithId<TSchema>>;
+  find(filter: Filter<WithId<TSchema>>, options?: FindOptions): FindCursor<WithId<TSchema>>;
+  find<T>(filter: Filter<WithId<TSchema>>, options?: FindOptions): FindCursor<T>;
+  find(filter?: Filter<WithId<TSchema>>, options?: FindOptions): FindCursor<WithId<TSchema>> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError(
         'Method "collection.find()" accepts at most two arguments'
@@ -738,7 +742,7 @@ export class Collection<TSchema extends Document = Document> {
       throw new MongoInvalidArgumentError('Argument "options" must not be function');
     }
 
-    return new FindCursor<TSchema>(
+    return new FindCursor<WithId<TSchema>>(
       getTopology(this),
       this.s.namespace,
       filter,
