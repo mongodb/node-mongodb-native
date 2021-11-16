@@ -750,6 +750,9 @@ describe('MongoOptions', function () {
       new MongoClient('mongodb://localhost?srvMaxHosts=0');
     }).to.throw(MongoParseError);
     expect(() => {
+      new MongoClient('mongodb://localhost', { srvMaxHosts: 0 });
+    }).to.throw(MongoParseError);
+    expect(() => {
       new MongoClient('mongodb://localhost?srvServiceName=abc');
     }).to.throw(MongoParseError);
     expect(() => {

@@ -226,24 +226,33 @@ describe('Polling Srv Records for Mongos Discovery', () => {
     // Only two addresses, one should remain the original 2017,
     // while the other will be one of 2019 or 2020
     expect(polledServerAddresses).to.have.lengthOf(2);
-    expect(polledServerAddresses.find(addr => addr.includes('2017'))).to.be.a('string');
+    expect(polledServerAddresses).to.include('localhost.test.mock.test.build.10gen.cc:2017');
     expect(polledServerAddresses).satisfies(
       addresses =>
         // If you want proof, comment one of these conditions out, and run the test a few times
         // you should see it pass and fail at random
-        typeof addresses.find(addr => addr.includes('2019')) === 'string' ||
-        typeof addresses.find(addr => addr.includes('2020')) === 'string'
+        addresses.includes('localhost.test.mock.test.build.10gen.cc:2019') ||
+        addresses.includes('localhost.test.mock.test.build.10gen.cc:2020')
     );
   });
 
   it('13 - DNS record with custom service name can be found', async () => {
+    const replacementRecords = [
+      { name: 'localhost.test.mock.test.build.10gen.cc', port: 2019, weight: 0, priority: 0 },
+      { name: 'localhost.test.mock.test.build.10gen.cc', port: 2020, weight: 0, priority: 0 }
+    ];
+
     client = new MongoClient(SRV_CONNECTION_STRING, {
       tls: false,
       srvServiceName: 'myFancySrvServiceName',
       serverSelectionTimeoutMS: 5000
     });
 
-    makeStubs({ srvServiceName: 'myFancySrvServiceName' });
+    makeStubs({
+      initialRecords: [initialRecords[0]],
+      replacementRecords,
+      srvServiceName: 'myFancySrvServiceName'
+    });
 
     await client.connect();
 
