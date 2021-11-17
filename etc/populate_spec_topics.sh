@@ -7,15 +7,13 @@ if [[ -z $MONGODB_SPECIFICATIONS_DIRECTORY ]]; then
     MONGODB_SPECIFICATIONS_DIRECTORY="$tmpdir"/specifications-master
 fi
 
+# lists only the top level directories
 SPEC_TOPICS=$(find "$MONGODB_SPECIFICATIONS_DIRECTORY"/source -maxdepth 1 -type d -exec basename {} + | sort)
 
 for TOPIC in $SPEC_TOPICS; do
     if [[ $TOPIC == ".DS_Store" ]]; then continue; fi
     if [[ $TOPIC == "Makefile" ]]; then continue; fi
     if [[ $TOPIC == "source" ]]; then continue; fi
-
-    # folders only
-    if [[ $TOPIC == *".rst" ]]; then continue; fi
 
     echo "$TOPIC"
     mkdir -p "test/integration/$TOPIC"
