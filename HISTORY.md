@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.2.0](https://github.com/mongodb/node-mongodb-native/compare/v4.1.3...v4.2.0) (2021-11-17)
+
+
+### Features
+
+* **NODE-3083:** support aggregate writes on secondaries ([#3022](https://github.com/mongodb/node-mongodb-native/issues/3022)) ([f696909](https://github.com/mongodb/node-mongodb-native/commit/f69690917c2355619027872b676bdaeeb254e427))
+* **NODE-3446:** deprecate mapReduce command ([#3036](https://github.com/mongodb/node-mongodb-native/issues/3036)) ([b6c73bf](https://github.com/mongodb/node-mongodb-native/commit/b6c73bf7ec71204eceee34dce4fc572830072cd0))
+* **NODE-3467:** implement srvMaxHosts, srvServiceName options ([#3031](https://github.com/mongodb/node-mongodb-native/issues/3031)) ([1f8b539](https://github.com/mongodb/node-mongodb-native/commit/1f8b539cd3d60dd9f36baa22fd287241b5c65380))
+* **NODE-3469,NODE-3615,NODE-3507:** update min and max wire versions ([#3014](https://github.com/mongodb/node-mongodb-native/issues/3014)) ([2a78d5a](https://github.com/mongodb/node-mongodb-native/commit/2a78d5a185ce1a6e8f35ce89dae479fcd0877bc6))
+* **NODE-3691:** make time series options granularity type strict ([#3005](https://github.com/mongodb/node-mongodb-native/issues/3005)) ([98017f9](https://github.com/mongodb/node-mongodb-native/commit/98017f9f7f7c218de7eeb44fb14d749d774acc38))
+* **NODE-3692:** make change stream events typing more generic ([#3034](https://github.com/mongodb/node-mongodb-native/issues/3034)) ([d5ae78e](https://github.com/mongodb/node-mongodb-native/commit/d5ae78ed73c1d7a850b9a830d1a9ef5c6b963bfb))
+* **NODE-3728:** Allow to pass `authorizedCollections` option to the `db.listCollections` method ([#3021](https://github.com/mongodb/node-mongodb-native/issues/3021)) ([e1234a7](https://github.com/mongodb/node-mongodb-native/commit/e1234a795f05ed687014651c154c8b9f9e8f2cbb))
+* **NODE-3729:** add withId to default return type for collection.find and collection.findOne ([#3039](https://github.com/mongodb/node-mongodb-native/issues/3039)) ([52520aa](https://github.com/mongodb/node-mongodb-native/commit/52520aac08ddb73888c7e6ee133f94ab5a481094))
+
+
+### Bug Fixes
+
+* **NODE-3116:** reschedule unreliable async interval first ([#3006](https://github.com/mongodb/node-mongodb-native/issues/3006)) ([33886a7](https://github.com/mongodb/node-mongodb-native/commit/33886a7ca5601b687d4be1062b5fe8583ec54b6d))
+* **NODE-3344:** allow setting `defaultTransactionOptions` with POJO rather than ReadConcern instance ([#3032](https://github.com/mongodb/node-mongodb-native/issues/3032)) ([53b3164](https://github.com/mongodb/node-mongodb-native/commit/53b3164b8ceb19c8c8be8b5084fd03476f5635b9))
+* **NODE-3515:** do proper opTime merging in bulk results ([#3012](https://github.com/mongodb/node-mongodb-native/issues/3012)) ([43300c3](https://github.com/mongodb/node-mongodb-native/commit/43300c393a190c00f174bc5be0b3fc6d0906e970))
+* **NODE-3668:** compile error with OptionalId on TS 4.5 beta ([#3004](https://github.com/mongodb/node-mongodb-native/issues/3004)) ([ee7f095](https://github.com/mongodb/node-mongodb-native/commit/ee7f095e28aacf07014de8055ce75b16a92a8965))
+* **NODE-3726:** add optional option overloads of Db's createCollection function ([#3019](https://github.com/mongodb/node-mongodb-native/issues/3019)) ([c3149e1](https://github.com/mongodb/node-mongodb-native/commit/c3149e17f301e7333fb5504b58b01e74f324c8e3))
+* **NODE-3727:** add overloads for BulkOperationBase's execute function ([#3018](https://github.com/mongodb/node-mongodb-native/issues/3018)) ([216d194](https://github.com/mongodb/node-mongodb-native/commit/216d1949301438b74ed71da8af9bb766bcbdbf92))
+
 ### [4.1.3](https://github.com/mongodb/node-mongodb-native/compare/v4.1.2...v4.1.3) (2021-10-05)
 
 
