@@ -58,7 +58,7 @@ We recommended these VS Code extensions:
 
 ### Automated Tests
 
-This repo contains a suite of automated tests.  See the [Testing README](/test/readme) for more details.
+This repo contains a suite of automated tests.  See the [Testing README](/test/readme.md) for more details.
 
 
 ### Commit messages
