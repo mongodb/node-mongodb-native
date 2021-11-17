@@ -5,12 +5,12 @@ about the types of tests and how to run them.
 
 ## Table of Contents
 
-[About the Tests](#about-the-tests)
-[Running the Tests Locally](#running-the-tests-locally)
-[Running the Tests in Evergreen](#running-the-tests-in-evergreen)
-[Using a Pre-Release Version of a Dependent Library](#using-a-pre-release-version-of-a-dependent-library)
-[Manually Testing the Driver](#manually-testing-the-driver)
-[Testing with Special Environments](#testing-with-special-environments)
+- [About the Tests](#about-the-tests)
+- [Running the Tests Locally](#running-the-tests-locally)
+- [Running the Tests in Evergreen](#running-the-tests-in-evergreen)
+- [Using a Pre-Release Version of a Dependent Library](#using-a-pre-release-version-of-a-dependent-library)
+- [Manually Testing the Driver](#manually-testing-the-driver)
+- [Testing with Special Environments](#testing-with-special-environments)
 
 ## About the Tests
 
