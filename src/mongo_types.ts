@@ -256,7 +256,7 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
 >;
 
 /** @public */
-export type MatchKeysAndValues<TSchema> = Readonly<Partial<TSchema>> & Record<string, any>;
+export type MatchKeysAndValues<TSchema> = Readonly<Partial<TSchema>> & Record<`${string}.${string}`, any>;
 
 /** @public */
 export type AddToSetOperators<Type> = {
