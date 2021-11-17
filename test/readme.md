@@ -28,7 +28,7 @@ Below is a summary of the types of test automation in this repo.
 | Functional | `/test/functional` | The function tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. | `npm run check:test` |
 | Benchmark | `/test/benchmarks` | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance. | `npm run check:bench` |
 | Integration | `/test/integration` | *Coming Soon* The integration tests test that pieces of the driver work together as expected. | `npm run check:test` |
-| Manual | `/test/manual` | The manual tests are functional tests that require specialized environment setups in Evergreen. <br>**Note**: "manual" does not refer to tests that should be run manually. These tests are automated. These tests require manual configuration in Evergreen. | There is no script for running all of the manual tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas connectivity <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OSCP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization
+| Specialized Environment | `/test/manual` | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests require manual configuration in Evergreen. | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas connectivity <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OSCP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization
 | Spec | Test input and expected results: `/test/spec`.  <br>Test runners are in `/test/functional` with  the `_spec` suffix in the test file's name.  <br>Some spec tests are also in `/test/unit`. | All of the MongoDB drivers follow the same [specifications (specs)][driver-specs]. Each spec has tests associated with it. Some of the tests are prose (written, descriptive) tests.  Other tests are written in JSON. The developers on the driver teams automate these tests. For prose tests, the tests are converted to automation and stored in the `test/unit` or `test/functional` as appropriate. For the JSON tests, a developer uses a tool to convert the JSON test file to YAML. Both the JSON and YAML files are stored in `test/spec`. The test runners for the JSON and YAML files are located in `test/functional` and `/test/unit`. | `npm run check:test` to run all of the functional and integration tests (including the spec tests stored with those). `npm run check:unit` to run all of the unit tests (including the spec tests stored with those).
 | TypeScript Definition | `/test/types` | The TypeScript definition tests verify the type definitions are correct. | `npm run check:tsd` |
 
@@ -214,12 +214,13 @@ The following steps will walk you through how to start and test a load balancer.
    FAKE_MONGODB_SERVICE_ID="true"
    ```
    > Please note, `FAKE_MONGODB_SERVICE_ID` will no longer be needed with the completion of [NODE-3431](https://jira.mongodb.org/browse/NODE-3431).
-1. Source the environment variables using a command like `source lb.env`
+1. Source the environment variables using a command like `source lb.env`.
+1. Export **each** of the environment variables that were created in `lb.env`. For example: `export SINGLE_MONGOS_LB_URI`.
 1. Run the test suite as you normally would:
    ```sh
    npm run check:test
    ```
-   Take note of the `[ topology type: load-balanced ]` printout from mocha to make sure it picked up the environment as expected.
+   Verify that the output from Mocha includes `[ topology type: load-balanced ]`. This indicates the tests successfully accessed the specialized environment variables for load balancer testing.
 1. When you are done testing, shutdown the HAProxy load balancer:
    ```sh
    $DRIVERS_TOOLS/.evergreen/run-load-balancer.sh stop
