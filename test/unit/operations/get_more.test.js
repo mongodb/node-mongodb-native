@@ -8,6 +8,7 @@ const { Server } = require('../../../src/sdam/server');
 const { ClientSession } = require('../../../src/sessions');
 const { ReadPreference } = require('../../../src/read_preference');
 const { Aspect } = require('../../../src/operations/operation');
+const { MongoRuntimeError } = require('../../../src/error');
 
 describe('GetMoreOperation', function () {
   const ns = 'db.coll';
@@ -41,24 +42,48 @@ describe('GetMoreOperation', function () {
   });
 
   describe('#execute', function () {
-    const getMoreStub = sinon.stub().yields(undefined);
-    const server = sinon.createStubInstance(Server, {
-      getMore: getMoreStub
-    });
-    const session = sinon.createStubInstance(ClientSession);
-    const opts = { ...options, session };
-    const operation = new GetMoreOperation(ns, cursorId, server, opts);
+    context('when the server is the same as the instance', function () {
+      const getMoreStub = sinon.stub().yields(undefined);
+      const server = sinon.createStubInstance(Server, {
+        getMore: getMoreStub
+      });
+      const session = sinon.createStubInstance(ClientSession);
+      const opts = { ...options, session };
+      const operation = new GetMoreOperation(ns, cursorId, server, opts);
 
-    it('executes a getmore on the provided server', function (done) {
-      const callback = () => {
-        const call = getMoreStub.getCall(0);
-        expect(getMoreStub.calledOnce).to.be.true;
-        expect(call.args[0]).to.equal(ns);
-        expect(call.args[1]).to.equal(cursorId);
-        expect(call.args[2]).to.deep.equal(opts);
-        done();
-      };
-      operation.execute(server, session, callback);
+      it('executes a getmore on the provided server', function (done) {
+        const callback = () => {
+          const call = getMoreStub.getCall(0);
+          expect(getMoreStub.calledOnce).to.be.true;
+          expect(call.args[0]).to.equal(ns);
+          expect(call.args[1]).to.equal(cursorId);
+          expect(call.args[2]).to.deep.equal(opts);
+          done();
+        };
+        operation.execute(server, session, callback);
+      });
+    });
+
+    context('when the server is not the same as the instance', function () {
+      const getMoreStub = sinon.stub().yields(undefined);
+      const server = sinon.createStubInstance(Server, {
+        getMore: getMoreStub
+      });
+      const newServer = sinon.createStubInstance(Server, {
+        getMore: getMoreStub
+      });
+      const session = sinon.createStubInstance(ClientSession);
+      const opts = { ...options, session };
+      const operation = new GetMoreOperation(ns, cursorId, server, opts);
+
+      it('errors in the callback', function (done) {
+        const callback = error => {
+          expect(error).to.be.instanceOf(MongoRuntimeError);
+          expect(error.message).to.equal('Getmore must run on the same server operation began on');
+          done();
+        };
+        operation.execute(newServer, session, callback);
+      });
     });
   });
 

@@ -1,4 +1,5 @@
 import type { Document, Long } from '../bson';
+import { MongoRuntimeError } from '../error';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { Server } from '../sdam/server';
 import { Aspect, AbstractOperation, OperationOptions, defineAspects } from './operation';
@@ -36,6 +37,11 @@ export class GetMoreOperation extends AbstractOperation {
    * for execute passes a server so we will just use that one.
    */
   execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+    if (server !== this.server) {
+      return callback(
+        new MongoRuntimeError('Getmore must run on the same server operation began on')
+      );
+    }
     server.getMore(this.ns, this.cursorId, this.options, callback);
   }
 }

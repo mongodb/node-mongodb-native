@@ -45,7 +45,6 @@ export function sameServerSelector(description?: ServerDescription): ServerSelec
     // the type is not unknown.
     return servers.filter(sd => {
       return sd.address === description.address && sd.type !== ServerType.Unknown;
-      return s.address === description.address && s.type !== ServerType.Unknown;
     });
   };
 }
