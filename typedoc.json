@@ -2,33 +2,6 @@
   "entryPoints": [
     "src/index.ts"
   ],
-  "toc": [
-    "Admin",
-    "AggregationCursor",
-    "Binary",
-    "BSONRegExp",
-    "ChangeStream",
-    "Code",
-    "Collection",
-    "Db",
-    "Decimal128",
-    "Double",
-    "FindCursor",
-    "GridFSBucket",
-    "Int32",
-    "Long",
-    "MongoClient",
-    "MongoClientOptions",
-    "MongoError",
-    "MongoNetworkError",
-    "MongoParseError",
-    "MongoServerSelectionError",
-    "MongoTimeoutError",
-    "MongoWriteConcernError",
-    "ObjectId",
-    "ReadConcern",
-    "ReadPreference",
-    "WriteConcern"
-  ],
+  "excludeTags": ["internal"],
   "out": "docs/public"
 }
