@@ -8,7 +8,7 @@ import type { ClientSession } from '../sessions';
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface GetMoreOptions<TSchema extends Document = Document> extends OperationOptions {
+export interface GetMoreOptions extends OperationOptions {
   /** Set the batchSize for the getMoreCommand when iterating over the query results. */
   batchSize?: number;
   /** You can put a $comment field on a query to make looking in the profiler logs simpler. */
