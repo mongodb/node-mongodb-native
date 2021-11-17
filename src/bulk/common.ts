@@ -33,7 +33,7 @@ import type { Collection } from '../collection';
 import type { Topology } from '../sdam/topology';
 import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
-import type { Filter, OneOrMore, OptionalId, UpdateFilter } from '../mongo_types';
+import type { Filter, OneOrMore, WithoutId, OptionalId, UpdateFilter } from '../mongo_types';
 
 /** @internal */
 const kServerError = Symbol('serverError');
@@ -79,7 +79,7 @@ export interface ReplaceOneModel<TSchema extends Document = Document> {
   /** The filter to limit the replaced document. */
   filter: Filter<TSchema>;
   /** The document with which to replace the matched document. */
-  replacement: TSchema;
+  replacement: WithoutId<TSchema>;
   /** Specifies a collation. */
   collation?: CollationOptions;
   /** The index to use. If specified, then the query system will only consider plans using the hinted index. */
