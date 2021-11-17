@@ -24,7 +24,7 @@ Below is a summary of the types of test automation in this repo.
 | TypeScript Definition | `/test/types` | The TypeScript definition tests verify the type definitions are correct. | `npm run check:tsd` |
 
 
-## Run the Tests Locally
+## Running the Tests Locally
 
 The easiest way to get started running the tests locally is to start a standalone server and run all of the tests.
 
@@ -55,7 +55,8 @@ running more than a standalone server, make sure your `ulimit` settings are in a
 can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated maxproc steps.)
 
 The [cluster_setup.sh](test/tools/cluster_setup.sh) script automatically stores the files associated
-with the MongoDB server in the `data` directory. You can delete this directory if you want to ensure
+with the MongoDB server in the `data` directory, which is stored at the top level of this repository.
+You can delete this directory if you want to ensure
 you're running a clean configuration. If you delete the directory, the associated database server
 will be stopped, and you will need to run the [cluster_setup.sh](test/tools/cluster_setup.sh) again.
 
@@ -76,7 +77,7 @@ Another way to run a single test is to use Mocha's `grep` flag.  For functional 
 run `npm run check:test -- -g 'test name'`. For unit tests, run `npm run check:unit -- -g 'test name'`.
 See the [Mocha documentation][mocha-grep] for information on the `grep` flag.
 
-## Run the Tests in Evergreen
+## Running the Tests in Evergreen
 
 [Evergreen][evergreen-wiki] is a continuous integration (CI) system
 we use.  Evergreen builds are automatically run whenever a pull request is created or when commits are
@@ -122,6 +123,37 @@ Once you have the Evergreen CLI setup, you are ready to run a build.
 
    `evergreen patch -y -u -p mongo-node-driver --browse`
 1. In your browser, select the build variants and tasks to run.
+
+## Using a Pre-Release Version of a Dependent Library
+
+You may want to test the driver with a pre-release version of a dependent library (e.g., [bson][js-bson]).
+Follow the steps below to do so.
+1. Open [package.json](../package.json)
+1. Identify the line that specifies the dependency
+1. Replace the version number with the commit hash of the dependent library. For example: `"bson": "e29156f7438fa77c1672fd70789d7ade9ca65061"`
+1. Run `npm install` to install the dependency
+
+Now you can run the automated tests, run manual tests, or kick off an Evergreen build from your local
+repository.
+
+## Manually Testing the Driver
+
+You may want to manually test changes you have made to the driver. The steps below will walk you
+through how to create a new Node project that uses your local copy of the Node driver.  You can
+modify the steps to work with existing Node projects.
+
+1. Navigate to a new directory and create a new Node project by running `npm init` in a terminal and
+   working through the interactive prompts. A new file named `package.json` will be created for you.
+1. In `package.json`, create a new dependency for `mongodb` that points to your local copy of the
+   driver. For example:
+   ```
+   "dependencies": {
+     "mongodb": "/path-to-your-copy-of-the-driver-repo/node-mongodb-native"
+   }
+   ```
+1. Run `npm install` to install the dependency.
+1. Create a new file that uses the driver to test your changes. See the
+   [MongoDB Node.js Quick Start Repo][node-quick-start] for example scripts you can use.
 
 
 ## Special Environments
@@ -250,3 +282,5 @@ Define the following variables in your environment:
 [evergreen-docs]: https://github.com/evergreen-ci/evergreen/wiki/Using-the-Command-Line-Tool
 [evergreen-wiki]: https://github.com/evergreen-ci/evergreen/wiki
 [driver-specs]: https://github.com/mongodb/specifications
+[node-quick-start]: https://github.com/mongodb-developer/nodejs-quickstart
+[js-bson]: https://github.com/mongodb/js-bson
