@@ -43,7 +43,8 @@ export function sameServerSelector(description?: ServerDescription): ServerSelec
     if (!description) return [];
     // Filter the servers to match the provided description only if
     // the type is not unknown.
-    return servers.filter((s: ServerDescription) => {
+    return servers.filter(sd => {
+      return sd.address === description.address && sd.type !== ServerType.Unknown;
       return s.address === description.address && s.type !== ServerType.Unknown;
     });
   };
