@@ -210,7 +210,7 @@ await collectionT.find({ $where: 'function() { return true }' }).toArray();
 await collectionT
   .find({
     $where: function () {
-      expectType<WithId<PetModel>>(this);
+      expectType<PetModel>(this);
       return this.name === 'MrMeow';
     }
   })
