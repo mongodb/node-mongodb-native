@@ -41,7 +41,7 @@ Start a mongod standalone with our [cluster_setup.sh](test/tools/cluster_setup.s
 
 Then run the tests: `npm test`.
 
-**Note:** the command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
+>**Note:** the command above will run a subset of the tests that work with the standalone server topology since the tests are being run against a standalone server.
 
 The output will show how many tests passed, failed, and are pending. Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test results.  See [Mocha's documentation][mocha-skip] for more information.
 
@@ -138,55 +138,69 @@ modify the steps to work with existing Node projects.
 
 In order to test some features, you will need to generate and set a specialized group of environment variables.  The subsections below will walk you through how to generate and set the environment variables for these features.
 
+We recommend using a different terminal for each specialized environment to avoid the environment variables from one test impacting the test runs of another type.
+
 Before you begin any of the subsections below, clone the [drivers-evergreen-tools repo](https://github.com/mongodb-labs/drivers-evergreen-tools.git).
 
-We recommend creating an environment variable named `DRIVERS_TOOLS` that stores the path to your local copy of the driver-evergreen-tools repo: `export DRIVERS_TOOLS="/path/to/your/copy/of/drivers-evergreen-tools"
+We recommend creating an environment variable named `DRIVERS_TOOLS` that stores the path to your local copy of the driver-evergreen-tools repo: `export DRIVERS_TOOLS="/path/to/your/copy/of/drivers-evergreen-tools"`.
 
 ### Serverless
 
-Create a new serverless instance in Atlas.
+The following steps will walk you through how to create and test a MongoDB Serverless instance.
 
-Find the following script in driver-evergreen-tools and make sure you have the following environment variables defined.
-_**Remember**_ some of these are sensitive credentials so keep them safe and only put them in your environment when you need them.
+1. Create the following environment variables using a command like `export PROJECT="node-driver"`.
 
-- `PROJECT`
-- `SERVERLESS_DRIVERS_GROUP`
-- `SERVERLESS_API_PUBLIC_KEY`
-- `SERVERLESS_API_PRIVATE_KEY`
-- `SERVERLESS_ATLAS_USER`
-- `SERVERLESS_ATLAS_PASSWORD`
-- `LOADBALANCED`
+   - `PROJECT`
+   - `SERVERLESS_DRIVERS_GROUP`
+   - `SERVERLESS_API_PUBLIC_KEY`
+   - `SERVERLESS_API_PRIVATE_KEY`
+   - `SERVERLESS_ATLAS_USER`
+   - `SERVERLESS_ATLAS_PASSWORD`
+   - `LOADBALANCED`
 
-```sh
-$DRIVERS_TOOLS/.evergreen/serverless/create-instance.sh
-```
+   TODO:  Explain what these variables represent and how to get their values.
 
-this will output an evergreen expansion in `serverless-expansion.yml` in the current working directory.
+   _**Remember**_ some of these are sensitive credentials so keep them safe and only put them in your environment when you need them.
 
-```yml
-MONGODB_URI: xxx
-MONGODB_SRV_URI: xxx
-SERVERLESS_INSTANCE_NAME: xxx
-SSL: xxx
-AUTH: xxx
-TOPOLOGY: xxx
-SERVERLESS: xxx
-MULTI_ATLASPROXY_SERVERLESS_URI: xxx
-SINGLE_ATLASPROXY_SERVERLESS_URI: xxx
-```
+1. Run the [create-instance][create-instance-script] script:
+   ```sh
+   $DRIVERS_TOOLS/.evergreen/serverless/create-instance.sh
+   ```
+   The script will take a few minutes to run.  When it is finished, a new file named `serverless-expansion.yml` will be created in the current working directory. The file will contain information about an Evergreen expansion:
 
-Since it's a flat yaml file, you can run the following to get a sourceable environment file:
+   ```yml
+   MONGODB_URI: xxx
+   MONGODB_SRV_URI: xxx
+   SERVERLESS_INSTANCE_NAME: xxx
+   SSL: xxx
+   AUTH: xxx
+   TOPOLOGY: xxx
+   SERVERLESS: xxx
+   MULTI_ATLASPROXY_SERVERLESS_URI: xxx
+   SINGLE_ATLASPROXY_SERVERLESS_URI: xxx
+   ```
 
-```sh
-cat serverless-expansion.yml | sed 's/: /=/g' > serverless.env
-```
+1. Generate a sourceable environment file from `serverless-expansion.yml` by running the following command:
 
-Before sourcing `serverless.env`, make some adjustments that are equivalent to what our EVG does:
+   ```sh
+   cat serverless-expansion.yml | sed 's/: /=/g' > serverless.env
+   ```
+   A new file named `serverless.env` is automatically created.
 
-- Change `MONGODB_URI` to be the same as `SINGLE_ATLASPROXY_SERVERLESS_URI`
-- Add `SINGLE_MONGOS_LB_URI` and `MULTI_MONGOS_LB_URI` and set them to `SINGLE_ATLASPROXY_SERVERLESS_URI`
+1. Update the following variables in `serverless.env`, so that they are equivalent to what our Evergreen builds do:
+   - Change `MONGODB_URI` to have the same value as `SINGLE_ATLASPROXY_SERVERLESS_URI`.
+   - Add `SINGLE_MONGOS_LB_URI` and set it to the value of `SINGLE_ATLASPROXY_SERVERLESS_URI`.
+   - Add `MULTI_MONGOS_LB_URI` and set it to the value of `SINGLE_ATLASPROXY_SERVERLESS_URI`.
 
-Lastly, comment out the `source` of `install-dependencies.sh` command in `.evergreen/run-serverless-tests.sh` and you can run that script directly to test serverless instances from your local machine.
+1. Source the environment variables using a command like `source serverless.env`.
+
+1. Export **each** of the environment variables that were created in `serverless.env`. For example: `export SINGLE_MONGOS_LB_URI`.
+
+1. Comment out the line in `.evergreen/run-serverless-tests.sh` that sources `install-dependencies.sh`.
+
+1. Run the `.evergreen/run-serverless-tests.sh` script directly to test serverless instances from your local machine.
+
+> Hint: If the test script fails with an error along the lines of `Uncaught TypeError: Cannot read properties of undefined (reading 'processId')`, ensure you do **not** have the `FAKE_MONGODB_SERVICE_ID` environment variable set.
 
 ### Load Balanced
 
@@ -213,7 +227,7 @@ The following steps will walk you through how to start and test a load balancer.
    ```sh
    FAKE_MONGODB_SERVICE_ID="true"
    ```
-   > Please note, `FAKE_MONGODB_SERVICE_ID` will no longer be needed with the completion of [NODE-3431](https://jira.mongodb.org/browse/NODE-3431).
+   > **Note:** `FAKE_MONGODB_SERVICE_ID` will no longer be needed with the completion of [NODE-3431](https://jira.mongodb.org/browse/NODE-3431).
 1. Source the environment variables using a command like `source lb.env`.
 1. Export **each** of the environment variables that were created in `lb.env`. For example: `export SINGLE_MONGOS_LB_URI`.
 1. Run the test suite as you normally would:
@@ -228,15 +242,27 @@ The following steps will walk you through how to start and test a load balancer.
 
 ### Client-Side Field Level Encryption (CSFLE)
 
-As long as certain environment variables are present and mongodb-client-encryption is installed, FLE will run with a regular mocha execution: `npm run check:test`.
+The following steps will walk you through how to run the tests for CSFLE.
 
-Define the following variables in your environment:
+1. Install [MongoDB Client Encryption][npm-csfle] if you haven't already:
+   `npm install mongodb-client-encryption`
 
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `CSFLE_KMS_PROVIDERS`
-- `AWS_REGION`
-- `AWS_CMK_ID`
+1. Create the following environment variables using a command like `export AWS_REGION="us-east-1"`.
+
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+   - `CSFLE_KMS_PROVIDERS`
+   - `AWS_REGION`
+   - `AWS_CMK_ID`
+
+   TODO:  Explain what these variables represent and how to get their values.
+
+1. Run the functional tests:
+
+   `npm run check:test`
+
+   The output of the tests will include sections like "Client Side Encryption Corpus," "Client Side Encryption Functional," "Client Side Encryption Prose Tests," and "Client Side Encryption."
+
 
 ### TODO Special Env Sections
 
@@ -260,3 +286,5 @@ Define the following variables in your environment:
 [driver-specs]: https://github.com/mongodb/specifications
 [node-quick-start]: https://github.com/mongodb-developer/nodejs-quickstart
 [js-bson]: https://github.com/mongodb/js-bson
+[create-instance-script]: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/create-instance.sh
+[npm-csfle]: (https://www.npmjs.com/package/mongodb-client-encryption)
