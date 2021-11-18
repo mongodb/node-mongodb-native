@@ -14,7 +14,8 @@ import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import { Readable, Transform } from 'stream';
-import type { ExecutionResult } from '../operations/execute_operation';
+import { executeOperation, ExecutionResult } from '../operations/execute_operation';
+import { GetMoreOperation } from '../operations/get_more';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 
@@ -610,16 +611,13 @@ export abstract class AbstractCursor<
       return;
     }
 
-    server.getMore(
-      cursorNs,
-      cursorId,
-      {
-        ...this[kOptions],
-        session: this[kSession],
-        batchSize
-      },
-      callback
-    );
+    const getMoreOperation = new GetMoreOperation(cursorNs, cursorId, server, {
+      ...this[kOptions],
+      session: this[kSession],
+      batchSize
+    });
+
+    executeOperation(this.topology, getMoreOperation, callback);
   }
 }
 
