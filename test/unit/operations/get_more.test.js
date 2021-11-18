@@ -11,7 +11,7 @@ const { Aspect } = require('../../../src/operations/operation');
 const { MongoRuntimeError } = require('../../../src/error');
 
 describe('GetMoreOperation', function () {
-  const ns = Object.freeze('db.coll');
+  const ns = 'db.coll';
   const cursorId = Object.freeze(Long.fromNumber(1));
   const options = Object.freeze({
     batchSize: 100,
