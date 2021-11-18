@@ -8,6 +8,7 @@ const { ReplSetFixture } = require('../tools/common');
 const { ns } = require('../../src/utils');
 const { Topology } = require('../../src/sdam/topology');
 const { MongoNetworkError, MongoWriteConcernError } = require('../../src/index');
+const { isRetryableEndTransactionError } = require('../../src/error');
 const {
   PoolClosedError: MongoPoolClosedError,
   WaitQueueTimeoutError: MongoWaitQueueTimeoutError
@@ -35,6 +36,34 @@ describe('MongoErrors', () => {
       });
     });
   }
+
+  describe('#isRetryableEndTransactionError', function () {
+    context('when the error has a RetryableWriteError label', function () {
+      const error = new MongoNetworkError('');
+      error.addErrorLabel('RetryableWriteError');
+
+      it('returns true', function () {
+        expect(isRetryableEndTransactionError(error)).to.be.true;
+      });
+    });
+
+    context('when the error does not have a RetryableWriteError label', function () {
+      const error = new MongoNetworkError('');
+      error.addErrorLabel('InvalidLabel');
+
+      it('returns false', function () {
+        expect(isRetryableEndTransactionError(error)).to.be.false;
+      });
+    });
+
+    context('when the error does not have any label', function () {
+      const error = new MongoNetworkError('');
+
+      it('returns false', function () {
+        expect(isRetryableEndTransactionError(error)).to.be.false;
+      });
+    });
+  });
 
   describe('when MongoNetworkError is constructed', () => {
     it('should only define beforeHandshake symbol if boolean option passed in', function () {
