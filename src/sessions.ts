@@ -8,6 +8,7 @@ import {
   MongoError,
   MongoInvalidArgumentError,
   isRetryableError,
+  isRetryableEndTransactionError,
   MongoCompatibilityError,
   MongoNetworkError,
   MongoWriteConcernError,
@@ -767,7 +768,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
         session.unpin();
       }
 
-      if (err && isRetryableError(err as MongoError)) {
+      if (err && isRetryableEndTransactionError(err as MongoError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         if (command.commitTransaction) {
           // per txns spec, must unpin session in this case
