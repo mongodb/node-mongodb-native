@@ -37,7 +37,7 @@ Below is a summary of the types of test automation in this repo.
 
 The easiest way to get started running the tests locally is to start a standalone server and run all of the tests.
 
-Start a mongod standalone with our [cluster_setup.sh](test/tools/cluster_setup.sh) script: `./test/tools/cluster_setup.sh server`.
+Start a mongod standalone with our [cluster_setup.sh](tools/cluster_setup.sh) script: `./test/tools/cluster_setup.sh server`.
 
 Then run the tests: `npm test`.
 
@@ -53,11 +53,11 @@ As we mentioned earlier, the tests check the topology of the MongoDB server bein
 
 In the steps above, we started a standalone server: `./test/tools/cluster_setup.sh server`.
 
-You can use the same [cluster_setup.sh](test/tools/cluster_setup.sh) script to start a replica set or sharded cluster by passing the appropriate option: `./test/tools/cluster_setup.sh replica_set` or
+You can use the same [cluster_setup.sh](tools/cluster_setup.sh) script to start a replica set or sharded cluster by passing the appropriate option: `./test/tools/cluster_setup.sh replica_set` or
 `./test/tools/cluster_setup.sh sharded_cluster`.  If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with [MongoDB's recommendations][mongodb-ulimit]. Changing the settings on the latest versions of macOS can be tricky. See [this article][macos-ulimt] for tips. (You likely don't need to do the complicated maxproc steps.)
 
-The [cluster_setup.sh](test/tools/cluster_setup.sh) script automatically stores the files associated with the MongoDB server in the `data` directory, which is stored at the top level of this repository.
-You can delete this directory if you want to ensure you're running a clean configuration. If you delete the directory, the associated database server will be stopped, and you will need to run [cluster_setup.sh](test/tools/cluster_setup.sh) again.
+The [cluster_setup.sh](tools/cluster_setup.sh) script automatically stores the files associated with the MongoDB server in the `data` directory, which is stored at the top level of this repository.
+You can delete this directory if you want to ensure you're running a clean configuration. If you delete the directory, the associated database server will be stopped, and you will need to run [cluster_setup.sh](tools/cluster_setup.sh) again.
 
 You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment. For example, for a standalone server, you might use: `env MONGODB_URI=mongodb://localhost:27017 npm test`. For a replica set, you might use: `env MONGODB_URI=mongodb://localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs npm test`.
 
@@ -206,7 +206,7 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
 The following steps will walk you through how to start and test a load balancer.
 
-1. Start a sharded cluster. You can use the [cluster_setup.sh](test/tools/cluster_setup.sh) script to do so: `./test/tools/cluster_setup.sh sharded_cluster`. The tool should create a cluster with two mongos, so you have a URI similar to `MONGODB_URI=mongodb://host1,host2/`.
+1. Start a sharded cluster. You can use the [cluster_setup.sh](tools/cluster_setup.sh) script to do so: `./test/tools/cluster_setup.sh sharded_cluster`. The tool should create a cluster with two mongos, so you have a URI similar to `MONGODB_URI=mongodb://host1,host2/`.
 1. Create an environment variable named `MONGODB_URI` that stores the URI of the sharded cluster you just created. For example: `export MONGODB_URI="mongodb://host1,host2/"`
 1. Install the HAProxy load balancer. For those on macOS, you can install HAProxy with `brew install haproxy`.
 1. Start the load balancer by using the [run-load-balancer script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/run-load-balancer.sh) provided in drivers-evergreen-tools.
