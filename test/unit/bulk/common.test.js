@@ -1,3 +1,5 @@
+/* eslint-disable no-loss-of-precision */
+/* eslint-disable @typescript-eslint/no-loss-of-precision */
 'use strict';
 
 const { expect } = require('chai');
