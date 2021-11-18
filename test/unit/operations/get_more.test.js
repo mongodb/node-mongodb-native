@@ -11,14 +11,14 @@ const { Aspect } = require('../../../src/operations/operation');
 const { MongoRuntimeError } = require('../../../src/error');
 
 describe('GetMoreOperation', function () {
-  const ns = 'db.coll';
-  const cursorId = Long.fromNumber(1);
-  const options = {
+  const ns = Object.freeze('db.coll');
+  const cursorId = Object.freeze(Long.fromNumber(1));
+  const options = Object.freeze({
     batchSize: 100,
     comment: 'test',
     maxTimeMS: 500,
     readPreference: ReadPreference.primary
-  };
+  });
 
   describe('#constructor', function () {
     const server = sinon.createStubInstance(Server, {});

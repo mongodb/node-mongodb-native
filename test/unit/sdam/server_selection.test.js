@@ -1,6 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
+const sinon = require('sinon');
 const { ObjectId } = require('../../../src/bson');
 const { ReadPreference } = require('../../../src/read_preference');
 const {
@@ -37,21 +38,21 @@ describe('server selection', function () {
   });
 
   describe('#sameServerSelector', function () {
+    const topologyDescription = sinon.stub();
     const serverDescriptions = new Map();
-    serverDescriptions.set('127.0.0.1:27017', primary);
-    serverDescriptions.set('127.0.0.1:27018', unknown);
+    serverDescriptions.set(primary.address, primary);
+    serverDescriptions.set(unknown.address, unknown);
+    let selector;
+    let servers;
+
+    beforeEach(function () {
+      servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+    });
 
     context('when the server is unknown', function () {
-      const topologyDescription = new TopologyDescription(
-        TopologyType.ReplicaSetWithPrimary,
-        serverDescriptions,
-        'test',
-        MIN_SECONDARY_WRITE_WIRE_VERSION,
-        new ObjectId(),
-        MIN_SECONDARY_WRITE_WIRE_VERSION
-      );
-      const selector = sameServerSelector(unknown);
-      const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+      before(function () {
+        selector = sameServerSelector(unknown);
+      });
 
       it('returns an empty array', function () {
         expect(servers).to.be.empty;
@@ -59,17 +60,9 @@ describe('server selection', function () {
     });
 
     context('when the server is not unknown', function () {
-      const topologyDescription = new TopologyDescription(
-        TopologyType.ReplicaSetWithPrimary,
-        serverDescriptions,
-        'test',
-        MIN_SECONDARY_WRITE_WIRE_VERSION,
-        new ObjectId(),
-        MIN_SECONDARY_WRITE_WIRE_VERSION
-      );
-
-      const selector = sameServerSelector(primary);
-      const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+      before(function () {
+        selector = sameServerSelector(primary);
+      });
 
       it('returns the server', function () {
         expect(servers).to.deep.equal([primary]);
@@ -77,16 +70,19 @@ describe('server selection', function () {
     });
 
     context('when no server description provided', function () {
-      const topologyDescription = new TopologyDescription(
-        TopologyType.ReplicaSetWithPrimary,
-        serverDescriptions,
-        'test',
-        MIN_SECONDARY_WRITE_WIRE_VERSION,
-        new ObjectId(),
-        MIN_SECONDARY_WRITE_WIRE_VERSION
-      );
-      const selector = sameServerSelector();
-      const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+      before(function () {
+        selector = sameServerSelector();
+      });
+
+      it('returns an empty array', function () {
+        expect(servers).to.be.empty;
+      });
+    });
+
+    context('when the server is not the same', function () {
+      before(function () {
+        selector = sameServerSelector(secondary);
+      });
 
       it('returns an empty array', function () {
         expect(servers).to.be.empty;
@@ -97,8 +93,8 @@ describe('server selection', function () {
   describe('#secondaryWritableServerSelector', function () {
     context('when the topology is a replica set', function () {
       const serverDescriptions = new Map();
-      serverDescriptions.set('127.0.0.1:27017', primary);
-      serverDescriptions.set('127.0.0.1:27018', secondary);
+      serverDescriptions.set(primary.address, primary);
+      serverDescriptions.set(secondary.address, secondary);
 
       context('when the common server version is >= 5.0', function () {
         const topologyDescription = new TopologyDescription(
@@ -184,7 +180,7 @@ describe('server selection', function () {
 
     context('when the topology is sharded', function () {
       const serverDescriptions = new Map();
-      serverDescriptions.set('127.0.0.1:27019', mongos);
+      serverDescriptions.set(mongos.address, mongos);
 
       context('when the common server version is >= 5.0', function () {
         const topologyDescription = new TopologyDescription(
@@ -270,7 +266,7 @@ describe('server selection', function () {
 
     context('when the topology is load balanced', function () {
       const serverDescriptions = new Map();
-      serverDescriptions.set('127.0.0.1:27020', loadBalancer);
+      serverDescriptions.set(loadBalancer.address, loadBalancer);
 
       context('when the common server version is >= 5.0', function () {
         const topologyDescription = new TopologyDescription(
@@ -356,7 +352,7 @@ describe('server selection', function () {
 
     context('when the topology is single', function () {
       const serverDescriptions = new Map();
-      serverDescriptions.set('127.0.0.1:27020', single);
+      serverDescriptions.set(single.address, single);
 
       context('when the common server version is >= 5.0', function () {
         const topologyDescription = new TopologyDescription(
