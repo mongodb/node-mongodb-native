@@ -1148,11 +1148,11 @@ export function isRecord(
  * but instead something that is good enough for the purposes of
  * command monitoring.
  */
-export function deepCopy<T extends any>(value: T): T {
+export function deepCopy<T>(value: T): T {
   if (value == null) {
     return value;
   } else if (Array.isArray(value)) {
-    return value.map(item => deepCopy(item)) as T;
+    return value.map(item => deepCopy(item)) as unknown as T;
   } else if (isRecord(value)) {
     const res = {} as any;
     for (const key in value) {
@@ -1167,11 +1167,11 @@ export function deepCopy<T extends any>(value: T): T {
       case 'date':
         return new ctor(Number(value));
       case 'map':
-        return new Map(value as any) as T;
+        return new Map(value as any) as unknown as T;
       case 'set':
-        return new Set(value as any) as T;
+        return new Set(value as any) as unknown as T;
       case 'buffer':
-        return Buffer.from(value as Buffer) as T;
+        return Buffer.from(value as Buffer) as unknown as T;
     }
   }
 

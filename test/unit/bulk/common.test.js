@@ -1,3 +1,6 @@
+/* eslint-disable no-loss-of-precision */
+/* eslint-disable @typescript-eslint/no-loss-of-precision */
+// TODO(NODE-3774): Lower the integer literals below JS max precision
 'use strict';
 
 const { expect } = require('chai');
