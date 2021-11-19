@@ -154,7 +154,7 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
    | Variable Name | Description |
    | ------------- | ----------- |
-   | Project | The name of the Evergreen project  where the tests will be run (e.g., `mongo-node-driver-next`) |
+   | `Project` | The name of the Evergreen project  where the tests will be run (e.g., `mongo-node-driver-next`) |
    | `SERVERLESS_DRIVERS_GROUP` | The Atlas organization where you will be creating the serverless instance |
    | `SERVERLESS_API_PUBLIC_KEY` | The [Atlas API Public Key][atlas-api-key] for the organization where you will be creating a serverless instance |
    | `SERVERLESS_API_PRIVATE_KEY` | The [Atlas API Private Key][atlas-api-key] for the organization where you will be creating a serverless instance |
@@ -316,6 +316,6 @@ The following steps will walk you through how to run the tests for CSFLE.
 [node-quick-start]: https://github.com/mongodb-developer/nodejs-quickstart
 [js-bson]: https://github.com/mongodb/js-bson
 [create-instance-script]: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/create-instance.sh
-[npm-csfle]: (https://www.npmjs.com/package/mongodb-client-encryption)
-[atlas-api-key]: (https://docs.atlas.mongodb.com/tutorial/configure-api-access/organization/create-one-api-key/)
-[scram-auth]: (https://docs.atlas.mongodb.com/security-add-mongodb-users/#database-user-authentication)
+[npm-csfle]: https://www.npmjs.com/package/mongodb-client-encryption
+[atlas-api-key]: https://docs.atlas.mongodb.com/tutorial/configure-api-access/organization/create-one-api-key
+[scram-auth]: https://docs.atlas.mongodb.com/security-add-mongodb-users/#database-user-authentication
