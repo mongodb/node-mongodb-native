@@ -28,8 +28,8 @@ Below is a summary of the types of test automation in this repo.
 | Functional | `/test/functional` | The functional tests test that a given feature or piece of a feature is working as expected. These tests do **not** use mocks; instead, they interact with a real database. | `npm run check:test` |
 | Benchmark | `/test/benchmarks` | The benchmark tests report how long a designated set of tests take to run. They are used to measure performance. | `npm run check:bench` |
 | Integration | `/test/integration` | *Coming Soon* The integration tests test that pieces of the driver work together as expected. | `npm run check:test` |
-| Specialized Environment | `/test/manual` | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br><br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests require manual configuration in Evergreen. | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OSCP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization
-| Spec | Test input and expected results are in `/test/spec`.  <br>Test runners are in `/test/functional` with  the `_spec` suffix in the test file's name.  <br>Some spec tests are also in `/test/unit`. | All of the MongoDB drivers follow the same [specifications (specs)][driver-specs]. Each spec has tests associated with it. Some of the tests are prose (written, descriptive) tests.  Other tests are written in JSON. The developers on the driver teams automate these tests. For prose tests, the tests are converted to automation and stored in the `test/unit` or `test/functional` directory as appropriate. For the JSON tests, a developer uses a tool to convert the JSON test file to YAML. Both the JSON and YAML files are stored in `test/spec`. The test runners for the JSON and YAML files are located in `test/functional` and `/test/unit`. | `npm run check:test` to run all of the functional and integration tests (including the spec tests stored with those). `npm run check:unit` to run all of the unit tests (including the spec tests stored with those).
+| Specialized Environment | `/test/manual` | The specalized environment tests are functional tests that require specialized environment setups in Evergreen. <br><br>**Note**: "manual" in the directory path does not refer to tests that should be run manually. These tests are automated. These tests have a special Evergreen configuration and run in isolation from the other tests. | There is no single script for running all of the specialized environment tests. Instead, you can run the appropriate script based on the specialized environment you want to use: <br>- `npm run check:atlas` to test Atlas <br>- `npm run check:adl` to test Atlas Data Lake <br>- `npm run check:ocsp` to test OSCP <br>- `npm run check:kerberos` to test Kerberos <br>- `npm run check:tls` to test TLS <br>- `npm run check:ldap` to test LDAP authorization
+| Spec | Test input and expected results are in `/test/spec`.  <br>Test runners are in `/test/functional` with  the `_spec` suffix in the test file's name.  <br>Some spec tests are also in `/test/unit`. | All of the MongoDB drivers follow the same [specifications (specs)][driver-specs]. Each spec has tests associated with it. Some of the tests are prose (written, descriptive) tests.  Other tests are written in YAML and converted to JSON. The developers on the driver teams automate these tests. For prose tests, the tests are converted to automation and stored in the `test/unit` or `test/functional` directory as appropriate. Both the JSON and YAML files are stored in `test/spec`. The test runners for the JSON and YAML files are located in `test/functional` and `/test/unit`. | `npm run check:test` to run all of the functional and integration tests (including the spec tests stored with those). `npm run check:unit` to run all of the unit tests (including the spec tests stored with those).
 | TypeScript Definition | `/test/types` | The TypeScript definition tests verify the type definitions are correct. | `npm run check:tsd` |
 
 
@@ -59,11 +59,11 @@ You can use the same [cluster_setup.sh](tools/cluster_setup.sh) script to start 
 The [cluster_setup.sh](tools/cluster_setup.sh) script automatically stores the files associated with the MongoDB server in the `data` directory, which is stored at the top level of this repository.
 You can delete this directory if you want to ensure you're running a clean configuration. If you delete the directory, the associated database server will be stopped, and you will need to run [cluster_setup.sh](tools/cluster_setup.sh) again.
 
-You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment. For example, for a standalone server, you might use: `env MONGODB_URI=mongodb://localhost:27017 npm test`. For a replica set, you might use: `env MONGODB_URI=mongodb://localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs npm test`.
+You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment. For example, for a standalone server, you might use: `MONGODB_URI=mongodb://localhost:27017 npm test`. For a replica set, you might use: `MONGODB_URI=mongodb://localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs npm test`.
 
 ### Running Individual Tests
 
-The easiest way to run a single test is by appending `.only()` to the suite or test you want to run. For example, you could update a test function to be `it.only(‘cool test’, function() {})`.  Then
+The easiest way to run a single test is by appending `.only()` to the test context you want to run. For example, you could update a test function to be `it.only(‘cool test’, function() {})`.  Then
 run the test using `npm run check:test` for a functional or integration test or `npm run check:unit` for a unit test.  See [Mocha's documentation][mocha-only] for more detailed information on `.only()`.
 
 Another way to run a single test is to use Mocha's `grep` flag.  For functional or integration tests, run `npm run check:test -- -g 'test name'`. For unit tests, run `npm run check:unit -- -g 'test name'`. See the [Mocha documentation][mocha-grep] for information on the `grep` flag.
@@ -72,9 +72,7 @@ Another way to run a single test is to use Mocha's `grep` flag.  For functional 
 
 [Evergreen][evergreen-wiki] is the continuous integration (CI) system we use.  Evergreen builds are automatically run whenever a pull request is created or when commits are pushed to particular branches (e.g., main, 4.0, and 3.6).
 
-Each Evergreen build runs the test suite against a variety of build variants that include a combination of topologies, special environments, and operating systems. By default, commits in pull requests only run a subset of the build variants in order to save time and resources. These builds can be individually configured in the Evergreen UI to include more build variants.
-
-Keep in mind that if you want to run only a few tests you can append `.only()` as described in the [section above on running individual tests](#running-individual-tests).
+Each Evergreen build runs the test suite against a variety of build variants that include a combination of topologies, special environments, and operating systems. By default, commits in pull requests only run a subset of the build variants in order to save time and resources. To configure a build, update `.evergreen/config.yml.in` and then generate a new Evergreen config via `node .evergreen/generate_evergreen_tasks.js`.
 
 ### Manually Kicking Off Evergreen Builds
 
@@ -96,7 +94,7 @@ Begin by setting up the Evergreen CLI.
 
 ##### Running the Build
 
-Once you have the Evergreen CLI setup, you are ready to run a build.
+Once you have the Evergreen CLI setup, you are ready to run a build.  Keep in mind that if you want to run only a few tests, you can append `.only()` as described in the [section above on running individual tests](#running-individual-tests).
 
 1. In a terminal, navigate to your node driver directory:
 
@@ -112,7 +110,7 @@ You may want to test the driver with a pre-release version of a dependent librar
 Follow the steps below to do so.
 1. Open [package.json](../package.json)
 1. Identify the line that specifies the dependency
-1. Replace the version number with the commit hash of the dependent library. For example: `"bson": "e29156f7438fa77c1672fd70789d7ade9ca65061"`
+1. Replace the version number with the commit hash of the dependent library. For example, you could use a particular commit for the [js-bson][js-bson] project on GitHub: `"bson": "mongodb/js-bson#e29156f7438fa77c1672fd70789d7ade9ca65061"`
 1. Run `npm install` to install the dependency
 
 Now you can run the automated tests, run manual tests, or kick off an Evergreen build from your local
@@ -133,6 +131,8 @@ modify the steps to work with existing Node projects.
 1. Run `npm install` to install the dependency.
 1. Create a new file that uses the driver to test your changes. See the [MongoDB Node.js Quick Start Repo][node-quick-start] for example scripts you can use.
 
+> **Note:**  When making driver changes, you will need to run `npm run build:ts` with each change in order for it to take effect.
+
 
 ## Testing with Special Environments
 
@@ -150,15 +150,16 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
 1. Create the following environment variables using a command like `export PROJECT="node-driver"`.
 
-   - `PROJECT`
-   - `SERVERLESS_DRIVERS_GROUP`
-   - `SERVERLESS_API_PUBLIC_KEY`
-   - `SERVERLESS_API_PRIVATE_KEY`
-   - `SERVERLESS_ATLAS_USER`
-   - `SERVERLESS_ATLAS_PASSWORD`
-   - `LOADBALANCED`
+   > Note: MongoDB employees can pull these values from the Evergreen project's configuration.
 
-   TODO:  Explain what these variables represent and how to get their values.
+   | Variable Name | Description |
+   | ------------- | ----------- |
+   | Project | The name of the Evergreen project  where the tests will be run (e.g., `mongo-node-driver-next`) |
+   | `SERVERLESS_DRIVERS_GROUP` | The Atlas organization where you will be creating the serverless instance |
+   | `SERVERLESS_API_PUBLIC_KEY` | The [Atlas API Public Key][atlas-api-key] for the organization where you will be creating a serverless instance |
+   | `SERVERLESS_API_PRIVATE_KEY` | The [Atlas API Private Key][atlas-api-key] for the organization where you will be creating a serverless instance |
+   | `SERVERLESS_ATLAS_USER` | The [SCRAM username][scram-auth] for the Atlas user who has permission to create a serverless instance |
+   | `SERVERLESS_ATLAS_PASSWORD` | The [SCRAM password][scram-auth] for the Atlas user who has permission to create a serverless instance |
 
    _**Remember**_ some of these are sensitive credentials, so keep them safe and only put them in your environment when you need them.
 
@@ -249,13 +250,41 @@ The following steps will walk you through how to run the tests for CSFLE.
 
 1. Create the following environment variables using a command like `export AWS_REGION="us-east-1"`.
 
-   - `AWS_ACCESS_KEY_ID`
-   - `AWS_SECRET_ACCESS_KEY`
-   - `CSFLE_KMS_PROVIDERS`
-   - `AWS_REGION`
-   - `AWS_CMK_ID`
+   > Note: MongoDB employees can pull these values from the Evergreen project's configuration.
 
-   TODO:  Explain what these variables represent and how to get their values.
+   | Variable Name | Description |
+   | ------------- | ----------- |
+   | `AWS_ACCESS_KEY_ID` | The AWS access key ID used to generate KMS messages |
+   | `AWS_SECRET_ACCESS_KEY` | The AWS secret access key used to generate KMS messages |
+   | `AWS_REGION` | The AWS region where the KMS resides (e.g., `us-east-1`) |
+   | `AWS_CMK_ID` | The Customer Master Key for the KMS |
+   | `CSFLE_KMS_PROVIDERS` | The raw EJSON description of the KMS providers. An example of the format is provided below. |
+
+   The value of the `CSFLE_KMS_PROVIDERS` variable will have the following format:
+
+   ```
+   interface CSFLE_kms_providers {
+      aws: {
+         accessKeyId: string;
+         secretAccessKey: string;
+      };
+      azure: {
+         tenantId: string;
+         clientId: string;
+         clientSecret: string;
+      };
+      gcp: {
+         email: string;
+         privateKey: string;
+      };
+      local: {
+         // EJSON handle converting this, its actually the canonical -> { $binary: { base64: string; subType: string } }
+         // **NOTE**: The dollar sign has to be escaped when using this as an ENV variable
+         key: Binary;
+      }
+   }
+   ```
+
 
 1. Run the functional tests:
 
@@ -288,3 +317,5 @@ The following steps will walk you through how to run the tests for CSFLE.
 [js-bson]: https://github.com/mongodb/js-bson
 [create-instance-script]: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/serverless/create-instance.sh
 [npm-csfle]: (https://www.npmjs.com/package/mongodb-client-encryption)
+[atlas-api-key]: (https://docs.atlas.mongodb.com/tutorial/configure-api-access/organization/create-one-api-key/)
+[scram-auth]: (https://docs.atlas.mongodb.com/security-add-mongodb-users/#database-user-authentication)
