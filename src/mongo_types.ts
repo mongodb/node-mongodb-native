@@ -57,7 +57,9 @@ export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
 export type Filter<TSchema> = {
-  [P in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<PropertyType<WithId<TSchema>, P>>;
+  [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
+    PropertyType<WithId<TSchema>, Property>
+  >;
 } & RootFilterOperators<WithId<TSchema>>;
 
 /** @public */
@@ -435,7 +437,7 @@ export type Join<T extends unknown[], D extends string> = T extends []
   ? `${T[0]}`
   : T extends [string | number, ...infer R]
   ? `${T[0]}${D}${Join<R, D>}`
-  : string | number;
+  : string;
 
 /** @public */
 export type PropertyType<Type, Property extends string> = string extends Property
