@@ -469,6 +469,7 @@ export interface MessageHeader {
 export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
+  validation?: { utf8: boolean | Record<string, true> | Record<string, false> };
 }
 
 /** @internal */
@@ -837,13 +838,15 @@ export class BinMsg {
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
+    const validation = options.validation ?? { utf8: { writeError: false } };
 
     // Set up the options
     const _options: BSONSerializeOptions = {
       promoteLongs,
       promoteValues,
       promoteBuffers,
-      bsonRegExp
+      bsonRegExp,
+      validation
     };
 
     while (this.index < this.data.length) {

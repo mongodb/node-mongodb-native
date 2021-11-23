@@ -54,6 +54,7 @@ export interface BSONSerializeOptions
     > {
   /** Return BSON filled buffers from operations */
   raw?: boolean;
+  validation?: { utf8: boolean | Record<string, true> | Record<string, false> };
 }
 
 export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSerializeOptions {

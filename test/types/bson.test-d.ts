@@ -21,7 +21,8 @@ type PermittedBSONOptionKeys =
   | 'promoteValues'
   | 'bsonRegExp'
   | 'fieldsAsRaw'
-  | 'raw';
+  | 'raw'
+  | 'validation';
 
 const keys = null as unknown as PermittedBSONOptionKeys;
 // creates an explicit allow list assertion
