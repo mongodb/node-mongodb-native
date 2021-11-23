@@ -839,7 +839,9 @@ export class BinMsg {
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
     if (options.validation && Object.keys(options.validation.utf8)[0] !== 'writeErrors') {
-      throw new Error('Can only toggle validation settings for writeErrors key');
+      throw new MongoInvalidArgumentError(
+        'Can only toggle validation settings for writeErrors key'
+      );
     }
     const validation = options.validation ?? { utf8: { writeErrors: false } };
 
