@@ -71,6 +71,18 @@ const invalidUtf8InOtherKeyJSON = {
 };
 
 describe('BinMsg', function () {
+  it('should throw error if trying to toggle validation settings for keys other than writeErrors', function () {
+    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
+      Buffer.alloc(0),
+      msgHeader,
+      msgBodyInvalidUtf8WriteErrors
+    );
+    expect(() => binMsgInvalidUtf8ErrorMsg.parse({ validation: { utf8: { n: false } } })).to.throw(
+      Error,
+      'Can only toggle validation settings for writeErrors key'
+    );
+  });
+
   it('should not throw invalid utf8 error when validation disabled for writeErrors', function () {
     const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),
