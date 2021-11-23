@@ -70,26 +70,23 @@ const invalidUtf8InOtherKeyJSON = {
   ok: 1
 };
 
-describe.only('BinMsg', function () {
+describe('BinMsg', function () {
   it('should not throw invalid utf8 error when validation disabled for writeErrors', function () {
-    const binMsgValidWriteError = new BinMsg(
+    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),
       msgHeader,
-      msgBodyInvalidUtf8WriteErrors,
-      {
-        validation: { utf8: { writeErrors: false } }
-      }
+      msgBodyInvalidUtf8WriteErrors
     );
     expect(() =>
-      binMsgValidWriteError.parse({ validation: { utf8: { writeErrors: false } } })
+      binMsgInvalidUtf8ErrorMsg.parse({ validation: { utf8: { writeErrors: false } } })
     ).to.not.throw();
     expect(
       BSON.deserialize(badutf8inputtodeserialize, { validation: { utf8: { writeErrors: false } } })
     ).to.deep.equals(invalidUtf8InWriteErrorsJSON);
   });
 
-  it('should throw invalid utf8 error when validation not specified or enabled for writeErrors', function () {
-    const binMsgValidWriteError = new BinMsg(
+  it('should by default disable validation for writeErrors if no validation specified', function () {
+    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),
       msgHeader,
       msgBodyInvalidUtf8WriteErrors
@@ -100,12 +97,17 @@ describe.only('BinMsg', function () {
       promoteLongs: true,
       promoteValues: true
     };
-    expect(() => binMsgValidWriteError.parse(options)).to.throw(
-      BSONError,
-      'Invalid UTF-8 string in BSON document'
+    expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
+  });
+
+  it('should throw invalid utf8 error when validation enabled for writeErrors', function () {
+    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
+      Buffer.alloc(0),
+      msgHeader,
+      msgBodyInvalidUtf8WriteErrors
     );
     expect(() =>
-      binMsgValidWriteError.parse({ validation: { utf8: { writeErrors: true } } })
+      binMsgInvalidUtf8ErrorMsg.parse({ validation: { utf8: { writeErrors: true } } })
     ).to.throw(BSONError, 'Invalid UTF-8 string in BSON document');
   });
 

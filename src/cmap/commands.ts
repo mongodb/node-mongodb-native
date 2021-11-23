@@ -838,7 +838,7 @@ export class BinMsg {
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
-    const validation = options.validation ?? { utf8: { writeError: false } };
+    const validation = options.validation ?? { utf8: { writeErrors: false } };
 
     // Set up the options
     const _options: BSONSerializeOptions = {
