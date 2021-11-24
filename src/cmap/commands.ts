@@ -850,8 +850,7 @@ export class BinMsg {
       promoteLongs,
       promoteValues,
       promoteBuffers,
-      bsonRegExp,
-      validation
+      bsonRegExp
     };
 
     while (this.index < this.data.length) {
@@ -859,8 +858,9 @@ export class BinMsg {
       if (payloadType === 0) {
         const bsonSize = this.data.readUInt32LE(this.index);
         const bin = this.data.slice(this.index, this.index + bsonSize);
-        this.documents.push(raw ? bin : BSON.deserialize(bin, _options));
-
+        this.documents.push(
+          raw ? bin : BSON.deserialize(bin, Object.assign({ validation }, _options))
+        );
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
@@ -874,8 +874,10 @@ export class BinMsg {
       const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
       _options.fieldsAsRaw = fieldsAsRaw;
-
-      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
+      const doc = BSON.deserialize(
+        this.documents[0] as Buffer,
+        Object.assign({ validation }, _options)
+      );
       this.documents = [doc];
     }
 

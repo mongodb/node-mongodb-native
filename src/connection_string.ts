@@ -864,10 +864,6 @@ export const OPTIONS = {
     default: false,
     type: 'boolean'
   },
-  validation: {
-    default: { utf8: { writeErrors: false } },
-    type: 'record'
-  },
   readConcern: {
     transform({ values: [value], options }) {
       if (value instanceof ReadConcern || isRecord(value, ['level'] as const)) {
