@@ -99,6 +99,17 @@ describe('Connection String', function () {
     expect(options.credentials.source).to.equal('0001');
   });
 
+  it('should not remove dbName from the options if authSource is provided', function () {
+    const dbName = 'my-db-name';
+    const authSource = 'admin';
+    const options = parseOptions(
+      `mongodb://myName:myPassword@localhost:27017/${dbName}?authSource=${authSource}`
+    );
+
+    expect(options).has.property('dbName', dbName);
+    expect(options.credentials).to.have.property('source', authSource);
+  });
+
   it('should parse a replicaSet with a leading number', function () {
     const options = parseOptions('mongodb://localhost/?replicaSet=123abc');
     expect(options).to.have.property('replicaSet');
