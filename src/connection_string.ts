@@ -291,11 +291,6 @@ export function parseOptions(
     }
   }
 
-  if (urlOptions.has('authSource')) {
-    // If authSource is an explicit key in the urlOptions we need to remove the dbName
-    urlOptions.delete('dbName');
-  }
-
   const objectOptions = new CaseInsensitiveMap(
     Object.entries(options).filter(([, v]) => v != null)
   );

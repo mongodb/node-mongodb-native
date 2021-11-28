@@ -788,3 +788,17 @@ describe('MongoOptions', function () {
     expect(thrownError).to.have.property('code', 'ENOTFOUND');
   });
 });
+
+describe('MongoClient', function () {
+  context('when a db is provided in the URI', function () {
+    const client = new MongoClient('mongodb://127.0.0.1:27017/dbName?authSource=admin');
+
+    context('when getting the db with no params', function () {
+      const db = client.db();
+
+      it('uses the db from the uri', function () {
+        expect(db.databaseName).to.equal('dbName');
+      });
+    });
+  });
+});
