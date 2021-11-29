@@ -58,27 +58,27 @@ const invalidUtf8InNKeyJSON = {
   ok: 1
 };
 
-describe('BinMsg', function () {
-  context('when validation is disabled for writeErrors', function () {
+describe('BinMsg BSON utf8 validation', () => {
+  context('when validation is disabled for writeErrors', () => {
     const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),
       msgHeader,
       msgBodyInvalidUtf8WriteErrors
     );
-    const options: OpResponseOptions = { validation: { utf8: { writeErrors: false } } };
+    const options = { validation: { utf8: { writeErrors: false } as const } };
 
-    it('contains replacement characters for invalid utf8 in writeError object', function () {
+    it('contains replacement characters for invalid utf8 in writeError object', () => {
       expect(BSON.deserialize(invalidUtf8ErrorMsgDeserializeInput, options)).to.deep.equals(
         invalidUtf8InWriteErrorsJSON
       );
     });
 
-    it('should not throw invalid utf8 error', function () {
+    it('should not throw invalid utf8 error', () => {
       expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
     });
   });
 
-  it('should by default disable validation for writeErrors if no validation specified', function () {
+  it('should by default disable validation for writeErrors if no validation specified', () => {
     const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),
       msgHeader,
@@ -93,29 +93,26 @@ describe('BinMsg', function () {
     expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
   });
 
-  context(
-    'when another key has invalid utf8 and validation is enabled for writeErrors',
-    function () {
-      const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
-        Buffer.alloc(0),
-        msgHeader,
-        msgBodyNKeyWithInvalidUtf8
+  context('when another key has invalid utf8 and validation is enabled for writeErrors', () => {
+    const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
+      Buffer.alloc(0),
+      msgHeader,
+      msgBodyNKeyWithInvalidUtf8
+    );
+    const options = { validation: { utf8: { writeErrors: true } as const } };
+
+    it('should not throw invalid utf8 error', () => {
+      expect(() => binMsgAnotherKeyWithInvalidUtf8.parse(options)).to.not.throw();
+    });
+
+    it('contains replacement characters for invalid utf8 key', () => {
+      expect(BSON.deserialize(nKeyWithInvalidUtf8DeserializeInput, options)).to.deep.equals(
+        invalidUtf8InNKeyJSON
       );
-      const option: OpResponseOptions = { validation: { utf8: { writeErrors: true } } };
+    });
+  });
 
-      it('should not throw invalid utf8 error', function () {
-        expect(() => binMsgAnotherKeyWithInvalidUtf8.parse(option)).to.not.throw();
-      });
-
-      it('contains replacement characters for invalid utf8 key', function () {
-        expect(BSON.deserialize(nKeyWithInvalidUtf8DeserializeInput, option)).to.deep.equals(
-          invalidUtf8InNKeyJSON
-        );
-      });
-    }
-  );
-
-  it('should throw invalid utf8 error when validation enabled for writeErrors', function () {
+  it('should throw invalid utf8 error when validation enabled for writeErrors', () => {
     const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),
       msgHeader,
@@ -126,7 +123,7 @@ describe('BinMsg', function () {
     ).to.throw(BSONError, 'Invalid UTF-8 string in BSON document');
   });
 
-  it('should throw error when another key has invalid utf8 and writeErrors is not validated', function () {
+  it('should throw error when another key has invalid utf8 and writeErrors is not validated', () => {
     const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
       Buffer.alloc(0),
       msgHeader,
