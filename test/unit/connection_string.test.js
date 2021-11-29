@@ -136,7 +136,7 @@ describe('Connection String', function () {
       context('when the options are not equal', function () {
         it('raises an error', function () {
           expect(() => {
-            parseOptions('mongodb://localhost/?tls=true&ssl=false')
+            parseOptions('mongodb://localhost/?tls=true&ssl=false');
           }).to.throw(MongoParseError, 'All values of tls/ssl must be the same.');
         });
       });
@@ -186,7 +186,7 @@ describe('Connection String', function () {
       context('when the options are not equal', function () {
         it('raises an error', function () {
           expect(() => {
-            parseOptions('mongodb://localhost/', { tls: true, ssl: false })
+            parseOptions('mongodb://localhost/', { tls: true, ssl: false });
           }).to.throw(MongoParseError, 'All values of tls/ssl must be the same.');
         });
       });
