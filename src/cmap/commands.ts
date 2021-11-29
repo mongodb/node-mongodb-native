@@ -469,7 +469,7 @@ export interface MessageHeader {
 export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
-  validation?: { utf8: boolean | Record<string, true> | Record<string, false> };
+  validation?: { utf8: Record<string, true> | Record<string, false> };
 }
 
 /** @internal */
