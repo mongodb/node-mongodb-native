@@ -78,18 +78,6 @@ describe('BinMsg', function () {
     });
   });
 
-  it('should throw error if trying to toggle validation settings for keys other than writeErrors', function () {
-    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
-      Buffer.alloc(0),
-      msgHeader,
-      msgBodyInvalidUtf8WriteErrors
-    );
-    expect(() => binMsgInvalidUtf8ErrorMsg.parse({ validation: { utf8: { n: false } } })).to.throw(
-      Error,
-      'Can only toggle validation settings for writeErrors key'
-    );
-  });
-
   it('should by default disable validation for writeErrors if no validation specified', function () {
     const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),

@@ -469,7 +469,8 @@ export interface MessageHeader {
 export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
-  validation?: { utf8: Record<string, true> | Record<string, false> };
+  // For now we use this internally to only prevent writeErrors from crashing the driver
+  validation?: { utf8: { writeErrors: boolean } };
 }
 
 /** @internal */
@@ -838,19 +839,15 @@ export class BinMsg {
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
-    if (options.validation && Object.keys(options.validation.utf8)[0] !== 'writeErrors') {
-      throw new MongoInvalidArgumentError(
-        'Can only toggle validation settings for writeErrors key'
-      );
-    }
     const validation = options.validation ?? { utf8: { writeErrors: false } };
 
     // Set up the options
-    const _options: BSONSerializeOptions = {
+    const bsonOptions: BSONSerializeOptions & { validation: { utf8: { writeErrors: boolean } } } = {
       promoteLongs,
       promoteValues,
       promoteBuffers,
-      bsonRegExp
+      bsonRegExp,
+      validation
     };
 
     while (this.index < this.data.length) {
@@ -858,9 +855,7 @@ export class BinMsg {
       if (payloadType === 0) {
         const bsonSize = this.data.readUInt32LE(this.index);
         const bin = this.data.slice(this.index, this.index + bsonSize);
-        this.documents.push(
-          raw ? bin : BSON.deserialize(bin, Object.assign({ validation }, _options))
-        );
+        this.documents.push(raw ? bin : BSON.deserialize(bin, bsonOptions));
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
@@ -873,11 +868,8 @@ export class BinMsg {
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
       const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
-      _options.fieldsAsRaw = fieldsAsRaw;
-      const doc = BSON.deserialize(
-        this.documents[0] as Buffer,
-        Object.assign({ validation }, _options)
-      );
+      bsonOptions.fieldsAsRaw = fieldsAsRaw;
+      const doc = BSON.deserialize(this.documents[0] as Buffer, bsonOptions);
       this.documents = [doc];
     }
 
