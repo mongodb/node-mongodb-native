@@ -270,6 +270,9 @@ interface SchemaWithTypicalId {
 const schemaWithTypicalIdCol = db.collection<SchemaWithTypicalId>('a');
 expectType<WithId<SchemaWithTypicalId> | null>(await schemaWithTypicalIdCol.findOne());
 expectAssignable<SchemaWithTypicalId | null>(await schemaWithTypicalIdCol.findOne());
+// should allow _id as an ObjectId
+await schemaWithTypicalIdCol.findOne({ _id: new ObjectId() });
+schemaWithTypicalIdCol.find({ _id: new ObjectId() });
 
 interface SchemaWithOptionalTypicalId {
   _id?: ObjectId;
@@ -278,6 +281,9 @@ interface SchemaWithOptionalTypicalId {
 const schemaWithOptionalTypicalId = db.collection<SchemaWithOptionalTypicalId>('a');
 expectType<WithId<SchemaWithOptionalTypicalId> | null>(await schemaWithOptionalTypicalId.findOne());
 expectAssignable<SchemaWithOptionalTypicalId | null>(await schemaWithOptionalTypicalId.findOne());
+// should allow _id as an ObjectId
+await schemaWithTypicalIdCol.findOne({ _id: new ObjectId() });
+await schemaWithTypicalIdCol.find({ _id: new ObjectId() });
 
 interface SchemaWithUserDefinedId {
   _id: number;
@@ -290,3 +296,6 @@ if (result !== null) {
   expectType<number>(result._id);
 }
 expectAssignable<SchemaWithUserDefinedId | null>(await schemaWithUserDefinedId.findOne());
+// should allow _id as a number
+await schemaWithUserDefinedId.findOne({ _id: 5 });
+await schemaWithUserDefinedId.find({ _id: 5 });

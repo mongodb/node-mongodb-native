@@ -56,8 +56,8 @@ export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
 export type Filter<TSchema> = {
-  [P in keyof TSchema]?: Condition<TSchema[P]>;
-} & RootFilterOperators<TSchema>;
+  [P in keyof WithId<TSchema>]?: Condition<WithId<TSchema>[P]>;
+} & RootFilterOperators<WithId<TSchema>>;
 
 /** @public */
 export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
