@@ -787,4 +787,63 @@ describe('MongoOptions', function () {
     // Nothing wrong with the name, just DNE
     expect(thrownError).to.have.property('code', 'ENOTFOUND');
   });
+
+  describe('dbName and authSource', () => {
+    describe('in the URI', () => {
+      it('should set the database name to the dbName in the uri', () => {
+        const client = new MongoClient('mongodb://u:p@host/myDb');
+        const db = client.db();
+        expect(db).to.have.property('databaseName', 'myDb');
+        expect(client).to.have.nested.property('options.credentials.source', 'myDb');
+      });
+      it('should set the database name to the uri pathname and respect the authSource option', () => {
+        const client = new MongoClient('mongodb://u:p@host/myDb?authSource=myAuthDb');
+        const db = client.db();
+        expect(db).to.have.property('databaseName', 'myDb');
+        expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+      });
+      it('should set the database name to the uri pathname and respect the authSource option in options object', () => {
+        const client = new MongoClient('mongodb://u:p@host/myDb', { authSource: 'myAuthDb' });
+        const db = client.db();
+        expect(db).to.have.property('databaseName', 'myDb');
+        expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+      });
+    });
+
+    describe('in the options object', () => {
+      it('should set the database name to the dbName in the options object', () => {
+        const client = new MongoClient('mongodb://u:p@host', { dbName: 'myDb' });
+        const db = client.db();
+        expect(db).to.have.property('databaseName', 'myDb');
+        expect(client).to.have.nested.property('options.credentials.source', 'myDb');
+      });
+      it('should set the database name to dbName and respect the authSource option', () => {
+        const client = new MongoClient('mongodb://u:p@host?authSource=myAuthDb', {
+          dbName: 'myDb'
+        });
+        const db = client.db();
+        expect(db).to.have.property('databaseName', 'myDb');
+        expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+      });
+      it('should set the database name to dbName and respect the authSource option in options object', () => {
+        const client = new MongoClient('mongodb://u:p@host', {
+          dbName: 'myDb',
+          authSource: 'myAuthDb'
+        });
+        const db = client.db();
+        expect(db).to.have.property('databaseName', 'myDb');
+        expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+      });
+
+      it('should set the database name to dbName in options object and respect the authSource option in options object', () => {
+        const client = new MongoClient('mongodb://u:p@host/myIgnoredDb', {
+          dbName: 'myDb',
+          authSource: 'myAuthDb'
+        });
+        const db = client.db();
+        expect(db).to.have.property('databaseName', 'myDb');
+        expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+      });
+    });
+  });
 });
