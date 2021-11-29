@@ -787,4 +787,27 @@ describe('MongoOptions', function () {
     // Nothing wrong with the name, just DNE
     expect(thrownError).to.have.property('code', 'ENOTFOUND');
   });
+
+  describe('specifying dbName', () => {
+    it('in the URI as a pathname', function () {
+      const client = new MongoClient('mongodb://u:p@host/myDb');
+      const db = client.db();
+      expect(db).to.have.property('databaseName', 'myDb');
+      expect(client).to.have.nested.property('options.credentials.source', 'myDb');
+    });
+
+    it('in the URI as a pathname with authSource option', function () {
+      const client = new MongoClient('mongodb://u:p@host/myDb?authSource=myAuthDb');
+      const db = client.db();
+      expect(db.databaseName).to.equal('myDb');
+      expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+    });
+
+    it('in the URI as a pathname with authSource option in options object', function () {
+      const client = new MongoClient('mongodb://u:p@host/myDb', { authSource: 'myAuthDb' });
+      const db = client.db();
+      expect(db.databaseName).to.equal('myDb');
+      expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+    });
+  });
 });
