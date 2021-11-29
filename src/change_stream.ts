@@ -310,7 +310,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
   }
 
   /** Check if there is any document still available in the Change Stream */
-  hasNext(callback?: Callback): Promise<void> | void {
+  hasNext(callback?: Callback): Promise<boolean> | void {
     setIsIterator(this);
     return maybePromise(callback, cb => {
       getCursor(this, (err, cursor) => {
