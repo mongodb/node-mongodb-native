@@ -834,6 +834,16 @@ describe('MongoOptions', function () {
         expect(db).to.have.property('databaseName', 'myDb');
         expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
       });
+
+      it('should set the database name to dbName in options object and respect the authSource option in options object', () => {
+        const client = new MongoClient('mongodb://u:p@host/myIgnoredDb', {
+          dbName: 'myDb',
+          authSource: 'myAuthDb'
+        });
+        const db = client.db();
+        expect(db).to.have.property('databaseName', 'myDb');
+        expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+      });
     });
   });
 });
