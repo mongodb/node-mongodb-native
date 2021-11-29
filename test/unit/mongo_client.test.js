@@ -796,6 +796,13 @@ describe('MongoOptions', function () {
       expect(client).to.have.nested.property('options.credentials.source', 'myDb');
     });
 
+    it('in the options object', function () {
+      const client = new MongoClient('mongodb://u:p@host', { dbName: 'myDb' });
+      const db = client.db();
+      expect(db).to.have.property('databaseName', 'myDb');
+      expect(client).to.have.nested.property('options.credentials.source', 'myDb');
+    });
+
     it('in the URI as a pathname with authSource option', function () {
       const client = new MongoClient('mongodb://u:p@host/myDb?authSource=myAuthDb');
       const db = client.db();
@@ -803,8 +810,25 @@ describe('MongoOptions', function () {
       expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
     });
 
+    it('in the options object with authSource option', function () {
+      const client = new MongoClient('mongodb://u:p@host?authSource=myAuthDb', { dbName: 'myDb' });
+      const db = client.db();
+      expect(db).to.have.property('databaseName', 'myDb');
+      expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+    });
+
     it('in the URI as a pathname with authSource option in options object', function () {
       const client = new MongoClient('mongodb://u:p@host/myDb', { authSource: 'myAuthDb' });
+      const db = client.db();
+      expect(db.databaseName).to.equal('myDb');
+      expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
+    });
+
+    it('in the options object with authSource option in options object', function () {
+      const client = new MongoClient('mongodb://u:p@host', {
+        dbName: 'myDb',
+        authSource: 'myAuthDb'
+      });
       const db = client.db();
       expect(db.databaseName).to.equal('myDb');
       expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
