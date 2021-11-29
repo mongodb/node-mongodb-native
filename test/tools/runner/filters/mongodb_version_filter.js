@@ -19,6 +19,10 @@ class MongoDBVersionFilter {
     this.version = null;
   }
 
+  get name() {
+    return this.constructor.name;
+  }
+
   initializeFilter(client, context, callback) {
     if (this.options.skip) {
       callback();

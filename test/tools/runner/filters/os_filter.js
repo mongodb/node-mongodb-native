@@ -16,6 +16,10 @@ class OSFilter {
     this.platform = process.platform;
   }
 
+  get name() {
+    return this.constructor.name;
+  }
+
   filter(test) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;

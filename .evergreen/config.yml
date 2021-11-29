@@ -158,12 +158,6 @@ functions:
           export MULTI_ATLASPROXY_SERVERLESS_URI="${MULTI_ATLASPROXY_SERVERLESS_URI}"
 
           export MONGODB_URI="${SINGLE_ATLASPROXY_SERVERLESS_URI}"
-          export SINGLE_MONGOS_LB_URI="${SINGLE_ATLASPROXY_SERVERLESS_URI}"
-
-          # Setting MULTI_MONGOS to the SINGLE_ATLAS is intentional
-          # LB tests pick one host out of the comma separated list
-          # so just passing the one host is equivalent
-          export MULTI_MONGOS_LB_URI="${SINGLE_ATLASPROXY_SERVERLESS_URI}"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-serverless-tests.sh
   start-load-balancer:
@@ -1613,32 +1607,34 @@ task_groups:
     setup_group:
       - func: fetch source
       - func: prepare resources
-      - command: shell.exec
+      - command: subprocess.exec
         params:
-          shell: bash
-          script: |
-            ${PREPARE_SHELL}
-            set +o xtrace
-            LOADBALANCED=ON \
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
-            SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
-            SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
-              bash ${DRIVERS_TOOLS}/.evergreen/serverless/create-instance.sh
+          binary: bash
+          env:
+            PROJECT: "NodeJsDriver"
+            LOADBALANCED: "ON"
+            SERVERLESS_DRIVERS_GROUP: ${SERVERLESS_DRIVERS_GROUP}
+            SERVERLESS_API_PUBLIC_KEY: ${SERVERLESS_API_PUBLIC_KEY}
+            SERVERLESS_API_PRIVATE_KEY: ${SERVERLESS_API_PRIVATE_KEY}
+          args:
+            - "${DRIVERS_TOOLS}/.evergreen/serverless/create-instance.sh"
       - command: expansions.update
         params:
           file: serverless-expansion.yml
     teardown_group:
       - func: upload test results
-      - command: shell.exec
+      - command: subprocess.exec
         params:
-          script: |
-            ${PREPARE_SHELL}
-            set +o xtrace
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
-            SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
-            SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
-            SERVERLESS_INSTANCE_NAME=${SERVERLESS_INSTANCE_NAME} \
-              bash ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
+          binary: bash
+          env:
+            PROJECT: "NodeJsDriver"
+            LOADBALANCED: "ON"
+            SERVERLESS_DRIVERS_GROUP: ${SERVERLESS_DRIVERS_GROUP}
+            SERVERLESS_API_PUBLIC_KEY: ${SERVERLESS_API_PUBLIC_KEY}
+            SERVERLESS_API_PRIVATE_KEY: ${SERVERLESS_API_PRIVATE_KEY}
+            SERVERLESS_INSTANCE_NAME: ${SERVERLESS_INSTANCE_NAME}
+          args:
+            - "${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh"
     tasks:
       - .serverless
 pre:

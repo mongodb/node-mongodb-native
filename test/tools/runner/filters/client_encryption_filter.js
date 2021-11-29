@@ -15,6 +15,10 @@ const semver = require('semver');
  */
 
 class ClientSideEncryptionFilter {
+  get name() {
+    return this.constructor.name;
+  }
+
   initializeFilter(client, context, callback) {
     const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
     let mongodbClientEncryption;

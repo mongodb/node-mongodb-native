@@ -16,6 +16,10 @@ class ApiVersionFilter {
     this.apiVersion = process.env.MONGODB_API_VERSION;
   }
 
+  get name() {
+    return this.constructor.name;
+  }
+
   filter(test) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;

@@ -17,6 +17,10 @@ class ServerlessFilter {
     this.serverless = !!process.env.SERVERLESS;
   }
 
+  get name() {
+    return this.constructor.name;
+  }
+
   initializeFilter(client, context, callback) {
     if (this.serverless) {
       context.serverlessCredentials = {

@@ -6,7 +6,7 @@ const { Topology } = require('../../src/sdam/topology');
 const { ClientSession } = require('../../src/sessions');
 const { TestRunnerContext, generateTopologyTests } = require('./spec-runner');
 const { loadSpecTests } = require('../spec');
-const { runUnifiedTest } = require('../tools/unified-spec-runner/runner');
+const { runUnifiedSuite } = require('../tools/unified-spec-runner/runner');
 const { MongoNetworkError } = require('../../src/error');
 
 function ignoreNsNotFoundForListIndexes(err) {
@@ -81,22 +81,6 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
-describe('Transactions Spec Unified Tests', function () {
-  for (const transactionTest of loadSpecTests(path.join('transactions', 'unified'))) {
-    expect(transactionTest).to.exist;
-    context(String(transactionTest.description), function () {
-      for (const test of transactionTest.tests) {
-        it(String(test.description), {
-          metadata: { sessions: { skipLeakTests: true } },
-          test: async function () {
-            await runUnifiedTest(this, transactionTest, test);
-          }
-        });
-      }
-    });
-  }
-});
-
 const SKIP_TESTS = [
   // commitTransaction retry seems to be swallowed by mongos in these three cases
   'commitTransaction retry succeeds on new mongos',
@@ -104,26 +88,22 @@ const SKIP_TESTS = [
   'unpin after transient error within a transaction and commit',
   // FIXME(NODE-3074): unskip count tests when spec tests have been updated
   'count',
-  // This test needs there to be multiple mongoses
-  // 'increment txnNumber',
-  // Skipping this until SPEC-1320 is resolved
-  // 'remain pinned after non-transient error on commit',
 
   // Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
   'Client side error when transaction is in progress'
 ];
 
-describe('Transactions Spec Legacy Tests', function () {
-  const testContext = new TransactionsRunnerContext();
-  const suitesToRun = [
-    { name: 'spec tests', specPath: path.join('transactions', 'legacy') },
-    { name: 'withTransaction spec tests', specPath: path.join('transactions', 'convenient-api') }
-  ];
+describe('Transactions', function () {
+  describe('Unified Tests', function () {
+    runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')));
+  });
 
-  for (const suiteSpec of suitesToRun) {
-    describe(suiteSpec.name, function () {
-      const testSuites = loadSpecTests(suiteSpec.specPath);
+  describe('Legacy Spec Tests', function () {
+    const testContext = new TransactionsRunnerContext();
+
+    describe('spec tests', function () {
+      const testSuites = loadSpecTests(path.join('transactions', 'legacy'));
       after(() => testContext.teardown());
       before(function () {
         return testContext.setup(this.configuration);
@@ -135,179 +115,201 @@ describe('Transactions Spec Legacy Tests', function () {
 
       generateTopologyTests(testSuites, testContext, testFilter);
     });
-  }
 
-  describe('withTransaction', function () {
-    let session, sessionPool;
-    beforeEach(() => {
-      const topology = new Topology('localhost:27017');
-      sessionPool = topology.s.sessionPool;
-      session = new ClientSession(topology, sessionPool);
-    });
+    if (!process.env.SERVERLESS) {
+      describe('withTransaction spec tests', function () {
+        const testSuites = loadSpecTests(path.join('transactions', 'convenient-api'));
+        after(() => testContext.teardown());
+        before(function () {
+          return testContext.setup(this.configuration);
+        });
 
-    afterEach(() => {
-      sessionPool.endAllPooledSessions();
-    });
-
-    it('should provide a useful error if a Promise is not returned', {
-      metadata: {
-        requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.1.5', serverless: 'forbid' }
-      },
-      test: function (done) {
-        function fnThatDoesntReturnPromise() {
-          return false;
+        function testFilter(spec) {
+          return SKIP_TESTS.indexOf(spec.description) === -1;
         }
 
-        expect(() => session.withTransaction(fnThatDoesntReturnPromise)).to.throw(
-          /must return a Promise/
-        );
+        generateTopologyTests(testSuites, testContext, testFilter);
+      });
+    }
 
-        session.endSession(done);
-      }
-    });
+    describe('withTransaction', function () {
+      let session, sessionPool;
+      beforeEach(() => {
+        const topology = new Topology('localhost:27017');
+        sessionPool = topology.s.sessionPool;
+        session = new ClientSession(topology, sessionPool);
+      });
 
-    it('should return readable error if promise rejected with no reason', {
-      metadata: {
-        requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.0.2' },
-        serverless: 'forbid'
-      },
-      test: function (done) {
-        function fnThatReturnsBadPromise() {
-          return Promise.reject();
+      afterEach(() => {
+        sessionPool.endAllPooledSessions();
+      });
+
+      it('should provide a useful error if a Promise is not returned', {
+        metadata: {
+          requires: {
+            topology: ['replicaset', 'sharded'],
+            mongodb: '>=4.1.5',
+            serverless: 'forbid'
+          }
+        },
+        test: function (done) {
+          function fnThatDoesntReturnPromise() {
+            return false;
+          }
+
+          expect(() => session.withTransaction(fnThatDoesntReturnPromise)).to.throw(
+            /must return a Promise/
+          );
+
+          session.endSession(done);
         }
+      });
 
-        session
-          .withTransaction(fnThatReturnsBadPromise)
-          .then(() => done(Error('Expected error')))
-          .catch(err => {
-            expect(err).to.equal(undefined);
-            session.endSession(done);
-          });
-      }
-    });
-  });
+      it('should return readable error if promise rejected with no reason', {
+        metadata: {
+          requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.0.2' },
+          serverless: 'forbid'
+        },
+        test: function (done) {
+          function fnThatReturnsBadPromise() {
+            return Promise.reject();
+          }
 
-  describe('startTransaction', function () {
-    it('should error if transactions are not supported', {
-      metadata: { requires: { topology: ['sharded'], mongodb: '4.0.x' } },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.url());
-
-        client.connect((err, client) => {
-          const session = client.startSession();
-          const db = client.db(configuration.db);
-          const coll = db.collection('transaction_error_test');
-          coll.insertOne({ a: 1 }, err => {
-            expect(err).to.not.exist;
-            expect(() => session.startTransaction()).to.throw(
-              'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
-            );
-
-            session.endSession(() => {
-              client.close(done);
+          session
+            .withTransaction(fnThatReturnsBadPromise)
+            .then(() => done(Error('Expected error')))
+            .catch(err => {
+              expect(err).to.equal(undefined);
+              session.endSession(done);
             });
-          });
-        });
-      }
+        }
+      });
     });
 
-    it('should not error if transactions are supported', {
-      metadata: { requires: { topology: ['sharded'], mongodb: '>=4.1.0' } },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient(configuration.url());
+    describe('startTransaction', function () {
+      it('should error if transactions are not supported', {
+        metadata: { requires: { topology: ['sharded'], mongodb: '4.0.x' } },
+        test: function (done) {
+          const configuration = this.configuration;
+          const client = configuration.newClient(configuration.url());
 
-        client.connect(err => {
-          expect(err).to.not.exist;
-
-          const session = client.startSession();
-          const db = client.db(configuration.db);
-          const coll = db.collection('transaction_error_test');
-          coll.insertOne({ a: 1 }, err => {
-            expect(err).to.not.exist;
-            expect(() => session.startTransaction()).to.not.throw();
-
-            session.abortTransaction(() => session.endSession(() => client.close(done)));
-          });
-        });
-      }
-    });
-  });
-
-  describe('TransientTransactionError', function () {
-    it('should have a TransientTransactionError label inside of a transaction', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 });
-
-        client.connect(err => {
-          expect(err).to.not.exist;
-
-          const session = client.startSession();
-          const db = client.db(configuration.db);
-          db.collection('transaction_error_test_2').drop(() => {
-            db.createCollection('transaction_error_test_2', (err, coll) => {
+          client.connect((err, client) => {
+            const session = client.startSession();
+            const db = client.db(configuration.db);
+            const coll = db.collection('transaction_error_test');
+            coll.insertOne({ a: 1 }, err => {
               expect(err).to.not.exist;
+              expect(() => session.startTransaction()).to.throw(
+                'Transactions are not supported on sharded clusters in MongoDB < 4.2.'
+              );
 
-              session.startTransaction();
-              coll.insertOne({ a: 1 }, { session }, err => {
-                expect(err).to.not.exist;
-                expect(session.inTransaction()).to.be.true;
-
-                client.db('admin').command(
-                  {
-                    configureFailPoint: 'failCommand',
-                    mode: { times: 1 },
-                    data: { failCommands: ['insert'], closeConnection: true }
-                  },
-                  err => {
-                    expect(err).to.not.exist;
-                    expect(session.inTransaction()).to.be.true;
-
-                    coll.insertOne({ b: 2 }, { session }, err => {
-                      expect(err).to.exist.and.to.be.an.instanceof(MongoNetworkError);
-                      expect(err.hasErrorLabel('TransientTransactionError')).to.be.true;
-
-                      session.abortTransaction(() => session.endSession(() => client.close(done)));
-                    });
-                  }
-                );
-              });
-            });
-          });
-        });
-      }
-    });
-
-    it('should not have a TransientTransactionError label outside of a transaction', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 });
-
-        client.connect(err => {
-          expect(err).to.not.exist;
-          const db = client.db(configuration.db);
-          const coll = db.collection('transaction_error_test1');
-
-          client.db('admin').command(
-            {
-              configureFailPoint: 'failCommand',
-              mode: { times: 2 },
-              data: { failCommands: ['insert'], closeConnection: true }
-            },
-            err => {
-              expect(err).to.not.exist;
-              coll.insertOne({ a: 1 }, err => {
-                expect(err).to.exist.and.to.be.an.instanceOf(MongoNetworkError);
+              session.endSession(() => {
                 client.close(done);
               });
-            }
-          );
-        });
-      }
+            });
+          });
+        }
+      });
+
+      it('should not error if transactions are supported', {
+        metadata: { requires: { topology: ['sharded'], mongodb: '>=4.1.0' } },
+        test: function (done) {
+          const configuration = this.configuration;
+          const client = configuration.newClient(configuration.url());
+
+          client.connect(err => {
+            expect(err).to.not.exist;
+
+            const session = client.startSession();
+            const db = client.db(configuration.db);
+            const coll = db.collection('transaction_error_test');
+            coll.insertOne({ a: 1 }, err => {
+              expect(err).to.not.exist;
+              expect(() => session.startTransaction()).to.not.throw();
+
+              session.abortTransaction(() => session.endSession(() => client.close(done)));
+            });
+          });
+        }
+      });
+    });
+
+    describe('TransientTransactionError', function () {
+      it('should have a TransientTransactionError label inside of a transaction', {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
+        test: function (done) {
+          const configuration = this.configuration;
+          const client = configuration.newClient({ w: 1 });
+
+          client.connect(err => {
+            expect(err).to.not.exist;
+
+            const session = client.startSession();
+            const db = client.db(configuration.db);
+            db.collection('transaction_error_test_2').drop(() => {
+              db.createCollection('transaction_error_test_2', (err, coll) => {
+                expect(err).to.not.exist;
+
+                session.startTransaction();
+                coll.insertOne({ a: 1 }, { session }, err => {
+                  expect(err).to.not.exist;
+                  expect(session.inTransaction()).to.be.true;
+
+                  client.db('admin').command(
+                    {
+                      configureFailPoint: 'failCommand',
+                      mode: { times: 1 },
+                      data: { failCommands: ['insert'], closeConnection: true }
+                    },
+                    err => {
+                      expect(err).to.not.exist;
+                      expect(session.inTransaction()).to.be.true;
+
+                      coll.insertOne({ b: 2 }, { session }, err => {
+                        expect(err).to.exist.and.to.be.an.instanceof(MongoNetworkError);
+                        expect(err.hasErrorLabel('TransientTransactionError')).to.be.true;
+
+                        session.abortTransaction(() =>
+                          session.endSession(() => client.close(done))
+                        );
+                      });
+                    }
+                  );
+                });
+              });
+            });
+          });
+        }
+      });
+
+      it('should not have a TransientTransactionError label outside of a transaction', {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
+        test: function (done) {
+          const configuration = this.configuration;
+          const client = configuration.newClient({ w: 1 });
+
+          client.connect(err => {
+            expect(err).to.not.exist;
+            const db = client.db(configuration.db);
+            const coll = db.collection('transaction_error_test1');
+
+            client.db('admin').command(
+              {
+                configureFailPoint: 'failCommand',
+                mode: { times: 2 },
+                data: { failCommands: ['insert'], closeConnection: true }
+              },
+              err => {
+                expect(err).to.not.exist;
+                coll.insertOne({ a: 1 }, err => {
+                  expect(err).to.exist.and.to.be.an.instanceOf(MongoNetworkError);
+                  client.close(done);
+                });
+              }
+            );
+          });
+        }
+      });
     });
   });
 });

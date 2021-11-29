@@ -17,6 +17,10 @@ class NodeVersionFilter {
     this.version = process.version;
   }
 
+  get name() {
+    return this.constructor.name;
+  }
+
   filter(test) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;

@@ -99,6 +99,10 @@ function parseTopologies(topologies) {
 }
 
 function parseRunOn(runOn) {
+  if (runOn.length === 0) {
+    throw new Error('An empty run on requirement will skip all tests!');
+  }
+
   return runOn.map(config => {
     const topology = parseTopologies(config.topology);
     const version = [];
@@ -134,6 +138,11 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
     for (const requires of environmentRequirementList) {
       const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
+
+      if (process.env.SERVERLESS) {
+        requires.topology.push('load-balanced');
+      }
+
       describe(suiteName, {
         metadata: { requires },
         test() {
@@ -274,14 +283,30 @@ function prepareDatabaseForSuite(suite, context) {
 }
 
 function parseSessionOptions(options) {
-  const result = Object.assign({}, options);
-  if (result.defaultTransactionOptions && result.defaultTransactionOptions.readPreference) {
-    result.defaultTransactionOptions.readPreference = normalizeReadPreference(
-      result.defaultTransactionOptions.readPreference.mode
-    );
+  const result = { ...options };
+  if (result.defaultTransactionOptions && typeof result.defaultTransactionOptions !== 'object') {
+    throw new Error('defaultTransactionOptions must be an object if defined');
+  } else if (!result.defaultTransactionOptions) {
+    return result;
   }
 
-  return result;
+  const rp = result.defaultTransactionOptions.readPreference;
+  if (rp && typeof rp !== 'object') {
+    throw new Error(`readPreference must be an object if defined, got: ${typeof rp} = ${rp}`);
+  } else if (!rp) {
+    return result;
+  }
+
+  const inMode = result.defaultTransactionOptions.readPreference.mode;
+  if (inMode && typeof inMode !== 'string') {
+    throw new Error('mode must be a string if defined');
+  } else if (!inMode) {
+    return result;
+  }
+
+  const outMode = normalizeReadPreference(inMode);
+
+  return { defaultTransactionOptions: { readPreference: outMode } };
 }
 
 const IGNORED_COMMANDS = new Set(['ismaster', 'configureFailPoint', 'endSessions']);
@@ -311,7 +336,7 @@ const CMAP_EVENTS = new Set([
 ]);
 
 let displayCommands = false;
-function runTestSuiteTest(configuration, spec, context) {
+async function runTestSuiteTest(configuration, spec, context) {
   context.commandEvents = [];
   const clientOptions = translateClientOptions(
     Object.assign(
@@ -346,65 +371,54 @@ function runTestSuiteTest(configuration, spec, context) {
 
     // very useful for debugging
     if (displayCommands) {
-      // console.dir(event, { depth: 5 });
+      console.dir(event, { depth: 5 });
     }
   });
 
-  return client.connect().then(client => {
-    context.testClient = client;
-    const sessionOptions = Object.assign({}, spec.transactionOptions);
+  await client.connect();
 
-    spec.sessionOptions = spec.sessionOptions || {};
-    const database = client.db(context.dbName);
+  context.testClient = client;
+  const sessionOptions = Object.assign({}, spec.transactionOptions);
 
-    let session0, session1;
-    let savedSessionData;
+  spec.sessionOptions = spec.sessionOptions || {};
+  const database = client.db(context.dbName);
 
-    if (context.useSessions) {
-      try {
-        session0 = client.startSession(
-          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
-        );
-        session1 = client.startSession(
-          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
-        );
+  let session0, session1;
+  let savedSessionData;
 
-        savedSessionData = {
-          session0: JSON.parse(EJSON.stringify(session0.id)),
-          session1: JSON.parse(EJSON.stringify(session1.id))
-        };
-      } catch (err) {
-        // ignore
-      }
-    }
-    // enable to see useful APM debug information at the time of actual test run
-    // displayCommands = true;
+  if (context.useSessions) {
+    session0 = client.startSession(
+      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
+    );
+    session1 = client.startSession(
+      Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
+    );
 
-    const operationContext = {
-      client,
-      database,
-      collectionName: context.collectionName,
-      session0,
-      session1,
-      testRunner: context
+    savedSessionData = {
+      session0: JSON.parse(EJSON.stringify(session0.id)),
+      session1: JSON.parse(EJSON.stringify(session1.id))
     };
+  }
+  // enable to see useful APM debug information at the time of actual test run
+  // displayCommands = true;
 
-    let testPromise = Promise.resolve();
-    return testPromise
-      .then(() => testOperations(spec, operationContext))
-      .catch(err => {
-        // If the driver throws an exception / returns an error while executing this series
-        // of operations, store the error message.
-        throw err;
-      })
-      .then(() => {
-        const promises = [];
-        if (session0) promises.push(session0.endSession());
-        if (session1) promises.push(session1.endSession());
-        return Promise.all(promises);
-      })
-      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));
-  });
+  const operationContext = {
+    client,
+    database,
+    collectionName: context.collectionName,
+    session0,
+    session1,
+    testRunner: context
+  };
+
+  try {
+    await testOperations(spec, operationContext);
+  } finally {
+    if (session0) await session0.endSession();
+    if (session1) await session1.endSession();
+  }
+
+  return validateExpectations(context.commandEvents, spec, savedSessionData);
 }
 
 function validateOutcome(testData, testContext) {
@@ -673,6 +687,10 @@ const kOperations = new Map([
  * @param {boolean} [options.swallowOperationErrors] Generally we want to observe operation errors, validate them against our expectations, and then swallow them. In cases like `withTransaction` we want to use the same `testOperations` to build the lambda, and in those cases it is not desireable to swallow the errors, since we need to test this behavior.
  */
 function testOperation(operation, obj, context, options) {
+  if (obj === undefined) {
+    throw new Error('Cannot proceed without a client/session/db/collection');
+  }
+
   options = options || { swallowOperationErrors: true };
   const opOptions = {};
   let args = [];
@@ -771,7 +789,9 @@ function testOperation(operation, obj, context, options) {
       opPromise = cursor.toArray();
     } else {
       // wrap this in a `promiseTry` because some operations might throw
-      opPromise = promiseTry(() => obj[operationName].apply(obj, args));
+      opPromise = promiseTry(() => {
+        return obj[operationName].apply(obj, args);
+      });
     }
   }
 
@@ -851,25 +871,24 @@ function convertCollectionOptions(options) {
   return result;
 }
 
-function testOperations(testData, operationContext, options) {
+async function testOperations(testData, operationContext, options) {
   options = options || { swallowOperationErrors: true };
-  return testData.operations.reduce((combined, operation) => {
-    return combined.then(() => {
-      const object = operation.object || 'collection';
-      if (object === 'collection') {
-        const db = operationContext.database;
-        const collectionName = operationContext.collectionName;
-        const collectionOptions = operation.collectionOptions || {};
 
-        operationContext[object] = db.collection(
-          collectionName,
-          convertCollectionOptions(collectionOptions)
-        );
-      }
+  for (const operation of testData.operations) {
+    const object = operation.object || 'collection';
+    if (object === 'collection') {
+      const db = operationContext.database;
+      const collectionName = operationContext.collectionName;
+      const collectionOptions = operation.collectionOptions || {};
 
-      return testOperation(operation, operationContext[object], operationContext, options);
-    });
-  }, Promise.resolve());
+      operationContext[object] = db.collection(
+        collectionName,
+        convertCollectionOptions(collectionOptions)
+      );
+    }
+
+    await testOperation(operation, operationContext[object], operationContext, options);
+  }
 }
 
 module.exports = {

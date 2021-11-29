@@ -18,6 +18,9 @@ const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
 // Load balancer fronting 2 mongoses.
 const MULTI_MONGOS_LB_URI = process.env.MULTI_MONGOS_LB_URI;
+
+const TRACE_TEST_FILTERS = process.env.TRACE_TEST_FILTERS;
+
 const filters = [];
 
 function initializeFilters(client, callback) {
@@ -56,19 +59,30 @@ function initializeFilters(client, callback) {
 }
 
 function filterOutTests(suite) {
-  suite.tests = suite.tests.filter(test => filters.every(f => f.filter(test)));
-  suite.suites.forEach(suite => filterOutTests(suite));
+  const filteredTests = [];
+
+  for (const test of suite.tests) {
+    let shouldRun = true;
+    for (const filterer of filters) {
+      shouldRun = shouldRun && filterer.filter(test);
+      if (shouldRun === false && TRACE_TEST_FILTERS) {
+        console.log(`${test.fullTitle()} filtered by ${filterer.name}`);
+        break;
+      }
+    }
+
+    if (shouldRun === true) {
+      filteredTests.push(test);
+    }
+  }
+  suite.tests = filteredTests;
+
+  for (const currentSuite of suite.suites) {
+    filterOutTests(currentSuite);
+  }
 }
 
 before(function (_done) {
-  // NOTE: if we first parse the connection string and redact auth, then we can reenable this
-  // const usingUnifiedTopology = !!process.env.MONGODB_UNIFIED_TOPOLOGY;
-  // console.log(
-  //   `connecting to: ${chalk.bold(MONGODB_URI)} using ${chalk.bold(
-  //     usingUnifiedTopology ? 'unified' : 'legacy'
-  //   )} topology`
-  // );
-
   const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
   const client = new MongoClient(
     loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,

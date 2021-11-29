@@ -12,6 +12,10 @@ const { TopologyType } = require('../../../../src/sdam/common');
  * }
  */
 class MongoDBTopologyFilter {
+  get name() {
+    return this.constructor.name;
+  }
+
   initializeFilter(client, context, callback) {
     let type = client.topology.description.type;
     context.topologyType = type;
