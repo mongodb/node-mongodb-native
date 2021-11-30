@@ -730,9 +730,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter predicate. If unspecified, then all documents in the collection will match the predicate
    */
   find(): FindCursor<WithId<TSchema>>;
-  find(filter: Filter<WithId<TSchema>>, options?: FindOptions): FindCursor<WithId<TSchema>>;
-  find<T>(filter: Filter<WithId<TSchema>>, options?: FindOptions): FindCursor<T>;
-  find(filter?: Filter<WithId<TSchema>>, options?: FindOptions): FindCursor<WithId<TSchema>> {
+  find(filter: Filter<TSchema>, options?: FindOptions): FindCursor<WithId<TSchema>>;
+  find<T>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
+  find(filter?: Filter<TSchema>, options?: FindOptions): FindCursor<WithId<TSchema>> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError(
         'Method "collection.find()" accepts at most two arguments'

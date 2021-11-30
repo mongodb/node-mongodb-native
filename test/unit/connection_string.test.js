@@ -116,6 +116,94 @@ describe('Connection String', function () {
     expect(options.replicaSet).to.equal('123abc');
   });
 
+  context('when both tls and ssl options are provided', function () {
+    context('when the options are provided in the URI', function () {
+      context('when the options are equal', function () {
+        context('when both options are true', function () {
+          const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
+
+          it('sets the tls option', function () {
+            expect(options.tls).to.be.true;
+          });
+
+          it('does not set the ssl option', function () {
+            expect(options.ssl).to.be.undefined;
+          });
+        });
+
+        context('when both options are false', function () {
+          const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
+
+          it('sets the tls option', function () {
+            expect(options.tls).to.be.false;
+          });
+
+          it('does not set the ssl option', function () {
+            expect(options.ssl).to.be.undefined;
+          });
+        });
+      });
+
+      context('when the options are not equal', function () {
+        it('raises an error', function () {
+          expect(() => {
+            parseOptions('mongodb://localhost/?tls=true&ssl=false');
+          }).to.throw(MongoParseError, 'All values of tls/ssl must be the same.');
+        });
+      });
+    });
+
+    context('when the options are provided in the options', function () {
+      context('when the options are equal', function () {
+        context('when both options are true', function () {
+          const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
+
+          it('sets the tls option', function () {
+            expect(options.tls).to.be.true;
+          });
+
+          it('does not set the ssl option', function () {
+            expect(options.ssl).to.be.undefined;
+          });
+        });
+
+        context('when both options are false', function () {
+          context('when the URI is an SRV URI', function () {
+            const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
+
+            it('overrides the tls option', function () {
+              expect(options.tls).to.be.false;
+            });
+
+            it('does not set the ssl option', function () {
+              expect(options.ssl).to.be.undefined;
+            });
+          });
+
+          context('when the URI is not SRV', function () {
+            const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
+
+            it('sets the tls option', function () {
+              expect(options.tls).to.be.false;
+            });
+
+            it('does not set the ssl option', function () {
+              expect(options.ssl).to.be.undefined;
+            });
+          });
+        });
+      });
+
+      context('when the options are not equal', function () {
+        it('raises an error', function () {
+          expect(() => {
+            parseOptions('mongodb://localhost/', { tls: true, ssl: false });
+          }).to.throw(MongoParseError, 'All values of tls/ssl must be the same.');
+        });
+      });
+    });
+  });
+
   describe('validation', function () {
     it('should validate compressors options', function () {
       expect(() => parseOptions('mongodb://localhost/?compressors=bunnies')).to.throw(
@@ -135,13 +223,6 @@ describe('Connection String', function () {
       expect(() => parseOptions('mongodb://localhost/?readPreference=llamasPreferred')).to.throw(
         MongoDriverError, // not parse Error b/c thrown from ReadPreference construction
         'Invalid read preference mode "llamasPreferred"'
-      );
-    });
-
-    it('should validate non-equal tls values', function () {
-      expect(() => parseOptions('mongodb://localhost/?tls=true&tls=false')).to.throw(
-        MongoParseError,
-        'All values of tls/ssl must be the same.'
       );
     });
   });

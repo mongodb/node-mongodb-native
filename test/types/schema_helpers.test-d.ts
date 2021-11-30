@@ -19,6 +19,8 @@ expectAssignable<InferIdType<{ _id: number } | { b: string }>>(1 + 1);
 // WithId
 expectAssignable<WithId<Document>>({ _id: new ObjectId() });
 expectAssignable<WithId<{ a: number }>>({ _id: new ObjectId(), a: 3 });
+expectAssignable<WithId<{ _id: ObjectId }>>({ _id: new ObjectId() });
+expectAssignable<WithId<{ _id: number }>>({ _id: 5 });
 expectNotType<WithId<Document>>({ _id: 3 });
 
 // Changing _id to a type other than ObjectId makes it required:
