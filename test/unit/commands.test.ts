@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BinMsg, MessageHeader, OpResponseOptions } from '../../src/cmap/commands';
+import { BinMsg, MessageHeader } from '../../src/cmap/commands';
 import { BSONError } from 'bson';
 import * as BSON from '../../src/bson';
 

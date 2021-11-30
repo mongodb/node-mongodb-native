@@ -842,13 +842,14 @@ export class BinMsg {
     const validation = options.validation ?? { utf8: { writeErrors: false } };
 
     // Set up the options
-    const bsonOptions: BSONSerializeOptions & { validation: { utf8: { writeErrors: boolean } } } = {
+    const bsonOptions: BSONSerializeOptions = {
       promoteLongs,
       promoteValues,
       promoteBuffers,
       bsonRegExp,
       validation
-    };
+      // Due to the strictness of the BSON libraries validation option we need this cast
+    } as BSONSerializeOptions & { validation: { utf8: { writeErrors: boolean } } };
 
     while (this.index < this.data.length) {
       const payloadType = this.data.readUInt8(this.index++);
