@@ -78,6 +78,50 @@ describe('ReadPreference', function () {
     });
   });
 
+  describe('fromOptions factory method', () => {
+    const { PRIMARY, SECONDARY } = ReadPreference;
+    const TAGS = [{ loc: 'dc' }];
+
+    it('should return undefined if no options are passed', () => {
+      const readPreference = ReadPreference.fromOptions();
+      expect(readPreference).to.be.undefined;
+    });
+
+    context('readPreference is string', () => {
+      it('should accept { readPreference }', function () {
+        const readPreference = ReadPreference.fromOptions({
+          readPreference: PRIMARY
+        });
+        expect(readPreference).to.be.an.instanceOf(ReadPreference);
+        expect(readPreference.mode).to.equal(PRIMARY);
+      });
+
+      it('should accept { readPreference, readPreferenceTags }', function () {
+        const readPreference = ReadPreference.fromOptions({
+          readPreference: SECONDARY,
+          readPreferenceTags: TAGS
+        });
+        expect(readPreference).to.be.an.instanceOf(ReadPreference);
+        expect(readPreference.mode).to.equal(SECONDARY);
+        expect(readPreference.tags).to.eql(TAGS);
+      });
+
+      it('should accept { readPreference, readPreferenceTags, hedge }', function () {
+        const readPreference = ReadPreference.fromOptions({
+          readPreference: SECONDARY,
+          readPreferenceTags: TAGS,
+          hedge: {
+            enabled: true
+          }
+        });
+        expect(readPreference).to.be.an.instanceOf(ReadPreference);
+        expect(readPreference.mode).to.equal(SECONDARY);
+        expect(readPreference.tags).to.eql(TAGS);
+        expect(readPreference.hedge).to.eql({ enabled: true });
+      });
+    });
+  });
+
   it('Should correctly apply collection level read Preference to count', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
