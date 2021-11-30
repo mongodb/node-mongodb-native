@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.1](https://github.com/mongodb/node-mongodb-native/compare/v4.2.0...v4.2.1) (2021-11-30)
+
+
+### Bug Fixes
+
+* **NODE-2370:** correct a return type of hasNext() ([#3058](https://github.com/mongodb/node-mongodb-native/issues/3058)) ([b6a63df](https://github.com/mongodb/node-mongodb-native/commit/b6a63df6269898fb09dd180b512197822727e90a))
+* **NODE-3627:** Enable flexible BSON validation for server error key containing invalid utf-8 ([#3054](https://github.com/mongodb/node-mongodb-native/issues/3054)) ([7a507f0](https://github.com/mongodb/node-mongodb-native/commit/7a507f08905d2e30f4c4b53adf0bf506e65e357f))
+* **NODE-3648:** run get more ops through server selection ([#3030](https://github.com/mongodb/node-mongodb-native/issues/3030)) ([268e211](https://github.com/mongodb/node-mongodb-native/commit/268e2110c0a26e51fa82f42e84251a21fa30a5d0))
+* **NODE-3767:** don't delete dbName if authSource is provided ([#3055](https://github.com/mongodb/node-mongodb-native/issues/3055)) ([0a830e2](https://github.com/mongodb/node-mongodb-native/commit/0a830e240adcd8564b6f11d8af0da50a411db58f))
+* **NODE-3770:** Filter type uses WithId on the schema ([#3053](https://github.com/mongodb/node-mongodb-native/issues/3053)) ([307d623](https://github.com/mongodb/node-mongodb-native/commit/307d623ea597c5d89c548b6731bd692fec7a8047))
+
 ## [4.2.0](https://github.com/mongodb/node-mongodb-native/compare/v4.1.3...v4.2.0) (2021-11-17)
 
 
