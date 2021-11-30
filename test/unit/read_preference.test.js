@@ -6,11 +6,10 @@ chai.use(require('chai-subset'));
 const expect = chai.expect;
 
 describe.only('ReadPreference', function () {
+  const maxStalenessSeconds = 1234;
+  const { PRIMARY, SECONDARY, NEAREST } = ReadPreference;
+  const TAGS = [{ loc: 'dc' }];
   describe('::constructor', function () {
-    const maxStalenessSeconds = 1234;
-    const { PRIMARY, SECONDARY, NEAREST } = ReadPreference;
-    const TAGS = [{ loc: 'dc' }];
-
     it('should accept (mode)', function () {
       expect(new ReadPreference(PRIMARY)).to.be.an.instanceOf(ReadPreference);
     });
@@ -18,7 +17,7 @@ describe.only('ReadPreference', function () {
     it('should accept valid (mode, tags)', function () {
       expect(new ReadPreference(PRIMARY, [])).to.be.an.instanceOf(ReadPreference);
       const p0 = new ReadPreference(NEAREST, TAGS);
-      expect(p0.mode).to.equal(NEAREST);
+      expect(p0).to.have.property('mode', NEAREST);
     });
 
     it('should not accept invalid tags', function () {
@@ -33,7 +32,7 @@ describe.only('ReadPreference', function () {
     it('should accept (mode, options)', function () {
       const p1 = new ReadPreference(SECONDARY, { maxStalenessSeconds });
       expect(p1.mode).to.equal(SECONDARY);
-      expect(p1.maxStalenessSeconds).to.equal(maxStalenessSeconds);
+      expect(p1).to.have.property('maxStalenessSeconds', maxStalenessSeconds);
     });
 
     it('should not accept mode=primary + tags', function () {
@@ -48,19 +47,25 @@ describe.only('ReadPreference', function () {
       );
     });
 
+    it('should not accept mode=primary + options.hedge enabled', function () {
+      expect(() => new ReadPreference(PRIMARY, null, { hedge: { enabled: true } })).to.throw(
+        'Primary read preference cannot be combined with hedge'
+      );
+    });
+
     it('should accept (mode=secondary, tags=null, options)', function () {
       const p2 = new ReadPreference(SECONDARY, null, { maxStalenessSeconds });
       expect(p2).to.be.an.instanceOf(ReadPreference);
-      expect(p2.mode).to.equal(SECONDARY);
-      expect(p2.maxStalenessSeconds).to.equal(maxStalenessSeconds);
+      expect(p2).to.have.property('mode', SECONDARY);
+      expect(p2).to.have.property('maxStalenessSeconds', maxStalenessSeconds);
     });
 
     it('should accept (mode=secondary, tags, options)', function () {
       const p3 = new ReadPreference(SECONDARY, TAGS, { maxStalenessSeconds });
       expect(p3).to.be.an.instanceOf(ReadPreference);
-      expect(p3.mode).to.equal(SECONDARY);
-      expect(p3.tags).to.eql(TAGS);
-      expect(p3.maxStalenessSeconds).to.equal(maxStalenessSeconds);
+      expect(p3).to.have.property('mode', SECONDARY);
+      expect(p3.tags).to.deep.equal(TAGS);
+      expect(p3).to.have.property('maxStalenessSeconds', maxStalenessSeconds);
     });
 
     it('should not accept (mode, options, tags)', function () {
@@ -71,9 +76,6 @@ describe.only('ReadPreference', function () {
   });
 
   describe('fromOptions factory method', () => {
-    const { PRIMARY, SECONDARY } = ReadPreference;
-    const TAGS = [{ loc: 'dc' }];
-
     it('should return undefined if no options are passed', () => {
       const readPreference = ReadPreference.fromOptions();
       expect(readPreference).to.be.undefined;
@@ -85,7 +87,7 @@ describe.only('ReadPreference', function () {
           readPreference: PRIMARY
         });
         expect(readPreference).to.be.an.instanceOf(ReadPreference);
-        expect(readPreference.mode).to.equal(PRIMARY);
+        expect(readPreference).to.have.property('mode', PRIMARY);
       });
 
       it('should accept { readPreference, readPreferenceTags }', function () {
@@ -94,8 +96,8 @@ describe.only('ReadPreference', function () {
           readPreferenceTags: TAGS
         });
         expect(readPreference).to.be.an.instanceOf(ReadPreference);
-        expect(readPreference.mode).to.equal(SECONDARY);
-        expect(readPreference.tags).to.eql(TAGS);
+        expect(readPreference).to.have.property('mode', SECONDARY);
+        expect(readPreference.tags).to.deep.equal(TAGS);
       });
 
       it('should accept { readPreference, readPreferenceTags, hedge }', function () {
@@ -107,9 +109,9 @@ describe.only('ReadPreference', function () {
           }
         });
         expect(readPreference).to.be.an.instanceOf(ReadPreference);
-        expect(readPreference.mode).to.equal(SECONDARY);
-        expect(readPreference.tags).to.eql(TAGS);
-        expect(readPreference.hedge).to.eql({ enabled: true });
+        expect(readPreference).to.have.property('mode', SECONDARY);
+        expect(readPreference.tags).to.deep.equal(TAGS);
+        expect(readPreference.hedge).to.deep.equal({ enabled: true });
       });
     });
   });
