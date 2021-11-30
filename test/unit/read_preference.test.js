@@ -100,19 +100,39 @@ describe.only('ReadPreference', function () {
         expect(readPreference.tags).to.deep.equal(TAGS);
       });
 
-      it('should accept { readPreference, readPreferenceTags, hedge }', function () {
+      it('should accept { readPreference, maxStalenessSeconds }', function () {
         const readPreference = ReadPreference.fromOptions({
           readPreference: SECONDARY,
-          readPreferenceTags: TAGS,
+          maxStalenessSeconds: maxStalenessSeconds
+        });
+        expect(readPreference).to.be.an.instanceOf(ReadPreference);
+        expect(readPreference).to.have.property('mode', SECONDARY);
+        expect(readPreference).to.have.property('maxStalenessSeconds', maxStalenessSeconds);
+      });
+
+      it('should accept { readPreference, hedge }', function () {
+        const readPreference = ReadPreference.fromOptions({
+          readPreference: SECONDARY,
           hedge: {
             enabled: true
           }
         });
         expect(readPreference).to.be.an.instanceOf(ReadPreference);
         expect(readPreference).to.have.property('mode', SECONDARY);
-        expect(readPreference.tags).to.deep.equal(TAGS);
         expect(readPreference.hedge).to.deep.equal({ enabled: true });
       });
+    });
+
+    it('should not accept mode=primary + options.hedge', function () {
+      expect(() =>
+        ReadPreference.fromOptions({ readPreference: PRIMARY, hedge: { enabled: true } })
+      ).to.throw('Primary read preference cannot be combined with hedge');
+    });
+
+    it('should not accept mode=primary + options.maxStalenessSeconds', function () {
+      expect(() =>
+        ReadPreference.fromOptions({ readPreference: PRIMARY, maxStalenessSeconds })
+      ).to.throw('Primary read preference cannot be combined with maxStalenessSeconds');
     });
   });
 });
