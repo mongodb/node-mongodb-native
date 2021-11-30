@@ -157,6 +157,7 @@ export class ReadPreference {
 
     if (typeof readPreference === 'string') {
       return new ReadPreference(readPreference as ReadPreferenceMode, readPreferenceTags, {
+        maxStalenessSeconds: options.maxStalenessSeconds,
         hedge: options.hedge
       });
     } else if (!(readPreference instanceof ReadPreference) && typeof readPreference === 'object') {
