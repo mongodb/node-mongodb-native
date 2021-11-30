@@ -1,11 +1,7 @@
-'use strict';
+import { ReadPreference } from '../../src';
+import { expect } from 'chai';
 
-const { ReadPreference } = require('../../src');
-const chai = require('chai');
-chai.use(require('chai-subset'));
-const expect = chai.expect;
-
-describe('ReadPreference', function () {
+describe('class ReadPreference', function () {
   const maxStalenessSeconds = 1234;
   const { PRIMARY, SECONDARY, NEAREST } = ReadPreference;
   const TAGS = [{ loc: 'dc' }];
@@ -21,16 +17,16 @@ describe('ReadPreference', function () {
     });
 
     it('should not accept invalid tags', function () {
-      expect(() => new ReadPreference(PRIMARY, 'invalid')).to.throw(
+      expect(() => new ReadPreference(PRIMARY, 'invalid' as any)).to.throw(
         'ReadPreference tags must be an array'
       );
-      expect(() => new ReadPreference(PRIMARY, { loc: 'dc' }, { maxStalenessSeconds })).to.throw(
-        'ReadPreference tags must be an array'
-      );
+      expect(
+        () => new ReadPreference(PRIMARY, { loc: 'dc' } as any, { maxStalenessSeconds })
+      ).to.throw('ReadPreference tags must be an array');
     });
 
     it('should accept (mode, options)', function () {
-      const p1 = new ReadPreference(SECONDARY, { maxStalenessSeconds });
+      const p1 = new ReadPreference(SECONDARY, { maxStalenessSeconds } as any);
       expect(p1.mode).to.equal(SECONDARY);
       expect(p1).to.have.property('maxStalenessSeconds', maxStalenessSeconds);
     });
@@ -69,9 +65,9 @@ describe('ReadPreference', function () {
     });
 
     it('should not accept (mode, options, tags)', function () {
-      expect(() => new ReadPreference(PRIMARY, { maxStalenessSeconds }, TAGS)).to.throw(
-        'ReadPreference tags must be an array'
-      );
+      expect(
+        () => new ReadPreference(PRIMARY, { maxStalenessSeconds } as any, TAGS as any)
+      ).to.throw('ReadPreference tags must be an array');
     });
   });
 
