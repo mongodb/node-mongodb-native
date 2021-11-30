@@ -5,7 +5,7 @@ const chai = require('chai');
 chai.use(require('chai-subset'));
 const expect = chai.expect;
 
-describe.only('ReadPreference', function () {
+describe('ReadPreference', function () {
   const maxStalenessSeconds = 1234;
   const { PRIMARY, SECONDARY, NEAREST } = ReadPreference;
   const TAGS = [{ loc: 'dc' }];
