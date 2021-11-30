@@ -469,6 +469,8 @@ export interface MessageHeader {
 export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
+  // For now we use this internally to only prevent writeErrors from crashing the driver
+  validation?: { utf8: { writeErrors: boolean } };
 }
 
 /** @internal */
@@ -837,22 +839,24 @@ export class BinMsg {
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
+    const validation = options.validation ?? { utf8: { writeErrors: false } };
 
     // Set up the options
-    const _options: BSONSerializeOptions = {
+    const bsonOptions: BSONSerializeOptions = {
       promoteLongs,
       promoteValues,
       promoteBuffers,
-      bsonRegExp
-    };
+      bsonRegExp,
+      validation
+      // Due to the strictness of the BSON libraries validation option we need this cast
+    } as BSONSerializeOptions & { validation: { utf8: { writeErrors: boolean } } };
 
     while (this.index < this.data.length) {
       const payloadType = this.data.readUInt8(this.index++);
       if (payloadType === 0) {
         const bsonSize = this.data.readUInt32LE(this.index);
         const bin = this.data.slice(this.index, this.index + bsonSize);
-        this.documents.push(raw ? bin : BSON.deserialize(bin, _options));
-
+        this.documents.push(raw ? bin : BSON.deserialize(bin, bsonOptions));
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
@@ -865,9 +869,8 @@ export class BinMsg {
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
       const fieldsAsRaw: Document = {};
       fieldsAsRaw[documentsReturnedIn] = true;
-      _options.fieldsAsRaw = fieldsAsRaw;
-
-      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
+      bsonOptions.fieldsAsRaw = fieldsAsRaw;
+      const doc = BSON.deserialize(this.documents[0] as Buffer, bsonOptions);
       this.documents = [doc];
     }
 

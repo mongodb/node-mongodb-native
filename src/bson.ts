@@ -51,6 +51,7 @@ export interface BSONSerializeOptions
       | 'cacheFunctionsCrc32'
       | 'allowObjectSmallerThanBufferSize'
       | 'index'
+      | 'validation'
     > {
   /** Return BSON filled buffers from operations */
   raw?: boolean;
