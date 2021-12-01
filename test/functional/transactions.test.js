@@ -111,13 +111,7 @@ const SKIP_TESTS = [
 
   // Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
-  'Client side error when transaction is in progress',
-
-  // Will be implemented as part of NODE-2538
-  'abortTransaction only retries once with RetryableWriteError from server',
-  'abortTransaction does not retry without RetryableWriteError label',
-  'commitTransaction does not retry error without RetryableWriteError label',
-  'commitTransaction retries once with RetryableWriteError from server'
+  'Client side error when transaction is in progress'
 ];
 
 describe('Transactions Spec Legacy Tests', function () {
