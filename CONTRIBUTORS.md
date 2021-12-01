@@ -58,6 +58,7 @@
 - Neal Beeken <<neal.beeken@mongodb.com>>
 - Durran Jordan <<durran@gmail.com>>
 - Daria Pardue <<daria.pardue@mongodb.com>>
+- Bailey Pearson <<bailey.pearson@mongodb.com>>
 
 ## Community Types
 
