@@ -56,45 +56,10 @@ We recommended these VS Code extensions:
 
 
 
-### Running the Tests
+### Automated Tests
 
-Start a mongod standalone with our [cluster_setup.sh](test/tools/cluster_setup.sh) script: `./test/tools/cluster_setup.sh server`
+This repo contains a suite of automated tests.  See the [Testing README](/test/readme.md) for more details.
 
-Then run the tests: `npm test`
-
-See [test/readme.md](test/readme.md) for more information on testing in a special environment like CSFLE or Serverless.
-
-### Tests FAQ
-
-- How can I run the tests against more than a standalone?
-
-  You can use `test/tools/cluster_setup.sh replica_set` to start a replica set.
-
-  If you are running more than a standalone server, make sure your `ulimit` settings are in accordance with
-  [MongoDB's recommendations][mongodb-ulimit].
-  Changing the settings on the latest versions of macOS can be tricky.  See [this article][macos-ulimt]
-  for tips. (You likely don't need to do the complicated maxproc steps.)
-
-  You can prefix `npm test` with a `MONGODB_URI` environment variable to point the tests to a specific deployment:
-  `env MONGODB_URI=mongodb://localhost:27017 npm test`
-
-- How can I run just one test?
-
-  The easiest way to run a single test is by appending `.only()` to the suite or test you want to run.
-  For example, you could update a test function to be `it.only(‘cool test’, function() {})`.  Then
-  run the test using `npm run check:test` for a functional or integration test or
-  `npm run check:unit` for a unit test.  See [Mocha's documentation][mocha-only]
-  for more detailed information on `.only()`.
-
-  Another way to run a single test is to use Mocha's `grep` flag.  For functional or integration tests,
-  run `npm run check:test -- -g 'test name'`. For unit tests, run `npm run check:unit -- -g 'test name'`.
-  See the [Mocha documentation][mocha-grep] for information on the `grep` flag.
-
-- Why are some of the tests "pending"?
-
-  Tests that we have indicated should be skipped using `.skip()` will appear as pending in the test
-  results.  See
-  [Mocha's documentation][mocha-skip] for more information.
 
 ### Commit messages
 
@@ -188,11 +153,5 @@ Reviewers should use the following questions to evaluate the implementation for 
 [mtools-install]: http://blog.rueckstiess.com/mtools/install.html
 [nvm-windows]: https://github.com/coreybutler/nvm-windows#installation--upgrades
 [nvm-unix]: https://github.com/nvm-sh/nvm#install--update-script
-[macos-ulimt]: https://wilsonmar.github.io/maximum-limits/
 [workspace-file]: https://gist.githubusercontent.com/nbbeeken/d831a3801b4c463648c077b27da5057b/raw/8e986843e5e28019f7c0cebe5c6fa72407bf8afb/node-mongodb-native.code-workspace
-[mongodb-ulimit]: https://docs.mongodb.com/manual/reference/ulimit/#recommended-ulimit-settings
-[mocha-only]: https://mochajs.org/#exclusive-tests
-[mocha-grep]: https://mochajs.org/#command-line-usage
-[mocha-ulimit]: https://docs.mongodb.com/manual/reference/ulimit/#recommended-ulimit-settings
-[mocha-skip]: https://mochajs.org/#inclusive-tests
 [node-jira]: https://jira.mongodb.org/browse/NODE
