@@ -1,10 +1,11 @@
 'use strict';
 const { Long } = require('bson');
 const { expect } = require('chai');
-const mock = require('../tools/mock');
-const { ReadPreference } = require('../../src');
+const mock = require('../../tools/mock');
+const { ReadPreference } = require('../../../src');
 
 const test = {};
+// TODO (NODE-3799): convert these to run against a real server
 describe('Max Staleness', function () {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
