@@ -17,5 +17,5 @@ npx mocha --file test/tools/runner/index.js \
   test/integration/retryable-writes/retryable_writes.spec.test.js \
   test/functional/sessions.test.js \
   test/functional/transactions.test.js \
-  test/functional/versioned-api.test.js \
+  test/integration/versioned-api/versioned_api.spec.test.js \
   test/integration/load-balancers/load_balancers.spec.test.js
