@@ -839,9 +839,7 @@ export class BinMsg {
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
-    const validation = options.enableUtf8Validation
-      ? { utf8: { writeErrors: false } }
-      : { utf8: false };
+    const validation = this._parseBsonSerializationOptions(options);
 
     // Set up the options
     const bsonOptions: BSONSerializeOptions = {
@@ -877,5 +875,16 @@ export class BinMsg {
     }
 
     this.parsed = true;
+  }
+
+  private _parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {
+    utf8: { writeErrors: false } | false;
+  } {
+    // eslint-disable-next-line no-restricted-syntax
+    if (enableUtf8Validation === undefined || enableUtf8Validation) {
+      return { utf8: { writeErrors: false } };
+    }
+
+    return { utf8: false };
   }
 }
