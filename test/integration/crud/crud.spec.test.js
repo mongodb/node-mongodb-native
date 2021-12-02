@@ -26,7 +26,7 @@ function enforceServerVersionLimits(requires, scenario) {
 }
 
 function findScenarios() {
-  const route = [__dirname, '..', 'spec', 'crud'].concat(Array.from(arguments));
+  const route = [__dirname, '..', '..', 'spec', 'crud'].concat(Array.from(arguments));
   return fs
     .readdirSync(path.resolve.apply(path, route))
     .filter(x => x.indexOf('json') !== -1)
