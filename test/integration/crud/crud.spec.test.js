@@ -6,8 +6,8 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const { loadSpecTests } = require('../spec/index');
-const { runUnifiedTest } = require('../tools/unified-spec-runner/runner');
+const { loadSpecTests } = require('../../spec/index');
+const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
 
 function enforceServerVersionLimits(requires, scenario) {
   const versionLimits = [];
