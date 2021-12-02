@@ -36,7 +36,7 @@ All of the MongoDB drivers follow the same [specifications (specs)][driver-specs
 
 The input test specifications are stored in `test/spec`.
 
-The actual implementations of the spec tests can be unit tests or integration tests depending on the requirements and they can be found in the corresponding test directory according to their type. Regardless of whether they are located in the `/unit` or `/integration` test directory, test files named `spec_name.spec.test` contain spec test implementations that use a standardized runner and `spec_name.prose.test` files contain prose test implementations.
+The actual implementations of the spec tests can be unit tests or integration tests depending on the requirements, and they can be found in the corresponding test directory according to their type. Regardless of whether they are located in the `/unit` or `/integration` test directory, test files named `spec_name.spec.test` contain spec test implementations that use a standardized runner and `spec_name.prose.test` files contain prose test implementations.
 
 ## Running the Tests Locally
 
