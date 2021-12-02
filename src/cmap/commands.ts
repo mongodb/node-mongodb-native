@@ -470,7 +470,7 @@ export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
   // For now we use this internally to only prevent writeErrors from crashing the driver
-  validation?: { utf8: { writeErrors: boolean } };
+  // validation?: { utf8: { writeErrors: boolean } };
 }
 
 /** @internal */
@@ -839,7 +839,9 @@ export class BinMsg {
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
-    const validation = options.validation ?? { utf8: { writeErrors: false } };
+    const validation = options.enableUtf8Validation
+      ? { utf8: { writeErrors: false } }
+      : { utf8: false };
 
     // Set up the options
     const bsonOptions: BSONSerializeOptions = {

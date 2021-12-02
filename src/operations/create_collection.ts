@@ -27,7 +27,8 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'promoteBuffers',
   'bsonRegExp',
   'serializeFunctions',
-  'ignoreUndefined'
+  'ignoreUndefined',
+  'enableUtf8Validation'
 ]);
 
 /** @public

@@ -65,16 +65,16 @@ describe('BinMsg BSON utf8 validation', () => {
       msgHeader,
       msgBodyInvalidUtf8WriteErrors
     );
-    const options = { validation: { utf8: { writeErrors: false } as const } };
 
     it('contains replacement characters for invalid utf8 in writeError object', () => {
+      const options = { validation: { utf8: { writeErrors: false } as const } };
       expect(BSON.deserialize(invalidUtf8ErrorMsgDeserializeInput, options)).to.deep.equals(
         invalidUtf8InWriteErrorsJSON
       );
     });
 
     it('should not throw invalid utf8 error', () => {
-      expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
+      expect(() => binMsgInvalidUtf8ErrorMsg.parse({ enableUtf8Validation: true })).to.not.throw();
     });
   });
 
@@ -93,34 +93,17 @@ describe('BinMsg BSON utf8 validation', () => {
     expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
   });
 
-  context('when another key has invalid utf8 and validation is enabled for writeErrors', () => {
-    const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
-      Buffer.alloc(0),
-      msgHeader,
-      msgBodyNKeyWithInvalidUtf8
-    );
-    const options = { validation: { utf8: { writeErrors: true } as const } };
-
-    it('should not throw invalid utf8 error', () => {
-      expect(() => binMsgAnotherKeyWithInvalidUtf8.parse(options)).to.not.throw();
-    });
-
-    it('contains replacement characters for invalid utf8 key', () => {
-      expect(BSON.deserialize(nKeyWithInvalidUtf8DeserializeInput, options)).to.deep.equals(
-        invalidUtf8InNKeyJSON
-      );
-    });
-  });
-
-  it('should throw invalid utf8 error when validation enabled for writeErrors', () => {
+  it('should never validate the writeErrors key, even if validation is enable', () => {
     const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),
       msgHeader,
       msgBodyInvalidUtf8WriteErrors
     );
     expect(() =>
-      binMsgInvalidUtf8ErrorMsg.parse({ validation: { utf8: { writeErrors: true } } })
-    ).to.throw(BSONError, 'Invalid UTF-8 string in BSON document');
+      binMsgInvalidUtf8ErrorMsg.parse({
+        enableUtf8Validation: true
+      })
+    ).not.to.throw(BSONError, 'Invalid UTF-8 string in BSON document');
   });
 
   it('should throw error when another key has invalid utf8 and writeErrors is not validated', () => {
@@ -129,8 +112,9 @@ describe('BinMsg BSON utf8 validation', () => {
       msgHeader,
       msgBodyNKeyWithInvalidUtf8
     );
-    expect(() =>
-      binMsgAnotherKeyWithInvalidUtf8.parse({ validation: { utf8: { writeErrors: false } } })
-    ).to.throw(BSONError, 'Invalid UTF-8 string in BSON document');
+    expect(() => binMsgAnotherKeyWithInvalidUtf8.parse({ enableUtf8Validation: true })).to.throw(
+      BSONError,
+      'Invalid UTF-8 string in BSON document'
+    );
   });
 });
