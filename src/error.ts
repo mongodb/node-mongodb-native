@@ -697,6 +697,10 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set<number>([
   MONGODB_ERROR_CODES.ExceededTimeLimit
 ]);
 
+export function isRetryableEndTransactionError(error: MongoError): boolean {
+  return error.hasErrorLabel('RetryableWriteError');
+}
+
 export function isRetryableWriteError(error: MongoError): boolean {
   if (error instanceof MongoWriteConcernError) {
     return RETRYABLE_WRITE_ERROR_CODES.has(error.result?.code ?? error.code ?? 0);

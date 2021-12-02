@@ -1,9 +1,11 @@
 'use strict';
 
 const path = require('path');
-const TestRunnerContext = require('../spec-runner').TestRunnerContext;
-const gatherTestSuites = require('../spec-runner').gatherTestSuites;
-const generateTopologyTests = require('../spec-runner').generateTopologyTests;
+const {
+  TestRunnerContext,
+  gatherTestSuites,
+  generateTopologyTests
+} = require('../../tools/spec-runner');
 
 describe('Client Side Encryption', function () {
   // TODO: Replace this with using the filter once the filter works on describe blocks
