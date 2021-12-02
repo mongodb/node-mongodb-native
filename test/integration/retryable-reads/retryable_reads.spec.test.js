@@ -1,8 +1,7 @@
 'use strict';
 
-const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const generateTopologyTests = require('./spec-runner').generateTopologyTests;
-const loadSpecTests = require('../spec').loadSpecTests;
+const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
+const { loadSpecTests } = require('../../spec');
 
 describe('Retryable Reads', function () {
   const testContext = new TestRunnerContext();
