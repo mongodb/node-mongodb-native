@@ -1,7 +1,7 @@
 'use strict';
 const BSON = require('bson');
 const chai = require('chai');
-const { deadlockTests } = require('./deadlock_tests.js');
+const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
