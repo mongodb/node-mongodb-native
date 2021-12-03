@@ -787,6 +787,8 @@ function write(
     promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
     promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
     bsonRegExp: typeof options.bsonRegExp === 'boolean' ? options.bsonRegExp : false,
+    enableUtf8Validation:
+      typeof options.enableUtf8Validation === 'boolean' ? options.enableUtf8Validation : true,
     raw: typeof options.raw === 'boolean' ? options.raw : false,
     started: 0
   };

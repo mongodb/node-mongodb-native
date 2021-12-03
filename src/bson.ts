@@ -68,7 +68,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     ignoreUndefined,
     bsonRegExp,
     raw,
-    enableUtf8Validation: bsonUtf8ValidationEnabled
+    enableUtf8Validation
   } = options;
   return {
     fieldsAsRaw,
@@ -79,7 +79,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     ignoreUndefined,
     bsonRegExp,
     raw,
-    enableUtf8Validation: bsonUtf8ValidationEnabled
+    enableUtf8Validation
   };
 }
 

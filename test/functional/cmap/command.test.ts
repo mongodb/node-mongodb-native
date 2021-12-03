@@ -14,12 +14,12 @@ const EXPECTED_VALIDATION_ENABLED_ARGUMENT = {
   }
 };
 
-describe.only('class BinMsg', () => {
+describe('class BinMsg', () => {
   beforeEach(() => {
     deserializeSpy.resetHistory();
   });
 
-  describe.only('enableUtf8Validation option set to false', () => {
+  describe('enableUtf8Validation option set to false', () => {
     let client;
     const option = { enableUtf8Validation: false };
 
@@ -38,7 +38,10 @@ describe.only('class BinMsg', () => {
             passOptionTo === 'collection' ? option : undefined
           );
 
-          await collection.insertOne({ name: 'John Doe' });
+          await collection.insertOne(
+            { name: 'John Doe' },
+            passOptionTo === 'operation' ? option : {}
+          );
 
           expect(deserializeSpy.called).to.be.true;
           const validationArgument = deserializeSpy.lastCall.lastArg.validation;
@@ -69,7 +72,10 @@ describe.only('class BinMsg', () => {
             passOptionTo === 'collection' ? option : undefined
           );
 
-          await collection.insertOne({ name: 'John Doe' });
+          await collection.insertOne(
+            { name: 'John Doe' },
+            passOptionTo === 'operation' ? option : {}
+          );
 
           expect(deserializeSpy.called).to.be.true;
           const validationArgument = deserializeSpy.lastCall.lastArg.validation;
@@ -100,7 +106,10 @@ describe.only('class BinMsg', () => {
             passOptionTo === 'collection' ? option : undefined
           );
 
-          await collection.insertOne({ name: 'John Doe' });
+          await collection.insertOne(
+            { name: 'John Doe' },
+            passOptionTo === 'operation' ? option : {}
+          );
 
           expect(deserializeSpy.called).to.be.true;
           const validationArgument = deserializeSpy.lastCall.lastArg.validation;
