@@ -102,7 +102,7 @@ describe('Transactions', function () {
   describe('Legacy Spec Tests', function () {
     const testContext = new TransactionsRunnerContext();
 
-    describe('spec tests', function () {
+    describe.only('spec tests', function () {
       const testSuites = loadSpecTests(path.join('transactions', 'legacy'));
       after(() => testContext.teardown());
       before(function () {

@@ -20,7 +20,9 @@ class MongoDBTopologyFilter {
     let type = client.topology.description.type;
     context.topologyType = type;
     this.runtimeTopology = topologyTypeToString(type);
-    console.error(`[ topology type: ${this.runtimeTopology} ]`);
+    console.error(
+      `[ topology type: ${this.runtimeTopology} ]${process.env.SERVERLESS ? '(serverless)' : ''}`
+    );
     callback();
   }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
+source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
 
 if [ -z ${SERVERLESS+omitted} ]; then echo "SERVERLESS is unset" && exit 1; fi
 if [ -z ${MULTI_ATLASPROXY_SERVERLESS_URI+omitted} ]; then echo "MULTI_ATLASPROXY_SERVERLESS_URI is unset" && exit 1; fi
