@@ -8,11 +8,18 @@ const { ReplSetFixture } = require('../tools/common');
 const { ns } = require('../../src/utils');
 const { Topology } = require('../../src/sdam/topology');
 const { MongoNetworkError, MongoWriteConcernError } = require('../../src/index');
-const { isRetryableEndTransactionError } = require('../../src/error');
+const {
+  isRetryableEndTransactionError,
+  MongoParseError,
+  isSDAMUnrecoverableError,
+  MongoError
+} = require('../../src/error');
 const {
   PoolClosedError: MongoPoolClosedError,
   WaitQueueTimeoutError: MongoWaitQueueTimeoutError
 } = require('../../src/cmap/errors');
+
+const LEGACY_NOT_PRIMARY_MESSAGE = 'not master';
 
 describe('MongoErrors', () => {
   // import errors as object
@@ -63,6 +70,73 @@ describe('MongoErrors', () => {
         expect(isRetryableEndTransactionError(error)).to.be.false;
       });
     });
+  });
+
+  describe('#isSDAMUnrecoverableError', function () {
+    context('when the error is a MongoParseError', function () {
+      it('returns true', function () {
+        const error = new MongoParseError('');
+        expect(isSDAMUnrecoverableError(error)).to.be.true;
+      });
+    });
+
+    context('when the error is null', function () {
+      it('returns true', function () {
+        expect(isSDAMUnrecoverableError(null)).to.be.true;
+      });
+    });
+
+    context('when the error has a "node is recovering" error code', function () {
+      it('returns true', function () {
+        const error = new MongoError('');
+        // Code for NotPrimaryOrSecondary
+        error.code = 13436;
+        expect(isSDAMUnrecoverableError(error)).to.be.true;
+      });
+    });
+
+    context('when the error has a "not writable primary" error code', function () {
+      it('returns true', function () {
+        const error = new MongoError('');
+        // Code for NotWritablePrimary
+        error.code = 10107;
+        expect(isSDAMUnrecoverableError(error)).to.be.true;
+      });
+    });
+
+    context(
+      'when the code is not a "node is recovering" error and not a "not writable primary" error',
+      function () {
+        it('returns false', function () {
+          // If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not writable primary" error.
+          const error = new MongoError('node is recovering');
+          error.code = 555;
+          expect(isSDAMUnrecoverableError(error)).to.be.false;
+        });
+      }
+    );
+
+    context(
+      'when the error message contains "node is recovering" and no error code is used',
+      function () {
+        it('returns true', function () {
+          const error = new MongoError('the node is recovering from an error');
+          expect(isSDAMUnrecoverableError(error)).to.be.true;
+        });
+      }
+    );
+
+    context(
+      'when the error message contains the legacy "not primary or secondary" message and no error code is used',
+      function () {
+        it('returns true', function () {
+          const error = new MongoError(
+            `this is ${LEGACY_NOT_PRIMARY_MESSAGE} or secondary, so we have a problem `
+          );
+          expect(isSDAMUnrecoverableError(error)).to.be.true;
+        });
+      }
+    );
   });
 
   describe('when MongoNetworkError is constructed', () => {
