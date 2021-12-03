@@ -19,6 +19,7 @@ const {
   WaitQueueTimeoutError: MongoWaitQueueTimeoutError
 } = require('../../src/cmap/errors');
 
+// Abstract the offensive terminology to a constant
 const LEGACY_NOT_PRIMARY_MESSAGE = 'not master';
 
 describe('MongoErrors', () => {

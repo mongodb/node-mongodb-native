@@ -9,9 +9,11 @@ export type AnyError = MongoError | Error;
 const kErrorLabels = Symbol('errorLabels');
 
 /** @internal */
+// Abstract the offensive terminology to a constant
 const LEGACY_NOT_PRIMARY_ERROR_MESSAGE_REGEX = /not master/;
 
 /** @internal */
+// Abstract the offensive terminology to a constant
 const LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE_REGEX = /not master or secondary/;
 
 /** @internal MongoDB Error Codes */
