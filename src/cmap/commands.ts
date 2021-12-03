@@ -470,8 +470,6 @@ export interface MessageHeader {
 export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
-  // For now we use this internally to only prevent writeErrors from crashing the driver
-  // validation?: { utf8: { writeErrors: boolean } };
 }
 
 /** @internal */
