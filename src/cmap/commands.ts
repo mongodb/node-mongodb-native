@@ -880,8 +880,7 @@ export class BinMsg {
   private _parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {
     utf8: { writeErrors: false } | false;
   } {
-    // eslint-disable-next-line no-restricted-syntax
-    if (enableUtf8Validation === undefined || enableUtf8Validation) {
+    if (enableUtf8Validation == null || enableUtf8Validation) {
       return { utf8: { writeErrors: false } };
     }
 
