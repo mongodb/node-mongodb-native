@@ -6,6 +6,7 @@ import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
 import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
+import { deserialize } from 'bson';
 
 // Incrementing request id
 let _requestId = 0;
@@ -856,7 +857,7 @@ export class BinMsg {
       if (payloadType === 0) {
         const bsonSize = this.data.readUInt32LE(this.index);
         const bin = this.data.slice(this.index, this.index + bsonSize);
-        this.documents.push(raw ? bin : BSON.deserialize(bin, bsonOptions));
+        this.documents.push(raw ? bin : deserialize(bin, bsonOptions));
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
