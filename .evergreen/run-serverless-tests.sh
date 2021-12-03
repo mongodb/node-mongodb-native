@@ -12,10 +12,10 @@ if [ -z ${SERVERLESS_ATLAS_USER+omitted} ]; then echo "SERVERLESS_ATLAS_USER is 
 if [ -z ${SERVERLESS_ATLAS_PASSWORD+omitted} ]; then echo "SERVERLESS_ATLAS_PASSWORD is unset" && exit 1; fi
 
 npx mocha --file test/tools/runner/index.js \
-  test/functional/crud_spec.test.js \
-  test/functional/retryable_reads.test.js \
-  test/functional/retryable_writes.test.js \
+  test/integration/crud/crud.spec.test.js \
+  test/integration/retryable-reads/retryable_reads.spec.test.js \
+  test/integration/retryable-writes/retryable_writes.spec.test.js \
   test/functional/sessions.test.js \
   test/functional/transactions.test.js \
-  test/functional/versioned-api.test.js \
-  test/functional/load-balancer-spec.test.js
+  test/integration/versioned-api/versioned_api.spec.test.js \
+  test/integration/load-balancers/load_balancers.spec.test.js

@@ -6,8 +6,8 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const { loadSpecTests } = require('../spec/index');
-const { runUnifiedTest } = require('../tools/unified-spec-runner/runner');
+const { loadSpecTests } = require('../../spec/index');
+const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
 
 function enforceServerVersionLimits(requires, scenario) {
   const versionLimits = [];
@@ -26,7 +26,7 @@ function enforceServerVersionLimits(requires, scenario) {
 }
 
 function findScenarios() {
-  const route = [__dirname, '..', 'spec', 'crud'].concat(Array.from(arguments));
+  const route = [__dirname, '..', '..', 'spec', 'crud'].concat(Array.from(arguments));
   return fs
     .readdirSync(path.resolve.apply(path, route))
     .filter(x => x.indexOf('json') !== -1)

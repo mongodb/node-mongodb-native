@@ -1,8 +1,8 @@
 'use strict';
 
-const expect = require('chai').expect;
-const loadSpecTests = require('../spec').loadSpecTests;
-const parseRunOn = require('../functional/spec-runner').parseRunOn;
+const { expect } = require('chai');
+const { loadSpecTests } = require('../../spec');
+const { parseRunOn } = require('../../tools/spec-runner');
 
 describe('Retryable Writes', function () {
   let ctx = {};
