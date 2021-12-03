@@ -83,7 +83,7 @@ feat(NODE-xxxx)!: created new version api, removed support for old version
 This helps the team automate [HISTORY.md](HISTORY.md) generation.
 These are the commit types we make use of:
 
-- **feat:** A new feature
+- **feat:** A new feature or deprecating (not removing) an existing feature
 - **fix:** A bug fix
 - **docs:** Documentation only changes
 - **style:** Changes that do not affect the meaning of the code (e.g, formatting)

@@ -1,8 +1,7 @@
 'use strict';
-const test = require('./shared').assert;
+const { assert: test, setupDatabase } = require('../shared');
 const { expect } = require('chai');
-const { ReturnDocument, ObjectId } = require('../../src');
-const setupDatabase = require('./shared').setupDatabase;
+const { ReturnDocument, ObjectId } = require('../../../src');
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
