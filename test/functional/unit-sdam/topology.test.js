@@ -227,7 +227,7 @@ describe('Topology (unit)', function () {
         if (doc.ismaster || doc.hello) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
-          request.reply({ ok: 0, message: 'not primary' });
+          request.reply({ ok: 0, message: 'not master' });
         } else {
           request.reply({ ok: 1 });
         }

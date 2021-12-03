@@ -8,6 +8,12 @@ export type AnyError = MongoError | Error;
 /** @internal */
 const kErrorLabels = Symbol('errorLabels');
 
+/** @internal */
+const LEGACY_NOT_PRIMARY_ERROR_MESSAGE_REGEX = /not master/;
+
+/** @internal */
+const LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE_REGEX = /not master or secondary/;
+
 /** @internal MongoDB Error Codes */
 export const MONGODB_ERROR_CODES = Object.freeze({
   HostUnreachable: 6,
@@ -714,7 +720,7 @@ export function isRetryableError(error: MongoError): boolean {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     (typeof error.code === 'number' && RETRYABLE_ERROR_CODES.has(error.code!)) ||
     error instanceof MongoNetworkError ||
-    !!error.message.match(/not primary/) ||
+    !!error.message.match(LEGACY_NOT_PRIMARY_ERROR_MESSAGE_REGEX) ||
     !!error.message.match(/node is recovering/)
   );
 }
@@ -744,7 +750,10 @@ function isRecoveringError(err: MongoError) {
     return SDAM_RECOVERING_CODES.has(err.code);
   }
 
-  return /not primary or secondary/.test(err.message) || /node is recovering/.test(err.message);
+  return (
+    LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE_REGEX.test(err.message) ||
+    /node is recovering/.test(err.message)
+  );
 }
 
 function isNotPrimaryError(err: MongoError) {
@@ -757,7 +766,7 @@ function isNotPrimaryError(err: MongoError) {
     return false;
   }
 
-  return /not primary/.test(err.message);
+  return LEGACY_NOT_PRIMARY_ERROR_MESSAGE_REGEX.test(err.message);
 }
 
 export function isNodeShuttingDownError(err: MongoError): boolean {
