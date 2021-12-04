@@ -645,10 +645,9 @@ describe('Explain', function () {
           .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], { explain: true })
           .toArray((err, docs) => {
             expect(err).to.not.exist;
-            const result = docs[0];
-            expect(result).to.have.property('stages');
-            expect(result.stages).to.have.lengthOf.at.least(1);
-            expect(result.stages[0]).to.have.property('$cursor');
+            const result = JSON.stringify(docs[0]);
+            expect(result).to.include('"queryPlanner"');
+            expect(result).to.include('"executionStats"');
             done();
           });
       });
@@ -675,12 +674,9 @@ describe('Explain', function () {
           })
           .toArray((err, docs) => {
             expect(err).to.not.exist;
-            const result = docs[0];
-            expect(result).to.have.property('stages');
-            expect(result.stages).to.have.lengthOf.at.least(1);
-            expect(result.stages[0]).to.have.property('$cursor');
-            expect(result.stages[0].$cursor).to.have.property('queryPlanner');
-            expect(result.stages[0].$cursor).to.have.property('executionStats');
+            const result = JSON.stringify(docs[0]);
+            expect(result).to.include('"queryPlanner"');
+            expect(result).to.include('"executionStats"');
             done();
           });
       });
@@ -699,11 +695,11 @@ describe('Explain', function () {
 
         collection
           .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
-          .explain(false, (err, result) => {
+          .explain(false, (err, res) => {
             expect(err).to.not.exist;
-            expect(result).to.have.property('stages');
-            expect(result.stages).to.have.lengthOf.at.least(1);
-            expect(result.stages[0]).to.have.property('$cursor');
+            const result = JSON.stringify(res);
+            expect(result).to.include('"queryPlanner"');
+            expect(result).not.to.include('"executionStats"');
             done();
           });
       });
@@ -726,14 +722,12 @@ describe('Explain', function () {
 
         collection
           .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
-          .explain('allPlansExecution', (err, result) => {
+          .explain('allPlansExecution', (err, res) => {
             expect(err).to.not.exist;
-            expect(result).to.exist;
-            expect(result).to.have.property('stages');
-            expect(result.stages).to.have.lengthOf.at.least(1);
-            expect(result.stages[0]).to.have.property('$cursor');
-            expect(result.stages[0].$cursor).to.have.property('queryPlanner');
-            expect(result.stages[0].$cursor).to.have.property('executionStats');
+            expect(res).to.exist;
+            const result = JSON.stringify(res);
+            expect(result).to.include('"queryPlanner"');
+            expect(result).to.include('"executionStats"');
             done();
           });
       });
@@ -752,11 +746,11 @@ describe('Explain', function () {
 
         collection
           .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
-          .explain((err, result) => {
+          .explain((err, res) => {
             expect(err).to.not.exist;
-            expect(result).to.have.property('stages');
-            expect(result.stages).to.have.lengthOf.at.least(1);
-            expect(result.stages[0]).to.have.property('$cursor');
+            const result = JSON.stringify(res);
+            expect(result).to.include('"queryPlanner"');
+            expect(result).to.include('"executionStats"');
             done();
           });
       });
