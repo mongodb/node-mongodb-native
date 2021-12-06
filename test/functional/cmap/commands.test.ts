@@ -87,12 +87,11 @@ describe('class BinMsg', () => {
     }
   });
 
-  describe('enableUtf8Validation option not set - should default to true', () => {
-    // define client and option for tests to use
+  describe('enableUtf8Validation option not set', () => {
     let client;
     const option = { enableUtf8Validation: true };
     for (const passOptionTo of ['client', 'db', 'collection', 'operation']) {
-      it(`should enable validation with option passed to ${passOptionTo}`, async function () {
+      it(`should default to enabled with option passed to ${passOptionTo}`, async function () {
         try {
           client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
           await client.connect();
