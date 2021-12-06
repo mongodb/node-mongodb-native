@@ -8,6 +8,27 @@ export type AnyError = MongoError | Error;
 /** @internal */
 const kErrorLabels = Symbol('errorLabels');
 
+/**
+ * @internal
+ * The legacy error message from the server that indicates the node is not a writable primary
+ * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ */
+export const LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE = 'not master';
+
+/**
+ * @internal
+ * The legacy error message from the server that indicates the node is not a primary or secondary
+ * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ */
+export const LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE = 'not master or secondary';
+
+/**
+ * @internal
+ * The error message from the server that indicates the node is recovering
+ * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ */
+export const NODE_IS_RECOVERING_ERROR_MESSAGE = 'node is recovering';
+
 /** @internal MongoDB Error Codes */
 export const MONGODB_ERROR_CODES = Object.freeze({
   HostUnreachable: 6,
@@ -17,11 +38,11 @@ export const MONGODB_ERROR_CODES = Object.freeze({
   PrimarySteppedDown: 189,
   ExceededTimeLimit: 262,
   SocketException: 9001,
-  NotMaster: 10107,
+  NotWritablePrimary: 10107,
   InterruptedAtShutdown: 11600,
   InterruptedDueToReplStateChange: 11602,
-  NotMasterNoSlaveOk: 13435,
-  NotMasterOrSecondary: 13436,
+  NotPrimaryNoSecondaryOk: 13435,
+  NotPrimaryOrSecondary: 13436,
   StaleShardVersion: 63,
   StaleEpoch: 150,
   StaleConfig: 13388,
@@ -46,11 +67,11 @@ export const GET_MORE_RESUMABLE_CODES = new Set<number>([
   MONGODB_ERROR_CODES.PrimarySteppedDown,
   MONGODB_ERROR_CODES.ExceededTimeLimit,
   MONGODB_ERROR_CODES.SocketException,
-  MONGODB_ERROR_CODES.NotMaster,
+  MONGODB_ERROR_CODES.NotWritablePrimary,
   MONGODB_ERROR_CODES.InterruptedAtShutdown,
   MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
-  MONGODB_ERROR_CODES.NotMasterNoSlaveOk,
-  MONGODB_ERROR_CODES.NotMasterOrSecondary,
+  MONGODB_ERROR_CODES.NotPrimaryNoSecondaryOk,
+  MONGODB_ERROR_CODES.NotPrimaryOrSecondary,
   MONGODB_ERROR_CODES.StaleShardVersion,
   MONGODB_ERROR_CODES.StaleEpoch,
   MONGODB_ERROR_CODES.StaleConfig,
@@ -675,19 +696,19 @@ const RETRYABLE_ERROR_CODES = new Set<number>([
   MONGODB_ERROR_CODES.ShutdownInProgress,
   MONGODB_ERROR_CODES.PrimarySteppedDown,
   MONGODB_ERROR_CODES.SocketException,
-  MONGODB_ERROR_CODES.NotMaster,
+  MONGODB_ERROR_CODES.NotWritablePrimary,
   MONGODB_ERROR_CODES.InterruptedAtShutdown,
   MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
-  MONGODB_ERROR_CODES.NotMasterNoSlaveOk,
-  MONGODB_ERROR_CODES.NotMasterOrSecondary
+  MONGODB_ERROR_CODES.NotPrimaryNoSecondaryOk,
+  MONGODB_ERROR_CODES.NotPrimaryOrSecondary
 ]);
 
 const RETRYABLE_WRITE_ERROR_CODES = new Set<number>([
   MONGODB_ERROR_CODES.InterruptedAtShutdown,
   MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
-  MONGODB_ERROR_CODES.NotMaster,
-  MONGODB_ERROR_CODES.NotMasterNoSlaveOk,
-  MONGODB_ERROR_CODES.NotMasterOrSecondary,
+  MONGODB_ERROR_CODES.NotWritablePrimary,
+  MONGODB_ERROR_CODES.NotPrimaryNoSecondaryOk,
+  MONGODB_ERROR_CODES.NotPrimaryOrSecondary,
   MONGODB_ERROR_CODES.PrimarySteppedDown,
   MONGODB_ERROR_CODES.ShutdownInProgress,
   MONGODB_ERROR_CODES.HostNotFound,
@@ -714,8 +735,8 @@ export function isRetryableError(error: MongoError): boolean {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     (typeof error.code === 'number' && RETRYABLE_ERROR_CODES.has(error.code!)) ||
     error instanceof MongoNetworkError ||
-    !!error.message.match(/not master/) ||
-    !!error.message.match(/node is recovering/)
+    !!error.message.match(new RegExp(LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE)) ||
+    !!error.message.match(new RegExp(NODE_IS_RECOVERING_ERROR_MESSAGE))
   );
 }
 
@@ -724,12 +745,12 @@ const SDAM_RECOVERING_CODES = new Set<number>([
   MONGODB_ERROR_CODES.PrimarySteppedDown,
   MONGODB_ERROR_CODES.InterruptedAtShutdown,
   MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
-  MONGODB_ERROR_CODES.NotMasterOrSecondary
+  MONGODB_ERROR_CODES.NotPrimaryOrSecondary
 ]);
 
-const SDAM_NOTMASTER_CODES = new Set<number>([
-  MONGODB_ERROR_CODES.NotMaster,
-  MONGODB_ERROR_CODES.NotMasterNoSlaveOk,
+const SDAM_NOTPRIMARY_CODES = new Set<number>([
+  MONGODB_ERROR_CODES.NotWritablePrimary,
+  MONGODB_ERROR_CODES.NotPrimaryNoSecondaryOk,
   MONGODB_ERROR_CODES.LegacyNotPrimary
 ]);
 
@@ -744,20 +765,23 @@ function isRecoveringError(err: MongoError) {
     return SDAM_RECOVERING_CODES.has(err.code);
   }
 
-  return /not master or secondary/.test(err.message) || /node is recovering/.test(err.message);
+  return (
+    new RegExp(LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE).test(err.message) ||
+    new RegExp(NODE_IS_RECOVERING_ERROR_MESSAGE).test(err.message)
+  );
 }
 
-function isNotMasterError(err: MongoError) {
+function isNotWritablePrimaryError(err: MongoError) {
   if (typeof err.code === 'number') {
     // If any error code exists, we ignore the error.message
-    return SDAM_NOTMASTER_CODES.has(err.code);
+    return SDAM_NOTPRIMARY_CODES.has(err.code);
   }
 
   if (isRecoveringError(err)) {
     return false;
   }
 
-  return /not master/.test(err.message);
+  return new RegExp(LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE).test(err.message);
 }
 
 export function isNodeShuttingDownError(err: MongoError): boolean {
@@ -778,7 +802,7 @@ export function isSDAMUnrecoverableError(error: MongoError): boolean {
     return true;
   }
 
-  return isRecoveringError(error) || isNotMasterError(error);
+  return isRecoveringError(error) || isNotWritablePrimaryError(error);
 }
 
 export function isNetworkTimeoutError(err: MongoError): err is MongoNetworkError {
