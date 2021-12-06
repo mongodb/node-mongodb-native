@@ -8,13 +8,26 @@ export type AnyError = MongoError | Error;
 /** @internal */
 const kErrorLabels = Symbol('errorLabels');
 
-/** @internal */
-// Abstract the offensive terminology to a constant
-const LEGACY_NOT_PRIMARY_ERROR_MESSAGE_REGEX = /not master/;
+/**
+ * @internal
+ * The legacy error message from the server that indicates the node is not a writable primary
+ * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ */
+export const LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE = 'not master';
 
-/** @internal */
-// Abstract the offensive terminology to a constant
-const LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE_REGEX = /not master or secondary/;
+/**
+ * @internal
+ * The legacy error message from the server that indicates the node is not a primary or secondary
+ * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ */
+export const LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE = 'not master or secondary';
+
+/**
+ * @internal
+ * The error message from the server that indicates the node is recovering
+ * https://github.com/mongodb/specifications/blob/b07c26dc40d04ac20349f989db531c9845fdd755/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#not-writable-primary-and-node-is-recovering
+ */
+export const NODE_IS_RECOVERING_ERROR_MESSAGE = 'node is recovering';
 
 /** @internal MongoDB Error Codes */
 export const MONGODB_ERROR_CODES = Object.freeze({
@@ -722,8 +735,8 @@ export function isRetryableError(error: MongoError): boolean {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     (typeof error.code === 'number' && RETRYABLE_ERROR_CODES.has(error.code!)) ||
     error instanceof MongoNetworkError ||
-    !!error.message.match(LEGACY_NOT_PRIMARY_ERROR_MESSAGE_REGEX) ||
-    !!error.message.match(/node is recovering/)
+    !!error.message.match(new RegExp(LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE)) ||
+    !!error.message.match(new RegExp(NODE_IS_RECOVERING_ERROR_MESSAGE))
   );
 }
 
@@ -753,12 +766,12 @@ function isRecoveringError(err: MongoError) {
   }
 
   return (
-    LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE_REGEX.test(err.message) ||
-    /node is recovering/.test(err.message)
+    new RegExp(LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE).test(err.message) ||
+    new RegExp(NODE_IS_RECOVERING_ERROR_MESSAGE).test(err.message)
   );
 }
 
-function isNotPrimaryError(err: MongoError) {
+function isNotWritablePrimaryError(err: MongoError) {
   if (typeof err.code === 'number') {
     // If any error code exists, we ignore the error.message
     return SDAM_NOTPRIMARY_CODES.has(err.code);
@@ -768,7 +781,7 @@ function isNotPrimaryError(err: MongoError) {
     return false;
   }
 
-  return LEGACY_NOT_PRIMARY_ERROR_MESSAGE_REGEX.test(err.message);
+  return new RegExp(LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE).test(err.message);
 }
 
 export function isNodeShuttingDownError(err: MongoError): boolean {
@@ -789,7 +802,7 @@ export function isSDAMUnrecoverableError(error: MongoError): boolean {
     return true;
   }
 
-  return isRecoveringError(error) || isNotPrimaryError(error);
+  return isRecoveringError(error) || isNotWritablePrimaryError(error);
 }
 
 export function isNetworkTimeoutError(err: MongoError): err is MongoNetworkError {

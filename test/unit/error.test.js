@@ -9,6 +9,11 @@ const { ns } = require('../../src/utils');
 const { Topology } = require('../../src/sdam/topology');
 const { MongoNetworkError, MongoWriteConcernError } = require('../../src/index');
 const {
+  LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
+  LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
+  NODE_IS_RECOVERING_ERROR_MESSAGE
+} = require('../../src/error');
+const {
   isRetryableEndTransactionError,
   MongoParseError,
   isSDAMUnrecoverableError,
@@ -18,9 +23,6 @@ const {
   PoolClosedError: MongoPoolClosedError,
   WaitQueueTimeoutError: MongoWaitQueueTimeoutError
 } = require('../../src/cmap/errors');
-
-// Abstract the offensive terminology to a constant
-const LEGACY_NOT_PRIMARY_MESSAGE = 'not master';
 
 describe('MongoErrors', () => {
   // import errors as object
@@ -110,9 +112,19 @@ describe('MongoErrors', () => {
       function () {
         it('returns false', function () {
           // If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not writable primary" error.
-          const error = new MongoError('node is recovering');
+          const error = new MongoError(NODE_IS_RECOVERING_ERROR_MESSAGE);
           error.code = 555;
           expect(isSDAMUnrecoverableError(error)).to.be.false;
+        });
+      }
+    );
+
+    context(
+      'when the error message contains the legacy "not primary" message and no error code is used',
+      function () {
+        it('returns true', function () {
+          const error = new MongoError(`this is ${LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE}.`);
+          expect(isSDAMUnrecoverableError(error)).to.be.true;
         });
       }
     );
@@ -121,7 +133,7 @@ describe('MongoErrors', () => {
       'when the error message contains "node is recovering" and no error code is used',
       function () {
         it('returns true', function () {
-          const error = new MongoError('the node is recovering from an error');
+          const error = new MongoError(`the ${NODE_IS_RECOVERING_ERROR_MESSAGE} from an error`);
           expect(isSDAMUnrecoverableError(error)).to.be.true;
         });
       }
@@ -132,7 +144,7 @@ describe('MongoErrors', () => {
       function () {
         it('returns true', function () {
           const error = new MongoError(
-            `this is ${LEGACY_NOT_PRIMARY_MESSAGE} or secondary, so we have a problem `
+            `this is ${LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE}, so we have a problem `
           );
           expect(isSDAMUnrecoverableError(error)).to.be.true;
         });
