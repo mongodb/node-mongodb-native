@@ -135,14 +135,14 @@ describe('Connections survive primary step down', function () {
     });
   }
 
-  it('Not Master - Keep Connection Pool', {
+  it('Not Primary - Keep Connection Pool', {
     metadata: { requires: { mongodb: '>=4.2.0', topology: 'replicaset' } },
     test: function () {
       return runStepownScenario(10107, expectPoolWasNotCleared);
     }
   });
 
-  it('Not Master - Reset Connection Pool', {
+  it('Not Primary - Reset Connection Pool', {
     metadata: { requires: { mongodb: '4.0.x', topology: 'replicaset' } },
     test: function () {
       return runStepownScenario(10107, expectPoolWasCleared);
