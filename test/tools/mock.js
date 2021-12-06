@@ -5,7 +5,7 @@ const {
   cleanup,
   DEFAULT_ISMASTER_36
   // eslint-disable-next-line no-restricted-modules
-} = require('mongodb-mock-server');
+} = require('./mongodb-mock');
 const { HostAddress } = require('../../src/utils');
 
 /**

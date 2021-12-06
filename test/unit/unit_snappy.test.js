@@ -19,14 +19,14 @@ describe('Compression', function () {
   /** @type {mock.MockServer} */
   let server;
   before(async function () {
-    if (!snappy) this.skip();
+    if (!snappy) return this.skip();
     server = await mock.createServer();
     client = new MongoClient(`mongodb://${server.uri()}`, { compressors: 'snappy' });
   });
 
   after(async function () {
-    await mock.cleanup();
-    await client.close();
+    if (server) await mock.cleanup();
+    if (client) await client.close();
   });
 
   describe('Snappy', () => {
