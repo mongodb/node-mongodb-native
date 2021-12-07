@@ -8,7 +8,7 @@ Please follow the [code of conduct][code-of-conduct] in all your interactions wi
 
 ## Developer Startup Guide
 
-This section will walk you though how to get started working with the code.
+This section will walk you through how to get started working with the code.
 ### Runtime
 
 We recommend you install Node Version Manager for [UNIX systems][nvm-unix] or [Windows][nvm-windows].
