@@ -4,7 +4,8 @@
 const setupDatabase = require('../shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(change-stream):', function () {
+// Fails on MacOS on Evergreen (NODE-3713)
+describe.skip('examples(change-stream):', function () {
   let client;
   let db;
 

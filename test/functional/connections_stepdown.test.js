@@ -26,7 +26,7 @@ function expectPoolWasNotCleared(initialCount) {
   return count => expect(count).to.equal(initialCount);
 }
 
-describe('Connections survive primary step down', function () {
+describe.skip('Connections survive primary step down', function () {
   let client;
   let checkClient;
   let db;

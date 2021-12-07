@@ -24,7 +24,8 @@ describe('monitoring', function () {
     return mock.createServer().then(server => (mockServer = server));
   });
 
-  it('should record roundTripTime', function (done) {
+  // Fails on MacOS on Evergreen (NODE-3713)
+  it.skip('should record roundTripTime', function (done) {
     mockServer.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {

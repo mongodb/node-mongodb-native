@@ -1655,7 +1655,7 @@ describe('Find', function () {
     }
   });
 
-  it('shouldCorrectlyIterateOverCollection', {
+  it.skip('shouldCorrectlyIterateOverCollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },

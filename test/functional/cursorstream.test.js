@@ -207,7 +207,8 @@ describe('Cursor Streams', function () {
     }
   });
 
-  it('should stream documents across getMore command and count correctly', {
+  // Fails on MacOS on Evergreen (NODE-3713)
+  it.skip('should stream documents across getMore command and count correctly', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
