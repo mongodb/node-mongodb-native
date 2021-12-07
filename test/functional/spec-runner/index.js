@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
+
 const expect = chai.expect;
 const { EJSON } = require('bson');
 const { isRecord } = require('../../../src/utils');

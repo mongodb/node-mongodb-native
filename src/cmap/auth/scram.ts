@@ -1,19 +1,19 @@
 import * as crypto from 'crypto';
+
 import { Binary, Document } from '../../bson';
+import { saslprep } from '../../deps';
 import {
   AnyError,
-  MongoRuntimeError,
-  MongoServerError,
   MongoInvalidArgumentError,
-  MongoMissingCredentialsError
+  MongoMissingCredentialsError,
+  MongoRuntimeError,
+  MongoServerError
 } from '../../error';
-import { AuthProvider, AuthContext } from './auth_provider';
-import { Callback, ns, emitWarning } from '../../utils';
-import type { MongoCredentials } from './mongo_credentials';
+import { Callback, emitWarning, ns } from '../../utils';
 import type { HandshakeDocument } from '../connect';
-
-import { saslprep } from '../../deps';
-import { AuthMechanism } from './defaultAuthProviders';
+import { AuthContext, AuthProvider } from './auth_provider';
+import type { MongoCredentials } from './mongo_credentials';
+import { AuthMechanism } from './providers';
 
 type CryptoMethod = 'sha1' | 'sha256';
 

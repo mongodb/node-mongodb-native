@@ -1,6 +1,7 @@
 'use strict';
 
 const chai = require('chai');
+
 const expect = chai.expect;
 const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;

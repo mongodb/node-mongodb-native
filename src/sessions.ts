@@ -1,46 +1,47 @@
-import { PromiseProvider } from './promise_provider';
-import { Binary, Long, Timestamp, Document } from './bson';
-import { ReadPreference } from './read_preference';
-import { isTransactionCommand, TxnState, Transaction, TransactionOptions } from './transactions';
-import { _advanceClusterTime, ClusterTime, TopologyType } from './sdam/common';
+import { Binary, Document, Long, Timestamp } from './bson';
+import type { CommandOptions, Connection } from './cmap/connection';
+import { ConnectionPoolMetrics } from './cmap/metrics';
 import { isSharded } from './cmap/wire_protocol/shared';
+import { PINNED, UNPINNED } from './constants';
+import type { AbstractCursor } from './cursor/abstract_cursor';
 import {
-  MongoError,
-  MongoInvalidArgumentError,
-  isRetryableError,
-  isRetryableEndTransactionError,
-  MongoCompatibilityError,
-  MongoNetworkError,
-  MongoWriteConcernError,
-  MONGODB_ERROR_CODES,
-  MongoServerError,
-  MongoDriverError,
-  MongoAPIError,
   AnyError,
+  isRetryableEndTransactionError,
+  isRetryableError,
+  MongoAPIError,
+  MongoCompatibilityError,
+  MONGODB_ERROR_CODES,
+  MongoDriverError,
+  MongoError,
   MongoExpiredSessionError,
+  MongoInvalidArgumentError,
+  MongoNetworkError,
+  MongoRuntimeError,
+  MongoServerError,
   MongoTransactionError,
-  MongoRuntimeError
+  MongoWriteConcernError
 } from './error';
-import {
-  now,
-  calculateDurationInMs,
-  Callback,
-  isPromiseLike,
-  uuidV4,
-  maxWireVersion,
-  maybePromise
-} from './utils';
-import type { Topology } from './sdam/topology';
 import type { MongoOptions } from './mongo_client';
+import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
-import type { AbstractCursor } from './cursor/abstract_cursor';
-import type { CommandOptions } from './cmap/connection';
-import { Connection } from './cmap/connection';
-import { ConnectionPoolMetrics } from './cmap/metrics';
-import type { WriteConcern } from './write_concern';
-import { TypedEventEmitter } from './mongo_types';
+import { PromiseProvider } from './promise_provider';
 import { ReadConcernLevel } from './read_concern';
+import { ReadPreference } from './read_preference';
+import { _advanceClusterTime, ClusterTime, TopologyType } from './sdam/common';
+import type { Topology } from './sdam/topology';
+import { isTransactionCommand, Transaction, TransactionOptions, TxnState } from './transactions';
+import {
+  calculateDurationInMs,
+  Callback,
+  commandSupportsReadConcern,
+  isPromiseLike,
+  maxWireVersion,
+  maybePromise,
+  now,
+  uuidV4
+} from './utils';
+import type { WriteConcern } from './write_concern';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -225,7 +226,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     this[kPinnedConnection] = conn;
     conn.emit(
-      Connection.PINNED,
+      PINNED,
       this.inTransaction() ? ConnectionPoolMetrics.TXN : ConnectionPoolMetrics.CURSOR
     );
   }
@@ -520,7 +521,7 @@ export function maybeClearPinnedConnection(
     if (options?.error == null || options?.force) {
       loadBalancer.s.pool.checkIn(conn);
       conn.emit(
-        Connection.UNPINNED,
+        UNPINNED,
         session.transaction.state !== TxnState.NO_TRANSACTION
           ? ConnectionPoolMetrics.TXN
           : ConnectionPoolMetrics.CURSOR
@@ -927,25 +928,6 @@ export class ServerSessionPool {
       this.sessions.unshift(session);
     }
   }
-}
-
-// TODO: this should be codified in command construction
-// @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern
-export function commandSupportsReadConcern(command: Document, options?: Document): boolean {
-  if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
-    return true;
-  }
-
-  if (
-    command.mapReduce &&
-    options &&
-    options.out &&
-    (options.out.inline === 1 || options.out === 'inline')
-  ) {
-    return true;
-  }
-
-  return false;
 }
 
 /**

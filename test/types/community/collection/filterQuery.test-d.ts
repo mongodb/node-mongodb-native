@@ -1,5 +1,6 @@
 import { BSONRegExp, Decimal128, ObjectId } from 'bson';
 import { expectAssignable, expectNotType, expectType } from 'tsd';
+
 import { Filter, MongoClient, WithId } from '../../../../src';
 
 /**

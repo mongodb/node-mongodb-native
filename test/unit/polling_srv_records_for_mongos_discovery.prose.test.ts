@@ -1,9 +1,9 @@
+import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
-import { expect } from 'chai';
+
 import { MongoClient } from '../../src';
 import { processTick } from '../tools/utils';
-import { it } from 'mocha';
 import * as mock from '../tools/mongodb-mock/index';
 
 /*

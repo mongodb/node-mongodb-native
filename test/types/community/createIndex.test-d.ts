@@ -1,5 +1,6 @@
 import { expectType } from 'tsd';
-import { CreateIndexesOptions, MongoClient, Document } from '../../../src';
+
+import { CreateIndexesOptions, Document, MongoClient } from '../../../src';
 
 const client = new MongoClient('');
 const db = client.db('test');

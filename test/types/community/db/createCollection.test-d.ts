@@ -1,12 +1,12 @@
 import { expectType } from 'tsd';
 
 import {
-  MongoClient,
-  ObjectId,
+  AnyError,
+  Callback,
   Collection,
   CreateCollectionOptions,
-  AnyError,
-  Callback
+  MongoClient,
+  ObjectId
 } from '../../../../src/index';
 
 const client = new MongoClient('');

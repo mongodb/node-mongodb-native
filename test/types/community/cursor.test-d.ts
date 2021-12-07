@@ -1,6 +1,7 @@
 import type { Readable } from 'stream';
 import { expectNotType, expectType } from 'tsd';
-import { FindCursor, MongoClient, Db, Document } from '../../../src/index';
+
+import { Db, Document, FindCursor, MongoClient } from '../../../src/index';
 
 // TODO(NODE-3346): Improve these tests to use expect assertions more
 

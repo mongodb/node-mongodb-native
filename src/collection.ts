@@ -1,102 +1,104 @@
-import { DEFAULT_PK_FACTORY, emitWarningOnce, resolveOptions } from './utils';
-import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import {
-  normalizeHintField,
-  checkCollectionName,
-  MongoDBNamespace,
-  Callback,
-  getTopology
-} from './utils';
-import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
-import { MongoInvalidArgumentError } from './error';
-import { UnorderedBulkOperation } from './bulk/unordered';
+import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
+import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
 import { OrderedBulkOperation } from './bulk/ordered';
+import { UnorderedBulkOperation } from './bulk/unordered';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { ReadConcern, ReadConcernLike } from './read_concern';
 import { AggregationCursor } from './cursor/aggregation_cursor';
+import { FindCursor } from './cursor/find_cursor';
+import type { Db } from './db';
+import { MongoInvalidArgumentError } from './error';
+import type { Logger, LoggerOptions } from './logger';
+import type { PkFactory } from './mongo_client';
+import type {
+  Filter,
+  Flatten,
+  OptionalId,
+  TODO_NODE_3286,
+  UpdateFilter,
+  WithId,
+  WithoutId
+} from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
+import type { IndexInformationOptions } from './operations/common_functions';
+import type { CountOptions } from './operations/count';
 import { CountDocumentsOperation, CountDocumentsOptions } from './operations/count_documents';
 import {
-  CreateIndexesOperation,
-  CreateIndexOperation,
-  DropIndexOperation,
-  DropIndexesOperation,
-  IndexesOperation,
-  IndexExistsOperation,
-  IndexInformationOperation,
-  CreateIndexesOptions,
-  DropIndexesOptions,
-  ListIndexesOptions,
-  IndexSpecification,
-  IndexDescription,
-  ListIndexesCursor
-} from './operations/indexes';
+  DeleteManyOperation,
+  DeleteOneOperation,
+  DeleteOptions,
+  DeleteResult
+} from './operations/delete';
 import { DistinctOperation, DistinctOptions } from './operations/distinct';
 import { DropCollectionOperation, DropCollectionOptions } from './operations/drop';
 import {
   EstimatedDocumentCountOperation,
   EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
+import { executeOperation } from './operations/execute_operation';
 import type { FindOptions } from './operations/find';
 import {
   FindOneAndDeleteOperation,
-  FindOneAndReplaceOperation,
-  FindOneAndUpdateOperation,
   FindOneAndDeleteOptions,
+  FindOneAndReplaceOperation,
   FindOneAndReplaceOptions,
+  FindOneAndUpdateOperation,
   FindOneAndUpdateOptions
 } from './operations/find_and_modify';
 import {
+  CreateIndexesOperation,
+  CreateIndexesOptions,
+  CreateIndexOperation,
+  DropIndexesOperation,
+  DropIndexesOptions,
+  DropIndexOperation,
+  IndexDescription,
+  IndexesOperation,
+  IndexExistsOperation,
+  IndexInformationOperation,
+  IndexSpecification,
+  ListIndexesCursor,
+  ListIndexesOptions
+} from './operations/indexes';
+import {
+  InsertManyOperation,
+  InsertManyResult,
   InsertOneOperation,
   InsertOneOptions,
-  InsertOneResult,
-  InsertManyOperation,
-  InsertManyResult
+  InsertOneResult
 } from './operations/insert';
-import {
-  UpdateOneOperation,
-  UpdateManyOperation,
-  UpdateOptions,
-  UpdateResult,
-  ReplaceOneOperation,
-  ReplaceOptions
-} from './operations/update';
-import {
-  DeleteOneOperation,
-  DeleteManyOperation,
-  DeleteOptions,
-  DeleteResult
-} from './operations/delete';
 import { IsCappedOperation } from './operations/is_capped';
 import {
-  MapReduceOperation,
   MapFunction,
-  ReduceFunction,
-  MapReduceOptions
+  MapReduceOperation,
+  MapReduceOptions,
+  ReduceFunction
 } from './operations/map_reduce';
+import type { Hint, OperationOptions } from './operations/operation';
 import { OptionsOperation } from './operations/options_operation';
 import { RenameOperation, RenameOptions } from './operations/rename';
 import { CollStats, CollStatsOperation, CollStatsOptions } from './operations/stats';
-import { executeOperation } from './operations/execute_operation';
-import type { Db } from './db';
-import type { OperationOptions, Hint } from './operations/operation';
-import type { IndexInformationOptions } from './operations/common_functions';
-import type { BulkWriteResult, BulkWriteOptions, AnyBulkWriteOperation } from './bulk/common';
-import type { PkFactory } from './mongo_client';
-import type { Logger, LoggerOptions } from './logger';
-import { FindCursor } from './cursor/find_cursor';
-import type { CountOptions } from './operations/count';
-import type {
-  Filter,
-  TODO_NODE_3286,
-  UpdateFilter,
-  WithId,
-  WithoutId,
-  OptionalId,
-  Flatten
-} from './mongo_types';
+import {
+  ReplaceOneOperation,
+  ReplaceOptions,
+  UpdateManyOperation,
+  UpdateOneOperation,
+  UpdateOptions,
+  UpdateResult
+} from './operations/update';
+import { ReadConcern, ReadConcernLike } from './read_concern';
+import { ReadPreference, ReadPreferenceLike } from './read_preference';
+import {
+  Callback,
+  checkCollectionName,
+  DEFAULT_PK_FACTORY,
+  emitWarningOnce,
+  getTopology,
+  MongoDBNamespace,
+  normalizeHintField,
+  resolveOptions
+} from './utils';
+import { WriteConcern, WriteConcernOptions } from './write_concern';
 
 /** @public */
 export interface ModifyResult<TSchema = Document> {

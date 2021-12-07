@@ -1,4 +1,5 @@
 import { expectType } from 'tsd';
+
 import { CollStats, MongoClient } from '../../../src/index';
 
 const client = new MongoClient('');

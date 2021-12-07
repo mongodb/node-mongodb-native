@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import type { PeerCertificate } from 'tls';
-import type { PropExists } from '../utility_types';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
+
 import {
   LoggerLevel,
   MongoClient,
@@ -9,6 +9,7 @@ import {
   ReadPreference,
   ReadPreferenceMode
 } from '../../../src';
+import type { PropExists } from '../utility_types';
 
 type MongoDBImport = typeof import('../../../src');
 

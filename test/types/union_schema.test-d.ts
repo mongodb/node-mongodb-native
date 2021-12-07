@@ -1,7 +1,7 @@
-import { expectType, expectError, expectNotType, expectNotAssignable, expectAssignable } from 'tsd';
+import { expectAssignable, expectError, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
-import type { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
+import type { Collection } from '../../src/collection';
 import type { WithId } from '../../src/mongo_types';
 
 type InsertOneFirstParam<Schema> = Parameters<Collection<Schema>['insertOne']>[0];

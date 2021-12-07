@@ -1,20 +1,20 @@
-import { Aspect, defineAspects, Hint } from './operation';
+import type { Document } from '../bson';
+import { isSharded } from '../cmap/wire_protocol/shared';
+import type { Collection } from '../collection';
+import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
+import { ReadConcern } from '../read_concern';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
+import { formatSort, Sort } from '../sort';
 import {
+  Callback,
+  decorateWithExplain,
   maxWireVersion,
   MongoDBNamespace,
-  Callback,
-  normalizeHintField,
-  decorateWithExplain
+  normalizeHintField
 } from '../utils';
-import { MongoInvalidArgumentError, MongoCompatibilityError } from '../error';
-import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
-import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
-import { Sort, formatSort } from '../sort';
-import { isSharded } from '../cmap/wire_protocol/shared';
-import { ReadConcern } from '../read_concern';
-import type { ClientSession } from '../sessions';
+import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects, Hint } from './operation';
 
 /**
  * @public

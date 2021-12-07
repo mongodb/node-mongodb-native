@@ -1,12 +1,12 @@
-import { checkCollectionName, Callback } from '../utils';
-import { RunAdminCommandOperation } from './run_command';
-import { defineAspects, Aspect } from './operation';
-import type { Server } from '../sdam/server';
+import type { Document } from '../bson';
 import { Collection } from '../collection';
-import type { CommandOperationOptions } from './command';
 import { MongoServerError } from '../error';
+import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Document } from 'bson';
+import { Callback, checkCollectionName } from '../utils';
+import type { CommandOperationOptions } from './command';
+import { Aspect, defineAspects } from './operation';
+import { RunAdminCommandOperation } from './run_command';
 
 /** @public */
 export interface RenameOptions extends CommandOperationOptions {

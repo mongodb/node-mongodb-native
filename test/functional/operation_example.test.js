@@ -6,6 +6,7 @@ const { Topology } = require('../../src/sdam/topology');
 const { Code, ObjectId, ReturnDocument } = require('../../src');
 
 const chai = require('chai');
+
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 

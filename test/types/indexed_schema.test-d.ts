@@ -1,7 +1,7 @@
-import { expectType, expectNotType, expectError } from 'tsd';
+import { expectError, expectNotType, expectType } from 'tsd';
 
-import { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
+import { Collection } from '../../src/collection';
 import { Db } from '../../src/db';
 import { MongoClient } from '../../src/mongo_client';
 

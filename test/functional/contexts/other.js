@@ -1,6 +1,7 @@
 'use strict';
 
 var shared = require('./shared');
+
 shared.object = { name: 1, age: -1 };
 shared.array = ['name'];
 shared.string = 'woot';

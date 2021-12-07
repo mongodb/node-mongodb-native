@@ -1,15 +1,16 @@
 import { expect } from 'chai';
-import { ReadPreference } from '../../../src/read_preference';
-import * as uni from './schema';
-import { zip, topologySatisfies, patchVersion } from './unified-utils';
-import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
-import { ns } from '../../../src/utils';
-import { executeOperationAndCheck } from './operations';
-import { matchesEvents } from './match';
 import { satisfies as semverSatisfies } from 'semver';
+
 import { MongoClient } from '../../../src/mongo_client';
+import { ReadPreference } from '../../../src/read_preference';
 import { TopologyType } from '../../../src/sdam/common';
+import { ns } from '../../../src/utils';
 import { ejson } from '../utils';
+import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
+import { matchesEvents } from './match';
+import { executeOperationAndCheck } from './operations';
+import * as uni from './schema';
+import { patchVersion, topologySatisfies, zip } from './unified-utils';
 
 export type TestConfiguration = InstanceType<
   typeof import('../../tools/runner/config')['TestConfiguration']

@@ -20,6 +20,7 @@ const { eachAsyncSeries, ns } = require('../../../src/utils');
 const chai = require('chai');
 chai.use(require('chai-subset'));
 chai.use(require('../../functional/spec-runner/matcher').default);
+
 const expect = chai.expect;
 
 const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');

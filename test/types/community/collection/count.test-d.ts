@@ -1,4 +1,5 @@
 import { expectDeprecated, expectType } from 'tsd';
+
 import { MongoClient } from '../../../../src/index';
 
 // test collection.countDocuments

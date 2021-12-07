@@ -1,5 +1,6 @@
-import { ReadPreference } from '../../src';
 import { expect } from 'chai';
+
+import { ReadPreference } from '../../src';
 
 describe('class ReadPreference', function () {
   const maxStalenessSeconds = 1234;

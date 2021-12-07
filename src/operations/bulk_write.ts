@@ -1,14 +1,14 @@
-import { Aspect, defineAspects, AbstractOperation } from './operation';
-import type { Callback } from '../utils';
-import type { Collection } from '../collection';
 import type {
+  AnyBulkWriteOperation,
   BulkOperationBase,
-  BulkWriteResult,
   BulkWriteOptions,
-  AnyBulkWriteOperation
+  BulkWriteResult
 } from '../bulk/common';
+import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import type { Callback } from '../utils';
+import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
 export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {

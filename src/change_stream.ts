@@ -1,39 +1,40 @@
 import Denque = require('denque');
-import {
-  MongoError,
-  AnyError,
-  isResumableError,
-  MongoRuntimeError,
-  MongoAPIError,
-  MongoChangeStreamError
-} from './error';
-import { AggregateOperation, AggregateOptions } from './operations/aggregate';
-import {
-  maxWireVersion,
-  calculateDurationInMs,
-  now,
-  maybePromise,
-  MongoDBNamespace,
-  Callback,
-  getTopology
-} from './utils';
-import type { ReadPreference } from './read_preference';
-import type { Timestamp, Document } from './bson';
-import type { Topology } from './sdam/topology';
-import type { OperationParent, CollationOptions } from './operations/command';
-import { MongoClient } from './mongo_client';
-import { Db } from './db';
-import { Collection } from './collection';
 import type { Readable } from 'stream';
+
+import type { Document, Timestamp } from './bson';
+import { Collection } from './collection';
 import {
   AbstractCursor,
   AbstractCursorEvents,
   AbstractCursorOptions,
   CursorStreamOptions
 } from './cursor/abstract_cursor';
-import type { ClientSession } from './sessions';
-import { executeOperation, ExecutionResult } from './operations/execute_operation';
+import { Db } from './db';
+import {
+  AnyError,
+  isResumableError,
+  MongoAPIError,
+  MongoChangeStreamError,
+  MongoError,
+  MongoRuntimeError
+} from './error';
+import { MongoClient } from './mongo_client';
 import { InferIdType, Nullable, TypedEventEmitter } from './mongo_types';
+import { AggregateOperation, AggregateOptions } from './operations/aggregate';
+import type { CollationOptions, OperationParent } from './operations/command';
+import { executeOperation, ExecutionResult } from './operations/execute_operation';
+import type { ReadPreference } from './read_preference';
+import type { Topology } from './sdam/topology';
+import type { ClientSession } from './sessions';
+import {
+  calculateDurationInMs,
+  Callback,
+  getTopology,
+  maxWireVersion,
+  maybePromise,
+  MongoDBNamespace,
+  now
+} from './utils';
 
 /** @internal */
 const kResumeQueue = Symbol('resumeQueue');

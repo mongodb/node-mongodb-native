@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import type { deserialize, Document, serialize } from './bson';
 import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
-import type { deserialize, Document, serialize } from './bson';
 import { Callback, parsePackageVersion } from './utils';
 
 export const PKG_VERSION = Symbol('kPkgVersion');

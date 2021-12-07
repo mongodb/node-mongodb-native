@@ -1,10 +1,10 @@
-import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback } from '../utils';
-import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
 import type { Admin } from '../admin';
-import type { ClientSession } from '../sessions';
+import type { Document } from '../bson';
 import { MongoRuntimeError } from '../error';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
+import type { Callback } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
 
 /** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {

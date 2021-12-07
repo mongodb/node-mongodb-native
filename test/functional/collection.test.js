@@ -1,6 +1,7 @@
 'use strict';
 const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
+
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 const mock = require('../tools/mongodb-mock/index');

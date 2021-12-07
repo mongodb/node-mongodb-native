@@ -1,13 +1,13 @@
-import { CommandOperation, CommandOperationOptions } from './command';
-import { Aspect, defineAspects } from './operation';
-import { maxWireVersion, Callback, getTopology, MongoDBNamespace } from '../utils';
-import * as CONSTANTS from '../constants';
 import type { Binary, Document } from '../bson';
-import type { Server } from '../sdam/server';
-import type { Db } from '../db';
+import * as CONSTANTS from '../constants';
 import { AbstractCursor } from '../cursor/abstract_cursor';
+import type { Db } from '../db';
+import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { Callback, getTopology, maxWireVersion, MongoDBNamespace } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
 import { executeOperation, ExecutionResult } from './execute_operation';
+import { Aspect, defineAspects } from './operation';
 
 const LIST_COLLECTIONS_WIRE_VERSION = 3;
 

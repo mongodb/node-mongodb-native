@@ -1,7 +1,7 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 
-import { Collection } from '../../src/collection';
 import { ObjectId } from '../../src/bson';
+import { Collection } from '../../src/collection';
 import { Db } from '../../src/db';
 import { MongoClient } from '../../src/mongo_client';
 import type { InferIdType } from '../../src/mongo_types';

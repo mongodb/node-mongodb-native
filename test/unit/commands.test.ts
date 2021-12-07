@@ -1,8 +1,8 @@
-import { expect } from 'chai';
-import { BinMsg, MessageHeader } from '../../src/cmap/commands';
 import { BSONError } from 'bson';
+import { expect } from 'chai';
+
 import * as BSON from '../../src/bson';
-import { test } from 'mocha';
+import { BinMsg, MessageHeader } from '../../src/cmap/commands';
 
 const msgHeader: MessageHeader = {
   length: 735,

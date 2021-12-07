@@ -1,17 +1,17 @@
-import { defineAspects, Aspect, Hint } from './operation';
+import type { Document, ObjectId } from '../bson';
+import type { Collection } from '../collection';
+import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
 import {
-  hasAtomicOperators,
-  MongoDBNamespace,
   Callback,
   collationNotSupported,
-  maxWireVersion
+  hasAtomicOperators,
+  maxWireVersion,
+  MongoDBNamespace
 } from '../utils';
-import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
-import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
-import type { ObjectId, Document } from '../bson';
-import type { ClientSession } from '../sessions';
-import { MongoServerError, MongoInvalidArgumentError, MongoCompatibilityError } from '../error';
+import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects, Hint } from './operation';
 
 /** @public */
 export interface UpdateOptions extends CommandOperationOptions {

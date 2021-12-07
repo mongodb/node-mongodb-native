@@ -1,4 +1,5 @@
-import { expectType, expectError } from 'tsd';
+import { expectError, expectType } from 'tsd';
+
 import { MongoClient } from '../../src/mongo_client';
 import { ReadConcern, ReadConcernLevel } from '../../src/read_concern';
 import type { ClientSession } from '../../src/sessions';

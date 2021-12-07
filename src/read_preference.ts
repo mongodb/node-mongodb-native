@@ -1,7 +1,7 @@
-import type { TagSet } from './sdam/server_description';
 import type { Document } from './bson';
-import type { ClientSession } from './sessions';
 import { MongoInvalidArgumentError } from './error';
+import type { TagSet } from './sdam/server_description';
+import type { ClientSession } from './sessions';
 
 /** @public */
 export type ReadPreferenceLike = ReadPreference | ReadPreferenceMode;

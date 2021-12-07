@@ -1,4 +1,4 @@
-import { expectType, expectNotType } from 'tsd';
+import { expectNotType, expectType } from 'tsd';
 
 import { MongoClient } from '../../src/mongo_client';
 import type { CollectionInfo, ListCollectionsCursor } from '../../src/operations/list_collections';

@@ -1,7 +1,7 @@
-import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
-import { calculateDurationInMs, deepCopy } from '../utils';
-import type { Connection } from './connection';
 import type { Document, ObjectId } from '../bson';
+import { calculateDurationInMs, deepCopy } from '../utils';
+import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
+import type { Connection } from './connection';
 
 /**
  * An event indicating the start of a given

@@ -7,8 +7,7 @@
   "require": [
     "source-map-support/register",
     "ts-node/register",
-    "test/tools/runner/chai-addons",
-    "test/tools/runner/circular-dep-hack"
+    "test/tools/runner/chai-addons"
   ],
   "ui": "test/tools/runner/metadata_ui.js",
   "recursive": true,
