@@ -6,7 +6,7 @@ import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
 import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
-import { deserialize } from 'bson';
+// import { deserialize } from '../bson';
 
 // Incrementing request id
 let _requestId = 0;
@@ -838,7 +838,7 @@ export class BinMsg {
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
-    const validation = this._parseBsonSerializationOptions(options);
+    const validation = this.parseBsonSerializationOptions(options);
 
     // Set up the options
     const bsonOptions: BSONSerializeOptions = {
@@ -855,7 +855,7 @@ export class BinMsg {
       if (payloadType === 0) {
         const bsonSize = this.data.readUInt32LE(this.index);
         const bin = this.data.slice(this.index, this.index + bsonSize);
-        this.documents.push(raw ? bin : deserialize(bin, bsonOptions));
+        this.documents.push(raw ? bin : BSON.deserialize(bin, bsonOptions));
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
@@ -876,7 +876,7 @@ export class BinMsg {
     this.parsed = true;
   }
 
-  private _parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {
+  parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {
     utf8: { writeErrors: false } | false;
   } {
     if (enableUtf8Validation == null || enableUtf8Validation) {
