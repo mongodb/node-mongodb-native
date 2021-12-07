@@ -4,6 +4,7 @@
   "altname_local": "local",
   "altname_azure": "azure",
   "altname_gcp": "gcp",
+  "altname_kmip": "kmip",
   "aws_double_rand_auto_id": {
     "kms": "aws",
     "type": "double",
@@ -6639,6 +6640,1667 @@
   },
   "gcp_maxKey_det_explicit_altname": {
     "kms": "gcp",
+    "type": "maxKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "kmip_double_rand_auto_id": {
+    "kms": "kmip",
+    "type": "double",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "kmip_double_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "double",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "kmip_double_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "double",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "kmip_double_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "double",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "kmip_double_det_explicit_id": {
+    "kms": "kmip",
+    "type": "double",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "kmip_double_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "double",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$numberDouble": "1.234"
+    }
+  },
+  "kmip_string_rand_auto_id": {
+    "kms": "kmip",
+    "type": "string",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "kmip_string_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "string",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "kmip_string_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "string",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "kmip_string_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "string",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "kmip_string_det_auto_id": {
+    "kms": "kmip",
+    "type": "string",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "kmip_string_det_explicit_id": {
+    "kms": "kmip",
+    "type": "string",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "kmip_string_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "string",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": "mongodb"
+  },
+  "kmip_object_rand_auto_id": {
+    "kms": "kmip",
+    "type": "object",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "kmip_object_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "object",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "kmip_object_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "object",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "kmip_object_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "object",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "kmip_object_det_explicit_id": {
+    "kms": "kmip",
+    "type": "object",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "kmip_object_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "object",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "x": {
+        "$numberInt": "1"
+      }
+    }
+  },
+  "kmip_array_rand_auto_id": {
+    "kms": "kmip",
+    "type": "array",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "kmip_array_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "array",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "kmip_array_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "array",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "kmip_array_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "array",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "kmip_array_det_explicit_id": {
+    "kms": "kmip",
+    "type": "array",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "kmip_array_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "array",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": [
+      {
+        "$numberInt": "1"
+      },
+      {
+        "$numberInt": "2"
+      },
+      {
+        "$numberInt": "3"
+      }
+    ]
+  },
+  "kmip_binData=00_rand_auto_id": {
+    "kms": "kmip",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "kmip_binData=00_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "kmip_binData=00_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "kmip_binData=00_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "binData=00",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "kmip_binData=00_det_auto_id": {
+    "kms": "kmip",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "kmip_binData=00_det_explicit_id": {
+    "kms": "kmip",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "kmip_binData=00_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "binData=00",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AQIDBA==",
+        "subType": "00"
+      }
+    }
+  },
+  "kmip_binData=04_rand_auto_id": {
+    "kms": "kmip",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "kmip_binData=04_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "kmip_binData=04_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "kmip_binData=04_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "binData=04",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "kmip_binData=04_det_auto_id": {
+    "kms": "kmip",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "kmip_binData=04_det_explicit_id": {
+    "kms": "kmip",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "kmip_binData=04_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "binData=04",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$binary": {
+        "base64": "AAECAwQFBgcICQoLDA0ODw==",
+        "subType": "04"
+      }
+    }
+  },
+  "kmip_undefined_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "undefined",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "kmip_undefined_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "undefined",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "kmip_undefined_det_explicit_id": {
+    "kms": "kmip",
+    "type": "undefined",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "kmip_undefined_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "undefined",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$undefined": true
+    }
+  },
+  "kmip_objectId_rand_auto_id": {
+    "kms": "kmip",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "kmip_objectId_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "kmip_objectId_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "kmip_objectId_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "objectId",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "kmip_objectId_det_auto_id": {
+    "kms": "kmip",
+    "type": "objectId",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "kmip_objectId_det_explicit_id": {
+    "kms": "kmip",
+    "type": "objectId",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "kmip_objectId_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "objectId",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$oid": "01234567890abcdef0123456"
+    }
+  },
+  "kmip_bool_rand_auto_id": {
+    "kms": "kmip",
+    "type": "bool",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": true
+  },
+  "kmip_bool_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "bool",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": true
+  },
+  "kmip_bool_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "bool",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": true
+  },
+  "kmip_bool_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "bool",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": true
+  },
+  "kmip_bool_det_explicit_id": {
+    "kms": "kmip",
+    "type": "bool",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": true
+  },
+  "kmip_bool_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "bool",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": true
+  },
+  "kmip_date_rand_auto_id": {
+    "kms": "kmip",
+    "type": "date",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "kmip_date_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "date",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "kmip_date_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "date",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "kmip_date_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "date",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "kmip_date_det_auto_id": {
+    "kms": "kmip",
+    "type": "date",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "kmip_date_det_explicit_id": {
+    "kms": "kmip",
+    "type": "date",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "kmip_date_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "date",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$date": {
+        "$numberLong": "12345"
+      }
+    }
+  },
+  "kmip_null_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "null",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": null
+  },
+  "kmip_null_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "null",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": null
+  },
+  "kmip_null_det_explicit_id": {
+    "kms": "kmip",
+    "type": "null",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": null
+  },
+  "kmip_null_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "null",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": null
+  },
+  "kmip_regex_rand_auto_id": {
+    "kms": "kmip",
+    "type": "regex",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "kmip_regex_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "regex",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "kmip_regex_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "regex",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "kmip_regex_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "regex",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "kmip_regex_det_auto_id": {
+    "kms": "kmip",
+    "type": "regex",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "kmip_regex_det_explicit_id": {
+    "kms": "kmip",
+    "type": "regex",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "kmip_regex_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "regex",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$regularExpression": {
+        "pattern": ".*",
+        "options": ""
+      }
+    }
+  },
+  "kmip_dbPointer_rand_auto_id": {
+    "kms": "kmip",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "kmip_dbPointer_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "kmip_dbPointer_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "kmip_dbPointer_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "dbPointer",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "kmip_dbPointer_det_auto_id": {
+    "kms": "kmip",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "kmip_dbPointer_det_explicit_id": {
+    "kms": "kmip",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "kmip_dbPointer_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "dbPointer",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$dbPointer": {
+        "$ref": "db.example",
+        "$id": {
+          "$oid": "01234567890abcdef0123456"
+        }
+      }
+    }
+  },
+  "kmip_javascript_rand_auto_id": {
+    "kms": "kmip",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "kmip_javascript_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "kmip_javascript_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "kmip_javascript_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "javascript",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "kmip_javascript_det_auto_id": {
+    "kms": "kmip",
+    "type": "javascript",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "kmip_javascript_det_explicit_id": {
+    "kms": "kmip",
+    "type": "javascript",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "kmip_javascript_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "javascript",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1"
+    }
+  },
+  "kmip_symbol_rand_auto_id": {
+    "kms": "kmip",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "kmip_symbol_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "kmip_symbol_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "kmip_symbol_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "symbol",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "kmip_symbol_det_auto_id": {
+    "kms": "kmip",
+    "type": "symbol",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "kmip_symbol_det_explicit_id": {
+    "kms": "kmip",
+    "type": "symbol",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "kmip_symbol_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "symbol",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$symbol": "mongodb-symbol"
+    }
+  },
+  "kmip_javascriptWithScope_rand_auto_id": {
+    "kms": "kmip",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "kmip_javascriptWithScope_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "kmip_javascriptWithScope_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "kmip_javascriptWithScope_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "javascriptWithScope",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "kmip_javascriptWithScope_det_explicit_id": {
+    "kms": "kmip",
+    "type": "javascriptWithScope",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "kmip_javascriptWithScope_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "javascriptWithScope",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$code": "x=1",
+      "$scope": {}
+    }
+  },
+  "kmip_int_rand_auto_id": {
+    "kms": "kmip",
+    "type": "int",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "kmip_int_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "int",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "kmip_int_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "int",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "kmip_int_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "int",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "kmip_int_det_auto_id": {
+    "kms": "kmip",
+    "type": "int",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "kmip_int_det_explicit_id": {
+    "kms": "kmip",
+    "type": "int",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "kmip_int_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "int",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberInt": "123"
+    }
+  },
+  "kmip_timestamp_rand_auto_id": {
+    "kms": "kmip",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "kmip_timestamp_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "kmip_timestamp_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "kmip_timestamp_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "timestamp",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "kmip_timestamp_det_auto_id": {
+    "kms": "kmip",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "kmip_timestamp_det_explicit_id": {
+    "kms": "kmip",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "kmip_timestamp_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "timestamp",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$timestamp": {
+        "t": 0,
+        "i": 12345
+      }
+    }
+  },
+  "kmip_long_rand_auto_id": {
+    "kms": "kmip",
+    "type": "long",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "kmip_long_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "long",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "kmip_long_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "long",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "kmip_long_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "long",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "kmip_long_det_auto_id": {
+    "kms": "kmip",
+    "type": "long",
+    "algo": "det",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "kmip_long_det_explicit_id": {
+    "kms": "kmip",
+    "type": "long",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "kmip_long_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "long",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberLong": "456"
+    }
+  },
+  "kmip_decimal_rand_auto_id": {
+    "kms": "kmip",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "kmip_decimal_rand_auto_altname": {
+    "kms": "kmip",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "auto",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "kmip_decimal_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "kmip_decimal_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "decimal",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": true,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "kmip_decimal_det_explicit_id": {
+    "kms": "kmip",
+    "type": "decimal",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "kmip_decimal_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "decimal",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$numberDecimal": "1.234"
+    }
+  },
+  "kmip_minKey_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "minKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "kmip_minKey_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "minKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "kmip_minKey_det_explicit_id": {
+    "kms": "kmip",
+    "type": "minKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "kmip_minKey_det_explicit_altname": {
+    "kms": "kmip",
+    "type": "minKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$minKey": 1
+    }
+  },
+  "kmip_maxKey_rand_explicit_id": {
+    "kms": "kmip",
+    "type": "maxKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "kmip_maxKey_rand_explicit_altname": {
+    "kms": "kmip",
+    "type": "maxKey",
+    "algo": "rand",
+    "method": "explicit",
+    "identifier": "altname",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "kmip_maxKey_det_explicit_id": {
+    "kms": "kmip",
+    "type": "maxKey",
+    "algo": "det",
+    "method": "explicit",
+    "identifier": "id",
+    "allowed": false,
+    "value": {
+      "$maxKey": 1
+    }
+  },
+  "kmip_maxKey_det_explicit_altname": {
+    "kms": "kmip",
     "type": "maxKey",
     "algo": "det",
     "method": "explicit",

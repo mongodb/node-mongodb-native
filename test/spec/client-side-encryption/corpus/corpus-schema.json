@@ -5064,6 +5064,1272 @@
           "bsonType": "binData"
         }
       }
+    },
+    "kmip_double_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "double"
+          }
+        }
+      }
+    },
+    "kmip_double_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "double"
+          }
+        }
+      }
+    },
+    "kmip_double_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_double_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_string_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "string"
+          }
+        }
+      }
+    },
+    "kmip_string_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "string"
+          }
+        }
+      }
+    },
+    "kmip_string_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_string_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_string_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "string"
+          }
+        }
+      }
+    },
+    "kmip_string_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_string_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_object_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "object"
+          }
+        }
+      }
+    },
+    "kmip_object_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "object"
+          }
+        }
+      }
+    },
+    "kmip_object_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_object_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_array_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "array"
+          }
+        }
+      }
+    },
+    "kmip_array_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "array"
+          }
+        }
+      }
+    },
+    "kmip_array_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_array_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_binData=00_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "binData"
+          }
+        }
+      }
+    },
+    "kmip_binData=00_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "binData"
+          }
+        }
+      }
+    },
+    "kmip_binData=00_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_binData=00_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_binData=00_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "binData"
+          }
+        }
+      }
+    },
+    "kmip_binData=00_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_binData=00_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_binData=04_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "binData"
+          }
+        }
+      }
+    },
+    "kmip_binData=04_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "binData"
+          }
+        }
+      }
+    },
+    "kmip_binData=04_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_binData=04_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_binData=04_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "binData"
+          }
+        }
+      }
+    },
+    "kmip_binData=04_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_binData=04_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_objectId_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "objectId"
+          }
+        }
+      }
+    },
+    "kmip_objectId_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "objectId"
+          }
+        }
+      }
+    },
+    "kmip_objectId_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_objectId_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_objectId_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "objectId"
+          }
+        }
+      }
+    },
+    "kmip_objectId_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_objectId_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_bool_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "bool"
+          }
+        }
+      }
+    },
+    "kmip_bool_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "bool"
+          }
+        }
+      }
+    },
+    "kmip_bool_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_bool_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_date_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "date"
+          }
+        }
+      }
+    },
+    "kmip_date_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "date"
+          }
+        }
+      }
+    },
+    "kmip_date_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_date_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_date_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "date"
+          }
+        }
+      }
+    },
+    "kmip_date_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_date_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_regex_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "regex"
+          }
+        }
+      }
+    },
+    "kmip_regex_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "regex"
+          }
+        }
+      }
+    },
+    "kmip_regex_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_regex_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_regex_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "regex"
+          }
+        }
+      }
+    },
+    "kmip_regex_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_regex_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_dbPointer_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "dbPointer"
+          }
+        }
+      }
+    },
+    "kmip_dbPointer_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "dbPointer"
+          }
+        }
+      }
+    },
+    "kmip_dbPointer_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_dbPointer_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_dbPointer_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "dbPointer"
+          }
+        }
+      }
+    },
+    "kmip_dbPointer_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_dbPointer_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_javascript_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "javascript"
+          }
+        }
+      }
+    },
+    "kmip_javascript_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "javascript"
+          }
+        }
+      }
+    },
+    "kmip_javascript_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_javascript_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_javascript_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "javascript"
+          }
+        }
+      }
+    },
+    "kmip_javascript_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_javascript_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_symbol_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "symbol"
+          }
+        }
+      }
+    },
+    "kmip_symbol_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "symbol"
+          }
+        }
+      }
+    },
+    "kmip_symbol_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_symbol_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_symbol_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "symbol"
+          }
+        }
+      }
+    },
+    "kmip_symbol_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_symbol_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_javascriptWithScope_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "javascriptWithScope"
+          }
+        }
+      }
+    },
+    "kmip_javascriptWithScope_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "javascriptWithScope"
+          }
+        }
+      }
+    },
+    "kmip_javascriptWithScope_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_javascriptWithScope_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_int_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "int"
+          }
+        }
+      }
+    },
+    "kmip_int_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "int"
+          }
+        }
+      }
+    },
+    "kmip_int_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_int_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_int_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "int"
+          }
+        }
+      }
+    },
+    "kmip_int_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_int_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_timestamp_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "timestamp"
+          }
+        }
+      }
+    },
+    "kmip_timestamp_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "timestamp"
+          }
+        }
+      }
+    },
+    "kmip_timestamp_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_timestamp_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_timestamp_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "timestamp"
+          }
+        }
+      }
+    },
+    "kmip_timestamp_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_timestamp_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_long_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "long"
+          }
+        }
+      }
+    },
+    "kmip_long_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "long"
+          }
+        }
+      }
+    },
+    "kmip_long_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_long_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_long_det_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+            "bsonType": "long"
+          }
+        }
+      }
+    },
+    "kmip_long_det_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_long_det_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_decimal_rand_auto_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": [
+              {
+                "$binary": {
+                  "base64": "KMIPAAAAAAAAAAAAAAAAAA==",
+                  "subType": "04"
+                }
+              }
+            ],
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "decimal"
+          }
+        }
+      }
+    },
+    "kmip_decimal_rand_auto_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "encrypt": {
+            "keyId": "/altname_kmip",
+            "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random",
+            "bsonType": "decimal"
+          }
+        }
+      }
+    },
+    "kmip_decimal_rand_explicit_id": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
+    },
+    "kmip_decimal_rand_explicit_altname": {
+      "bsonType": "object",
+      "properties": {
+        "value": {
+          "bsonType": "binData"
+        }
+      }
     }
   }
 }

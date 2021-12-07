@@ -86,47 +86,46 @@
     {
       "_id": {
         "$binary": {
-          "base64": "AZURE+AAAAAAAAAAAAAAAA==",
+          "base64": "dBHpr8aITfeBQ15grpbLpQ==",
           "subType": "04"
         }
       },
       "keyMaterial": {
         "$binary": {
-          "base64": "n+HWZ0ZSVOYA3cvQgP7inN4JSXfOH85IngmeQxRpQHjCCcqT3IFqEWNlrsVHiz3AELimHhX4HKqOLWMUeSIT6emUDDoQX9BAv8DR1+E1w4nGs/NyEneac78EYFkK3JysrFDOgl2ypCCTKAypkn9CkAx1if4cfgQE93LW4kczcyHdGiH36CIxrCDGv1UzAvERN5Qa47DVwsM6a+hWsF2AAAJVnF0wYLLJU07TuRHdMrrphPWXZsFgyV+lRqJ7DDpReKNO8nMPLV/mHqHBHGPGQiRdb9NoJo8CvokGz4+KE8oLwzKf6V24dtwZmRkrsDV4iOhvROAzz+Euo1ypSkL3mw==",
+          "base64": "eUYDyB0HuWb+lQgUwO+6qJQyTTDTY2gp9FbemL7ZFo0pvr0x6rm6Ff9OVUTGH6HyMKipaeHdiIJU1dzsLwvqKvi7Beh+U4iaIWX/K0oEg1GOsJc0+Z/in8gNHbGUYLmycHViM3LES3kdt7FdFSUl5rEBHrM71yoNEXImz17QJWMGOuT4x6yoi2pvnaRJwfrI4DjpmnnTrDMac92jgZehbg==",
           "subType": "00"
         }
       },
       "creationDate": {
         "$date": {
-          "$numberLong": "1601573901680"
+          "$numberLong": "1634220190041"
         }
       },
       "updateDate": {
         "$date": {
-          "$numberLong": "1601573901680"
+          "$numberLong": "1634220190041"
         }
       },
       "status": {
         "$numberInt": "0"
       },
       "masterKey": {
-        "provider": "azure",
-        "keyVaultEndpoint": "key-vault-csfle.vault.azure.net",
-        "keyName": "key-name-csfle"
+        "provider": "kmip",
+        "keyId": "1"
       },
       "keyAltNames": [
         "altname",
-        "azure_altname"
+        "kmip_altname"
       ]
     }
   ],
   "tests": [
     {
-      "description": "Insert a document with auto encryption using Azure KMS provider",
+      "description": "Insert a document with auto encryption using KMIP KMS provider",
       "clientOptions": {
         "autoEncryptOpts": {
           "kmsProviders": {
-            "azure": {}
+            "kmip": {}
           }
         }
       },
@@ -136,7 +135,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encrypted_string_azure": "string0"
+              "encrypted_string_kmip": "string0"
             }
           }
         }
@@ -164,7 +163,7 @@
                       "$in": [
                         {
                           "$binary": {
-                            "base64": "AZURE+AAAAAAAAAAAAAAAA==",
+                            "base64": "dBHpr8aITfeBQ15grpbLpQ==",
                             "subType": "04"
                           }
                         }
@@ -190,9 +189,9 @@
               "documents": [
                 {
                   "_id": 1,
-                  "encrypted_string_azure": {
+                  "encrypted_string_kmip": {
                     "$binary": {
-                      "base64": "AQGVERPgAAAAAAAAAAAAAAAC5DbBSwPwfSlBrDtRuglvNvCXD1KzDuCKY2P+4bRFtHDjpTOE2XuytPAUaAbXf1orsPq59PVZmsbTZbt2CB8qaQ==",
+                      "base64": "AXQR6a/GiE33gUNeYK6Wy6UCKCwtKFIsL8eKObDVxvqGupJNUk7kXswHhB7G5j/C1D+6no+Asra0KgSU43bTL3ooIBLVyIzbV5CDJYqzAsa4WQ==",
                       "subType": "06"
                     }
                   }
@@ -209,9 +208,9 @@
           "data": [
             {
               "_id": 1,
-              "encrypted_string_azure": {
+              "encrypted_string_kmip": {
                 "$binary": {
-                  "base64": "AQGVERPgAAAAAAAAAAAAAAAC5DbBSwPwfSlBrDtRuglvNvCXD1KzDuCKY2P+4bRFtHDjpTOE2XuytPAUaAbXf1orsPq59PVZmsbTZbt2CB8qaQ==",
+                  "base64": "AXQR6a/GiE33gUNeYK6Wy6UCKCwtKFIsL8eKObDVxvqGupJNUk7kXswHhB7G5j/C1D+6no+Asra0KgSU43bTL3ooIBLVyIzbV5CDJYqzAsa4WQ==",
                   "subType": "06"
                 }
               }

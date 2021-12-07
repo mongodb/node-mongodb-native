@@ -234,6 +234,17 @@ export interface AutoEncryptionOptions {
        */
       endpoint?: string | undefined;
     };
+    /**
+     * Configuration options for using 'kmip' as your KMS provider
+     */
+    kmip?: {
+      /**
+       * The output endpoint string.
+       * The endpoint consists of a hostname and port separated by a colon.
+       * E.g. "example.com:123". A port is always present.
+       */
+      endpoint?: string;
+    };
   };
   /**
    * A map of namespaces to a local JSON schema for encryption
