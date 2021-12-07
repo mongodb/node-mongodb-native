@@ -1,6 +1,6 @@
 'use strict';
 
-const mock = require('../tools/mock');
+const mock = require('../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const { MongoServerSelectionError, MongoClient } = require('../../src');
 

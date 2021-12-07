@@ -6,8 +6,9 @@ const MESSAGE_HEADER_SIZE = require('./utils').MESSAGE_HEADER_SIZE;
 const opcodes = require('./utils').opcodes;
 const compressorIDs = require('./utils').compressorIDs;
 const Request = require('./request');
-const Query = require('./protocol').Query;
+const { Query } = require('./protocol');
 const EventEmitter = require('events');
+const { HostAddress } = require('../../../../src/utils');
 
 /*
  * MockServer class
@@ -44,6 +45,11 @@ class MockServer extends EventEmitter {
 
     // message handlers
     this.messageHandlers = Object.create(null);
+  }
+
+  hostAddress() {
+    const address = this.address();
+    return new HostAddress(`${address.host}:${address.port}`);
   }
 
   /**

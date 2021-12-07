@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const { MongoError } = require('../../../src/error');
-const mock = require('../../tools/mock');
+const mock = require('../../tools/mongodb-mock/index');
 const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
 const { MongoDBNamespace } = require('../../../src/utils');
