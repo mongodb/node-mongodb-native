@@ -4,6 +4,7 @@ const { expect } = require('chai');
 const mock = require('../tools/mongodb-mock/index');
 const { Topology } = require('../../src/sdam/topology');
 const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('SCRAM Iterations Tests', function () {
   let server;
@@ -34,7 +35,7 @@ describe('SCRAM Iterations Tests', function () {
 
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         return request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.saslStart) {
         return request.reply({
@@ -80,7 +81,7 @@ describe('SCRAM Iterations Tests', function () {
 
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         return request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.saslStart) {
         return request.reply({
@@ -127,7 +128,7 @@ describe('SCRAM Iterations Tests', function () {
 
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         return request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.saslStart) {
         return request.reply({

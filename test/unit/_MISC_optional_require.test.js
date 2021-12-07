@@ -9,6 +9,7 @@ const { GSSAPI } = require('../../src/cmap/auth/gssapi');
 const { AuthContext } = require('../../src/cmap/auth/auth_provider');
 const { MongoDBAWS } = require('../../src/cmap/auth/mongodb_aws');
 const { HostAddress } = require('../../src/utils');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 function moduleExistsSync(moduleName) {
   return existsSync(resolve(__dirname, `../../node_modules/${moduleName}`));
@@ -66,10 +67,13 @@ describe('optionalRequire', function () {
           return this.skip();
         }
         const mdbAWS = new MongoDBAWS();
-        mdbAWS.auth(new AuthContext({ ismaster: { maxWireVersion: 9 } }, true, null), error => {
-          expect(error).to.exist;
-          expect(error.message).includes('not found');
-        });
+        mdbAWS.auth(
+          new AuthContext({ [LEGACY_HELLO_COMMAND]: { maxWireVersion: 9 } }, true, null),
+          error => {
+            expect(error).to.exist;
+            expect(error.message).includes('not found');
+          }
+        );
       });
     }
   });

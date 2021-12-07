@@ -23,6 +23,7 @@ const {
   PoolClosedError: MongoPoolClosedError,
   WaitQueueTimeoutError: MongoWaitQueueTimeoutError
 } = require('../../src/cmap/errors');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('MongoErrors', () => {
   // import errors as object
@@ -245,7 +246,7 @@ describe('MongoErrors', () => {
     it('should expose a user command writeConcern error like a normal WriteConcernError', function (done) {
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           setTimeout(() => request.reply(test.primaryStates[0]));
         } else if (doc.createUser) {
           setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR));
@@ -286,7 +287,7 @@ describe('MongoErrors', () => {
     it('should propagate writeConcernError.errInfo ', function (done) {
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           setTimeout(() => request.reply(test.primaryStates[0]));
         } else if (doc.createUser) {
           setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR_INFO));

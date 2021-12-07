@@ -6,6 +6,7 @@ import { MongoClient } from '../../src';
 import * as mock from '../tools/mongodb-mock/index';
 import type { MockServer } from '../tools/mongodb-mock/src/server';
 import { processTick } from '../tools/utils';
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 
 /*
     The SRV Prose Tests make use of the following REAL DNS records.
@@ -74,7 +75,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       mongos.setMessageHandler(request => {
         const document = request.document;
 
-        if (document.ismaster || document.hello) {
+        if (document[LEGACY_HELLO_COMMAND] || document.hello) {
           request.reply({ ...mock.HELLO, msg: 'isdbgrid' });
         }
       });

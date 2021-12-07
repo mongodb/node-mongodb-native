@@ -3,6 +3,7 @@
 const mock = require('../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const { MongoServerSelectionError, MongoClient } = require('../../src');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 const minCompatErrMsg = `minimum wire version ${
   Number.MAX_SAFE_INTEGER - 1
@@ -16,7 +17,7 @@ describe('Wire Protocol Version', () => {
   function setWireProtocolMessageHandler(min, max) {
     server.setMessageHandler(req => {
       const doc = req.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         const hello = {
           ...mock.HELLO,
           minWireVersion: min,
