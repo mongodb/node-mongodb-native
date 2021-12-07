@@ -217,6 +217,7 @@ export type { ConnectionPoolMetrics } from './cmap/metrics';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
 export type { CompressorName } from './cmap/wire_protocol/compression';
 export type { CollectionOptions, CollectionPrivate, ModifyResult } from './collection';
+export type { MONGO_CLIENT_EVENTS } from './constants';
 export type {
   AbstractCursorEvents,
   AbstractCursorOptions,
