@@ -55,6 +55,8 @@ export interface BSONSerializeOptions
     > {
   /** Return BSON filled buffers from operations */
   raw?: boolean;
+
+  /** Enable utf8 validation when deserializing BSON documents.  Defaults to true. */
   enableUtf8Validation?: boolean;
 }
 
