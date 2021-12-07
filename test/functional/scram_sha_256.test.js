@@ -5,6 +5,7 @@ const { expect } = require('chai');
 const { Connection } = require('../../src/cmap/connection');
 const { ScramSHA256 } = require('../../src/cmap/auth/scram');
 const { setupDatabase, withClient } = require('./shared');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('SCRAM-SHA-256 auth', function () {
   const test = {};
@@ -270,7 +271,7 @@ describe('SCRAM-SHA-256 auth', function () {
         const calls = commandSpy
           .getCalls()
           .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
-          .filter(c => c.args[1].ismaster); // only consider handshakes
+          .filter(c => c.args[1][LEGACY_HELLO_COMMAND]); // only consider handshakes
 
         expect(calls).to.have.length(1);
         const handshakeDoc = calls[0].args[1];

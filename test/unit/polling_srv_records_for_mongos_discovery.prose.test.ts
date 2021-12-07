@@ -3,10 +3,10 @@ import * as dns from 'dns';
 import * as sinon from 'sinon';
 
 import { MongoClient } from '../../src';
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 import * as mock from '../tools/mongodb-mock/index';
 import type { MockServer } from '../tools/mongodb-mock/src/server';
 import { processTick } from '../tools/utils';
-import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 
 /*
     The SRV Prose Tests make use of the following REAL DNS records.

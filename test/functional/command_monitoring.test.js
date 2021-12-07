@@ -10,6 +10,7 @@ const { loadSpecTests } = require('../spec');
 const { expect } = require('chai');
 const { ReadPreference } = require('../../src/read_preference');
 const { runUnifiedTest } = require('../tools/unified-spec-runner/runner');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('APM', function () {
   before(function () {
@@ -838,15 +839,15 @@ describe('APM', function () {
           // Set up the listeners
           client.on(
             'commandStarted',
-            filterOutCommands(['ismaster', 'endSessions'], monitoringResults.starts)
+            filterOutCommands([LEGACY_HELLO_COMMAND, 'endSessions'], monitoringResults.starts)
           );
           client.on(
             'commandFailed',
-            filterOutCommands(['ismaster', 'endSessions'], monitoringResults.failures)
+            filterOutCommands([LEGACY_HELLO_COMMAND, 'endSessions'], monitoringResults.failures)
           );
           client.on(
             'commandSucceeded',
-            filterOutCommands(['ismaster', 'endSessions'], monitoringResults.successes)
+            filterOutCommands([LEGACY_HELLO_COMMAND, 'endSessions'], monitoringResults.successes)
           );
 
           // Unpack the operation

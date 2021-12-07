@@ -4,6 +4,7 @@ const { setupDatabase } = require('./shared');
 const { expect } = require('chai');
 const { MongoClient } = require('../../src');
 const { Connection } = require('../../src/cmap/connection');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('MongoClient Options', function () {
   before(function () {
@@ -67,7 +68,7 @@ describe('MongoClient Options', function () {
           const options = args[2] || {};
           if (
             ns.toString() === 'admin.$cmd' &&
-            (command.ismaster || command.hello) &&
+            (command[LEGACY_HELLO_COMMAND] || command.hello) &&
             options.exhaustAllowed
           ) {
             expect(options).property('socketTimeoutMS').to.equal(0);
@@ -96,7 +97,7 @@ describe('MongoClient Options', function () {
           const options = args[2] || {};
           if (
             ns.toString() === 'admin.$cmd' &&
-            (command.ismaster || command.hello) &&
+            (command[LEGACY_HELLO_COMMAND] || command.hello) &&
             options.exhaustAllowed
           ) {
             expect(options).property('socketTimeoutMS').to.equal(510);

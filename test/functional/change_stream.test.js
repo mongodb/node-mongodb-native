@@ -14,7 +14,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
-
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 chai.use(require('chai-subset'));
 
 function withChangeStream(dbName, collectionName, callback) {
@@ -1115,11 +1115,11 @@ describe('Change Streams', function () {
           const doc = request.document;
 
           // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
-          if (doc.ismaster || doc.hello) {
+          if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
             request.reply(
               Object.assign(
                 {
-                  ismaster: true,
+                  [LEGACY_HELLO_COMMAND]: true,
                   secondary: false,
                   me: primaryServer.uri(),
                   primary: primaryServer.uri(),
@@ -1314,9 +1314,9 @@ describe('Change Streams', function () {
 
       const OPERATION_TIME = new Timestamp(4, 1501511802);
 
-      const makeIsMaster = server => ({
+      const makePrimary = server => ({
         __nodejs_mock_server__: true,
-        ismaster: true,
+        [LEGACY_HELLO_COMMAND]: true,
         secondary: false,
         me: server.uri(),
         primary: server.uri(),
@@ -1399,8 +1399,8 @@ describe('Change Streams', function () {
       function primaryServerHandler(request) {
         try {
           const doc = request.document;
-          if (doc.ismaster || doc.hello) {
-            return request.reply(makeIsMaster(server));
+          if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+            return request.reply(makePrimary(server));
           } else if (doc.aggregate) {
             return request.reply(AGGREGATE_RESPONSE);
           } else if (doc.getMore) {
@@ -1671,7 +1671,13 @@ describe('Change Streams', function () {
     class MockServerManager {
       constructor(config, commandIterators) {
         this.config = config;
-        this.cmdList = new Set(['ismaster', 'hello', 'endSessions', 'aggregate', 'getMore']);
+        this.cmdList = new Set([
+          LEGACY_HELLO_COMMAND,
+          'hello',
+          'endSessions',
+          'aggregate',
+          'getMore'
+        ]);
         this.database = 'test_db';
         this.collection = 'test_coll';
         this.ns = `${this.database}.${this.collection}`;
@@ -1758,7 +1764,7 @@ describe('Change Streams', function () {
       ismaster() {
         const uri = this.server.uri();
         return Object.assign({}, mock.HELLO, {
-          ismaster: true,
+          [LEGACY_HELLO_COMMAND]: true,
           secondary: false,
           me: uri,
           primary: uri,
@@ -2502,7 +2508,7 @@ context('NODE-2626 - handle null changes without error', function () {
   it('changeStream should close if cursor id for initial aggregate is Long.ZERO', function (done) {
     mockServer.setMessageHandler(req => {
       const doc = req.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         return req.reply(mock.HELLO);
       }
       if (doc.aggregate) {

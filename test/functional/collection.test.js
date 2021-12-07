@@ -7,6 +7,7 @@ const sinonChai = require('sinon-chai');
 const mock = require('../tools/mongodb-mock/index');
 
 chai.use(sinonChai);
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('Collection', function () {
   let configuration;
@@ -638,7 +639,7 @@ describe('Collection', function () {
           }
         }
 
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           request.reply(Object.assign({}, mock.HELLO));
         } else if (doc.endSessions) {
           request.reply({ ok: 1 });
