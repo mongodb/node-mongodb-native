@@ -6,7 +6,6 @@ import type { Long, Document, BSONSerializeOptions } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
 import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
-// import { deserialize } from '../bson';
 
 // Incrementing request id
 let _requestId = 0;
