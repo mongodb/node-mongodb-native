@@ -883,10 +883,5 @@ export class BinMsg {
     }
 
     return { utf8: { writeErrors: false } };
-    // if (enableUtf8Validation == null || enableUtf8Validation) {
-    //   return { utf8: { writeErrors: false } };
-    // }
-
-    // return { utf8: false };
   }
 }
