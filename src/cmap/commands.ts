@@ -878,10 +878,15 @@ export class BinMsg {
   parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {
     utf8: { writeErrors: false } | false;
   } {
-    if (enableUtf8Validation == null || enableUtf8Validation) {
-      return { utf8: { writeErrors: false } };
+    if (enableUtf8Validation === false) {
+      return { utf8: false };
     }
 
-    return { utf8: false };
+    return { utf8: { writeErrors: false } };
+    // if (enableUtf8Validation == null || enableUtf8Validation) {
+    //   return { utf8: { writeErrors: false } };
+    // }
+
+    // return { utf8: false };
   }
 }
