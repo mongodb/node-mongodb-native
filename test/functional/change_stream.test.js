@@ -1685,6 +1685,11 @@ describe('Change Streams', function () {
         this.cursorId = new Long('9064341847921713401');
         this.commandIterators = commandIterators;
         this.promise = this.init();
+
+        // Handler for the legacy hello command
+        this[LEGACY_HELLO_COMMAND] = function () {
+          return this.hello();
+        };
       }
 
       init() {
@@ -1761,7 +1766,7 @@ describe('Change Streams', function () {
 
       // Handlers for specific commands
 
-      ismaster() {
+      hello() {
         const uri = this.server.uri();
         return Object.assign({}, mock.HELLO, {
           [LEGACY_HELLO_COMMAND]: true,
@@ -1773,10 +1778,6 @@ describe('Change Streams', function () {
           ok: 1,
           hosts: [uri]
         });
-      }
-
-      hello() {
-        return this.ismaster();
       }
 
       endSessions() {
