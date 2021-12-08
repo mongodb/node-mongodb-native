@@ -93,6 +93,7 @@ import type {
   TODO_NODE_3286,
   UpdateFilter,
   WithId,
+  WithoutId,
   OptionalId,
   Flatten
 } from './mongo_types';
@@ -459,26 +460,29 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  replaceOne(filter: Filter<TSchema>, replacement: TSchema): Promise<UpdateResult | Document>;
   replaceOne(
     filter: Filter<TSchema>,
-    replacement: TSchema,
+    replacement: WithoutId<TSchema>
+  ): Promise<UpdateResult | Document>;
+  replaceOne(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
     callback: Callback<UpdateResult | Document>
   ): void;
   replaceOne(
     filter: Filter<TSchema>,
-    replacement: TSchema,
+    replacement: WithoutId<TSchema>,
     options: ReplaceOptions
   ): Promise<UpdateResult | Document>;
   replaceOne(
     filter: Filter<TSchema>,
-    replacement: TSchema,
+    replacement: WithoutId<TSchema>,
     options: ReplaceOptions,
     callback: Callback<UpdateResult | Document>
   ): void;
   replaceOne(
     filter: Filter<TSchema>,
-    replacement: TSchema,
+    replacement: WithoutId<TSchema>,
     options?: ReplaceOptions | Callback<UpdateResult | Document>,
     callback?: Callback<UpdateResult | Document>
   ): Promise<UpdateResult | Document> | void {
@@ -1279,26 +1283,29 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  findOneAndReplace(filter: Filter<TSchema>, replacement: Document): Promise<ModifyResult<TSchema>>;
   findOneAndReplace(
     filter: Filter<TSchema>,
-    replacement: Document,
+    replacement: WithoutId<TSchema>
+  ): Promise<ModifyResult<TSchema>>;
+  findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndReplace(
     filter: Filter<TSchema>,
-    replacement: Document,
+    replacement: WithoutId<TSchema>,
     options: FindOneAndReplaceOptions
   ): Promise<ModifyResult<TSchema>>;
   findOneAndReplace(
     filter: Filter<TSchema>,
-    replacement: Document,
+    replacement: WithoutId<TSchema>,
     options: FindOneAndReplaceOptions,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
   findOneAndReplace(
     filter: Filter<TSchema>,
-    replacement: Document,
+    replacement: WithoutId<TSchema>,
     options?: FindOneAndReplaceOptions | Callback<ModifyResult<TSchema>>,
     callback?: Callback<ModifyResult<TSchema>>
   ): Promise<ModifyResult<TSchema>> | void {

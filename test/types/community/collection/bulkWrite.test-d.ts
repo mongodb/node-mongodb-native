@@ -181,6 +181,38 @@ collectionType.bulkWrite([
     }
   }
 ]);
+// allow a literal replacement doc without an _id
+collectionType.bulkWrite([
+  {
+    replaceOne: {
+      filter: {},
+      replacement: {
+        dateField: new Date(),
+        fruitTags: [],
+        numberField: 0,
+        readonlyFruitTags: [],
+        stringField: 'string',
+        subInterfaceArray: [],
+        subInterfaceField: { field1: '1', field2: '2' }
+      },
+      upsert: true
+    }
+  }
+]);
+// disallow a literal replacement doc with an _id
+expectError(
+  collectionType.bulkWrite([
+    {
+      replaceOne: {
+        filter: {},
+        replacement: {
+          _id: new ObjectId()
+        },
+        upsert: true
+      }
+    }
+  ])
+);
 
 expectError(
   collectionType.bulkWrite([
