@@ -221,10 +221,14 @@ describe('SCRAM-SHA-256 auth', function () {
     }
   });
 
-  // For a non-existent username, verify that not specifying a mechanism when connecting fails with the same error
-  // type that would occur with a correct username but incorrect password or mechanism. (Because negotiation with
-  // a non-existent user name causes an isMaster error, we want to verify this is seen by users as similar to other
-  // authentication errors, not as a network or database command error.)
+  // For a non-existent username, verify that not specifying a mechanism when
+  // connecting fails with the same error type that would occur with a correct
+  // username but incorrect password or mechanism.  (Because negotiation with a
+  // non-existent user name at one point during server development caused a
+  // handshake error, we want to verify this is seen by users as similar to other
+  // authentication errors, not as a network or database command error on the ``hello``
+  // or legacy hello commands themselves.)
+  // Source: https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst#step-3
   it('should fail for a nonexistent username with same error type as bad password', {
     metadata: { requires: { mongodb: '>=3.7.3' } },
     test: function () {
