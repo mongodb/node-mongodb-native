@@ -16,11 +16,11 @@ describe('Max Staleness', function () {
       const defaultFields = Object.assign({}, mock.HELLO, { msg: 'isdbgrid' });
 
       // Primary server states
-      const serverIsMaster = [Object.assign({}, defaultFields)];
+      const serverIsPrimary = [Object.assign({}, defaultFields)];
       server.setMessageHandler(request => {
         var doc = request.document;
         if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
-          request.reply(serverIsMaster[0]);
+          request.reply(serverIsPrimary[0]);
           return;
         }
 
