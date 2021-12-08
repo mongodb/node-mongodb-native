@@ -41,7 +41,9 @@ const nKeyWithInvalidUtf8 =
 const msgBodyNKeyWithInvalidUtf8 = Buffer.from(nKeyWithInvalidUtf8, 'hex');
 
 describe('BinMsg BSON utf8 validation', () => {
-  test('mock data contains replacement characters for invalid utf8 in writeError object', () => {
+  test('bson correctly deserializes data with replacement characters for invalid utf8 in writeErrors object', () => {
+    // this is a sanity check to make sure nothing unexpected is happening in the deserialize method itself
+
     const options = { validation: { utf8: { writeErrors: false } as const } };
     expect(BSON.deserialize(invalidUtf8ErrorMsgDeserializeInput, options)).to.deep.equals(
       invalidUtf8InWriteErrorsJSON
