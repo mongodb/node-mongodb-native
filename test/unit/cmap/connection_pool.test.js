@@ -173,9 +173,9 @@ describe('Connection Pool', function () {
           ns('$admin.cmd'),
           { [LEGACY_HELLO_COMMAND]: 1 },
           undefined,
-          (cmdErr, isWritablePrimary) => {
+          (cmdErr, hello) => {
             expect(cmdErr).to.not.exist;
-            cb(undefined, isWritablePrimary);
+            cb(undefined, hello);
           }
         );
       }, callback);

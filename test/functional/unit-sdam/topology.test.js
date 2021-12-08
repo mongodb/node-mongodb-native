@@ -12,6 +12,7 @@ const { TopologyDescription } = require('../../../src/sdam/topology_description'
 const { TopologyType } = require('../../../src/sdam/common');
 const { SrvPoller, SrvPollingEvent } = require('../../../src/sdam/srv_polling');
 const { getSymbolFrom } = require('../../tools/utils');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 describe('Topology (unit)', function () {
   describe('client metadata', function () {
@@ -36,11 +37,11 @@ describe('Topology (unit)', function () {
     });
 
     it('should report the correct platform in client metadata', function (done) {
-      const ismasters = [];
+      const helloRequests = [];
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          ismasters.push(doc);
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+          helloRequests.push(doc);
           request.reply(mock.HELLO);
         } else {
           request.reply({ ok: 1 });
@@ -55,9 +56,9 @@ describe('Topology (unit)', function () {
         client.db().command({ ping: 1 }, err => {
           expect(err).to.not.exist;
 
-          expect(ismasters).to.have.length.greaterThan(1);
-          ismasters.forEach(ismaster =>
-            expect(ismaster)
+          expect(helloRequests).to.have.length.greaterThan(1);
+          helloRequests.forEach(helloRequest =>
+            expect(helloRequest)
               .nested.property('client.platform')
               .to.match(/unified/)
           );
@@ -152,7 +153,7 @@ describe('Topology (unit)', function () {
         const doc = request.document;
 
         let initialIsMasterSent = false;
-        if ((doc.ismaster || doc.hello) && !initialIsMasterSent) {
+        if ((doc[LEGACY_HELLO_COMMAND] || doc.hello) && !initialIsMasterSent) {
           request.reply(mock.HELLO);
           initialIsMasterSent = true;
         } else {

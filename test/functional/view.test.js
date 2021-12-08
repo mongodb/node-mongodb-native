@@ -2,6 +2,7 @@
 const { expect } = require('chai');
 const mock = require('../tools/mongodb-mock/index');
 const { Long } = require('../../src');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('Views', function () {
   it('should successfully pass through collation to findAndModify command', {
@@ -22,7 +23,7 @@ describe('Views', function () {
       const singleServer = await mock.createServer();
       singleServer.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           request.reply(primary[0]);
         } else if (doc.listCollections) {
           request.reply({

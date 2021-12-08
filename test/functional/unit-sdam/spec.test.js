@@ -244,7 +244,7 @@ function executeSDAMTest(testData, testDone) {
         // }
 
         if (phase.responses) {
-          // simulate each ismaster response
+          // simulate each hello response
           phase.responses.forEach(response =>
             topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
           );
@@ -353,7 +353,7 @@ function assertOutcomeExpectations(topology, events, outcome) {
       return;
     }
 
-    // Load balancer mode has no monitor ismaster response and
+    // Load balancer mode has no monitor hello response and
     // only expects address and compatible to be set in the
     // server description.
     if (description.type === TopologyType.LoadBalanced) {

@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect;
 const mock = require('../tools/mongodb-mock/index');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('CreateIndexError', function () {
   const test = {};
@@ -19,7 +20,7 @@ describe('CreateIndexError', function () {
     test.server.setMessageHandler(request => {
       const doc = request.document;
 
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         return request.reply(Object.assign({}, mock.HELLO));
       }
 

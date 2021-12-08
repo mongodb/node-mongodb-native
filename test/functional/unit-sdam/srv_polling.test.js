@@ -13,6 +13,7 @@ const sinon = require('sinon');
 const mock = require('../../tools/mongodb-mock/index');
 const { HostAddress } = require('../../../src/utils');
 const { MongoDriverError } = require('../../../src/error');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const expect = chai.expect;
 chai.use(require('sinon-chai'));
@@ -328,7 +329,7 @@ describe('Mongos SRV Polling', function () {
           server.setMessageHandler(request => {
             const doc = request.document;
 
-            if (doc.ismaster || doc.hello) {
+            if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
               request.reply(Object.assign({}, MONGOS_HELLO));
             }
           });

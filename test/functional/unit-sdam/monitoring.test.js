@@ -5,6 +5,7 @@ const { Topology } = require('../../../src/sdam/topology');
 const { Monitor } = require('../../../src/sdam/monitor');
 const { expect } = require('chai');
 const { ServerDescription } = require('../../../src/sdam/server_description');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 class MockServer {
   constructor(options) {
@@ -25,7 +26,7 @@ describe('monitoring', function () {
   it('should record roundTripTime', function (done) {
     mockServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -64,7 +65,7 @@ describe('monitoring', function () {
       }
 
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -91,7 +92,7 @@ describe('monitoring', function () {
     it('should connect and issue an initial server check', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           request.reply(Object.assign({}, mock.HELLO));
         }
       });
@@ -108,7 +109,7 @@ describe('monitoring', function () {
     it('should ignore attempts to connect when not already closed', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           request.reply(Object.assign({}, mock.HELLO));
         }
       });
@@ -126,7 +127,7 @@ describe('monitoring', function () {
     it('should not initiate another check if one is in progress', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           setTimeout(() => request.reply(Object.assign({}, mock.HELLO)), 250);
         }
       });
@@ -162,17 +163,17 @@ describe('monitoring', function () {
     });
 
     it('should not close the monitor on a failed heartbeat', function (done) {
-      let isMasterCount = 0;
+      let helloCount = 0;
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          isMasterCount++;
-          if (isMasterCount === 2) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+          helloCount++;
+          if (helloCount === 2) {
             request.reply({ ok: 0, errmsg: 'forced from mock server' });
             return;
           }
 
-          if (isMasterCount === 3) {
+          if (helloCount === 3) {
             request.connection.destroy();
             return;
           }
@@ -212,11 +213,11 @@ describe('monitoring', function () {
         const doc = request.document;
         docs.push(doc);
         if (docs.length === 2) {
-          expect(docs[0]).to.have.property('ismaster', true);
+          expect(docs[0]).to.have.property(LEGACY_HELLO_COMMAND, true);
           expect(docs[0]).to.have.property('helloOk', true);
           expect(docs[1]).to.have.property('hello', true);
           done();
-        } else if (doc.ismaster || doc.hello) {
+        } else if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           setTimeout(() => request.reply(Object.assign({ helloOk: true }, mock.HELLO)), 250);
         }
       });
