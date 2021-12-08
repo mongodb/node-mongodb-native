@@ -152,10 +152,10 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
 
-        let initialIsMasterSent = false;
-        if ((doc[LEGACY_HELLO_COMMAND] || doc.hello) && !initialIsMasterSent) {
+        let initialHelloSent = false;
+        if ((doc[LEGACY_HELLO_COMMAND] || doc.hello) && !initialHelloSent) {
           request.reply(mock.HELLO);
-          initialIsMasterSent = true;
+          initialHelloSent = true;
         } else {
           // black hole all other operations
         }
