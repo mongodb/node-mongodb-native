@@ -2,6 +2,7 @@
 
 const MongoClient = require('../../src').MongoClient;
 const expect = require('chai').expect;
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 const OCSP_TLS_SHOULD_SUCCEED = process.env.OCSP_TLS_SHOULD_SUCCEED;
 const CA_FILE = process.env.CA_FILE;
@@ -22,7 +23,7 @@ describe('OCSP Support', function () {
     client.connect(err => {
       if (err) return done(err);
 
-      client.db('admin').command({ ismaster: 1 }, err => {
+      client.db('admin').command({ [LEGACY_HELLO_COMMAND]: 1 }, err => {
         client.close(err2 => done(err || err2));
       });
     });

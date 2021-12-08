@@ -188,7 +188,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown and reset pool on `node is recovering` error', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'node is recovering', code: 11600 });
@@ -225,7 +225,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown and NOT reset pool on stepdown errors', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'not master' });
@@ -262,7 +262,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown on non-timeout network error', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.connection.destroy();

@@ -2,6 +2,7 @@
 
 const mock = require('./mongodb-mock/index');
 const BSON = require('../../src/bson');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 class ReplSetFixture {
   constructor() {
@@ -89,21 +90,21 @@ class ReplSetFixture {
   configureMessageHandlers() {
     this.primaryServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         request.reply(this.primaryStates[0]);
       }
     });
 
     this.firstSecondaryServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         request.reply(this.firstSecondaryStates[0]);
       }
     });
 
     this.arbiterServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
         request.reply(this.arbiterStates[0]);
       }
     });

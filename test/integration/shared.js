@@ -227,9 +227,9 @@ function withCursor(cursor, body, done) {
  * });
  * @example
  * beforeEach(function() {
- *   // same as above, but excludes 'ismaster' events
+ *   // same as above, but excludes 'insert' events
  *   this.commandStarted = new EventCollector(this.client, 'commandStarted', {
- *     exclude: ['ismaster']
+ *     exclude: ['insert']
  *   });
  * });
  */
