@@ -10,7 +10,7 @@ const { MongoClient } = require('../../../src');
 const { TestConfiguration } = require('./config');
 const { getEnvironmentalOptions } = require('../utils');
 const { eachAsync } = require('../../../src/utils');
-const mock = require('../mock');
+const mock = require('../mongodb-mock/index');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;

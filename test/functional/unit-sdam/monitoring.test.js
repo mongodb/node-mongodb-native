@@ -1,5 +1,5 @@
 'use strict';
-const mock = require('../../tools/mock');
+const mock = require('../../tools/mongodb-mock/index');
 const { ServerType } = require('../../../src/sdam/common');
 const { Topology } = require('../../../src/sdam/topology');
 const { Monitor } = require('../../../src/sdam/monitor');

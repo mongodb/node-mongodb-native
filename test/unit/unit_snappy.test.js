@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const mock = require('../tools/mock');
+const mock = require('../tools/mongodb-mock/index');
 const snappy = optionalRequire('snappy');
 const snappyVersion = optionalRequire('snappy/package.json').version;
 const { MongoClient } = require('../../src');
@@ -19,14 +19,14 @@ describe('Compression', function () {
   /** @type {mock.MockServer} */
   let server;
   before(async function () {
-    if (!snappy) this.skip();
+    if (!snappy) return this.skip();
     server = await mock.createServer();
     client = new MongoClient(`mongodb://${server.uri()}`, { compressors: 'snappy' });
   });
 
   after(async function () {
-    await mock.cleanup();
-    await client.close();
+    if (server) await mock.cleanup();
+    if (client) await client.close();
   });
 
   describe('Snappy', () => {

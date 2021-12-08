@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { MongoClient } from '../../src';
 import { processTick } from '../tools/utils';
 import { it } from 'mocha';
-import * as mock from '../tools/mock';
+import * as mock from '../tools/mongodb-mock/index';
 
 /*
     The SRV Prose Tests make use of the following REAL DNS records.

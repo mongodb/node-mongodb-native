@@ -10,7 +10,7 @@ const dns = require('dns');
 const EventEmitter = require('events').EventEmitter;
 const chai = require('chai');
 const sinon = require('sinon');
-const mock = require('../../tools/mock');
+const mock = require('../../tools/mongodb-mock/index');
 const { HostAddress } = require('../../../src/utils');
 const { MongoDriverError } = require('../../../src/error');
 

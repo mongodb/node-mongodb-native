@@ -10,7 +10,7 @@ const { withMonitoredClient } = require('./shared');
 // WriteConcernError test requires
 const { once } = require('events');
 
-const mock = require('../tools/mock');
+const mock = require('../tools/mongodb-mock/index');
 const { MongoClient, MongoServerError } = require('../../src');
 
 describe('Write Concern', function () {

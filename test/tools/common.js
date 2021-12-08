@@ -1,6 +1,6 @@
 'use strict';
 
-const mock = require('./mock');
+const mock = require('./mongodb-mock/index');
 const BSON = require('../../src/bson');
 
 class ReplSetFixture {

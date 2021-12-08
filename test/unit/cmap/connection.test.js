@@ -1,6 +1,6 @@
 'use strict';
 
-const mock = require('../../tools/mock');
+const mock = require('../../tools/mongodb-mock/index');
 const { connect } = require('../../../src/cmap/connect');
 const { Connection, hasSessionSupport } = require('../../../src/cmap/connection');
 const { expect } = require('chai');
