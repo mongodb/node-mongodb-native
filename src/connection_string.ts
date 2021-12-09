@@ -688,7 +688,6 @@ export const OPTIONS = {
       });
     }
   },
-  enableUtf8Validation: { type: 'boolean', default: true },
   family: {
     transform({ name, values: [value] }): 4 | 6 {
       const transformValue = getInt(name, value);

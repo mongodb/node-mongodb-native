@@ -21,7 +21,6 @@ type PermittedBSONOptionKeys =
   | 'promoteValues'
   | 'bsonRegExp'
   | 'fieldsAsRaw'
-  | 'enableUtf8Validation'
   | 'raw';
 
 const keys = null as unknown as PermittedBSONOptionKeys;
