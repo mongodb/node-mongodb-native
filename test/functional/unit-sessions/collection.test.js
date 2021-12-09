@@ -2,7 +2,7 @@
 const { Timestamp } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const test = {};
 describe('Sessions - unit/sessions', function () {
