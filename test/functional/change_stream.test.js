@@ -1314,7 +1314,7 @@ describe('Change Streams', function () {
 
       const OPERATION_TIME = new Timestamp(4, 1501511802);
 
-      const makePrimary = server => ({
+      const makeHello = server => ({
         __nodejs_mock_server__: true,
         [LEGACY_HELLO_COMMAND]: true,
         secondary: false,
@@ -1400,7 +1400,7 @@ describe('Change Streams', function () {
         try {
           const doc = request.document;
           if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
-            return request.reply(makePrimary(server));
+            return request.reply(makeHello(server));
           } else if (doc.aggregate) {
             return request.reply(AGGREGATE_RESPONSE);
           } else if (doc.getMore) {
