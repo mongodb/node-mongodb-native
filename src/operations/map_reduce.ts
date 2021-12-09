@@ -33,7 +33,6 @@ const exclusionList = [
   'bsonRegExp',
   'serializeFunctions',
   'ignoreUndefined',
-  'enableUtf8Validation',
   'scope' // this option is reformatted thus exclude the original
 ];
 

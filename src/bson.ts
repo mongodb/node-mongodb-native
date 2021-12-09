@@ -55,9 +55,6 @@ export interface BSONSerializeOptions
     > {
   /** Return BSON filled buffers from operations */
   raw?: boolean;
-
-  /** Enable utf8 validation when deserializing BSON documents.  Defaults to true. */
-  enableUtf8Validation?: boolean;
 }
 
 export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSerializeOptions {
@@ -69,8 +66,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     serializeFunctions,
     ignoreUndefined,
     bsonRegExp,
-    raw,
-    enableUtf8Validation
+    raw
   } = options;
   return {
     fieldsAsRaw,
@@ -80,8 +76,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     serializeFunctions,
     ignoreUndefined,
     bsonRegExp,
-    raw,
-    enableUtf8Validation
+    raw
   };
 }
 
@@ -104,8 +99,6 @@ export function resolveBSONOptions(
     ignoreUndefined: options?.ignoreUndefined ?? parentOptions?.ignoreUndefined ?? false,
     bsonRegExp: options?.bsonRegExp ?? parentOptions?.bsonRegExp ?? false,
     serializeFunctions: options?.serializeFunctions ?? parentOptions?.serializeFunctions ?? false,
-    fieldsAsRaw: options?.fieldsAsRaw ?? parentOptions?.fieldsAsRaw ?? {},
-    enableUtf8Validation:
-      options?.enableUtf8Validation ?? parentOptions?.enableUtf8Validation ?? true
+    fieldsAsRaw: options?.fieldsAsRaw ?? parentOptions?.fieldsAsRaw ?? {}
   };
 }

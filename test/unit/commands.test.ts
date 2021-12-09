@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { BinMsg, MessageHeader } from '../../src/cmap/commands';
 import { BSONError } from 'bson';
 import * as BSON from '../../src/bson';
-import { test } from 'mocha';
 
 const msgHeader: MessageHeader = {
   length: 735,
@@ -38,65 +37,44 @@ const invalidUtf8InWriteErrorsJSON = {
 // when another top-level key besides writeErrors has invalid utf8
 const nKeyWithInvalidUtf8 =
   '0000000000cc020000026e0005000000f09f98ff000477726974654572726f727300a60200000330009e02000010696e646578000000000010636f646500f82a0000036b65795061747465726e000f0000001074657874000100000000036b657956616c756500610100000274657874005201000064e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e298830000026572726d736700f2000000453131303030206475706c6963617465206b6579206572726f7220636f6c6c656374696f6e3a20626967646174612e7465737420696e6465783a20746578745f3120647570206b65793a207b20746578743a202264e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883e29883efbfbd2e2e2e22207d000000106f6b000100000000';
+const nKeyWithInvalidUtf8DeserializeInput = Buffer.from(nKeyWithInvalidUtf8.substring(10), 'hex');
 const msgBodyNKeyWithInvalidUtf8 = Buffer.from(nKeyWithInvalidUtf8, 'hex');
+const invalidUtf8InNKeyJSON = {
+  n: '��',
+  writeErrors: [
+    {
+      index: 0,
+      code: 11000,
+      keyPattern: {
+        text: 1
+      },
+      keyValue: {
+        text: 'd☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃'
+      },
+      errmsg:
+        'E11000 duplicate key error collection: bigdata.test index: text_1 dup key: { text: "d☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃�..." }'
+    }
+  ],
+  ok: 1
+};
 
 describe('BinMsg BSON utf8 validation', () => {
-  test('bson correctly deserializes data with replacement characters for invalid utf8 in writeErrors object', () => {
-    // this is a sanity check to make sure nothing unexpected is happening in the deserialize method itself
-
+  context('when validation is disabled for writeErrors', () => {
+    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
+      Buffer.alloc(0),
+      msgHeader,
+      msgBodyInvalidUtf8WriteErrors
+    );
     const options = { validation: { utf8: { writeErrors: false } as const } };
-    expect(BSON.deserialize(invalidUtf8ErrorMsgDeserializeInput, options)).to.deep.equals(
-      invalidUtf8InWriteErrorsJSON
-    );
-  });
 
-  context('when enableUtf8Validation option is not specified', () => {
-    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
-      Buffer.alloc(0),
-      msgHeader,
-      msgBodyInvalidUtf8WriteErrors
-    );
+    it('contains replacement characters for invalid utf8 in writeError object', () => {
+      expect(BSON.deserialize(invalidUtf8ErrorMsgDeserializeInput, options)).to.deep.equals(
+        invalidUtf8InWriteErrorsJSON
+      );
+    });
 
-    const options = {};
-    it('does not validate the writeErrors key', () => {
+    it('should not throw invalid utf8 error', () => {
       expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
-    });
-
-    it('should validate keys other than the writeErrors key', () => {
-      const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
-        Buffer.alloc(0),
-        msgHeader,
-        msgBodyNKeyWithInvalidUtf8
-      );
-      expect(() => binMsgAnotherKeyWithInvalidUtf8.parse(options)).to.throw(
-        BSONError,
-        'Invalid UTF-8 string in BSON document'
-      );
-    });
-  });
-
-  context('when validation is disabled', () => {
-    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
-      Buffer.alloc(0),
-      msgHeader,
-      msgBodyInvalidUtf8WriteErrors
-    );
-
-    const options = { enableUtf8Validation: false };
-    it('should not validate the writeErrors key', () => {
-      expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
-    });
-
-    it('should not validate keys other than the writeErrors key', () => {
-      const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
-        Buffer.alloc(0),
-        msgHeader,
-        msgBodyNKeyWithInvalidUtf8
-      );
-      expect(() => binMsgAnotherKeyWithInvalidUtf8.parse(options)).to.not.throw(
-        BSONError,
-        'Invalid UTF-8 string in BSON document'
-      );
     });
   });
 
@@ -115,30 +93,44 @@ describe('BinMsg BSON utf8 validation', () => {
     expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
   });
 
-  context('utf8 validation enabled', () => {
-    const options = { enableUtf8Validation: true };
-    it('should not validate the writeErrors key', () => {
-      const binMsgInvalidUtf8ErrorMsg = new BinMsg(
-        Buffer.alloc(0),
-        msgHeader,
-        msgBodyInvalidUtf8WriteErrors
-      );
-      expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).not.to.throw(
-        BSONError,
-        'Invalid UTF-8 string in BSON document'
-      );
+  context('when another key has invalid utf8 and validation is enabled for writeErrors', () => {
+    const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
+      Buffer.alloc(0),
+      msgHeader,
+      msgBodyNKeyWithInvalidUtf8
+    );
+    const options = { validation: { utf8: { writeErrors: true } as const } };
+
+    it('should not throw invalid utf8 error', () => {
+      expect(() => binMsgAnotherKeyWithInvalidUtf8.parse(options)).to.not.throw();
     });
 
-    it('should validate keys other than the writeErrors key', () => {
-      const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
-        Buffer.alloc(0),
-        msgHeader,
-        msgBodyNKeyWithInvalidUtf8
-      );
-      expect(() => binMsgAnotherKeyWithInvalidUtf8.parse(options)).to.throw(
-        BSONError,
-        'Invalid UTF-8 string in BSON document'
+    it('contains replacement characters for invalid utf8 key', () => {
+      expect(BSON.deserialize(nKeyWithInvalidUtf8DeserializeInput, options)).to.deep.equals(
+        invalidUtf8InNKeyJSON
       );
     });
+  });
+
+  it('should throw invalid utf8 error when validation enabled for writeErrors', () => {
+    const binMsgInvalidUtf8ErrorMsg = new BinMsg(
+      Buffer.alloc(0),
+      msgHeader,
+      msgBodyInvalidUtf8WriteErrors
+    );
+    expect(() =>
+      binMsgInvalidUtf8ErrorMsg.parse({ validation: { utf8: { writeErrors: true } } })
+    ).to.throw(BSONError, 'Invalid UTF-8 string in BSON document');
+  });
+
+  it('should throw error when another key has invalid utf8 and writeErrors is not validated', () => {
+    const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
+      Buffer.alloc(0),
+      msgHeader,
+      msgBodyNKeyWithInvalidUtf8
+    );
+    expect(() =>
+      binMsgAnotherKeyWithInvalidUtf8.parse({ validation: { utf8: { writeErrors: false } } })
+    ).to.throw(BSONError, 'Invalid UTF-8 string in BSON document');
   });
 });

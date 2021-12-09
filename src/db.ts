@@ -73,7 +73,6 @@ const DB_OPTIONS_ALLOW_LIST = [
   'promoteBuffers',
   'promoteLongs',
   'bsonRegExp',
-  'enableUtf8Validation',
   'promoteValues',
   'compression',
   'retryWrites'
