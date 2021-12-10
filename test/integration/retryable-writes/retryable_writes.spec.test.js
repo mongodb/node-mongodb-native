@@ -6,7 +6,8 @@ const { parseRunOn } = require('../../tools/spec-runner');
 
 describe('Retryable Writes', function () {
   let ctx = {};
-  loadSpecTests('retryable-writes').forEach(suite => {
+  const retryableSpecs = loadSpecTests('retryable-writes');
+  for(const suite of retryableSpecs) {
     const environmentRequirementList = parseRunOn(suite.runOn);
     environmentRequirementList.forEach(requires => {
       const suiteName = `${suite.name} - ${requires.topology.join()}`;

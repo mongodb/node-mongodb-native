@@ -136,40 +136,39 @@ function generateTopologyTests(testSuites, testContext, filter) {
     }
     const environmentRequirementList = parseRunOn(runOn);
 
-    for (const requires of environmentRequirementList) {
-      const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
-
-      if (process.env.SERVERLESS) {
-        requires.topology.push('load-balanced');
-      }
-
-      describe(suiteName, {
-        metadata: { requires },
-        test() {
-          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-          afterEach(() => testContext.cleanupAfterSuite());
-
-          for (const spec of testSuite.tests) {
-            const maybeIt = shouldRunSpecTest(this.configuration, requires, spec, filter)
-              ? it
-              : it.skip;
-
-            maybeIt(spec.description, async function () {
-              if (spec.failPoint) {
-                await testContext.enableFailPoint(spec.failPoint);
-              }
-
-              await runTestSuiteTest(this.configuration, spec, testContext);
-
-              if (spec.failPoint) {
-                await testContext.disableFailPoint(spec.failPoint);
-              }
-              return await validateOutcome(spec, testContext);
-            });
+    describe(testSuite.name, () => {
+      beforeEach(async function () {
+        let shouldRun = true;
+        const spec = this.currentTest.spec;
+        for (const requires of environmentRequirementList) {
+          shouldRun = shouldRun && shouldRunSpecTest(this.configuration, requires, spec, filter);
+          if (!shouldRun) {
+            return this.skip();
           }
         }
+        // skip before preparing anything that would create sessions (to avoid leak check issues)
+        await prepareDatabaseForSuite(testSuite, testContext);
       });
-    }
+      afterEach(() => testContext.cleanupAfterSuite());
+
+      for (const spec of testSuite.tests) {
+        const mochaTest = it(spec.description, async function () {
+          if (spec.failPoint) {
+            await testContext.enableFailPoint(spec.failPoint);
+          }
+
+          await runTestSuiteTest(this.configuration, spec, testContext);
+
+          if (spec.failPoint) {
+            await testContext.disableFailPoint(spec.failPoint);
+          }
+          return await validateOutcome(spec, testContext);
+        });
+
+        // Make spec accessible in beforeEach hook
+        mochaTest.spec = spec;
+      }
+    });
   }
 }
 
@@ -203,83 +202,77 @@ function shouldRunSpecTest(configuration, requires, spec, filter) {
 }
 
 // Test runner helpers
-function prepareDatabaseForSuite(suite, context) {
+async function prepareDatabaseForSuite(suite, context) {
   context.dbName = suite.database_name || 'spec_db';
   context.collectionName = suite.collection_name || 'spec_collection';
 
   const db = context.sharedClient.db(context.dbName);
 
-  if (context.skipPrepareDatabase) return Promise.resolve();
+  if (context.skipPrepareDatabase) {
+    return;
+  }
 
-  // Note: killAllSession is not supported on serverless, see CLOUDP-84298
-  const setupPromise = context.serverless
-    ? Promise.resolve()
-    : db
-        .admin()
-        .command({ killAllSessions: [] })
-        .catch(err => {
-          if (
-            err.message.match(/no such (cmd|command)/) ||
-            err.message.match(/Failed to kill on some hosts/) ||
-            err.code === 11601
-          ) {
-            return;
-          }
-
-          throw err;
-        });
+  if (!context.serverless) {
+    // Note: killAllSession is not supported on serverless, see CLOUDP-84298
+    try {
+      await db.admin().command({ killAllSessions: [] });
+    } catch (error) {
+      if (
+        !(
+          error.message.match(/no such (cmd|command)/) ||
+          error.message.match(/Failed to kill on some hosts/) ||
+          error.code === 11601
+        )
+      ) {
+        throw error;
+      }
+    }
+  }
 
   if (context.collectionName == null || context.dbName === 'admin') {
-    return setupPromise;
+    return;
   }
 
   const coll = db.collection(context.collectionName);
-  return setupPromise
-    .then(() => coll.drop({ writeConcern: { w: 'majority' } }))
-    .catch(err => {
-      if (!err.message.match(/ns not found/)) throw err;
-    })
-    .then(() => {
-      if (suite.key_vault_data) {
-        const dataKeysCollection = context.sharedClient.db('keyvault').collection('datakeys');
-        return dataKeysCollection
-          .drop({ writeConcern: { w: 'majority' } })
-          .catch(err => {
-            if (!err.message.match(/ns not found/)) {
-              throw err;
-            }
-          })
-          .then(() => {
-            if (suite.key_vault_data.length) {
-              return dataKeysCollection.insertMany(suite.key_vault_data, {
-                writeConcern: { w: 'majority' }
-              });
-            }
-          });
-      }
-    })
-    .then(() => {
-      const options = { writeConcern: { w: 'majority' } };
-      if (suite.json_schema) {
-        options.validator = { $jsonSchema: suite.json_schema };
-      }
 
-      return db.createCollection(context.collectionName, options);
-    })
-    .then(() => {
-      if (suite.data && Array.isArray(suite.data) && suite.data.length > 0) {
-        return coll.insertMany(suite.data, { writeConcern: { w: 'majority' } });
-      }
-    })
-    .then(() => {
-      return context.runForAllClients(client => {
-        return client
-          .db(context.dbName)
-          .collection(context.collectionName)
-          .distinct('x')
-          .catch(() => {});
+  try {
+    await coll.drop({ writeConcern: { w: 'majority' } });
+  } catch (error) {
+    if (!error.message.match(/ns not found/)) throw error;
+  }
+
+  if (suite.key_vault_data) {
+    const dataKeysCollection = context.sharedClient.db('keyvault').collection('datakeys');
+    try {
+      await dataKeysCollection.drop({ writeConcern: { w: 'majority' } });
+    } catch (error) {
+      if (!error.message.match(/ns not found/)) throw error;
+    }
+    if (suite.key_vault_data.length) {
+      await dataKeysCollection.insertMany(suite.key_vault_data, {
+        writeConcern: { w: 'majority' }
       });
-    });
+    }
+  }
+
+  const options = { writeConcern: { w: 'majority' } };
+  if (suite.json_schema) {
+    options.validator = { $jsonSchema: suite.json_schema };
+  }
+
+  await db.createCollection(context.collectionName, options);
+
+  if (suite.data && Array.isArray(suite.data) && suite.data.length > 0) {
+    await coll.insertMany(suite.data, { writeConcern: { w: 'majority' } });
+  }
+
+  await context.runForAllClients(client =>
+    client
+      .db(context.dbName)
+      .collection(context.collectionName)
+      .distinct('x')
+      .catch(() => {})
+  );
 }
 
 function parseSessionOptions(options) {
