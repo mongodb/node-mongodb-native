@@ -34,16 +34,13 @@ export type WithId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id: InferIdType<
 /**
  * Add an optional _id field to an object shaped type
  * @public
- *
- * @privateRemarks
- * `ObjectId extends TSchema['_id']` is a confusing ordering at first glance. Rather than ask
- * `TSchema['_id'] extends ObjectId` which translated to "Is the _id property ObjectId?"
- * we instead ask "Does ObjectId look like (have the same shape) as the _id?"
  */
 export type OptionalId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id?: InferIdType<TSchema> };
 
 /**
- * Add an optional _id field to a schema EXCEPT if:
+ * Adds an optional _id field to an object shaped type, unless the _id field is requried on that type.
+ * In the case _id is required, this method continues to require_id.
+ *
  * @public
  *
  * @privateRemarks
@@ -53,8 +50,6 @@ export type OptionalId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id?: InferId
  */
 export type CollectionOperationsID<TSchema> = TSchema extends { _id: any }
   ? TSchema
-  : TSchema extends { _id?: any }
-  ? OptionalId<TSchema>
   : OptionalId<TSchema>;
 
 /** TypeScript Omit (Exclude to be specific) does not work for objects with an "any" indexed type, and breaks discriminated unions @public */
