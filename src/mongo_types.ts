@@ -48,7 +48,7 @@ export type OptionalId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id?: InferId
  * `TSchema['_id'] extends ObjectId` which translated to "Is the _id property ObjectId?"
  * we instead ask "Does ObjectId look like (have the same shape) as the _id?"
  */
-export type CollectionOperationsID<TSchema> = TSchema extends { _id: any }
+export type OptionalUnlessRequiredId<TSchema> = TSchema extends { _id: any }
   ? TSchema
   : OptionalId<TSchema>;
 

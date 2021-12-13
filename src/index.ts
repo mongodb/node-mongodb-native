@@ -399,6 +399,7 @@ export type {
   EnhancedOmit,
   WithId,
   OptionalId,
+  OptionalUnlessRequiredId,
   WithoutId,
   UpdateFilter,
   Filter,

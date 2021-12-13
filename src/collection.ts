@@ -94,7 +94,6 @@ import type {
   UpdateFilter,
   WithId,
   WithoutId,
-  OptionalId,
   Flatten,
   OptionalUnlessRequiredId
 } from './mongo_types';
