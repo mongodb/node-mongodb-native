@@ -100,27 +100,22 @@ describe('Srv Option Handling', () => {
     expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
   });
 
-  for (const iterator of [
-    { mechanism: AuthMechanism.MONGODB_AWS },
-    { mechmanism: AuthMechanism.MONGODB_SCRAM_SHA256 }
-  ]) {
-    it('should retain credentials for any mechanism with no user-sepcificed source and no source in DNS:', async function () {
-      makeStub('');
-      const options = {
-        credentials: new MongoCredentials({
-          source: 'admin',
-          mechanism: iterator.mechanism,
-          username: 'username',
-          password: 'password',
-          mechanismProperties: {}
-        }),
-        srvHost: 'test.mock.test.build.10gen.cc',
-        srvServiceName: 'mongodb',
-        userSpecifiedAuthSource: false
-      };
+  it('should retain credentials for any mechanism with no user-sepcificed source and no source in DNS:', async function () {
+    makeStub('');
+    const options = {
+      credentials: new MongoCredentials({
+        source: 'admin',
+        mechanism: AuthMechanism.MONGODB_SCRAM_SHA256,
+        username: 'username',
+        password: 'password',
+        mechanismProperties: {}
+      }),
+      srvHost: 'test.mock.test.build.10gen.cc',
+      srvServiceName: 'mongodb',
+      userSpecifiedAuthSource: false
+    };
 
-      await resolveSRVRecordAsync(options as any);
-      expect(options).to.have.nested.property('credentials.source', 'admin');
-    });
-  }
+    await resolveSRVRecordAsync(options as any);
+    expect(options).to.have.nested.property('credentials.source', 'admin');
+  });
 });
