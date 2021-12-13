@@ -16,6 +16,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 chai.use(require('chai-subset'));
+const { isHello } = require('../../src/utils');
 
 function withChangeStream(dbName, collectionName, callback) {
   if (arguments.length === 1) {
@@ -1115,7 +1116,7 @@ describe('Change Streams', function () {
           const doc = request.document;
 
           // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
-          if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+          if (isHello(doc)) {
             request.reply(
               Object.assign(
                 {
@@ -1399,7 +1400,7 @@ describe('Change Streams', function () {
       function primaryServerHandler(request) {
         try {
           const doc = request.document;
-          if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+          if (isHello(doc)) {
             return request.reply(makeHello(server));
           } else if (doc.aggregate) {
             return request.reply(AGGREGATE_RESPONSE);
@@ -2509,7 +2510,7 @@ context('NODE-2626 - handle null changes without error', function () {
   it('changeStream should close if cursor id for initial aggregate is Long.ZERO', function (done) {
     mockServer.setMessageHandler(req => {
       const doc = req.document;
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         return req.reply(mock.HELLO);
       }
       if (doc.aggregate) {

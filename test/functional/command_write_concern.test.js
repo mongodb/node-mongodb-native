@@ -3,6 +3,7 @@ const mock = require('../tools/mongodb-mock/index');
 const expect = require('chai').expect;
 const { ObjectId, Code } = require('../../src');
 const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { isHello } = require('../../src/utils');
 
 const TEST_OPTIONS = { writeConcern: { w: 2, wtimeoutMS: 1000 } };
 
@@ -57,7 +58,7 @@ class WriteConcernTest {
 
     primaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(self.serverStates.primary[0]);
       } else if (doc[resultKey]) {
         self.commandResult = doc;
@@ -69,7 +70,7 @@ class WriteConcernTest {
 
     firstSecondaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(self.serverStates.firstSecondary[0]);
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -78,7 +79,7 @@ class WriteConcernTest {
 
     arbiterServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(self.serverStates.arbiter[0]);
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });

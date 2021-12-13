@@ -3,7 +3,7 @@ const { Long } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
 const { ReadPreference } = require('../../../src');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { isHello } = require('../../../src/utils');
 
 const test = {};
 // TODO (NODE-3799): convert these to run against a real server
@@ -19,7 +19,7 @@ describe('Max Staleness', function () {
       const serverIsPrimary = [Object.assign({}, defaultFields)];
       server.setMessageHandler(request => {
         var doc = request.document;
-        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+        if (isHello(doc)) {
           request.reply(serverIsPrimary[0]);
           return;
         }

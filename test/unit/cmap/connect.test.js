@@ -8,7 +8,7 @@ const { connect } = require('../../../src/cmap/connect');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
 const { genClusterTime } = require('../../tools/common');
 const { MongoNetworkError } = require('../../../src/error');
-const { HostAddress } = require('../../../src/utils');
+const { HostAddress, isHello } = require('../../../src/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 describe('Connect Tests', function () {
@@ -36,7 +36,7 @@ describe('Connect Tests', function () {
       const doc = request.document;
       const $clusterTime = genClusterTime(Date.now());
 
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         whatHappened[LEGACY_HELLO_COMMAND] = true;
         request.reply(
           Object.assign({}, mock.HELLO, {
@@ -66,7 +66,7 @@ describe('Connect Tests', function () {
     test.server.setMessageHandler(request => {
       const doc = request.document;
       const $clusterTime = genClusterTime(Date.now());
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         whatHappened[LEGACY_HELLO_COMMAND] = true;
         request.reply(
           Object.assign({}, mock.HELLO, {

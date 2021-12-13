@@ -5,9 +5,8 @@ const { MongoError } = require('../../../src/error');
 const mock = require('../../tools/mongodb-mock/index');
 const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
-const { MongoDBNamespace } = require('../../../src/utils');
+const { MongoDBNamespace, isHello } = require('../../../src/utils');
 const { FindCursor } = require('../../../src/cursor/find_cursor');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const test = {};
 describe('Find Cursor', function () {
@@ -30,7 +29,7 @@ describe('Find Cursor', function () {
 
         test.server.setMessageHandler(request => {
           const doc = request.document;
-          if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+          if (isHello(doc)) {
             request.reply(
               Object.assign({}, mock.HELLO, {
                 maxWireVersion: 6

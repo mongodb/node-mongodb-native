@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const mock = require('../tools/mongodb-mock/index');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { isHello } = require('../../src/utils');
 
 describe('bypass document validation', function () {
   const test = {};
@@ -39,7 +39,7 @@ describe('bypass document validation', function () {
         }
       }
 
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -92,7 +92,7 @@ describe('bypass document validation', function () {
         }
       }
 
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -149,7 +149,7 @@ describe('bypass document validation', function () {
         }
       }
 
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -198,7 +198,7 @@ describe('bypass document validation', function () {
         }
       }
 
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });

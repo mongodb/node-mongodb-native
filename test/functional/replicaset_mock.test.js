@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const mock = require('../tools/mongodb-mock/index');
 const { ObjectId } = require('bson');
 const { Logger } = require('../../src/logger');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { isHello } = require('../../src/utils');
 
 const test = {};
 describe('ReplSet (mocks)', function () {
@@ -32,7 +32,7 @@ describe('ReplSet (mocks)', function () {
 
       test.mongos1.setMessageHandler(request => {
         var doc = request.document;
-        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+        if (isHello(doc)) {
           request.reply(serverIsPrimary[0]);
         } else if (doc.insert) {
           request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
@@ -43,7 +43,7 @@ describe('ReplSet (mocks)', function () {
 
       test.mongos2.setMessageHandler(request => {
         var doc = request.document;
-        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+        if (isHello(doc)) {
           request.reply(serverIsPrimary[1]);
         } else if (doc.insert) {
           request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });

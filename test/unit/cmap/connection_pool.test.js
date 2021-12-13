@@ -9,7 +9,7 @@ const mock = require('../../tools/mongodb-mock/index');
 const cmapEvents = require('../../../src/cmap/connection_pool_events');
 const sinon = require('sinon');
 const { expect } = require('chai');
-const { ns } = require('../../../src/utils');
+const { ns, isHello } = require('../../../src/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const ALL_POOL_EVENTS = new Set([
@@ -45,7 +45,7 @@ describe('Connection Pool', function () {
   it('should destroy connections which have been closed', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(mock.HELLO);
       } else {
         // destroy on any other command
@@ -88,7 +88,7 @@ describe('Connection Pool', function () {
   it('should propagate socket timeouts to connections', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(mock.HELLO);
       } else {
         // blackhole other requests
@@ -118,7 +118,7 @@ describe('Connection Pool', function () {
   it('should clear timed out wait queue members if no connections are available', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         request.reply(mock.HELLO);
       }
     });
@@ -154,7 +154,7 @@ describe('Connection Pool', function () {
     it('should manage a connection for a successful operation', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+        if (isHello(doc)) {
           request.reply(mock.HELLO);
         }
       });
@@ -184,7 +184,7 @@ describe('Connection Pool', function () {
     it('should allow user interaction with an error', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+        if (isHello(doc)) {
           request.connection.destroy();
         }
       });
@@ -214,7 +214,7 @@ describe('Connection Pool', function () {
     it('should return an error to the original callback', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+        if (isHello(doc)) {
           request.reply(mock.HELLO);
         }
       });
@@ -240,7 +240,7 @@ describe('Connection Pool', function () {
     it('should still manage a connection if no callback is provided', function (done) {
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+        if (isHello(doc)) {
           request.reply(mock.HELLO);
         }
       });
@@ -412,7 +412,7 @@ describe('Connection Pool', function () {
       // and establish valid connections
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+        if (isHello(doc)) {
           request.reply(mock.HELLO);
         }
       });

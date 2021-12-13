@@ -4,7 +4,7 @@ const { setupDatabase } = require('./shared');
 const { expect } = require('chai');
 const { MongoClient } = require('../../src');
 const { Connection } = require('../../src/cmap/connection');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { isHello } = require('../../src/utils');
 
 describe('MongoClient Options', function () {
   before(function () {
@@ -66,11 +66,7 @@ describe('MongoClient Options', function () {
           const ns = args[0];
           const command = args[1];
           const options = args[2] || {};
-          if (
-            ns.toString() === 'admin.$cmd' &&
-            (command[LEGACY_HELLO_COMMAND] || command.hello) &&
-            options.exhaustAllowed
-          ) {
+          if (ns.toString() === 'admin.$cmd' && isHello(command) && options.exhaustAllowed) {
             expect(options).property('socketTimeoutMS').to.equal(0);
             stub.restore();
             client.close(done);
@@ -95,11 +91,7 @@ describe('MongoClient Options', function () {
           const ns = args[0];
           const command = args[1];
           const options = args[2] || {};
-          if (
-            ns.toString() === 'admin.$cmd' &&
-            (command[LEGACY_HELLO_COMMAND] || command.hello) &&
-            options.exhaustAllowed
-          ) {
+          if (ns.toString() === 'admin.$cmd' && isHello(command) && options.exhaustAllowed) {
             expect(options).property('socketTimeoutMS').to.equal(510);
             stub.restore();
             client.close(done);

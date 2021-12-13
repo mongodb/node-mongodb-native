@@ -5,8 +5,7 @@ const { expect } = require('chai');
 const { genClusterTime, sessionCleanupHandler } = require('../tools/common');
 const { Topology } = require('../../src/sdam/topology');
 const { ServerSessionPool, ServerSession, ClientSession } = require('../../src/sessions');
-const { now } = require('../../src/utils');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { now, isHello } = require('../../src/utils');
 
 let test = {};
 
@@ -226,7 +225,7 @@ describe('Sessions - unit/core', function () {
           test.server = server;
           test.server.setMessageHandler(request => {
             var doc = request.document;
-            if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+            if (isHello(doc)) {
               request.reply(Object.assign({}, mock.HELLO, { logicalSessionTimeoutMinutes: 10 }));
             }
           });

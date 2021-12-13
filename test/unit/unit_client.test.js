@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const mock = require('../tools/mongodb-mock/index');
 const { MongoClient } = require('../../src');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { isHello } = require('../../src/utils');
 
 describe('Client (unit)', function () {
   let server, client;
@@ -20,7 +20,7 @@ describe('Client (unit)', function () {
     let handshake;
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
+      if (isHello(doc)) {
         handshake = doc;
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
