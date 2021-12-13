@@ -49,7 +49,7 @@
   },
   "tests": [
     {
-      "description": "unpin after TransientTransctionError error on commit",
+      "description": "unpin after TransientTransactionError error on commit",
       "runOnRequirements": [
         {
           "serverless": "forbid"
@@ -108,6 +108,24 @@
           "arguments": {
             "session": "session0"
           }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
         }
       ]
     },
@@ -142,7 +160,7 @@
       ]
     },
     {
-      "description": "unpin after TransientTransctionError error on abort",
+      "description": "unpin after non-transient error on abort",
       "runOnRequirements": [
         {
           "serverless": "forbid"
@@ -192,6 +210,91 @@
           "arguments": {
             "session": "session0"
           }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ]
+    },
+    {
+      "description": "unpin after TransientTransactionError error on abort",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "abortTransaction"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "assertSessionUnpinned",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            },
+            "session": "session0"
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
         }
       ]
     },

@@ -118,10 +118,10 @@ tests:
             mode: { times: 1 }
             data:
               failCommands: ["commitTransaction"]
+              errorLabels: ["RetryableWriteError"]
               writeConcernError:
                 code: 91
                 errmsg: Replication is being shut down
-                errorLabels: ["RetryableWriteError"]
       # The client sees a retryable writeConcernError on the first
       # commitTransaction due to the fail point but it actually succeeds on the
       # server (SERVER-39346). The retry will succeed both on a new mongos and
@@ -196,7 +196,7 @@ tests:
         result:
           insertedId: 1
       # Enable the fail point only on the Mongos that session0 is pinned to.
-      # Fail isMaster to prevent the heartbeat requested directly after the
+      # Fail hello/legacy hello to prevent the heartbeat requested directly after the
       # retryable commit error from racing with server selection for the retry.
       # Note: times: 7 is slightly artbitrary but it accounts for one failed
       # commit and some SDAM heartbeats. A test runner will have multiple
@@ -210,7 +210,7 @@ tests:
             configureFailPoint: failCommand
             mode: { times: 7 }
             data:
-              failCommands: ["commitTransaction", "isMaster"]
+              failCommands: ["commitTransaction", "isMaster", "hello"]
               closeConnection: true
       # The first commitTransaction sees a retryable connection error due to
       # the fail point and also fails on the server. The retry attempt on a
@@ -218,7 +218,7 @@ tests:
       # because the transaction was aborted. Note that the retry attempt should
       # not select the original mongos because that server's SDAM state is
       # reset by the connection error, heartbeatFrequencyMS is high, and
-      # subsequent isMaster heartbeats should fail.
+      # subsequent heartbeats should fail.
       - name: commitTransaction
         object: session0
         result:

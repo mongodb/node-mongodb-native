@@ -68,14 +68,14 @@ tests:
       collection:
         data: []
 
-  - description: NotMaster errors contain transient label
+  - description: NotWritablePrimary errors contain transient label
 
     failPoint:
       configureFailPoint: failCommand
       mode: { times: 1 }
       data:
           failCommands: ["insert"]
-          errorCode: 10107  # NotMaster
+          errorCode: 10107  # NotWritablePrimary
 
     operations:
       - name: startTransaction
@@ -590,10 +590,10 @@ tests:
       mode: { times: 2 }
       data:
           failCommands: ["commitTransaction"]
+          errorLabels: ["RetryableWriteError"]
           writeConcernError:
             code: 91
             errmsg: Replication is being shut down
-            errorLabels: ["RetryableWriteError"]
 
     operations:
       - name: startTransaction

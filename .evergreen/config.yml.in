@@ -712,11 +712,12 @@ task_groups:
           script: |
             ${PREPARE_SHELL}
             set +o xtrace
-            LOADBALANCED=ON \
-            SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP} \
-            SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY} \
-            SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY} \
-              bash ${DRIVERS_TOOLS}/.evergreen/serverless/create-instance.sh
+            export LOADBALANCED="ON"
+            export SERVERLESS_DRIVERS_GROUP=${SERVERLESS_DRIVERS_GROUP}
+            export SERVERLESS_API_PUBLIC_KEY=${SERVERLESS_API_PUBLIC_KEY}
+            export SERVERLESS_API_PRIVATE_KEY=${SERVERLESS_API_PRIVATE_KEY}
+            export PROJECT="nodeDriver"
+            bash ${DRIVERS_TOOLS}/.evergreen/serverless/create-instance.sh
       - command: expansions.update
         params:
           file: serverless-expansion.yml
