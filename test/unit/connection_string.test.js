@@ -95,9 +95,6 @@ describe('Connection String', function () {
   });
 
   it('should provide default authSource when valid AuthMechanism provided', function () {
-    // const options = parseOptions(
-    //   'mongodb+srv://jira-sync.pw0q4.mongodb.net/testDB?authMechanism=MONGODB-AWS&retryWrites=true&w=majority'
-    // );
     const options = parseOptions(
       'mongodb+srv://jira-sync.pw0q4.mongodb.net/testDB?authMechanism=MONGODB-AWS&retryWrites=true&w=majority'
     );
