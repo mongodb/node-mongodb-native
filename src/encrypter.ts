@@ -51,6 +51,7 @@ export class Encrypter {
     options.autoEncryption.bson!.serialize = serialize;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     options.autoEncryption.bson!.deserialize = deserialize;
+    options.autoEncryption.serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
 
     this.autoEncrypter = new AutoEncrypterClass(client, options.autoEncryption);
   }
