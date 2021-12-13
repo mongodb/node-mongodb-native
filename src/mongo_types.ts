@@ -24,7 +24,7 @@ export type InferIdType<TSchema> = TSchema extends { _id: infer IdType }
   : TSchema extends { _id?: infer IdType }
   ? // optional _id defined - return ObjectId | IdType
     unknown extends IdType
-    ? ObjectId
+    ? ObjectId // infer the _id type as ObjectId if the type of _id is unknown
     : IdType | ObjectId
   : ObjectId; // user has not defined _id on schema
 
