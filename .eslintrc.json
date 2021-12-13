@@ -20,6 +20,7 @@
     "prettier/prettier": "error",
     "tsdoc/syntax": "warn",
     "no-console": "error",
+    "valid-typeof": "error",
     "eqeqeq": [
       "error",
       "always",
