@@ -18,7 +18,7 @@ expectType<InferIdType<Document>>(new ObjectId());
 expectType<InferIdType<{ _id: number }>>(1 + 1);
 expectType<InferIdType<{ a: number } | { b: string }>>(new ObjectId());
 expectType<InferIdType<{ _id?: number | ObjectId }>>(optionalReturnValue());
-expectError<InferIdType<{ _id: {} }>>({});
+expectError<InferIdType<{ _id: Record<string, any> }>>({});
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(new ObjectId());
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(1 + 1);
 
