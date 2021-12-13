@@ -3,7 +3,7 @@
 const { MongoParseError, MongoDriverError, MongoInvalidArgumentError } = require('../../src/error');
 const { loadSpecTests } = require('../spec');
 const { parseOptions } = require('../../src/connection_string');
-const { AuthMechanism } = require('../../src/cmap/auth/defaultAuthProviders');
+const { AuthMechanism } = require('../../src/cmap/auth/providers');
 const { expect } = require('chai');
 
 // NOTE: These are cases we could never check for unless we write our own

@@ -5,9 +5,11 @@ const { deprecateOptions, arrayStrictEqual, errorStrictEqual } = require('../../
 const chalk = require('chalk');
 const util = require('util');
 const chai = require('chai');
+
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 const { EJSON } = require('bson');
+
 chai.use(sinonChai);
 
 function makeTestFunction(config) {

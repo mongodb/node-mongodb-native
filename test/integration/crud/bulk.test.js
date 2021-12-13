@@ -10,6 +10,7 @@ const {
 const { Long, MongoBatchReExecutionError, MongoDriverError } = require('../../../src');
 const crypto = require('crypto');
 const chai = require('chai');
+
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 

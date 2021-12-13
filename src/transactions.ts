@@ -1,10 +1,10 @@
-import { ReadPreference } from './read_preference';
-import { MongoRuntimeError, MongoTransactionError } from './error';
-import { ReadConcern, ReadConcernLike } from './read_concern';
-import { WriteConcern } from './write_concern';
-import type { Server } from './sdam/server';
-import type { CommandOperationOptions } from './operations/command';
 import type { Document } from './bson';
+import { MongoRuntimeError, MongoTransactionError } from './error';
+import type { CommandOperationOptions } from './operations/command';
+import { ReadConcern, ReadConcernLike } from './read_concern';
+import { ReadPreference } from './read_preference';
+import type { Server } from './sdam/server';
+import { WriteConcern } from './write_concern';
 
 /** @internal */
 export const TxnState = Object.freeze({

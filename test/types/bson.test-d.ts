@@ -1,4 +1,5 @@
 import { expectType } from 'tsd';
+
 import type { BSONSerializeOptions, Document } from '../../src/bson';
 
 const options: BSONSerializeOptions = {};

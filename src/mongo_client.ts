@@ -1,42 +1,44 @@
-import { Db, DbOptions } from './db';
+import type { TcpNetConnectOpts } from 'net';
+import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
+
+import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
-import type { ReadPreference, ReadPreferenceMode } from './read_preference';
+import type { AuthMechanismProperties, MongoCredentials } from './cmap/auth/mongo_credentials';
+import type { AuthMechanism } from './cmap/auth/providers';
+import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
+import type { Connection } from './cmap/connection';
+import type { CompressorName } from './cmap/wire_protocol/compression';
+import { parseOptions } from './connection_string';
+import type { MONGO_CLIENT_EVENTS } from './constants';
+import { Db, DbOptions } from './db';
+import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
+import type { Encrypter } from './encrypter';
 import {
   AnyError,
-  MongoRuntimeError,
   MongoInvalidArgumentError,
-  MongoNotConnectedError
+  MongoNotConnectedError,
+  MongoRuntimeError
 } from './error';
-import type { W, WriteConcern } from './write_concern';
-import {
-  maybePromise,
-  MongoDBNamespace,
-  Callback,
-  resolveOptions,
-  ClientMetadata,
-  ns,
-  HostAddress
-} from './utils';
-import { connect, MONGO_CLIENT_EVENTS } from './operations/connect';
-import { PromiseProvider } from './promise_provider';
 import type { Logger, LoggerLevel } from './logger';
+import { TypedEventEmitter } from './mongo_types';
+import { connect } from './operations/connect';
+import { PromiseProvider } from './promise_provider';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
-import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
-import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
-import type { AuthMechanism } from './cmap/auth/defaultAuthProviders';
+import type { ReadPreference, ReadPreferenceMode } from './read_preference';
+import type { TagSet } from './sdam/server_description';
+import type { SrvPoller } from './sdam/srv_polling';
 import type { Topology, TopologyEvents } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
-import type { TagSet } from './sdam/server_description';
-import type { AuthMechanismProperties, MongoCredentials } from './cmap/auth/mongo_credentials';
-import { parseOptions } from './connection_string';
-import type { CompressorName } from './cmap/wire_protocol/compression';
-import type { TLSSocketOptions, ConnectionOptions as TLSConnectionOptions } from 'tls';
-import type { TcpNetConnectOpts } from 'net';
-import type { SrvPoller } from './sdam/srv_polling';
-import type { Connection } from './cmap/connection';
-import type { LEGAL_TLS_SOCKET_OPTIONS, LEGAL_TCP_SOCKET_OPTIONS } from './cmap/connect';
-import type { Encrypter } from './encrypter';
-import { TypedEventEmitter } from './mongo_types';
+import {
+  Callback,
+  ClientMetadata,
+  HostAddress,
+  maybePromise,
+  MongoDBNamespace,
+  ns,
+  resolveOptions
+} from './utils';
+import type { W, WriteConcern } from './write_concern';
 
 /** @public */
 export const ServerApiVersion = Object.freeze({

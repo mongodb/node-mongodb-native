@@ -1,39 +1,31 @@
-import {
-  Callback,
-  resolveOptions,
-  filterOptions,
-  MongoDBNamespace,
-  getTopology,
-  DEFAULT_PK_FACTORY
-} from './utils';
-import { AggregationCursor } from './cursor/aggregation_cursor';
-import { Document, BSONSerializeOptions, resolveBSONOptions } from './bson';
-import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import { MongoAPIError, MongoInvalidArgumentError } from './error';
-import { Collection, CollectionOptions } from './collection';
+import { Admin } from './admin';
+import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import { ChangeStream, ChangeStreamOptions } from './change_stream';
+import { Collection, CollectionOptions } from './collection';
 import * as CONSTANTS from './constants';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
-import { ReadConcern } from './read_concern';
+import { AggregationCursor } from './cursor/aggregation_cursor';
+import { MongoAPIError, MongoInvalidArgumentError } from './error';
 import { Logger, LoggerOptions } from './logger';
-import type { AggregateOptions } from './operations/aggregate';
+import type { MongoClient, PkFactory } from './mongo_client';
+import type { TODO_NODE_3286 } from './mongo_types';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
+import type { AggregateOptions } from './operations/aggregate';
 import { CollectionsOperation } from './operations/collections';
-import { DbStatsOperation, DbStatsOptions } from './operations/stats';
-import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
+import type { IndexInformationOptions } from './operations/common_functions';
 import { CreateCollectionOperation, CreateCollectionOptions } from './operations/create_collection';
 import {
+  DropCollectionOperation,
+  DropCollectionOptions,
+  DropDatabaseOperation,
+  DropDatabaseOptions
+} from './operations/drop';
+import { executeOperation } from './operations/execute_operation';
+import {
+  CreateIndexesOptions,
   CreateIndexOperation,
   IndexInformationOperation,
-  CreateIndexesOptions,
   IndexSpecification
 } from './operations/indexes';
-import {
-  DropCollectionOperation,
-  DropDatabaseOperation,
-  DropDatabaseOptions,
-  DropCollectionOptions
-} from './operations/drop';
 import {
   CollectionInfo,
   ListCollectionsCursor,
@@ -42,16 +34,24 @@ import {
 import { ProfilingLevelOperation, ProfilingLevelOptions } from './operations/profiling_level';
 import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
 import { RenameOperation, RenameOptions } from './operations/rename';
+import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
 import {
+  ProfilingLevel,
   SetProfilingLevelOperation,
-  SetProfilingLevelOptions,
-  ProfilingLevel
+  SetProfilingLevelOptions
 } from './operations/set_profiling_level';
-import { executeOperation } from './operations/execute_operation';
-import type { IndexInformationOptions } from './operations/common_functions';
-import type { MongoClient, PkFactory } from './mongo_client';
-import { Admin } from './admin';
-import type { TODO_NODE_3286 } from './mongo_types';
+import { DbStatsOperation, DbStatsOptions } from './operations/stats';
+import { ReadConcern } from './read_concern';
+import { ReadPreference, ReadPreferenceLike } from './read_preference';
+import {
+  Callback,
+  DEFAULT_PK_FACTORY,
+  filterOptions,
+  getTopology,
+  MongoDBNamespace,
+  resolveOptions
+} from './utils';
+import { WriteConcern, WriteConcernOptions } from './write_concern';
 
 // Allowed parameters
 const DB_OPTIONS_ALLOW_LIST = [

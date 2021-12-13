@@ -2,6 +2,7 @@
 const { expect } = require('chai');
 const { resolveConnectionString } = require('./utils');
 const { ns } = require('../../../src/utils');
+
 class Thread {
   constructor() {
     this._killed = false;

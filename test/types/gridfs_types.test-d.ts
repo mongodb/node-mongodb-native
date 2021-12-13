@@ -1,5 +1,6 @@
 import { Readable } from 'stream';
 import { expectType } from 'tsd';
+
 import type { GridFSBucket, GridFSBucketWriteStream } from '../../src';
 
 (function test(bucket: GridFSBucket) {

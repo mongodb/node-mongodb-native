@@ -1,39 +1,40 @@
-import {
-  MongoClient,
-  Db,
-  Collection,
-  GridFSBucket,
-  Document,
-  HostAddress
-} from '../../../src/index';
-import { ReadConcern } from '../../../src/read_concern';
-import { WriteConcern } from '../../../src/write_concern';
-import { ReadPreference } from '../../../src/read_preference';
-import { ClientSession } from '../../../src/sessions';
+import { expect } from 'chai';
+
 import { ChangeStream } from '../../../src/change_stream';
-import { FindCursor } from '../../../src/cursor/find_cursor';
-import type { ClientEntity, EntityDescription } from './schema';
-import type {
-  ConnectionPoolCreatedEvent,
-  ConnectionPoolClosedEvent,
-  ConnectionCreatedEvent,
-  ConnectionReadyEvent,
-  ConnectionClosedEvent,
-  ConnectionCheckOutStartedEvent,
-  ConnectionCheckOutFailedEvent,
-  ConnectionCheckedOutEvent,
-  ConnectionCheckedInEvent,
-  ConnectionPoolClearedEvent
-} from '../../../src/cmap/connection_pool_events';
 import type {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/command_monitoring_events';
-import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
-import { expect } from 'chai';
+import type {
+  ConnectionCheckedInEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent,
+  ConnectionReadyEvent
+} from '../../../src/cmap/connection_pool_events';
+import { FindCursor } from '../../../src/cursor/find_cursor';
+import {
+  Collection,
+  Db,
+  Document,
+  GridFSBucket,
+  HostAddress,
+  MongoClient
+} from '../../../src/index';
+import { ReadConcern } from '../../../src/read_concern';
+import { ReadPreference } from '../../../src/read_preference';
+import { ClientSession } from '../../../src/sessions';
+import { WriteConcern } from '../../../src/write_concern';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
 import { TestConfiguration, trace } from './runner';
+import type { ClientEntity, EntityDescription } from './schema';
+import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 
 interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;

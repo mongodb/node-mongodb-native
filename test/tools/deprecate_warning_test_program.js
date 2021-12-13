@@ -6,6 +6,7 @@ if (require.main !== module) {
 }
 
 const deprecateOptions = require('../../src/utils').deprecateOptions;
+
 const testDeprecationFlags = deprecateOptions(
   {
     name: 'testDeprecationFlags',

@@ -7,6 +7,7 @@ const { ReadPreference, Topology } = require('../../src');
 const { withClient } = require('./shared');
 const chai = require('chai');
 chai.use(require('chai-subset'));
+
 const expect = chai.expect;
 
 describe('ReadPreference', function () {

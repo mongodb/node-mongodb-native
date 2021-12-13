@@ -1,4 +1,5 @@
 import { expectType } from 'tsd';
+
 import { MongoClient, ObjectId } from '../../../../src/index';
 
 // test collection.distinct functions

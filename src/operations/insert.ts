@@ -1,16 +1,16 @@
-import { MongoServerError, MongoInvalidArgumentError } from '../error';
-import { defineAspects, Aspect, AbstractOperation } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
-import { prepareDocs } from './common_functions';
-import type { Callback, MongoDBNamespace } from '../utils';
-import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
 import type { Document } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
-import { WriteConcern } from '../write_concern';
-import type { ClientSession } from '../sessions';
-import { BulkWriteOperation } from './bulk_write';
+import type { Collection } from '../collection';
+import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
+import type { Callback, MongoDBNamespace } from '../utils';
+import { WriteConcern } from '../write_concern';
+import { BulkWriteOperation } from './bulk_write';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { prepareDocs } from './common_functions';
+import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
 export class InsertOperation extends CommandOperation<Document> {

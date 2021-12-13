@@ -1,10 +1,11 @@
+import { expect } from 'chai';
+import * as dns from 'dns';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as dns from 'dns';
-import { expect } from 'chai';
 import { promisify } from 'util';
-import { HostAddress } from '../../../src/utils';
+
 import { MongoClient } from '../../../src';
+import { HostAddress } from '../../../src/utils';
 
 function makeTest(test, topology) {
   let client;

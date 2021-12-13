@@ -2,6 +2,7 @@
 
 const { expect } = require('chai');
 const mock = require('../tools/mongodb-mock/index');
+
 const snappy = optionalRequire('snappy');
 const snappyVersion = optionalRequire('snappy/package.json').version;
 const { MongoClient } = require('../../src');

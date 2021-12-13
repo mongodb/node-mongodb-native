@@ -1,11 +1,11 @@
-import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
-import { MongoInvalidArgumentError } from '../error';
-import { maxWireVersion, MongoDBNamespace } from '../utils';
-import { Aspect, defineAspects, Hint } from './operation';
-import type { Callback } from '../utils';
 import type { Document } from '../bson';
+import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import type { Callback } from '../utils';
+import { maxWireVersion, MongoDBNamespace } from '../utils';
+import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects, Hint } from './operation';
 
 /** @internal */
 export const DB_AGGREGATE_COLLECTION = 1 as const;

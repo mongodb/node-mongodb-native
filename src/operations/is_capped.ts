@@ -1,9 +1,9 @@
-import type { Callback } from '../utils';
 import type { Collection } from '../collection';
-import { OperationOptions, AbstractOperation } from './operation';
+import { MongoAPIError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { MongoAPIError } from '../error';
+import type { Callback } from '../utils';
+import { AbstractOperation, OperationOptions } from './operation';
 
 /** @internal */
 export class IsCappedOperation extends AbstractOperation<boolean> {

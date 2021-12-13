@@ -1,22 +1,22 @@
-import { AuthProvider, AuthContext } from './auth_provider';
+import * as dns from 'dns';
+
+import type { Document } from '../../bson';
+import { Kerberos, KerberosClient } from '../../deps';
 import {
-  MongoRuntimeError,
+  MongoError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
-  MongoError,
-  MongoMissingDependencyError
+  MongoMissingDependencyError,
+  MongoRuntimeError
 } from '../../error';
-import { Kerberos, KerberosClient } from '../../deps';
 import { Callback, ns } from '../../utils';
-import type { Document } from '../../bson';
+import { AuthContext, AuthProvider } from './auth_provider';
 
 type MechanismProperties = {
   gssapiCanonicalizeHostName?: boolean;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
 };
-
-import * as dns from 'dns';
 
 export class GSSAPI extends AuthProvider {
   auth(authContext: AuthContext, callback: Callback): void {

@@ -6,6 +6,7 @@ const { delay, setupDatabase, withClient, withCursor } = require('./shared');
 const mock = require('../tools/mongodb-mock/index');
 const { EventCollector, getSymbolFrom } = require('../tools/utils');
 const chai = require('chai');
+
 const expect = chai.expect;
 const sinon = require('sinon');
 const { ObjectId, Timestamp, Long, ReadPreference } = require('../../src');

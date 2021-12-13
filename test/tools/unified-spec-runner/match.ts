@@ -1,24 +1,25 @@
 import { expect } from 'chai';
 import { inspect } from 'util';
-import { Binary, Document, Long, ObjectId, MongoError } from '../../../src';
+
+import { Binary, Document, Long, MongoError, ObjectId } from '../../../src';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/command_monitoring_events';
 import {
-  ConnectionPoolCreatedEvent,
-  ConnectionPoolClosedEvent,
-  ConnectionCreatedEvent,
-  ConnectionReadyEvent,
-  ConnectionClosedEvent,
-  ConnectionCheckOutStartedEvent,
-  ConnectionCheckOutFailedEvent,
-  ConnectionCheckedOutEvent,
   ConnectionCheckedInEvent,
-  ConnectionPoolClearedEvent
+  ConnectionCheckedOutEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent,
+  ConnectionReadyEvent
 } from '../../../src/cmap/connection_pool_events';
-import { CommandEvent, CmapEvent, EntitiesMap } from './entities';
+import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
 import { ExpectedCmapEvent, ExpectedCommandEvent, ExpectedError } from './schema';
 
 export interface ExistsOperator {

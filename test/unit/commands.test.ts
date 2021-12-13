@@ -1,8 +1,8 @@
-import { expect } from 'chai';
-import { BinMsg, MessageHeader } from '../../src/cmap/commands';
 import { BSONError } from 'bson';
+import { expect } from 'chai';
+
 import * as BSON from '../../src/bson';
-import { test } from 'mocha';
+import { BinMsg, MessageHeader } from '../../src/cmap/commands';
 
 const msgHeader: MessageHeader = {
   length: 735,
@@ -41,7 +41,7 @@ const nKeyWithInvalidUtf8 =
 const msgBodyNKeyWithInvalidUtf8 = Buffer.from(nKeyWithInvalidUtf8, 'hex');
 
 describe('BinMsg BSON utf8 validation', () => {
-  test('bson correctly deserializes data with replacement characters for invalid utf8 in writeErrors object', () => {
+  it('bson correctly deserializes data with replacement characters for invalid utf8 in writeErrors object', () => {
     // this is a sanity check to make sure nothing unexpected is happening in the deserialize method itself
 
     const options = { validation: { utf8: { writeErrors: false } as const } };

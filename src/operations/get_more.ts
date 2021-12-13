@@ -1,9 +1,9 @@
 import type { Document, Long } from '../bson';
 import { MongoRuntimeError } from '../error';
-import type { Callback, MongoDBNamespace } from '../utils';
 import type { Server } from '../sdam/server';
-import { Aspect, AbstractOperation, OperationOptions, defineAspects } from './operation';
 import type { ClientSession } from '../sessions';
+import type { Callback, MongoDBNamespace } from '../utils';
+import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './operation';
 
 /**
  * @public

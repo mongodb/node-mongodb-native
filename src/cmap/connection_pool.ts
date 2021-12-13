@@ -1,25 +1,38 @@
 import Denque = require('denque');
-import { APM_EVENTS, Connection, ConnectionEvents, ConnectionOptions } from './connection';
-import type { ObjectId } from 'bson';
-import { Logger } from '../logger';
-import { ConnectionPoolMetrics } from './metrics';
-import { connect } from './connect';
-import { eachAsync, makeCounter, Callback } from '../utils';
-import { MongoError, MongoInvalidArgumentError, MongoRuntimeError } from '../error';
-import { PoolClosedError, WaitQueueTimeoutError } from './errors';
+import type { ObjectId } from '../bson';
 import {
-  ConnectionPoolCreatedEvent,
-  ConnectionPoolClosedEvent,
-  ConnectionCreatedEvent,
-  ConnectionReadyEvent,
-  ConnectionClosedEvent,
-  ConnectionCheckOutStartedEvent,
-  ConnectionCheckOutFailedEvent,
-  ConnectionCheckedOutEvent,
-  ConnectionCheckedInEvent,
-  ConnectionPoolClearedEvent
-} from './connection_pool_events';
+  APM_EVENTS,
+  CONNECTION_CHECK_OUT_FAILED,
+  CONNECTION_CHECK_OUT_STARTED,
+  CONNECTION_CHECKED_IN,
+  CONNECTION_CHECKED_OUT,
+  CONNECTION_CLOSED,
+  CONNECTION_CREATED,
+  CONNECTION_POOL_CLEARED,
+  CONNECTION_POOL_CLOSED,
+  CONNECTION_POOL_CREATED,
+  CONNECTION_READY
+} from '../constants';
+import { MongoError, MongoInvalidArgumentError, MongoRuntimeError } from '../error';
+import { Logger } from '../logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { Callback, eachAsync, makeCounter } from '../utils';
+import { connect } from './connect';
+import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
+import {
+  ConnectionCheckedInEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent,
+  ConnectionReadyEvent
+} from './connection_pool_events';
+import { PoolClosedError, WaitQueueTimeoutError } from './errors';
+import { ConnectionPoolMetrics } from './metrics';
 
 /** @internal */
 const kLogger = Symbol('logger');
@@ -132,52 +145,52 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * Emitted when the connection pool is created.
    * @event
    */
-  static readonly CONNECTION_POOL_CREATED = 'connectionPoolCreated' as const;
+  static readonly CONNECTION_POOL_CREATED = CONNECTION_POOL_CREATED;
   /**
    * Emitted once when the connection pool is closed
    * @event
    */
-  static readonly CONNECTION_POOL_CLOSED = 'connectionPoolClosed' as const;
+  static readonly CONNECTION_POOL_CLOSED = CONNECTION_POOL_CLOSED;
   /**
    * Emitted each time the connection pool is cleared and it's generation incremented
    * @event
    */
-  static readonly CONNECTION_POOL_CLEARED = 'connectionPoolCleared' as const;
+  static readonly CONNECTION_POOL_CLEARED = CONNECTION_POOL_CLEARED;
   /**
    * Emitted when a connection is created.
    * @event
    */
-  static readonly CONNECTION_CREATED = 'connectionCreated' as const;
+  static readonly CONNECTION_CREATED = CONNECTION_CREATED;
   /**
    * Emitted when a connection becomes established, and is ready to use
    * @event
    */
-  static readonly CONNECTION_READY = 'connectionReady' as const;
+  static readonly CONNECTION_READY = CONNECTION_READY;
   /**
    * Emitted when a connection is closed
    * @event
    */
-  static readonly CONNECTION_CLOSED = 'connectionClosed' as const;
+  static readonly CONNECTION_CLOSED = CONNECTION_CLOSED;
   /**
    * Emitted when an attempt to check out a connection begins
    * @event
    */
-  static readonly CONNECTION_CHECK_OUT_STARTED = 'connectionCheckOutStarted' as const;
+  static readonly CONNECTION_CHECK_OUT_STARTED = CONNECTION_CHECK_OUT_STARTED;
   /**
    * Emitted when an attempt to check out a connection fails
    * @event
    */
-  static readonly CONNECTION_CHECK_OUT_FAILED = 'connectionCheckOutFailed' as const;
+  static readonly CONNECTION_CHECK_OUT_FAILED = CONNECTION_CHECK_OUT_FAILED;
   /**
    * Emitted each time a connection is successfully checked out of the connection pool
    * @event
    */
-  static readonly CONNECTION_CHECKED_OUT = 'connectionCheckedOut' as const;
+  static readonly CONNECTION_CHECKED_OUT = CONNECTION_CHECKED_OUT;
   /**
    * Emitted each time a connection is successfully checked into the connection pool
    * @event
    */
-  static readonly CONNECTION_CHECKED_IN = 'connectionCheckedIn' as const;
+  static readonly CONNECTION_CHECKED_IN = CONNECTION_CHECKED_IN;
 
   /** @internal */
   constructor(options: ConnectionPoolOptions) {
@@ -663,19 +676,6 @@ function processWaitQueue(pool: ConnectionPool) {
     pool[kProcessingWaitQueue] = false;
   }
 }
-
-export const CMAP_EVENTS = [
-  ConnectionPool.CONNECTION_POOL_CREATED,
-  ConnectionPool.CONNECTION_POOL_CLOSED,
-  ConnectionPool.CONNECTION_CREATED,
-  ConnectionPool.CONNECTION_READY,
-  ConnectionPool.CONNECTION_CLOSED,
-  ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
-  ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-  ConnectionPool.CONNECTION_CHECKED_OUT,
-  ConnectionPool.CONNECTION_CHECKED_IN,
-  ConnectionPool.CONNECTION_POOL_CLEARED
-] as const;
 
 /**
  * A callback provided to `withConnection`

@@ -1,26 +1,25 @@
-import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
-import {
-  now,
-  makeStateMachine,
-  calculateDurationInMs,
-  makeInterruptibleAsyncInterval,
-  ns,
-  EventEmitterWithState
-} from '../utils';
+import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
-import { MongoNetworkError, AnyError } from '../error';
-import { Long, Document } from '../bson';
-import {
-  ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent,
-  ServerHeartbeatFailedEvent
-} from './events';
-
-import { Server } from './server';
-import type { InterruptibleAsyncInterval, Callback } from '../utils';
-import type { TopologyVersion } from './server_description';
+import { AnyError, MongoNetworkError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import type { Callback, InterruptibleAsyncInterval } from '../utils';
+import {
+  calculateDurationInMs,
+  EventEmitterWithState,
+  makeInterruptibleAsyncInterval,
+  makeStateMachine,
+  now,
+  ns
+} from '../utils';
+import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
+import {
+  ServerHeartbeatFailedEvent,
+  ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent
+} from './events';
+import { Server } from './server';
+import type { TopologyVersion } from './server_description';
 
 /** @internal */
 const kServer = Symbol('server');

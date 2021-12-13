@@ -1,13 +1,13 @@
-import type {
-  InferIdType,
-  WithId,
-  WithoutId,
-  OptionalId,
-  EnhancedOmit
-} from '../../src/mongo_types';
-
-import { expectType, expectNotType, expectAssignable } from 'tsd';
 import { Document, ObjectId } from 'bson';
+import { expectAssignable, expectNotType, expectType } from 'tsd';
+
+import type {
+  EnhancedOmit,
+  InferIdType,
+  OptionalId,
+  WithId,
+  WithoutId
+} from '../../src/mongo_types';
 
 // InferIdType
 expectType<InferIdType<Document>>(new ObjectId());

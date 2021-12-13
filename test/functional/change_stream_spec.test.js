@@ -7,6 +7,7 @@ const { runUnifiedSuite } = require('../tools/unified-spec-runner/runner');
 const camelCase = require('lodash.camelcase');
 const { setupDatabase } = require('./shared');
 const { delay } = require('./shared');
+
 const expect = chai.expect;
 
 describe('Change Streams Spec - Unified', function () {

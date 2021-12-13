@@ -1,14 +1,14 @@
-import { AggregateOperation, AggregateOptions } from '../operations/aggregate';
-import { AbstractCursor, assertUninitialized } from './abstract_cursor';
-import { executeOperation, ExecutionResult } from '../operations/execute_operation';
-import { mergeOptions } from '../utils';
 import type { Document } from '../bson';
-import type { Sort } from '../sort';
-import type { Topology } from '../sdam/topology';
-import type { Callback, MongoDBNamespace } from '../utils';
-import type { ClientSession } from '../sessions';
-import type { AbstractCursorOptions } from './abstract_cursor';
 import type { ExplainVerbosityLike } from '../explain';
+import { AggregateOperation, AggregateOptions } from '../operations/aggregate';
+import { executeOperation, ExecutionResult } from '../operations/execute_operation';
+import type { Topology } from '../sdam/topology';
+import type { ClientSession } from '../sessions';
+import type { Sort } from '../sort';
+import type { Callback, MongoDBNamespace } from '../utils';
+import { mergeOptions } from '../utils';
+import type { AbstractCursorOptions } from './abstract_cursor';
+import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
 /** @public */
 export interface AggregationCursorOptions extends AbstractCursorOptions, AggregateOptions {}

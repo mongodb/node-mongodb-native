@@ -1,10 +1,11 @@
+import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
-import { expect } from 'chai';
+
 import { MongoClient } from '../../src';
-import { processTick } from '../tools/utils';
-import { it } from 'mocha';
 import * as mock from '../tools/mongodb-mock/index';
+import type { MockServer } from '../tools/mongodb-mock/src/server';
+import { processTick } from '../tools/utils';
 
 /*
     The SRV Prose Tests make use of the following REAL DNS records.
@@ -26,7 +27,7 @@ import * as mock from '../tools/mongodb-mock/index';
 
 const srvRecord = (name, port) => ({ name, port, weight: 0, priority: 0 });
 interface ShardedClusterMocks {
-  mongoses: mock.MockServer[];
+  mongoses: MockServer[];
   readonly srvRecords: dns.SrvRecord[];
 }
 

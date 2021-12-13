@@ -1,49 +1,59 @@
-import { MessageStream, OperationDescription } from './message_stream';
-import { StreamDescription, StreamDescriptionOptions } from './stream_description';
+import { BSONSerializeOptions, Document, Long, ObjectId, pluckBSONSerializeOptions } from '../bson';
 import {
-  CommandStartedEvent,
-  CommandFailedEvent,
-  CommandSucceededEvent
-} from './command_monitoring_events';
-import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
+  CLOSE,
+  CLUSTER_TIME_RECEIVED,
+  COMMAND_FAILED,
+  COMMAND_STARTED,
+  COMMAND_SUCCEEDED,
+  MESSAGE,
+  PINNED,
+  UNPINNED
+} from '../constants';
+import type { AutoEncrypter } from '../deps';
 import {
-  uuidV4,
-  ClientMetadata,
-  now,
-  calculateDurationInMs,
-  Callback,
-  MongoDBNamespace,
-  maxWireVersion,
-  HostAddress
-} from '../utils';
-import {
-  MongoRuntimeError,
-  MongoMissingDependencyError,
   MongoCompatibilityError,
+  MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoRuntimeError,
   MongoServerError,
   MongoWriteConcernError
 } from '../error';
-import {
-  BinMsg,
-  WriteProtocolMessageType,
-  Response,
-  KillCursor,
-  GetMore,
-  Query,
-  OpQueryOptions,
-  Msg
-} from './commands';
-import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions, ObjectId } from '../bson';
-import type { AutoEncrypter } from '../deps';
-import type { MongoCredentials } from './auth/mongo_credentials';
-import type { Stream } from './connect';
-import { applyCommonQueryOptions, getReadPreference, isSharded } from './wire_protocol/shared';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
+import {
+  calculateDurationInMs,
+  Callback,
+  ClientMetadata,
+  HostAddress,
+  maxWireVersion,
+  MongoDBNamespace,
+  now,
+  uuidV4
+} from '../utils';
+import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
+import type { MongoCredentials } from './auth/mongo_credentials';
+import {
+  CommandFailedEvent,
+  CommandStartedEvent,
+  CommandSucceededEvent
+} from './command_monitoring_events';
+import {
+  BinMsg,
+  GetMore,
+  KillCursor,
+  Msg,
+  OpQueryOptions,
+  Query,
+  Response,
+  WriteProtocolMessageType
+} from './commands';
+import type { Stream } from './connect';
+import { MessageStream, OperationDescription } from './message_stream';
+import { StreamDescription, StreamDescriptionOptions } from './stream_description';
+import { applyCommonQueryOptions, getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
 const kStream = Symbol('stream');
@@ -187,21 +197,21 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   [kClusterTime]: Document;
 
   /** @event */
-  static readonly COMMAND_STARTED = 'commandStarted' as const;
+  static readonly COMMAND_STARTED = COMMAND_STARTED;
   /** @event */
-  static readonly COMMAND_SUCCEEDED = 'commandSucceeded' as const;
+  static readonly COMMAND_SUCCEEDED = COMMAND_SUCCEEDED;
   /** @event */
-  static readonly COMMAND_FAILED = 'commandFailed' as const;
+  static readonly COMMAND_FAILED = COMMAND_FAILED;
   /** @event */
-  static readonly CLUSTER_TIME_RECEIVED = 'clusterTimeReceived' as const;
+  static readonly CLUSTER_TIME_RECEIVED = CLUSTER_TIME_RECEIVED;
   /** @event */
-  static readonly CLOSE = 'close' as const;
+  static readonly CLOSE = CLOSE;
   /** @event */
-  static readonly MESSAGE = 'message' as const;
+  static readonly MESSAGE = MESSAGE;
   /** @event */
-  static readonly PINNED = 'pinned' as const;
+  static readonly PINNED = PINNED;
   /** @event */
-  static readonly UNPINNED = 'unpinned' as const;
+  static readonly UNPINNED = UNPINNED;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
@@ -615,13 +625,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     );
   }
 }
-
-/** @public */
-export const APM_EVENTS = [
-  Connection.COMMAND_STARTED,
-  Connection.COMMAND_SUCCEEDED,
-  Connection.COMMAND_FAILED
-];
 
 /** @internal */
 export class CryptoConnection extends Connection {

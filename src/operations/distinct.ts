@@ -1,11 +1,11 @@
-import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
-import { decorateWithCollation, decorateWithReadConcern, Callback, maxWireVersion } from '../utils';
 import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError } from '../error';
+import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { Callback, decorateWithCollation, decorateWithReadConcern, maxWireVersion } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects } from './operation';
 
 /** @public */
 export type DistinctOptions = CommandOperationOptions;

@@ -1,39 +1,39 @@
-import { PromiseProvider } from '../promise_provider';
 import {
+  BSONSerializeOptions,
+  Document,
   Long,
   ObjectId,
-  Document,
-  BSONSerializeOptions,
   resolveBSONOptions,
   Timestamp
 } from '../bson';
+import type { Collection } from '../collection';
 import {
-  MongoWriteConcernError,
   AnyError,
+  MongoBatchReExecutionError,
   MONGODB_ERROR_CODES,
-  MongoServerError,
   MongoInvalidArgumentError,
-  MongoBatchReExecutionError
+  MongoServerError,
+  MongoWriteConcernError
 } from '../error';
-import {
-  applyRetryableWrites,
-  executeLegacyOperation,
-  hasAtomicOperators,
-  Callback,
-  MongoDBNamespace,
-  getTopology,
-  resolveOptions
-} from '../utils';
+import type { Filter, OneOrMore, OptionalId, UpdateFilter, WithoutId } from '../mongo_types';
+import type { CollationOptions, CommandOperationOptions } from '../operations/command';
+import { DeleteOperation, DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import { UpdateOperation, UpdateStatement, makeUpdateStatement } from '../operations/update';
-import { DeleteOperation, DeleteStatement, makeDeleteStatement } from '../operations/delete';
-import { WriteConcern } from '../write_concern';
-import type { Collection } from '../collection';
-import type { Topology } from '../sdam/topology';
-import type { CommandOperationOptions, CollationOptions } from '../operations/command';
 import type { Hint } from '../operations/operation';
-import type { Filter, OneOrMore, WithoutId, OptionalId, UpdateFilter } from '../mongo_types';
+import { makeUpdateStatement, UpdateOperation, UpdateStatement } from '../operations/update';
+import { PromiseProvider } from '../promise_provider';
+import type { Topology } from '../sdam/topology';
+import {
+  applyRetryableWrites,
+  Callback,
+  executeLegacyOperation,
+  getTopology,
+  hasAtomicOperators,
+  MongoDBNamespace,
+  resolveOptions
+} from '../utils';
+import { WriteConcern } from '../write_concern';
 
 /** @internal */
 const kServerError = Symbol('serverError');

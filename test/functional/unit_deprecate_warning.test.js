@@ -1,9 +1,11 @@
 'use strict';
 const deprecateOptions = require('../../src/utils').deprecateOptions;
 const chai = require('chai');
+
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 require('mocha-sinon');
+
 chai.use(sinonChai);
 
 const makeTestFunction = require('../tools/utils').makeTestFunction;

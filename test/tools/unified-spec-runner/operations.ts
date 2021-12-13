@@ -1,15 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
-import { Collection, Db, GridFSFile, MongoClient, ObjectId, AbstractCursor } from '../../../src';
+
+import {
+  AbstractCursor,
+  Collection,
+  Db,
+  Document,
+  GridFSFile,
+  MongoClient,
+  ObjectId
+} from '../../../src';
+import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
-import { Document } from '../../../src';
 import { EventCollector } from '../../tools/utils';
 import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
-import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
 import { translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {

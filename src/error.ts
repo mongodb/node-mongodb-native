@@ -1,5 +1,5 @@
-import type { TopologyVersion } from './sdam/server_description';
 import type { Document } from './bson';
+import type { TopologyVersion } from './sdam/server_description';
 import type { TopologyDescription } from './sdam/topology_description';
 
 /** @public */

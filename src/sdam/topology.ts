@@ -1,87 +1,82 @@
 import Denque = require('denque');
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import { compareTopologyVersion, ServerDescription } from './server_description';
-import { TopologyDescription } from './topology_description';
-import { Server, ServerEvents, ServerOptions } from './server';
+import type { BSONSerializeOptions, Document } from '../bson';
+import { deserialize, serialize } from '../bson';
+import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
+import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
+import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
+import { DEFAULT_OPTIONS } from '../connection_string';
 import {
-  ClientSession,
-  ServerSessionPool,
-  ServerSessionId,
-  ClientSessionOptions
-} from '../sessions';
-import { SrvPoller, SrvPollingEvent } from './srv_polling';
-import { CMAP_EVENTS, ConnectionPoolEvents } from '../cmap/connection_pool';
+  CLOSE,
+  CONNECT,
+  ERROR,
+  LOCAL_SERVER_EVENTS,
+  OPEN,
+  SERVER_CLOSED,
+  SERVER_DESCRIPTION_CHANGED,
+  SERVER_OPENING,
+  SERVER_RELAY_EVENTS,
+  TIMEOUT,
+  TOPOLOGY_CLOSED,
+  TOPOLOGY_DESCRIPTION_CHANGED,
+  TOPOLOGY_OPENING
+} from '../constants';
 import {
-  MongoServerSelectionError,
   MongoCompatibilityError,
   MongoDriverError,
-  MongoTopologyClosedError,
-  MongoRuntimeError
+  MongoRuntimeError,
+  MongoServerSelectionError,
+  MongoTopologyClosedError
 } from '../error';
-import { readPreferenceServerSelector, ServerSelector } from './server_selection';
+import type { MongoOptions, ServerApi } from '../mongo_client';
+import { TypedEventEmitter } from '../mongo_types';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import {
-  makeStateMachine,
-  eachAsync,
-  ClientMetadata,
+  ClientSession,
+  ClientSessionOptions,
+  ServerSessionId,
+  ServerSessionPool
+} from '../sessions';
+import type { Transaction } from '../transactions';
+import {
   Callback,
-  HostAddress,
-  ns,
+  ClientMetadata,
+  eachAsync,
   emitWarning,
   EventEmitterWithState,
+  HostAddress,
+  makeStateMachine,
+  ns,
   shuffle
 } from '../utils';
 import {
-  TopologyType,
-  ServerType,
-  ClusterTime,
-  TimerQueue,
   _advanceClusterTime,
-  drainTimerQueue,
   clearAndRemoveTimerFrom,
+  ClusterTime,
+  drainTimerQueue,
+  ServerType,
   STATE_CLOSED,
   STATE_CLOSING,
+  STATE_CONNECTED,
   STATE_CONNECTING,
-  STATE_CONNECTED
+  TimerQueue,
+  TopologyType
 } from './common';
 import {
-  ServerOpeningEvent,
   ServerClosedEvent,
   ServerDescriptionChangedEvent,
-  TopologyOpeningEvent,
+  ServerOpeningEvent,
   TopologyClosedEvent,
-  TopologyDescriptionChangedEvent
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent
 } from './events';
-import type { Document, BSONSerializeOptions } from '../bson';
-import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
-import type { Transaction } from '../transactions';
-import type { CloseOptions } from '../cmap/connection_pool';
-import { DestroyOptions, Connection, ConnectionEvents } from '../cmap/connection';
-import type { MongoOptions, ServerApi } from '../mongo_client';
-import { DEFAULT_OPTIONS } from '../connection_string';
-import { serialize, deserialize } from '../bson';
-import { TypedEventEmitter } from '../mongo_types';
+import { Server, ServerEvents, ServerOptions } from './server';
+import { compareTopologyVersion, ServerDescription } from './server_description';
+import { readPreferenceServerSelector, ServerSelector } from './server_selection';
+import { SrvPoller, SrvPollingEvent } from './srv_polling';
+import { TopologyDescription } from './topology_description';
 
 // Global state
 let globalTopologyCounter = 0;
-
-// events that we relay to the `Topology`
-const SERVER_RELAY_EVENTS = [
-  Server.SERVER_HEARTBEAT_STARTED,
-  Server.SERVER_HEARTBEAT_SUCCEEDED,
-  Server.SERVER_HEARTBEAT_FAILED,
-  Connection.COMMAND_STARTED,
-  Connection.COMMAND_SUCCEEDED,
-  Connection.COMMAND_FAILED,
-  ...CMAP_EVENTS
-];
-
-// all events we listen to from `Server` instances
-const LOCAL_SERVER_EVENTS = [
-  Server.CONNECT,
-  Server.DESCRIPTION_RECEIVED,
-  Server.CLOSED,
-  Server.ENDED
-];
 
 const stateTransition = makeStateMachine({
   [STATE_CLOSED]: [STATE_CLOSED, STATE_CONNECTING],
@@ -208,27 +203,27 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   _type?: string;
 
   /** @event */
-  static readonly SERVER_OPENING = 'serverOpening' as const;
+  static readonly SERVER_OPENING = SERVER_OPENING;
   /** @event */
-  static readonly SERVER_CLOSED = 'serverClosed' as const;
+  static readonly SERVER_CLOSED = SERVER_CLOSED;
   /** @event */
-  static readonly SERVER_DESCRIPTION_CHANGED = 'serverDescriptionChanged' as const;
+  static readonly SERVER_DESCRIPTION_CHANGED = SERVER_DESCRIPTION_CHANGED;
   /** @event */
-  static readonly TOPOLOGY_OPENING = 'topologyOpening' as const;
+  static readonly TOPOLOGY_OPENING = TOPOLOGY_OPENING;
   /** @event */
-  static readonly TOPOLOGY_CLOSED = 'topologyClosed' as const;
+  static readonly TOPOLOGY_CLOSED = TOPOLOGY_CLOSED;
   /** @event */
-  static readonly TOPOLOGY_DESCRIPTION_CHANGED = 'topologyDescriptionChanged' as const;
+  static readonly TOPOLOGY_DESCRIPTION_CHANGED = TOPOLOGY_DESCRIPTION_CHANGED;
   /** @event */
-  static readonly ERROR = 'error' as const;
+  static readonly ERROR = ERROR;
   /** @event */
-  static readonly OPEN = 'open' as const;
+  static readonly OPEN = OPEN;
   /** @event */
-  static readonly CONNECT = 'connect' as const;
+  static readonly CONNECT = CONNECT;
   /** @event */
-  static readonly CLOSE = 'close' as const;
+  static readonly CLOSE = CLOSE;
   /** @event */
-  static readonly TIMEOUT = 'timeout' as const;
+  static readonly TIMEOUT = TIMEOUT;
 
   /**
    * @internal
@@ -826,19 +821,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     this.s.clusterTime = clusterTime;
   }
 }
-
-/** @public */
-export const TOPOLOGY_EVENTS = [
-  Topology.SERVER_OPENING,
-  Topology.SERVER_CLOSED,
-  Topology.SERVER_DESCRIPTION_CHANGED,
-  Topology.TOPOLOGY_OPENING,
-  Topology.TOPOLOGY_CLOSED,
-  Topology.TOPOLOGY_DESCRIPTION_CHANGED,
-  Topology.ERROR,
-  Topology.TIMEOUT,
-  Topology.CLOSE
-];
 
 /** Destroys a server, and removes all event listeners from the instance */
 function destroyServer(

@@ -6,6 +6,7 @@ const Runner = MongoBench.Runner;
 const commonHelpers = require('./common');
 
 let BSON = require('bson');
+
 try {
   BSON = require('bson-ext');
 } catch (_) {
