@@ -1,9 +1,15 @@
 import * as dns from 'dns';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
+import { promisify } from 'util';
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { resolveSRVRecord } from '../../src/connection_string';
-import { AuthMechanism } from '../../src/cmap/auth/defaultAuthProviders';
+import {
+  AuthMechanism,
+  $EXTERNAL_AUTH_SOURCE_MECHANISMS
+} from '../../src/cmap/auth/defaultAuthProviders';
+
+const resolveSRVRecordAsync = promisify(resolveSRVRecord);
 
 describe('Srv Option Handling', () => {
   let resolveSrvStub: sinon.SinonStub;
@@ -53,53 +59,68 @@ describe('Srv Option Handling', () => {
     });
   }
 
-  for (const iterator of [
-    {
-      mechanism: AuthMechanism.MONGODB_AWS,
-      source: '',
-      userSpecifiedAuthSource: false,
-      expected: 'succeed'
-    },
-    {
-      mechanism: AuthMechanism.MONGODB_AWS,
-      source: 'admin',
-      userSpecifiedAuthSource: true,
-      expected: 'succeed'
-    },
-    {
-      mechanism: null,
-      source: 'admin',
-      userSpecifiedAuthSource: false,
-      expected: 'fail'
-    }
-  ]) {
-    it(`should ${iterator.expected} for ${iterator.mechanism} mechanism and ${
-      iterator.userSpecifiedAuthSource ? '' : 'non-'
-    }user-specified source: ${iterator.source}`, function () {
-      makeStub('authSource=admin');
-
+  for (const mechanism of $EXTERNAL_AUTH_SOURCE_MECHANISMS) {
+    it('should set authSource to $external for ${mechanism} external mechanism:', async function () {
+      makeStub('authSource=thisShouldNotBeAuthSource');
       const options = {
         credentials: new MongoCredentials({
           source: '$external',
+          mechanism: mechanism,
+          username: 'username',
+          password: 'password',
+          mechanismProperties: {}
+        }),
+        srvHost: 'test.mock.test.build.10gen.cc',
+        srvServiceName: 'mongodb',
+        userSpecifiedAuthSource: false
+      };
+
+      await resolveSRVRecordAsync(options as any);
+      expect(options).to.have.nested.property('credentials.source', '$external');
+    });
+  }
+
+  it('should set a default authSource for non-external mechanisms with no user-specified source:', async function () {
+    makeStub('authSource=thisShouldBeAuthSource');
+
+    const options = {
+      credentials: new MongoCredentials({
+        source: 'admin',
+        mechanism: AuthMechanism.MONGODB_SCRAM_SHA256,
+        username: 'username',
+        password: 'password',
+        mechanismProperties: {}
+      }),
+      srvHost: 'test.mock.test.build.10gen.cc',
+      srvServiceName: 'mongodb',
+      userSpecifiedAuthSource: false
+    };
+
+    await resolveSRVRecordAsync(options as any);
+    expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
+  });
+
+  for (const iterator of [
+    { mechanism: AuthMechanism.MONGODB_AWS },
+    { mechmanism: AuthMechanism.MONGODB_SCRAM_SHA256 }
+  ]) {
+    it('should retain credentials for any mechanism with no user-sepcificed source and no source in DNS:', async function () {
+      makeStub('');
+      const options = {
+        credentials: new MongoCredentials({
+          source: 'admin',
           mechanism: iterator.mechanism,
           username: 'username',
           password: 'password',
           mechanismProperties: {}
         }),
-        srvHost: 'host',
+        srvHost: 'test.mock.test.build.10gen.cc',
         srvServiceName: 'mongodb',
-        userSpecifiedAuthSource: iterator.userSpecifiedAuthSource
+        userSpecifiedAuthSource: false
       };
 
-      resolveSRVRecord(options as any, (err, hostAddress) => {
-        if (iterator.expected === 'succeed') {
-          expect(options).to.have.nested.property('credentials.source', '$external');
-        } else {
-          expect(options).to.not.have.nested.property('credentials.source', '$external');
-        }
-      });
-
-      // expect(client).to.have.nested.property('options.credentials.source', '$external');
+      await resolveSRVRecordAsync(options as any);
+      expect(options).to.have.nested.property('credentials.source', 'admin');
     });
   }
 });

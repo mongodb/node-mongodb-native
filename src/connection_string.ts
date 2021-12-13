@@ -573,9 +573,7 @@ export const OPTIONS = {
       let source = options.credentials?.source;
       if (
         mechanism === AuthMechanism.MONGODB_PLAIN ||
-        mechanism === AuthMechanism.MONGODB_GSSAPI ||
-        mechanism === AuthMechanism.MONGODB_AWS ||
-        mechanism === AuthMechanism.MONGODB_X509
+        $EXTERNAL_AUTH_SOURCE_MECHANISMS.has(mechanism)
       ) {
         // some mechanisms have '$external' as the Auth Source
         source = '$external';
