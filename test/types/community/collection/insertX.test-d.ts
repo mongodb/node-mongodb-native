@@ -122,12 +122,14 @@ await collectionWithObjectId.insertOne({
   numberField: 23,
   fruitTags: ['hi']
 });
-// should not demand _id if it is ObjectId
-await collectionWithObjectId.insertOne({
-  stringField: 'hola',
-  numberField: 23,
-  fruitTags: ['hi']
-});
+// if _id is defined on the schema, it must be passed to insert operations
+expectError(
+  collectionWithObjectId.insertOne({
+    stringField: 'hola',
+    numberField: 23,
+    fruitTags: ['hi']
+  })
+);
 
 /**
  * test indexed types

@@ -16,14 +16,16 @@ import type { Sort } from './sort';
 export type TODO_NODE_3286 = any;
 
 /** Given an object shaped type, return the type of the _id field or default to ObjectId @public */
-export type InferIdType<TSchema> = TSchema extends { _id: infer IdType } // user has defined a type for _id
-  ? // eslint-disable-next-line @typescript-eslint/ban-types
-    {} extends IdType // TODO(NODE-3285): Improve type readability
-    ? // eslint-disable-next-line @typescript-eslint/ban-types
-      Exclude<IdType, {}>
-    : unknown extends IdType
-    ? ObjectId
+export type InferIdType<TSchema> = TSchema extends { _id: infer IdType }
+  ? // user has defined a type for _id
+    Record<any, never> extends IdType
+    ? never // explicitly forbid empty objects as the type of _id
     : IdType
+  : TSchema extends { _id?: infer IdType }
+  ? // optional _id defined - return ObjectId | IdType
+    unknown extends IdType
+    ? ObjectId
+    : IdType | ObjectId
   : ObjectId; // user has not defined _id on schema
 
 /** Add an _id field to an object shaped type @public */
@@ -38,11 +40,22 @@ export type WithId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id: InferIdType<
  * `TSchema['_id'] extends ObjectId` which translated to "Is the _id property ObjectId?"
  * we instead ask "Does ObjectId look like (have the same shape) as the _id?"
  */
-export type OptionalId<TSchema> = TSchema extends { _id?: any }
-  ? ObjectId extends TSchema['_id'] // a Schema with ObjectId _id type or "any" or "indexed type" provided
-    ? EnhancedOmit<TSchema, '_id'> & { _id?: InferIdType<TSchema> } // a Schema provided but _id type is not ObjectId
-    : WithId<TSchema>
-  : EnhancedOmit<TSchema, '_id'> & { _id?: InferIdType<TSchema> }; // TODO(NODE-3285): Improve type readability
+export type OptionalId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id?: InferIdType<TSchema> };
+
+/**
+ * Add an optional _id field to a schema EXCEPT if:
+ * @public
+ *
+ * @privateRemarks
+ * `ObjectId extends TSchema['_id']` is a confusing ordering at first glance. Rather than ask
+ * `TSchema['_id'] extends ObjectId` which translated to "Is the _id property ObjectId?"
+ * we instead ask "Does ObjectId look like (have the same shape) as the _id?"
+ */
+export type CollectionOperationsID<TSchema> = TSchema extends { _id: any }
+  ? TSchema
+  : TSchema extends { _id?: any }
+  ? OptionalId<TSchema>
+  : OptionalId<TSchema>;
 
 /** TypeScript Omit (Exclude to be specific) does not work for objects with an "any" indexed type, and breaks discriminated unions @public */
 export type EnhancedOmit<TRecordOrUnion, KeyUnion> = string extends keyof TRecordOrUnion
