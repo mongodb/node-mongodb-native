@@ -3,16 +3,22 @@ import type {
   WithId,
   WithoutId,
   OptionalId,
+  OptionalUnlessRequiredId,
   EnhancedOmit
 } from '../../src/mongo_types';
 
-import { expectType, expectNotType, expectAssignable } from 'tsd';
+import { expectType, expectNotType, expectAssignable, expectError } from 'tsd';
 import { Document, ObjectId } from 'bson';
 
+function optionalReturnValue(): number | ObjectId {
+  return Math.random() > 0.5 ? 3 : new ObjectId();
+}
 // InferIdType
 expectType<InferIdType<Document>>(new ObjectId());
 expectType<InferIdType<{ _id: number }>>(1 + 1);
 expectType<InferIdType<{ a: number } | { b: string }>>(new ObjectId());
+expectType<InferIdType<{ _id?: number | ObjectId }>>(optionalReturnValue());
+expectError<InferIdType<{ _id: {} }>>({});
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(new ObjectId());
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(1 + 1);
 
@@ -37,6 +43,14 @@ expectNotType<OptionalId<{ _id: number; [x: string]: number }>>({ a: 3 });
 class MyId {}
 expectNotType<OptionalId<{ _id: MyId; a: number }>>({ a: 3 });
 expectNotType<OptionalId<{ _id: MyId; a: number }>>({ _id: new ObjectId(), a: 3 });
+
+declare function functionReturningOptionalId(): OptionalId<{
+  _id?: ObjectId | undefined;
+  a: number;
+}>;
+// OptionalUnlessRequiredId
+expectType<OptionalUnlessRequiredId<{ _id: ObjectId; a: number }>>({ a: 3, _id: new ObjectId() });
+expectType<OptionalUnlessRequiredId<{ _id?: ObjectId; a: number }>>(functionReturningOptionalId());
 
 // WithoutId removes _id whether defined in the schema or not
 expectType<WithoutId<{ _id: number; a: number }>>({ a: 2 });
