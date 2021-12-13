@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.2](https://github.com/mongodb/node-mongodb-native/compare/v4.2.1...v4.2.2) (2021-12-13)
+
+### Bug Fixes
+
+* **NODE-3705:** ReadPreference.fromOptions omitting hedge and maxStalenessSeconds when readPreference is a string ([#3060](https://github.com/mongodb/node-mongodb-native/issues/3060)) ([b9fbac5](https://github.com/mongodb/node-mongodb-native/commit/b9fbac5b13e0305a196f05b30b25111632f3ef13))
+* **NODE-3711:** retry txn end on retryable write ([#3045](https://github.com/mongodb/node-mongodb-native/issues/3045)) ([7b00d0f](https://github.com/mongodb/node-mongodb-native/commit/7b00d0f06052b5302583fedec15796142cb151cf))
+* **NODE-3765:** make replacement for replaceOne operations without _id ([#3040](https://github.com/mongodb/node-mongodb-native/issues/3040)) ([e07e564](https://github.com/mongodb/node-mongodb-native/commit/e07e564dc073eee12d12c98635f7d61a04665251))
+* stricter protocol check in connection string ([#3078](https://github.com/mongodb/node-mongodb-native/issues/3078)) ([bc05671](https://github.com/mongodb/node-mongodb-native/commit/bc056719dac0b34cbfd59ac544f92a992f30ca76))
+
 ### [4.2.1](https://github.com/mongodb/node-mongodb-native/compare/v4.2.0...v4.2.1) (2021-11-30)
 
 
