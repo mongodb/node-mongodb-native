@@ -94,6 +94,16 @@ describe('Connection String', function () {
     expect(options.credentials.mechanism).to.equal(AuthMechanism.MONGODB_GSSAPI);
   });
 
+  it('should provide default authSource when valid AuthMechanism provided', function () {
+    // const options = parseOptions(
+    //   'mongodb+srv://jira-sync.pw0q4.mongodb.net/testDB?authMechanism=MONGODB-AWS&retryWrites=true&w=majority'
+    // );
+    const options = parseOptions(
+      'mongodb+srv://jira-sync.pw0q4.mongodb.net/testDB?authMechanism=MONGODB-AWS&retryWrites=true&w=majority'
+    );
+    expect(options.credentials.source).to.equal('$external');
+  });
+
   it('should parse a numeric authSource with variable width', function () {
     const options = parseOptions('mongodb://test@localhost/?authSource=0001');
     expect(options.credentials.source).to.equal('0001');
