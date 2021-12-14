@@ -291,6 +291,7 @@ export type {
   OneOrMore,
   OnlyFieldsOfType,
   OptionalId,
+  OptionalUnlessRequiredId,
   Projection,
   ProjectionOperators,
   PullAllOperator,

@@ -1,4 +1,3 @@
-import type { OptionalUnlessRequiredId } from '.';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
 import { OrderedBulkOperation } from './bulk/ordered';
@@ -13,7 +12,7 @@ import type { PkFactory } from './mongo_client';
 import type {
   Filter,
   Flatten,
-  OptionalId,
+  OptionalUnlessRequiredId,
   TODO_NODE_3286,
   UpdateFilter,
   WithId,
