@@ -3,11 +3,8 @@ import * as dns from 'dns';
 import * as sinon from 'sinon';
 import { promisify } from 'util';
 
-import {
-  $EXTERNAL_AUTH_SOURCE_MECHANISMS,
-  AuthMechanism
-} from '../../src/cmap/auth/defaultAuthProviders';
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
+import { $EXTERNAL_AUTH_SOURCE_MECHANISMS, AuthMechanism } from '../../src/cmap/auth/providers';
 import { resolveSRVRecord } from '../../src/connection_string';
 
 const resolveSRVRecordAsync = promisify(resolveSRVRecord);
