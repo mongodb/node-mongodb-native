@@ -1103,10 +1103,7 @@ export function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]): boo
  * @internal
  */
 export function isHello(doc: Document): boolean {
-  if (doc[LEGACY_HELLO_COMMAND] || doc.hello) {
-    return true;
-  }
-  return false;
+  return doc[LEGACY_HELLO_COMMAND] || doc.hello ? true : false;
 }
 
 /** Returns the items that are uniquely in setA */
