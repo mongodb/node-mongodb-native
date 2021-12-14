@@ -240,7 +240,7 @@ export class ReadPreference {
     return this.secondaryOk();
   }
 
-   /**
+  /**
    * Indicates that this readPreference needs the "SecondaryOk" bit when sent over the wire
    * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
    */
