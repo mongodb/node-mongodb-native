@@ -128,7 +128,8 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
         if (
           !options.userSpecifiedAuthSource &&
           source &&
-          !$EXTERNAL_AUTH_SOURCE_MECHANISMS.has(options.credentials?.mechanism)
+          options.credentials &&
+          !$EXTERNAL_AUTH_SOURCE_MECHANISMS.has(options.credentials.mechanism)
         ) {
           options.credentials = MongoCredentials.merge(options.credentials, { source });
         }
