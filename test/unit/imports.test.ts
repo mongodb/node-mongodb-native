@@ -19,6 +19,10 @@ describe('importing mongodb driver', () => {
   const sourceFiles = walk(path.resolve(__dirname, '../../src'));
 
   for (const sourceFile of sourceFiles) {
+    if (!sourceFile.endsWith('.ts')) {
+      continue;
+    }
+
     const sliceFrom = sourceFile.indexOf('src');
     it(`should import ${sourceFile.slice(sliceFrom)} directly without issue`, () => {
       execSync(`./node_modules/.bin/ts-node -e "require('${sourceFile}')"`);
