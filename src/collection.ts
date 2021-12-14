@@ -112,7 +112,11 @@ export interface CollectionOptions
   extends BSONSerializeOptions,
     WriteConcernOptions,
     LoggerOptions {
+  /**
+   * @deprecated Use secondaryOk instead
+   */
   slaveOk?: boolean;
+  secondaryOk?: boolean;
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
@@ -127,7 +131,7 @@ export interface CollectionPrivate {
   namespace: MongoDBNamespace;
   readPreference?: ReadPreference;
   bsonOptions: BSONSerializeOptions;
-  slaveOk?: boolean;
+  secondaryOk?: boolean;
   collectionHint?: Hint;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -182,7 +186,8 @@ export class Collection<TSchema extends Document = Document> {
       bsonOptions: resolveBSONOptions(options, db),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options),
-      slaveOk: options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk
+      secondaryOk:
+        options == null || options.secondaryOk == null ? db.secondaryOk : options.secondaryOk
     };
   }
 
