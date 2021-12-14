@@ -96,7 +96,7 @@ export interface QueryOptions extends BSONSerializeOptions {
 /** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
   command?: boolean;
-  slaveOk?: boolean;
+  secondaryOk?: boolean;
   /** Specify read preference if command supports it */
   readPreference?: ReadPreferenceLike;
   raw?: boolean;
@@ -427,7 +427,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         numberToReturn: -1,
         checkKeys: false,
         // This value is not overridable
-        slaveOk: readPreference.slaveOk()
+        secondaryOk: readPreference.secondaryOk()
       },
       options
     );
@@ -472,7 +472,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       numberToReturn,
       pre32Limit: typeof limit === 'number' ? limit : undefined,
       checkKeys: false,
-      slaveOk: readPreference.slaveOk()
+      secondaryOk: readPreference.secondaryOk()
     };
 
     if (options.projection) {
