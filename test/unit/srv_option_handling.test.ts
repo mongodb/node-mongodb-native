@@ -1,13 +1,14 @@
+import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
-import { expect } from 'chai';
 import { promisify } from 'util';
+
+import {
+  $EXTERNAL_AUTH_SOURCE_MECHANISMS,
+  AuthMechanism
+} from '../../src/cmap/auth/defaultAuthProviders';
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { resolveSRVRecord } from '../../src/connection_string';
-import {
-  AuthMechanism,
-  $EXTERNAL_AUTH_SOURCE_MECHANISMS
-} from '../../src/cmap/auth/defaultAuthProviders';
 
 const resolveSRVRecordAsync = promisify(resolveSRVRecord);
 

@@ -2,9 +2,10 @@ import * as dns from 'dns';
 import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
+
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
-import { AuthMechanism, $EXTERNAL_AUTH_SOURCE_MECHANISMS } from './cmap/auth/providers';
+import { $EXTERNAL_AUTH_SOURCE_MECHANISMS, AuthMechanism } from './cmap/auth/providers';
 import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
 import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from './error';

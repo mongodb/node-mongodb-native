@@ -2,7 +2,7 @@
 
 import type { Document } from '../../bson';
 import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
-import { AuthMechanism, $EXTERNAL_AUTH_SOURCE_MECHANISMS } from './providers';
+import { $EXTERNAL_AUTH_SOURCE_MECHANISMS, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
 function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
