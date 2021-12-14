@@ -1,12 +1,12 @@
-import { defineAspects, Aspect, Hint } from './operation';
-import { CommandOperation, CommandOperationOptions, CollationOptions } from './command';
-import { Callback, maxWireVersion, MongoDBNamespace, collationNotSupported } from '../utils';
 import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
+import { MongoCompatibilityError, MongoServerError } from '../error';
+import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { MongoServerError, MongoCompatibilityError } from '../error';
+import { Callback, collationNotSupported, maxWireVersion, MongoDBNamespace } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
+import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects, Hint } from './operation';
 
 /** @public */
 export interface DeleteOptions extends CommandOperationOptions, WriteConcernOptions {

@@ -1,13 +1,16 @@
 'use strict';
 const exec = require('child_process').exec;
 const chai = require('chai');
+
 const expect = chai.expect;
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 require('mocha-sinon');
+
 chai.use(sinonChai);
 
 const utils = require('../tools/utils');
+
 const ClassWithLogger = utils.ClassWithLogger;
 const ClassWithoutLogger = utils.ClassWithoutLogger;
 const ClassWithUndefinedLogger = utils.ClassWithUndefinedLogger;

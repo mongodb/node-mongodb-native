@@ -1,14 +1,14 @@
-import { ReadPreference } from '../read_preference';
-import { maxWireVersion, decorateWithCollation, hasAtomicOperators, Callback } from '../utils';
-import { MongoInvalidArgumentError, MongoCompatibilityError } from '../error';
-import { CommandOperation, CommandOperationOptions } from './command';
-import { defineAspects, Aspect } from './operation';
 import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
-import { Sort, SortForCmd, formatSort } from '../sort';
+import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
+import { ReadPreference } from '../read_preference';
+import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { formatSort, Sort, SortForCmd } from '../sort';
+import { Callback, decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
 import type { WriteConcern, WriteConcernSettings } from '../write_concern';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects } from './operation';
 
 /** @public */
 export const ReturnDocument = Object.freeze({

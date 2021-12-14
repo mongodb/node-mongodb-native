@@ -1,18 +1,20 @@
+import { Document, ObjectId } from 'bson';
+import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
+
 import type {
   InferIdType,
-  WithId,
-  WithoutId,
   OptionalId,
   OptionalUnlessRequiredId,
-  EnhancedOmit
+  EnhancedOmit,
+  WithId,
+  WithoutId
 } from '../../src/mongo_types';
 
-import { expectType, expectNotType, expectAssignable, expectError } from 'tsd';
-import { Document, ObjectId } from 'bson';
 
 function optionalReturnValue(): number | ObjectId {
   return Math.random() > 0.5 ? 3 : new ObjectId();
 }
+
 // InferIdType
 expectType<InferIdType<Document>>(new ObjectId());
 expectType<InferIdType<{ _id: number }>>(1 + 1);

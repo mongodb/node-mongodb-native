@@ -1,22 +1,22 @@
+import type { ObjectId } from '../bson';
 import { Code, Document } from '../bson';
+import type { Collection } from '../collection';
+import { Db } from '../db';
+import { MongoCompatibilityError, MongoServerError } from '../error';
+import { ReadPreference, ReadPreferenceMode } from '../read_preference';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
+import type { Sort } from '../sort';
 import {
   applyWriteConcern,
+  Callback,
   decorateWithCollation,
   decorateWithReadConcern,
   isObject,
-  Callback,
   maxWireVersion
 } from '../utils';
-import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import { CommandOperation, CommandOperationOptions } from './command';
-import type { Server } from '../sdam/server';
-import type { Collection } from '../collection';
-import type { Sort } from '../sort';
-import { MongoServerError, MongoCompatibilityError } from '../error';
-import type { ObjectId } from '../bson';
 import { Aspect, defineAspects } from './operation';
-import type { ClientSession } from '../sessions';
-import { Db } from '../db';
 
 const exclusionList = [
   'explain',
@@ -33,6 +33,7 @@ const exclusionList = [
   'bsonRegExp',
   'serializeFunctions',
   'ignoreUndefined',
+  'enableUtf8Validation',
   'scope' // this option is reformatted thus exclude the original
 ];
 

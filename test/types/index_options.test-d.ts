@@ -1,4 +1,5 @@
 import { expectAssignable, expectNotAssignable } from 'tsd';
+
 import type { IndexDescription } from '../../src';
 
 // test that all valid index options are allowed in IndexDescription

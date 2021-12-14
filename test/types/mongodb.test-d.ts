@@ -1,13 +1,14 @@
-import { expectType, expectDeprecated, expectNotDeprecated, expectError } from 'tsd';
-import { MongoClient } from '../../src/mongo_client';
+import type { Document } from 'bson';
+import { expectDeprecated, expectError, expectNotDeprecated, expectType } from 'tsd';
+
+import { Db, WithId } from '../../src';
+import * as MongoDBDriver from '../../src';
+import type { ChangeStreamDocument } from '../../src/change_stream';
 import { Collection } from '../../src/collection';
 import { AggregationCursor } from '../../src/cursor/aggregation_cursor';
 import type { FindCursor } from '../../src/cursor/find_cursor';
-import type { ChangeStreamDocument } from '../../src/change_stream';
-import type { Document } from 'bson';
-import { Db, WithId } from '../../src';
+import { MongoClient } from '../../src/mongo_client';
 import { Topology } from '../../src/sdam/topology';
-import * as MongoDBDriver from '../../src';
 
 // We wish to keep these APIs but continue to ensure they are marked as deprecated.
 expectDeprecated(Collection.prototype.insert);

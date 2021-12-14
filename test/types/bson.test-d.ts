@@ -1,4 +1,5 @@
 import { expectType } from 'tsd';
+
 import type { BSONSerializeOptions, Document } from '../../src/bson';
 
 const options: BSONSerializeOptions = {};
@@ -21,6 +22,7 @@ type PermittedBSONOptionKeys =
   | 'promoteValues'
   | 'bsonRegExp'
   | 'fieldsAsRaw'
+  | 'enableUtf8Validation'
   | 'raw';
 
 const keys = null as unknown as PermittedBSONOptionKeys;

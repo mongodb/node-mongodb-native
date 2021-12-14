@@ -1,11 +1,11 @@
-import { ReadPreference } from '../read_preference';
+import type { BSONSerializeOptions, Document, Long } from '../bson';
 import * as BSON from '../bson';
-import { databaseNamespace } from '../utils';
-import { OP_QUERY, OP_GETMORE, OP_KILL_CURSORS, OP_MSG } from './wire_protocol/constants';
-import type { Long, Document, BSONSerializeOptions } from '../bson';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
+import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
+import { databaseNamespace } from '../utils';
 import type { CommandOptions } from './connection';
-import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
+import { OP_GETMORE, OP_KILL_CURSORS, OP_MSG, OP_QUERY } from './wire_protocol/constants';
 
 // Incrementing request id
 let _requestId = 0;
@@ -469,8 +469,6 @@ export interface MessageHeader {
 export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
-  // For now we use this internally to only prevent writeErrors from crashing the driver
-  validation?: { utf8: { writeErrors: boolean } };
 }
 
 /** @internal */
@@ -839,7 +837,7 @@ export class BinMsg {
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
     const bsonRegExp = options.bsonRegExp ?? this.opts.bsonRegExp;
-    const validation = options.validation ?? { utf8: { writeErrors: false } };
+    const validation = this.parseBsonSerializationOptions(options);
 
     // Set up the options
     const bsonOptions: BSONSerializeOptions = {
@@ -875,5 +873,15 @@ export class BinMsg {
     }
 
     this.parsed = true;
+  }
+
+  parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {
+    utf8: { writeErrors: false } | false;
+  } {
+    if (enableUtf8Validation === false) {
+      return { utf8: false };
+    }
+
+    return { utf8: { writeErrors: false } };
   }
 }

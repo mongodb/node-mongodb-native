@@ -2,6 +2,7 @@
 'use strict';
 const mocha = require('mocha');
 const chalk = require('chalk');
+
 const {
   EVENT_RUN_BEGIN,
   EVENT_RUN_END,

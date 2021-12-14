@@ -1,27 +1,26 @@
-import { ReadPreference } from '../read_preference';
+import type { Document } from '../bson';
 import {
-  MongoError,
   isRetryableError,
-  MONGODB_ERROR_CODES,
-  MongoRuntimeError,
-  MongoNetworkError,
   MongoCompatibilityError,
-  MongoServerError,
+  MONGODB_ERROR_CODES,
+  MongoError,
   MongoExpiredSessionError,
+  MongoNetworkError,
+  MongoRuntimeError,
+  MongoServerError,
   MongoTransactionError
 } from '../error';
-import { Aspect, AbstractOperation } from './operation';
-import { maxWireVersion, maybePromise, Callback } from '../utils';
+import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
-import type { Topology } from '../sdam/topology';
-import type { ClientSession } from '../sessions';
-import type { Document } from '../bson';
-import { supportsRetryableWrites } from '../utils';
 import {
   sameServerSelector,
   secondaryWritableServerSelector,
   ServerSelector
 } from '../sdam/server_selection';
+import type { Topology } from '../sdam/topology';
+import type { ClientSession } from '../sessions';
+import { Callback, maxWireVersion, maybePromise, supportsRetryableWrites } from '../utils';
+import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =

@@ -1,62 +1,72 @@
-import { Logger } from '../logger';
+import type { Document, Long } from '../bson';
 import {
-  ConnectionPool,
-  ConnectionPoolOptions,
-  CMAP_EVENTS,
-  ConnectionPoolEvents
-} from '../cmap/connection_pool';
-import { ServerDescription, compareTopologyVersion } from './server_description';
-import { Monitor, MonitorOptions } from './monitor';
-import { isTransactionCommand } from '../transactions';
-import {
-  collationNotSupported,
-  makeStateMachine,
-  maxWireVersion,
-  Callback,
-  CallbackWithType,
-  MongoDBNamespace,
-  EventEmitterWithState
-} from '../utils';
-import {
-  STATE_CLOSED,
-  STATE_CLOSING,
-  STATE_CONNECTING,
-  STATE_CONNECTED,
-  ClusterTime,
-  TopologyType
-} from './common';
-import {
-  MongoError,
-  MongoNetworkError,
-  MongoNetworkTimeoutError,
-  isSDAMUnrecoverableError,
-  isRetryableWriteError,
-  isNodeShuttingDownError,
-  isNetworkErrorBeforeHandshake,
-  MongoCompatibilityError,
-  MongoInvalidArgumentError,
-  MongoServerClosedError
-} from '../error';
-import {
+  CommandOptions,
   Connection,
   DestroyOptions,
-  QueryOptions,
   GetMoreOptions,
-  CommandOptions,
-  APM_EVENTS
+  QueryOptions
 } from '../cmap/connection';
-import type { Topology } from './topology';
+import {
+  ConnectionPool,
+  ConnectionPoolEvents,
+  ConnectionPoolOptions
+} from '../cmap/connection_pool';
+import {
+  APM_EVENTS,
+  CLOSED,
+  CMAP_EVENTS,
+  CONNECT,
+  DESCRIPTION_RECEIVED,
+  ENDED,
+  HEARTBEAT_EVENTS,
+  SERVER_HEARTBEAT_FAILED,
+  SERVER_HEARTBEAT_STARTED,
+  SERVER_HEARTBEAT_SUCCEEDED
+} from '../constants';
+import type { AutoEncrypter } from '../deps';
+import {
+  isNetworkErrorBeforeHandshake,
+  isNodeShuttingDownError,
+  isRetryableWriteError,
+  isSDAMUnrecoverableError,
+  MongoCompatibilityError,
+  MongoError,
+  MongoInvalidArgumentError,
+  MongoNetworkError,
+  MongoNetworkTimeoutError,
+  MongoServerClosedError
+} from '../error';
+import { Logger } from '../logger';
+import type { ServerApi } from '../mongo_client';
+import { TypedEventEmitter } from '../mongo_types';
+import type { ClientSession } from '../sessions';
+import { isTransactionCommand } from '../transactions';
+import {
+  Callback,
+  CallbackWithType,
+  collationNotSupported,
+  EventEmitterWithState,
+  makeStateMachine,
+  maxWireVersion,
+  MongoDBNamespace,
+  supportsRetryableWrites
+} from '../utils';
+import {
+  ClusterTime,
+  STATE_CLOSED,
+  STATE_CLOSING,
+  STATE_CONNECTED,
+  STATE_CONNECTING,
+  TopologyType
+} from './common';
 import type {
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent
 } from './events';
-import type { ClientSession } from '../sessions';
-import type { Document, Long } from '../bson';
-import type { AutoEncrypter } from '../deps';
-import type { ServerApi } from '../mongo_client';
-import { TypedEventEmitter } from '../mongo_types';
-import { supportsRetryableWrites } from '../utils';
+import { Monitor, MonitorOptions } from './monitor';
+import { compareTopologyVersion, ServerDescription } from './server_description';
+import type { Topology } from './topology';
 
 const stateTransition = makeStateMachine({
   [STATE_CLOSED]: [STATE_CLOSED, STATE_CONNECTING],
@@ -108,24 +118,23 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   /** @internal */
   s: ServerPrivate;
   serverApi?: ServerApi;
-  clusterTime?: ClusterTime;
   ismaster?: Document;
   [kMonitor]: Monitor;
 
   /** @event */
-  static readonly SERVER_HEARTBEAT_STARTED = 'serverHeartbeatStarted' as const;
+  static readonly SERVER_HEARTBEAT_STARTED = SERVER_HEARTBEAT_STARTED;
   /** @event */
-  static readonly SERVER_HEARTBEAT_SUCCEEDED = 'serverHeartbeatSucceeded' as const;
+  static readonly SERVER_HEARTBEAT_SUCCEEDED = SERVER_HEARTBEAT_SUCCEEDED;
   /** @event */
-  static readonly SERVER_HEARTBEAT_FAILED = 'serverHeartbeatFailed' as const;
+  static readonly SERVER_HEARTBEAT_FAILED = SERVER_HEARTBEAT_FAILED;
   /** @event */
-  static readonly CONNECT = 'connect' as const;
+  static readonly CONNECT = CONNECT;
   /** @event */
-  static readonly DESCRIPTION_RECEIVED = 'descriptionReceived' as const;
+  static readonly DESCRIPTION_RECEIVED = DESCRIPTION_RECEIVED;
   /** @event */
-  static readonly CLOSED = 'closed' as const;
+  static readonly CLOSED = CLOSED;
   /** @event */
-  static readonly ENDED = 'ended' as const;
+  static readonly ENDED = ENDED;
 
   /**
    * Create a server
@@ -182,6 +191,14 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         this.emit(Server.CONNECT, this);
       }
     });
+  }
+
+  get clusterTime(): ClusterTime | undefined {
+    return this.s.topology.clusterTime;
+  }
+
+  set clusterTime(clusterTime: ClusterTime | undefined) {
+    this.s.topology.clusterTime = clusterTime;
   }
 
   get description(): ServerDescription {
@@ -452,21 +469,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     );
   }
 }
-
-export const HEARTBEAT_EVENTS = [
-  Server.SERVER_HEARTBEAT_STARTED,
-  Server.SERVER_HEARTBEAT_SUCCEEDED,
-  Server.SERVER_HEARTBEAT_FAILED
-];
-
-Object.defineProperty(Server.prototype, 'clusterTime', {
-  get() {
-    return this.s.topology.clusterTime;
-  },
-  set(clusterTime: ClusterTime) {
-    this.s.topology.clusterTime = clusterTime;
-  }
-});
 
 function calculateRoundTripTime(oldRtt: number, duration: number): number {
   if (oldRtt === -1) {

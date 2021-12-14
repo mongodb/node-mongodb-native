@@ -1,10 +1,10 @@
+import type { Document } from '../bson';
+import type { Db } from '../db';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
+import { Callback, MongoDBNamespace } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { MongoDBNamespace, Callback } from '../utils';
-import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
-import type { Db } from '../db';
-import type { ClientSession } from '../sessions';
 
 /** @public */
 export interface ListDatabasesResult {

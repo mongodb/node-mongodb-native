@@ -1,10 +1,11 @@
-import { CommandOperation, CommandOperationOptions } from './command';
+import type { Db } from '../db';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
 import { enumToString } from '../utils';
-import type { Server } from '../sdam/server';
-import type { Db } from '../db';
-import type { ClientSession } from '../sessions';
-import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
+import { CommandOperation, CommandOperationOptions } from './command';
+
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
 /** @public */

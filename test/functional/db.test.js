@@ -1,5 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
+
 const { setupDatabase, withClient } = require(`./shared`);
 const { expect } = require('chai');
 const { Db } = require('../../src');

@@ -1,11 +1,11 @@
-import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback } from '../utils';
 import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
+import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import type { Callback } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects } from './operation';
 
 /** @public */
 export interface CollStatsOptions extends CommandOperationOptions {

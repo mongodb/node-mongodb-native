@@ -1,8 +1,9 @@
 import * as dns from 'dns';
-import { Logger, LoggerOptions } from '../logger';
-import { HostAddress } from '../utils';
-import { TypedEventEmitter } from '../mongo_types';
+
 import { MongoRuntimeError } from '../error';
+import { Logger, LoggerOptions } from '../logger';
+import { TypedEventEmitter } from '../mongo_types';
+import { HostAddress } from '../utils';
 
 /**
  * Determines whether a provided address matches the provided parent domain in order

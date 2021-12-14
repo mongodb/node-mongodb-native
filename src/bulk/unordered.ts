@@ -1,11 +1,11 @@
-import * as BSON from '../bson';
-import { BulkOperationBase, Batch, BatchType, BulkWriteOptions, BulkWriteResult } from './common';
-import type { Callback } from '../utils';
 import type { Document } from '../bson';
+import * as BSON from '../bson';
 import type { Collection } from '../collection';
-import type { UpdateStatement } from '../operations/update';
-import type { DeleteStatement } from '../operations/delete';
 import { MongoInvalidArgumentError } from '../error';
+import type { DeleteStatement } from '../operations/delete';
+import type { UpdateStatement } from '../operations/update';
+import type { Callback } from '../utils';
+import { Batch, BatchType, BulkOperationBase, BulkWriteOptions, BulkWriteResult } from './common';
 
 /** @public */
 export class UnorderedBulkOperation extends BulkOperationBase {

@@ -1,20 +1,19 @@
-import * as http from 'http';
 import * as crypto from 'crypto';
+import * as http from 'http';
 import * as url from 'url';
-import * as BSON from '../../bson';
-import { AuthProvider, AuthContext } from './auth_provider';
-import { MongoCredentials } from './mongo_credentials';
-import {
-  MongoRuntimeError,
-  MongoMissingCredentialsError,
-  MongoCompatibilityError
-} from '../../error';
-import { maxWireVersion, Callback, ns } from '../../utils';
-import type { BSONSerializeOptions } from '../../bson';
 
+import type { Binary, BSONSerializeOptions } from '../../bson';
+import * as BSON from '../../bson';
 import { aws4 } from '../../deps';
-import { AuthMechanism } from './defaultAuthProviders';
-import type { Binary } from 'bson';
+import {
+  MongoCompatibilityError,
+  MongoMissingCredentialsError,
+  MongoRuntimeError
+} from '../../error';
+import { Callback, maxWireVersion, ns } from '../../utils';
+import { AuthContext, AuthProvider } from './auth_provider';
+import { MongoCredentials } from './mongo_credentials';
+import { AuthMechanism } from './providers';
 
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';

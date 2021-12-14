@@ -1,15 +1,16 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
+
+import type { Projection, ProjectionOperators } from '../../../../src';
 import {
+  Collection,
+  Db,
+  Document,
   FindCursor,
   FindOptions,
   MongoClient,
-  Document,
-  Collection,
-  Db,
-  WithId,
-  ObjectId
+  ObjectId,
+  WithId
 } from '../../../../src';
-import type { Projection, ProjectionOperators } from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
 // collection.findX tests

@@ -1,11 +1,14 @@
 import type {
-  serialize as serializeFn,
+  calculateObjectSize as calculateObjectSizeFn,
   deserialize as deserializeFn,
-  calculateObjectSize as calculateObjectSizeFn
+  DeserializeOptions,
+  serialize as serializeFn,
+  SerializeOptions
 } from 'bson';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 let BSON = require('bson');
+
 try {
   // Ensure you always wrap an optional require in the try block NODE-3199
   BSON = require('bson-ext');
@@ -19,24 +22,22 @@ export const serialize = BSON.serialize as typeof serializeFn;
 export const calculateObjectSize = BSON.calculateObjectSize as typeof calculateObjectSizeFn;
 
 export {
-  Long,
   Binary,
-  ObjectId,
-  Timestamp,
-  Code,
-  MinKey,
-  MaxKey,
-  Decimal128,
-  Int32,
-  Double,
-  DBRef,
   BSONRegExp,
   BSONSymbol,
+  Code,
+  DBRef,
+  Decimal128,
+  Document,
+  Double,
+  Int32,
+  Long,
   Map,
-  Document
+  MaxKey,
+  MinKey,
+  ObjectId,
+  Timestamp
 } from 'bson';
-
-import type { DeserializeOptions, SerializeOptions } from 'bson';
 
 /**
  * BSON Serialization options.
@@ -55,6 +56,9 @@ export interface BSONSerializeOptions
     > {
   /** Return BSON filled buffers from operations */
   raw?: boolean;
+
+  /** Enable utf8 validation when deserializing BSON documents.  Defaults to true. */
+  enableUtf8Validation?: boolean;
 }
 
 export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSerializeOptions {
@@ -66,7 +70,8 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     serializeFunctions,
     ignoreUndefined,
     bsonRegExp,
-    raw
+    raw,
+    enableUtf8Validation
   } = options;
   return {
     fieldsAsRaw,
@@ -76,7 +81,8 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
     serializeFunctions,
     ignoreUndefined,
     bsonRegExp,
-    raw
+    raw,
+    enableUtf8Validation
   };
 }
 
@@ -99,6 +105,8 @@ export function resolveBSONOptions(
     ignoreUndefined: options?.ignoreUndefined ?? parentOptions?.ignoreUndefined ?? false,
     bsonRegExp: options?.bsonRegExp ?? parentOptions?.bsonRegExp ?? false,
     serializeFunctions: options?.serializeFunctions ?? parentOptions?.serializeFunctions ?? false,
-    fieldsAsRaw: options?.fieldsAsRaw ?? parentOptions?.fieldsAsRaw ?? {}
+    fieldsAsRaw: options?.fieldsAsRaw ?? parentOptions?.fieldsAsRaw ?? {},
+    enableUtf8Validation:
+      options?.enableUtf8Validation ?? parentOptions?.enableUtf8Validation ?? true
   };
 }

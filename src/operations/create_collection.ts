@@ -1,12 +1,12 @@
-import { CommandOperation, CommandOperationOptions } from './command';
-import { Aspect, defineAspects } from './operation';
-import { Collection } from '../collection';
-import type { Callback } from '../utils';
 import type { Document } from '../bson';
-import type { Server } from '../sdam/server';
+import { Collection } from '../collection';
 import type { Db } from '../db';
 import type { PkFactory } from '../mongo_client';
+import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import type { Callback } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects } from './operation';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
   'w',
@@ -27,7 +27,8 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'promoteBuffers',
   'bsonRegExp',
   'serializeFunctions',
-  'ignoreUndefined'
+  'ignoreUndefined',
+  'enableUtf8Validation'
 ]);
 
 /** @public

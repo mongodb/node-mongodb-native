@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { expectType } from 'tsd';
+
 import {
   GridFSBucket,
   MongoClient,

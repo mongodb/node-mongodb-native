@@ -1,19 +1,9 @@
-import { MongoRuntimeError, MongoInvalidArgumentError } from '../error';
-import { Topology, TOPOLOGY_EVENTS } from '../sdam/topology';
 import { resolveSRVRecord } from '../connection_string';
-import type { Callback } from '../utils';
+import { MONGO_CLIENT_EVENTS } from '../constants';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import type { MongoClient, MongoOptions } from '../mongo_client';
-import { CMAP_EVENTS } from '../cmap/connection_pool';
-import { APM_EVENTS } from '../cmap/connection';
-import { HEARTBEAT_EVENTS } from '../sdam/server';
-
-/** @public */
-export const MONGO_CLIENT_EVENTS = [
-  ...CMAP_EVENTS,
-  ...APM_EVENTS,
-  ...TOPOLOGY_EVENTS,
-  ...HEARTBEAT_EVENTS
-] as const;
+import { Topology } from '../sdam/topology';
+import type { Callback } from '../utils';
 
 export function connect(
   mongoClient: MongoClient,

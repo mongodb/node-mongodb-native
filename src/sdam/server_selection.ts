@@ -1,8 +1,8 @@
-import { ServerType, TopologyType } from './common';
-import { ReadPreference } from '../read_preference';
 import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
-import type { TopologyDescription } from './topology_description';
+import { ReadPreference } from '../read_preference';
+import { ServerType, TopologyType } from './common';
 import type { ServerDescription, TagSet } from './server_description';
+import type { TopologyDescription } from './topology_description';
 
 // max staleness constants
 const IDLE_WRITE_PERIOD = 10000;

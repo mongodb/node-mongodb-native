@@ -1,9 +1,9 @@
-import { Aspect, defineAspects } from './operation';
-import { CommandOperation, CommandOperationOptions } from './command';
-import type { Callback } from '../utils';
-import type { Server } from '../sdam/server';
 import type { Db } from '../db';
+import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import type { Callback } from '../utils';
+import { CommandOperation, CommandOperationOptions } from './command';
+import { Aspect, defineAspects } from './operation';
 
 /** @public */
 export type DropCollectionOptions = CommandOperationOptions;

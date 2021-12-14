@@ -3,6 +3,7 @@
 const crypto = require('crypto');
 const BSON = require('bson');
 const chai = require('chai');
+
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 

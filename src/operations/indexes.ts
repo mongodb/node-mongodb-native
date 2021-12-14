@@ -1,28 +1,28 @@
-import { indexInformation, IndexInformationOptions } from './common_functions';
-import { AbstractOperation, Aspect, defineAspects } from './operation';
-import { MONGODB_ERROR_CODES, MongoServerError, MongoCompatibilityError } from '../error';
-import {
-  maxWireVersion,
-  parseIndexOptions,
-  MongoDBNamespace,
-  Callback,
-  getTopology
-} from '../utils';
-import {
-  CommandOperation,
-  CommandOperationOptions,
-  OperationParent,
-  CollationOptions
-} from './command';
-import { ReadPreference } from '../read_preference';
-import type { Server } from '../sdam/server';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
-import type { Db } from '../db';
 import { AbstractCursor } from '../cursor/abstract_cursor';
-import type { ClientSession } from '../sessions';
-import { executeOperation, ExecutionResult } from './execute_operation';
+import type { Db } from '../db';
+import { MongoCompatibilityError, MONGODB_ERROR_CODES, MongoServerError } from '../error';
 import type { OneOrMore } from '../mongo_types';
+import { ReadPreference } from '../read_preference';
+import type { Server } from '../sdam/server';
+import type { ClientSession } from '../sessions';
+import {
+  Callback,
+  getTopology,
+  maxWireVersion,
+  MongoDBNamespace,
+  parseIndexOptions
+} from '../utils';
+import {
+  CollationOptions,
+  CommandOperation,
+  CommandOperationOptions,
+  OperationParent
+} from './command';
+import { indexInformation, IndexInformationOptions } from './common_functions';
+import { executeOperation, ExecutionResult } from './execute_operation';
+import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([

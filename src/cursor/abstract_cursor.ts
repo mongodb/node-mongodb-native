@@ -1,23 +1,24 @@
-import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
-import { Long, Document, BSONSerializeOptions, pluckBSONSerializeOptions } from '../bson';
-import { ClientSession, maybeClearPinnedConnection } from '../sessions';
+import { Readable, Transform } from 'stream';
+
+import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
 import {
   AnyError,
-  MongoRuntimeError,
-  MongoNetworkError,
-  MongoInvalidArgumentError,
   MongoCursorExhaustedError,
-  MongoTailableCursorError,
-  MongoCursorInUseError
+  MongoCursorInUseError,
+  MongoInvalidArgumentError,
+  MongoNetworkError,
+  MongoRuntimeError,
+  MongoTailableCursorError
 } from '../error';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import type { Server } from '../sdam/server';
-import type { Topology } from '../sdam/topology';
-import { Readable, Transform } from 'stream';
+import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
-import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
+import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import type { Server } from '../sdam/server';
+import type { Topology } from '../sdam/topology';
+import { ClientSession, maybeClearPinnedConnection } from '../sessions';
+import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');

@@ -1,23 +1,24 @@
 import { expectAssignable, expectError, expectNotAssignable, expectNotType } from 'tsd';
+
 import {
   Decimal128,
+  Document,
   Double,
   Int32,
   Long,
-  ObjectId,
-  Timestamp,
   MongoClient,
-  Document
+  ObjectId,
+  Timestamp
 } from '../../../../src/index';
 import type {
-  UpdateFilter,
-  MatchKeysAndValues,
   AddToSetOperators,
   ArrayOperator,
-  SetFields,
-  PushOperator,
+  MatchKeysAndValues,
+  PullAllOperator,
   PullOperator,
-  PullAllOperator
+  PushOperator,
+  SetFields,
+  UpdateFilter
 } from '../../../../src/mongo_types';
 
 // MatchKeysAndValues - for basic mapping keys to their values, restricts that key types must be the same but optional, and permit dot array notation

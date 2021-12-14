@@ -1,7 +1,7 @@
-import { parseServerType } from '../sdam/server_description';
 import type { Document } from '../bson';
-import type { CompressorName } from './wire_protocol/compression';
 import { ServerType } from '../sdam/common';
+import { parseServerType } from '../sdam/server_description';
+import type { CompressorName } from './wire_protocol/compression';
 
 const RESPONSE_FIELDS = [
   'minWireVersion',
@@ -55,8 +55,8 @@ export class StreamDescription {
 
   receiveResponse(response: Document): void {
     this.type = parseServerType(response);
-    RESPONSE_FIELDS.forEach(field => {
-      if (typeof response[field] != null) {
+    for (const field of RESPONSE_FIELDS) {
+      if (response[field] != null) {
         this[field] = response[field];
       }
 
@@ -64,7 +64,7 @@ export class StreamDescription {
       if ('__nodejs_mock_server__' in response) {
         this.__nodejs_mock_server__ = response['__nodejs_mock_server__'];
       }
-    });
+    }
 
     if (response.compression) {
       this.compressor = this.compressors.filter(c => response.compression?.includes(c))[0];

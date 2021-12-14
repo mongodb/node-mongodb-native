@@ -1,4 +1,5 @@
 import { expectError } from 'tsd';
+
 import { MongoClient, ObjectId } from '../../../../src';
 
 // test collection.replaceX functions

@@ -1,8 +1,10 @@
 'use strict';
 const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
+
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
+
 chai.use(sinonChai);
 
 describe('Errors', function () {

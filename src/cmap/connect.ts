@@ -1,29 +1,45 @@
+import type { Socket, SocketConnectOpts } from 'net';
 import * as net from 'net';
+import type { ConnectionOptions as TLSConnectionOpts, TLSSocket } from 'tls';
 import * as tls from 'tls';
-import { Connection, ConnectionOptions, CryptoConnection } from './connection';
+
+import type { Document } from '../bson';
+import { Int32 } from '../bson';
 import {
-  MongoNetworkError,
-  MongoNetworkTimeoutError,
   AnyError,
   MongoCompatibilityError,
   MongoInvalidArgumentError,
-  MongoServerError,
-  MongoRuntimeError
+  MongoNetworkError,
+  MongoNetworkTimeoutError,
+  MongoRuntimeError,
+  MongoServerError
 } from '../error';
-import { AUTH_PROVIDERS, AuthMechanism } from './auth/defaultAuthProviders';
-import { AuthContext } from './auth/auth_provider';
-import { makeClientMetadata, ClientMetadata, Callback, CallbackWithType, ns } from '../utils';
+import { Callback, CallbackWithType, ClientMetadata, makeClientMetadata, ns } from '../utils';
+import { AuthContext, AuthProvider } from './auth/auth_provider';
+import { GSSAPI } from './auth/gssapi';
+import { MongoCR } from './auth/mongocr';
+import { MongoDBAWS } from './auth/mongodb_aws';
+import { Plain } from './auth/plain';
+import { AuthMechanism } from './auth/providers';
+import { ScramSHA1, ScramSHA256 } from './auth/scram';
+import { X509 } from './auth/x509';
+import { Connection, ConnectionOptions, CryptoConnection } from './connection';
 import {
-  MAX_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_SERVER_VERSION,
-  MIN_SUPPORTED_WIRE_VERSION,
-  MIN_SUPPORTED_SERVER_VERSION
+  MAX_SUPPORTED_WIRE_VERSION,
+  MIN_SUPPORTED_SERVER_VERSION,
+  MIN_SUPPORTED_WIRE_VERSION
 } from './wire_protocol/constants';
-import type { Document } from '../bson';
-import { Int32 } from '../bson';
 
-import type { Socket, SocketConnectOpts } from 'net';
-import type { TLSSocket, ConnectionOptions as TLSConnectionOpts } from 'tls';
+const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
+  [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
+  [AuthMechanism.MONGODB_CR, new MongoCR()],
+  [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],
+  [AuthMechanism.MONGODB_PLAIN, new Plain()],
+  [AuthMechanism.MONGODB_SCRAM_SHA1, new ScramSHA1()],
+  [AuthMechanism.MONGODB_SCRAM_SHA256, new ScramSHA256()],
+  [AuthMechanism.MONGODB_X509, new X509()]
+]);
 
 const FAKE_MONGODB_SERVICE_ID =
   typeof process.env.FAKE_MONGODB_SERVICE_ID === 'string' &&

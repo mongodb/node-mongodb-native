@@ -1,15 +1,14 @@
-import { ServerType } from '../../sdam/common';
-import { TopologyDescription } from '../../sdam/topology_description';
-import { MongoInvalidArgumentError } from '../../error';
-import { ReadPreference } from '../../read_preference';
 import type { Document } from '../../bson';
-import type { OpQueryOptions } from '../commands';
-import type { Topology } from '../../sdam/topology';
+import { MongoInvalidArgumentError } from '../../error';
+import type { ReadPreferenceLike } from '../../read_preference';
+import { ReadPreference } from '../../read_preference';
+import { ServerType } from '../../sdam/common';
 import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
-import type { ReadPreferenceLike } from '../../read_preference';
-import type { CommandOptions } from '../connection';
-import type { Connection } from '../connection';
+import type { Topology } from '../../sdam/topology';
+import { TopologyDescription } from '../../sdam/topology_description';
+import type { OpQueryOptions } from '../commands';
+import type { CommandOptions, Connection } from '../connection';
 
 export interface ReadPreferenceOption {
   readPreference?: ReadPreferenceLike;
@@ -45,7 +44,9 @@ export function applyCommonQueryOptions(
     promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
     promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
     promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-    bsonRegExp: typeof options.bsonRegExp === 'boolean' ? options.bsonRegExp : false
+    bsonRegExp: typeof options.bsonRegExp === 'boolean' ? options.bsonRegExp : false,
+    enableUtf8Validation:
+      typeof options.enableUtf8Validation === 'boolean' ? options.enableUtf8Validation : true
   });
 
   if (options.session) {

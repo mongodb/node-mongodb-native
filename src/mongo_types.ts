@@ -1,15 +1,16 @@
+import { EventEmitter } from 'events';
+
 import type {
   Binary,
-  Document,
-  ObjectId,
   BSONRegExp,
-  Timestamp,
   Decimal128,
+  Document,
   Double,
   Int32,
-  Long
+  Long,
+  ObjectId,
+  Timestamp
 } from './bson';
-import { EventEmitter } from 'events';
 import type { Sort } from './sort';
 
 /** @internal */

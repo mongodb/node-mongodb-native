@@ -1,10 +1,10 @@
-import { MongoTopologyClosedError } from '../error';
-import { Callback, getTopology } from '../utils';
 import type { Document } from '../bson';
-import type { Db } from '../db';
-import type { ClientSession } from '../sessions';
-import type { ReadPreference } from '../read_preference';
 import type { Collection } from '../collection';
+import type { Db } from '../db';
+import { MongoTopologyClosedError } from '../error';
+import type { ReadPreference } from '../read_preference';
+import type { ClientSession } from '../sessions';
+import { Callback, getTopology } from '../utils';
 
 /** @public */
 export interface IndexInformationOptions {
