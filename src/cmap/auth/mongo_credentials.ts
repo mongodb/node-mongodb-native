@@ -2,7 +2,7 @@
 
 import type { Document } from '../../bson';
 import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
-import { AuthMechanism } from './providers';
+import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
 function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
@@ -136,11 +136,7 @@ export class MongoCredentials {
       throw new MongoMissingCredentialsError(`Username required for mechanism '${this.mechanism}'`);
     }
 
-    if (
-      this.mechanism === AuthMechanism.MONGODB_GSSAPI ||
-      this.mechanism === AuthMechanism.MONGODB_AWS ||
-      this.mechanism === AuthMechanism.MONGODB_X509
-    ) {
+    if (AUTH_MECHS_AUTH_SRC_EXTERNAL.has(this.mechanism)) {
       if (this.source != null && this.source !== '$external') {
         // TODO(NODE-3485): Replace this with a MongoAuthValidationError
         throw new MongoAPIError(

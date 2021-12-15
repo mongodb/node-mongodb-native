@@ -12,3 +12,10 @@ export const AuthMechanism = Object.freeze({
 
 /** @public */
 export type AuthMechanism = typeof AuthMechanism[keyof typeof AuthMechanism];
+
+/** @internal */
+export const AUTH_MECHS_AUTH_SRC_EXTERNAL = new Set<AuthMechanism>([
+  AuthMechanism.MONGODB_GSSAPI,
+  AuthMechanism.MONGODB_AWS,
+  AuthMechanism.MONGODB_X509
+]);

@@ -1,10 +1,14 @@
-'use strict';
+import { expect } from 'chai';
+import * as dns from 'dns';
+import * as sinon from 'sinon';
+import { promisify } from 'util';
 
-const { MongoParseError, MongoDriverError, MongoInvalidArgumentError } = require('../../src/error');
-const { loadSpecTests } = require('../spec');
-const { parseOptions } = require('../../src/connection_string');
-const { AuthMechanism } = require('../../src/cmap/auth/providers');
-const { expect } = require('chai');
+import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
+import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
+import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
+import { MongoDriverError, MongoInvalidArgumentError, MongoParseError } from '../../src/error';
+import { MongoOptions } from '../../src/mongo_client';
+import { loadSpecTests } from '../spec';
 
 // NOTE: These are cases we could never check for unless we write our own
 //       url parser. The node parser simply won't let these through, so we
@@ -30,7 +34,9 @@ describe('Connection String', function () {
       auth: { user: 'testing', password: 'llamas' }
     };
 
-    expect(() => parseOptions('mongodb://localhost', optionsWithUser)).to.throw(MongoParseError);
+    expect(() => parseOptions('mongodb://localhost', optionsWithUser as any)).to.throw(
+      MongoParseError
+    );
   });
 
   it('should support auth passed with username', function () {
@@ -38,7 +44,7 @@ describe('Connection String', function () {
       authMechanism: 'SCRAM-SHA-1',
       auth: { username: 'testing', password: 'llamas' }
     };
-    const options = parseOptions('mongodb://localhost', optionsWithUsername);
+    const options = parseOptions('mongodb://localhost', optionsWithUsername as any);
     expect(options.credentials).to.containSubset({
       source: 'admin',
       username: 'testing',
@@ -94,6 +100,13 @@ describe('Connection String', function () {
     expect(options.credentials.mechanism).to.equal(AuthMechanism.MONGODB_GSSAPI);
   });
 
+  it('should provide default authSource when valid AuthMechanism provided', function () {
+    const options = parseOptions(
+      'mongodb+srv://jira-sync.pw0q4.mongodb.net/testDB?authMechanism=MONGODB-AWS&retryWrites=true&w=majority'
+    );
+    expect(options.credentials.source).to.equal('$external');
+  });
+
   it('should parse a numeric authSource with variable width', function () {
     const options = parseOptions('mongodb://test@localhost/?authSource=0001');
     expect(options.credentials.source).to.equal('0001');
@@ -127,7 +140,7 @@ describe('Connection String', function () {
           });
 
           it('does not set the ssl option', function () {
-            expect(options.ssl).to.be.undefined;
+            expect(options).to.not.have.property('ssl');
           });
         });
 
@@ -139,7 +152,7 @@ describe('Connection String', function () {
           });
 
           it('does not set the ssl option', function () {
-            expect(options.ssl).to.be.undefined;
+            expect(options).to.not.have.property('ssl');
           });
         });
       });
@@ -163,7 +176,7 @@ describe('Connection String', function () {
           });
 
           it('does not set the ssl option', function () {
-            expect(options.ssl).to.be.undefined;
+            expect(options).to.not.have.property('ssl');
           });
         });
 
@@ -176,7 +189,7 @@ describe('Connection String', function () {
             });
 
             it('does not set the ssl option', function () {
-              expect(options.ssl).to.be.undefined;
+              expect(options).to.not.have.property('ssl');
             });
           });
 
@@ -188,7 +201,7 @@ describe('Connection String', function () {
             });
 
             it('does not set the ssl option', function () {
-              expect(options.ssl).to.be.undefined;
+              expect(options).to.not.have.property('ssl');
             });
           });
         });
@@ -310,6 +323,112 @@ describe('Connection String', function () {
       const options = parseOptions('mongodb+srv://test1.test.build.10gen.cc/somedb');
       expect(options.dbName).to.equal('somedb');
       expect(options.srvHost).to.equal('test1.test.build.10gen.cc');
+    });
+  });
+
+  describe('resolveSRVRecord()', () => {
+    const resolveSRVRecordAsync = promisify(resolveSRVRecord);
+
+    afterEach(async () => {
+      sinon.restore();
+    });
+
+    function makeStub(txtRecord: string) {
+      const mockAddress = [
+        {
+          name: 'localhost.test.mock.test.build.10gen.cc',
+          port: 2017,
+          weight: 0,
+          priority: 0
+        }
+      ];
+
+      const mockRecord: string[][] = [[txtRecord]];
+
+      // first call is for stubbing resolveSrv
+      // second call is for stubbing resolveTxt
+      sinon.stub(dns, 'resolveSrv').callsFake((address, callback) => {
+        return process.nextTick(callback, null, mockAddress);
+      });
+
+      sinon.stub(dns, 'resolveTxt').callsFake((address, whatWeTest) => {
+        whatWeTest(null, mockRecord);
+      });
+    }
+
+    for (const mechanism of AUTH_MECHS_AUTH_SRC_EXTERNAL) {
+      it(`should set authSource to $external for ${mechanism} external mechanism`, async function () {
+        makeStub('authSource=thisShouldNotBeAuthSource');
+        const credentials = new MongoCredentials({
+          source: '$external',
+          mechanism,
+          username: 'username',
+          password: mechanism === AuthMechanism.MONGODB_X509 ? undefined : 'password',
+          mechanismProperties: {}
+        });
+        credentials.validate();
+
+        const options = {
+          credentials,
+          srvHost: 'test.mock.test.build.10gen.cc',
+          srvServiceName: 'mongodb',
+          userSpecifiedAuthSource: false
+        } as MongoOptions;
+
+        await resolveSRVRecordAsync(options);
+        // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
+        expect(options).property('credentials').to.equal(credentials);
+        expect(options).to.have.nested.property('credentials.source', '$external');
+      });
+    }
+
+    it('should set a default authSource for non-external mechanisms with no user-specified source', async function () {
+      makeStub('authSource=thisShouldBeAuthSource');
+
+      const credentials = new MongoCredentials({
+        source: 'admin',
+        mechanism: AuthMechanism.MONGODB_SCRAM_SHA256,
+        username: 'username',
+        password: 'password',
+        mechanismProperties: {}
+      });
+      credentials.validate();
+
+      const options = {
+        credentials,
+        srvHost: 'test.mock.test.build.10gen.cc',
+        srvServiceName: 'mongodb',
+        userSpecifiedAuthSource: false
+      } as MongoOptions;
+
+      await resolveSRVRecordAsync(options);
+      // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
+      expect(options).property('credentials').to.not.equal(credentials);
+      expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
+    });
+
+    it('should retain credentials for any mechanism with no user-sepcificed source and no source in DNS', async function () {
+      makeStub('');
+      const credentials = new MongoCredentials({
+        source: 'admin',
+        mechanism: AuthMechanism.MONGODB_SCRAM_SHA256,
+        username: 'username',
+        password: 'password',
+        mechanismProperties: {}
+      });
+      credentials.validate();
+
+      const options = {
+        credentials,
+        srvHost: 'test.mock.test.build.10gen.cc',
+        srvServiceName: 'mongodb',
+        userSpecifiedAuthSource: false
+      } as MongoOptions;
+
+      await resolveSRVRecordAsync(options as any);
+      // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
+      expect(options).property('credentials').to.equal(credentials);
+      expect(options).to.have.nested.property('credentials.source', 'admin');
     });
   });
 });

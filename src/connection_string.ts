@@ -5,7 +5,7 @@ import { URLSearchParams } from 'url';
 
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
-import { AuthMechanism } from './cmap/auth/providers';
+import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
 import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
 import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from './error';
@@ -125,7 +125,12 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
         const replicaSet = txtRecordOptions.get('replicaSet') ?? undefined;
         const loadBalanced = txtRecordOptions.get('loadBalanced') ?? undefined;
 
-        if (!options.userSpecifiedAuthSource && source) {
+        if (
+          !options.userSpecifiedAuthSource &&
+          source &&
+          options.credentials &&
+          !AUTH_MECHS_AUTH_SRC_EXTERNAL.has(options.credentials.mechanism)
+        ) {
           options.credentials = MongoCredentials.merge(options.credentials, { source });
         }
 
@@ -570,9 +575,7 @@ export const OPTIONS = {
       let source = options.credentials?.source;
       if (
         mechanism === AuthMechanism.MONGODB_PLAIN ||
-        mechanism === AuthMechanism.MONGODB_GSSAPI ||
-        mechanism === AuthMechanism.MONGODB_AWS ||
-        mechanism === AuthMechanism.MONGODB_X509
+        AUTH_MECHS_AUTH_SRC_EXTERNAL.has(mechanism)
       ) {
         // some mechanisms have '$external' as the Auth Source
         source = '$external';
