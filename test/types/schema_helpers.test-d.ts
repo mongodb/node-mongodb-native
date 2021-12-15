@@ -10,13 +10,15 @@ import type {
   WithoutId
 } from '../../src/mongo_types';
 
-declare function optionalReturnValue(): number | ObjectId;
 // InferIdType
 expectType<InferIdType<Document>>(new ObjectId());
 expectType<InferIdType<{ _id: number }>>(1 + 1);
 expectType<InferIdType<{ a: number } | { b: string }>>(new ObjectId());
-expectType<InferIdType<{ _id?: number | ObjectId }>>(optionalReturnValue());
+expectType<InferIdType<{ _id?: number }>>(1 + 1);
+expectType<InferIdType<{ _id?: unknown }>>(new ObjectId());
 expectError<InferIdType<{ _id: Record<string, any> }>>({});
+
+// union types could have an id of either type
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(new ObjectId());
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(1 + 1);
 
