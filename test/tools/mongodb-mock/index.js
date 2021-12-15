@@ -5,7 +5,7 @@ const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 let mockServers = [];
 
 // Default message fields
-const DEFAULT_LEGACY_HELLO = {
+const DEFAULT_HELLO = {
   __nodejs_mock_server__: true,
   [LEGACY_HELLO_COMMAND]: true,
   maxBsonObjectSize: 16777216,
@@ -17,7 +17,7 @@ const DEFAULT_LEGACY_HELLO = {
   ok: 1
 };
 
-const DEFAULT_LEGACY_HELLO_36 = Object.assign({}, DEFAULT_LEGACY_HELLO, {
+const DEFAULT_HELLO_36 = Object.assign({}, DEFAULT_HELLO, {
   maxWireVersion: 6,
   logicalSessionTimeoutMinutes: 10
 });
@@ -92,7 +92,5 @@ function cleanup(spy, callback) {
 module.exports = {
   createServer,
   cleanup,
-  DEFAULT_LEGACY_HELLO,
-  DEFAULT_LEGACY_HELLO_36,
-  HELLO: DEFAULT_LEGACY_HELLO_36
+  HELLO: DEFAULT_HELLO_36
 };
