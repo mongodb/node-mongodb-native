@@ -41,8 +41,6 @@ export interface OpQueryOptions extends CommandOptions {
   ignoreUndefined?: boolean;
   maxBsonSize?: number;
   checkKeys?: boolean;
-  /**@deprecated Use secondaryOk instead */
-  slaveOk?: boolean;
   secondaryOk?: boolean;
 
   requestId?: number;
@@ -69,8 +67,6 @@ export class Query {
   checkKeys: boolean;
   batchSize: number;
   tailable: boolean;
-  /**@deprecated Use secondaryOk instead */
-  slaveOk: boolean;
   secondaryOk: boolean;
   oplogReplay: boolean;
   noCursorTimeout: boolean;
@@ -117,7 +113,6 @@ export class Query {
     // Flags
     this.tailable = false;
     this.secondaryOk = typeof options.secondaryOk === 'boolean' ? options.secondaryOk : false;
-    this.slaveOk = this.secondaryOk;
     this.oplogReplay = false;
     this.noCursorTimeout = false;
     this.awaitData = false;

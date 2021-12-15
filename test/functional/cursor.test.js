@@ -3752,7 +3752,7 @@ describe('Cursor', function () {
           db.s.topology,
           db.s.namespace,
           {},
-          { limit: 0, skip: 0, slaveOk: false, readPreference: 42 }
+          { limit: 0, skip: 0, secondaryOk: false, readPreference: 42 }
         );
 
         cursor.hasNext(err => {
