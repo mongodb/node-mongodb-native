@@ -11,7 +11,7 @@ export const AuthMechanism = Object.freeze({
 } as const);
 
 /** @public */
-export const $EXTERNAL_AUTH_SOURCE_MECHANISMS = new Set<AuthMechanism>([
+export const AUTH_MECHS_AUTH_SRC_EXTERNAL = new Set<AuthMechanism>([
   AuthMechanism.MONGODB_GSSAPI,
   AuthMechanism.MONGODB_AWS,
   AuthMechanism.MONGODB_X509

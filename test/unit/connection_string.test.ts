@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import { promisify } from 'util';
 
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
-import { $EXTERNAL_AUTH_SOURCE_MECHANISMS, AuthMechanism } from '../../src/cmap/auth/providers';
+import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
 import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
 import { MongoDriverError, MongoInvalidArgumentError, MongoParseError } from '../../src/error';
 import { MongoOptions } from '../../src/mongo_client';
@@ -356,7 +356,7 @@ describe('Connection String', function () {
       });
     }
 
-    for (const mechanism of $EXTERNAL_AUTH_SOURCE_MECHANISMS) {
+    for (const mechanism of AUTH_MECHS_AUTH_SRC_EXTERNAL) {
       it(`should set authSource to $external for ${mechanism} external mechanism`, async function () {
         makeStub('authSource=thisShouldNotBeAuthSource');
         const credentials = new MongoCredentials({
@@ -376,7 +376,8 @@ describe('Connection String', function () {
         } as MongoOptions;
 
         await resolveSRVRecordAsync(options);
-        expect(options.credentials === credentials).to.be.true;
+        // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
+        expect(options).property('credentials').to.equal(credentials);
         expect(options).to.have.nested.property('credentials.source', '$external');
       });
     }
@@ -401,7 +402,8 @@ describe('Connection String', function () {
       } as MongoOptions;
 
       await resolveSRVRecordAsync(options);
-      expect(options.credentials !== credentials).to.be.true;
+      // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
+      expect(options).property('credentials').to.not.equal(credentials);
       expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
     });
 
@@ -424,7 +426,8 @@ describe('Connection String', function () {
       } as MongoOptions;
 
       await resolveSRVRecordAsync(options as any);
-      expect(options.credentials === credentials).to.be.true;
+      // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
+      expect(options).property('credentials').to.equal(credentials);
       expect(options).to.have.nested.property('credentials.source', 'admin');
     });
   });
