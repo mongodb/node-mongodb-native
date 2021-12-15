@@ -13,6 +13,7 @@ if [ -z ${SERVERLESS_ATLAS_PASSWORD+omitted} ]; then echo "SERVERLESS_ATLAS_PASS
 
 npx mocha --file test/tools/runner/index.js \
   test/integration/crud/crud.spec.test.js \
+  test/integration/crud/crud.prose.test.js \
   test/integration/retryable-reads/retryable_reads.spec.test.js \
   test/integration/retryable-writes/retryable_writes.spec.test.js \
   test/functional/sessions.test.js \
