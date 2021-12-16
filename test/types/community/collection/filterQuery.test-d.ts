@@ -36,6 +36,7 @@ interface PetModel {
   playTimePercent: Decimal128; // bson Decimal128 type
   readonly friends?: ReadonlyArray<HumanModel>; // readonly array of objects
   playmates?: HumanModel[]; // writable array of objects
+  laps?: Map<string, number>; // map field
   // Object with multiple nested levels
   meta?: {
     updatedAt?: Date;
@@ -122,6 +123,7 @@ collectionT.find({ 'friends.0.name': 'John' });
 collectionT.find({ 'playmates.0.name': 'John' });
 // supports arrays with primitive types
 collectionT.find({ 'treats.0': 'bone' });
+collectionT.find({ 'laps.foo': 123 });
 
 // Handle special BSON types
 collectionT.find({ numOfPats: Long.fromBigInt(2n) });
@@ -135,11 +137,12 @@ collectionT.find({ 'friends.999999999999999999999999999999999999.name': 'John' }
 expectNotType<Filter<PetModel>>({ 'meta.updatedAt': 123 });
 expectNotType<Filter<PetModel>>({ 'meta.updatedAt': true });
 expectNotType<Filter<PetModel>>({ 'meta.updatedAt': 'now' });
-expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': '123' });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': 'string' });
 expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': true });
 expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': new Date() });
 expectNotType<Filter<PetModel>>({ 'friends.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
+expectNotType<Filter<PetModel>>({ 'laps.foo': 'string' });
 expectNotType<Filter<PetModel>>({ 'treats.0': 123 });
 expectNotType<Filter<PetModel>>({ 'numOfPats.__isLong__': true });
 expectNotType<Filter<PetModel>>({ 'playTimePercent.bytes.BYTES_PER_ELEMENT': 1 });

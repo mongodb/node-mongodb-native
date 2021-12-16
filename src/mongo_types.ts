@@ -454,7 +454,9 @@ export type PropertyType<Type, Property extends string> = string extends Propert
       ? PropertyType<ArrayType, Rest>
       : unknown
     : Key extends keyof Type
-    ? PropertyType<Type[Key], Rest>
+    ? Type[Key] extends Map<string, infer MapType>
+      ? MapType
+      : PropertyType<Type[Key], Rest>
     : unknown
   : unknown;
 
@@ -476,6 +478,8 @@ export type NestedPaths<Type> = Type extends
   ? []
   : Type extends ReadonlyArray<infer ArrayType>
   ? [number, ...NestedPaths<ArrayType>]
+  : Type extends Map<string, any>
+  ? [string]
   : // eslint-disable-next-line @typescript-eslint/ban-types
   Type extends object
   ? {
