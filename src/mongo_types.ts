@@ -70,7 +70,7 @@ export type Filter<TSchema> = {
 } & RootFilterOperators<WithId<TSchema>>;
 
 /** @public */
-export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>
+export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
 
 /**
  * It is possible to search using alternative types in mongodb e.g.
@@ -104,8 +104,8 @@ export interface RootFilterOperators<TSchema> extends Document {
  * A type that extends Document but forbids anything that "looks like" an object id.
  */
 export type NonObjectIdLikeDocument = {
-  [key in keyof ObjectIdLike]?: never
-} & Document
+  [key in keyof ObjectIdLike]?: never;
+} & Document;
 
 /** @public */
 export interface FilterOperators<TValue> extends NonObjectIdLikeDocument {
