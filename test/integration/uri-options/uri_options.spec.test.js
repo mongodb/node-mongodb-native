@@ -4,9 +4,9 @@ const { expect } = require('chai');
 const { promisify } = require('util');
 require('chai').use(require('chai-subset'));
 
-const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
-const { MongoParseError } = require('../../src/error');
-const { loadSpecTests } = require('../spec');
+const { parseOptions, resolveSRVRecord } = require('../../../src/connection_string');
+const { MongoParseError } = require('../../../src/error');
+const { loadSpecTests } = require('../../spec');
 
 describe('URI Options (spec)', function () {
   const uriSpecs = loadSpecTests('uri-options');
