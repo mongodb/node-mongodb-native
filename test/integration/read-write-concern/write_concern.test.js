@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { withMonitoredClient } = require('./shared');
+const { withMonitoredClient } = require('../shared');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 // WriteConcernError test requires
