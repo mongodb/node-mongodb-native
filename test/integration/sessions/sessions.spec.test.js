@@ -7,10 +7,6 @@ const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
 const { loadSpecTests } = require('../../spec');
 
 describe('Sessions', function () {
-  // before(function () {
-  //   return setupDatabase(this.configuration);
-  // });
-
   describe('legacy spec tests', function () {
     class SessionSpecTestContext extends TestRunnerContext {
       assertSessionNotDirty(options) {
