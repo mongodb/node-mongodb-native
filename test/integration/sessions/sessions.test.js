@@ -27,7 +27,7 @@ const test = {
   }
 };
 
-describe('Sessions', function () {
+describe('Sessions Spec', function () {
   describe('Sessions - functional - old format', function () {
     before(function () {
       return setupDatabase(this.configuration);

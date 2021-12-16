@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const { expect } = require('chai');
 const { Topology } = require('../../../src/sdam/topology');
 const { ClientSession } = require('../../../src/sessions');
