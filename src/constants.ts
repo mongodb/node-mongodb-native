@@ -114,3 +114,9 @@ export const MONGO_CLIENT_EVENTS = Object.freeze([
   ...TOPOLOGY_EVENTS,
   ...HEARTBEAT_EVENTS
 ] as const);
+
+/**
+ * @internal
+ * The legacy hello command that was deprecated in MongoDB 5.0.
+ */
+export const LEGACY_HELLO_COMMAND = 'ismaster';

@@ -7,6 +7,7 @@ const sinonChai = require('sinon-chai');
 const mock = require('../tools/mongodb-mock/index');
 
 chai.use(sinonChai);
+const { isHello } = require('../../src/utils');
 
 describe('Collection', function () {
   let configuration;
@@ -638,7 +639,7 @@ describe('Collection', function () {
           }
         }
 
-        if (doc.ismaster || doc.hello) {
+        if (isHello(doc)) {
           request.reply(Object.assign({}, mock.HELLO));
         } else if (doc.endSessions) {
           request.reply({ ok: 1 });

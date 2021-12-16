@@ -9,6 +9,7 @@ const { isRecord } = require('../../../src/utils');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 const { shouldRunServerlessTest } = require('../../tools/utils');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -287,7 +288,7 @@ function parseSessionOptions(options) {
   return result;
 }
 
-const IGNORED_COMMANDS = new Set(['ismaster', 'configureFailPoint', 'endSessions']);
+const IGNORED_COMMANDS = new Set([LEGACY_HELLO_COMMAND, 'configureFailPoint', 'endSessions']);
 const SDAM_EVENTS = new Set([
   'serverOpening',
   'serverClosed',

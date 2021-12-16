@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const mock = require('../../tools/mongodb-mock/index');
 const { ReplSetFixture } = require('../../tools/common');
+const { isHello } = require('../../../src/utils');
 
 const test = {};
 describe('Sessions - client/unit', function () {
@@ -19,7 +20,7 @@ describe('Sessions - client/unit', function () {
       test() {
         test.server.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster || doc.hello) {
+          if (isHello(doc)) {
             request.reply(Object.assign({}, mock.HELLO));
           } else if (doc.endSessions) {
             request.reply({ ok: 1 });
@@ -46,10 +47,10 @@ describe('Sessions - client/unit', function () {
           .then(() => {
             replicaSetMock.firstSecondaryServer.setMessageHandler(request => {
               var doc = request.document;
-              if (doc.ismaster || doc.hello) {
-                const ismaster = replicaSetMock.firstSecondaryStates[0];
-                ismaster.logicalSessionTimeoutMinutes = 20;
-                request.reply(ismaster);
+              if (isHello(doc)) {
+                const hello = replicaSetMock.firstSecondaryStates[0];
+                hello.logicalSessionTimeoutMinutes = 20;
+                request.reply(hello);
               } else if (doc.endSessions) {
                 request.reply({ ok: 1 });
               }
@@ -57,10 +58,10 @@ describe('Sessions - client/unit', function () {
 
             replicaSetMock.secondSecondaryServer.setMessageHandler(request => {
               var doc = request.document;
-              if (doc.ismaster || doc.hello) {
-                const ismaster = replicaSetMock.secondSecondaryStates[0];
-                ismaster.logicalSessionTimeoutMinutes = 10;
-                request.reply(ismaster);
+              if (isHello(doc)) {
+                const hello = replicaSetMock.secondSecondaryStates[0];
+                hello.logicalSessionTimeoutMinutes = 10;
+                request.reply(hello);
               } else if (doc.endSessions) {
                 request.reply({ ok: 1 });
               }
@@ -68,10 +69,10 @@ describe('Sessions - client/unit', function () {
 
             replicaSetMock.arbiterServer.setMessageHandler(request => {
               var doc = request.document;
-              if (doc.ismaster || doc.hello) {
-                const ismaster = replicaSetMock.arbiterStates[0];
-                ismaster.logicalSessionTimeoutMinutes = 30;
-                request.reply(ismaster);
+              if (isHello(doc)) {
+                const hello = replicaSetMock.arbiterStates[0];
+                hello.logicalSessionTimeoutMinutes = 30;
+                request.reply(hello);
               } else if (doc.endSessions) {
                 request.reply({ ok: 1 });
               }
@@ -79,10 +80,10 @@ describe('Sessions - client/unit', function () {
 
             replicaSetMock.primaryServer.setMessageHandler(request => {
               var doc = request.document;
-              if (doc.ismaster || doc.hello) {
-                const ismaster = replicaSetMock.primaryStates[0];
-                ismaster.logicalSessionTimeoutMinutes = null;
-                request.reply(ismaster);
+              if (isHello(doc)) {
+                const hello = replicaSetMock.primaryStates[0];
+                hello.logicalSessionTimeoutMinutes = null;
+                request.reply(hello);
               } else if (doc.endSessions) {
                 request.reply({ ok: 1 });
               }
@@ -114,7 +115,7 @@ describe('Sessions - client/unit', function () {
       test: function (done) {
         test.server.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster || doc.hello) {
+          if (isHello(doc)) {
             request.reply(
               Object.assign({}, mock.HELLO, {
                 logicalSessionTimeoutMinutes: 10

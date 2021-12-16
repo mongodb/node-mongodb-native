@@ -1,8 +1,11 @@
 'use strict';
+
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+
 const setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
 
-const ignoredCommands = ['ismaster', 'endSessions'];
+const ignoredCommands = [LEGACY_HELLO_COMMAND, 'endSessions'];
 const test = { commands: { started: [], succeeded: [] } };
 describe('Causal Consistency', function () {
   before(function () {

@@ -3,8 +3,9 @@
 const { expect } = require('chai');
 const { MongoServerError } = require('../../../src');
 const { setupDatabase, withMonitoredClient } = require('../shared');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
-const ignoredCommands = ['ismaster'];
+const ignoredCommands = [LEGACY_HELLO_COMMAND];
 const test = {
   commands: { started: [], succeeded: [] },
   setup: function (config) {

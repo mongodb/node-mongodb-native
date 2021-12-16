@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const mock = require('../tools/mongodb-mock/index');
 const { MongoClient } = require('../../src');
+const { isHello } = require('../../src/utils');
 
 describe('Client (unit)', function () {
   let server, client;
@@ -19,7 +20,7 @@ describe('Client (unit)', function () {
     let handshake;
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         handshake = doc;
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {

@@ -8,7 +8,8 @@ const { connect } = require('../../../src/cmap/connect');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
 const { genClusterTime } = require('../../tools/common');
 const { MongoNetworkError } = require('../../../src/error');
-const { HostAddress } = require('../../../src/utils');
+const { HostAddress, isHello } = require('../../../src/utils');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 describe('Connect Tests', function () {
   const test = {};
@@ -35,8 +36,8 @@ describe('Connect Tests', function () {
       const doc = request.document;
       const $clusterTime = genClusterTime(Date.now());
 
-      if (doc.ismaster || doc.hello) {
-        whatHappened.ismaster = true;
+      if (isHello(doc)) {
+        whatHappened[LEGACY_HELLO_COMMAND] = true;
         request.reply(
           Object.assign({}, mock.HELLO, {
             $clusterTime
@@ -50,7 +51,7 @@ describe('Connect Tests', function () {
 
     connect(test.connectOptions, err => {
       try {
-        expect(whatHappened).to.have.property('ismaster', true);
+        expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
         expect(whatHappened).to.have.property('saslStart', true);
       } catch (_err) {
         err = _err;
@@ -65,8 +66,8 @@ describe('Connect Tests', function () {
     test.server.setMessageHandler(request => {
       const doc = request.document;
       const $clusterTime = genClusterTime(Date.now());
-      if (doc.ismaster || doc.hello) {
-        whatHappened.ismaster = true;
+      if (isHello(doc)) {
+        whatHappened[LEGACY_HELLO_COMMAND] = true;
         request.reply(
           Object.assign({}, mock.HELLO, {
             $clusterTime,
@@ -81,7 +82,7 @@ describe('Connect Tests', function () {
 
     connect(test.connectOptions, err => {
       try {
-        expect(whatHappened).to.have.property('ismaster', true);
+        expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
         expect(whatHappened).to.not.have.property('saslStart');
       } catch (_err) {
         err = _err;

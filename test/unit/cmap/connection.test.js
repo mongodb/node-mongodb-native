@@ -5,8 +5,9 @@ const { connect } = require('../../../src/cmap/connect');
 const { Connection, hasSessionSupport } = require('../../../src/cmap/connection');
 const { expect } = require('chai');
 const { Socket } = require('net');
-const { ns } = require('../../../src/utils');
+const { ns, isHello } = require('../../../src/utils');
 const { getSymbolFrom } = require('../../tools/utils');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 describe('Connection - unit/cmap', function () {
   let server;
@@ -16,7 +17,7 @@ describe('Connection - unit/cmap', function () {
   it('should support fire-and-forget messages', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(mock.HELLO);
       }
 
@@ -39,7 +40,7 @@ describe('Connection - unit/cmap', function () {
   it('should destroy streams which time out', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(mock.HELLO);
       }
 
@@ -64,7 +65,7 @@ describe('Connection - unit/cmap', function () {
   it('should throw a network error with kBeforeHandshake set to false on timeout after hand shake', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(mock.HELLO);
       }
       // respond to no other requests to trigger timeout event
@@ -77,7 +78,7 @@ describe('Connection - unit/cmap', function () {
     connect(options, (err, conn) => {
       expect(err).to.be.a('undefined');
       expect(conn).to.be.instanceOf(Connection);
-      expect(conn).to.have.property('ismaster').that.is.a('object');
+      expect(conn).to.have.property(LEGACY_HELLO_COMMAND).that.is.a('object');
 
       conn.command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 }, err => {
         const beforeHandshakeSymbol = getSymbolFrom(err, 'beforeHandshake', false);

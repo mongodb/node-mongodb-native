@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const mock = require('../tools/mongodb-mock/index');
 const { MongoClient } = require('../../src');
+const { isHello } = require('../../src/utils');
 
 describe('Bulk Writes', function () {
   const test = {};
@@ -33,7 +34,7 @@ describe('Bulk Writes', function () {
 
     test.server.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(Object.assign({}, mock.HELLO));
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });

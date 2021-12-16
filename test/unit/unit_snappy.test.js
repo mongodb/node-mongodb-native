@@ -6,6 +6,7 @@ const mock = require('../tools/mongodb-mock/index');
 const snappy = optionalRequire('snappy');
 const snappyVersion = optionalRequire('snappy/package.json').version;
 const { MongoClient } = require('../../src');
+const { isHello } = require('../../src/utils');
 
 function optionalRequire(mod) {
   try {
@@ -38,7 +39,7 @@ describe('Compression', function () {
 
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (isHello(doc)) {
           return request.reply({ ...mock.HELLO, compression: ['snappy'] });
         }
         if (doc.insert === 'snappy') {

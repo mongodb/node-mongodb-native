@@ -5,6 +5,7 @@ const { connect } = require('../../../src/cmap/connect');
 const { expect } = require('chai');
 const { setupDatabase } = require('../../functional/shared');
 const { ns, HostAddress } = require('../../../src/utils');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 describe('Connection - functional/cmap', function () {
   before(function () {
@@ -23,10 +24,10 @@ describe('Connection - functional/cmap', function () {
         expect(err).to.not.exist;
         this.defer(_done => conn.destroy(_done));
 
-        conn.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, (err, ismaster) => {
+        conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, (err, hello) => {
           expect(err).to.not.exist;
-          expect(ismaster).to.exist;
-          expect(ismaster.ok).to.equal(1);
+          expect(hello).to.exist;
+          expect(hello.ok).to.equal(1);
           done();
         });
       });
@@ -50,10 +51,10 @@ describe('Connection - functional/cmap', function () {
         conn.on('commandSucceeded', event => events.push(event));
         conn.on('commandFailed', event => events.push(event));
 
-        conn.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, (err, ismaster) => {
+        conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, (err, hello) => {
           expect(err).to.not.exist;
-          expect(ismaster).to.exist;
-          expect(ismaster.ok).to.equal(1);
+          expect(hello).to.exist;
+          expect(hello.ok).to.equal(1);
           expect(events).to.have.length(2);
           done();
         });

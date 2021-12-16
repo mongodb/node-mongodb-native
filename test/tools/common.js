@@ -2,6 +2,8 @@
 
 const mock = require('./mongodb-mock/index');
 const BSON = require('../../src/bson');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { isHello } = require('../../src/utils');
 
 class ReplSetFixture {
   constructor() {
@@ -16,7 +18,7 @@ class ReplSetFixture {
 
   setup(options) {
     options = options || {};
-    const ismaster = options.ismaster ? options.ismaster : mock.HELLO;
+    const hello = options[LEGACY_HELLO_COMMAND] ? options[LEGACY_HELLO_COMMAND] : mock.HELLO;
 
     return Promise.all([
       mock.createServer(),
@@ -30,7 +32,7 @@ class ReplSetFixture {
       this.secondSecondaryServer = servers[2];
       this.arbiterServer = servers[3];
 
-      this.defaultFields = Object.assign({}, ismaster, {
+      this.defaultFields = Object.assign({}, hello, {
         __nodejs_mock_server__: true,
         setName: 'rs',
         setVersion: 1,
@@ -47,7 +49,7 @@ class ReplSetFixture {
   defineReplSetStates() {
     this.primaryStates = [
       Object.assign({}, this.defaultFields, {
-        ismaster: true,
+        [LEGACY_HELLO_COMMAND]: true,
         secondary: false,
         me: this.primaryServer.uri(),
         primary: this.primaryServer.uri(),
@@ -57,7 +59,7 @@ class ReplSetFixture {
 
     this.firstSecondaryStates = [
       Object.assign({}, this.defaultFields, {
-        ismaster: false,
+        [LEGACY_HELLO_COMMAND]: false,
         secondary: true,
         me: this.firstSecondaryServer.uri(),
         primary: this.primaryServer.uri(),
@@ -67,7 +69,7 @@ class ReplSetFixture {
 
     this.secondSecondaryStates = [
       Object.assign({}, this.defaultFields, {
-        ismaster: false,
+        [LEGACY_HELLO_COMMAND]: false,
         secondary: true,
         me: this.secondSecondaryServer.uri(),
         primary: this.primaryServer.uri(),
@@ -77,7 +79,7 @@ class ReplSetFixture {
 
     this.arbiterStates = [
       Object.assign({}, this.defaultFields, {
-        ismaster: false,
+        [LEGACY_HELLO_COMMAND]: false,
         secondary: false,
         arbiterOnly: true,
         me: this.arbiterServer.uri(),
@@ -89,21 +91,21 @@ class ReplSetFixture {
   configureMessageHandlers() {
     this.primaryServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(this.primaryStates[0]);
       }
     });
 
     this.firstSecondaryServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(this.firstSecondaryStates[0]);
       }
     });
 
     this.arbiterServer.setMessageHandler(request => {
       var doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(this.arbiterStates[0]);
       }
     });

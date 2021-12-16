@@ -7,6 +7,7 @@ const TestRunnerContext = require('./spec-runner').TestRunnerContext;
 const generateTopologyTests = require('./spec-runner').generateTopologyTests;
 const loadSpecTests = require('../spec').loadSpecTests;
 const { withMonitoredClient } = require('./shared');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 // WriteConcernError test requires
 const { once } = require('events');
@@ -99,7 +100,7 @@ describe('Write Concern', function () {
 
   it('should pipe writeConcern from client down to API call', function () {
     server.setMessageHandler(request => {
-      if (request.document && request.document.ismaster) {
+      if (request.document && request.document[LEGACY_HELLO_COMMAND]) {
         return request.reply(mock.HELLO);
       }
       expect(request.document.writeConcern).to.exist;

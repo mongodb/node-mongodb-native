@@ -11,7 +11,7 @@ const EventEmitter = require('events').EventEmitter;
 const chai = require('chai');
 const sinon = require('sinon');
 const mock = require('../../tools/mongodb-mock/index');
-const { HostAddress } = require('../../../src/utils');
+const { HostAddress, isHello } = require('../../../src/utils');
 const { MongoDriverError } = require('../../../src/error');
 
 const expect = chai.expect;
@@ -328,7 +328,7 @@ describe('Mongos SRV Polling', function () {
           server.setMessageHandler(request => {
             const doc = request.document;
 
-            if (doc.ismaster || doc.hello) {
+            if (isHello(doc)) {
               request.reply(Object.assign({}, MONGOS_HELLO));
             }
           });

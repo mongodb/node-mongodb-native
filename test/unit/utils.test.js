@@ -4,11 +4,13 @@ const {
   executeLegacyOperation,
   makeInterruptibleAsyncInterval,
   BufferPool,
-  shuffle
+  shuffle,
+  isHello
 } = require('../../src/utils');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { MongoRuntimeError } = require('../../src/error');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('driver utils', function () {
   context('eachAsync()', function () {
@@ -540,6 +542,28 @@ describe('driver utils', function () {
 
     it('should throw if limit is larger than input size', () => {
       expect(() => shuffle(['a', 'b'], 3)).to.throw(MongoRuntimeError);
+    });
+  });
+
+  context('isHello()', function () {
+    it('should return true if document has legacy hello property set to true', function () {
+      const doc = { [LEGACY_HELLO_COMMAND]: true };
+      expect(isHello(doc)).to.be.true;
+    });
+
+    it('should return true if document has hello property set to true', function () {
+      const doc = { hello: true };
+      expect(isHello(doc)).to.be.true;
+    });
+
+    it('should return false if document does not have legacy hello property or hello property', function () {
+      const doc = { a: 'b' };
+      expect(isHello(doc)).to.be.false;
+    });
+
+    it('should return false if the legacy hello property and hello property are set to false', function () {
+      const doc = { [LEGACY_HELLO_COMMAND]: false, hello: false };
+      expect(isHello(doc)).to.be.false;
     });
   });
 });

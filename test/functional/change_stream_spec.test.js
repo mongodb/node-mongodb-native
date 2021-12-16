@@ -9,6 +9,7 @@ const { setupDatabase } = require('./shared');
 const { delay } = require('./shared');
 
 const expect = chai.expect;
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('Change Streams Spec - Unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')));
@@ -66,7 +67,7 @@ describe('Change Stream Spec - v1', function () {
             ctx.database = ctx.client.db(sDB);
             ctx.collection = ctx.database.collection(sColl);
             ctx.client.on('commandStarted', e => {
-              if (e.commandName !== 'ismaster') _events.push(e);
+              if (e.commandName !== LEGACY_HELLO_COMMAND) _events.push(e);
             });
           });
       });

@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var f = require('util').format;
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
@@ -47,7 +48,7 @@ describe('Promises (Db)', function () {
     }
   });
 
-  it('Should correctly execute ismaster using Promise', {
+  it('Should correctly execute legacy hello command using Promise', {
     metadata: {
       requires: {
         topology: ['single']
@@ -64,10 +65,10 @@ describe('Promises (Db)', function () {
 
       const client = configuration.newClient(url);
       client.connect().then(function (client) {
-        // Execute ismaster
+        // Execute legacy hello command
         client
           .db(configuration.db)
-          .command({ ismaster: true })
+          .command({ [LEGACY_HELLO_COMMAND]: true })
           .then(function (result) {
             test.ok(result !== null);
 
@@ -94,7 +95,6 @@ describe('Promises (Db)', function () {
 
       const client = configuration.newClient(url);
       client.connect().then(function (client) {
-        // Execute ismaster
         client
           .db(configuration.db)
           .command({ nosuchcommand: true })
