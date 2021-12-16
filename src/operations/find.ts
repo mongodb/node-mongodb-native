@@ -36,7 +36,7 @@ export interface FindOptions<TSchema extends Document = Document> extends Comman
   timeout?: boolean;
   /** Specify if the cursor is tailable. */
   tailable?: boolean;
-  /** Specify if the cursor is a a tailable-await cursor. Requires `tailable` to be true */
+  /** Specify if the cursor is a tailable-await cursor. Requires `tailable` to be true */
   awaitData?: boolean;
   /** Set the batchSize for the getMoreCommand when iterating over the query results. */
   batchSize?: number;
