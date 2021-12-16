@@ -83,7 +83,10 @@ describe('Change Stream Spec - v1', function () {
 
       suite.tests.forEach(test => {
         const shouldSkip = test.skip || TESTS_TO_SKIP.has(test.description);
-        const itFn = shouldSkip ? it.skip : test.only ? it.only : it;
+        // There's no evidence of test.only being defined in the spec files
+        // But let's avoid removing it now to just be sure we aren't changing anything
+        // These tests will eventually be replaced by unified format versions.
+        const itFn = shouldSkip ? it.skip : test.only ? Reflect.get(it, 'only') : it;
         const metadata = generateMetadata(test);
         const testFn = generateTestFn(test);
 

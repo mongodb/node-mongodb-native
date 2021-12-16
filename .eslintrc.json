@@ -23,6 +23,21 @@
     "es6": true
   },
   "rules": {
+    "no-restricted-properties": [
+      "error",
+      {
+        "object": "describe",
+        "property": "only"
+      },
+      {
+        "object": "it",
+        "property": "only"
+      },
+      {
+        "object": "context",
+        "property": "only"
+      }
+    ],
     "prettier/prettier": "error",
     "tsdoc/syntax": "warn",
     "no-console": "error",
