@@ -238,14 +238,13 @@ expectAssignable<Filter<PetModel>>({ 'bestFriend.name': 23 }); // using dot nota
 expectNotType<Filter<PetModel>>({ bestFriend: { name: 23 } });
 
 // ObjectId are not allowed to be used as a query predicate (issue described here: NODE-3758)
+// this only applies to schemas where the _id is not of type ObjectId.
 declare const nonObjectIdCollection: Collection<{ _id: number; otherField: string }>;
-
 expectError(
   nonObjectIdCollection.find({
     _id: new ObjectId()
   })
 );
-
 expectError(
   nonObjectIdCollection.find({
     otherField: new ObjectId()
@@ -258,8 +257,26 @@ nonObjectIdCollection.find({
     hello: 'world'
   }
 });
-
 nonObjectIdCollection.find({
+  otherField: {
+    hello: 'world'
+  }
+});
+
+declare const nonSpecifiedCollection: Collection;
+nonSpecifiedCollection.find({
+  _id: new ObjectId()
+});
+nonSpecifiedCollection.find({
+  otherField: new ObjectId()
+});
+
+nonSpecifiedCollection.find({
+  _id: {
+    hello: 'world'
+  }
+});
+nonSpecifiedCollection.find({
   otherField: {
     hello: 'world'
   }
