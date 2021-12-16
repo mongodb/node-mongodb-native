@@ -3,7 +3,7 @@
 const { expect } = require('chai');
 const { MongoServerError } = require('../../../src');
 const { setupDatabase, withMonitoredClient } = require('../shared');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND];
 const test = {
