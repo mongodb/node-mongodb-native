@@ -1,5 +1,7 @@
 import { expect } from 'chai';
+
 import { parseOptions } from '../../src/connection_string';
+import { loadSpecTests } from '../spec';
 
 // NOTE: These are cases we could never check for unless we write our own
 //       url parser. The node parser simply won't let these through, so we

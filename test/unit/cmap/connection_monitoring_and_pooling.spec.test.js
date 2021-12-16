@@ -6,6 +6,7 @@ const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const { EventEmitter } = require('events');
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
+const { isHello } = require('../../../src/utils');
 
 const ALL_POOL_EVENTS = new Set([
   'connectionPoolCreated',
@@ -184,7 +185,7 @@ describe('Connection Monitoring and Pooling', function () {
       // and establish valid connections
       server.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (isHello(doc)) {
           request.reply(mock.HELLO);
         }
       });
