@@ -11,7 +11,6 @@ const { Writable } = require('stream');
 const { ReadPreference } = require('../../src/read_preference');
 const { ServerType } = require('../../src/sdam/common');
 const { formatSort } = require('../../src/sort');
-const { FindCursor } = require('../../src/cursor/find_cursor');
 
 describe('Cursor', function () {
   before(function () {
