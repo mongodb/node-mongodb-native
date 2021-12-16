@@ -1,7 +1,7 @@
-import { BSONRegExp, Decimal128, ObjectId } from 'bson';
-import { expectAssignable, expectNotType, expectType } from 'tsd';
+import { BSONRegExp, Decimal128, ObjectID, ObjectId } from 'bson';
+import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
-import { Filter, MongoClient, WithId } from '../../../../src';
+import { Collection, Filter, MongoClient, WithId } from '../../../../src';
 
 /**
  * test the Filter type using collection.find<T>() method
@@ -236,3 +236,27 @@ expectNotType<Filter<PetModel>>({ type: { $size: 2 } });
 // dot key case that shows it is assignable even when the referenced key is the wrong type
 expectAssignable<Filter<PetModel>>({ 'bestFriend.name': 23 }); // using dot notation permits any type for the key
 expectNotType<Filter<PetModel>>({ bestFriend: { name: 23 } });
+
+// ObjectId are not allowed to be used as a query predicate (issue described here: NODE-3758)
+declare const nonObjectIDCollection: Collection<{ _id: number, otherField: string }>
+
+expectError(nonObjectIDCollection.find({
+  _id: new ObjectID()
+}))
+
+expectError(nonObjectIDCollection.find({
+  otherField: new ObjectID()
+}))
+
+// we only forbid objects that "look like" object ids, so other random objects are permitted
+nonObjectIDCollection.find({
+  _id: {
+    hello: "world"
+  }
+})
+
+nonObjectIDCollection.find({
+  otherField: {
+    hello: "world"
+  }
+})
