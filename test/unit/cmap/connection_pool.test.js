@@ -1,7 +1,6 @@
 'use strict';
 
 const util = require('util');
-const { loadSpecTests } = require('../../spec');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const { WaitQueueTimeoutError } = require('../../../src/cmap/errors');
 const { EventEmitter } = require('events');
@@ -441,68 +440,6 @@ describe('Connection Pool', function () {
           poolEvents.length = 0;
           poolEventsEventEmitter.removeAllListeners();
         });
-    });
-
-    loadSpecTests('connection-monitoring-and-pooling').forEach(test => {
-      it(test.description, function () {
-        const operations = test.operations;
-        const expectedEvents = test.events || [];
-        const ignoreEvents = test.ignore || [];
-        const expectedError = test.error;
-        const poolOptions = test.poolOptions || {};
-
-        let actualError;
-
-        const MAIN_THREAD_KEY = Symbol('Main Thread');
-        const mainThread = new Thread();
-        threads.set(MAIN_THREAD_KEY, mainThread);
-        mainThread.start();
-
-        createPool(poolOptions);
-
-        let basePromise = Promise.resolve();
-
-        for (let idx in operations) {
-          const op = operations[idx];
-
-          const threadKey = op.thread || MAIN_THREAD_KEY;
-          const thread = getThread(threadKey);
-
-          basePromise = basePromise.then(() => {
-            if (!thread) {
-              throw new Error(`Invalid thread ${threadKey}`);
-            }
-
-            return Promise.resolve()
-              .then(() => thread.run(op))
-              .then(() => new Promise(r => setTimeout(r)));
-          });
-        }
-
-        return basePromise
-          .then(() => mainThread.finish())
-          .catch(e => (actualError = e))
-          .then(() => {
-            const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(eventType(ev)) < 0);
-
-            if (expectedError) {
-              expect(actualError).to.exist;
-              expect(actualError).property('message').to.equal(expectedError.message);
-            } else if (actualError) {
-              throw actualError;
-            }
-
-            expectedEvents.forEach((expected, index) => {
-              const actual = actualEvents[index];
-              if (expected.type) {
-                expect(actual.constructor.name).to.equal(`${expected.type}Event`);
-                delete expected.type;
-              }
-
-              expect(actual).to.matchMongoSpec(expected);
-            });
-          });
-      });
     });
   });
 });
