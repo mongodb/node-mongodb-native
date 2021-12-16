@@ -3732,38 +3732,6 @@ describe('Cursor', function () {
     }
   });
 
-  // NOTE: This is skipped because I don't think its correct or adds value. The expected error
-  //       is not an error with hasNext (from server), but rather a local TypeError which should
-  //       be caught anyway. The only solution here would be to wrap the entire top level call
-  //       in a try/catch which is not going to happen.
-  it.skip('Should propagate hasNext errors when using a callback', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-    test: function (done) {
-      const configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
-
-        const db = client.db(configuration.db);
-        const cursor = new FindCursor(
-          db.s.topology,
-          db.s.namespace,
-          {},
-          { limit: 0, skip: 0, secondaryOk: false, readPreference: 42 }
-        );
-
-        cursor.hasNext(err => {
-          test.ok(err !== null);
-          test.equal(err.message, 'readPreference must be a ReadPreference instance');
-          done();
-        });
-      });
-    }
-  });
-
   it(
     'should return implicit session to pool when client-side cursor exhausts results on initial query',
     {
