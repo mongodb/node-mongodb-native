@@ -101,6 +101,7 @@ export interface RootFilterOperators<TSchema> extends Document {
 }
 
 /**
+ * @public
  * A type that extends Document but forbids anything that "looks like" an object id.
  */
 export type NonObjectIdLikeDocument = {

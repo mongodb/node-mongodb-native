@@ -286,6 +286,7 @@ export type {
   KeysOfAType,
   KeysOfOtherType,
   MatchKeysAndValues,
+  NonObjectIdLikeDocument,
   NotAcceptedFields,
   NumericType,
   OneOrMore,
