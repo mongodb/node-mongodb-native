@@ -26,6 +26,7 @@ function expectPoolWasNotCleared(initialCount) {
   return count => expect(count).to.equal(initialCount);
 }
 
+// TODO: NODE-3819: Unskip flaky MacOS tests.
 describe.skip('Connections survive primary step down', function () {
   let client;
   let checkClient;

@@ -4,7 +4,7 @@
 const setupDatabase = require('../shared').setupDatabase;
 const expect = require('chai').expect;
 
-// Fails on MacOS on Evergreen (NODE-3713)
+// TODO: NODE-3819: Unskip flaky MacOS tests.
 describe.skip('examples(change-stream):', function () {
   let client;
   let db;

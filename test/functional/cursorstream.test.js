@@ -207,7 +207,7 @@ describe('Cursor Streams', function () {
     }
   });
 
-  // Fails on MacOS on Evergreen (NODE-3713)
+  // TODO: NODE-3819: Unskip flaky MacOS tests.
   it.skip('should stream documents across getMore command and count correctly', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
