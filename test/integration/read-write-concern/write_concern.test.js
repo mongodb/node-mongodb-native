@@ -2,7 +2,7 @@
 
 const { expect } = require('chai');
 const { withMonitoredClient } = require('./shared');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 // WriteConcernError test requires
 const { once } = require('events');
