@@ -7,8 +7,8 @@ const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 // WriteConcernError test requires
 const { once } = require('events');
 
-const mock = require('../tools/mongodb-mock/index');
-const { MongoClient, MongoServerError } = require('../../src');
+const mock = require('../../tools/mongodb-mock/index');
+const { MongoClient, MongoServerError } = require('../../../src');
 
 describe('Write Concern', function () {
   it(
