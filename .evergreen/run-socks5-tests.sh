@@ -21,7 +21,7 @@ FIRST_HOST=$(node -p 'new (require("mongodb-connection-string-url").default)(pro
 export MONGODB_URI_SINGLEHOST="mongodb://localhost:12345/"
 
 # Compute path to socks5 fake server script in a way that works on Windows
-SOCKS5_SERVER_SCRIPT="${PROJECT_DIRECTORY}/.evergreen/socks5srv.py"
+SOCKS5_SERVER_SCRIPT="$DRIVERS_TOOLS/.evergreen/socks5srv.py"
 if [ "Windows_NT" = "$OS" ]; then
   SOCKS5_SERVER_SCRIPT=$(cygpath -w "$SOCKS5_SERVER_SCRIPT")
 fi
