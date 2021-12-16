@@ -250,6 +250,9 @@ expectError(
     otherField: new ObjectId()
   })
 );
+nonObjectIdCollection.find({
+  fieldThatDoesNotExistOnSchema: new ObjectId()
+});
 
 // we only forbid objects that "look like" object ids, so other random objects are permitted
 nonObjectIdCollection.find({
