@@ -15,7 +15,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 chai.use(require('chai-subset'));
-const { isHello } = require('../../src/utils');
+const { isHello } = require('../../../src/utils');
 
 function withChangeStream(dbName, collectionName, callback) {
   if (arguments.length === 1) {
