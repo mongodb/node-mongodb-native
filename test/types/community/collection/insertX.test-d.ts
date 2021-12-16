@@ -123,12 +123,35 @@ await collectionWithObjectId.insertOne({
   numberField: 23,
   fruitTags: ['hi']
 });
-// should not demand _id if it is ObjectId
-await collectionWithObjectId.insertOne({
-  stringField: 'hola',
-  numberField: 23,
-  fruitTags: ['hi']
-});
+// if _id is defined on the schema, it must be passed to insert operations
+expectError(
+  collectionWithObjectId.insertOne({
+    stringField: 'hola',
+    numberField: 23,
+    fruitTags: ['hi']
+  })
+);
+
+// defined _id's that are not of type ObjectId cannot be cast to ObjectId
+const collectionWithRequiredNumericId =
+  db.collection<{ _id: number; otherField: string }>('testCollection');
+
+expectError(
+  collectionWithRequiredNumericId.insertOne({
+    _id: new ObjectId(),
+    otherField: 'hola'
+  })
+);
+
+const collectionWithOptionalNumericId =
+  db.collection<{ _id?: number; otherField: string }>('testCollection');
+
+expectError(
+  collectionWithOptionalNumericId.insertOne({
+    _id: new ObjectId(),
+    otherField: 'hola'
+  })
+);
 
 /**
  * test indexed types

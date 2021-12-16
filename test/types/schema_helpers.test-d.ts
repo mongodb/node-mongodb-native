@@ -1,10 +1,11 @@
 import { Document, ObjectId } from 'bson';
-import { expectAssignable, expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
 import type {
   EnhancedOmit,
   InferIdType,
   OptionalId,
+  OptionalUnlessRequiredId,
   WithId,
   WithoutId
 } from '../../src/mongo_types';
@@ -13,6 +14,11 @@ import type {
 expectType<InferIdType<Document>>(new ObjectId());
 expectType<InferIdType<{ _id: number }>>(1 + 1);
 expectType<InferIdType<{ a: number } | { b: string }>>(new ObjectId());
+expectType<InferIdType<{ _id?: number }>>(1 + 1);
+expectType<InferIdType<{ _id?: unknown }>>(new ObjectId());
+expectError<InferIdType<{ _id: Record<string, any> }>>({});
+
+// union types could have an id of either type
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(new ObjectId());
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(1 + 1);
 
@@ -37,6 +43,14 @@ expectNotType<OptionalId<{ _id: number; [x: string]: number }>>({ a: 3 });
 class MyId {}
 expectNotType<OptionalId<{ _id: MyId; a: number }>>({ a: 3 });
 expectNotType<OptionalId<{ _id: MyId; a: number }>>({ _id: new ObjectId(), a: 3 });
+
+declare function functionReturningOptionalId(): OptionalId<{
+  _id?: ObjectId | undefined;
+  a: number;
+}>;
+// OptionalUnlessRequiredId
+expectType<OptionalUnlessRequiredId<{ _id: ObjectId; a: number }>>({ a: 3, _id: new ObjectId() });
+expectType<OptionalUnlessRequiredId<{ _id?: ObjectId; a: number }>>(functionReturningOptionalId());
 
 // WithoutId removes _id whether defined in the schema or not
 expectType<WithoutId<{ _id: number; a: number }>>({ a: 2 });
