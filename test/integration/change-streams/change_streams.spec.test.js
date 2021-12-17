@@ -1,15 +1,12 @@
 'use strict';
 
 const path = require('path');
-const chai = require('chai');
-const { loadSpecTests } = require('../spec');
-const { runUnifiedSuite } = require('../tools/unified-spec-runner/runner');
+const { expect } = require('chai');
+const { loadSpecTests } = require('../../spec');
+const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const camelCase = require('lodash.camelcase');
-const { setupDatabase } = require('./shared');
-const { delay } = require('./shared');
-
-const expect = chai.expect;
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { delay, setupDatabase } = require('../shared');
 
 describe('Change Streams Spec - Unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')));

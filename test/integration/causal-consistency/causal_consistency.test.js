@@ -1,9 +1,9 @@
 'use strict';
 
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
-const setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
+const { setupDatabase } = require('../shared');
+const { expect } = require('chai');
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND, 'endSessions'];
 const test = { commands: { started: [], succeeded: [] } };

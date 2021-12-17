@@ -1,33 +1,16 @@
 'use strict';
 
-const chai = require('chai');
-
-const expect = chai.expect;
-const TestRunnerContext = require('./spec-runner').TestRunnerContext;
-const generateTopologyTests = require('./spec-runner').generateTopologyTests;
-const loadSpecTests = require('../spec').loadSpecTests;
-const { withMonitoredClient } = require('./shared');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { expect } = require('chai');
+const { withMonitoredClient } = require('../shared');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 // WriteConcernError test requires
 const { once } = require('events');
 
-const mock = require('../tools/mongodb-mock/index');
-const { MongoClient, MongoServerError } = require('../../src');
+const mock = require('../../tools/mongodb-mock/index');
+const { MongoClient, MongoServerError } = require('../../../src');
 
 describe('Write Concern', function () {
-  describe('spec tests', function () {
-    const testContext = new TestRunnerContext();
-    const testSuites = loadSpecTests('read-write-concern/operation');
-
-    after(() => testContext.teardown());
-    before(function () {
-      return testContext.setup(this.configuration);
-    });
-
-    generateTopologyTests(testSuites, testContext);
-  });
-
   it(
     'should respect writeConcern from uri',
     withMonitoredClient('insert', { queryOptions: { w: 0 } }, function (client, events, done) {
@@ -89,38 +72,40 @@ describe('Write Concern', function () {
     );
   });
 
-  let server;
-  before(() => {
-    return mock.createServer().then(s => {
-      server = s;
-    });
-  });
-
-  after(() => mock.cleanup());
-
-  it('should pipe writeConcern from client down to API call', function () {
-    server.setMessageHandler(request => {
-      if (request.document && request.document[LEGACY_HELLO_COMMAND]) {
-        return request.reply(mock.HELLO);
-      }
-      expect(request.document.writeConcern).to.exist;
-      expect(request.document.writeConcern.w).to.equal('majority');
-      return request.reply({ ok: 1 });
-    });
-
-    const uri = `mongodb://${server.uri()}`;
-    const client = new MongoClient(uri, { writeConcern: 'majority' });
-    return client
-      .connect()
-      .then(() => {
-        const db = client.db('wc_test');
-        const collection = db.collection('wc');
-
-        return collection.insertMany([{ a: 2 }]);
-      })
-      .then(() => {
-        return client.close();
+  describe('mock server write concern test', () => {
+    let server;
+    before(() => {
+      return mock.createServer().then(s => {
+        server = s;
       });
+    });
+
+    after(() => mock.cleanup());
+
+    it('should pipe writeConcern from client down to API call', function () {
+      server.setMessageHandler(request => {
+        if (request.document && request.document[LEGACY_HELLO_COMMAND]) {
+          return request.reply(mock.HELLO);
+        }
+        expect(request.document.writeConcern).to.exist;
+        expect(request.document.writeConcern.w).to.equal('majority');
+        return request.reply({ ok: 1 });
+      });
+
+      const uri = `mongodb://${server.uri()}`;
+      const client = new MongoClient(uri, { writeConcern: 'majority' });
+      return client
+        .connect()
+        .then(() => {
+          const db = client.db('wc_test');
+          const collection = db.collection('wc');
+
+          return collection.insertMany([{ a: 2 }]);
+        })
+        .then(() => {
+          return client.close();
+        });
+    });
   });
 
   // This test was moved from the WriteConcernError unit test file, there is probably a better place for it

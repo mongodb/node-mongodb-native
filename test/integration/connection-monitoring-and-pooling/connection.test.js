@@ -3,7 +3,7 @@
 const { Connection } = require('../../../src/cmap/connection');
 const { connect } = require('../../../src/cmap/connect');
 const { expect } = require('chai');
-const { setupDatabase } = require('../../functional/shared');
+const { setupDatabase } = require('../shared');
 const { ns, HostAddress } = require('../../../src/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
