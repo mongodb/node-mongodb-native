@@ -4,7 +4,7 @@ import { MongoClient } from '../../src';
 import { Db, DbOptions } from '../../src/db';
 import { ReadPreference } from '../../src/read_preference';
 
-describe('Db - test secondaryOk matches readPreference', function () {
+describe('class Db', function () {
   const client = new MongoClient('mongodb://localhost:27017');
   const legacy_secondary_ok = 'slaveOk';
 
