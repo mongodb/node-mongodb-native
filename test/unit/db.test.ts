@@ -8,7 +8,7 @@ describe('class Db', function () {
   const client = new MongoClient('mongodb://localhost:27017');
   const legacy_secondary_ok = 'slaveOk';
 
-  it.only('secondaryOk should be false when readPreference is Primary', function () {
+  it('secondaryOk should be false when readPreference is Primary', function () {
     const options: DbOptions = { readPreference: ReadPreference.PRIMARY };
     const mydb = new Db(client, 'mydb', options);
 
@@ -16,7 +16,7 @@ describe('class Db', function () {
     expect(mydb[legacy_secondary_ok]).to.be.false;
   });
 
-  it.only('secondaryOk should be true when readPreference is Primary Preferred', function () {
+  it('secondaryOk should be true when readPreference is Primary Preferred', function () {
     const options: DbOptions = { readPreference: ReadPreference.PRIMARY_PREFERRED };
     const mydb = new Db(client, 'mydb', options);
 
@@ -24,7 +24,7 @@ describe('class Db', function () {
     expect(mydb[legacy_secondary_ok]).to.be.true;
   });
 
-  it.only('secondaryOk should be true when readPreference is Secondary', function () {
+  it('secondaryOk should be true when readPreference is Secondary', function () {
     const options: DbOptions = { readPreference: ReadPreference.SECONDARY };
     const mydb = new Db(client, 'mydb', options);
 
@@ -32,7 +32,7 @@ describe('class Db', function () {
     expect(mydb[legacy_secondary_ok]).to.be.true;
   });
 
-  it.only('secondaryOk should be true when readPreference is Secondary Preferred', function () {
+  it('secondaryOk should be true when readPreference is Secondary Preferred', function () {
     const options: DbOptions = { readPreference: ReadPreference.SECONDARY_PREFERRED };
     const mydb = new Db(client, 'mydb', options);
 
@@ -40,7 +40,7 @@ describe('class Db', function () {
     expect(mydb[legacy_secondary_ok]).to.be.true;
   });
 
-  it.only('secondaryOk should be true when readPreference is Nearest', function () {
+  it('secondaryOk should be true when readPreference is Nearest', function () {
     const options: DbOptions = { readPreference: ReadPreference.NEAREST };
     const mydb = new Db(client, 'mydb', options);
 

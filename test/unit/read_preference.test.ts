@@ -134,48 +134,44 @@ describe('class ReadPreference', function () {
   });
 
   describe('::secondaryOk', function () {
-
-  it.only('secondaryOk should be true when readPreference is Primary', function () {
+    it('secondaryOk should be true when readPreference is Primary', function () {
       const readPreference = ReadPreference.fromOptions({
-          readPreference: PRIMARY,
-        });
+        readPreference: PRIMARY
+      });
       expect(readPreference.secondaryOk()).to.equal(false);
       expect(readPreference.slaveOk()).to.equal(false);
-  });
+    });
 
-  it.only('secondaryOk should be true when readPreference is Primary Preferred', function () {
+    it('secondaryOk should be true when readPreference is Primary Preferred', function () {
       const readPreference = ReadPreference.fromOptions({
-          readPreference: PRIMARY_PREFERRED,
-        });
+        readPreference: PRIMARY_PREFERRED
+      });
       expect(readPreference.secondaryOk()).to.equal(true);
       expect(readPreference.slaveOk()).to.equal(true);
-  });
+    });
 
-  it.only('secondaryOk should be true when readPreference is Secondary', function () {
-    const readPreference = ReadPreference.fromOptions({
-          readPreference: PRIMARY_PREFERRED,
-        });
+    it('secondaryOk should be true when readPreference is Secondary', function () {
+      const readPreference = ReadPreference.fromOptions({
+        readPreference: PRIMARY_PREFERRED
+      });
       expect(readPreference.secondaryOk()).to.equal(true);
       expect(readPreference.slaveOk()).to.equal(true);
-  });
+    });
 
-  it.only('secondaryOk should be true when readPreference is Secondary Preferred', function () {
-    const readPreference = ReadPreference.fromOptions({
-          readPreference: SECONDARY_PREFERRED,
-        });
+    it('secondaryOk should be true when readPreference is Secondary Preferred', function () {
+      const readPreference = ReadPreference.fromOptions({
+        readPreference: SECONDARY_PREFERRED
+      });
       expect(readPreference.secondaryOk()).to.equal(true);
       expect(readPreference.slaveOk()).to.equal(true);
-  });
+    });
 
-  it.only('secondaryOk should be true when readPreference is Nearest', function () {
-    const readPreference = ReadPreference.fromOptions({
-          readPreference: NEAREST,
-        });
+    it('secondaryOk should be true when readPreference is Nearest', function () {
+      const readPreference = ReadPreference.fromOptions({
+        readPreference: NEAREST
+      });
       expect(readPreference.secondaryOk()).to.equal(true);
       expect(readPreference.slaveOk()).to.equal(true);
-  });
-
-
-
+    });
   });
 });
