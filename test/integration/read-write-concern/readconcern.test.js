@@ -1,6 +1,5 @@
 'use strict';
-const setupDatabase = require('./shared').setupDatabase;
-const filterForCommands = require('./shared').filterForCommands;
+const { setupDatabase, filterForCommands } = require('../shared');
 const expect = require('chai').expect;
 
 describe('ReadConcern', function () {
