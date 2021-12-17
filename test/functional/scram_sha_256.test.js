@@ -5,6 +5,7 @@ const { expect } = require('chai');
 const { Connection } = require('../../src/cmap/connection');
 const { ScramSHA256 } = require('../../src/cmap/auth/scram');
 const { setupDatabase, withClient } = require('./shared');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 describe('SCRAM-SHA-256 auth', function () {
   const test = {};
@@ -220,10 +221,14 @@ describe('SCRAM-SHA-256 auth', function () {
     }
   });
 
-  // For a non-existent username, verify that not specifying a mechanism when connecting fails with the same error
-  // type that would occur with a correct username but incorrect password or mechanism. (Because negotiation with
-  // a non-existent user name causes an isMaster error, we want to verify this is seen by users as similar to other
-  // authentication errors, not as a network or database command error.)
+  // For a non-existent username, verify that not specifying a mechanism when
+  // connecting fails with the same error type that would occur with a correct
+  // username but incorrect password or mechanism.  (Because negotiation with a
+  // non-existent user name at one point during server development caused a
+  // handshake error, we want to verify this is seen by users as similar to other
+  // authentication errors, not as a network or database command error on the ``hello``
+  // or legacy hello commands themselves.)
+  // Source: https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst#step-3
   it('should fail for a nonexistent username with same error type as bad password', {
     metadata: { requires: { mongodb: '>=3.7.3' } },
     test: function () {
@@ -270,7 +275,7 @@ describe('SCRAM-SHA-256 auth', function () {
         const calls = commandSpy
           .getCalls()
           .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
-          .filter(c => c.args[1].ismaster); // only consider handshakes
+          .filter(c => c.args[1][LEGACY_HELLO_COMMAND]); // only consider handshakes
 
         expect(calls).to.have.length(1);
         const handshakeDoc = calls[0].args[1];

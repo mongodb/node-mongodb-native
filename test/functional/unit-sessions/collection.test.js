@@ -2,6 +2,7 @@
 const { Timestamp } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
+const { isHello } = require('../../../src/utils');
 
 const test = {};
 describe('Sessions - unit/sessions', function () {
@@ -21,7 +22,7 @@ describe('Sessions - unit/sessions', function () {
         let insertOperationTime = Timestamp.fromNumber(Date.now());
         test.server.setMessageHandler(request => {
           const doc = request.document;
-          if (doc.ismaster || doc.hello) {
+          if (isHello(doc)) {
             request.reply(Object.assign({ logicalSessionTimeoutMinutes: 15 }, mock.HELLO));
           } else if (doc.insert) {
             request.reply({ ok: 1, operationTime: insertOperationTime });
@@ -59,7 +60,7 @@ describe('Sessions - unit/sessions', function () {
         const options = Object.freeze({});
         test.server.setMessageHandler(request => {
           const doc = request.document;
-          if (doc.ismaster || doc.hello) {
+          if (isHello(doc)) {
             request.reply(mock.HELLO);
           } else if (doc.count || doc.aggregate || doc.endSessions) {
             request.reply({ ok: 1 });

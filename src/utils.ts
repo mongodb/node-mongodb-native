@@ -7,6 +7,7 @@ import { Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 import type { Collection } from './collection';
+import { LEGACY_HELLO_COMMAND } from './constants';
 import type { Db } from './db';
 import {
   AnyError,
@@ -1095,6 +1096,14 @@ export function isSuperset(set: Set<any> | any[], subset: Set<any> | any[]): boo
     }
   }
   return true;
+}
+
+/**
+ * Checks if the document is a Hello request
+ * @internal
+ */
+export function isHello(doc: Document): boolean {
+  return doc[LEGACY_HELLO_COMMAND] || doc.hello ? true : false;
 }
 
 /** Returns the items that are uniquely in setA */

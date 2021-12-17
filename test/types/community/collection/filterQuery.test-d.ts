@@ -1,7 +1,7 @@
 import { BSONRegExp, Decimal128, Long, ObjectId } from 'bson';
-import { expectAssignable, expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
-import { Filter, MongoClient, WithId } from '../../../../src';
+import { Collection, Filter, MongoClient, WithId } from '../../../../src';
 
 /**
  * test the Filter type using collection.find<T>() method
@@ -290,3 +290,51 @@ await collectionT.find({ playmates: { $elemMatch: { name: 'MrMeow' } } }).toArra
 expectNotType<Filter<PetModel>>({ name: { $all: ['world', 'world'] } });
 expectNotType<Filter<PetModel>>({ age: { $elemMatch: [1, 2] } });
 expectNotType<Filter<PetModel>>({ type: { $size: 2 } });
+
+// ObjectId are not allowed to be used as a query predicate (issue described here: NODE-3758)
+// this only applies to schemas where the _id is not of type ObjectId.
+declare const nonObjectIdCollection: Collection<{ _id: number; otherField: string }>;
+expectError(
+  nonObjectIdCollection.find({
+    _id: new ObjectId()
+  })
+);
+expectError(
+  nonObjectIdCollection.find({
+    otherField: new ObjectId()
+  })
+);
+nonObjectIdCollection.find({
+  fieldThatDoesNotExistOnSchema: new ObjectId()
+});
+
+// we only forbid objects that "look like" object ids, so other random objects are permitted
+nonObjectIdCollection.find({
+  _id: {
+    hello: 'world'
+  }
+});
+nonObjectIdCollection.find({
+  otherField: {
+    hello: 'world'
+  }
+});
+
+declare const nonSpecifiedCollection: Collection;
+nonSpecifiedCollection.find({
+  _id: new ObjectId()
+});
+nonSpecifiedCollection.find({
+  otherField: new ObjectId()
+});
+
+nonSpecifiedCollection.find({
+  _id: {
+    hello: 'world'
+  }
+});
+nonSpecifiedCollection.find({
+  otherField: {
+    hello: 'world'
+  }
+});

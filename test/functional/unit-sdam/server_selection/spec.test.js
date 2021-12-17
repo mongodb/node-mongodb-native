@@ -8,6 +8,7 @@ const { ServerDescription } = require('../../../../src/sdam/server_description')
 const { ReadPreference } = require('../../../../src/read_preference');
 const { MongoServerSelectionError } = require('../../../../src/error');
 const ServerSelectors = require('../../../../src/sdam/server_selection');
+const { LEGACY_HELLO_COMMAND } = require('../../../../src/constants');
 
 const { EJSON } = require('bson');
 
@@ -161,31 +162,31 @@ function serverDescriptionFromDefinition(definition, hosts) {
     return description;
   }
 
-  const fakeIsMaster = { ok: 1, hosts };
+  const fakeHello = { ok: 1, hosts };
   if (serverType !== ServerType.Standalone && serverType !== ServerType.Mongos) {
-    fakeIsMaster.setName = 'rs';
+    fakeHello.setName = 'rs';
   }
 
   if (serverType === ServerType.RSPrimary) {
-    fakeIsMaster.ismaster = true;
+    fakeHello[LEGACY_HELLO_COMMAND] = true;
   } else if (serverType === ServerType.RSSecondary) {
-    fakeIsMaster.secondary = true;
+    fakeHello.secondary = true;
   } else if (serverType === ServerType.Mongos) {
-    fakeIsMaster.msg = 'isdbgrid';
+    fakeHello.msg = 'isdbgrid';
   }
 
   ['maxWireVersion', 'tags', 'idleWritePeriodMillis'].forEach(field => {
     if (definition[field]) {
-      fakeIsMaster[field] = definition[field];
+      fakeHello[field] = definition[field];
     }
   });
 
-  fakeIsMaster.lastWrite = definition.lastWrite;
+  fakeHello.lastWrite = definition.lastWrite;
 
   // default max wire version is `6`
-  fakeIsMaster.maxWireVersion = fakeIsMaster.maxWireVersion || 6;
+  fakeHello.maxWireVersion = fakeHello.maxWireVersion || 6;
 
-  const serverDescription = new ServerDescription(definition.address, fakeIsMaster, {
+  const serverDescription = new ServerDescription(definition.address, fakeHello, {
     roundTripTime: definition.avg_rtt_ms
   });
 

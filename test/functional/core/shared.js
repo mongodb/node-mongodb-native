@@ -3,6 +3,7 @@ const EventEmitter = require('events');
 const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const { format: f } = require('util');
 const { Query } = require('../../../src/cmap/commands');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 function executeCommand(configuration, db, cmd, options, cb) {
   // Optional options
@@ -54,7 +55,7 @@ function locateAuthMethod(configuration, cb) {
 
   // Set up operations
   var db = 'admin';
-  var cmd = { ismaster: true };
+  var cmd = { [LEGACY_HELLO_COMMAND]: true };
 
   // Attempt to connect
   var pool = new ConnectionPool(null, {

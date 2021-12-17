@@ -4,6 +4,7 @@ const Writable = require('stream').Writable;
 const { MessageStream } = require('../../../src/cmap/message_stream');
 const { Msg } = require('../../../src/cmap/commands');
 const expect = require('chai').expect;
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 function bufferToStream(buffer) {
   const stream = new Readable();
@@ -26,7 +27,7 @@ describe('Message Stream', function () {
           '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
           'hex'
         ),
-        documents: [{ ismaster: 1 }]
+        documents: [{ [LEGACY_HELLO_COMMAND]: 1 }]
       },
       {
         description: 'valid multiple OP_REPLY',
@@ -38,7 +39,7 @@ describe('Message Stream', function () {
             '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
           'hex'
         ),
-        documents: [{ ismaster: 1 }]
+        documents: [{ [LEGACY_HELLO_COMMAND]: 1 }]
       },
       {
         description: 'valid OP_REPLY (partial)',
@@ -50,7 +51,7 @@ describe('Message Stream', function () {
             'hex'
           )
         ],
-        documents: [{ ismaster: 1 }]
+        documents: [{ [LEGACY_HELLO_COMMAND]: 1 }]
       },
 
       {
@@ -59,7 +60,7 @@ describe('Message Stream', function () {
           '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000',
           'hex'
         ),
-        documents: [{ $db: 'admin', ismaster: 1 }]
+        documents: [{ $db: 'admin', [LEGACY_HELLO_COMMAND]: 1 }]
       },
       {
         description: 'valid multiple OP_MSG',
@@ -71,7 +72,7 @@ describe('Message Stream', function () {
             '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000',
           'hex'
         ),
-        documents: [{ $db: 'admin', ismaster: 1 }]
+        documents: [{ $db: 'admin', [LEGACY_HELLO_COMMAND]: 1 }]
       },
 
       {
@@ -147,7 +148,7 @@ describe('Message Stream', function () {
       const messageStream = new MessageStream();
       messageStream.pipe(writeableStream);
 
-      const command = new Msg('admin.$cmd', { ismaster: 1 }, { requestId: 3 });
+      const command = new Msg('admin.$cmd', { [LEGACY_HELLO_COMMAND]: 1 }, { requestId: 3 });
       messageStream.writeCommand(command, null, err => {
         done(err);
       });

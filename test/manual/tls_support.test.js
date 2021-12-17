@@ -1,5 +1,6 @@
 'use strict';
 const { MongoClient } = require('../../src');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 const REQUIRED_ENV = ['MONGODB_URI', 'SSL_KEY_FILE', 'SSL_CA_FILE'];
 
@@ -36,7 +37,7 @@ function makeConnectionTest(connectionString, clientOptions) {
 
     return client
       .connect()
-      .then(() => client.db('admin').command({ ismaster: 1 }))
+      .then(() => client.db('admin').command({ [LEGACY_HELLO_COMMAND]: 1 }))
       .then(() => client.db('test').collection('test').findOne({}))
       .then(() => client.close());
   };

@@ -2,6 +2,8 @@
 const mock = require('../tools/mongodb-mock/index');
 const expect = require('chai').expect;
 const { ObjectId, Code } = require('../../src');
+const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { isHello } = require('../../src/utils');
 
 const TEST_OPTIONS = { writeConcern: { w: 2, wtimeoutMS: 1000 } };
 
@@ -21,21 +23,21 @@ class WriteConcernTest {
     this.serverStates = {
       primary: [
         Object.assign({}, defaultFields, {
-          ismaster: true,
+          [LEGACY_HELLO_COMMAND]: true,
           secondary: false,
           me: 'localhost:32000'
         })
       ],
       firstSecondary: [
         Object.assign({}, defaultFields, {
-          ismaster: false,
+          [LEGACY_HELLO_COMMAND]: false,
           secondary: true,
           me: 'localhost:32001'
         })
       ],
       arbiter: [
         Object.assign({}, defaultFields, {
-          ismaster: false,
+          [LEGACY_HELLO_COMMAND]: false,
           secondary: false,
           arbiterOnly: true,
           me: 'localhost:32002'
@@ -56,7 +58,7 @@ class WriteConcernTest {
 
     primaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(self.serverStates.primary[0]);
       } else if (doc[resultKey]) {
         self.commandResult = doc;
@@ -68,7 +70,7 @@ class WriteConcernTest {
 
     firstSecondaryServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(self.serverStates.firstSecondary[0]);
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });
@@ -77,7 +79,7 @@ class WriteConcernTest {
 
     arbiterServer.setMessageHandler(request => {
       const doc = request.document;
-      if (doc.ismaster || doc.hello) {
+      if (isHello(doc)) {
         request.reply(self.serverStates.arbiter[0]);
       } else if (doc.endSessions) {
         request.reply({ ok: 1 });

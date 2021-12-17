@@ -1,8 +1,8 @@
 'use strict';
 
 const { expect } = require('chai');
-const { loadSpecTests } = require('../spec/index');
-const { runUnifiedTest } = require('../tools/unified-spec-runner/runner');
+const { loadSpecTests } = require('../../spec/index');
+const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
 
 describe('Collection management unified spec tests', function () {
   for (const collectionManagementTest of loadSpecTests('collection-management')) {

@@ -1,12 +1,13 @@
 const fs = require('fs');
 const { MockServer } = require('./src/server.js');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 let mockServers = [];
 
 // Default message fields
-const DEFAULT_ISMASTER = {
+const DEFAULT_HELLO = {
   __nodejs_mock_server__: true,
-  ismaster: true,
+  [LEGACY_HELLO_COMMAND]: true,
   maxBsonObjectSize: 16777216,
   maxMessageSizeBytes: 48000000,
   maxWriteBatchSize: 1000,
@@ -16,7 +17,7 @@ const DEFAULT_ISMASTER = {
   ok: 1
 };
 
-const DEFAULT_ISMASTER_36 = Object.assign({}, DEFAULT_ISMASTER, {
+const DEFAULT_HELLO_36 = Object.assign({}, DEFAULT_HELLO, {
   maxWireVersion: 6,
   logicalSessionTimeoutMinutes: 10
 });
@@ -91,7 +92,5 @@ function cleanup(spy, callback) {
 module.exports = {
   createServer,
   cleanup,
-  DEFAULT_ISMASTER,
-  DEFAULT_ISMASTER_36,
-  HELLO: DEFAULT_ISMASTER_36
+  HELLO: DEFAULT_HELLO_36
 };

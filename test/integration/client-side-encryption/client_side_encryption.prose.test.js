@@ -5,6 +5,7 @@ const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
 
 const expect = chai.expect;
 chai.use(require('chai-subset'));
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const getKmsProviders = localKey => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
@@ -54,7 +55,7 @@ describe('Client Side Encryption Prose Tests', function () {
       this.client = this.configuration.newClient({}, { monitorCommands: true });
 
       this.commandStartedEvents = new APMEventCollector(this.client, 'commandStarted', {
-        exclude: ['ismaster']
+        exclude: [LEGACY_HELLO_COMMAND]
       });
 
       const schemaMap = {

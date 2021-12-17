@@ -3,6 +3,7 @@ const { expect } = require('chai');
 const mock = require('../tools/mongodb-mock/index');
 const { ObjectId } = require('bson');
 const { Logger } = require('../../src/logger');
+const { isHello } = require('../../src/utils');
 
 const test = {};
 describe('ReplSet (mocks)', function () {
@@ -23,7 +24,7 @@ describe('ReplSet (mocks)', function () {
     });
 
     // Primary server states
-    const serverIsMaster = [Object.assign({}, defaultFields), Object.assign({}, defaultRSFields)];
+    const serverIsPrimary = [Object.assign({}, defaultFields), Object.assign({}, defaultRSFields)];
 
     return Promise.all([mock.createServer(), mock.createServer()]).then(servers => {
       test.mongos1 = servers[0];
@@ -31,8 +32,8 @@ describe('ReplSet (mocks)', function () {
 
       test.mongos1.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(serverIsMaster[0]);
+        if (isHello(doc)) {
+          request.reply(serverIsPrimary[0]);
         } else if (doc.insert) {
           request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
         } else if (doc.endSessions) {
@@ -42,8 +43,8 @@ describe('ReplSet (mocks)', function () {
 
       test.mongos2.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(serverIsMaster[1]);
+        if (isHello(doc)) {
+          request.reply(serverIsPrimary[1]);
         } else if (doc.insert) {
           request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
         } else if (doc.endSessions) {

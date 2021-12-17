@@ -1,4 +1,4 @@
-import { expectAssignable, expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
 import { ObjectId } from '../../src/bson';
 import { Collection } from '../../src/collection';
@@ -31,7 +31,7 @@ expectNotType<InsertOneArgOf<ACounter>>({ a: 2, b: 34 });
 // With _id
 expectAssignable<InsertOneArgOf<ACounterWithId>>({ _id: new ObjectId(), a: 3 });
 // Without _id
-expectAssignable<InsertOneArgOf<ACounterWithId>>({ a: 3 });
+expectNotAssignable<InsertOneArgOf<ACounterWithId>>({ a: 3 });
 // Does not permit extra keys
 expectNotType<InsertOneArgOf<ACounterWithId>>({ a: 2, b: 34 });
 

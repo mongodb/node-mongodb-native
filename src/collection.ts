@@ -12,7 +12,7 @@ import type { PkFactory } from './mongo_client';
 import type {
   Filter,
   Flatten,
-  OptionalId,
+  OptionalUnlessRequiredId,
   TODO_NODE_3286,
   UpdateFilter,
   WithId,
@@ -264,16 +264,22 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  insertOne(doc: OptionalId<TSchema>): Promise<InsertOneResult<TSchema>>;
-  insertOne(doc: OptionalId<TSchema>, callback: Callback<InsertOneResult<TSchema>>): void;
-  insertOne(doc: OptionalId<TSchema>, options: InsertOneOptions): Promise<InsertOneResult<TSchema>>;
+  insertOne(doc: OptionalUnlessRequiredId<TSchema>): Promise<InsertOneResult<TSchema>>;
   insertOne(
-    doc: OptionalId<TSchema>,
+    doc: OptionalUnlessRequiredId<TSchema>,
+    callback: Callback<InsertOneResult<TSchema>>
+  ): void;
+  insertOne(
+    doc: OptionalUnlessRequiredId<TSchema>,
+    options: InsertOneOptions
+  ): Promise<InsertOneResult<TSchema>>;
+  insertOne(
+    doc: OptionalUnlessRequiredId<TSchema>,
     options: InsertOneOptions,
     callback: Callback<InsertOneResult<TSchema>>
   ): void;
   insertOne(
-    doc: OptionalId<TSchema>,
+    doc: OptionalUnlessRequiredId<TSchema>,
     options?: InsertOneOptions | Callback<InsertOneResult<TSchema>>,
     callback?: Callback<InsertOneResult<TSchema>>
   ): Promise<InsertOneResult<TSchema>> | void {
@@ -308,19 +314,22 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  insertMany(docs: OptionalId<TSchema>[]): Promise<InsertManyResult<TSchema>>;
-  insertMany(docs: OptionalId<TSchema>[], callback: Callback<InsertManyResult<TSchema>>): void;
+  insertMany(docs: OptionalUnlessRequiredId<TSchema>[]): Promise<InsertManyResult<TSchema>>;
   insertMany(
-    docs: OptionalId<TSchema>[],
+    docs: OptionalUnlessRequiredId<TSchema>[],
+    callback: Callback<InsertManyResult<TSchema>>
+  ): void;
+  insertMany(
+    docs: OptionalUnlessRequiredId<TSchema>[],
     options: BulkWriteOptions
   ): Promise<InsertManyResult<TSchema>>;
   insertMany(
-    docs: OptionalId<TSchema>[],
+    docs: OptionalUnlessRequiredId<TSchema>[],
     options: BulkWriteOptions,
     callback: Callback<InsertManyResult<TSchema>>
   ): void;
   insertMany(
-    docs: OptionalId<TSchema>[],
+    docs: OptionalUnlessRequiredId<TSchema>[],
     options?: BulkWriteOptions | Callback<InsertManyResult<TSchema>>,
     callback?: Callback<InsertManyResult<TSchema>>
   ): Promise<InsertManyResult<TSchema>> | void {
@@ -1526,7 +1535,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   insert(
-    docs: OptionalId<TSchema>[],
+    docs: OptionalUnlessRequiredId<TSchema>[],
     options: BulkWriteOptions,
     callback: Callback<InsertManyResult<TSchema>>
   ): Promise<InsertManyResult<TSchema>> | void {

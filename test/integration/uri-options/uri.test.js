@@ -1,8 +1,8 @@
 'use strict';
 
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const sinon = require('sinon');
-const { Topology } = require('../../src/sdam/topology');
+const { Topology } = require('../../../src/sdam/topology');
 
 describe('URI', function () {
   it('should correctly allow for w:0 overriding on the connect url', {

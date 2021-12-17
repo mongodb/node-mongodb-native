@@ -1,14 +1,12 @@
 'use strict';
 
 const path = require('path');
-const chai = require('chai');
-const { loadSpecTests } = require('../spec');
-const { runUnifiedSuite } = require('../tools/unified-spec-runner/runner');
+const { expect } = require('chai');
+const { loadSpecTests } = require('../../spec');
+const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const camelCase = require('lodash.camelcase');
-const { setupDatabase } = require('./shared');
-const { delay } = require('./shared');
-
-const expect = chai.expect;
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { delay, setupDatabase } = require('../shared');
 
 describe('Change Streams Spec - Unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')));
@@ -66,7 +64,7 @@ describe('Change Stream Spec - v1', function () {
             ctx.database = ctx.client.db(sDB);
             ctx.collection = ctx.database.collection(sColl);
             ctx.client.on('commandStarted', e => {
-              if (e.commandName !== 'ismaster') _events.push(e);
+              if (e.commandName !== LEGACY_HELLO_COMMAND) _events.push(e);
             });
           });
       });
@@ -83,7 +81,10 @@ describe('Change Stream Spec - v1', function () {
 
       suite.tests.forEach(test => {
         const shouldSkip = test.skip || TESTS_TO_SKIP.has(test.description);
-        const itFn = shouldSkip ? it.skip : test.only ? it.only : it;
+        // There's no evidence of test.only being defined in the spec files
+        // But let's avoid removing it now to just be sure we aren't changing anything
+        // These tests will eventually be replaced by unified format versions.
+        const itFn = shouldSkip ? it.skip : test.only ? Reflect.get(it, 'only') : it;
         const metadata = generateMetadata(test);
         const testFn = generateTestFn(test);
 

@@ -18,7 +18,7 @@ interface Rectangle {
 type Shape = Circle | Rectangle;
 
 type ShapeInsert = InsertOneFirstParam<Shape>;
-expectAssignable<ShapeInsert>({ height: 2, width: 2, radius: 2 }); // This is permitted...
+expectNotAssignable<ShapeInsert>({ height: 2, width: 2, radius: 2 }); // This is not permitted...
 // error cases, should not insert a portion of a type
 expectNotAssignable<ShapeInsert>({ height: 2 });
 expectError<ShapeInsert>({
@@ -27,8 +27,8 @@ expectError<ShapeInsert>({
   _id: new ObjectId()
 });
 // valid cases
-expectAssignable<ShapeInsert>({ height: 4, width: 4 });
-expectAssignable<ShapeInsert>({ radius: 4 });
+expectAssignable<ShapeInsert>({ height: 4, width: 4, _id: new ObjectId() });
+expectAssignable<ShapeInsert>({ radius: 4, _id: new ObjectId() });
 
 const c: Collection<Shape> = null as never;
 expectType<Promise<WithId<Shape> | null>>(c.findOne({ height: 4, width: 4 }));

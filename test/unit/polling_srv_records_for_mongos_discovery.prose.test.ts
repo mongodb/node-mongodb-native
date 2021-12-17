@@ -3,6 +3,7 @@ import * as dns from 'dns';
 import * as sinon from 'sinon';
 
 import { MongoClient } from '../../src';
+import { isHello } from '../../src/utils';
 import * as mock from '../tools/mongodb-mock/index';
 import type { MockServer } from '../tools/mongodb-mock/src/server';
 import { processTick } from '../tools/utils';
@@ -74,7 +75,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       mongos.setMessageHandler(request => {
         const document = request.document;
 
-        if (document.ismaster || document.hello) {
+        if (isHello(document)) {
           request.reply({ ...mock.HELLO, msg: 'isdbgrid' });
         }
       });

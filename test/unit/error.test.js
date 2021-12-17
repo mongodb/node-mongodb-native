@@ -5,7 +5,7 @@ const expect = require('chai').expect;
 const mock = require('../tools/mongodb-mock/index');
 const { getSymbolFrom } = require('../tools/utils');
 const { ReplSetFixture } = require('../tools/common');
-const { ns } = require('../../src/utils');
+const { ns, isHello } = require('../../src/utils');
 const { Topology } = require('../../src/sdam/topology');
 const { MongoNetworkError, MongoWriteConcernError } = require('../../src/index');
 const {
@@ -245,7 +245,7 @@ describe('MongoErrors', () => {
     it('should expose a user command writeConcern error like a normal WriteConcernError', function (done) {
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (isHello(doc)) {
           setTimeout(() => request.reply(test.primaryStates[0]));
         } else if (doc.createUser) {
           setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR));
@@ -286,7 +286,7 @@ describe('MongoErrors', () => {
     it('should propagate writeConcernError.errInfo ', function (done) {
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (isHello(doc)) {
           setTimeout(() => request.reply(test.primaryStates[0]));
         } else if (doc.createUser) {
           setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR_INFO));

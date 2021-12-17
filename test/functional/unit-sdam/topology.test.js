@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
-const { ns, makeClientMetadata } = require('../../../src/utils');
+const { ns, makeClientMetadata, isHello } = require('../../../src/utils');
 const { TopologyDescriptionChangedEvent } = require('../../../src/sdam/events');
 const { TopologyDescription } = require('../../../src/sdam/topology_description');
 const { TopologyType } = require('../../../src/sdam/common');
@@ -36,11 +36,11 @@ describe('Topology (unit)', function () {
     });
 
     it('should report the correct platform in client metadata', function (done) {
-      const ismasters = [];
+      const helloRequests = [];
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          ismasters.push(doc);
+        if (isHello(doc)) {
+          helloRequests.push(doc);
           request.reply(mock.HELLO);
         } else {
           request.reply({ ok: 1 });
@@ -55,9 +55,9 @@ describe('Topology (unit)', function () {
         client.db().command({ ping: 1 }, err => {
           expect(err).to.not.exist;
 
-          expect(ismasters).to.have.length.greaterThan(1);
-          ismasters.forEach(ismaster =>
-            expect(ismaster)
+          expect(helloRequests).to.have.length.greaterThan(1);
+          helloRequests.forEach(helloRequest =>
+            expect(helloRequest)
               .nested.property('client.platform')
               .to.match(/unified/)
           );
@@ -151,10 +151,10 @@ describe('Topology (unit)', function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
 
-        let initialIsMasterSent = false;
-        if ((doc.ismaster || doc.hello) && !initialIsMasterSent) {
+        let initialHelloSent = false;
+        if (isHello(doc) && !initialHelloSent) {
           request.reply(mock.HELLO);
-          initialIsMasterSent = true;
+          initialHelloSent = true;
         } else {
           // black hole all other operations
         }
@@ -187,7 +187,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown and reset pool on `node is recovering` error', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (isHello(doc)) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'node is recovering', code: 11600 });
@@ -224,7 +224,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown and NOT reset pool on stepdown errors', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (isHello(doc)) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.reply({ ok: 0, message: 'not master' });
@@ -261,7 +261,7 @@ describe('Topology (unit)', function () {
     it('should set server to unknown on non-timeout network error', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
-        if (doc.ismaster || doc.hello) {
+        if (isHello(doc)) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
           request.connection.destroy();

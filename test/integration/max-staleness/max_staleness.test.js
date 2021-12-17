@@ -3,6 +3,7 @@ const { Long } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
 const { ReadPreference } = require('../../../src');
+const { isHello } = require('../../../src/utils');
 
 const test = {};
 // TODO (NODE-3799): convert these to run against a real server
@@ -15,11 +16,11 @@ describe('Max Staleness', function () {
       const defaultFields = Object.assign({}, mock.HELLO, { msg: 'isdbgrid' });
 
       // Primary server states
-      const serverIsMaster = [Object.assign({}, defaultFields)];
+      const serverIsPrimary = [Object.assign({}, defaultFields)];
       server.setMessageHandler(request => {
         var doc = request.document;
-        if (doc.ismaster || doc.hello) {
-          request.reply(serverIsMaster[0]);
+        if (isHello(doc)) {
+          request.reply(serverIsPrimary[0]);
           return;
         }
 
