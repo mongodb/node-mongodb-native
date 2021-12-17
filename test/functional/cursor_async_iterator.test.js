@@ -88,7 +88,7 @@ describe('Cursor Async Iterator Tests', function () {
   });
   context('custom promise library', () => {
     let client, collection, promiseSpy;
-    before(async function () {
+    beforeEach(async function () {
       promiseSpy = Sinon.spy(BluebirdPromise.prototype, 'then');
       client = this.configuration.newClient({}, { promiseLibrary: BluebirdPromise });
 
