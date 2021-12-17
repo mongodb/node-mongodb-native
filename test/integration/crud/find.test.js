@@ -1,9 +1,8 @@
 'use strict';
-const test = require('./shared').assert;
-const { setupDatabase, withMonitoredClient } = require('./shared');
+const { assert: test, setupDatabase, withMonitoredClient } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../src');
+const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../../src');
 
 describe('Find', function () {
   before(function () {
