@@ -40,8 +40,7 @@ rm -rf libmongocrypt mongo-c-driver
 git clone https://github.com/mongodb-js/libmongocrypt.git
 pushd libmongocrypt
 git fetch --tags
-#git checkout "$CSFLE_GIT_REF" -b csfle-custom
-git checkout "7896064885e05ad494362b383cbbb9eade98c7ae" -b csfle-custom
+git checkout "$CSFLE_GIT_REF" -b csfle-custom
 popd # libmongocrypt
 
 git clone https://github.com/mongodb/mongo-c-driver.git
