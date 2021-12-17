@@ -1,8 +1,8 @@
 'use strict';
-var test = require('./shared').assert;
+const { assert: test } = require('../shared');
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
-const { Decimal128 } = require('../../src');
+const { setupDatabase } = require('../shared');
+const { Decimal128 } = require('../../../src');
 
 describe('Decimal128', function () {
   before(function () {
