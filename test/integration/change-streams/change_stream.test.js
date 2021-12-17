@@ -509,7 +509,9 @@ describe('Change Streams', function () {
     }
   });
 
-  it('should cache the change stream resume token using promises', {
+  // TODO: NODE-3819: Unskip flaky MacOS tests.
+  const maybeIt = process.platform === 'darwin' ? it.skip : it;
+  maybeIt('should cache the change stream resume token using promises', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function () {
       const configuration = this.configuration;

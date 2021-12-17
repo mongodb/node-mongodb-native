@@ -82,7 +82,8 @@ describe('Write Concern', function () {
 
     after(() => mock.cleanup());
 
-    it('should pipe writeConcern from client down to API call', function () {
+    // TODO: NODE-3816
+    it.skip('should pipe writeConcern from client down to API call', function () {
       server.setMessageHandler(request => {
         if (request.document && request.document[LEGACY_HELLO_COMMAND]) {
           return request.reply(mock.HELLO);

@@ -4,7 +4,9 @@
 const setupDatabase = require('../shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe('examples(change-stream):', function () {
+// TODO: NODE-3819: Unskip flaky MacOS/Windows tests.
+const maybeDescribe = process.platform !== 'linux' ? describe.skip : describe;
+maybeDescribe('examples(change-stream):', function () {
   let client;
   let db;
 

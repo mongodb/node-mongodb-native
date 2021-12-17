@@ -72,7 +72,7 @@ describe('Kerberos', function () {
       client.connect(function (err) {
         expect(err).to.exist;
         expect(err.message).to.match(
-          /(Error from KDC: LOOKING_UP_SERVER)|(not found in Kerberos database)/
+          /(Error from KDC: LOOKING_UP_SERVER)|(not found in Kerberos database)|(UNKNOWN_SERVER)/
         );
         done();
       });
@@ -85,7 +85,7 @@ describe('Kerberos', function () {
       client.connect(function (err) {
         expect(err).to.exist;
         expect(err.message).to.match(
-          /(Error from KDC: LOOKING_UP_SERVER)|(not found in Kerberos database)/
+          /(Error from KDC: LOOKING_UP_SERVER)|(not found in Kerberos database)|(UNKNOWN_SERVER)/
         );
         done();
       });

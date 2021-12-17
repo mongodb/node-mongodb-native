@@ -118,7 +118,7 @@ functions:
       type: test
       params:
         working_dir: src
-        timeout_secs: 60
+        timeout_secs: 300
         script: |
           ${PREPARE_SHELL}
 
@@ -186,7 +186,7 @@ functions:
       type: test
       params:
         working_dir: src
-        timeout_secs: 60
+        timeout_secs: 300
         script: |
           ${PREPARE_SHELL}
 

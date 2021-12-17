@@ -1655,7 +1655,8 @@ describe('Find', function () {
     }
   });
 
-  it('shouldCorrectlyIterateOverCollection', {
+  // TODO: NODE-3819: Unskip flaky tests.
+  it.skip('shouldCorrectlyIterateOverCollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },

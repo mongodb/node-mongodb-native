@@ -12,7 +12,9 @@ describe('Change Streams Spec - Unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')));
 });
 
-describe('Change Stream Spec - v1', function () {
+// TODO: NODE-3819: Unskip flaky MacOS tests.
+const maybeDescribe = process.platform === 'darwin' ? describe.skip : describe;
+maybeDescribe('Change Stream Spec - v1', function () {
   let globalClient;
   let ctx;
   let events;
