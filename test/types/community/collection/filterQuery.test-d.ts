@@ -1,4 +1,15 @@
-import { BSONRegExp, Decimal128, ObjectId } from 'bson';
+import {
+  Binary,
+  BSONRegExp,
+  BSONSymbol,
+  Code,
+  DBRef,
+  Decimal128,
+  Long,
+  MaxKey,
+  MinKey,
+  ObjectId
+} from 'bson';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
 import { Collection, Filter, MongoClient, WithId } from '../../../../src';
@@ -16,6 +27,11 @@ const db = client.db('test');
  * Test the generic Filter using collection.find<T>() method
  */
 
+interface HumanModel {
+  _id: ObjectId;
+  name: string;
+}
+
 // a collection model for all possible MongoDB BSON types and TypeScript types
 interface PetModel {
   _id: ObjectId; // ObjectId field
@@ -24,13 +40,41 @@ interface PetModel {
   age: number; // number field
   type: 'dog' | 'cat' | 'fish'; // union field
   isCute: boolean; // boolean field
-  bestFriend?: PetModel; // object field (Embedded/Nested Documents)
+  bestFriend?: HumanModel; // object field (Embedded/Nested Documents)
   createdAt: Date; // date field
+  numOfPats: Long; // long field
   treats: string[]; // array of string
   playTimePercent: Decimal128; // bson Decimal128 type
-  readonly friends?: ReadonlyArray<PetModel>; // readonly array of objects
-  playmates?: PetModel[]; // writable array of objects
+  readonly friends?: ReadonlyArray<HumanModel>; // readonly array of objects
+  playmates?: HumanModel[]; // writable array of objects
+  laps?: Map<string, number>; // map field
+  // Object with multiple nested levels
+  meta?: {
+    updatedAt?: Date;
+    deep?: {
+      nestedArray: number[];
+      nested?: {
+        level?: number;
+      };
+    };
+  };
+
+  binary: Binary;
+  code: Code;
+  minKey: MinKey;
+  maxKey: MaxKey;
+  dBRef: DBRef;
+  bSONSymbol: BSONSymbol;
+
+  regex: RegExp;
+
+  fn: (...args: any[]) => any;
 }
+
+const john = {
+  _id: new ObjectId('577fa2d90c4cc47e31cf4b6a'),
+  name: 'John'
+};
 
 const spot = {
   _id: new ObjectId('577fa2d90c4cc47e31cf4b6f'),
@@ -40,8 +84,22 @@ const spot = {
   type: 'dog' as const,
   isCute: true,
   createdAt: new Date(),
+  numOfPats: Long.fromBigInt(100000000n),
   treats: ['kibble', 'bone'],
-  playTimePercent: new Decimal128('0.999999')
+  playTimePercent: new Decimal128('0.999999'),
+
+  binary: new Binary('', 2),
+  code: new Code(() => true),
+  minKey: new MinKey(),
+  maxKey: new MaxKey(),
+  dBRef: new DBRef('collection', new ObjectId()),
+  bSONSymbol: new BSONSymbol('hi'),
+
+  regex: /a/,
+
+  fn() {
+    return 'hi';
+  }
 };
 
 expectAssignable<PetModel>(spot);
@@ -49,7 +107,7 @@ expectAssignable<PetModel>(spot);
 const collectionT = db.collection<PetModel>('test.filterQuery');
 
 // Assert that collection.find uses the Filter helper like so:
-const filter: Filter<PetModel> = {};
+const filter: Filter<PetModel> = {} as Filter<PetModel>;
 collectionT.find(filter);
 collectionT.find(spot); // a whole model definition is also a valid filter
 // Now tests below can directly test the Filter helper, and are implicitly checking collection.find
@@ -73,6 +131,10 @@ expectNotType<Filter<PetModel>>({ name: 23 });
 expectNotType<Filter<PetModel>>({ name: { suffix: 'Jr' } });
 expectNotType<Filter<PetModel>>({ name: ['Spot'] });
 
+// it should not accept wrong types for function fields
+expectNotType<Filter<PetModel>>({ fn: 3 });
+expectAssignable<WithId<PetModel>[]>(await collectionT.find({ fn: () => true }).toArray());
+
 /// it should query __number__ fields
 await collectionT.find({ age: 12 }).toArray();
 /// it should not accept wrong types for number fields
@@ -83,14 +145,67 @@ expectNotType<Filter<PetModel>>({ age: [23, 43] });
 
 /// it should query __nested document__ fields only by exact match
 // TODO: we currently cannot enforce field order but field order is important for mongo
-await collectionT.find({ bestFriend: spot }).toArray();
+await collectionT.find({ bestFriend: john }).toArray();
 /// nested documents query should contain all required fields
-expectNotType<Filter<PetModel>>({ bestFriend: { family: 'Andersons' } });
+expectNotType<Filter<PetModel>>({ bestFriend: { name: 'Andersons' } });
 /// it should not accept wrong types for nested document fields
 expectNotType<Filter<PetModel>>({ bestFriend: 21 });
 expectNotType<Filter<PetModel>>({ bestFriend: 'Andersons' });
 expectNotType<Filter<PetModel>>({ bestFriend: [spot] });
-expectNotType<Filter<PetModel>>({ bestFriend: [{ family: 'Andersons' }] });
+expectNotType<Filter<PetModel>>({ bestFriend: [{ name: 'Andersons' }] });
+
+// it should permit all our BSON types as query values
+expectAssignable<Filter<PetModel>>({ binary: new Binary('', 2) });
+expectAssignable<Filter<PetModel>>({ code: new Code(() => true) });
+expectAssignable<Filter<PetModel>>({ minKey: new MinKey() });
+expectAssignable<Filter<PetModel>>({ maxKey: new MaxKey() });
+expectAssignable<Filter<PetModel>>({ dBRef: new DBRef('collection', new ObjectId()) });
+expectAssignable<Filter<PetModel>>({ bSONSymbol: new BSONSymbol('hi') });
+
+// None of the bson types should be broken up into their nested keys
+expectNotType<Filter<PetModel>>({ 'binary.sub_type': 2 });
+expectNotType<Filter<PetModel>>({ 'code.code': 'string' });
+expectNotType<Filter<PetModel>>({ 'minKey._bsontype': 'MinKey' });
+expectNotType<Filter<PetModel>>({ 'maxKey._bsontype': 'MaxKey' });
+expectNotType<Filter<PetModel>>({ 'dBRef.collection': 'collection' });
+expectNotType<Filter<PetModel>>({ 'bSONSymbol.value': 'hi' });
+expectNotType<Filter<PetModel>>({ 'numOfPats.__isLong__': true });
+expectNotType<Filter<PetModel>>({ 'playTimePercent.bytes.BYTES_PER_ELEMENT': 1 });
+expectNotType<Filter<PetModel>>({ 'binary.sub_type': 'blah' });
+expectNotType<Filter<PetModel>>({ 'regex.dotAll': true });
+
+/// it should query __nested document__ fields using dot-notation
+collectionT.find({ 'meta.updatedAt': new Date() });
+collectionT.find({ 'meta.deep.nested.level': 123 });
+collectionT.find({ meta: { deep: { nested: { level: 123 } } } }); // no impact on actual nesting
+collectionT.find({ 'friends.0.name': 'John' });
+collectionT.find({ 'playmates.0.name': 'John' });
+// supports arrays with primitive types
+collectionT.find({ 'treats.0': 'bone' });
+collectionT.find({ 'laps.foo': 123 });
+
+// Handle special BSON types
+collectionT.find({ numOfPats: Long.fromBigInt(2n) });
+collectionT.find({ playTimePercent: new Decimal128('123.2') });
+
+// works with some extreme indexes
+collectionT.find({ 'friends.4294967295.name': 'John' });
+collectionT.find({ 'friends.999999999999999999999999999999999999.name': 'John' });
+
+/// it should not accept wrong types for nested document fields
+expectNotType<Filter<PetModel>>({ 'meta.updatedAt': 123 });
+expectNotType<Filter<PetModel>>({ 'meta.updatedAt': true });
+expectNotType<Filter<PetModel>>({ 'meta.updatedAt': 'now' });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': 'string' });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': true });
+expectNotType<Filter<PetModel>>({ 'meta.deep.nested.level': new Date() });
+expectNotType<Filter<PetModel>>({ 'friends.0.name': 123 });
+expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
+expectNotType<Filter<PetModel>>({ 'laps.foo': 'string' });
+expectNotType<Filter<PetModel>>({ 'treats.0': 123 });
+
+// Nested arrays aren't checked
+expectNotType<Filter<PetModel>>({ 'meta.deep.nestedArray.0': 'not a number' });
 
 /// it should query __array__ fields by exact match
 await collectionT.find({ treats: ['kibble', 'bone'] }).toArray();
@@ -232,10 +347,6 @@ await collectionT.find({ playmates: { $elemMatch: { name: 'MrMeow' } } }).toArra
 expectNotType<Filter<PetModel>>({ name: { $all: ['world', 'world'] } });
 expectNotType<Filter<PetModel>>({ age: { $elemMatch: [1, 2] } });
 expectNotType<Filter<PetModel>>({ type: { $size: 2 } });
-
-// dot key case that shows it is assignable even when the referenced key is the wrong type
-expectAssignable<Filter<PetModel>>({ 'bestFriend.name': 23 }); // using dot notation permits any type for the key
-expectNotType<Filter<PetModel>>({ bestFriend: { name: 23 } });
 
 // ObjectId are not allowed to be used as a query predicate (issue described here: NODE-3758)
 // this only applies to schemas where the _id is not of type ObjectId.

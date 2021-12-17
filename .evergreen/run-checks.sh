@@ -20,12 +20,16 @@ npm run check:lint
 
 npm run check:unit
 
-echo "Typescript $(npx tsc -v)"
-# check resolution uses the default latest types
-echo "import * as mdb from '.'" > file.ts && npx tsc --noEmit --traceResolution file.ts | grep 'mongodb.d.ts' && rm file.ts
+export TSC="./node_modules/typescript/bin/tsc"
 
-npm i --no-save typescript@4.0.2 # there is no 4.0.0
-echo "Typescript $(npx tsc -v)"
-npx tsc --noEmit mongodb.ts34.d.ts
+echo "Typescript $($TSC -v)"
+# check resolution uses the default latest types
+echo "import * as mdb from '.'" > file.ts && $TSC --noEmit --traceResolution file.ts | grep 'mongodb.d.ts' && rm file.ts
+
+npm i --no-save typescript@4.1.6
+echo "Typescript $($TSC -v)"
+$TSC --noEmit mongodb.ts34.d.ts
 # check that resolution uses the downleveled types
-echo "import * as mdb from '.'" > file.ts && npx tsc --noEmit --traceResolution file.ts | grep 'mongodb.ts34.d.ts' && rm file.ts
+echo "import * as mdb from '.'" > file.ts && $TSC --noEmit --traceResolution file.ts | grep 'mongodb.ts34.d.ts' && rm file.ts
+
+rm -f file.ts

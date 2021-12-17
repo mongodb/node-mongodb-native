@@ -46,7 +46,7 @@ For version compatibility matrices, please refer to the following links:
 
 #### Typescript Version
 
-We recommend using the latest version of typescript, however we do provide a [downleveled](https://github.com/sandersn/downlevel-dts#readme) version of the type definitions that we test compiling against `typescript@4.0.2`.
+We recommend using the latest version of typescript, however we do provide a [downleveled](https://github.com/sandersn/downlevel-dts#readme) version of the type definitions that we test compiling against `typescript@4.1.6`.
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes) we consider this support best effort.
 If you run into any unexpected compiler failures please let us know and we will do our best to correct it.
 
