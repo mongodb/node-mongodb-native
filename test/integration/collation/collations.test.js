@@ -2,7 +2,6 @@
 const { setupDatabase } = require('../shared');
 const { expect } = require('chai');
 
-const testContext = {};
 describe('Collation', function () {
   before(function () {
     return setupDatabase(this.configuration);
