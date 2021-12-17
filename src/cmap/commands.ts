@@ -12,7 +12,7 @@ let _requestId = 0;
 
 // Query flags
 const OPTS_TAILABLE_CURSOR = 2;
-const OPTS_SLAVE = 4;
+const OPTS_SECONDARY = 4;
 const OPTS_OPLOG_REPLAY = 8;
 const OPTS_NO_CURSOR_TIMEOUT = 16;
 const OPTS_AWAIT_DATA = 32;
@@ -41,7 +41,7 @@ export interface OpQueryOptions extends CommandOptions {
   ignoreUndefined?: boolean;
   maxBsonSize?: number;
   checkKeys?: boolean;
-  slaveOk?: boolean;
+  secondaryOk?: boolean;
 
   requestId?: number;
   moreToCome?: boolean;
@@ -67,7 +67,7 @@ export class Query {
   checkKeys: boolean;
   batchSize: number;
   tailable: boolean;
-  slaveOk: boolean;
+  secondaryOk: boolean;
   oplogReplay: boolean;
   noCursorTimeout: boolean;
   awaitData: boolean;
@@ -112,7 +112,7 @@ export class Query {
 
     // Flags
     this.tailable = false;
-    this.slaveOk = typeof options.slaveOk === 'boolean' ? options.slaveOk : false;
+    this.secondaryOk = typeof options.secondaryOk === 'boolean' ? options.secondaryOk : false;
     this.oplogReplay = false;
     this.noCursorTimeout = false;
     this.awaitData = false;
@@ -146,8 +146,8 @@ export class Query {
       flags |= OPTS_TAILABLE_CURSOR;
     }
 
-    if (this.slaveOk) {
-      flags |= OPTS_SLAVE;
+    if (this.secondaryOk) {
+      flags |= OPTS_SECONDARY;
     }
 
     if (this.oplogReplay) {

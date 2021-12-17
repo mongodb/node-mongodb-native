@@ -4,7 +4,7 @@ import { ReadPreference } from '../../src';
 
 describe('class ReadPreference', function () {
   const maxStalenessSeconds = 1234;
-  const { PRIMARY, SECONDARY, NEAREST } = ReadPreference;
+  const { PRIMARY, PRIMARY_PREFERRED, SECONDARY, SECONDARY_PREFERRED, NEAREST } = ReadPreference;
   const TAGS = [{ loc: 'dc' }];
   describe('::constructor', function () {
     it('should accept (mode)', function () {
@@ -130,6 +130,48 @@ describe('class ReadPreference', function () {
       expect(() =>
         ReadPreference.fromOptions({ readPreference: PRIMARY, maxStalenessSeconds })
       ).to.throw('Primary read preference cannot be combined with maxStalenessSeconds');
+    });
+  });
+
+  describe('secondaryOk()', function () {
+    it('should be false when readPreference is Primary', function () {
+      const readPreference = ReadPreference.fromOptions({
+        readPreference: PRIMARY
+      });
+      expect(readPreference.secondaryOk()).to.be.false;
+      expect(readPreference.slaveOk()).to.be.false;
+    });
+
+    it('should be true when readPreference is Primary Preferred', function () {
+      const readPreference = ReadPreference.fromOptions({
+        readPreference: PRIMARY_PREFERRED
+      });
+      expect(readPreference.secondaryOk()).to.be.true;
+      expect(readPreference.slaveOk()).to.be.true;
+    });
+
+    it('should be true when readPreference is Secondary', function () {
+      const readPreference = ReadPreference.fromOptions({
+        readPreference: SECONDARY
+      });
+      expect(readPreference.secondaryOk()).to.be.true;
+      expect(readPreference.slaveOk()).to.be.true;
+    });
+
+    it('should be true when readPreference is Secondary Preferred', function () {
+      const readPreference = ReadPreference.fromOptions({
+        readPreference: SECONDARY_PREFERRED
+      });
+      expect(readPreference.secondaryOk()).to.be.true;
+      expect(readPreference.slaveOk()).to.be.true;
+    });
+
+    it('should be true when readPreference is Nearest', function () {
+      const readPreference = ReadPreference.fromOptions({
+        readPreference: NEAREST
+      });
+      expect(readPreference.secondaryOk()).to.be.true;
+      expect(readPreference.slaveOk()).to.be.true;
     });
   });
 });

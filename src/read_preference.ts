@@ -232,19 +232,27 @@ export class ReadPreference {
   }
 
   /**
-   * Indicates that this readPreference needs the "slaveOk" bit when sent over the wire
-   *
+   * Indicates that this readPreference needs the "secondaryOk" bit when sent over the wire
+   * @deprecated Use secondaryOk instead
    * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
    */
   slaveOk(): boolean {
-    const NEEDS_SLAVEOK = new Set<string>([
+    return this.secondaryOk();
+  }
+
+  /**
+   * Indicates that this readPreference needs the "SecondaryOk" bit when sent over the wire
+   * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
+   */
+  secondaryOk(): boolean {
+    const NEEDS_SECONDARYOK = new Set<string>([
       ReadPreference.PRIMARY_PREFERRED,
       ReadPreference.SECONDARY,
       ReadPreference.SECONDARY_PREFERRED,
       ReadPreference.NEAREST
     ]);
 
-    return NEEDS_SLAVEOK.has(this.mode);
+    return NEEDS_SECONDARYOK.has(this.mode);
   }
 
   /**
