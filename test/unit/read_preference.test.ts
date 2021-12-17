@@ -134,7 +134,7 @@ describe('class ReadPreference', function () {
   });
 
   describe('secondaryOk()', function () {
-    it('should be true when readPreference is Primary', function () {
+    it('should be false when readPreference is Primary', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: PRIMARY
       });
