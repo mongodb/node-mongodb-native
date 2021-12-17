@@ -1,11 +1,16 @@
 'use strict';
 
-var expect = require('chai').expect;
+const { expect } = require('chai');
+const { PromiseProvider } = require('../../src/promise_provider');
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
 describe('Optional PromiseLibrary / maybePromise', function () {
+  afterEach(() => {
+    PromiseProvider.set(Promise);
+  });
+
   it('should correctly implement custom dependency-less promise', function (done) {
     const getCustomPromise = v => new CustomPromise(resolve => resolve(v));
     const getNativePromise = v => new Promise(resolve => resolve(v));

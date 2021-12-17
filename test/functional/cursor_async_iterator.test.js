@@ -3,6 +3,7 @@
 const { expect } = require('chai');
 const Sinon = require('sinon');
 const { Promise: BluebirdPromise } = require('bluebird');
+const { PromiseProvider } = require('../../src/promise_provider');
 
 describe('Cursor Async Iterator Tests', function () {
   context('default promise library', function () {
@@ -111,6 +112,7 @@ describe('Cursor Async Iterator Tests', function () {
 
     afterEach(() => {
       promiseSpy.restore();
+      PromiseProvider.set(Promise);
       return client.close();
     });
 
