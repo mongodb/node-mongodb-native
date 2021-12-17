@@ -208,7 +208,8 @@ describe('Cursor Streams', function () {
   });
 
   // TODO: NODE-3819: Unskip flaky MacOS tests.
-  it.skip('should stream documents across getMore command and count correctly', {
+  const maybeIt = process.platform === 'darwin' ? it.skip : it;
+  maybeIt('should stream documents across getMore command and count correctly', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },

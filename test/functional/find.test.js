@@ -1655,7 +1655,7 @@ describe('Find', function () {
     }
   });
 
-  // TODO: NODE-3819: Unskip flaky MacOS tests.
+  // TODO: NODE-3819: Unskip flaky tests.
   it.skip('shouldCorrectlyIterateOverCollection', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }

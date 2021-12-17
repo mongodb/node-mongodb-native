@@ -24,7 +24,7 @@ describe('monitoring', function () {
     return mock.createServer().then(server => (mockServer = server));
   });
 
-  // TODO: NODE-3819: Unskip flaky MacOS tests.
+  // TODO: NODE-3819: Unskip flaky tests.
   it.skip('should record roundTripTime', function (done) {
     mockServer.setMessageHandler(request => {
       const doc = request.document;
