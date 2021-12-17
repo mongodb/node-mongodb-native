@@ -138,40 +138,40 @@ describe('class ReadPreference', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: PRIMARY
       });
-      expect(readPreference.secondaryOk()).to.equal(false);
-      expect(readPreference.slaveOk()).to.equal(false);
+      expect(readPreference.secondaryOk()).to.be.false;
+      expect(readPreference.slaveOk()).to.be.false;
     });
 
     it('should be true when readPreference is Primary Preferred', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: PRIMARY_PREFERRED
       });
-      expect(readPreference.secondaryOk()).to.equal(true);
-      expect(readPreference.slaveOk()).to.equal(true);
+      expect(readPreference.secondaryOk()).to.be.true;
+      expect(readPreference.slaveOk()).to.be.true;
     });
 
     it('should be true when readPreference is Secondary', function () {
       const readPreference = ReadPreference.fromOptions({
-        readPreference: PRIMARY_PREFERRED
+        readPreference: SECONDARY
       });
-      expect(readPreference.secondaryOk()).to.equal(true);
-      expect(readPreference.slaveOk()).to.equal(true);
+      expect(readPreference.secondaryOk()).to.be.true;
+      expect(readPreference.slaveOk()).to.be.true;
     });
 
     it('should be true when readPreference is Secondary Preferred', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: SECONDARY_PREFERRED
       });
-      expect(readPreference.secondaryOk()).to.equal(true);
-      expect(readPreference.slaveOk()).to.equal(true);
+      expect(readPreference.secondaryOk()).to.be.true;
+      expect(readPreference.slaveOk()).to.be.true;
     });
 
     it('should be true when readPreference is Nearest', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: NEAREST
       });
-      expect(readPreference.secondaryOk()).to.equal(true);
-      expect(readPreference.slaveOk()).to.equal(true);
+      expect(readPreference.secondaryOk()).to.be.true;
+      expect(readPreference.slaveOk()).to.be.true;
     });
   });
 });
