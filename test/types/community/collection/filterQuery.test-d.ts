@@ -1,4 +1,15 @@
-import { BSONRegExp, Decimal128, Long, ObjectId } from 'bson';
+import {
+  Binary,
+  BSONRegExp,
+  BSONSymbol,
+  Code,
+  DBRef,
+  Decimal128,
+  Long,
+  MaxKey,
+  MinKey,
+  ObjectId
+} from 'bson';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
 import { Collection, Filter, MongoClient, WithId } from '../../../../src';
@@ -47,6 +58,17 @@ interface PetModel {
       };
     };
   };
+
+  binary: Binary;
+  code: Code;
+  minKey: MinKey;
+  maxKey: MaxKey;
+  dBRef: DBRef;
+  bSONSymbol: BSONSymbol;
+
+  regex: RegExp;
+
+  fn: (...args: any[]) => any;
 }
 
 const john = {
@@ -64,7 +86,20 @@ const spot = {
   createdAt: new Date(),
   numOfPats: Long.fromBigInt(100000000n),
   treats: ['kibble', 'bone'],
-  playTimePercent: new Decimal128('0.999999')
+  playTimePercent: new Decimal128('0.999999'),
+
+  binary: new Binary('', 2),
+  code: new Code(() => true),
+  minKey: new MinKey(),
+  maxKey: new MaxKey(),
+  dBRef: new DBRef('collection', new ObjectId()),
+  bSONSymbol: new BSONSymbol('hi'),
+
+  regex: /a/,
+
+  fn() {
+    return 'hi';
+  }
 };
 
 expectAssignable<PetModel>(spot);
@@ -72,7 +107,7 @@ expectAssignable<PetModel>(spot);
 const collectionT = db.collection<PetModel>('test.filterQuery');
 
 // Assert that collection.find uses the Filter helper like so:
-const filter: Filter<PetModel> = {};
+const filter: Filter<PetModel> = {} as Filter<PetModel>;
 collectionT.find(filter);
 collectionT.find(spot); // a whole model definition is also a valid filter
 // Now tests below can directly test the Filter helper, and are implicitly checking collection.find
@@ -96,6 +131,10 @@ expectNotType<Filter<PetModel>>({ name: 23 });
 expectNotType<Filter<PetModel>>({ name: { suffix: 'Jr' } });
 expectNotType<Filter<PetModel>>({ name: ['Spot'] });
 
+// it should not accept wrong types for function fields
+expectNotType<Filter<PetModel>>({ fn: 3 });
+expectAssignable<WithId<PetModel>[]>(await collectionT.find({ fn: () => true }).toArray());
+
 /// it should query __number__ fields
 await collectionT.find({ age: 12 }).toArray();
 /// it should not accept wrong types for number fields
@@ -114,6 +153,26 @@ expectNotType<Filter<PetModel>>({ bestFriend: 21 });
 expectNotType<Filter<PetModel>>({ bestFriend: 'Andersons' });
 expectNotType<Filter<PetModel>>({ bestFriend: [spot] });
 expectNotType<Filter<PetModel>>({ bestFriend: [{ name: 'Andersons' }] });
+
+// it should permit all our BSON types as query values
+expectAssignable<Filter<PetModel>>({ binary: new Binary('', 2) });
+expectAssignable<Filter<PetModel>>({ code: new Code(() => true) });
+expectAssignable<Filter<PetModel>>({ minKey: new MinKey() });
+expectAssignable<Filter<PetModel>>({ maxKey: new MaxKey() });
+expectAssignable<Filter<PetModel>>({ dBRef: new DBRef('collection', new ObjectId()) });
+expectAssignable<Filter<PetModel>>({ bSONSymbol: new BSONSymbol('hi') });
+
+// None of the bson types should be broken up into their nested keys
+expectNotType<Filter<PetModel>>({ 'binary.sub_type': 2 });
+expectNotType<Filter<PetModel>>({ 'code.code': 'string' });
+expectNotType<Filter<PetModel>>({ 'minKey._bsontype': 'MinKey' });
+expectNotType<Filter<PetModel>>({ 'maxKey._bsontype': 'MaxKey' });
+expectNotType<Filter<PetModel>>({ 'dBRef.collection': 'collection' });
+expectNotType<Filter<PetModel>>({ 'bSONSymbol.value': 'hi' });
+expectNotType<Filter<PetModel>>({ 'numOfPats.__isLong__': true });
+expectNotType<Filter<PetModel>>({ 'playTimePercent.bytes.BYTES_PER_ELEMENT': 1 });
+expectNotType<Filter<PetModel>>({ 'binary.sub_type': 'blah' });
+expectNotType<Filter<PetModel>>({ 'regex.dotAll': true });
 
 /// it should query __nested document__ fields using dot-notation
 collectionT.find({ 'meta.updatedAt': new Date() });
@@ -144,8 +203,6 @@ expectNotType<Filter<PetModel>>({ 'friends.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'laps.foo': 'string' });
 expectNotType<Filter<PetModel>>({ 'treats.0': 123 });
-expectNotType<Filter<PetModel>>({ 'numOfPats.__isLong__': true });
-expectNotType<Filter<PetModel>>({ 'playTimePercent.bytes.BYTES_PER_ELEMENT': 1 });
 
 // Nested arrays aren't checked
 expectNotType<Filter<PetModel>>({ 'meta.deep.nestedArray.0': 'not a number' });

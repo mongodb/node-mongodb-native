@@ -483,15 +483,12 @@ export type NestedPaths<Type> = Type extends
   | string
   | number
   | boolean
-  | BSONRegExp
-  | Binary
   | Date
-  | Decimal128
-  | Double
-  | Int32
-  | Long
-  | ObjectId
-  | Timestamp
+  | RegExp
+  | Buffer
+  | Uint8Array
+  | ((...args: any[]) => any)
+  | { _bsontype: string }
   ? []
   : Type extends ReadonlyArray<infer ArrayType>
   ? [number, ...NestedPaths<ArrayType>]
