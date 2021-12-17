@@ -133,8 +133,8 @@ describe('class ReadPreference', function () {
     });
   });
 
-  describe('::secondaryOk', function () {
-    it('secondaryOk should be true when readPreference is Primary', function () {
+  describe('secondaryOk()', function () {
+    it('should be true when readPreference is Primary', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: PRIMARY
       });
@@ -142,7 +142,7 @@ describe('class ReadPreference', function () {
       expect(readPreference.slaveOk()).to.equal(false);
     });
 
-    it('secondaryOk should be true when readPreference is Primary Preferred', function () {
+    it('should be true when readPreference is Primary Preferred', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: PRIMARY_PREFERRED
       });
@@ -150,7 +150,7 @@ describe('class ReadPreference', function () {
       expect(readPreference.slaveOk()).to.equal(true);
     });
 
-    it('secondaryOk should be true when readPreference is Secondary', function () {
+    it('should be true when readPreference is Secondary', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: PRIMARY_PREFERRED
       });
@@ -158,7 +158,7 @@ describe('class ReadPreference', function () {
       expect(readPreference.slaveOk()).to.equal(true);
     });
 
-    it('secondaryOk should be true when readPreference is Secondary Preferred', function () {
+    it('should be true when readPreference is Secondary Preferred', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: SECONDARY_PREFERRED
       });
@@ -166,7 +166,7 @@ describe('class ReadPreference', function () {
       expect(readPreference.slaveOk()).to.equal(true);
     });
 
-    it('secondaryOk should be true when readPreference is Nearest', function () {
+    it('should be true when readPreference is Nearest', function () {
       const readPreference = ReadPreference.fromOptions({
         readPreference: NEAREST
       });
