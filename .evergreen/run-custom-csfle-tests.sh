@@ -41,12 +41,14 @@ git clone https://github.com/mongodb-js/libmongocrypt.git
 pushd libmongocrypt
 git fetch --tags
 git checkout "$CSFLE_GIT_REF" -b csfle-custom
+echo "checked out libmongocrypt at $(git rev-parse HEAD)"
 popd # libmongocrypt
 
 git clone https://github.com/mongodb/mongo-c-driver.git
 pushd mongo-c-driver
 git fetch --tags
 git checkout "$CDRIVER_GIT_REF" -b cdriver-custom
+echo "checked out C driver at $(git rev-parse HEAD)"
 popd # mongo-c-driver
 
 pushd libmongocrypt/bindings/node
