@@ -659,6 +659,18 @@ functions:
           export CDRIVER_GIT_REF="${CDRIVER_GIT_REF}"
           EOT
     - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          cd ${DRIVERS_TOOLS}/.evergreen/csfle
+          . ./activate_venv.sh
+    - command: shell.exec
+      params:
+        background: true
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/csfle
+          ./kmstlsvenv/bin/python3 -u kms_kmip_server.py
+    - command: shell.exec
       type: test
       params:
         working_dir: src
