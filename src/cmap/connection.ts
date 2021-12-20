@@ -126,16 +126,17 @@ export interface GetMoreOptions extends CommandOptions {
 
 /** @public */
 export interface ProxyOptions {
-  host: string;
-  port?: number;
-  username?: string;
-  password?: string;
+  proxyHost?: string;
+  proxyPort?: number;
+  proxyUsername?: string;
+  proxyPassword?: string;
 }
 
 /** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
-    StreamDescriptionOptions {
+    StreamDescriptionOptions,
+    ProxyOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -154,7 +155,6 @@ export interface ConnectionOptions
   noDelay?: boolean;
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
-  proxyOptions?: ProxyOptions;
 
   metadata: ClientMetadata;
 }
@@ -767,7 +767,7 @@ function messageHandler(conn: Connection) {
 }
 
 function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
-  if (options.proxyOptions) {
+  if (options.proxyHost) {
     // If proxy options are specified, the properties of `stream` itself
     // will not accurately reflect what endpoint this is connected to.
     return options.hostAddress.toString();

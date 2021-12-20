@@ -1,8 +1,8 @@
-'use strict';
+import { expect } from 'chai';
+import ConnectionString from 'mongodb-connection-string-url';
+
 import { MongoClient } from '../../src';
 import { MongoParseError } from '../../src/error';
-import ConnectionString from 'mongodb-connection-string-url';
-import { expect } from 'chai';
 
 /**
  * The SOCKS5_CONFIG environment variable is either a JSON 4-tuple
@@ -59,10 +59,8 @@ describe('Socks5 Connectivity', function () {
       it('fails to connect to a single host (config options)', async function () {
         try {
           await testConnection(singleConnectionString.toString(), {
-            proxyOptions: {
-              host: proxyHost,
-              port: proxyPort
-            },
+            proxyHost,
+            proxyPort,
             directConnection: true
           });
         } catch (err) {
@@ -90,10 +88,8 @@ describe('Socks5 Connectivity', function () {
       it('fails to connect to a replica set (config options)', async function () {
         try {
           await testConnection(rsConnectionString.toString(), {
-            proxyOptions: {
-              host: proxyHost,
-              port: proxyPort
-            }
+            proxyHost,
+            proxyPort
           });
         } catch (err) {
           expect(err.name).to.equal('MongoServerSelectionError');
@@ -140,16 +136,14 @@ describe('Socks5 Connectivity', function () {
 
       it('can connect to a single host (config options)', async function () {
         await testConnection(singleConnectionString.toString(), {
-          proxyOptions: {
-            host: proxyHost,
-            port: proxyPort,
-            ...(proxyUsername
-              ? {}
-              : {
-                  username: 'nonexistentuser',
-                  password: 'badauth'
-                })
-          },
+          proxyHost,
+          proxyPort,
+          ...(proxyUsername
+            ? {}
+            : {
+                proxyUsername: 'nonexistentuser',
+                proxyPassword: 'badauth'
+              }),
           directConnection: true
         });
       });
@@ -165,16 +159,14 @@ describe('Socks5 Connectivity', function () {
 
       it('can connect to a replica set (config options)', async function () {
         await testConnection(rsConnectionString.toString(), {
-          proxyOptions: {
-            host: proxyHost,
-            port: proxyPort,
-            ...(proxyUsername
-              ? {}
-              : {
-                  username: 'nonexistentuser',
-                  password: 'badauth'
-                })
-          }
+          proxyHost,
+          proxyPort,
+          ...(proxyUsername
+            ? {}
+            : {
+                proxyUsername: 'nonexistentuser',
+                proxyPassword: 'badauth'
+              })
         });
       });
     });
@@ -195,16 +187,14 @@ describe('Socks5 Connectivity', function () {
       it('can connect to a single host (config options, with directConnection)', async function () {
         expect(
           await testConnection(singleConnectionString.toString(), {
-            proxyOptions: {
-              host: proxyHost,
-              port: proxyPort,
-              ...(proxyUsername
-                ? {
-                    username: proxyUsername,
-                    password: proxyPassword
-                  }
-                : {})
-            },
+            proxyHost,
+            proxyPort,
+            ...(proxyUsername
+              ? {
+                  proxyUsername,
+                  proxyPassword
+                }
+              : {}),
             directConnection: true
           })
         ).to.equal('Single');
@@ -225,16 +215,14 @@ describe('Socks5 Connectivity', function () {
       it('can connect to a single host (config options, without directConnection)', async function () {
         expect(
           await testConnection(singleConnectionString.toString(), {
-            proxyOptions: {
-              host: proxyHost,
-              port: proxyPort,
-              ...(proxyUsername
-                ? {
-                    username: proxyUsername,
-                    password: proxyPassword
-                  }
-                : {})
-            },
+            proxyHost,
+            proxyPort,
+            ...(proxyUsername
+              ? {
+                  proxyUsername,
+                  proxyPassword
+                }
+              : {}),
             directConnection: false
           })
         ).to.equal('ReplicaSetWithPrimary');
@@ -254,32 +242,28 @@ describe('Socks5 Connectivity', function () {
       it('can connect to a replica set (config options)', async function () {
         expect(
           await testConnection(rsConnectionString.toString(), {
-            proxyOptions: {
-              host: proxyHost,
-              port: proxyPort,
-              ...(proxyUsername
-                ? {
-                    username: proxyUsername,
-                    password: proxyPassword
-                  }
-                : {})
-            }
+            proxyHost,
+            proxyPort,
+            ...(proxyUsername
+              ? {
+                  proxyUsername,
+                  proxyPassword
+                }
+              : {})
           })
         ).to.equal('ReplicaSetWithPrimary');
       });
 
       it('does not mention the proxy in command monitoring events', async function () {
         const client = new MongoClient(singleConnectionString.toString(), {
-          proxyOptions: {
-            host: proxyHost,
-            port: proxyPort,
-            ...(proxyUsername
-              ? {
-                  username: proxyUsername,
-                  password: proxyPassword
-                }
-              : {})
-          },
+          proxyHost,
+          proxyPort,
+          ...(proxyUsername
+            ? {
+                proxyUsername,
+                proxyPassword
+              }
+            : {}),
           directConnection: true,
           monitorCommands: true
         });
@@ -296,12 +280,12 @@ describe('Socks5 Connectivity', function () {
 
   context('MongoClient option validation', () => {
     for (const proxyOptions of [
-      { port: 1080 },
-      { username: 'abc' },
-      { password: 'def' },
-      { port: 1080, username: 'abc', password: 'def' },
-      { host: 'localhost', username: 'abc' },
-      { host: 'localhost', password: 'def' }
+      { proxyPort: 1080 },
+      { proxyUsername: 'abc' },
+      { proxyPassword: 'def' },
+      { proxyPort: 1080, proxyUsername: 'abc', proxyPassword: 'def' },
+      { proxyHost: 'localhost', proxyUsername: 'abc' },
+      { proxyHost: 'localhost', proxyPassword: 'def' }
     ]) {
       it(`rejects invalid MongoClient options ${JSON.stringify(proxyOptions)}`, () => {
         expect(() => new MongoClient('mongodb://localhost', proxyOptions)).to.throw(

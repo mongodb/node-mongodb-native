@@ -31,7 +31,7 @@ import { Plain } from './auth/plain';
 import { AuthMechanism } from './auth/providers';
 import { ScramSHA1, ScramSHA256 } from './auth/scram';
 import { X509 } from './auth/x509';
-import { Connection, ConnectionOptions, CryptoConnection, ProxyOptions } from './connection';
+import { Connection, ConnectionOptions, CryptoConnection } from './connection';
 import {
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
@@ -354,7 +354,6 @@ function makeConnection(
     ((options.keepAliveInitialDelay ?? 120000) > socketTimeoutMS
       ? Math.round(socketTimeoutMS / 2)
       : options.keepAliveInitialDelay) ?? 120000;
-  const proxyOptions = options.proxyOptions;
   const existingSocket = options.existingSocket;
 
   let socket: Stream;
@@ -366,15 +365,13 @@ function makeConnection(
     _callback(err, ret);
   };
 
-  if (proxyOptions?.host != null) {
+  if (options.proxyHost != null) {
     // Currently, only Socks5 is supported.
     return makeSocks5Connection(
       {
         ...options,
-        connectTimeoutMS, // Should always be present for Socks5
-        proxyOptions: undefined
+        connectTimeoutMS // Should always be present for Socks5
       },
-      proxyOptions,
       callback
     );
   }
@@ -441,19 +438,19 @@ function makeConnection(
   }
 }
 
-function makeSocks5Connection(
-  options: MakeConnectionOptions & { proxyOptions: undefined },
-  proxyOptions: ProxyOptions,
-  callback: Callback<Stream>
-) {
-  const hostAddress = HostAddress.fromHostPort(proxyOptions.host, proxyOptions.port ?? 1080);
+function makeSocks5Connection(options: MakeConnectionOptions, callback: Callback<Stream>) {
+  const hostAddress = HostAddress.fromHostPort(
+    options.proxyHost ?? '', // proxyHost is guaranteed to set here
+    options.proxyPort ?? 1080
+  );
 
   // First, connect to the proxy server itself:
   makeConnection(
     {
       ...options,
       hostAddress,
-      tls: false
+      tls: false,
+      proxyHost: undefined
     },
     (err, rawSocket) => {
       if (err) {
@@ -482,8 +479,8 @@ function makeSocks5Connection(
             host: 'iLoveJavaScript',
             port: 0,
             type: 5,
-            userId: proxyOptions.username || undefined,
-            password: proxyOptions.password || undefined
+            userId: options.proxyUsername || undefined,
+            password: options.proxyPassword || undefined
           }
         },
         (err: AnyError, info: { socket: Stream }) => {
@@ -496,7 +493,8 @@ function makeSocks5Connection(
           makeConnection(
             {
               ...options,
-              existingSocket: info.socket
+              existingSocket: info.socket,
+              proxyHost: undefined
             },
             callback
           );

@@ -46,8 +46,13 @@ export class Encrypter {
       options.autoEncryption.metadataClient = this.getInternalClient(client, uri, options);
     }
 
-    if (options.proxyOptions) {
-      options.autoEncryption.proxyOptions = options.proxyOptions;
+    if (options.proxyHost) {
+      options.autoEncryption.proxyOptions = {
+        proxyHost: options.proxyHost,
+        proxyPort: options.proxyPort,
+        proxyUsername: options.proxyUsername,
+        proxyPassword: options.proxyPassword
+      };
     }
 
     options.autoEncryption.bson = Object.create(null);
