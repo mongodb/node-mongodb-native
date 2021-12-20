@@ -55,6 +55,7 @@ describe('Client Side Encryption Corpus', function () {
   const corpusKeyLocal = loadCorpusData('corpus-key-local.json');
   const corpusKeyAws = loadCorpusData('corpus-key-aws.json');
   const corpusKeyAzure = loadCorpusData('corpus-key-azure.json');
+  const corpusKeyKmip = loadCorpusData('corpus-key-kmip.json');
   const corpusKeyGcp = loadCorpusData('corpus-key-gcp.json');
   const corpusAll = filterImportedObject(loadCorpusData('corpus.json'));
   const corpusEncryptedExpectedAll = filterImportedObject(loadCorpusData('corpus-encrypted.json'));
@@ -74,20 +75,23 @@ describe('Client Side Encryption Corpus', function () {
     ['local', corpusKeyLocal._id],
     ['aws', corpusKeyAws._id],
     ['azure', corpusKeyAzure._id],
-    ['gcp', corpusKeyGcp._id]
+    ['gcp', corpusKeyGcp._id],
+    ['kmip', corpusKeyKmip._id]
   ]);
   const keyAltNameMap = new Map([
     ['local', 'local'],
     ['aws', 'aws'],
     ['azure', 'azure'],
-    ['gcp', 'gcp']
+    ['gcp', 'gcp'],
+    ['kmip', 'kmip']
   ]);
   const copyOverValues = new Set([
     '_id',
     'altname_aws',
     'altname_local',
     'altname_azure',
-    'altname_gcp'
+    'altname_gcp',
+    'altname_kmip'
   ]);
 
   let client;
