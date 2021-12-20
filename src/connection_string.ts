@@ -474,7 +474,9 @@ export function parseOptions(
     urlOptions.get('proxyUsername')?.length > 1 ||
     urlOptions.get('proxyPassword')?.length > 1
   ) {
-    throw new MongoParseError('Proxy options cannot be specified multiple times in the connection string');
+    throw new MongoParseError(
+      'Proxy options cannot be specified multiple times in the connection string'
+    );
   }
 
   return mongoOptions;
