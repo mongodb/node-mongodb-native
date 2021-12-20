@@ -468,6 +468,15 @@ export function parseOptions(
     throw new MongoParseError('Can only specify both of proxy username/password or neither');
   }
 
+  if (
+    urlOptions.get('proxyHost')?.length > 1 ||
+    urlOptions.get('proxyPort')?.length > 1 ||
+    urlOptions.get('proxyUsername')?.length > 1 ||
+    urlOptions.get('proxyPassword')?.length > 1
+  ) {
+    throw new MongoParseError('Proxy options cannot be specified multiple times in the connection string');
+  }
+
   return mongoOptions;
 }
 
