@@ -1,8 +1,8 @@
 'use strict';
-const { MongoClient } = require('../../src');
-const { MongoParseError } = require('../../src/error');
-const { default: ConnectionString } = require('mongodb-connection-string-url');
-const { expect } = require('chai');
+import { MongoClient } from '../../src';
+import { MongoParseError } from '../../src/error';
+import ConnectionString from 'mongodb-connection-string-url';
+import { expect } from 'chai';
 
 /**
  * The SOCKS5_CONFIG environment variable is either a JSON 4-tuple
