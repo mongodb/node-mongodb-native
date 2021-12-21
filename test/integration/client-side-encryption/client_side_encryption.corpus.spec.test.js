@@ -157,7 +157,7 @@ describe('Client Side Encryption Corpus', function () {
           .catch(() => {})
           .then(() => keyDb.collection(keyVaultCollName))
           .then(keyColl =>
-            keyColl.insertMany([corpusKeyLocal, corpusKeyAws, corpusKeyAzure, corpusKeyGcp])
+            keyColl.insertMany([corpusKeyLocal, corpusKeyAws, corpusKeyAzure, corpusKeyGcp, corpusKeyKmip])
           );
       });
   });
