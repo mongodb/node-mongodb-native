@@ -53,7 +53,15 @@ class TestConfiguration {
       host: hostAddresses[0].host,
       port: typeof hostAddresses[0].host === 'string' ? hostAddresses[0].port : undefined,
       db: url.pathname.slice(1) ? url.pathname.slice(1) : 'integration_tests',
-      replicaSet: url.searchParams.get('replicaSet')
+      replicaSet: url.searchParams.get('replicaSet'),
+      proxyURIParams: url.searchParams.get('proxyHost')
+        ? {
+            proxyHost: url.searchParams.get('proxyHost'),
+            proxyPort: url.searchParams.get('proxyPort'),
+            proxyUsername: url.searchParams.get('proxyUsername'),
+            proxyPassword: url.searchParams.get('proxyPassword')
+          }
+        : undefined
     };
     if (url.username) {
       this.options.auth = {
@@ -144,6 +152,14 @@ class TestConfiguration {
       Object.assign(dbOptions, { replicaSet: this.options.replicaSet });
     }
 
+    if (this.options.proxyURIParams) {
+      for (const [name, value] of Object.entries(this.options.proxyURIParams)) {
+        if (value) {
+          dbOptions[name] = value;
+        }
+      }
+    }
+
     // Flatten any options nested under `writeConcern` before we make the connection string
     if (dbOptions.writeConcern) {
       Object.assign(dbOptions, dbOptions.writeConcern);
@@ -206,7 +222,12 @@ class TestConfiguration {
    * @param {UrlOptions} [options] - overrides and settings for URI generation
    */
   url(options) {
-    options = { db: this.options.db, replicaSet: this.options.replicaSet, ...options };
+    options = {
+      db: this.options.db,
+      replicaSet: this.options.replicaSet,
+      proxyURIParams: this.options.proxyURIParams,
+      ...options
+    };
 
     const FILLER_HOST = 'fillerHost';
 
@@ -214,6 +235,14 @@ class TestConfiguration {
 
     if (options.replicaSet) {
       url.searchParams.append('replicaSet', options.replicaSet);
+    }
+
+    if (options.proxyURIParams) {
+      for (const [name, value] of Object.entries(options.proxyURIParams)) {
+        if (value) {
+          url.searchParams.append(name, value);
+        }
+      }
     }
 
     url.pathname = `/${options.db}`;

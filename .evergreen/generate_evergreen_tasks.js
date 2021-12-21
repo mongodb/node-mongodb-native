@@ -137,6 +137,37 @@ TASKS.push(
       commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
     },
     {
+      name: 'test-socks5',
+      tags: [],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: 'latest',
+            TOPOLOGY: 'replica_set'
+          }
+        },
+        { func: 'run socks5 tests' }
+      ]
+    },
+    {
+      name: 'test-socks5-tls',
+      tags: [],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            SSL: 'ssl',
+            VERSION: 'latest',
+            TOPOLOGY: 'replica_set'
+          }
+        },
+        { func: 'run socks5 tests', vars: { SSL: 'ssl' } }
+      ]
+    },
+    {
       name: 'test-ocsp-valid-cert-server-staples',
       tags: ['ocsp'],
       commands: [

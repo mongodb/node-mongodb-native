@@ -198,6 +198,7 @@ export type {
   ConnectionOptions,
   DestroyOptions,
   GetMoreOptions,
+  ProxyOptions,
   QueryOptions
 } from './cmap/connection';
 export type {

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { deserialize, Document, serialize } from './bson';
+import type { ProxyOptions } from './cmap/connection';
 import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
 import { Callback, parsePackageVersion } from './utils';
@@ -262,6 +263,7 @@ export interface AutoEncryptionOptions {
     /** Command line arguments to use when auto-spawning a mongocryptd */
     mongocryptdSpawnArgs?: string[];
   };
+  proxyOptions?: ProxyOptions;
 }
 
 /** @public */

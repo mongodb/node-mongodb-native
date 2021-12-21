@@ -454,6 +454,31 @@ export function parseOptions(
     }
   }
 
+  if (
+    !mongoOptions.proxyHost &&
+    (mongoOptions.proxyPort || mongoOptions.proxyUsername || mongoOptions.proxyPassword)
+  ) {
+    throw new MongoParseError('Must specify proxyHost if other proxy options are passed');
+  }
+
+  if (
+    (mongoOptions.proxyUsername && !mongoOptions.proxyPassword) ||
+    (!mongoOptions.proxyUsername && mongoOptions.proxyPassword)
+  ) {
+    throw new MongoParseError('Can only specify both of proxy username/password or neither');
+  }
+
+  if (
+    urlOptions.get('proxyHost')?.length > 1 ||
+    urlOptions.get('proxyPort')?.length > 1 ||
+    urlOptions.get('proxyUsername')?.length > 1 ||
+    urlOptions.get('proxyPassword')?.length > 1
+  ) {
+    throw new MongoParseError(
+      'Proxy options cannot be specified multiple times in the connection string'
+    );
+  }
+
   return mongoOptions;
 }
 
@@ -859,6 +884,18 @@ export const OPTIONS = {
   },
   promoteValues: {
     type: 'boolean'
+  },
+  proxyHost: {
+    type: 'string'
+  },
+  proxyPassword: {
+    type: 'string'
+  },
+  proxyPort: {
+    type: 'uint'
+  },
+  proxyUsername: {
+    type: 'string'
   },
   raw: {
     default: false,

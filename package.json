@@ -34,7 +34,8 @@
   "dependencies": {
     "bson": "^4.6.0",
     "denque": "^2.0.1",
-    "mongodb-connection-string-url": "^2.3.2"
+    "mongodb-connection-string-url": "^2.3.2",
+    "socks": "^2.6.1"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
@@ -113,6 +114,7 @@
     "check:kerberos": "mocha --config \"test/manual/mocharc.json\" test/manual/kerberos.test.js",
     "check:tls": "mocha --config \"test/manual/mocharc.json\" test/manual/tls_support.test.js",
     "check:ldap": "mocha --config \"test/manual/mocharc.json\" test/manual/ldap.test.js",
+    "check:socks5": "mocha --config \"test/manual/mocharc.json\" test/manual/socks5.test.ts",
     "check:csfle": "mocha --file test/tools/runner test/integration/client-side-encryption",
     "check:snappy": "mocha --file test/tools/runner test/functional/unit_snappy.test.js",
     "prepare": "node etc/prepare.js",
