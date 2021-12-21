@@ -41,9 +41,7 @@ if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
   unset AWS_ACCESS_KEY_ID;
   unset AWS_SECRET_ACCESS_KEY;
 else
-  if [[ ! -d ${PROJECT_DIRECTORY}/node_modules/mongodb-client-encryption ]]; then
-    npm install mongodb-client-encryption@">=2.0.0-beta.0"
-  fi
+  npm install mongodb-client-encryption@">=2.0.0-beta.1"
   pip install --upgrade boto3
 
   # Get access to the AWS temporary credentials:
