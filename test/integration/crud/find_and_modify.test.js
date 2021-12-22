@@ -1,8 +1,7 @@
 'use strict';
 var f = require('util').format;
-var test = require('./shared').assert;
 
-const { setupDatabase, withClient } = require(`./shared`);
+const { setupDatabase, withClient, assert: test } = require(`../shared`);
 const { expect } = require('chai');
 
 describe('Find and Modify', function () {

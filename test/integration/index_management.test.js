@@ -1,6 +1,7 @@
 'use strict';
 const { expect } = require('chai');
 const { assert: test, setupDatabase, withClient, withMonitoredClient } = require('./shared');
+const shared = require('../tools/contexts');
 
 describe('Indexes', function () {
   before(function () {
@@ -640,7 +641,6 @@ describe('Indexes', function () {
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
         var db = client.db(configuration.db);
-        var shared = require('./contexts');
 
         db.collection('indexcontext').createIndex(
           shared.object,

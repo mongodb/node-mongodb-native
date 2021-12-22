@@ -1,13 +1,13 @@
 'use strict';
-const setupDatabase = require('./shared').setupDatabase;
+const { setupDatabase } = require('../shared');
 const chai = require('chai');
 
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
-const mock = require('../tools/mongodb-mock/index');
+const mock = require('../../tools/mongodb-mock/index');
 
 chai.use(sinonChai);
-const { isHello } = require('../../src/utils');
+const { isHello } = require('../../../src/utils');
 
 describe('Collection', function () {
   let configuration;

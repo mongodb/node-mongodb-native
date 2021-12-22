@@ -1,15 +1,14 @@
 'use strict';
 const mock = require('../tools/mongodb-mock/index');
 const expect = require('chai').expect;
-const { ObjectId, Code } = require('../../src');
+const { ObjectId, Code, MongoClient } = require('../../src');
 const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 const { isHello } = require('../../src/utils');
 
 const TEST_OPTIONS = { writeConcern: { w: 2, wtimeoutMS: 1000 } };
 
 class WriteConcernTest {
-  constructor(configuration) {
-    this.configuration = configuration;
+  constructor() {
     this.responseDecoration = {};
     const electionIds = [new ObjectId(), new ObjectId()];
     const defaultFields = Object.assign({}, mock.HELLO, {
@@ -86,21 +85,21 @@ class WriteConcernTest {
       }
     });
 
-    const client = self.configuration.newClient(
+    const client = new MongoClient(
       'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
     );
 
     await client.connect();
-    await testFn(client, client.db(self.configuration.db));
+    await testFn(client, client.db('write_concern_db'));
   }
 }
 
 function writeConcernTest(command, testFn) {
   return async function () {
-    const t = new WriteConcernTest(this.configuration);
+    const t = new WriteConcernTest();
     switch (command) {
       case 'aggregate':
-        t.decorateResponse({ cursor: { id: 0, firstBatch: [], ns: this.configuration.db } });
+        t.decorateResponse({ cursor: { id: 0, firstBatch: [], ns: 'write_concern_db' } });
         break;
       case 'mapReduce':
         t.decorateResponse({ result: 'tempCollection' });
@@ -119,11 +118,9 @@ function writeConcernTest(command, testFn) {
 
 describe('Command Write Concern', function () {
   afterEach(() => mock.cleanup());
-  const metadata = { requires: { generators: true, topology: 'single' } };
 
-  it('successfully pass through writeConcern to aggregate command', {
-    metadata,
-    test: writeConcernTest('aggregate', (db, writeConcernTestOptions) =>
+  it('successfully pass through writeConcern to aggregate command', () =>
+    writeConcernTest('aggregate', (db, writeConcernTestOptions) =>
       db
         .collection('test')
         .aggregate(
@@ -131,52 +128,40 @@ describe('Command Write Concern', function () {
           writeConcernTestOptions
         )
         .toArray()
-    )
-  });
+    ));
 
-  it('successfully pass through writeConcern to create command', {
-    metadata,
-    test: writeConcernTest('create', (db, writeConcernTestOptions) =>
+  it('successfully pass through writeConcern to create command', () =>
+    writeConcernTest('create', (db, writeConcernTestOptions) =>
       db.createCollection('test_collection_methods', writeConcernTestOptions)
-    )
-  });
+    ));
 
-  it('successfully pass through writeConcern to createIndexes command', {
-    metadata,
-    test: writeConcernTest('createIndexes', (db, writeConcernTestOptions) =>
+  it('successfully pass through writeConcern to createIndexes command', () =>
+    writeConcernTest('createIndexes', (db, writeConcernTestOptions) =>
       db
         .collection('indexOptionDefault')
         .createIndex(
           { a: 1 },
           Object.assign({ indexOptionDefaults: true }, writeConcernTestOptions)
         )
-    )
-  });
+    ));
 
-  it('successfully pass through writeConcern to drop command', {
-    metadata,
-    test: writeConcernTest('drop', (db, writeConcernTestOptions) =>
+  it('successfully pass through writeConcern to drop command', () =>
+    writeConcernTest('drop', (db, writeConcernTestOptions) =>
       db.collection('indexOptionDefault').drop(writeConcernTestOptions)
-    )
-  });
+    ));
 
-  it('successfully pass through writeConcern to dropDatabase command', {
-    metadata,
-    test: writeConcernTest('dropDatabase', (db, writeConcernTestOptions) =>
+  it('successfully pass through writeConcern to dropDatabase command', () =>
+    writeConcernTest('dropDatabase', (db, writeConcernTestOptions) =>
       db.dropDatabase(writeConcernTestOptions)
-    )
-  });
+    ));
 
-  it('successfully pass through writeConcern to dropIndexes command', {
-    metadata,
-    test: writeConcernTest('dropIndexes', (db, writeConcernTestOptions) =>
+  it('successfully pass through writeConcern to dropIndexes command', () =>
+    writeConcernTest('dropIndexes', (db, writeConcernTestOptions) =>
       db.collection('test').dropIndexes(writeConcernTestOptions)
-    )
-  });
+    ));
 
-  it('successfully pass through writeConcern to mapReduce command', {
-    metadata,
-    test: writeConcernTest('mapReduce', function (db, writeConcernTestOptions) {
+  it('successfully pass through writeConcern to mapReduce command', () =>
+    writeConcernTest('mapReduce', function (db, writeConcernTestOptions) {
       const map = new Code('function() { emit(this.user_id, 1); }');
       const reduce = new Code('function(k,vals) { return 1; }');
       return db
@@ -186,20 +171,15 @@ describe('Command Write Concern', function () {
           reduce,
           Object.assign({ out: { replace: 'tempCollection' } }, writeConcernTestOptions)
         );
-    })
-  });
+    }));
 
-  it('successfully pass through writeConcern to createUser command', {
-    metadata,
-    test: writeConcernTest('createUser', (db, writeConcernTestOptions) =>
+  it('successfully pass through writeConcern to createUser command', () =>
+    writeConcernTest('createUser', (db, writeConcernTestOptions) =>
       db.admin().addUser('kay:kay', 'abc123', writeConcernTestOptions)
-    )
-  });
+    ));
 
-  it('successfully pass through writeConcern to dropUser command', {
-    metadata,
-    test: writeConcernTest('dropUser', (db, writeConcernTestOptions) =>
+  it('successfully pass through writeConcern to dropUser command', () =>
+    writeConcernTest('dropUser', (db, writeConcernTestOptions) =>
       db.admin().removeUser('kay:kay', writeConcernTestOptions)
-    )
-  });
+    ));
 });

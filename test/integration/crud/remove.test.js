@@ -1,6 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-const { setupDatabase } = require('./shared');
+const { setupDatabase } = require('../shared');
 
 describe('Remove', function () {
   before(function () {
