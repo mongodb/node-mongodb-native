@@ -172,21 +172,21 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
    * @param encoding - Optional encoding for the buffer
    * @param callback - Function to call when all files and chunks have been persisted to MongoDB
    */
-  end(): void;
-  end(chunk: Buffer): void;
-  end(callback: Callback<GridFSFile | void>): void;
-  end(chunk: Buffer, callback: Callback<GridFSFile | void>): void;
-  end(chunk: Buffer, encoding: BufferEncoding): void;
+  end(): this;
+  end(chunk: Buffer): this;
+  end(callback: Callback<GridFSFile | void>): this;
+  end(chunk: Buffer, callback: Callback<GridFSFile | void>): this;
+  end(chunk: Buffer, encoding: BufferEncoding): this;
   end(
     chunk: Buffer,
     encoding: BufferEncoding | undefined,
     callback: Callback<GridFSFile | void>
-  ): void;
+  ): this;
   end(
     chunkOrCallback?: Buffer | Callback<GridFSFile | void>,
     encodingOrCallback?: BufferEncoding | Callback<GridFSFile | void>,
     callback?: Callback<GridFSFile | void>
-  ): void {
+  ): this {
     const chunk = typeof chunkOrCallback === 'function' ? undefined : chunkOrCallback;
     const encoding = typeof encodingOrCallback === 'function' ? undefined : encodingOrCallback;
     callback =
@@ -196,7 +196,7 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
         ? encodingOrCallback
         : callback;
 
-    if (checkAborted(this, callback)) return;
+    if (checkAborted(this, callback)) return this;
 
     this.state.streamEnd = true;
 
@@ -208,12 +208,14 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
 
     if (!chunk) {
       waitForIndexes(this, () => !!writeRemnant(this));
-      return;
+      return this;
     }
 
     this.write(chunk, encoding, () => {
       writeRemnant(this);
     });
+
+    return this;
   }
 }
 
