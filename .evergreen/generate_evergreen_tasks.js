@@ -118,7 +118,8 @@ TASKS.push(
           func: 'bootstrap mongo-orchestration',
           vars: {
             VERSION: 'latest',
-            TOPOLOGY: 'sharded_cluster'
+            TOPOLOGY: 'sharded_cluster',
+            LOAD_BALANCER: 'true'
           }
         },
         { func: 'start-load-balancer' },
