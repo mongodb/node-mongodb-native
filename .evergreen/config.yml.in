@@ -225,7 +225,7 @@ functions:
           TOPOLOGY="${TOPOLOGY}" \
           SKIP_DEPS=${SKIP_DEPS|1} \
           NO_EXIT=${NO_EXIT|1} \
-          FAKE_MONGODB_SERVICE_ID="true" \
+          LOAD_BALANCER="true" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "run checks":

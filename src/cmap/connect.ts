@@ -50,10 +50,6 @@ const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
   [AuthMechanism.MONGODB_X509, new X509()]
 ]);
 
-const FAKE_MONGODB_SERVICE_ID =
-  typeof process.env.FAKE_MONGODB_SERVICE_ID === 'string' &&
-  process.env.FAKE_MONGODB_SERVICE_ID.toLowerCase() === 'true';
-
 /** @public */
 export type Stream = Socket | TLSSocket;
 
@@ -163,10 +159,6 @@ function performInitialHandshake(
       }
 
       if (options.loadBalanced) {
-        // TODO: Durran: Remove when server support exists. (NODE-3431)
-        if (FAKE_MONGODB_SERVICE_ID) {
-          response.serviceId = response.topologyVersion.processId;
-        }
         if (!response.serviceId) {
           return callback(
             new MongoCompatibilityError(

@@ -117,7 +117,7 @@ TASKS.push(
         {
           func: 'bootstrap mongo-orchestration',
           vars: {
-            VERSION: '5.0',
+            VERSION: 'latest',
             TOPOLOGY: 'sharded_cluster'
           }
         },
