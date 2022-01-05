@@ -334,5 +334,20 @@ describe('Connection String', function () {
       expect(options).property('credentials').to.equal(credentials);
       expect(options).to.have.nested.property('credentials.source', 'admin');
     });
+
+    it('should retain specified authSource with no provided credentials', async function () {
+      makeStub('authSource=thisShouldBeAuthSource');
+      const credentials = {};
+
+      const options = {
+        credentials,
+        srvHost: 'test.mock.test.build.10gen.cc',
+        srvServiceName: 'mongodb',
+        userSpecifiedAuthSource: false
+      } as MongoOptions;
+
+      await resolveSRVRecordAsync(options as any);
+      expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
+    });
   });
 });
