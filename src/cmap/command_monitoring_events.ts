@@ -1,4 +1,5 @@
 import type { Document, ObjectId } from '../bson';
+import { LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMMAND_CAMEL_CASE } from '../constants';
 import { calculateDurationInMs, deepCopy } from '../utils';
 import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
 import type { Connection } from './connection';
@@ -161,7 +162,7 @@ const SENSITIVE_COMMANDS = new Set([
   'copydb'
 ]);
 
-const HELLO_COMMANDS = new Set(['hello', 'ismaster', 'isMaster']);
+const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMMAND_CAMEL_CASE]);
 
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
