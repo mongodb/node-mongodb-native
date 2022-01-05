@@ -1,6 +1,7 @@
 import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
+import { LEGACY_HELLO_COMMAND } from '../constants';
 import { AnyError, MongoNetworkError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, InterruptibleAsyncInterval } from '../utils';
@@ -233,7 +234,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
     const isAwaitable = topologyVersion != null;
 
     const cmd = {
-      [serverApi?.version || helloOk ? 'hello' : 'ismaster']: true,
+      [serverApi?.version || helloOk ? 'hello' : LEGACY_HELLO_COMMAND]: true,
       ...(isAwaitable && topologyVersion
         ? { maxAwaitTimeMS, topologyVersion: makeTopologyVersion(topologyVersion) }
         : {})
@@ -256,14 +257,14 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
       );
     }
 
-    connection.command(ns('admin.$cmd'), cmd, options, (err, isMaster) => {
+    connection.command(ns('admin.$cmd'), cmd, options, (err, hello) => {
       if (err) {
         failureHandler(err);
         return;
       }
-      if ('isWritablePrimary' in isMaster) {
+      if ('isWritablePrimary' in hello) {
         // Provide pre-hello-style response document.
-        isMaster.ismaster = isMaster.isWritablePrimary;
+        hello[LEGACY_HELLO_COMMAND] = hello.isWritablePrimary;
       }
 
       const rttPinger = monitor[kRTTPinger];
@@ -272,12 +273,12 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
-        new ServerHeartbeatSucceededEvent(monitor.address, duration, isMaster)
+        new ServerHeartbeatSucceededEvent(monitor.address, duration, hello)
       );
 
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
-      if (isAwaitable && isMaster.topologyVersion) {
+      if (isAwaitable && hello.topologyVersion) {
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address)
@@ -287,14 +288,14 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
         monitor[kRTTPinger]?.close();
         monitor[kRTTPinger] = undefined;
 
-        callback(undefined, isMaster);
+        callback(undefined, hello);
       }
     });
 
     return;
   }
 
-  // connecting does an implicit `ismaster`
+  // connecting does an implicit `hello`
   connect(monitor.connectOptions, (err, conn) => {
     if (err) {
       monitor[kConnection] = undefined;
@@ -336,7 +337,7 @@ function monitorServer(monitor: Monitor) {
       callback();
     }
 
-    checkServer(monitor, (err, isMaster) => {
+    checkServer(monitor, (err, hello) => {
       if (err) {
         // otherwise an error occurred on initial discovery, also bail
         if (monitor[kServer].description.type === ServerType.Unknown) {
@@ -346,7 +347,7 @@ function monitorServer(monitor: Monitor) {
       }
 
       // if the check indicates streaming is supported, immediately reschedule monitoring
-      if (isMaster && isMaster.topologyVersion) {
+      if (hello && hello.topologyVersion) {
         setTimeout(() => {
           if (!isInCloseState(monitor)) {
             monitor[kMonitorId]?.wake();
@@ -448,7 +449,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
     return;
   }
 
-  connection.command(ns('admin.$cmd'), { ismaster: 1 }, undefined, err => {
+  connection.command(ns('admin.$cmd'), { LEGACY_HELLO_COMMAND: 1 }, undefined, err => {
     if (err) {
       rttPinger[kConnection] = undefined;
       rttPinger[kRoundTripTime] = 0;
