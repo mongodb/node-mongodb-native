@@ -265,7 +265,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return this[kHello];
   }
 
-  // the `connect` method stores the result of the handshake ismaster on the connection
+  // the `connect` method stores the result of the handshake hello on the connection
   set hello(response: Document) {
     this[kDescription].receiveResponse(response);
     this[kDescription] = Object.freeze(this[kDescription]);
