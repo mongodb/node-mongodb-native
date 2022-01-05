@@ -370,6 +370,11 @@ export class TestConfiguration {
         key: localKey
       };
     }
+    if (typeof type !== 'string' || type === 'kmip') {
+      kmsProviders.kmip = {
+        endpoint: 'localhost:5698'
+      };
+    }
     return kmsProviders;
   }
 }

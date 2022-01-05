@@ -71,6 +71,12 @@ function translateClientOptions(options) {
           };
         }
 
+        if (options.autoEncryptOpts.kmsProviders.kmip) {
+          kmsProviders.kmip = {
+            endpoint: 'localhost:5698'
+          };
+        }
+
         options.autoEncryption.kmsProviders = kmsProviders;
       }
 

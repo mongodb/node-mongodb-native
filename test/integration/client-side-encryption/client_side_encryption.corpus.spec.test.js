@@ -29,6 +29,9 @@ describe('Client Side Encryption Corpus', function () {
       'base64'
     )
   };
+  kmsProviders.kmip = {
+    endpoint: 'localhost:5698'
+  };
 
   // TODO: build this into EJSON
   // TODO: make a custom chai assertion for this
