@@ -49,7 +49,7 @@ Here's a quick description of each:
         "files.trimFinalNewlines": true,
         "files.insertFinalNewline": true,
         // Testing settings
-        "mochaExplorer.files": "test/unit/**/*.test.js",
+        "mochaExplorer.files": "test/unit/**/*.test.*",
         "mochaExplorer.ui": "test/tools/runner/metadata_ui.js",
         "mochaExplorer.envPath": null, // Useful for more advanced tests
         // Typescript settings
