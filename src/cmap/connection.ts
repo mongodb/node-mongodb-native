@@ -185,7 +185,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   monitorCommands: boolean;
   closed: boolean;
   destroyed: boolean;
-  lastIsMasterMS?: number;
+  lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
   /** @internal */
