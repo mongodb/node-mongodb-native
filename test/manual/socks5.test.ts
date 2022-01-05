@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
 
 import { MongoClient } from '../../src';
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 import { MongoParseError } from '../../src/error';
 
 /**
@@ -271,7 +272,7 @@ describe('Socks5 Connectivity', function () {
         client.on('commandSucceeded', ev => seenCommandAddresses.add(ev.address));
 
         await client.connect();
-        await client.db('admin').command({ ismaster: 1 });
+        await client.db('admin').command({ [LEGACY_HELLO_COMMAND]: 1 });
         await client.close();
         expect([...seenCommandAddresses]).to.deep.equal(singleConnectionString.hosts);
       });
