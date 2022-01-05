@@ -7,7 +7,6 @@ const { expect } = require('chai');
 const { Socket } = require('net');
 const { ns, isHello } = require('../../../src/utils');
 const { getSymbolFrom } = require('../../tools/utils');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 describe('Connection - unit/cmap', function () {
   let server;

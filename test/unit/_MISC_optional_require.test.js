@@ -9,7 +9,6 @@ const { GSSAPI } = require('../../src/cmap/auth/gssapi');
 const { AuthContext } = require('../../src/cmap/auth/auth_provider');
 const { MongoDBAWS } = require('../../src/cmap/auth/mongodb_aws');
 const { HostAddress } = require('../../src/utils');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 function moduleExistsSync(moduleName) {
   return existsSync(resolve(__dirname, `../../node_modules/${moduleName}`));
