@@ -198,7 +198,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @internal */
   [kWaitQueue]: Denque<ServerSelectionRequest>;
   /** @internal */
-  ismaster?: Document;
+  hello?: Document;
   /** @internal */
   _type?: string;
 
@@ -403,7 +403,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   get capabilities(): ServerCapabilities {
-    return new ServerCapabilities(this.lastIsMaster());
+    return new ServerCapabilities(this.lastHello());
   }
 
   /** Initiate server connect */
@@ -791,10 +791,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     emitWarning('`unref` is a noop and will be removed in the next major version');
   }
 
-  // NOTE: There are many places in code where we explicitly check the last isMaster
+  // NOTE: There are many places in code where we explicitly check the last hello
   //       to do feature support detection. This should be done any other way, but for
-  //       now we will just return the first isMaster seen, which should suffice.
-  lastIsMaster(): Document {
+  //       now we will just return the first hello seen, which should suffice.
+  lastHello(): Document {
     const serverDescriptions = Array.from(this.description.servers.values());
     if (serverDescriptions.length === 0) return {};
     const sd = serverDescriptions.filter(
@@ -1066,9 +1066,9 @@ export class ServerCapabilities {
   maxWireVersion: number;
   minWireVersion: number;
 
-  constructor(ismaster: Document) {
-    this.minWireVersion = ismaster.minWireVersion || 0;
-    this.maxWireVersion = ismaster.maxWireVersion || 0;
+  constructor(hello: Document) {
+    this.minWireVersion = hello.minWireVersion || 0;
+    this.maxWireVersion = hello.maxWireVersion || 0;
   }
 
   get hasAggregationCursor(): boolean {

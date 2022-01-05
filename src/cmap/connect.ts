@@ -179,7 +179,7 @@ function performInitialHandshake(
       // NOTE: This is metadata attached to the connection while porting away from
       //       handshake being done in the `Server` class. Likely, it should be
       //       relocated, or at very least restructured.
-      conn.ismaster = response;
+      conn.hello = response;
       conn.lastIsMasterMS = new Date().getTime() - start;
 
       if (!response.arbiterOnly && credentials) {

@@ -950,7 +950,7 @@ export abstract class BulkOperationBase {
     const currentOp = undefined;
 
     // Set max byte size
-    const isMaster = topology.lastIsMaster();
+    const isMaster = topology.lastHello();
 
     // If we have autoEncryption on, batch-splitting must be done on 2mb chunks, but single documents
     // over 2mb are still allowed

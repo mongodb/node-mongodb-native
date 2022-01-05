@@ -317,14 +317,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
       monitor[kConnection] = conn;
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
-        new ServerHeartbeatSucceededEvent(
-          monitor.address,
-          calculateDurationInMs(start),
-          conn.ismaster
-        )
+        new ServerHeartbeatSucceededEvent(monitor.address, calculateDurationInMs(start), conn.hello)
       );
 
-      callback(undefined, conn.ismaster);
+      callback(undefined, conn.hello);
     }
   });
 }

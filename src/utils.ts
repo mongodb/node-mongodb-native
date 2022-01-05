@@ -656,14 +656,14 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
       // application that a feature is avaiable that is actually not.
       return MAX_SUPPORTED_WIRE_VERSION;
     }
-    if (topologyOrServer.ismaster) {
-      return topologyOrServer.ismaster.maxWireVersion;
+    if (topologyOrServer.hello) {
+      return topologyOrServer.hello.maxWireVersion;
     }
 
-    if ('lastIsMaster' in topologyOrServer && typeof topologyOrServer.lastIsMaster === 'function') {
-      const lastIsMaster = topologyOrServer.lastIsMaster();
-      if (lastIsMaster) {
-        return lastIsMaster.maxWireVersion;
+    if ('lastHello' in topologyOrServer && typeof topologyOrServer.lastHello === 'function') {
+      const lastHello = topologyOrServer.lastHello();
+      if (lastHello) {
+        return lastHello.maxWireVersion;
       }
     }
 

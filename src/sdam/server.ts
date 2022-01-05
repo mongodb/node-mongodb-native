@@ -118,7 +118,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   /** @internal */
   s: ServerPrivate;
   serverApi?: ServerApi;
-  ismaster?: Document;
+  hello?: Document;
   [kMonitor]: Monitor;
 
   /** @event */

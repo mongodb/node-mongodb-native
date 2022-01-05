@@ -75,7 +75,7 @@ export class AddUserOperation extends CommandOperation<Document> {
       roles = Array.isArray(options.roles) ? options.roles : [options.roles];
     }
 
-    const digestPassword = getTopology(db).lastIsMaster().maxWireVersion >= 7;
+    const digestPassword = getTopology(db).lastHello().maxWireVersion >= 7;
 
     let userPassword = password;
 
