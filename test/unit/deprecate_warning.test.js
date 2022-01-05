@@ -9,7 +9,6 @@ require('mocha-sinon');
 chai.use(sinonChai);
 
 const makeTestFunction = require('../tools/utils').makeTestFunction;
-const ensureCalledWith = require('../tools/utils').ensureCalledWith;
 
 describe('Deprecation Warnings - unit', function () {
   let messages = [];
@@ -49,30 +48,15 @@ describe('Deprecation Warnings - unit', function () {
       f2({ maxScan: 5 });
     });
 
-    it('multiple functions with the same deprecated options should both warn', {
-      metadata: { requires: { node: '>=6.0.0' } },
-      test: function (done) {
-        process.nextTick(() => {
-          expect(messages).to.deep.equal([
-            'f1 option [maxScan]' + defaultMessage,
-            'f2 option [maxScan]' + defaultMessage
-          ]);
-          expect(messages).to.have.a.lengthOf(2);
-          done();
-        });
-      }
-    });
-
-    it('multiple functions with the same deprecated options should both warn', {
-      metadata: { requires: { node: '<6.0.0' } },
-      test: function (done) {
-        ensureCalledWith(console.error, [
+    it('multiple functions with the same deprecated options should both warn', done => {
+      process.nextTick(() => {
+        expect(messages).to.deep.equal([
           'f1 option [maxScan]' + defaultMessage,
           'f2 option [maxScan]' + defaultMessage
         ]);
-        expect(console.error).to.have.been.calledTwice;
+        expect(messages).to.have.a.lengthOf(2);
         done();
-      }
+      });
     });
   });
 
@@ -86,22 +70,11 @@ describe('Deprecation Warnings - unit', function () {
       f({});
     });
 
-    it('should not warn if empty options object passed in', {
-      metadata: { requires: { node: '>=6.0.0' } },
-      test: function (done) {
-        process.nextTick(() => {
-          expect(messages).to.have.a.lengthOf(0);
-          done();
-        });
-      }
-    });
-
-    it('should not warn if empty options object passed in', {
-      metadata: { requires: { node: '<6.0.0' } },
-      test: function (done) {
-        expect(console.error).to.have.not.been.called;
+    it('should not warn if empty options object passed in', done => {
+      process.nextTick(() => {
+        expect(messages).to.have.a.lengthOf(0);
         done();
-      }
+      });
     });
   });
 
@@ -121,32 +94,16 @@ describe('Deprecation Warnings - unit', function () {
       f({ maxScan: 5, snapshot: true, fields: 'hi' });
     });
 
-    it('should use user-specified message handler', {
-      metadata: { requires: { node: '>=6.0.0' } },
-      test: function (done) {
-        process.nextTick(() => {
-          expect(messages).to.deep.equal([
-            'custom msg for function f and option maxScan',
-            'custom msg for function f and option snapshot',
-            'custom msg for function f and option fields'
-          ]);
-          expect(messages).to.have.a.lengthOf(3);
-          done();
-        });
-      }
-    });
-
-    it('should use user-specified message handler', {
-      metadata: { requires: { node: '<6.0.0' } },
-      test: function (done) {
-        ensureCalledWith(console.error, [
+    it('should use user-specified message handler', done => {
+      process.nextTick(() => {
+        expect(messages).to.deep.equal([
           'custom msg for function f and option maxScan',
           'custom msg for function f and option snapshot',
           'custom msg for function f and option fields'
         ]);
-        expect(console.error).to.have.been.calledThrice;
+        expect(messages).to.have.a.lengthOf(3);
         done();
-      }
+      });
     });
   });
 
@@ -161,30 +118,15 @@ describe('Deprecation Warnings - unit', function () {
       f({ maxScan: 5, fields: 'hi' });
     });
 
-    it('each function should only warn once per deprecated option', {
-      metadata: { requires: { node: '>=6.0.0' } },
-      test: function (done) {
-        process.nextTick(() => {
-          expect(messages).to.deep.equal([
-            'f option [maxScan]' + defaultMessage,
-            'f option [fields]' + defaultMessage
-          ]);
-          expect(messages).to.have.a.lengthOf(2);
-          done();
-        });
-      }
-    });
-
-    it('each function should only warn once per deprecated option', {
-      metadata: { requires: { node: '<6.0.0' } },
-      test: function (done) {
-        ensureCalledWith(console.error, [
+    it('each function should only warn once per deprecated option', done => {
+      process.nextTick(() => {
+        expect(messages).to.deep.equal([
           'f option [maxScan]' + defaultMessage,
           'f option [fields]' + defaultMessage
         ]);
-        expect(console.error).to.have.been.calledTwice;
+        expect(messages).to.have.a.lengthOf(2);
         done();
-      }
+      });
     });
   });
 
@@ -214,50 +156,33 @@ describe('Deprecation Warnings - unit', function () {
       expect(add).to.equal(7);
     });
 
-    it('wrapped functions should maintain original functionality', {
-      metadata: { requires: { node: '>=6.0.0' } },
-      test: function (done) {
-        process.nextTick(() => {
-          expect(messages).to.deep.equal([
-            'f option [multiply]' + defaultMessage,
-            'f option [add]' + defaultMessage
-          ]);
-          expect(messages).to.have.a.lengthOf(2);
-          done();
-        });
-      }
-    });
-
-    it('wrapped functions should maintain original functionality', {
-      metadata: { requires: { node: '<6.0.0' } },
-      test: function (done) {
-        ensureCalledWith(console.error, [
+    it('wrapped functions should maintain original functionality', done => {
+      process.nextTick(() => {
+        expect(messages).to.deep.equal([
           'f option [multiply]' + defaultMessage,
           'f option [add]' + defaultMessage
         ]);
-        expect(console.error).to.have.been.calledTwice;
+        expect(messages).to.have.a.lengthOf(2);
         done();
-      }
+      });
     });
   });
 
-  it('optionsIndex pointing to undefined should not error', function (done) {
+  it('optionsIndex pointing to undefined should not error', () => {
     const f = makeTestFunction({
       name: 'f',
       deprecatedOptions: deprecatedOptions,
       optionsIndex: 0
     });
     expect(f).to.not.throw();
-    done();
   });
 
-  it('optionsIndex not pointing to object should not error', function (done) {
+  it('optionsIndex not pointing to object should not error', () => {
     const f = makeTestFunction({
       name: 'f',
       deprecatedOptions: deprecatedOptions,
       optionsIndex: 0
     });
     expect(() => f('not-an-object')).to.not.throw();
-    done();
   });
 });

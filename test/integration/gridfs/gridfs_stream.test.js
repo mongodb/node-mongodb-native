@@ -437,7 +437,7 @@ describe('GridFS Stream', function () {
    * @example-method abort
    */
   it('Aborting an upload', {
-    metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
+    metadata: { requires: { topology: ['single'] } },
 
     test(done) {
       const configuration = this.configuration;
@@ -487,7 +487,7 @@ describe('GridFS Stream', function () {
    * Aborting an upload
    */
   it('Destroy an upload', {
-    metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
+    metadata: { requires: { topology: ['single'] } },
 
     test(done) {
       const configuration = this.configuration;
@@ -599,7 +599,7 @@ describe('GridFS Stream', function () {
    */
   it('Deleting a file using promises', {
     metadata: {
-      requires: { topology: ['single'], node: '>12.0.0', sessions: { skipLeakTests: true } }
+      requires: { topology: ['single'], sessions: { skipLeakTests: true } }
     },
 
     test(done) {
@@ -717,8 +717,7 @@ describe('GridFS Stream', function () {
    * @example-method drop
    */
   it('drop using promises', {
-    metadata: { requires: { topology: ['single'], node: '>12.0.0' } },
-
+    metadata: { requires: { topology: ['single'] } },
     test(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
@@ -897,7 +896,7 @@ describe('GridFS Stream', function () {
    * NODE-822 GridFSBucketWriteStream end method does not handle optional parameters
    */
   it('should correctly handle calling end function with only a callback', {
-    metadata: { requires: { topology: ['single'], node: '>4.0.0' } },
+    metadata: { requires: { topology: ['single'] } },
 
     test(done) {
       const configuration = this.configuration;

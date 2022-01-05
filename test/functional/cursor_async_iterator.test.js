@@ -41,19 +41,16 @@ describe('Cursor Async Iterator Tests', function () {
       expect(counter).to.equal(1000);
     });
 
-    it('should be able to use a for-await loop on an aggregation cursor', {
-      metadata: { requires: { node: '>=10.5.0' } },
-      test: async function () {
-        const cursor = collection.aggregate([{ $match: { bar: 1 } }]);
+    it('should be able to use a for-await loop on an aggregation cursor', async function () {
+      const cursor = collection.aggregate([{ $match: { bar: 1 } }]);
 
-        let counter = 0;
-        for await (const doc of cursor) {
-          expect(doc).to.have.property('bar', 1);
-          counter += 1;
-        }
-
-        expect(counter).to.equal(1000);
+      let counter = 0;
+      for await (const doc of cursor) {
+        expect(doc).to.have.property('bar', 1);
+        counter += 1;
       }
+
+      expect(counter).to.equal(1000);
     });
 
     it('should be able to use a for-await loop on a command cursor', {

@@ -1120,8 +1120,7 @@ describe('Aggregation', function () {
     metadata: {
       requires: {
         mongodb: '>=3.5.0',
-        topology: 'single',
-        node: '>=4.8.5'
+        topology: 'single'
       }
     },
     test: function (done) {
