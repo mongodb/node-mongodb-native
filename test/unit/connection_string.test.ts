@@ -338,7 +338,6 @@ describe('Connection String', function () {
     it('should retain specified authSource with no provided credentials', async function () {
       makeStub('authSource=thisShouldBeAuthSource');
       const credentials = {};
-
       const options = {
         credentials,
         srvHost: 'test.mock.test.build.10gen.cc',
