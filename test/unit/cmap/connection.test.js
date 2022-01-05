@@ -78,7 +78,7 @@ describe('Connection - unit/cmap', function () {
     connect(options, (err, conn) => {
       expect(err).to.be.a('undefined');
       expect(conn).to.be.instanceOf(Connection);
-      expect(conn).to.have.property(LEGACY_HELLO_COMMAND).that.is.a('object');
+      expect(conn).to.have.property('hello').that.is.a('object');
 
       conn.command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 }, err => {
         const beforeHandshakeSymbol = getSymbolFrom(err, 'beforeHandshake', false);

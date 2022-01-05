@@ -67,13 +67,10 @@ describe('optionalRequire', function () {
           return this.skip();
         }
         const mdbAWS = new MongoDBAWS();
-        mdbAWS.auth(
-          new AuthContext({ [LEGACY_HELLO_COMMAND]: { maxWireVersion: 9 } }, true, null),
-          error => {
-            expect(error).to.exist;
-            expect(error.message).includes('not found');
-          }
-        );
+        mdbAWS.auth(new AuthContext({ hello: { maxWireVersion: 9 } }, true, null), error => {
+          expect(error).to.exist;
+          expect(error.message).includes('not found');
+        });
       });
     }
   });
