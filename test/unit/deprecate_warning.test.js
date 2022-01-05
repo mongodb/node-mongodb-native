@@ -168,23 +168,21 @@ describe('Deprecation Warnings - unit', function () {
     });
   });
 
-  it('optionsIndex pointing to undefined should not error', done => {
+  it('optionsIndex pointing to undefined should not error', () => {
     const f = makeTestFunction({
       name: 'f',
       deprecatedOptions: deprecatedOptions,
       optionsIndex: 0
     });
     expect(f).to.not.throw();
-    done();
   });
 
-  it('optionsIndex not pointing to object should not error', done => {
+  it('optionsIndex not pointing to object should not error', () => {
     const f = makeTestFunction({
       name: 'f',
       deprecatedOptions: deprecatedOptions,
       optionsIndex: 0
     });
     expect(() => f('not-an-object')).to.not.throw();
-    done();
   });
 });
