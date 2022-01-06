@@ -262,7 +262,9 @@ function doRead(stream: GridFSBucketReadStream): void {
       if (bytesRemaining <= 0) {
         return stream.emit(
           GridFSBucketReadStream.ERROR,
-          new MongoGridFSChunkError(`ExtraChunk: Got unexpected n: ${doc.n}`)
+          new MongoGridFSChunkError(
+            `ExtraChunk: Got unexpected n: ${doc.n}, expected file length ${stream.s.file.length} bytes but already read ${stream.s.bytesRead} bytes`
+          )
         );
       }
 
