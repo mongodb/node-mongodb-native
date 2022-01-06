@@ -1,7 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
+var test = require('../functional/shared').assert;
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
+var setupDatabase = require('../functional/shared').setupDatabase;
 const { ObjectId } = require('../../src');
 
 describe('ObjectId', function () {
