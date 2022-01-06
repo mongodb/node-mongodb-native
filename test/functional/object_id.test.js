@@ -1,10 +1,10 @@
 'use strict';
-var test = require('../functional/shared').assert;
+var test = require('./shared').assert;
 const { expect } = require('chai');
-var setupDatabase = require('../functional/shared').setupDatabase;
+var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
 
-describe('ObjectId', function () {
+describe.only('ObjectId', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
