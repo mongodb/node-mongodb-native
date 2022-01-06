@@ -1,9 +1,9 @@
-#!/usr/bin/env node
-'use strict';
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-var-requires */
 
 const { MongoClient } = require('../../src');
 const visualizeMonitoringEvents = require('./utils').visualizeMonitoringEvents;
-const { now, calculateDurationInMs } = require('../../lib/utils');
+const { now, calculateDurationInMs } = require('../../src/utils');
 const chalk = require('chalk');
 const argv = require('yargs')
   .usage('Usage: $0 [options] <connection string>')
@@ -84,7 +84,7 @@ async function scheduleWriteWorkload(client) {
 
   try {
     const start = now();
-    const result = await client.db('test').collection('test').insertOne({ a: 42 });
+    await client.db('test').collection('test').insertOne({ a: 42 });
     averageWriteMS = 0.2 * calculateDurationInMs(start) + 0.8 * averageWriteMS;
 
     completedWriteWorkloads++;
