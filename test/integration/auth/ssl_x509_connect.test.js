@@ -1,10 +1,10 @@
 'use strict';
 var fs = require('fs');
 var f = require('util').format;
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+var test = require('../../functional/shared').assert;
+var setupDatabase = require('../../functional/shared').setupDatabase;
 const { expect } = require('chai');
-const { MongoClient } = require('../../src');
+const { MongoClient } = require('../../../src');
 
 describe('SSL (x509)', function () {
   before(function () {

@@ -4,7 +4,7 @@ const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
 
-describe.only('ObjectId', function () {
+describe('ObjectId', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
