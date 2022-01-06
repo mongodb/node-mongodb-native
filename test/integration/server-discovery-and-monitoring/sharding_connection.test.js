@@ -4,7 +4,7 @@ const { withClient, setupDatabase } = require('../../functional/shared');
 const { expect } = require('chai');
 const { TopologyType } = require('../../../src/sdam/common');
 
-describe.only('Sharding (Connection)', function () {
+describe('Sharding (Connection)', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
