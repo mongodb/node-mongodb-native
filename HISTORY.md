@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.3.0](https://github.com/mongodb/node-mongodb-native/compare/v4.2.2...v4.3.0) (2022-01-06)
+
+
+### Features
+
+* **NODE-3589:** support dot-notation attributes in Filter ([#2972](https://github.com/mongodb/node-mongodb-native/issues/2972)) ([76fff97](https://github.com/mongodb/node-mongodb-native/commit/76fff97606d5e8b33ff8453400ccaefd18a54a1a))
+* **NODE-3633:** add Socks5 support ([#3041](https://github.com/mongodb/node-mongodb-native/issues/3041)) ([451627a](https://github.com/mongodb/node-mongodb-native/commit/451627a3a5ac93f259410a12b71d87b0911715e1))
+* **NODE-3784:**  Add `enableUtf8Validation` option ([#3074](https://github.com/mongodb/node-mongodb-native/issues/3074)) ([4f56409](https://github.com/mongodb/node-mongodb-native/commit/4f56409e5ddeaf9aa1796135008869dec9d7c690))
+* **NODE-3793:** Remove offensive language from code and tests ([#3082](https://github.com/mongodb/node-mongodb-native/issues/3082)) ([91a67e0](https://github.com/mongodb/node-mongodb-native/commit/91a67e0f370e46b36665966ad49988207907624d))
+
+
+### Bug Fixes
+
+* **gridfs:** make `GridFSBucketWriteStream.prototype.end()` return `this` for compat with @types/node@17.0.6 ([#3088](https://github.com/mongodb/node-mongodb-native/issues/3088)) ([7bb9e37](https://github.com/mongodb/node-mongodb-native/commit/7bb9e3729a23e845a68532f554808fb52decfacb))
+* **NODE-2899:** sort and correct circular imports ([#3072](https://github.com/mongodb/node-mongodb-native/issues/3072)) ([48cc729](https://github.com/mongodb/node-mongodb-native/commit/48cc72940ac13a81a1aef7899d227da9159f0675))
+* **NODE-3675:** SRV option bug correctly defaults authSource to $external ([#3079](https://github.com/mongodb/node-mongodb-native/issues/3079)) ([30f2a2d](https://github.com/mongodb/node-mongodb-native/commit/30f2a2d9304a429f025a0be244c83ca97e72cddf))
+* **NODE-3803:** Fix _id typing on collection create operations ([#3077](https://github.com/mongodb/node-mongodb-native/issues/3077)) ([f1979db](https://github.com/mongodb/node-mongodb-native/commit/f1979db85370bf8b674ff7074d5e5b1dd1a020e9))
+
 ### [4.2.2](https://github.com/mongodb/node-mongodb-native/compare/v4.2.1...v4.2.2) (2021-12-13)
 
 ### Bug Fixes
