@@ -1,8 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
-const { Long, Int32, Double } = require('../../src');
+const { Long, Int32, Double } = require('../../../../src');
+const { assert: test, setupDatabase } = require('../../shared');
 
 describe('Promote Values', function () {
   before(function () {

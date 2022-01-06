@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, setupDatabase } = require('./shared');
+const { assert: test, setupDatabase } = require('../../shared');
 const { Buffer } = require('buffer');
 const { expect } = require('chai');
 
