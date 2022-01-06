@@ -1,9 +1,11 @@
+import { MongoClient, RemoveUserOptions } from '../../../src';
+
 describe('listDatabases - authorizedDatabases', function () {
   const username = 'newUser';
   const password = 'newUserPw';
-  let client;
-  let newClient;
-  const mockRoles = { roles: [{ role: 'read', db: 'mockAuthorizedDb' }] };
+  let client: MongoClient;
+  let newClient: MongoClient;
+  const mockRoles: RemoveUserOptions = { roles: [{ role: 'read', db: 'mockAuthorizedDb' }] };
 
   before(async function () {
     client = this.configuration.newClient();
@@ -14,16 +16,16 @@ describe('listDatabases - authorizedDatabases', function () {
     await newClient.connect();
   });
 
-  // after(async function () {
-  //   await client.db('admin').removeUser(username, mockRoles);
-  // });
-
-  it.only('@TEMP: should correctly show authorized databases', async function () {
-    await newClient.db().admin().listDatabases();
-    await newClient.db().admin().command({ connectionStatus: 1 });
-
-    await client.db('admin').removeUser(username, mockRoles);
+  afterEach(async function () {
+    await client.db('admin').removeUser(username);
     await client.close();
     await newClient.close();
+  });
+
+  it.only('@TEMP: should correctly show authorized databases', async function () {
+    const dbs = await newClient.db().admin().listDatabases();
+    const status = await newClient.db().admin().command({ connectionStatus: 1 });
+    const authorized = await newClient.db().admin().listDatabases({ authorizedDatabases: true });
+    //do someting
   });
 });
