@@ -1,10 +1,10 @@
 'use strict';
 
-const { withClient, setupDatabase } = require('./shared');
+const { withClient, setupDatabase } = require('../../functional/shared');
 const { expect } = require('chai');
-const { TopologyType } = require('../../src/sdam/common');
+const { TopologyType } = require('../../../src/sdam/common');
 
-describe('Sharding (Connection)', function () {
+describe.only('Sharding (Connection)', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
