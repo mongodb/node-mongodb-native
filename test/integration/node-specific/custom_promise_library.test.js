@@ -1,12 +1,12 @@
 'use strict';
 
 const { expect } = require('chai');
-const { PromiseProvider } = require('../../src/promise_provider');
+const { PromiseProvider } = require('../../../src/promise_provider');
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-describe('Optional PromiseLibrary / maybePromise', function () {
+describe('Optional PromiseLibrary', function () {
   afterEach(() => {
     PromiseProvider.set(Promise);
   });
