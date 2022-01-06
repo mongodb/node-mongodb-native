@@ -89,6 +89,15 @@ describe('Connection String', function () {
     expect(options.credentials.source).to.equal('$external');
   });
 
+  it('should retain user-specified authSource with no credentials for non-srv URI', function () {
+    const mockAuthSource = 'thisShouldBeAuthSource';
+    const options = parseOptions(`mongodb://localhost/?authSource=${mockAuthSource}`);
+
+    expect(options).to.have.nested.property('credentials.username', '');
+    expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
+    expect(options).to.have.nested.property('credentials.source', mockAuthSource);
+  });
+
   it('should parse a numeric authSource with variable width', function () {
     const options = parseOptions('mongodb://test@localhost/?authSource=0001');
     expect(options.credentials.source).to.equal('0001');
@@ -346,6 +355,8 @@ describe('Connection String', function () {
       } as MongoOptions;
 
       await resolveSRVRecordAsync(options as any);
+      expect(options).to.have.nested.property('credentials.username', '');
+      expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
       expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
     });
   });
