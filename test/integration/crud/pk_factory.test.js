@@ -1,9 +1,9 @@
 'use strict';
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
-const { ObjectId } = require('../../src');
+var setupDatabase = require('../../functional/shared').setupDatabase;
+const { ObjectId } = require('../../../src');
 
-describe('Custom PK', function () {
+describe('PkFactory', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

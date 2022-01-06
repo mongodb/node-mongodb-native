@@ -1,8 +1,7 @@
 'use strict';
-var fs = require('fs');
-var f = require('util').format;
-var test = require('../../functional/shared').assert;
-var setupDatabase = require('../../functional/shared').setupDatabase;
+const fs = require('fs');
+const { format: f } = require('util');
+const { test, setupDatabase } = require('../shared');
 const { expect } = require('chai');
 const { MongoClient } = require('../../../src');
 

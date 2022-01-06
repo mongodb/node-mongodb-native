@@ -1,7 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
+
+const { assert: test, setupDatabase } = require('../../shared');
 
 describe('Promote Buffers', function () {
   before(function () {

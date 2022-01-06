@@ -1,8 +1,8 @@
 'use strict';
-var test = require('../../functional/shared').assert;
-var setupDatabase = require('../../functional/shared').setupDatabase;
 const { MongoClient } = require('../../../src');
 const { expect } = require('chai');
+
+const { assert: test, setupDatabase } = require('../shared');
 
 describe('SCRAM', function () {
   before(function () {

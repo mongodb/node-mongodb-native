@@ -1,12 +1,10 @@
 'use strict';
 
-const test = require('../../functional/shared').assert;
-const setupDatabase = require('../../functional/shared').setupDatabase;
-const withMonitoredClient = require('../../functional/shared').withMonitoredClient;
 const { ReadPreference, Topology } = require('../../../src');
-const { withClient } = require('../../functional/shared');
 const chai = require('chai');
 chai.use(require('chai-subset'));
+
+const { assert: test, setupDatabase, withClient, withMonitoredClient } = require('../shared');
 
 const expect = chai.expect;
 

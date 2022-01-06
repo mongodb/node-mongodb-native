@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const { expect } = require('chai');
 const { Connection } = require('../../../src/cmap/connection');
 const { ScramSHA256 } = require('../../../src/cmap/auth/scram');
-const { setupDatabase, withClient } = require('../../functional/shared');
+const { setupDatabase, withClient } = require('../shared');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 describe('SCRAM-SHA-256 auth', function () {

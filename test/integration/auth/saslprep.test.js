@@ -1,7 +1,6 @@
 'use strict';
 
-const setupDatabase = require('../../functional/shared').setupDatabase;
-const withClient = require('../../functional/shared').withClient;
+const { setupDatabase, withClient } = require('../shared');
 
 describe('SASLPrep', function () {
   // Step 4
