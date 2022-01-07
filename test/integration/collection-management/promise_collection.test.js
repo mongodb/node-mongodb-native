@@ -1,13 +1,11 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-var f = require('util').format;
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { assert: test, setupDatabase } = require('../shared');
+const f = require('util').format;
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-describe('Promises (Db)', function () {
+describe('Collection Management (promise tests)', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
@@ -48,67 +46,6 @@ describe('Promises (Db)', function () {
     }
   });
 
-  it('Should correctly execute legacy hello command using Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=5')
-          : f('%s?%s', url, 'maxPoolSize=5');
-
-      const client = configuration.newClient(url);
-      client.connect().then(function (client) {
-        // Execute legacy hello command
-        client
-          .db(configuration.db)
-          .command({ [LEGACY_HELLO_COMMAND]: true })
-          .then(function (result) {
-            test.ok(result !== null);
-
-            client.close(done);
-          });
-      });
-    }
-  });
-
-  it('Should correctly catch command error using Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=5')
-          : f('%s?%s', url, 'maxPoolSize=5');
-
-      const client = configuration.newClient(url);
-      client.connect().then(function (client) {
-        client
-          .db(configuration.db)
-          .command({ nosuchcommand: true })
-          .then(function () {})
-          .catch(function () {
-            // Execute close using promise
-            client.close().then(function () {
-              done();
-            });
-          });
-      });
-    }
-  });
-
   it('Should correctly createCollection using Promise', {
     metadata: {
       requires: {
@@ -136,35 +73,6 @@ describe('Promises (Db)', function () {
           })
           .catch(function (err) {
             test.ok(err != null);
-          });
-      });
-    }
-  });
-
-  it('Should correctly execute stats using Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=5')
-          : f('%s?%s', url, 'maxPoolSize=5');
-
-      const client = configuration.newClient(url);
-      client.connect().then(function (client) {
-        client
-          .db(configuration.db)
-          .stats()
-          .then(function (stats) {
-            test.ok(stats != null);
-
-            client.close(done);
           });
       });
     }
@@ -271,66 +179,6 @@ describe('Promises (Db)', function () {
             });
           });
         });
-      });
-    }
-  });
-
-  it('Should correctly execute createIndex using Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=5')
-          : f('%s?%s', url, 'maxPoolSize=5');
-
-      const client = configuration.newClient(url);
-      client.connect().then(function (client) {
-        // Create an index
-        client
-          .db(configuration.db)
-          .createIndex('promiseCollectionCollections1', { a: 1 })
-          .then(function (r) {
-            test.ok(r != null);
-
-            client.close(done);
-          });
-      });
-    }
-  });
-
-  it('Should correctly execute ensureIndex using Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=5')
-          : f('%s?%s', url, 'maxPoolSize=5');
-
-      const client = configuration.newClient(url);
-      client.connect().then(function (client) {
-        // Create an index
-        client
-          .db(configuration.db)
-          .createIndex('promiseCollectionCollections2', { a: 1 })
-          .then(function (r) {
-            test.ok(r != null);
-
-            client.close(done);
-          });
       });
     }
   });

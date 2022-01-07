@@ -2,10 +2,73 @@
 const { expect } = require('chai');
 const { assert: test, setupDatabase, withClient, withMonitoredClient } = require('./shared');
 const shared = require('../tools/contexts');
+const f = require('util').format;
 
 describe('Indexes', function () {
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  context('promise tests', () => {
+    it('Should correctly execute createIndex using Promise', {
+      metadata: {
+        requires: {
+          topology: ['single']
+        }
+      },
+
+      test: function (done) {
+        var configuration = this.configuration;
+        var url = configuration.url();
+        url =
+          url.indexOf('?') !== -1
+            ? f('%s&%s', url, 'maxPoolSize=5')
+            : f('%s?%s', url, 'maxPoolSize=5');
+
+        const client = configuration.newClient(url);
+        client.connect().then(function (client) {
+          // Create an index
+          client
+            .db(configuration.db)
+            .createIndex('promiseCollectionCollections1', { a: 1 })
+            .then(function (r) {
+              test.ok(r != null);
+
+              client.close(done);
+            });
+        });
+      }
+    });
+
+    it('Should correctly execute ensureIndex using Promise', {
+      metadata: {
+        requires: {
+          topology: ['single']
+        }
+      },
+
+      test: function (done) {
+        var configuration = this.configuration;
+        var url = configuration.url();
+        url =
+          url.indexOf('?') !== -1
+            ? f('%s&%s', url, 'maxPoolSize=5')
+            : f('%s?%s', url, 'maxPoolSize=5');
+
+        const client = configuration.newClient(url);
+        client.connect().then(function (client) {
+          // Create an index
+          client
+            .db(configuration.db)
+            .createIndex('promiseCollectionCollections2', { a: 1 })
+            .then(function (r) {
+              test.ok(r != null);
+
+              client.close(done);
+            });
+        });
+      }
+    });
   });
 
   it('shouldCorrectlyExtractIndexInformation', {
