@@ -3,6 +3,8 @@
 const mocha = require('mocha');
 const chalk = require('chalk');
 
+chalk.level = 3;
+
 const {
   EVENT_RUN_BEGIN,
   EVENT_RUN_END,
