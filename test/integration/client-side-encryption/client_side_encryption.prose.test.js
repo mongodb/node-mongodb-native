@@ -552,14 +552,16 @@ describe('Client Side Encryption Prose Tests', function () {
     const limitsKey = loadLimits('limits-key.json');
     const limitsDoc = loadLimits('limits-doc.json');
 
-    before(function () {
-      // First, perform the setup.
+    let firstTimeSetup = true;
+    beforeEach(async function () {
+      if (firstTimeSetup) {
+        firstTimeSetup = false;
+        // First, perform the setup.
 
-      // #. Create a MongoClient without encryption enabled (referred to as ``client``).
-      this.client = this.configuration.newClient();
+        // #. Create a MongoClient without encryption enabled (referred to as ``client``).
+        this.client = this.configuration.newClient();
 
-      return (
-        this.client
+        await this.client
           .connect()
           // #. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
           .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
@@ -575,11 +577,9 @@ describe('Client Side Encryption Prose Tests', function () {
               .db(keyVaultDbName)
               .collection(keyVaultCollName)
               .insertOne(limitsKey, { writeConcern: { w: 'majority' } });
-          })
-      );
-    });
+          });
+      }
 
-    beforeEach(function () {
       // #. Create a MongoClient configured with auto encryption (referred to as ``client_encrypted``)
       //    Configure with the ``local`` KMS provider as follows:
       //    .. code:: javascript
