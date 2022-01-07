@@ -1,8 +1,12 @@
-'use strict';
-const { expect } = require('chai');
+import { expect } from 'chai';
+
+import { Db } from '../../../src/db';
+import { MongoClient } from '../../../src/mongo_client';
+import { CollectionInfo } from '../../../src/operations/list_collections';
 
 describe('Views', function () {
-  let client, db;
+  let client: MongoClient;
+  let db: Db;
   beforeEach(async function () {
     const configuration = this.configuration;
     client = this.configuration.newClient();
@@ -33,15 +37,13 @@ describe('Views', function () {
         })
         .next();
 
-      console.error(newView);
-
       expect(newView).to.exist;
 
-      const options = newView.options;
+      const options = (newView as CollectionInfo).options ?? null;
       expect(options).to.haveOwnProperty('viewOn', 'users');
       expect(options)
         .to.haveOwnProperty('pipeline')
         .to.deep.equal([{ $match: {} }]);
     }
-  });
+  } as any);
 });
