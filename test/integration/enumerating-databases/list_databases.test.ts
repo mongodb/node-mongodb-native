@@ -1,16 +1,16 @@
-import { MongoClient, RemoveUserOptions } from '../../../src';
+import { AddUserOptions, MongoClient } from '../../../src';
 
 describe('listDatabases - authorizedDatabases', function () {
   const username = 'newUser';
   const password = 'newUserPw';
   let client: MongoClient;
   let newClient: MongoClient;
-  const mockRoles: RemoveUserOptions = { roles: [{ role: 'read', db: 'mockAuthorizedDb' }] };
+  const userOptions: AddUserOptions = { roles: [{ role: 'read', db: 'mockAuthorizedDb' }] };
 
   before(async function () {
     client = this.configuration.newClient();
     await client.connect();
-    await client.db('admin').addUser(username, password, mockRoles);
+    await client.db('admin').addUser(username, password, userOptions);
 
     newClient = this.configuration.newClient({ auth: { username, password } });
     await newClient.connect();
