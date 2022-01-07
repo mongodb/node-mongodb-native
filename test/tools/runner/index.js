@@ -10,6 +10,7 @@ const { MongoClient } = require('../../../src');
 const { TestConfiguration } = require('./config');
 const { getEnvironmentalOptions } = require('../utils');
 const mock = require('../mongodb-mock/index');
+const { inspect } = require('util');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
@@ -19,8 +20,6 @@ const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
 const MULTI_MONGOS_LB_URI = process.env.MULTI_MONGOS_LB_URI;
 const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
 const filters = [];
-
-const LOG_FILTER_REASON = false;
 
 let initializedFilters = false;
 async function initializeFilters(client) {
@@ -55,20 +54,19 @@ async function initializeFilters(client) {
 
 beforeEach(async function () {
   if (Object.keys(this.currentTest.metadata).length > 0) {
-    let ok = true;
-    for (const filter of filters) {
-      ok = ok && filter.filter(this.currentTest);
-      if (!ok) {
-        if (LOG_FILTER_REASON) {
-          this.currentTest.title += ` ## filtered by ${filter.constructor.name} - ${JSON.stringify(
-            this.currentTest.metadata
-          )}`;
-        }
-        break;
-      }
-    }
+    const failedFilter = filters.find(filter => !filter.filter(this.currentTest));
 
-    if (!ok) {
+    if (failedFilter) {
+      const filterName = failedFilter.constructor.name;
+      const metadataString = inspect(this.currentTest.metadata, {
+        colors: true,
+        compact: true,
+        depth: 10,
+        breakLength: Infinity
+      });
+
+      this.currentTest.skipReason = `filtered by ${filterName} - ${metadataString}`;
+
       this.skip();
     }
   }

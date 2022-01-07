@@ -198,7 +198,7 @@ module.exports = Mocha.interfaces.metadata_ui = function (suite) {
       context.xspecify =
       context.it.skip =
         function (title) {
-          context.it(title);
+          return context.it(title);
         };
 
     /**

@@ -230,10 +230,13 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
   }
 
   /**
-   * @param {MongoMochaTest} test
+   * @param {MongoMochaTest & {skipReason?: string}} test
    */
   pending(test) {
     if (REPORT_TO_STDIO) console.log(chalk.cyan(`↬ ${test.fullTitle()}`));
+    if (typeof test.skipReason === 'string') {
+      console.log(chalk.cyan(`${'  '.repeat(test.titlePath().length + 1)}↬ ${test.skipReason}`));
+    }
     test.skipped = true;
   }
 }
