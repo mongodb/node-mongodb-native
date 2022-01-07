@@ -109,7 +109,7 @@ Once you have the Evergreen CLI setup, you are ready to run a build. Keep in min
 
 1. Use the Evergreen `patch` command. `-y` skips the confirmation dialog. `-u` includes uncommitted changes. `-p [project name]` specifies the Evergreen project. --browse opens the patch URL in your browser.
 
-   `evergreen patch -y -u -p mongo-node-driver --browse`
+   `evergreen patch -y -u -p mongo-node-driver-next --browse`
 
 1. In your browser, select the build variants and tasks to run.
 
