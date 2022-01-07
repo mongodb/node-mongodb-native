@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, setupDatabase } = require('./shared');
+const { assert: test, setupDatabase } = require('../shared');
 const { expect } = require('chai');
 
 describe('Unicode', function () {
