@@ -262,9 +262,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
         failureHandler(err);
         return;
       }
-      if ('isWritablePrimary' in hello) {
-        // Provide pre-hello-style response document.
-        hello[LEGACY_HELLO_COMMAND] = hello.isWritablePrimary;
+
+      if (!('isWritablePrimary' in hello)) {
+        // Provide hello-style response document.
+        hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
       }
 
       const rttPinger = monitor[kRTTPinger];

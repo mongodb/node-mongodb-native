@@ -147,9 +147,9 @@ function performInitialHandshake(
         return;
       }
 
-      if ('isWritablePrimary' in response) {
-        // Provide pre-hello-style response document.
-        response[LEGACY_HELLO_COMMAND] = response.isWritablePrimary;
+      if (!('isWritablePrimary' in response)) {
+        // Provide hello-style response document.
+        response.isWritablePrimary = response[LEGACY_HELLO_COMMAND];
       }
 
       if (response.helloOk) {
