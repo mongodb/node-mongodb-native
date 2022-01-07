@@ -1,7 +1,6 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-const { ReturnDocument } = require('../../src');
+const { assert: test, setupDatabase } = require('../shared');
+const { ReturnDocument } = require('../../../src');
 const { expect } = require('chai');
 
 describe('Multiple Databases', function () {
