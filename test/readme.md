@@ -154,7 +154,7 @@ Some special notes on how mocha works with our testing setup:
 
 - `before` hooks will run even if a test is skipped by the environment it runs on.
   - So, for example, if your before hook does logic that can only run on a certain server version you can't depend on your test block metadata to filter for that.
-- `after` hooks cannot be used to clean up clients because the session leak checker currently runs its afterEach hook first.
+- `after` hooks cannot be used to clean up clients because the session leak checker currently runs in an `afterEach` hook, which would be executed before any `after` hook has a chance to run
 
 ## Testing with Special Environments
 
