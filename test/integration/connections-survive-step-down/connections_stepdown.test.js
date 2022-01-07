@@ -1,8 +1,6 @@
 'use strict';
 
-const chai = require('chai');
-
-const expect = chai.expect;
+const { expect } = require('chai');
 
 function ignoreNsNotFound(err) {
   if (!err.message.match(/ns not found/)) {
