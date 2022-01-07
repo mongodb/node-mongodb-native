@@ -1,8 +1,8 @@
 'use strict';
 const { expect } = require('chai');
-const { filterForCommands, withClientV2 } = require('./shared');
+const { filterForCommands, withClientV2 } = require('../shared');
 
-describe('AbstractCursor', function () {
+describe('Find Cursor', function () {
   before(
     withClientV2((client, done) => {
       const docs = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }, { a: 6 }];

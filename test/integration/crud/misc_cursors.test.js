@@ -1,6 +1,11 @@
 'use strict';
-const { assert: test, filterForCommands, withClient, withMonitoredClient } = require('./shared');
-const { setupDatabase } = require('./shared');
+const {
+  assert: test,
+  filterForCommands,
+  setupDatabase,
+  withClient,
+  withMonitoredClient
+} = require('../shared');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -8,9 +13,9 @@ const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
-const { ReadPreference } = require('../../src/read_preference');
-const { ServerType } = require('../../src/sdam/common');
-const { formatSort } = require('../../src/sort');
+const { ReadPreference } = require('../../../src/read_preference');
+const { ServerType } = require('../../../src/sdam/common');
+const { formatSort } = require('../../../src/sort');
 
 describe('Cursor', function () {
   before(function () {

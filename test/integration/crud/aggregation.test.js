@@ -1,8 +1,8 @@
 'use strict';
 
-const { filterForCommands } = require('./shared');
+const { expect } = require('chai');
 
-var expect = require('chai').expect;
+const { filterForCommands } = require('../shared');
 
 describe('Aggregation', function () {
   /**
