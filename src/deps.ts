@@ -201,7 +201,7 @@ export interface AutoEncryptionOptions {
     /** Configuration options for using 'local' as your KMS provider */
     local?: {
       /**
-       * The KMS key used to encrypt/decrypt data keys.
+       * The master key used to encrypt/decrypt data keys.
        * A 96-byte long Buffer or base64 encoded string.
        */
       key: Buffer | string;
