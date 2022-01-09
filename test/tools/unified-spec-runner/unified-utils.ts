@@ -71,9 +71,21 @@ export async function topologySatisfies(
     }
   }
 
-  if (r.auth) {
-    ok &&= process.env.AUTH === 'auth';
-    if (!ok && skipReason == null) skipReason = `requires auth but auth is not enabled`;
+  if (typeof r.auth === 'boolean') {
+    if (r.auth === true) {
+      // TODO(NODE-2471): Currently when there are credentials our driver will send a ping command
+      // All other drivers connect implicitly upon the first operation
+      // but in node you'll run into auth errors / successes at client.connect() time.
+      // so we cannot run into saslContinue failPoints that get configured for an operation to fail with
+      // Ex. 'errors during authentication are processed' in test/spec/load-balancers/sdam-error-handling.yml
+      ok &&= false; // process.env.AUTH === 'auth';
+      if (!ok && skipReason == null) {
+        skipReason = `requires auth but auth cannot be tested in the unified format - TODO(NODE-2471)`;
+      }
+    } else if (r.auth === false) {
+      ok &&= process.env.AUTH === 'noauth' || process.env.AUTH == null;
+      if (!ok && skipReason == null) skipReason = `requires no auth but auth is enabled`;
+    }
   }
 
   if (r.serverless) {
