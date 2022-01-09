@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { satisfies as semverSatisfies } from 'semver';
 
-import { MongoClient } from '../../../src/mongo_client';
+import type { MongoClient } from '../../../src/mongo_client';
 import { ReadPreference } from '../../../src/read_preference';
 import { TopologyType } from '../../../src/sdam/common';
 import { ns } from '../../../src/utils';
@@ -15,9 +15,6 @@ import { patchVersion, topologySatisfies, zip } from './unified-utils';
 export type TestConfiguration = InstanceType<
   typeof import('../../tools/runner/config')['TestConfiguration']
 >;
-interface MongoDBMochaTestContext extends Mocha.Context {
-  configuration: TestConfiguration;
-}
 
 export function trace(message: string): void {
   if (process.env.UTR_TRACE) {
@@ -43,7 +40,7 @@ async function terminateOpenTransactions(client: MongoClient) {
 }
 
 export async function runUnifiedTest(
-  ctx: MongoDBMochaTestContext,
+  ctx: Mocha.Context,
   unifiedSuite: uni.UnifiedSuite,
   test: uni.Test,
   testsToSkip?: string[]
@@ -103,7 +100,7 @@ export async function runUnifiedTest(
 
     trace('satisfiesRequirements');
     for (const requirement of allRequirements) {
-      const met = await topologySatisfies(ctx.configuration, requirement, utilClient);
+      const met = await topologySatisfies(ctx, requirement, utilClient);
       if (!met) {
         return ctx.skip();
       }

@@ -1,0 +1,9 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "strict": false,
+        "allowJs": true,
+        "checkJs": false
+    },
+    "include": ["../node_modules/@types/mocha/index.d.ts", "./mongodb-mocha.d.ts",]
+}

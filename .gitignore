@@ -57,6 +57,7 @@ lib/
 *.d.ts
 # type definition tests
 !test/types
+!test/mongodb-mocha.d.ts
 
 .vscode
 output

@@ -3,10 +3,8 @@ import ConnectionString from 'mongodb-connection-string-url';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
-import type { Document } from '../../../src';
-import { CollectionOptions, DbOptions, MongoClient } from '../../../src';
+import type { CollectionOptions, DbOptions, Document, MongoClient } from '../../../src';
 import { shouldRunServerlessTest } from '../../tools/utils';
-import { TestConfiguration } from './runner';
 import type { CollectionOrDatabaseOptions, RunOnRequirement } from './schema';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
@@ -15,18 +13,26 @@ export function log(message: unknown, ...optionalParameters: unknown[]): void {
 }
 
 export async function topologySatisfies(
-  config: TestConfiguration,
+  ctx: Mocha.Context,
   r: RunOnRequirement,
   utilClient: MongoClient
 ): Promise<boolean> {
+  const config = ctx.configuration;
   let ok = true;
+
+  let skipReason;
+
   if (r.minServerVersion) {
     const minVersion = patchVersion(r.minServerVersion);
     ok &&= semverGte(config.version, minVersion);
+    if (!ok && skipReason == null) {
+      skipReason = `requires mongodb version greater than ${minVersion}`;
+    }
   }
   if (r.maxServerVersion) {
     const maxVersion = patchVersion(r.maxServerVersion);
     ok &&= semverLte(config.version, maxVersion);
+    if (!ok && skipReason == null) skipReason = `requires mongodb version less than ${maxVersion}`;
   }
 
   if (r.topologies) {
@@ -41,9 +47,15 @@ export async function topologySatisfies(
     if (r.topologies.includes('sharded-replicaset') && topologyType === 'sharded') {
       const shards = await utilClient.db('config').collection('shards').find({}).toArray();
       ok &&= shards.length > 0 && shards.every(shard => shard.host.split(',').length > 1);
+      if (!ok && skipReason == null) {
+        skipReason = `requires sharded-replicaset but shards.length=${shards.length}`;
+      }
     } else {
       if (!topologyType) throw new Error(`Topology undiscovered: ${config.topologyType}`);
       ok &&= r.topologies.includes(topologyType);
+      if (!ok && skipReason == null) {
+        skipReason = `requires ${r.topologies} but against a ${topologyType} topology`;
+      }
     }
   }
 
@@ -52,20 +64,24 @@ export async function topologySatisfies(
     for (const [name, value] of Object.entries(r.serverParameters)) {
       if (name in config.parameters) {
         ok &&= isDeepStrictEqual(config.parameters[name], value);
+        if (!ok && skipReason == null) {
+          skipReason = `requires serverParameter ${name} to be ${value} but found ${config.parameters[name]}`;
+        }
       }
     }
   }
 
   if (r.auth) {
-    ok &&=
-      !!utilClient.options.auth ||
-      !!utilClient.options.authSource ||
-      !!utilClient.options.authMechanism;
+    ok &&= process.env.AUTH === 'auth';
+    if (!ok && skipReason == null) skipReason = `requires auth but auth is not enabled`;
   }
 
   if (r.serverless) {
     ok &&= shouldRunServerlessTest(r.serverless, config.isServerless);
+    if (!ok && skipReason == null) skipReason = `has serverless set to ${r.serverless}`;
   }
+
+  if (!ok && skipReason != null && ctx.test) ctx.test.skipReason = skipReason;
 
   return ok;
 }

@@ -53,19 +53,21 @@ async function initializeFilters(client) {
 }
 
 beforeEach(async function () {
-  if (Object.keys(this.currentTest.metadata).length > 0) {
+  // `metadata` always exists, `requires` is optional
+  const requires = this.currentTest.metadata.requires;
+  if (requires && Object.keys(requires).length > 0) {
     const failedFilter = filters.find(filter => !filter.filter(this.currentTest));
 
     if (failedFilter) {
       const filterName = failedFilter.constructor.name;
-      const metadataString = inspect(this.currentTest.metadata, {
+      const metadataString = inspect(requires, {
         colors: true,
         compact: true,
         depth: 10,
         breakLength: Infinity
       });
 
-      this.currentTest.skipReason = `filtered by ${filterName} - ${metadataString}`;
+      this.currentTest.skipReason = `filtered by ${filterName} requires ${metadataString}`;
 
       this.skip();
     }
