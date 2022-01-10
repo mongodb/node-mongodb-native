@@ -41,7 +41,7 @@ describe('crud - insert', function () {
     it('Should correctly return failing Promise when no document array passed into insertMany', {
       metadata: {
         requires: {
-          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+          topology: ['single', 'replicaset', 'sharded']
         }
       },
 
