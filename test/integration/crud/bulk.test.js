@@ -26,7 +26,7 @@ describe('Bulk', function () {
     it('Should correctly execute unordered bulk operation in promise form', {
       metadata: {
         requires: {
-          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+          topology: ['single', 'replicaset', 'sharded']
         }
       },
 
@@ -61,7 +61,7 @@ describe('Bulk', function () {
     it('Should correctly execute ordered bulk operation in promise form', {
       metadata: {
         requires: {
-          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+          topology: ['single', 'replicaset', 'sharded']
         }
       },
 
@@ -96,7 +96,7 @@ describe('Bulk', function () {
     it('Should correctly handle bulkWrite with no options', {
       metadata: {
         requires: {
-          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+          topology: ['single', 'replicaset', 'sharded']
         }
       },
 

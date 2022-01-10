@@ -15,7 +15,7 @@ describe('Find and Modify', function () {
       {
         metadata: {
           requires: {
-            topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+            topology: ['single', 'replicaset', 'sharded']
           }
         },
 
@@ -65,7 +65,7 @@ describe('Find and Modify', function () {
       {
         metadata: {
           requires: {
-            topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+            topology: ['single', 'replicaset', 'sharded']
           }
         },
 
@@ -115,7 +115,7 @@ describe('Find and Modify', function () {
       {
         metadata: {
           requires: {
-            topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+            topology: ['single', 'replicaset', 'sharded']
           }
         },
 
