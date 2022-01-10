@@ -10,6 +10,7 @@ about the types of tests and how to run them.
 - [Running the Tests in Evergreen](#running-the-tests-in-evergreen)
 - [Using a Pre-Release Version of a Dependent Library](#using-a-pre-release-version-of-a-dependent-library)
 - [Manually Testing the Driver](#manually-testing-the-driver)
+- [Writing Tests](#writing-tests)
 - [Testing with Special Environments](#testing-with-special-environments)
 
 ## About the Tests
@@ -142,6 +143,18 @@ modify the steps to work with existing Node projects.
 1. Create a new file that uses the driver to test your changes. See the [MongoDB Node.js Quick Start Repo][node-quick-start] for example scripts you can use.
 
 > **Note:** When making driver changes, you will need to run `npm run build:ts` with each change in order for it to take effect.
+
+## Writing Tests
+
+> TODO: flesh this section out more
+
+We use mocha to construct our test suites and chai to assert expectations.
+
+Some special notes on how mocha works with our testing setup:
+
+- `before` hooks will run even if a test is skipped by the environment it runs on.
+  - So, for example, if your before hook does logic that can only run on a certain server version you can't depend on your test block metadata to filter for that.
+- `after` hooks cannot be used to clean up clients because the session leak checker currently runs in an `afterEach` hook, which would be executed before any `after` hook has a chance to run
 
 ## Testing with Special Environments
 

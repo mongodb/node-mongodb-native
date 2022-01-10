@@ -2,7 +2,7 @@
 const { TopologyType } = require('../../../../src/sdam/common');
 
 /**
- * Filter for the MongoDB toopology required for the test
+ * Filter for the MongoDB topology required for the test
  *
  * example:
  * metadata: {

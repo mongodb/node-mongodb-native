@@ -1,7 +1,6 @@
 'use strict';
 
 const mongodb = require('../../../../src');
-const semver = require('semver');
 
 /**
  * Filter for whether or not a test needs / doesn't need Client Side Encryption
@@ -40,11 +39,7 @@ class ClientSideEncryptionFilter {
     const clientSideEncryption =
       test.metadata && test.metadata.requires && test.metadata.requires.clientSideEncryption;
 
-    // CSFLE is only supported on LTS versions of node
-    const nodeSupportsCSFLE = semver.satisfies(process.version, '>4');
-
-    const ret = typeof clientSideEncryption !== 'boolean' || clientSideEncryption === this.enabled;
-    return ret && nodeSupportsCSFLE;
+    return typeof clientSideEncryption !== 'boolean' || clientSideEncryption === this.enabled;
   }
 }
 

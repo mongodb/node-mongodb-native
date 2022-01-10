@@ -57,6 +57,7 @@ lib/
 *.d.ts
 # type definition tests
 !test/types
+!global.d.ts
 
 .vscode
 output

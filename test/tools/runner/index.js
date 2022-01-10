@@ -9,8 +9,8 @@ const fs = require('fs');
 const { MongoClient } = require('../../../src');
 const { TestConfiguration } = require('./config');
 const { getEnvironmentalOptions } = require('../utils');
-const { eachAsync } = require('../../../src/utils');
 const mock = require('../mongodb-mock/index');
+const { inspect } = require('util');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
@@ -18,92 +18,83 @@ const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;
 // Load balancer fronting 2 mongoses.
 const MULTI_MONGOS_LB_URI = process.env.MULTI_MONGOS_LB_URI;
+const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
 const filters = [];
 
-function initializeFilters(client, callback) {
+let initializedFilters = false;
+async function initializeFilters(client) {
+  if (initializedFilters) {
+    return;
+  }
+  initializedFilters = true;
+  const context = {};
+
   const filterFiles = fs
     .readdirSync(path.join(__dirname, 'filters'))
     .filter(x => x.indexOf('js') !== -1);
 
-  // context object that can be appended to as part of filter initialization
-  const context = {};
+  for (const filterName of filterFiles) {
+    const FilterModule = require(path.join(__dirname, 'filters', filterName));
+    const filter = new FilterModule();
 
-  eachAsync(
-    filterFiles,
-    (filterName, cb) => {
-      const FilterModule = require(path.join(__dirname, 'filters', filterName));
-      const filter = new FilterModule();
+    console.assert(typeof filter === 'object');
+    console.assert(filter.filter && typeof filter.filter === 'function');
 
-      if (typeof filter !== 'object') {
-        cb(new TypeError('Type of filter must be an object'));
-        return;
-      }
+    filters.push(filter);
 
-      if (!filter.filter || typeof filter.filter !== 'function') {
-        cb(new TypeError('Object filters must have a function named filter'));
-        return;
-      }
+    if (typeof filter.initializeFilter === 'function') {
+      await new Promise((resolve, reject) =>
+        filter.initializeFilter(client, context, e => (e ? reject(e) : resolve()))
+      );
+    }
+  }
 
-      filters.push(filter);
-      if (typeof filter.initializeFilter === 'function') {
-        filter.initializeFilter(client, context, cb);
-      } else {
-        cb();
-      }
-    },
-    err => callback(err, context)
-  );
+  return context;
 }
 
-function filterOutTests(suite) {
-  suite.tests = suite.tests.filter(test => filters.every(f => f.filter(test)));
-  suite.suites.forEach(suite => filterOutTests(suite));
-}
+beforeEach(async function () {
+  // `metadata` always exists, `requires` is optional
+  const requires = this.currentTest.metadata.requires;
+  if (requires && Object.keys(requires).length > 0) {
+    const failedFilter = filters.find(filter => !filter.filter(this.currentTest));
 
-before(function (_done) {
-  // NOTE: if we first parse the connection string and redact auth, then we can reenable this
-  // const usingUnifiedTopology = !!process.env.MONGODB_UNIFIED_TOPOLOGY;
-  // console.log(
-  //   `connecting to: ${chalk.bold(MONGODB_URI)} using ${chalk.bold(
-  //     usingUnifiedTopology ? 'unified' : 'legacy'
-  //   )} topology`
-  // );
+    if (failedFilter) {
+      const filterName = failedFilter.constructor.name;
+      const metadataString = inspect(requires, {
+        colors: true,
+        compact: true,
+        depth: 10,
+        breakLength: Infinity
+      });
 
-  const loadBalanced = SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI;
+      this.currentTest.skipReason = `filtered by ${filterName} requires ${metadataString}`;
+
+      this.skip();
+    }
+  }
+});
+
+before(async function () {
   const client = new MongoClient(
     loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
     getEnvironmentalOptions()
   );
-  const done = err => client.close(err2 => _done(err || err2));
 
-  client.connect(err => {
-    if (err) {
-      done(err);
-      return;
-    }
+  await client.connect();
 
-    initializeFilters(client, (err, context) => {
-      if (err) {
-        done(err);
-        return;
-      }
+  const context = await initializeFilters(client);
 
-      // Ensure test MongoClients set a serverApi parameter when required
-      if (MONGODB_API_VERSION) {
-        context.serverApi = MONGODB_API_VERSION;
-      }
+  if (MONGODB_API_VERSION) {
+    context.serverApi = MONGODB_API_VERSION;
+  }
 
-      if (SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI) {
-        context.singleMongosLoadBalancerUri = SINGLE_MONGOS_LB_URI;
-        context.multiMongosLoadBalancerUri = MULTI_MONGOS_LB_URI;
-      }
+  if (SINGLE_MONGOS_LB_URI && MULTI_MONGOS_LB_URI) {
+    context.singleMongosLoadBalancerUri = SINGLE_MONGOS_LB_URI;
+    context.multiMongosLoadBalancerUri = MULTI_MONGOS_LB_URI;
+  }
 
-      // replace this when mocha supports dynamic skipping with `afterEach`
-      filterOutTests(this._runnable.parent);
-      this.configuration = new TestConfiguration(MONGODB_URI, context);
-      done();
-    });
-  });
+  this.configuration = new TestConfiguration(MONGODB_URI, context);
+  await client.close();
 });
 
 // ensure all mock connections are closed after the suite is run

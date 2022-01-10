@@ -552,31 +552,37 @@ describe('Client Side Encryption Prose Tests', function () {
     const limitsKey = loadLimits('limits-key.json');
     const limitsDoc = loadLimits('limits-doc.json');
 
-    before(function () {
+    let hasRunFirstTimeSetup = false;
+    beforeEach(async function () {
+      if (hasRunFirstTimeSetup) {
+        // Even though we have to use a beforeEach here
+        // We still only want the following code to be run *once*
+        // before all the tests that follow
+        return;
+      }
+      hasRunFirstTimeSetup = true;
       // First, perform the setup.
 
       // #. Create a MongoClient without encryption enabled (referred to as ``client``).
       this.client = this.configuration.newClient();
 
-      return (
-        this.client
-          .connect()
-          // #. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
-          .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
-          .then(() => {
-            return this.client.db(dataDbName).createCollection(dataCollName, {
-              validator: { $jsonSchema: limitsSchema }
-            });
-          })
-          // #. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
-          .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
-          .then(() => {
-            return this.client
-              .db(keyVaultDbName)
-              .collection(keyVaultCollName)
-              .insertOne(limitsKey, { writeConcern: { w: 'majority' } });
-          })
-      );
+      await this.client
+        .connect()
+        // #. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
+        .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
+        .then(() => {
+          return this.client.db(dataDbName).createCollection(dataCollName, {
+            validator: { $jsonSchema: limitsSchema }
+          });
+        })
+        // #. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
+        .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
+        .then(() => {
+          return this.client
+            .db(keyVaultDbName)
+            .collection(keyVaultCollName)
+            .insertOne(limitsKey, { writeConcern: { w: 'majority' } });
+        });
     });
 
     beforeEach(function () {

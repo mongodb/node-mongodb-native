@@ -24,7 +24,7 @@ describe('monitoring', function () {
     return mock.createServer().then(server => (mockServer = server));
   });
 
-  // TODO: NODE-3819: Unskip flaky tests.
+  // TODO(NODE-3819): Unskip flaky tests.
   it.skip('should record roundTripTime', function (done) {
     mockServer.setMessageHandler(request => {
       const doc = request.document;
@@ -49,7 +49,7 @@ describe('monitoring', function () {
         topology.close(done);
       }, 500);
     });
-  });
+  }).skipReason = 'TODO(NODE-3819): Unskip flaky tests';
 
   // TODO(NODE-3600): Unskip flaky test
   it.skip('should recover on error during initial connect', function (done) {
@@ -88,7 +88,7 @@ describe('monitoring', function () {
 
       topology.close(done);
     });
-  });
+  }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
 
   describe('Monitor', function () {
     it('should connect and issue an initial server check', function (done) {

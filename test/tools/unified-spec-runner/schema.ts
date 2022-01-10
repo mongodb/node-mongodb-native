@@ -34,6 +34,8 @@ export const TopologyType = Object.freeze({
 } as const);
 export type TopologyId = typeof TopologyType[keyof typeof TopologyType];
 export interface RunOnRequirement {
+  serverless: 'forbid' | 'allow' | 'require';
+  auth: boolean;
   maxServerVersion?: string;
   minServerVersion?: string;
   topologies?: TopologyId[];
