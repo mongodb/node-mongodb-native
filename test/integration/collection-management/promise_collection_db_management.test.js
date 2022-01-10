@@ -5,14 +5,14 @@ const f = require('util').format;
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-describe('Collection Management (promise tests)', function () {
+describe('Collection Management and Db Management (promise tests)', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
 
   it('Should correctly createCollection using Promise', function (done) {
-    var configuration = this.configuration;
-    var url = configuration.url();
+    const configuration = this.configuration;
+    let url = configuration.url();
     url =
       url.indexOf('?') !== -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -33,18 +33,18 @@ describe('Collection Management (promise tests)', function () {
   });
 
   it('Should correctly rename and drop collection using Promise', function (done) {
-    var configuration = this.configuration;
-    var url = configuration.url();
+    const configuration = this.configuration;
+    let url = configuration.url();
     url =
       url.indexOf('?') !== -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     const client = configuration.newClient(url);
     client.connect().then(function (client) {
-      var db = client.db(configuration.db);
+      const db = client.db(configuration.db);
 
       db.createCollection('promiseCollection1').then(function (col) {
         test.ok(col != null);
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
 
         db.renameCollection('promiseCollection1', 'promiseCollection2').then(function (col) {
           test.ok(col != null);
@@ -60,8 +60,8 @@ describe('Collection Management (promise tests)', function () {
   });
 
   it('Should correctly drop database using Promise', function (done) {
-    var configuration = this.configuration;
-    var url = configuration.url();
+    const configuration = this.configuration;
+    let url = configuration.url();
     url =
       url.indexOf('?') !== -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -82,14 +82,14 @@ describe('Collection Management (promise tests)', function () {
   });
 
   it('Should correctly createCollections and call collections with Promise', function (done) {
-    var configuration = this.configuration;
-    var url = configuration.url();
+    const configuration = this.configuration;
+    let url = configuration.url();
     url =
       url.indexOf('?') !== -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     const client = configuration.newClient(url);
     client.connect().then(function (client) {
-      var db = client.db(configuration.db);
+      const db = client.db(configuration.db);
 
       db.createCollection('promiseCollectionCollections1').then(function (col) {
         test.ok(col != null);
