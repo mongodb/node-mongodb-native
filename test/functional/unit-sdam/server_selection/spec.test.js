@@ -223,20 +223,13 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
     { seedlist: [], hosts: [] }
   );
 
-  console.log('the seed data is');
-  console.log(seedData);
-
   const topologyOptions = {
     heartbeatFrequencyMS: testDefinition.heartbeatFrequencyMS,
     monitorFunction: () => {},
     loadBalanced: topologyDescription.type === TopologyType.LoadBalanced
   };
-  console.log('topologyOptions');
-  console.log(topologyOptions);
 
   const topology = new Topology(seedData.seedlist, topologyOptions);
-  console.log('topology');
-  console.log(topology);
   // Each test will attempt to connect by doing server selection. We want to make the first
   // call to `selectServers` call a fake, and then immediately restore the original behavior.
   let topologySelectServers = sinon
@@ -301,7 +294,6 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
 
       if (err) {
         // this is another expected error case
-        console.log('THINK WE HIT A SERVER SELECTION ERROR HERE !!!!!!!!!!!');
         if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return done();
         return done(err);
       }
@@ -318,7 +310,6 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
         );
 
         if (!expectedServerArray.length) {
-          console.log('No suitable servers found!!!!!!!!!!!!!!!!!!!!!');
           return done(new Error('No suitable servers found!'));
         }
 
