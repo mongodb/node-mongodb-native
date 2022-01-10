@@ -1,6 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-const { setupDatabase } = require('../shared');
+const { assert: test, setupDatabase } = require('../shared');
 
 describe('Multiple Databases', function () {
   before(function () {
