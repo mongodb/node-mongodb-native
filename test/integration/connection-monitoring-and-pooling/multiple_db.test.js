@@ -6,21 +6,15 @@ describe('Multiple Databases', function () {
     return setupDatabase(this.configuration, ['integration_tests2']);
   });
 
-  it('should not leak listeners', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should not leak listeners', function (done) {
+    var configuration = this.configuration;
+    const client = configuration.newClient({}, { sslValidate: false });
+    client.connect(function (err, client) {
+      for (var i = 0; i < 100; i++) {
+        client.db('test');
+      }
 
-    test: function (done) {
-      var configuration = this.configuration;
-      const client = configuration.newClient({}, { sslValidate: false });
-      client.connect(function (err, client) {
-        for (var i = 0; i < 100; i++) {
-          client.db('test');
-        }
-
-        client.close(done);
-      });
-    }
+      client.close(done);
+    });
   });
 });
