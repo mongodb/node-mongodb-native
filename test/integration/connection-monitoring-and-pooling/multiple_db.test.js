@@ -8,7 +8,7 @@ describe('Multiple Databases', function () {
 
   it('should not leak listeners', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
