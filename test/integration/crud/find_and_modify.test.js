@@ -1,5 +1,5 @@
 'use strict';
-var f = require('util').format;
+const { format: f } = require('util');
 
 const { setupDatabase, withClient, assert: test } = require(`../shared`);
 const { expect } = require('chai');
@@ -7,6 +7,89 @@ const { expect } = require('chai');
 describe('Find and Modify', function () {
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  context('promise tests', function () {
+    it('Should correctly execute findOneAndDelete operation With Promises and no options passed in', function (done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1
+      });
+
+      client.connect().then(function (client) {
+        const db = client.db(configuration.db);
+        const col = db.collection('find_one_and_delete_with_promise_no_option');
+        col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
+          expect(r).property('insertedCount').to.equal(1);
+
+          col
+            .findOneAndDelete({ a: 1 })
+            .then(function (r) {
+              test.equal(1, r.lastErrorObject.n);
+              test.equal(1, r.value.b);
+
+              client.close(done);
+            })
+            .catch(function (err) {
+              test.ok(err != null);
+            });
+        });
+      });
+    });
+
+    it('Should correctly execute findOneAndUpate operation With Promises and no options passed in', function (done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1
+      });
+
+      client.connect().then(function (client) {
+        const db = client.db(configuration.db);
+        const col = db.collection('find_one_and_update_with_promise_no_option');
+        col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
+          expect(r).property('insertedCount').to.equal(1);
+
+          col
+            .findOneAndUpdate({ a: 1 }, { $set: { a: 1 } })
+            .then(function (r) {
+              test.equal(1, r.lastErrorObject.n);
+              test.equal(1, r.value.b);
+
+              client.close(done);
+            })
+            .catch(function (err) {
+              test.ok(err != null);
+            });
+        });
+      });
+    });
+
+    it('Should correctly execute findOneAndReplace operation With Promises and no options passed in', function (done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        maxPoolSize: 1
+      });
+
+      client.connect().then(function (client) {
+        const db = client.db(configuration.db);
+        const col = db.collection('find_one_and_replace_with_promise_no_option');
+        col.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } }).then(function (r) {
+          expect(r).property('insertedCount').to.equal(1);
+
+          col
+            .findOneAndReplace({ a: 1 }, { a: 1 })
+            .then(function (r) {
+              test.equal(1, r.lastErrorObject.n);
+              test.equal(1, r.value.b);
+
+              client.close(done);
+            })
+            .catch(function (err) {
+              test.ok(err != null);
+            });
+        });
+      });
+    });
   });
 
   it('should pass through writeConcern to all findAndModify commands at command level', {
