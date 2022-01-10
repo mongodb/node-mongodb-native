@@ -1,4 +1,4 @@
-import type { TestConfiguration } from './tools/unified-spec-runner/runner';
+import type { TestConfiguration } from './test/tools/unified-spec-runner/runner';
 
 /** Defined in test/tools/runner/filters/mongodb_topology_filter.js (topologyTypeToString) */
 type TopologyTypes = 'single' | 'replicaset' | 'sharded' | 'load-balanced';
