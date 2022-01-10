@@ -5,7 +5,7 @@ const f = require('util').format;
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
-describe('MongoClient', function () {
+describe('MongoClient integration', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
