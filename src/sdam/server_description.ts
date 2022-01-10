@@ -1,5 +1,4 @@
 import { Document, Long, ObjectId } from '../bson';
-import { LEGACY_HELLO_COMMAND } from '../constants';
 import type { MongoError } from '../error';
 import { arrayStrictEqual, errorStrictEqual, HostAddress, now } from '../utils';
 import type { ClusterTime } from './common';
@@ -228,7 +227,7 @@ export function parseServerType(hello?: Document, options?: ServerDescriptionOpt
   if (hello.setName) {
     if (hello.hidden) {
       return ServerType.RSOther;
-    } else if (hello[LEGACY_HELLO_COMMAND] || hello.isWritablePrimary) {
+    } else if (hello.isWritablePrimary) {
       return ServerType.RSPrimary;
     } else if (hello.secondary) {
       return ServerType.RSSecondary;

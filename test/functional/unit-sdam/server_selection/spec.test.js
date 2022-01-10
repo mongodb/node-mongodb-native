@@ -8,7 +8,6 @@ const { ServerDescription } = require('../../../../src/sdam/server_description')
 const { ReadPreference } = require('../../../../src/read_preference');
 const { MongoServerSelectionError } = require('../../../../src/error');
 const ServerSelectors = require('../../../../src/sdam/server_selection');
-const { LEGACY_HELLO_COMMAND } = require('../../../../src/constants');
 
 const { EJSON } = require('bson');
 
@@ -168,7 +167,7 @@ function serverDescriptionFromDefinition(definition, hosts) {
   }
 
   if (serverType === ServerType.RSPrimary) {
-    fakeHello[LEGACY_HELLO_COMMAND] = true;
+    fakeHello.isWritablePrimary = true;
   } else if (serverType === ServerType.RSSecondary) {
     fakeHello.secondary = true;
   } else if (serverType === ServerType.Mongos) {
@@ -224,13 +223,20 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
     { seedlist: [], hosts: [] }
   );
 
+  console.log('the seed data is');
+  console.log(seedData);
+
   const topologyOptions = {
     heartbeatFrequencyMS: testDefinition.heartbeatFrequencyMS,
     monitorFunction: () => {},
     loadBalanced: topologyDescription.type === TopologyType.LoadBalanced
   };
+  console.log('topologyOptions');
+  console.log(topologyOptions);
 
   const topology = new Topology(seedData.seedlist, topologyOptions);
+  console.log('topology');
+  console.log(topology);
   // Each test will attempt to connect by doing server selection. We want to make the first
   // call to `selectServers` call a fake, and then immediately restore the original behavior.
   let topologySelectServers = sinon
@@ -295,6 +301,7 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
 
       if (err) {
         // this is another expected error case
+        console.log('THINK WE HIT A SERVER SELECTION ERROR HERE !!!!!!!!!!!');
         if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return done();
         return done(err);
       }
@@ -311,6 +318,7 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
         );
 
         if (!expectedServerArray.length) {
+          console.log('No suitable servers found!!!!!!!!!!!!!!!!!!!!!');
           return done(new Error('No suitable servers found!'));
         }
 
