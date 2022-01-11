@@ -1,31 +1,77 @@
-import { AddUserOptions, MongoClient } from '../../../src';
+import { expect } from 'chai';
 
-describe('listDatabases - authorizedDatabases', function () {
-  const username = 'newUser';
-  const password = 'newUserPw';
-  let client: MongoClient;
-  let newClient: MongoClient;
-  const userOptions: AddUserOptions = { roles: [{ role: 'read', db: 'mockAuthorizedDb' }] };
+import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 
-  before(async function () {
-    client = this.configuration.newClient();
-    await client.connect();
-    await client.db('admin').addUser(username, password, userOptions);
+describe('listDatabases', function () {
+  // beforeEach(function () {
+  //   if(process.env.AUTH !== 'auth') {
+  //     this.skip();
+  //   }
+  // });
 
-    newClient = this.configuration.newClient({ auth: { username, password } });
-    await newClient.connect();
-  });
+  describe('authorizedDatabases flag', function () {
+    const username = 'a';
+    const password = 'b';
+    const mockAuthorizedDb = 'mockAuthorizedDb';
 
-  afterEach(async function () {
-    await client.db('admin').removeUser(username);
-    await client.close();
-    await newClient.close();
-  });
+    let client, authorizedClient: MongoClient;
 
-  it.only('@TEMP: should correctly show authorized databases', async function () {
-    const dbs = await newClient.db().admin().listDatabases();
-    const status = await newClient.db().admin().command({ connectionStatus: 1 });
-    const authorized = await newClient.db().admin().listDatabases({ authorizedDatabases: true });
-    //do someting
+    const authorizedUserOptions: AddUserOptions = {
+      roles: [{ role: 'read', db: mockAuthorizedDb }]
+    };
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ auth: { username: 'user', password: 'password' } });
+      await client.connect();
+
+      await client
+        .db('mockAuthorizedDb')
+        .createCollection('a')
+        .catch(() => null);
+
+      await client.db('admin').addUser(username, password, authorizedUserOptions);
+
+      authorizedClient = this.configuration.newClient({
+        auth: { username: username, password: password }
+      });
+      await authorizedClient.connect();
+    });
+
+    afterEach(async function () {
+      await client.db('admin').removeUser(username);
+      await client.close();
+      await authorizedClient.close();
+    });
+
+    it('should list authorized databases for authorizedDatabases set to true', async function () {
+      const adminListDbs = await client.db().admin().listDatabases();
+      const authorizedListDbs = await authorizedClient
+        .db()
+        .admin()
+        .listDatabases({ authorizedDatabases: true });
+      const adminDbs = adminListDbs.databases;
+      const authorizedDbs = authorizedListDbs.databases;
+
+      expect(adminDbs).to.have.length.greaterThan(1);
+      expect(authorizedDbs).to.have.length(1);
+
+      expect(adminDbs.filter(db => db.name === mockAuthorizedDb).length).equals(1);
+      expect(adminDbs.filter(db => db.name !== mockAuthorizedDb).length).greaterThan(0);
+      expect(authorizedDbs.filter(db => db.name === mockAuthorizedDb).length).equals(1);
+    });
+
+    it('should error for authorizedDatabases set to false', async function () {
+      let thrownError;
+      try {
+        await authorizedClient.db().admin().listDatabases({ authorizedDatabases: false });
+      } catch (error) {
+        thrownError = error;
+      }
+
+      if (thrownError) {
+        expect(thrownError).to.be.instanceOf(MongoServerError);
+        expect(thrownError).to.have.property('message').that.includes('list');
+      }
+    });
   });
 });
