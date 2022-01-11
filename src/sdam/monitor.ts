@@ -450,7 +450,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
     return;
   }
 
-  connection.command(ns('admin.$cmd'), { LEGACY_HELLO_COMMAND: 1 }, undefined, err => {
+  connection.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, err => {
     if (err) {
       rttPinger[kConnection] = undefined;
       rttPinger[kRoundTripTime] = 0;
