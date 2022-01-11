@@ -21,7 +21,7 @@ elif [[ $1 == "sharded_cluster" ]]; then
     echo "mongodb://localhost:51000,localhost:51001"
 elif [[ $1 == "server" ]]; then
     mkdir -p $SINGLE_DIR
-    mlaunch init --auth --dir $SINGLE_DIR --single --setParameter enableTestCommands=1
+    mlaunch init --dir $SINGLE_DIR --single --setParameter enableTestCommands=1
     echo "mongodb://localhost:27017"
 else
     echo "unsupported topology: $1"
