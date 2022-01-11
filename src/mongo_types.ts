@@ -65,11 +65,13 @@ export type EnhancedOmit<TRecordOrUnion, KeyUnion> = string extends keyof TRecor
 export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
-export type Filter<TSchema> = {
-  [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
-    PropertyType<WithId<TSchema>, Property>
-  >;
-} & RootFilterOperators<WithId<TSchema>>;
+export type Filter<TSchema> =
+  | Partial<TSchema>
+  | ({
+      [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
+        PropertyType<WithId<TSchema>, Property>
+      >;
+    } & RootFilterOperators<WithId<TSchema>>);
 
 /** @public */
 export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
