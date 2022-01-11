@@ -2,25 +2,29 @@ import { expect } from 'chai';
 
 import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 
-describe('listDatabases', function () {
-  beforeEach(function () {
-    if (process.env.AUTH !== 'auth') {
-      this.skip();
-    }
-  });
+describe.only('listDatabases', function () {
+  // TODO(NODE3860): Create driver test variants that run with AUTH enabled
+  // beforeEach(function () {
+  //   if (process.env.AUTH !== 'auth') {
+  //     this.skip();
+  //   }
+  // });
 
   describe('authorizedDatabases flag', function () {
     const username = 'a';
     const password = 'b';
     const mockAuthorizedDb = 'mockAuthorizedDb';
 
-    let client, authorizedClient: MongoClient;
+    let client: MongoClient;
+    let authorizedClient: MongoClient;
 
     const authorizedUserOptions: AddUserOptions = {
       roles: [{ role: 'read', db: mockAuthorizedDb }]
     };
 
     beforeEach(async function () {
+      // pass credentials from cluster_setup's mlaunch defaults
+      // TODO(NODE3860): pass credentials instead based on environment variable
       client = this.configuration.newClient({ auth: { username: 'user', password: 'password' } });
       await client.connect();
 
@@ -53,7 +57,7 @@ describe('listDatabases', function () {
       const authorizedDbs = authorizedListDbs.databases;
 
       expect(adminDbs).to.have.length.greaterThan(1);
-      expect(authorizedDbs).to.have.length(1);
+      expect(authorizedDbs).to.have.lengthOf(1);
 
       expect(adminDbs.filter(db => db.name === mockAuthorizedDb).length).equals(1);
       expect(adminDbs.filter(db => db.name !== mockAuthorizedDb).length).greaterThan(0);
@@ -68,10 +72,8 @@ describe('listDatabases', function () {
         thrownError = error;
       }
 
-      if (thrownError) {
-        expect(thrownError).to.be.instanceOf(MongoServerError);
-        expect(thrownError).to.have.property('message').that.includes('list');
-      }
+      expect(thrownError).to.be.instanceOf(MongoServerError);
+      expect(thrownError).to.have.property('message').that.includes('list');
     });
   });
 });
