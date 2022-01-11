@@ -479,6 +479,20 @@ export type PropertyType<Type, Property extends string> = string extends Propert
     : unknown
   : unknown;
 
+/**
+ * @public
+ *
+ * Helper type for NestedPaths to prevent circular reference errors.
+ *
+ * This helper type checks if the key is an optional property of the same type
+ *  as the parent type.  If so, rather than recursively call `NestedPaths`, we
+ *  return the key type.  This prevents the TS compiler from realizing we're
+ *  looking at circular type references
+ */
+export type PseudoRecurseOnObject<Type, Key extends keyof Type> = Type[Key] extends Type | undefined
+  ? [Key]
+  : Type[Key];
+
 // We dont't support nested circular references
 /** @public */
 export type NestedPaths<Type> = Type extends
@@ -499,6 +513,6 @@ export type NestedPaths<Type> = Type extends
   : // eslint-disable-next-line @typescript-eslint/ban-types
   Type extends object
   ? {
-      [Key in Extract<keyof Type, string>]: [Key, ...NestedPaths<Type[Key]>];
+      [Key in Extract<keyof Type, string>]: [Key, ...NestedPaths<PseudoRecurseOnObject<Type, Key>>];
     }[Extract<keyof Type, string>]
   : [];

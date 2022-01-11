@@ -348,3 +348,41 @@ expectType<WithId<{ a: number; b: string }> | null>(
 expectType<WithId<{ a: number; b: string }> | null>(
   (await coll.findOneAndDelete({ a: 3 }, { projection: { _id: 0 } })).value
 );
+
+interface RecursiveSchema {
+  name: RecursiveSchema;
+  age: number;
+}
+
+declare const collection3: Collection<RecursiveSchema>;
+
+collection3.find({
+  name: {
+    name: {
+      age: 23
+    }
+  }
+});
+
+collection3.find({
+  age: 23
+});
+
+interface RecursiveOptionalSchema {
+  name?: RecursiveOptionalSchema;
+  age: number;
+}
+
+declare const collection4: Collection<RecursiveOptionalSchema>;
+
+collection4.find({
+  name: {
+    name: {
+      age: 23
+    }
+  }
+});
+
+collection4.find({
+  age: 23
+});
