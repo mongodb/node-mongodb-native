@@ -3,11 +3,11 @@ import { expect } from 'chai';
 import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 
 describe('listDatabases', function () {
-  // beforeEach(function () {
-  //   if(process.env.AUTH !== 'auth') {
-  //     this.skip();
-  //   }
-  // });
+  beforeEach(function () {
+    if (process.env.AUTH !== 'auth') {
+      this.skip();
+    }
+  });
 
   describe('authorizedDatabases flag', function () {
     const username = 'a';
