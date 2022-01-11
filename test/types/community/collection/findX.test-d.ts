@@ -325,3 +325,26 @@ const fooObjWithArray: FooWithArray = {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const fooFilterWithArray: Filter<FooWithArray> = fooObjWithArray;
+
+declare const coll: Collection<{ a: number; b: string }>;
+expectType<WithId<{ a: number; b: string }> | null>((await coll.findOneAndDelete({ a: 3 })).value);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' })).value
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (
+    await coll.findOneAndUpdate(
+      { a: 3 },
+      {
+        $set: {
+          a: 5
+        }
+      }
+    )
+  ).value
+);
+
+// projections do not change the return type - our typing doesn't support this
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndDelete({ a: 3 }, { projection: { _id: 0 } })).value
+);
