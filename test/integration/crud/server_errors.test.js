@@ -1,5 +1,5 @@
 'use strict';
-const setupDatabase = require('./shared').setupDatabase;
+const { setupDatabase } = require('../shared');
 const chai = require('chai');
 
 const expect = chai.expect;
