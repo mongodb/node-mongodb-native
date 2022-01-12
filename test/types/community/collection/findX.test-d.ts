@@ -358,7 +358,8 @@ interface B {
 }
 
 declare const mutuallyRecursive: Collection<A>;
-expectError(() => mutuallyRecursive.find({}));
+//@ts-expect-error
+mutuallyRecursive.find({});
 // expectError(
 //   mutuallyRecursive.find({
 //     'b.a.b': {}
@@ -420,13 +421,32 @@ interface Node {
 
 declare const nodeCollection: Collection<Node>;
 
+// vscode doesn't pick up the error, but the compiler does when running the tests
+// @ts-expect-error
+nodeCollection.find({
+  next: null
+});
+
+nodeCollection.find({
+  next: {
+    next: null
+  }
+});
+
 expectError(
   nodeCollection.find({
-    next: {
-      next: null
-    }
+    next: 'asdf'
   })
 );
+
+// vscode flags this as an error for me but the test fails
+expectError(
+  nodeCollection.find({
+    'next.next': 'asdf'
+  })
+);
+
+nodeCollection.find({ 'next.next.next': null });
 
 interface MongoStrings {
   projectId: number;
@@ -467,6 +487,7 @@ coll5.findOne({
   'branches.0.directories.0.files.0.id': 'hello'
 });
 
+// I'd expect this to error too?
 expectError(
   coll5.find({
     branches: [
@@ -476,3 +497,12 @@ expectError(
     ]
   })
 );
+
+interface Test {
+  a: string;
+  b: number;
+}
+
+declare const c: Collection<Test>;
+
+expectError(c.find({ a: 'asdf' }));
