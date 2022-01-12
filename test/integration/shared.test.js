@@ -1,6 +1,6 @@
 'use strict';
-const withMonitoredClient = require('./shared').withMonitoredClient;
-const expect = require('chai').expect;
+const { withMonitoredClient } = require('./shared');
+const { expect } = require('chai');
 
 describe('shared test utilities', function () {
   context('withMonitoredClient', function () {
