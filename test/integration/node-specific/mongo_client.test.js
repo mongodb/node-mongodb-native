@@ -17,7 +17,12 @@ describe('MongoClient integration', function () {
   });
 
   it('Should correctly pass through extra db options', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: {
+      requires: {
+        topology: ['single']
+      }
+    },
+
     test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(
@@ -58,30 +63,41 @@ describe('MongoClient integration', function () {
     }
   });
 
-  it('Should fail due to wrong uri user:password@localhost', function () {
-    expect(() => this.configuration.newClient('user:password@localhost:27017/test')).to.throw(
-      'Invalid connection string "user:password@localhost:27017/test"'
-    );
+  it('Should fail due to wrong uri user:password@localhost', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
+    },
+    test() {
+      expect(() => this.configuration.newClient('user:password@localhost:27017/test')).to.throw(
+        'Invalid connection string "user:password@localhost:27017/test"'
+      );
+    }
   });
 
-  it('correctly error out when no socket available on MongoClient `connect`', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient('mongodb://localhost:27088/test', {
-      serverSelectionTimeoutMS: 10
-    });
+  it('correctly error out when no socket available on MongoClient `connect`', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
+    },
 
-    client.connect(function (err) {
-      test.ok(err != null);
+    test: function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient('mongodb://localhost:27088/test', {
+        serverSelectionTimeoutMS: 10
+      });
 
-      done();
-    });
+      client.connect(function (err) {
+        test.ok(err != null);
+
+        done();
+      });
+    }
   });
 
   it('should correctly connect to mongodb using domain socket', {
     metadata: { requires: { topology: ['single'], os: '!win32' } },
 
     test: function (done) {
-      const configuration = this.configuration;
+      var configuration = this.configuration;
       const client = configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock/test');
       client.connect(function (err) {
         expect(err).to.not.exist;
@@ -110,55 +126,79 @@ describe('MongoClient integration', function () {
     }
   });
 
-  it('Should correctly pass through appname', function (done) {
-    const configuration = this.configuration;
-    let url = configuration.url();
-    if (url.indexOf('replicaSet') !== -1) {
-      url = f('%s&appname=hello%20world', configuration.url());
-    } else {
-      url = f('%s?appname=hello%20world', configuration.url());
-    }
-
-    const client = configuration.newClient(url);
-    client.connect(function (err, client) {
-      expect(err).to.not.exist;
-      test.equal('hello world', client.topology.clientMetadata.application.name);
-
-      client.close(done);
-    });
-  });
-
-  it('Should correctly pass through appname in options', function (done) {
-    const configuration = this.configuration;
-    const url = configuration.url();
-
-    const client = configuration.newClient(url, { appname: 'hello world' });
-    client.connect(err => {
-      expect(err).to.not.exist;
-      test.equal('hello world', client.topology.clientMetadata.application.name);
-
-      client.close(done);
-    });
-  });
-
-  it('Should correctly pass through socketTimeoutMS and connectTimeoutMS', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient(
-      {},
-      {
-        socketTimeoutMS: 0,
-        connectTimeoutMS: 0
+  it('Should correctly pass through appname', {
+    metadata: {
+      requires: {
+        topology: ['single', 'replicaset', 'sharded']
       }
-    );
+    },
 
-    client.connect(function (err, client) {
-      expect(err).to.not.exist;
-      const topology = getTopology(client.db(configuration.db));
-      expect(topology).nested.property('s.options.connectTimeoutMS').to.equal(0);
-      expect(topology).nested.property('s.options.socketTimeoutMS').to.equal(0);
+    test: function (done) {
+      const configuration = this.configuration;
+      let url = configuration.url();
+      if (url.indexOf('replicaSet') !== -1) {
+        url = f('%s&appname=hello%20world', configuration.url());
+      } else {
+        url = f('%s?appname=hello%20world', configuration.url());
+      }
 
-      client.close(done);
-    });
+      const client = configuration.newClient(url);
+      client.connect(function (err, client) {
+        expect(err).to.not.exist;
+        test.equal('hello world', client.topology.clientMetadata.application.name);
+
+        client.close(done);
+      });
+    }
+  });
+
+  it('Should correctly pass through appname in options', {
+    metadata: {
+      requires: {
+        topology: ['single', 'replicaset', 'sharded']
+      }
+    },
+
+    test: function (done) {
+      const configuration = this.configuration;
+      const url = configuration.url();
+
+      const client = configuration.newClient(url, { appname: 'hello world' });
+      client.connect(err => {
+        expect(err).to.not.exist;
+        test.equal('hello world', client.topology.clientMetadata.application.name);
+
+        client.close(done);
+      });
+    }
+  });
+
+  it('Should correctly pass through socketTimeoutMS and connectTimeoutMS', {
+    metadata: {
+      requires: {
+        topology: ['single', 'replicaset', 'sharded']
+      }
+    },
+
+    test: function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(
+        {},
+        {
+          socketTimeoutMS: 0,
+          connectTimeoutMS: 0
+        }
+      );
+
+      client.connect(function (err, client) {
+        expect(err).to.not.exist;
+        const topology = getTopology(client.db(configuration.db));
+        expect(topology).nested.property('s.options.connectTimeoutMS').to.equal(0);
+        expect(topology).nested.property('s.options.socketTimeoutMS').to.equal(0);
+
+        client.close(done);
+      });
+    }
   });
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -166,22 +206,30 @@ describe('MongoClient integration', function () {
   // new MongoClient connection tests
   //
   //////////////////////////////////////////////////////////////////////////////////////////
-  it('Should open a new MongoClient connection', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient();
-    client.connect(function (err, mongoclient) {
-      expect(err).to.not.exist;
+  it('Should open a new MongoClient connection', {
+    metadata: {
+      requires: {
+        topology: ['single']
+      }
+    },
 
-      mongoclient
-        .db('integration_tests')
-        .collection('new_mongo_client_collection')
-        .insertOne({ a: 1 }, function (err, r) {
-          expect(err).to.not.exist;
-          test.ok(r);
+    test: function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+      client.connect(function (err, mongoclient) {
+        expect(err).to.not.exist;
 
-          mongoclient.close(done);
-        });
-    });
+        mongoclient
+          .db('integration_tests')
+          .collection('new_mongo_client_collection')
+          .insertOne({ a: 1 }, function (err, r) {
+            expect(err).to.not.exist;
+            test.ok(r);
+
+            mongoclient.close(done);
+          });
+      });
+    }
   });
 
   it('Should correctly connect with MongoClient `connect` using Promise', function () {
@@ -196,20 +244,28 @@ describe('MongoClient integration', function () {
     return client.connect().then(() => client.close());
   });
 
-  it('Should open a usable MongoClient connection using promise', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient();
-    client.connect().then(function (mongoclient) {
-      mongoclient
-        .db('integration_tests')
-        .collection('new_mongo_client_collection')
-        .insertOne({ a: 1 })
-        .then(function (r) {
-          test.ok(r);
+  it('Should open a new MongoClient connection using promise', {
+    metadata: {
+      requires: {
+        topology: ['single']
+      }
+    },
 
-          mongoclient.close(done);
-        });
-    });
+    test: function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient();
+      client.connect().then(function (mongoclient) {
+        mongoclient
+          .db('integration_tests')
+          .collection('new_mongo_client_collection')
+          .insertOne({ a: 1 })
+          .then(function (r) {
+            test.ok(r);
+
+            mongoclient.close(done);
+          });
+      });
+    }
   });
 
   it('should be able to access a database named "constructor"', function () {
