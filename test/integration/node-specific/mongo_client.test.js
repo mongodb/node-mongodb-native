@@ -13,43 +13,46 @@ describe('MongoClient integration', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('Should correctly pass through extra db options', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient(
-      {},
-      {
-        writeConcern: { w: 1, wtimeoutMS: 1000, fsync: true, j: true },
-        readPreference: 'nearest',
-        readPreferenceTags: { loc: 'ny' },
-        forceServerObjectId: true,
-        pkFactory: {
-          createPk() {
-            return 1;
-          }
-        },
-        serializeFunctions: true,
-        raw: true
-      }
-    );
+  it('Should correctly pass through extra db options', {
+    metadata: { requires: { topology: ['single'] } },
+    test: function (done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(
+        {},
+        {
+          writeConcern: { w: 1, wtimeoutMS: 1000, fsync: true, j: true },
+          readPreference: 'nearest',
+          readPreferenceTags: { loc: 'ny' },
+          forceServerObjectId: true,
+          pkFactory: {
+            createPk() {
+              return 1;
+            }
+          },
+          serializeFunctions: true,
+          raw: true
+        }
+      );
 
-    client.connect(function (err, client) {
-      const db = client.db(configuration.db);
+      client.connect(function (err, client) {
+        const db = client.db(configuration.db);
 
-      test.equal(1, db.writeConcern.w);
-      test.equal(1000, db.writeConcern.wtimeout);
-      test.equal(true, db.writeConcern.fsync);
-      test.equal(true, db.writeConcern.j);
+        test.equal(1, db.writeConcern.w);
+        test.equal(1000, db.writeConcern.wtimeout);
+        test.equal(true, db.writeConcern.fsync);
+        test.equal(true, db.writeConcern.j);
 
-      test.equal('nearest', db.s.readPreference.mode);
-      test.deepEqual([{ loc: 'ny' }], db.s.readPreference.tags);
+        test.equal('nearest', db.s.readPreference.mode);
+        test.deepEqual([{ loc: 'ny' }], db.s.readPreference.tags);
 
-      test.equal(true, db.s.options.forceServerObjectId);
-      test.equal(1, db.s.pkFactory.createPk());
-      test.equal(true, db.bsonOptions.serializeFunctions);
-      test.equal(true, db.bsonOptions.raw);
+        test.equal(true, db.s.options.forceServerObjectId);
+        test.equal(1, db.s.pkFactory.createPk());
+        test.equal(true, db.bsonOptions.serializeFunctions);
+        test.equal(true, db.bsonOptions.raw);
 
-      client.close(done);
-    });
+        client.close(done);
+      });
+    }
   });
 
   it('Should fail due to wrong uri user:password@localhost', function () {
