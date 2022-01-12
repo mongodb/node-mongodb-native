@@ -1,9 +1,8 @@
 'use strict';
-var test = require('./shared').assert;
 
-const { setupDatabase, withClient } = require(`./shared`);
+const { setupDatabase, withClient, assert: test } = require(`../shared`);
 const { expect } = require('chai');
-const { Db } = require('../../src');
+const { Db } = require('../../../src');
 
 describe('Db', function () {
   before(function () {
@@ -12,7 +11,7 @@ describe('Db', function () {
 
   it('shouldCorrectlyHandleIllegalDbNames', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: withClient((client, done) => {
@@ -36,7 +35,7 @@ describe('Db', function () {
 
   it('shouldCorrectlyHandleFailedConnection', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -54,7 +53,7 @@ describe('Db', function () {
 
   it('shouldCorrectlyGetErrorDroppingNonExistingDb', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -75,7 +74,7 @@ describe('Db', function () {
 
   it.skip('shouldCorrectlyThrowWhenTryingToReOpenConnection', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -96,7 +95,7 @@ describe('Db', function () {
 
   it('shouldCorrectlyReconnectWhenError', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -120,7 +119,7 @@ describe('Db', function () {
 
   it('should not cut collection name when it is the same as the database', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -148,7 +147,7 @@ describe('Db', function () {
 
   it('shouldCorrectlyUseCursorWithListCollectionsCommand', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -185,7 +184,7 @@ describe('Db', function () {
 
   it('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -222,7 +221,7 @@ describe('Db', function () {
 
   it('should correctly list collection names with . in the middle', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -267,7 +266,7 @@ describe('Db', function () {
   it('should correctly list collection names with batchSize 1 for 2.8 or higher', {
     metadata: {
       requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        topology: ['single', 'replicaset', 'sharded'],
         mongodb: '>= 2.8.0'
       }
     },
