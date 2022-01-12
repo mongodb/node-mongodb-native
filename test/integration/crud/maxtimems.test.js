@@ -1,59 +1,42 @@
 'use strict';
-var test = require('./shared').assert;
+const { assert: test, setupDatabase } = require('../shared');
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
 
 describe('MaxTimeMS', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
 
-  it('Should Correctly respect the maxtimeMs property on count', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      disabled: true,
-      requires: {
-        mongodb: '>2.5.5',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
-      }
-    },
+  it('Should Correctly respect the maxtimeMs property on count', function (done) {
+    var configuration = this.configuration;
+    var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client.connect(function (err, client) {
+      var db = client.db(configuration.db);
+      var col = db.collection('max_time_ms');
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var col = db.collection('max_time_ms');
+      // Insert a couple of docs
+      var docs_1 = [{ agg_pipe: 1 }];
 
-        // Insert a couple of docs
-        var docs_1 = [{ agg_pipe: 1 }];
+      // Simple insert
+      col.insert(docs_1, { writeConcern: { w: 1 } }, function (err) {
+        expect(err).to.not.exist;
 
-        // Simple insert
-        col.insert(docs_1, { writeConcern: { w: 1 } }, function (err) {
-          expect(err).to.not.exist;
-
-          // Execute a find command
-          col
-            .find({ $where: 'sleep(100) || true' })
-            .maxTimeMS(50)
-            .count(function (err) {
-              test.ok(err != null);
-              client.close(done);
-            });
-        });
+        // Execute a find command
+        col
+          .find({ $where: 'sleep(100) || true' })
+          .maxTimeMS(50)
+          .count(function (err) {
+            test.ok(err != null);
+            client.close(done);
+          });
       });
-    }
+    });
   });
 
   it('Should Correctly respect the maxtimeMs property on toArray', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      disabled: true,
       requires: {
-        topology: ['single', 'replicaset'],
-        mongodb: '>2.5.5'
+        topology: ['single', 'replicaset']
       }
     },
 
@@ -89,8 +72,7 @@ describe('MaxTimeMS', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        topology: ['single', 'replicaset'],
-        mongodb: '>2.5.5'
+        topology: ['single', 'replicaset']
       }
     },
 
