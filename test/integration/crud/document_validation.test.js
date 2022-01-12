@@ -1,7 +1,6 @@
 'use strict';
-var test = require('./shared').assert;
+const { assert: test, setupDatabase } = require('../shared');
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
 
 describe('Document Validation', function () {
   before(function () {
@@ -14,7 +13,7 @@ describe('Document Validation', function () {
     metadata: {
       requires: {
         mongodb: '>=3.1.7',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset', 'sharded']
       }
     },
 
@@ -71,7 +70,7 @@ describe('Document Validation', function () {
     metadata: {
       requires: {
         mongodb: '>=3.1.7',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset', 'sharded']
       }
     },
 
@@ -153,7 +152,7 @@ describe('Document Validation', function () {
     metadata: {
       requires: {
         mongodb: '>=3.1.7',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset', 'sharded']
       }
     },
 
@@ -203,7 +202,7 @@ describe('Document Validation', function () {
     metadata: {
       requires: {
         mongodb: '>=3.1.7',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset', 'sharded']
       }
     },
 
@@ -265,7 +264,7 @@ describe('Document Validation', function () {
     metadata: {
       requires: {
         mongodb: '>=3.1.7',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset', 'sharded']
       }
     },
 
@@ -350,7 +349,7 @@ describe('Document Validation', function () {
     metadata: {
       requires: {
         mongodb: '>=3.1.7',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset', 'sharded']
       }
     },
 
