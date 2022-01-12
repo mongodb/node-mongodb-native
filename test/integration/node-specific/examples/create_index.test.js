@@ -1,6 +1,6 @@
 'use strict';
 
-const setupDatabase = require('../shared').setupDatabase;
+const setupDatabase = require('../../shared').setupDatabase;
 
 describe('examples.createIndex:', function () {
   let client;

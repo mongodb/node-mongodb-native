@@ -1,7 +1,7 @@
 /* eslint no-unused-vars: 0 */
 'use strict';
 
-const setupDatabase = require('../shared').setupDatabase;
+const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
 
 // TODO: NODE-3819: Unskip flaky MacOS/Windows tests.

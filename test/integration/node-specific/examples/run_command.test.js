@@ -1,6 +1,6 @@
 'use strict';
 
-const setupDatabase = require('../shared').setupDatabase;
+const setupDatabase = require('../../shared').setupDatabase;
 
 describe('examples.runCommand:', function () {
   let client;
