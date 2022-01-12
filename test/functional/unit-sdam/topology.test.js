@@ -12,6 +12,7 @@ const { TopologyDescription } = require('../../../src/sdam/topology_description'
 const { TopologyType } = require('../../../src/sdam/common');
 const { SrvPoller, SrvPollingEvent } = require('../../../src/sdam/srv_polling');
 const { getSymbolFrom } = require('../../tools/utils');
+const { LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE } = require('../../../src/error');
 
 describe('Topology (unit)', function () {
   describe('client metadata', function () {
@@ -227,7 +228,7 @@ describe('Topology (unit)', function () {
         if (isHello(doc)) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
-          request.reply({ ok: 0, message: 'not master' });
+          request.reply({ ok: 0, message: LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE });
         } else {
           request.reply({ ok: 1 });
         }

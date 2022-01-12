@@ -123,8 +123,8 @@ export class TopologyClosedEvent {
 }
 
 /**
- * Emitted when the server monitor’s ismaster command is started - immediately before
- * the ismaster command is serialized into raw BSON and written to the socket.
+ * Emitted when the server monitor’s hello command is started - immediately before
+ * the hello command is serialized into raw BSON and written to the socket.
  *
  * @public
  * @category Event
@@ -140,7 +140,7 @@ export class ServerHeartbeatStartedEvent {
 }
 
 /**
- * Emitted when the server monitor’s ismaster succeeds.
+ * Emitted when the server monitor’s hello succeeds.
  * @public
  * @category Event
  */
@@ -161,7 +161,7 @@ export class ServerHeartbeatSucceededEvent {
 }
 
 /**
- * Emitted when the server monitor’s ismaster fails, either with an “ok: 0” or a socket exception.
+ * Emitted when the server monitor’s hello fails, either with an “ok: 0” or a socket exception.
  * @public
  * @category Event
  */

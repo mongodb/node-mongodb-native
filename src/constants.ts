@@ -120,3 +120,9 @@ export const MONGO_CLIENT_EVENTS = Object.freeze([
  * The legacy hello command that was deprecated in MongoDB 5.0.
  */
 export const LEGACY_HELLO_COMMAND = 'ismaster';
+
+/**
+ * @internal
+ * The legacy hello command that was deprecated in MongoDB 5.0.
+ */
+export const LEGACY_HELLO_COMMAND_CAMEL_CASE = 'isMaster';

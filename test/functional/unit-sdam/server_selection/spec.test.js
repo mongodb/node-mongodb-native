@@ -8,7 +8,6 @@ const { ServerDescription } = require('../../../../src/sdam/server_description')
 const { ReadPreference } = require('../../../../src/read_preference');
 const { MongoServerSelectionError } = require('../../../../src/error');
 const ServerSelectors = require('../../../../src/sdam/server_selection');
-const { LEGACY_HELLO_COMMAND } = require('../../../../src/constants');
 
 const { EJSON } = require('bson');
 
@@ -168,7 +167,7 @@ function serverDescriptionFromDefinition(definition, hosts) {
   }
 
   if (serverType === ServerType.RSPrimary) {
-    fakeHello[LEGACY_HELLO_COMMAND] = true;
+    fakeHello.isWritablePrimary = true;
   } else if (serverType === ServerType.RSSecondary) {
     fakeHello.secondary = true;
   } else if (serverType === ServerType.Mongos) {

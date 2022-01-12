@@ -71,7 +71,7 @@ export interface ResumeOptions {
 }
 
 /**
- * Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token| Change Stream} on the server.
+ * Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/manual/changeStreams/#std-label-change-stream-resume| Change Stream} on the server.
  * @public
  */
 export type ResumeToken = unknown;
@@ -98,9 +98,9 @@ export interface ChangeStreamOptions extends AggregateOptions {
   fullDocument?: string;
   /** The maximum amount of time for the server to wait on new documents to satisfy a change stream query. */
   maxAwaitTimeMS?: number;
-  /** Allows you to start a changeStream after a specified event. See {@link https://docs.mongodb.com/master/changeStreams/#resumeafter-for-change-streams|ChangeStream documentation}. */
+  /** Allows you to start a changeStream after a specified event. See {@link https://docs.mongodb.com/manual/changeStreams/#resumeafter-for-change-streams|ChangeStream documentation}. */
   resumeAfter?: ResumeToken;
-  /** Similar to resumeAfter, but will allow you to start after an invalidated event. See {@link https://docs.mongodb.com/master/changeStreams/#startafter-for-change-streams|ChangeStream documentation}. */
+  /** Similar to resumeAfter, but will allow you to start after an invalidated event. See {@link https://docs.mongodb.com/manual/changeStreams/#startafter-for-change-streams|ChangeStream documentation}. */
   startAfter?: ResumeToken;
   /** Will start the changeStream after the specified operationTime. */
   startAtOperationTime?: OperationTime;

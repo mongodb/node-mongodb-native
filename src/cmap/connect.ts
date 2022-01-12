@@ -6,6 +6,7 @@ import * as tls from 'tls';
 
 import type { Document } from '../bson';
 import { Int32 } from '../bson';
+import { LEGACY_HELLO_COMMAND } from '../constants';
 import {
   AnyError,
   MongoCompatibilityError,
@@ -70,15 +71,15 @@ export function connect(options: ConnectionOptions, callback: Callback<Connectio
   });
 }
 
-function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
+function checkSupportedServer(hello: Document, options: ConnectionOptions) {
   const serverVersionHighEnough =
-    ismaster &&
-    (typeof ismaster.maxWireVersion === 'number' || ismaster.maxWireVersion instanceof Int32) &&
-    ismaster.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
+    hello &&
+    (typeof hello.maxWireVersion === 'number' || hello.maxWireVersion instanceof Int32) &&
+    hello.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
   const serverVersionLowEnough =
-    ismaster &&
-    (typeof ismaster.minWireVersion === 'number' || ismaster.minWireVersion instanceof Int32) &&
-    ismaster.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
+    hello &&
+    (typeof hello.minWireVersion === 'number' || hello.minWireVersion instanceof Int32) &&
+    hello.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
 
   if (serverVersionHighEnough) {
     if (serverVersionLowEnough) {
@@ -86,13 +87,13 @@ function checkSupportedServer(ismaster: Document, options: ConnectionOptions) {
     }
 
     const message = `Server at ${options.hostAddress} reports minimum wire version ${JSON.stringify(
-      ismaster.minWireVersion
+      hello.minWireVersion
     )}, but this version of the Node.js Driver requires at most ${MAX_SUPPORTED_WIRE_VERSION} (MongoDB ${MAX_SUPPORTED_SERVER_VERSION})`;
     return new MongoCompatibilityError(message);
   }
 
   const message = `Server at ${options.hostAddress} reports maximum wire version ${
-    JSON.stringify(ismaster.maxWireVersion) ?? 0
+    JSON.stringify(hello.maxWireVersion) ?? 0
   }, but this version of the Node.js Driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION})`;
   return new MongoCompatibilityError(message);
 }
@@ -146,9 +147,9 @@ function performInitialHandshake(
         return;
       }
 
-      if ('isWritablePrimary' in response) {
-        // Provide pre-hello-style response document.
-        response.ismaster = response.isWritablePrimary;
+      if (!('isWritablePrimary' in response)) {
+        // Provide hello-style response document.
+        response.isWritablePrimary = response[LEGACY_HELLO_COMMAND];
       }
 
       if (response.helloOk) {
@@ -179,8 +180,8 @@ function performInitialHandshake(
       // NOTE: This is metadata attached to the connection while porting away from
       //       handshake being done in the `Server` class. Likely, it should be
       //       relocated, or at very least restructured.
-      conn.ismaster = response;
-      conn.lastIsMasterMS = new Date().getTime() - start;
+      conn.hello = response;
+      conn.lastHelloMS = new Date().getTime() - start;
 
       if (!response.arbiterOnly && credentials) {
         // store the response on auth context
@@ -209,6 +210,9 @@ function performInitialHandshake(
 }
 
 export interface HandshakeDocument extends Document {
+  /**
+   * @deprecated Use hello instead
+   */
   ismaster?: boolean;
   hello?: boolean;
   helloOk?: boolean;
@@ -224,7 +228,7 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
   const { serverApi } = authContext.connection;
 
   const handshakeDoc: HandshakeDocument = {
-    [serverApi?.version ? 'hello' : 'ismaster']: true,
+    [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: true,
     helloOk: true,
     client: options.metadata || makeClientMetadata(options),
     compression: compressors,

@@ -5,18 +5,18 @@ import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(ismaster?: Document): AuthMechanism {
-  if (ismaster) {
-    // If ismaster contains saslSupportedMechs, use scram-sha-256
+function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
+  if (hello) {
+    // If hello contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
-    if (Array.isArray(ismaster.saslSupportedMechs)) {
-      return ismaster.saslSupportedMechs.includes(AuthMechanism.MONGODB_SCRAM_SHA256)
+    if (Array.isArray(hello.saslSupportedMechs)) {
+      return hello.saslSupportedMechs.includes(AuthMechanism.MONGODB_SCRAM_SHA256)
         ? AuthMechanism.MONGODB_SCRAM_SHA256
         : AuthMechanism.MONGODB_SCRAM_SHA1;
     }
 
     // Fallback to legacy selection method. If wire version >= 3, use scram-sha-1
-    if (ismaster.maxWireVersion >= 3) {
+    if (hello.maxWireVersion >= 3) {
       return AuthMechanism.MONGODB_SCRAM_SHA1;
     }
   }
@@ -107,16 +107,16 @@ export class MongoCredentials {
    * If the authentication mechanism is set to "default", resolves the authMechanism
    * based on the server version and server supported sasl mechanisms.
    *
-   * @param ismaster - An ismaster response from the server
+   * @param hello - A hello response from the server
    */
-  resolveAuthMechanism(ismaster?: Document): MongoCredentials {
+  resolveAuthMechanism(hello?: Document): MongoCredentials {
     // If the mechanism is not "default", then it does not need to be resolved
     if (this.mechanism.match(/DEFAULT/i)) {
       return new MongoCredentials({
         username: this.username,
         password: this.password,
         source: this.source,
-        mechanism: getDefaultAuthMechanism(ismaster),
+        mechanism: getDefaultAuthMechanism(hello),
         mechanismProperties: this.mechanismProperties
       });
     }

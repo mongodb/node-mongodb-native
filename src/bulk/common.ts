@@ -940,7 +940,7 @@ export abstract class BulkOperationBase {
 
     const topology = getTopology(collection);
     options = options == null ? {} : options;
-    // TODO Bring from driver information in isMaster
+    // TODO Bring from driver information in hello
     // Get the namespace for the write operations
     const namespace = collection.s.namespace;
     // Used to mark operation as executed
@@ -950,16 +950,15 @@ export abstract class BulkOperationBase {
     const currentOp = undefined;
 
     // Set max byte size
-    const isMaster = topology.lastIsMaster();
+    const hello = topology.lastHello();
 
     // If we have autoEncryption on, batch-splitting must be done on 2mb chunks, but single documents
     // over 2mb are still allowed
     const usingAutoEncryption = !!(topology.s.options && topology.s.options.autoEncrypter);
     const maxBsonObjectSize =
-      isMaster && isMaster.maxBsonObjectSize ? isMaster.maxBsonObjectSize : 1024 * 1024 * 16;
+      hello && hello.maxBsonObjectSize ? hello.maxBsonObjectSize : 1024 * 1024 * 16;
     const maxBatchSizeBytes = usingAutoEncryption ? 1024 * 1024 * 2 : maxBsonObjectSize;
-    const maxWriteBatchSize =
-      isMaster && isMaster.maxWriteBatchSize ? isMaster.maxWriteBatchSize : 1000;
+    const maxWriteBatchSize = hello && hello.maxWriteBatchSize ? hello.maxWriteBatchSize : 1000;
 
     // Calculates the largest possible size of an Array key, represented as a BSON string
     // element. This calculation:

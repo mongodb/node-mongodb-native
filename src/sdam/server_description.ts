@@ -44,7 +44,7 @@ export interface ServerDescriptionOptions {
 }
 
 /**
- * The client's view of a single server, based on the most recent ismaster outcome.
+ * The client's view of a single server, based on the most recent hello outcome.
  *
  * Internal type, not meant to be directly instantiated
  * @public
@@ -81,13 +81,9 @@ export class ServerDescription {
    * @internal
    *
    * @param address - The address of the server
-   * @param ismaster - An optional ismaster response for this server
+   * @param hello - An optional hello response for this server
    */
-  constructor(
-    address: HostAddress | string,
-    ismaster?: Document,
-    options?: ServerDescriptionOptions
-  ) {
+  constructor(address: HostAddress | string, hello?: Document, options?: ServerDescriptionOptions) {
     if (typeof address === 'string') {
       this._hostAddress = new HostAddress(address);
       this.address = this._hostAddress.toString();
@@ -95,53 +91,53 @@ export class ServerDescription {
       this._hostAddress = address;
       this.address = this._hostAddress.toString();
     }
-    this.type = parseServerType(ismaster, options);
-    this.hosts = ismaster?.hosts?.map((host: string) => host.toLowerCase()) ?? [];
-    this.passives = ismaster?.passives?.map((host: string) => host.toLowerCase()) ?? [];
-    this.arbiters = ismaster?.arbiters?.map((host: string) => host.toLowerCase()) ?? [];
-    this.tags = ismaster?.tags ?? {};
-    this.minWireVersion = ismaster?.minWireVersion ?? 0;
-    this.maxWireVersion = ismaster?.maxWireVersion ?? 0;
+    this.type = parseServerType(hello, options);
+    this.hosts = hello?.hosts?.map((host: string) => host.toLowerCase()) ?? [];
+    this.passives = hello?.passives?.map((host: string) => host.toLowerCase()) ?? [];
+    this.arbiters = hello?.arbiters?.map((host: string) => host.toLowerCase()) ?? [];
+    this.tags = hello?.tags ?? {};
+    this.minWireVersion = hello?.minWireVersion ?? 0;
+    this.maxWireVersion = hello?.maxWireVersion ?? 0;
     this.roundTripTime = options?.roundTripTime ?? -1;
     this.lastUpdateTime = now();
-    this.lastWriteDate = ismaster?.lastWrite?.lastWriteDate ?? 0;
+    this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? 0;
 
     if (options?.topologyVersion) {
       this.topologyVersion = options.topologyVersion;
-    } else if (ismaster?.topologyVersion) {
-      this.topologyVersion = ismaster.topologyVersion;
+    } else if (hello?.topologyVersion) {
+      this.topologyVersion = hello.topologyVersion;
     }
 
     if (options?.error) {
       this.error = options.error;
     }
 
-    if (ismaster?.primary) {
-      this.primary = ismaster.primary;
+    if (hello?.primary) {
+      this.primary = hello.primary;
     }
 
-    if (ismaster?.me) {
-      this.me = ismaster.me.toLowerCase();
+    if (hello?.me) {
+      this.me = hello.me.toLowerCase();
     }
 
-    if (ismaster?.setName) {
-      this.setName = ismaster.setName;
+    if (hello?.setName) {
+      this.setName = hello.setName;
     }
 
-    if (ismaster?.setVersion) {
-      this.setVersion = ismaster.setVersion;
+    if (hello?.setVersion) {
+      this.setVersion = hello.setVersion;
     }
 
-    if (ismaster?.electionId) {
-      this.electionId = ismaster.electionId;
+    if (hello?.electionId) {
+      this.electionId = hello.electionId;
     }
 
-    if (ismaster?.logicalSessionTimeoutMinutes) {
-      this.logicalSessionTimeoutMinutes = ismaster.logicalSessionTimeoutMinutes;
+    if (hello?.logicalSessionTimeoutMinutes) {
+      this.logicalSessionTimeoutMinutes = hello.logicalSessionTimeoutMinutes;
     }
 
-    if (ismaster?.$clusterTime) {
-      this.$clusterTime = ismaster.$clusterTime;
+    if (hello?.$clusterTime) {
+      this.$clusterTime = hello.$clusterTime;
     }
   }
 
@@ -210,35 +206,32 @@ export class ServerDescription {
   }
 }
 
-// Parses an `ismaster` message and determines the server type
-export function parseServerType(
-  ismaster?: Document,
-  options?: ServerDescriptionOptions
-): ServerType {
+// Parses a `hello` message and determines the server type
+export function parseServerType(hello?: Document, options?: ServerDescriptionOptions): ServerType {
   if (options?.loadBalanced) {
     return ServerType.LoadBalancer;
   }
 
-  if (!ismaster || !ismaster.ok) {
+  if (!hello || !hello.ok) {
     return ServerType.Unknown;
   }
 
-  if (ismaster.isreplicaset) {
+  if (hello.isreplicaset) {
     return ServerType.RSGhost;
   }
 
-  if (ismaster.msg && ismaster.msg === 'isdbgrid') {
+  if (hello.msg && hello.msg === 'isdbgrid') {
     return ServerType.Mongos;
   }
 
-  if (ismaster.setName) {
-    if (ismaster.hidden) {
+  if (hello.setName) {
+    if (hello.hidden) {
       return ServerType.RSOther;
-    } else if (ismaster.ismaster || ismaster.isWritablePrimary) {
+    } else if (hello.isWritablePrimary) {
       return ServerType.RSPrimary;
-    } else if (ismaster.secondary) {
+    } else if (hello.secondary) {
       return ServerType.RSSecondary;
-    } else if (ismaster.arbiterOnly) {
+    } else if (hello.arbiterOnly) {
       return ServerType.RSArbiter;
     } else {
       return ServerType.RSOther;

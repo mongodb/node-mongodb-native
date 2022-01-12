@@ -70,7 +70,7 @@ const kClusterTime = Symbol('clusterTime');
 /** @internal */
 const kDescription = Symbol('description');
 /** @internal */
-const kIsMaster = Symbol('ismaster');
+const kHello = Symbol('hello');
 /** @internal */
 const kAutoEncrypter = Symbol('autoEncrypter');
 /** @internal */
@@ -185,7 +185,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   monitorCommands: boolean;
   closed: boolean;
   destroyed: boolean;
-  lastIsMasterMS?: number;
+  lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
   /** @internal */
@@ -201,7 +201,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   [kStream]: Stream;
   /** @internal */
-  [kIsMaster]: Document;
+  [kHello]: Document;
   /** @internal */
   [kClusterTime]: Document;
 
@@ -240,7 +240,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kQueue] = new Map();
     this[kMessageStream] = new MessageStream({
       ...options,
-      maxBsonMessageSize: this.ismaster?.maxBsonMessageSize
+      maxBsonMessageSize: this.hello?.maxBsonMessageSize
     });
     this[kMessageStream].on('message', messageHandler(this));
     this[kStream] = stream;
@@ -261,21 +261,21 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return this[kDescription];
   }
 
-  get ismaster(): Document {
-    return this[kIsMaster];
+  get hello(): Document {
+    return this[kHello];
   }
 
-  // the `connect` method stores the result of the handshake ismaster on the connection
-  set ismaster(response: Document) {
+  // the `connect` method stores the result of the handshake hello on the connection
+  set hello(response: Document) {
     this[kDescription].receiveResponse(response);
     this[kDescription] = Object.freeze(this[kDescription]);
 
     // TODO: remove this, and only use the `StreamDescription` in the future
-    this[kIsMaster] = response;
+    this[kHello] = response;
   }
 
   get serviceId(): ObjectId | undefined {
-    return this.ismaster?.serviceId;
+    return this.hello?.serviceId;
   }
 
   get loadBalanced(): boolean {
@@ -321,7 +321,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       if (issue.isTimeout) {
         op.cb(
           new MongoNetworkTimeoutError(`connection ${this.id} to ${this.address} timed out`, {
-            beforeHandshake: this.ismaster == null
+            beforeHandshake: this.hello == null
           })
         );
       } else if (issue.isClose) {

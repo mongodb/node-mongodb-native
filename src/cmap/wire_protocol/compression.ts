@@ -1,5 +1,6 @@
 import * as zlib from 'zlib';
 
+import { LEGACY_HELLO_COMMAND } from '../../constants';
 import { PKG_VERSION, Snappy } from '../../deps';
 import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
 import type { Callback } from '../../utils';
@@ -19,7 +20,7 @@ export type Compressor = typeof Compressor[CompressorName];
 export type CompressorName = keyof typeof Compressor;
 
 export const uncompressibleCommands = new Set([
-  'ismaster',
+  LEGACY_HELLO_COMMAND,
   'saslStart',
   'saslContinue',
   'getnonce',

@@ -106,7 +106,7 @@ export class TopologyDescription {
       }
     }
 
-    // Whenever a client updates the TopologyDescription from an ismaster response, it MUST set
+    // Whenever a client updates the TopologyDescription from a hello response, it MUST set
     // TopologyDescription.logicalSessionTimeoutMinutes to the smallest logicalSessionTimeoutMinutes
     // value among ServerDescriptions of all data-bearing server types. If any have a null
     // logicalSessionTimeoutMinutes, then TopologyDescription.logicalSessionTimeoutMinutes MUST be
