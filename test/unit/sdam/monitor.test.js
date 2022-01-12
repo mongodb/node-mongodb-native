@@ -91,6 +91,18 @@ describe('monitoring', function () {
   }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
 
   describe('Monitor', function () {
+    let monitor;
+
+    beforeEach(() => {
+      monitor = null;
+    });
+
+    afterEach(() => {
+      if (monitor) {
+        monitor.close();
+      }
+    });
+
     it('should connect and issue an initial server check', function (done) {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
@@ -100,8 +112,7 @@ describe('monitoring', function () {
       });
 
       const server = new MockServer(mockServer.address());
-      const monitor = new Monitor(server, {});
-      this.defer(() => monitor.close());
+      monitor = new Monitor(server, {});
 
       monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
       monitor.on('serverHeartbeatSucceeded', () => done());
@@ -117,8 +128,7 @@ describe('monitoring', function () {
       });
 
       const server = new MockServer(mockServer.address());
-      const monitor = new Monitor(server, {});
-      this.defer(() => monitor.close());
+      monitor = new Monitor(server, {});
 
       monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
       monitor.on('serverHeartbeatSucceeded', () => done());
@@ -135,7 +145,7 @@ describe('monitoring', function () {
       });
 
       const server = new MockServer(mockServer.address());
-      const monitor = new Monitor(server, {});
+      monitor = new Monitor(server, {});
 
       const startedEvents = [];
       monitor.on('serverHeartbeatStarted', event => startedEvents.push(event));
@@ -186,7 +196,7 @@ describe('monitoring', function () {
 
       const server = new MockServer(mockServer.address());
       server.description = new ServerDescription(server.description.hostAddress);
-      const monitor = new Monitor(server, {
+      monitor = new Monitor(server, {
         heartbeatFrequencyMS: 250,
         minHeartbeatFrequencyMS: 50
       });
@@ -225,8 +235,8 @@ describe('monitoring', function () {
       });
 
       const server = new MockServer(mockServer.address());
-      const monitor = new Monitor(server, {});
-      this.defer(() => monitor.close());
+      monitor = new Monitor(server, {});
+
       monitor.connect();
       monitor.once('serverHeartbeatSucceeded', () => {
         const minHeartbeatFrequencyMS = 500;
