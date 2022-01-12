@@ -1,9 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
-const { ObjectId } = require('../../src');
-const withClient = require('./shared').withClient;
+const { assert: test, setupDatabase, withClient } = require('../../shared');
+const { ObjectId } = require('../../../../src');
 
 describe('Ignore Undefined', function () {
   before(function () {
