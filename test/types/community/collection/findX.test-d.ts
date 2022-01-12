@@ -349,6 +349,9 @@ expectType<WithId<{ a: number; b: string }> | null>(
   (await coll.findOneAndDelete({ a: 3 }, { projection: { _id: 0 } })).value
 );
 
+/**
+ * mutually recursive types are not supported and will not get type safety
+ */
 interface A {
   b: B;
 }
@@ -360,29 +363,38 @@ interface B {
 declare const mutuallyRecursive: Collection<A>;
 //@ts-expect-error
 mutuallyRecursive.find({});
-// expectError(
-//   mutuallyRecursive.find({
-//     'b.a.b': {}
-//   })
-// );
+mutuallyRecursive.find({
+  b: {}
+});
 
+/**
+ * types that are not recursive in name but are recursive in structure are
+ *   still supported
+ */
 interface RecursiveButNotReally {
   a: { a: number; b: string };
   b: string;
 }
 
 declare const recursiveButNotReallyColl: Collection<RecursiveButNotReally>;
+expectError(
+  recursiveButNotReallyColl.find({
+    'a.a': 'asdf'
+  })
+);
 recursiveButNotReallyColl.find({
   'a.a': 2
 });
 
+/**
+ * recursive schemas are now supported, but with limited type checking support
+ */
 interface RecursiveSchema {
   name: RecursiveSchema;
   age: number;
 }
 
 declare const collection3: Collection<RecursiveSchema>;
-
 collection3.find({
   name: {
     name: {
@@ -395,6 +407,10 @@ collection3.find({
   age: 23
 });
 
+/**
+ * Recursive optional schemas are also supported with the same capabilities as
+ *   standard recursive schemas
+ */
 interface RecursiveOptionalSchema {
   name?: RecursiveOptionalSchema;
   age: number;
@@ -414,43 +430,40 @@ collection4.find({
   age: 23
 });
 
-// we don't support recursive union types currently
+/**
+ * recursive union types are not supported
+ */
 interface Node {
   next: Node | null;
 }
 
 declare const nodeCollection: Collection<Node>;
 
-// vscode doesn't pick up the error, but the compiler does when running the tests
+// circular type error is thrown
 // @ts-expect-error
 nodeCollection.find({
   next: null
 });
 
 nodeCollection.find({
-  next: {
-    next: null
-  }
+  next: 'asdf'
 });
 
-expectError(
-  nodeCollection.find({
-    next: 'asdf'
-  })
-);
+nodeCollection.find({
+  'next.next': 'asdf'
+});
 
-// vscode flags this as an error for me but the test fails
-expectError(
-  nodeCollection.find({
-    'next.next': 'asdf'
-  })
-);
+nodeCollection.find({ 'next.next.next': 'yoohoo' });
 
-nodeCollection.find({ 'next.next.next': null });
-
+/**
+ * Recursive schemas with arrays are also supported
+ */
 interface MongoStrings {
   projectId: number;
   branches: Branch[];
+  twoLevelsDeep: {
+    name: string;
+  };
 }
 
 interface Branch {
@@ -487,7 +500,6 @@ coll5.findOne({
   'branches.0.directories.0.files.0.id': 'hello'
 });
 
-// type inference on objects only works at the top level
 coll5.findOne({
   branches: [
     {
@@ -496,35 +508,15 @@ coll5.findOne({
   ]
 });
 
+// type inference works on non-recursive properties but only at the top level
 expectError(
   coll5.findOne({
     projectId: 'asdf'
   })
 );
 
-expectError(
-  coll5.findOne({
-    branches: 'not array'
-  })
-);
-interface Test {
-  a: {
-    b: string;
-  };
-}
-
-declare const c: Collection<Test>;
-expectError(
-  c.findOne({
-    a: {
-      b: 3
-    }
-  })
-);
-
-// this works
-expectError(
-  c.findOne({
-    'a.b': 3
-  })
-);
+coll5.findOne({
+  twoLevelsDeep: {
+    name: 3
+  }
+});
