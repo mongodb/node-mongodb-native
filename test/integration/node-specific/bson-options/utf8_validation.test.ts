@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { spy } from 'sinon';
 
-import * as BSON from '../../../src/bson';
+import * as BSON from '../../../../src/bson';
 
 const deserializeSpy = spy(BSON, 'deserialize');
 
