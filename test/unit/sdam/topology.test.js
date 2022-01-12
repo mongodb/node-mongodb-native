@@ -3,6 +3,7 @@
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const sinon = require('sinon');
+const { MongoClient } = require('../../../src');
 const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
@@ -15,6 +16,18 @@ const { getSymbolFrom } = require('../../tools/utils');
 const { LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE } = require('../../../src/error');
 
 describe('Topology (unit)', function () {
+  let client, topology;
+
+  afterEach(async () => {
+    if (client) {
+      await client.close();
+    }
+
+    if (topology) {
+      topology.close();
+    }
+  });
+
   describe('client metadata', function () {
     let mockServer;
     before(() => mock.createServer().then(server => (mockServer = server)));
@@ -25,7 +38,7 @@ describe('Topology (unit)', function () {
 
       test: function (done) {
         // Attempt to connect
-        var server = new Topology([`${this.configuration.host}:${this.configuration.port}`], {
+        var server = new Topology([`localhost:27017`], {
           metadata: makeClientMetadata({
             appName: 'My application name'
           })
@@ -48,10 +61,9 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`);
+      client = new MongoClient(`mongodb://${mockServer.uri()}/`);
       client.connect(err => {
         expect(err).to.not.exist;
-        this.defer(() => client.close());
 
         client.db().command({ ping: 1 }, err => {
           expect(err).to.not.exist;
@@ -197,13 +209,12 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = new Topology(mockServer.hostAddress());
+      topology = new Topology(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
         topology.selectServer('primary', (err, server) => {
           expect(err).to.not.exist;
-          this.defer(() => topology.close());
 
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
@@ -240,7 +251,6 @@ describe('Topology (unit)', function () {
 
         topology.selectServer('primary', (err, server) => {
           expect(err).to.not.exist;
-          this.defer(() => topology.close());
 
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
@@ -271,13 +281,12 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = new Topology(mockServer.hostAddress());
+      topology = new Topology(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
         topology.selectServer('primary', (err, server) => {
           expect(err).to.not.exist;
-          this.defer(() => topology.close());
 
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
@@ -300,7 +309,7 @@ describe('Topology (unit)', function () {
       server.listen(0, 'localhost', 2, () => {
         server.on('connection', c => c.on('data', () => c.write('garbage_data')));
         const { address, port } = server.address();
-        const client = this.configuration.newClient(`mongodb://${address}:${port}`, {
+        const client = new MongoClient(`mongodb://${address}:${port}`, {
           serverSelectionTimeoutMS: 1000
         });
         p.then(() =>
