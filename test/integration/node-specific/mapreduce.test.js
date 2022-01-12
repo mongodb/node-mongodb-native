@@ -1,7 +1,6 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-const { Code } = require('../../src');
+const { assert: test, setupDatabase } = require('../shared');
+const { Code } = require('../../../src');
 const { expect } = require('chai');
 
 describe('MapReduce', function () {
@@ -14,7 +13,7 @@ describe('MapReduce', function () {
    */
   it('shouldPerformMapReduceWithStringFunctions', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -64,7 +63,7 @@ describe('MapReduce', function () {
     metadata: {
       requires: {
         mongodb: '>1.7.6',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset', 'sharded']
       }
     },
 
@@ -97,7 +96,7 @@ describe('MapReduce', function () {
 
   it('shouldPerformMapReduceWithParametersBeingFunctions', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -117,7 +116,7 @@ describe('MapReduce', function () {
 
                 // String functions
                 var map = function () {
-                emit(this.user_id, 1); // eslint-disable-line
+                  emit(this.user_id, 1); // eslint-disable-line
                 };
                 var reduce = function () {
                   return 1;
@@ -148,7 +147,7 @@ describe('MapReduce', function () {
 
   it('shouldPerformMapReduceWithCodeObjects', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -190,7 +189,7 @@ describe('MapReduce', function () {
 
   it('shouldPerformMapReduceWithOptions', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -236,7 +235,7 @@ describe('MapReduce', function () {
 
   it('shouldHandleMapReduceErrors', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -273,7 +272,7 @@ describe('MapReduce', function () {
   it('shouldSaveDataToDifferentDbFromMapreduce', {
     metadata: {
       requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        topology: ['single', 'replicaset', 'sharded'],
         mongodb: '>= 3.4'
       }
     },
@@ -341,7 +340,7 @@ describe('MapReduce', function () {
    */
   it.skip('shouldPerformMapReduceWithScopeContainingFunction', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
