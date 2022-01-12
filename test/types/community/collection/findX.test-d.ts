@@ -505,4 +505,5 @@ interface Test {
 
 declare const c: Collection<Test>;
 
+// this should fail, but doesn't
 expectError(c.find({ a: 'asdf' }));
