@@ -4,6 +4,7 @@ const expect = require('chai').expect;
 const mock = require('../../tools/mongodb-mock/index');
 const { ReplSetFixture } = require('../../tools/common');
 const { isHello } = require('../../../src/utils');
+const { MongoClient } = require('../../../src');
 
 const test = {};
 describe('Sessions - client/unit', function () {
@@ -27,7 +28,7 @@ describe('Sessions - client/unit', function () {
           }
         });
 
-        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
         return client.connect().then(() => {
           expect(() => client.startSession()).to.not.throw(
             'Current topology does not support sessions'
@@ -92,7 +93,7 @@ describe('Sessions - client/unit', function () {
             return replicaSetMock.uri();
           })
           .then(uri => {
-            testClient = this.configuration.newClient(uri);
+            testClient = new MongoClient(uri);
             return testClient.connect();
           })
           .then(client => {
@@ -126,7 +127,7 @@ describe('Sessions - client/unit', function () {
           }
         });
 
-        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
         client.connect(function (err, client) {
           expect(err).to.not.exist;
           let session = client.startSession();

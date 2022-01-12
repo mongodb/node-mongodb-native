@@ -3,6 +3,7 @@ const { Timestamp } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
 const { isHello } = require('../../../src/utils');
+const { MongoClient } = require('../../../src');
 
 const test = {};
 describe('Sessions - unit/sessions', function () {
@@ -34,7 +35,7 @@ describe('Sessions - unit/sessions', function () {
           }
         });
 
-        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
         return client.connect().then(client => {
           const session = client.startSession({ causalConsistency: true });
           const coll = client.db('foo').collection('bar');
@@ -67,7 +68,7 @@ describe('Sessions - unit/sessions', function () {
           }
         });
 
-        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
         return client.connect().then(client => {
           const coll = client.db('foo').collection('bar');
 
