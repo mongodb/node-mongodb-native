@@ -1,146 +1,16 @@
 'use strict';
-const path = require('path');
-const fs = require('fs');
-const { Topology } = require('../../../../src/sdam/topology');
-const { Server } = require('../../../../src/sdam/server');
-const { ServerType, TopologyType } = require('../../../../src/sdam/common');
-const { ServerDescription } = require('../../../../src/sdam/server_description');
-const { ReadPreference } = require('../../../../src/read_preference');
-const { MongoServerSelectionError } = require('../../../../src/error');
-const ServerSelectors = require('../../../../src/sdam/server_selection');
-
-const { EJSON } = require('bson');
+const { Topology } = require('../../../src/sdam/topology');
+const { ServerType, TopologyType } = require('../../../src/sdam/common');
+const { ServerDescription } = require('../../../src/sdam/server_description');
+const { ReadPreference } = require('../../../src/read_preference');
+const { MongoServerSelectionError } = require('../../../src/error');
+const ServerSelectors = require('../../../src/sdam/server_selection');
 
 const sinon = require('sinon');
 const chai = require('chai');
 
 const expect = chai.expect;
 chai.use(require('chai-subset'));
-
-const selectionSpecDir = path.join(__dirname, '../../../spec/server-selection/server_selection');
-function collectSelectionTests(specDir) {
-  const testTypes = fs
-    .readdirSync(specDir)
-    .filter(d => fs.statSync(path.join(specDir, d)).isDirectory());
-
-  const tests = {};
-  testTypes.forEach(testType => {
-    tests[testType] = fs
-      .readdirSync(path.join(specDir, testType))
-      .filter(d => fs.statSync(path.join(specDir, testType, d)).isDirectory())
-      .reduce((result, subType) => {
-        result[subType] = fs
-          .readdirSync(path.join(specDir, testType, subType))
-          .filter(f => path.extname(f) === '.json')
-          .map(f => {
-            const subTypeData = EJSON.parse(
-              fs.readFileSync(path.join(specDir, testType, subType, f)),
-              { relaxed: true }
-            );
-            subTypeData.name = path.basename(f, '.json');
-            subTypeData.type = testType;
-            subTypeData.subType = subType;
-            return subTypeData;
-          });
-
-        return result;
-      }, {});
-  });
-
-  return tests;
-}
-
-describe('Server Selection (spec)', function () {
-  let serverConnect;
-  before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
-      this.s.state = 'connected';
-    });
-  });
-
-  after(() => {
-    serverConnect.restore();
-  });
-
-  const specTests = collectSelectionTests(selectionSpecDir);
-  Object.keys(specTests).forEach(topologyType => {
-    describe(topologyType, function () {
-      Object.keys(specTests[topologyType]).forEach(subType => {
-        describe(subType, function () {
-          specTests[topologyType][subType].forEach(test => {
-            // NOTE: node does not support PossiblePrimary
-            const maybeIt = test.name.match(/Possible/) ? it.skip : it;
-
-            maybeIt(test.name, function (done) {
-              executeServerSelectionTest(test, { checkLatencyWindow: false }, done);
-            });
-          });
-        });
-
-        describe(subType + ' (within latency window)', function () {
-          specTests[topologyType][subType].forEach(test => {
-            // NOTE: node does not support PossiblePrimary
-            const maybeIt = test.name.match(/Possible/) ? it.skip : it;
-
-            maybeIt(test.name, function (done) {
-              executeServerSelectionTest(test, { checkLatencyWindow: true }, done);
-            });
-          });
-        });
-      });
-    });
-  });
-});
-
-const maxStalenessDir = path.join(__dirname, '../../../spec/max-staleness');
-function collectStalenessTests(specDir) {
-  const testTypes = fs
-    .readdirSync(specDir)
-    .filter(d => fs.statSync(path.join(specDir, d)).isDirectory());
-
-  const tests = {};
-  testTypes.forEach(testType => {
-    tests[testType] = fs
-      .readdirSync(path.join(specDir, testType))
-      .filter(f => path.extname(f) === '.json')
-      .map(f => {
-        const result = EJSON.parse(fs.readFileSync(path.join(specDir, testType, f)), {
-          relaxed: true
-        });
-        result.description = path.basename(f, '.json');
-        result.type = testType;
-        return result;
-      });
-  });
-  return tests;
-}
-
-describe('Max Staleness (spec)', function () {
-  let serverConnect;
-  before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
-      this.s.state = 'connected';
-    });
-  });
-
-  after(() => {
-    serverConnect.restore();
-  });
-
-  const specTests = collectStalenessTests(maxStalenessDir);
-  Object.keys(specTests).forEach(specTestName => {
-    describe(specTestName, () => {
-      specTests[specTestName].forEach(testData => {
-        it(testData.description, {
-          metadata: { requires: { topology: 'single' } },
-          test: function (done) {
-            executeServerSelectionTest(testData, { checkLatencyWindow: false }, done);
-          }
-        });
-      });
-    });
-  });
-});
 
 function serverDescriptionFromDefinition(definition, hosts) {
   hosts = hosts || [];
@@ -321,3 +191,5 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
     });
   });
 }
+
+module.exports = { executeServerSelectionTest };
