@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
+import { AddUserOptions, MongoClient, MongoServerError } from '../../src';
 
 describe('listDatabases', function () {
   // TODO(NODE3860): Create driver test variants that run with AUTH enabled
