@@ -1,9 +1,8 @@
 'use strict';
-const { assert: test } = require('./shared');
-const { setupDatabase } = require('./shared');
+const { assert: test, setupDatabase } = require('../shared');
 const { format: f } = require('util');
-const { Topology } = require('../../src/sdam/topology');
-const { Code, ObjectId, ReturnDocument } = require('../../src');
+const { Topology } = require('../../../src/sdam/topology');
+const { Code, ObjectId, ReturnDocument } = require('../../../src');
 
 const chai = require('chai');
 
@@ -1729,38 +1728,44 @@ describe('Operation Examples', function () {
         var collection = db.collection('test_map_reduce_functions');
 
         // Insert some documents to perform map reduce over
-        collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { writeConcern: { w: 1 } }, function(err, r) {
-          test.ok(r);
-          expect(err).to.not.exist;
-
-          // Map function
-          var map = function () {
-            emit(this.user_id, 1);
-          };
-          // Reduce function
-          var reduce = function (k, vals) {
-            return 1;
-          };
-
-          // Perform the map reduce
-          collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, function (
-            err,
-            collection
-          ) {
+        collection.insertMany(
+          [{ user_id: 1 }, { user_id: 2 }],
+          { writeConcern: { w: 1 } },
+          function (err, r) {
+            test.ok(r);
             expect(err).to.not.exist;
 
-            // Mapreduce returns the temporary collection with the results
-            collection.findOne({ _id: 1 }, function (err, result) {
-              test.equal(1, result.value);
+            // Map function
+            var map = function () {
+              emit(this.user_id, 1);
+            };
+            // Reduce function
+            var reduce = function (k, vals) {
+              return 1;
+            };
 
-              collection.findOne({ _id: 2 }, function (err, result) {
-                test.equal(1, result.value);
+            // Perform the map reduce
+            collection.mapReduce(
+              map,
+              reduce,
+              { out: { replace: 'tempCollection' } },
+              function (err, collection) {
+                expect(err).to.not.exist;
 
-                client.close(done);
-              });
-            });
-          });
-        });
+                // Mapreduce returns the temporary collection with the results
+                collection.findOne({ _id: 1 }, function (err, result) {
+                  test.equal(1, result.value);
+
+                  collection.findOne({ _id: 2 }, function (err, result) {
+                    test.equal(1, result.value);
+
+                    client.close(done);
+                  });
+                });
+              }
+            );
+          }
+        );
       });
       // END
       /* eslint-enable */
@@ -1811,12 +1816,12 @@ describe('Operation Examples', function () {
 
             // Map function
             var map = function () {
-            emit(this.user_id, 1); // eslint-disable-line
+              emit(this.user_id, 1); // eslint-disable-line
             };
 
             // Reduce function
             // eslint-disable-next-line
-          var reduce = function (k, vals) {
+            var reduce = function (k, vals) {
               return 1;
             };
 

@@ -1,19 +1,11 @@
 'use strict';
-var f = require('util').format;
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-const { enumToString } = require('../../src/utils');
-const { ProfilingLevel } = require('../../src/operations/set_profiling_level');
-const { Code, ReturnDocument } = require('../../src');
+const { format: f } = require('util');
+const { assert: test, setupDatabase } = require('../shared');
+const { sleep: delay } = require('../../tools/utils');
+const { enumToString } = require('../../../src/utils');
+const { ProfilingLevel } = require('../../../src/operations/set_profiling_level');
+const { Code, ReturnDocument } = require('../../../src');
 const { expect } = require('chai');
-
-var delay = function (ms) {
-  return new Promise(function (resolve) {
-    setTimeout(function () {
-      resolve();
-    }, ms);
-  });
-};
 
 describe('Operation (Promises)', function () {
   before(function () {
