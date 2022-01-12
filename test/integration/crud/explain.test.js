@@ -1,6 +1,6 @@
 'use strict';
-const { setupDatabase, withClient } = require('./shared');
-const { MongoServerError } = require('../../src');
+const { setupDatabase, withClient } = require('../shared');
+const { MongoServerError } = require('../../../src');
 const chai = require('chai');
 
 const expect = chai.expect;
