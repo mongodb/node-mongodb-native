@@ -1,5 +1,5 @@
 'use strict';
-const { MongoClient } = require('../../../src');
+const { MongoClient } = require('../../../../src');
 
 describe('examples.versionedApi:', function () {
   let uri;
