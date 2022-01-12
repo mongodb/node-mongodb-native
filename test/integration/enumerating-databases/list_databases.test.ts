@@ -2,13 +2,13 @@ import { expect } from 'chai';
 
 import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 
-describe.only('listDatabases', function () {
+describe('listDatabases', function () {
   // TODO(NODE3860): Create driver test variants that run with AUTH enabled
-  // beforeEach(function () {
-  //   if (process.env.AUTH !== 'auth') {
-  //     this.skip();
-  //   }
-  // });
+  beforeEach(function () {
+    if (process.env.AUTH !== 'auth') {
+      this.skip();
+    }
+  });
 
   describe('authorizedDatabases flag', function () {
     const username = 'a';
