@@ -299,7 +299,6 @@ export type {
   Projection,
   ProjectionOperators,
   PropertyType,
-  PseudoRecurseOnObject,
   PullAllOperator,
   PullOperator,
   PushOperator,

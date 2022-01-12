@@ -1,4 +1,4 @@
-import { expectAssignable, expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
 import type { Filter, Projection, ProjectionOperators } from '../../../../src';
 import {
@@ -349,6 +349,32 @@ expectType<WithId<{ a: number; b: string }> | null>(
   (await coll.findOneAndDelete({ a: 3 }, { projection: { _id: 0 } })).value
 );
 
+interface A {
+  b: B;
+}
+
+interface B {
+  a: A;
+}
+
+declare const mutuallyRecursive: Collection<A>;
+expectError(() => mutuallyRecursive.find({}));
+// expectError(
+//   mutuallyRecursive.find({
+//     'b.a.b': {}
+//   })
+// );
+
+interface RecursiveButNotReally {
+  a: { a: number; b: string };
+  b: string;
+}
+
+declare const recursiveButNotReallyColl: Collection<RecursiveButNotReally>;
+recursiveButNotReallyColl.find({
+  'a.a': 2
+});
+
 interface RecursiveSchema {
   name: RecursiveSchema;
   age: number;
@@ -386,3 +412,67 @@ collection4.find({
 collection4.find({
   age: 23
 });
+
+// we don't support recursive union types currently
+interface Node {
+  next: Node | null;
+}
+
+declare const nodeCollection: Collection<Node>;
+
+expectError(
+  nodeCollection.find({
+    next: {
+      next: null
+    }
+  })
+);
+
+interface MongoStrings {
+  projectId: number;
+  branches: Branch[];
+}
+
+interface Branch {
+  id: number;
+  name: string;
+  title?: string;
+  directories: Directory[];
+}
+
+interface Directory {
+  id: number;
+  name: string;
+  title?: string;
+  branchId: number;
+  files: Directory[];
+}
+
+declare const coll5: Collection<MongoStrings>;
+expectError(
+  coll5.findOne({
+    'branches.0.id': 'hello'
+  })
+);
+
+expectError(
+  coll5.findOne({
+    'branches.0.directories.0.id': 'hello'
+  })
+);
+
+// type safety breaks after the first
+//   level of nested types
+coll5.findOne({
+  'branches.0.directories.0.files.0.id': 'hello'
+});
+
+expectError(
+  coll5.find({
+    branches: [
+      {
+        id: 'asdf'
+      }
+    ]
+  })
+);
