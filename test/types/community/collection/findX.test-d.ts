@@ -487,23 +487,44 @@ coll5.findOne({
   'branches.0.directories.0.files.0.id': 'hello'
 });
 
-// I'd expect this to error too?
+// type inference on objects only works at the top level
+coll5.findOne({
+  branches: [
+    {
+      id: 'asdf'
+    }
+  ]
+});
+
 expectError(
-  coll5.find({
-    branches: [
-      {
-        id: 'asdf'
-      }
-    ]
+  coll5.findOne({
+    projectId: 'asdf'
   })
 );
 
+expectError(
+  coll5.findOne({
+    branches: 'not array'
+  })
+);
 interface Test {
-  a: string;
-  b: number;
+  a: {
+    b: string;
+  };
 }
 
 declare const c: Collection<Test>;
+expectError(
+  c.findOne({
+    a: {
+      b: 3
+    }
+  })
+);
 
-// this should fail, but doesn't
-expectError(c.find({ a: 'asdf' }));
+// this works
+expectError(
+  c.findOne({
+    'a.b': 3
+  })
+);
