@@ -1,10 +1,12 @@
 'use strict';
 const { expect } = require('chai');
 const path = require('path');
-const { TestRunnerContext } = require('../functional/spec-runner');
-const { gatherTestSuites } = require('../functional/spec-runner');
-const { generateTopologyTests } = require('../functional/spec-runner');
-const { withClient } = require('../functional/shared');
+const {
+  TestRunnerContext,
+  gatherTestSuites,
+  generateTopologyTests
+} = require('../tools/spec-runner');
+const { withClient } = require('../integration/shared');
 
 describe('Atlas Data Lake', function () {
   context('spec tests', function () {
