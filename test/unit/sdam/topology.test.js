@@ -3,6 +3,7 @@
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const sinon = require('sinon');
+const net = require('net');
 const { MongoClient, ReadPreference } = require('../../../src');
 const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
@@ -263,7 +264,7 @@ describe('Topology (unit)', function () {
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
             expect(poolCleared).to.be.false;
-            done();
+            topology.close(done);
           });
         });
       });
@@ -302,10 +303,10 @@ describe('Topology (unit)', function () {
       });
     });
 
-    it('should encounter a server selection timeout on garbled server responses', function () {
-      const net = require('net');
+    it('should encounter a server selection timeout on garbled server responses', function (done) {
       const server = net.createServer();
       const p = Promise.resolve();
+      let unexpectedError, expectedError;
       server.listen(0, 'localhost', 2, () => {
         server.on('connection', c => c.on('data', () => c.write('garbage_data')));
         const { address, port } = server.address();
@@ -316,18 +317,29 @@ describe('Topology (unit)', function () {
           client
             .connect()
             .then(() => {
-              expect.fail('Should throw a server selection error!');
+              unexpectedError = new Error('Expected a server selection error but got none');
             })
             .catch(error => {
-              expect(error).to.exist;
+              expectedError = error;
+            })
+            .then(() => {
+              server.close();
+              return client.close(err => {
+                if (!unexpectedError) {
+                  unexpectedError = err;
+                }
+              });
             })
             .finally(() => {
-              server.close();
-              return client.close();
+              if (unexpectedError) {
+                return done(unexpectedError);
+              }
+              if (expectedError) {
+                return done();
+              }
             })
         );
       });
-      return p;
     });
 
     describe('srv event listeners', function () {
