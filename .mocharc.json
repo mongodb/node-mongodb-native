@@ -12,6 +12,7 @@
   "ui": "test/tools/runner/metadata_ui.js",
   "recursive": true,
   "timeout": 60000,
+  "failZero": true,
   "reporter": "test/tools/reporter/mongodb_reporter.js",
   "sort": true,
   "color": true
