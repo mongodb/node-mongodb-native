@@ -502,10 +502,16 @@ export type NestedPaths<Type> = Type extends
   : // eslint-disable-next-line @typescript-eslint/ban-types
   Type extends object
   ? {
-      [Key in Extract<keyof Type, string>]: Type[Key] extends Type | ReadonlyArray<Type>
+      [Key in Extract<keyof Type, string>]: Type[Key] extends Type
         ? [Key]
         : Type extends Type[Key]
         ? [Key]
+        : Type[Key] extends ReadonlyArray<infer ArrayType>
+        ? Type extends ArrayType
+          ? [Key]
+          : ArrayType extends Type
+          ? [Key]
+          : [Key, ...NestedPaths<Type[Key]>]
         : [Key, ...NestedPaths<Type[Key]>];
     }[Extract<keyof Type, string>]
   : [];

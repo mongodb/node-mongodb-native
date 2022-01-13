@@ -478,7 +478,7 @@ interface Directory {
   name: string;
   title?: string;
   branchId: number;
-  files: Directory[];
+  files: (number | Directory)[];
 }
 
 declare const coll5: Collection<MongoStrings>;
