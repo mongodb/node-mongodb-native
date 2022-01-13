@@ -3,9 +3,11 @@ import { expect } from 'chai';
 import { AddUserOptions, MongoClient, MongoServerError } from '../../src';
 
 describe('listDatabases', function () {
-  // TODO(NODE3860): Create driver test variants that run with AUTH enabled
+  // TODO(NODE-3860): Create driver test variants that require AUTH enabled
   beforeEach(function () {
     if (process.env.AUTH !== 'auth') {
+      this.skip();
+      // this.currentTest.skipReason = 'TODO(NODE-3860): Create driver test variants that require AUTH enabled'
       this.skip();
     }
   });
