@@ -58,6 +58,16 @@ declare global {
        * - my test
        *   - TODO(NODE-XXXX): Feature implementation impending!
        * ```
+       * 
+       * You can also skip a set of tests via beforeEach:
+       * ```
+       * beforeEach(() => {
+       *   if ('some condition') {
+       *     this.currentTest.skipReason = 'requires <run condition> to run';
+       *     this.skip();
+       *   }
+       * });
+       * ```
        */
       skipReason?: string;
     }
