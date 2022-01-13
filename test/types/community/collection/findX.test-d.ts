@@ -431,7 +431,7 @@ collection4.find({
 });
 
 /**
- * recursive union types are not supported
+ * recursive union types are supported
  */
 interface Node {
   next: Node | null;
@@ -439,15 +439,15 @@ interface Node {
 
 declare const nodeCollection: Collection<Node>;
 
-// circular type error is thrown
-// @ts-expect-error
 nodeCollection.find({
   next: null
 });
 
-nodeCollection.find({
-  next: 'asdf'
-});
+expectError(
+  nodeCollection.find({
+    next: 'asdf'
+  })
+);
 
 nodeCollection.find({
   'next.next': 'asdf'
@@ -508,7 +508,7 @@ coll5.findOne({
   ]
 });
 
-// type inference works on non-recursive properties but only at the top level
+// type inference works on properties but only at the top level
 expectError(
   coll5.findOne({
     projectId: 'asdf'
