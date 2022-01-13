@@ -29,7 +29,7 @@ phases:
     logicalSessionTimeoutMinutes: null
     setName: rs
 
-- description: errmsg "not writable primary" gets ignored when error code exists
+- description: errmsg "not master" gets ignored when error code exists
   applicationErrors:
   - address: a:27017
     when: afterHandshakeCompletes
@@ -37,7 +37,7 @@ phases:
     type: command
     response:
       ok: 0
-      errmsg: "not writable primary"
+      errmsg: "not master"  # NOTE: This needs to be "not master" and not "not writable primary".
       code: 1  # Not a "not writable primary" error code.
   outcome: *outcome
 
