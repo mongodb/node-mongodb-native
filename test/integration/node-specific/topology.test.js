@@ -1,5 +1,5 @@
 'use strict';
-const expect = require('chai').expect;
+const { expect } = require('chai');
 
 describe('Topology', function () {
   it('should correctly track states of a topology', {
