@@ -502,16 +502,21 @@ export type NestedPaths<Type> = Type extends
   : // eslint-disable-next-line @typescript-eslint/ban-types
   Type extends object
   ? {
-      [Key in Extract<keyof Type, string>]: Type[Key] extends Type
+      [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
         ? [Key]
-        : Type extends Type[Key]
+        : // for a recursive union type, the child will never extend the parent type.
+        // but the parent will still extend the child
+        Type extends Type[Key]
         ? [Key]
-        : Type[Key] extends ReadonlyArray<infer ArrayType>
-        ? Type extends ArrayType
-          ? [Key]
-          : ArrayType extends Type
-          ? [Key]
-          : [Key, ...NestedPaths<Type[Key]>]
-        : [Key, ...NestedPaths<Type[Key]>];
+        : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
+        ? Type extends ArrayType // is the type of the parent the same as the type of the array?
+          ? [Key] // yes, it's a recursive array type
+          : // for unions, the child type extends the parent
+          ArrayType extends Type
+          ? [Key] // we have a recursive array union
+          : // child is an array, but it's not a recursive array
+            [Key, ...NestedPaths<Type[Key]>]
+        : // child is not structured the same as the parent
+          [Key, ...NestedPaths<Type[Key]>];
     }[Extract<keyof Type, string>]
   : [];
