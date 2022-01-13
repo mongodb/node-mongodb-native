@@ -52,7 +52,7 @@
       }
     },
     {
-      "description": "errmsg \"not writable primary\" gets ignored when error code exists",
+      "description": "errmsg \"not master\" gets ignored when error code exists",
       "applicationErrors": [
         {
           "address": "a:27017",
@@ -61,7 +61,7 @@
           "type": "command",
           "response": {
             "ok": 0,
-            "errmsg": "not writable primary",
+            "errmsg": "not master",
             "code": 1
           }
         }
