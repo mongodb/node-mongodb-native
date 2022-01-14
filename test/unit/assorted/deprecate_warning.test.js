@@ -1,12 +1,12 @@
 'use strict';
-const { deprecateOptions } = require('../../src/utils');
+const { deprecateOptions } = require('../../../src/utils');
 const {
   ClassWithLogger,
   ClassWithoutLogger,
   ClassWithUndefinedLogger,
   ensureCalledWith,
   makeTestFunction
-} = require('../tools/utils');
+} = require('../../tools/utils');
 
 const chai = require('chai');
 

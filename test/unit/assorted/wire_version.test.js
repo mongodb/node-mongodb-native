@@ -1,9 +1,9 @@
 'use strict';
 
-const mock = require('../tools/mongodb-mock/index');
+const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
-const { MongoServerSelectionError, MongoClient } = require('../../src');
-const { isHello } = require('../../src/utils');
+const { MongoServerSelectionError, MongoClient } = require('../../../src');
+const { isHello } = require('../../../src/utils');
 
 const minCompatErrMsg = `minimum wire version ${
   Number.MAX_SAFE_INTEGER - 1
@@ -40,7 +40,7 @@ describe('Wire Protocol Version', () => {
     it('should raise a compatibility error', async function () {
       setWireProtocolMessageHandler(Number.MAX_SAFE_INTEGER - 1, Number.MAX_SAFE_INTEGER);
 
-      /** @type {import('../../src/mongo_client').MongoClient} */
+      /** @type {MongoClient} */
       client = new MongoClient(
         `mongodb://${server.uri()}/wireVersionTest?serverSelectionTimeoutMS=200`
       );
@@ -58,7 +58,7 @@ describe('Wire Protocol Version', () => {
     it('should raise a compatibility error', async function () {
       setWireProtocolMessageHandler(1, 1);
 
-      /** @type {import('../../src/mongo_client').MongoClient} */
+      /** @type {MongoClient} */
       client = new MongoClient(
         `mongodb://${server.uri()}/wireVersionTest?serverSelectionTimeoutMS=200`
       );

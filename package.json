@@ -116,7 +116,7 @@
     "check:ldap": "mocha --config \"test/manual/mocharc.json\" test/manual/ldap.test.js",
     "check:socks5": "mocha --config \"test/manual/mocharc.json\" test/manual/socks5.test.ts",
     "check:csfle": "mocha --file test/tools/runner test/integration/client-side-encryption",
-    "check:snappy": "mocha test/unit/unit_snappy.test.js",
+    "check:snappy": "mocha test/unit/assorted/snappy.test.js",
     "prepare": "node etc/prepare.js",
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run test:all",
