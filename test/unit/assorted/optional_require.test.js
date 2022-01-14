@@ -4,14 +4,14 @@ const { expect } = require('chai');
 const { existsSync } = require('fs');
 const { resolve } = require('path');
 
-const { compress } = require('../../src/cmap/wire_protocol/compression');
-const { GSSAPI } = require('../../src/cmap/auth/gssapi');
-const { AuthContext } = require('../../src/cmap/auth/auth_provider');
-const { MongoDBAWS } = require('../../src/cmap/auth/mongodb_aws');
-const { HostAddress } = require('../../src/utils');
+const { compress } = require('../../../src/cmap/wire_protocol/compression');
+const { GSSAPI } = require('../../../src/cmap/auth/gssapi');
+const { AuthContext } = require('../../../src/cmap/auth/auth_provider');
+const { MongoDBAWS } = require('../../../src/cmap/auth/mongodb_aws');
+const { HostAddress } = require('../../../src/utils');
 
 function moduleExistsSync(moduleName) {
-  return existsSync(resolve(__dirname, `../../node_modules/${moduleName}`));
+  return existsSync(resolve(__dirname, `../../../node_modules/${moduleName}`));
 }
 
 describe('optionalRequire', function () {

@@ -1,9 +1,9 @@
 'use strict';
 
-const expect = require('chai').expect;
-const mock = require('../tools/mongodb-mock/index');
-const { MongoClient } = require('../../src');
-const { isHello } = require('../../src/utils');
+const { expect } = require('chai');
+const mock = require('../../tools/mongodb-mock/index');
+const { MongoClient } = require('../../../src');
+const { isHello } = require('../../../src/utils');
 
 describe('Client (unit)', function () {
   let server, client;

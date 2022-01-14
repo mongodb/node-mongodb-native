@@ -1,9 +1,9 @@
 'use strict';
-const mock = require('../tools/mongodb-mock/index');
-const expect = require('chai').expect;
-const { ObjectId, Code, MongoClient } = require('../../src');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
-const { isHello } = require('../../src/utils');
+const mock = require('../../tools/mongodb-mock/index');
+const { expect } = require('chai');
+const { ObjectId, Code, MongoClient } = require('../../../src');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { isHello } = require('../../../src/utils');
 
 const TEST_OPTIONS = { writeConcern: { w: 2, wtimeoutMS: 1000 } };
 

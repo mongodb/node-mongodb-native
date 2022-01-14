@@ -1,10 +1,10 @@
 'use strict';
 
 const { expect } = require('chai');
-const mock = require('../tools/mongodb-mock/index');
-const { Topology } = require('../../src/sdam/topology');
-const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
-const { isHello } = require('../../src/utils');
+const mock = require('../../tools/mongodb-mock/index');
+const { Topology } = require('../../../src/sdam/topology');
+const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
+const { isHello } = require('../../../src/utils');
 
 describe('SCRAM Iterations Tests', function () {
   let server;

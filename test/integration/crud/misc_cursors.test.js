@@ -6,6 +6,7 @@ const {
   withClient,
   withMonitoredClient
 } = require('../shared');
+const { runLater } = require('../../tools/utils');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -30,7 +31,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -77,7 +78,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -116,7 +117,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -152,7 +153,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -184,7 +185,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -304,7 +305,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -388,7 +389,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -435,7 +436,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -484,7 +485,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -534,7 +535,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -584,7 +585,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -620,7 +621,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -659,7 +660,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -695,7 +696,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -766,7 +767,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -819,7 +820,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -878,7 +879,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -950,7 +951,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1016,7 +1017,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1071,7 +1072,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1133,7 +1134,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1197,7 +1198,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1226,7 +1227,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1309,7 +1310,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1392,7 +1393,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1429,7 +1430,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1466,7 +1467,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1500,7 +1501,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1595,7 +1596,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1679,7 +1680,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1764,7 +1765,7 @@ describe('Cursor', function () {
 
   it('removes session wheen cloning an aggregation cursor', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1800,7 +1801,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1922,7 +1923,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -1978,7 +1979,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
+      requires: { topology: ['single', 'replicaset', 'sharded'] },
       sessions: { skipLeakTests: true },
       os: '!win32' // NODE-2943: timeout on windows
     },
@@ -2040,7 +2041,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2112,12 +2113,69 @@ describe('Cursor', function () {
     });
   });
 
+  context('awaiting data core tailable cursor test', () => {
+    let client;
+    let cursor;
+
+    beforeEach(async function () {
+      client = await this.configuration.newClient().connect();
+    });
+
+    afterEach(async () => {
+      if (cursor) await cursor.close();
+      await client.close();
+    });
+
+    it(
+      'should block waiting for new data to arrive when the cursor reaches the end of the capped collection',
+      {
+        metadata: { requires: { mongodb: '>=3.2' } },
+        async test() {
+          const db = client.db('cursor_tailable');
+
+          try {
+            await db.collection('cursor_tailable').drop();
+            // eslint-disable-next-line no-empty
+          } catch (_) {}
+
+          const collection = await db.createCollection('cursor_tailable', {
+            capped: true,
+            size: 10000
+          });
+
+          const res = await collection.insertOne({ a: 1 });
+          expect(res).property('insertedId').to.exist;
+
+          cursor = collection.find({}, { batchSize: 2, tailable: true, awaitData: true });
+          const doc0 = await cursor.next();
+          expect(doc0).to.have.property('a', 1);
+
+          // After 300ms make an insert
+          const later = runLater(async () => {
+            const res = await collection.insertOne({ b: 2 });
+            expect(res).property('insertedId').to.exist;
+          }, 300);
+
+          const start = new Date();
+          const doc1 = await cursor.next();
+          expect(doc1).to.have.property('b', 2);
+          const end = new Date();
+
+          await later; // make sure this finished, without a failure
+
+          // We should see here that cursor.next blocked for at least 300ms
+          expect(end.getTime() - start.getTime()).to.be.at.least(300);
+        }
+      }
+    );
+  });
+
   // NOTE: should we continue to let users explicitly `kill` a cursor?
   it.skip('Should correctly retry tailable cursor connection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2156,7 +2214,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2379,7 +2437,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2414,7 +2472,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2463,7 +2521,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2521,7 +2579,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2582,7 +2640,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2627,7 +2685,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2666,7 +2724,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2716,7 +2774,7 @@ describe('Cursor', function () {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        topology: ['single', 'replicaset', 'sharded'],
         mongodb: '>2.5.5'
       }
     },
@@ -2781,7 +2839,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2831,7 +2889,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2867,7 +2925,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2926,7 +2984,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -2982,7 +3040,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3027,7 +3085,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3080,7 +3138,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3127,7 +3185,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3178,7 +3236,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3232,7 +3290,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3282,7 +3340,7 @@ describe('Cursor', function () {
   it('Should correctly apply skip and limit to large set of documents', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+    metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     test: function (done) {
       const configuration = this.configuration;
@@ -3370,7 +3428,7 @@ describe('Cursor', function () {
   it('Should not emit any events after close event emitted due to cursor killed', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+    metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     test: function (done) {
       const configuration = this.configuration;
@@ -3411,7 +3469,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3464,7 +3522,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3519,7 +3577,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3565,7 +3623,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3608,7 +3666,7 @@ describe('Cursor', function () {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
     test: function (done) {
@@ -3655,7 +3713,7 @@ describe('Cursor', function () {
   it.skip('Should properly kill a cursor', {
     metadata: {
       requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        topology: ['single', 'replicaset', 'sharded'],
         mongodb: '>=3.2.0'
       }
     },
@@ -3741,7 +3799,7 @@ describe('Cursor', function () {
     {
       metadata: {
         requires: {
-          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+          topology: ['single', 'replicaset', 'sharded'],
           mongodb: '>=3.6.0'
         }
       },
@@ -3775,7 +3833,7 @@ describe('Cursor', function () {
     {
       metadata: {
         requires: {
-          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+          topology: ['single', 'replicaset', 'sharded'],
           mongodb: '>=3.6.0'
         }
       },

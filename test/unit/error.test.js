@@ -7,17 +7,19 @@ const { getSymbolFrom } = require('../tools/utils');
 const { ReplSetFixture } = require('../tools/common');
 const { ns, isHello } = require('../../src/utils');
 const { Topology } = require('../../src/sdam/topology');
-const { MongoNetworkError, MongoWriteConcernError } = require('../../src/index');
+const {
+  MongoNetworkError,
+  MongoWriteConcernError,
+  MongoError,
+  MongoServerError,
+  MongoParseError
+} = require('../../src/index');
 const {
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
-  NODE_IS_RECOVERING_ERROR_MESSAGE
-} = require('../../src/error');
-const {
+  NODE_IS_RECOVERING_ERROR_MESSAGE,
   isRetryableEndTransactionError,
-  MongoParseError,
-  isSDAMUnrecoverableError,
-  MongoError
+  isSDAMUnrecoverableError
 } = require('../../src/error');
 const {
   PoolClosedError: MongoPoolClosedError,
@@ -46,6 +48,46 @@ describe('MongoErrors', () => {
       });
     });
   }
+
+  describe('MongoError#constructor', () => {
+    it('should accept a string', function () {
+      const errorMessage = 'A test error';
+      const err = new MongoError(errorMessage);
+      expect(err).to.be.an.instanceof(Error);
+      expect(err.name).to.equal('MongoError');
+      expect(err.message).to.equal(errorMessage);
+    });
+
+    it('should accept an Error object', () => {
+      const errorMessage = 'A test error';
+      const err = new MongoError(new Error(errorMessage));
+      expect(err).to.be.an.instanceof(Error);
+      expect(err.name).to.equal('MongoError');
+      expect(err.message).to.equal(errorMessage);
+    });
+  });
+
+  describe('MongoServerError#constructor', () => {
+    it('should accept an object', function () {
+      const errorMessage = 'A test error';
+      const err = new MongoServerError({ message: errorMessage, someData: 12345 });
+      expect(err).to.be.an.instanceof(Error);
+      expect(err.name).to.equal('MongoServerError');
+      expect(err.message).to.equal(errorMessage);
+      expect(err.someData).to.equal(12345);
+    });
+  });
+
+  describe('MongoNetworkError#constructor', () => {
+    it('should accept a string', function () {
+      const errorMessage = 'A test error';
+      const err = new MongoNetworkError(errorMessage);
+      expect(err).to.be.an.instanceof(Error);
+      expect(err).to.be.an.instanceof(MongoError);
+      expect(err.name).to.equal('MongoNetworkError');
+      expect(err.message).to.equal(errorMessage);
+    });
+  });
 
   describe('#isRetryableEndTransactionError', function () {
     context('when the error has a RetryableWriteError label', function () {
