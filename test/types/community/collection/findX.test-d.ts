@@ -1,4 +1,4 @@
-import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectNotType, expectType } from 'tsd';
 
 import type { Filter, Projection, ProjectionOperators } from '../../../../src';
 import {
