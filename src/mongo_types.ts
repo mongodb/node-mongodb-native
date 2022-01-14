@@ -65,11 +65,13 @@ export type EnhancedOmit<TRecordOrUnion, KeyUnion> = string extends keyof TRecor
 export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
-export type Filter<TSchema> = {
-  [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
-    PropertyType<WithId<TSchema>, Property>
-  >;
-} & RootFilterOperators<WithId<TSchema>>;
+export type Filter<TSchema> =
+  | Partial<TSchema>
+  | ({
+      [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
+        PropertyType<WithId<TSchema>, Property>
+      >;
+    } & RootFilterOperators<WithId<TSchema>>);
 
 /** @public */
 export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
@@ -477,8 +479,11 @@ export type PropertyType<Type, Property extends string> = string extends Propert
     : unknown
   : unknown;
 
-// We dont't support nested circular references
-/** @public */
+/**
+ * @public
+ * returns tuple of strings (keys to be joined on '.') that represent every path into a schema
+ * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
+ */
 export type NestedPaths<Type> = Type extends
   | string
   | number
@@ -497,6 +502,21 @@ export type NestedPaths<Type> = Type extends
   : // eslint-disable-next-line @typescript-eslint/ban-types
   Type extends object
   ? {
-      [Key in Extract<keyof Type, string>]: [Key, ...NestedPaths<Type[Key]>];
+      [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
+        ? [Key]
+        : // for a recursive union type, the child will never extend the parent type.
+        // but the parent will still extend the child
+        Type extends Type[Key]
+        ? [Key]
+        : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
+        ? Type extends ArrayType // is the type of the parent the same as the type of the array?
+          ? [Key] // yes, it's a recursive array type
+          : // for unions, the child type extends the parent
+          ArrayType extends Type
+          ? [Key] // we have a recursive array union
+          : // child is an array, but it's not a recursive array
+            [Key, ...NestedPaths<Type[Key]>]
+        : // child is not structured the same as the parent
+          [Key, ...NestedPaths<Type[Key]>];
     }[Extract<keyof Type, string>]
   : [];

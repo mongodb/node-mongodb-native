@@ -1,6 +1,6 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 
-import type { Projection, ProjectionOperators } from '../../../../src';
+import type { Filter, Projection, ProjectionOperators } from '../../../../src';
 import {
   Collection,
   Db,
@@ -300,3 +300,51 @@ expectAssignable<SchemaWithUserDefinedId | null>(await schemaWithUserDefinedId.f
 // should allow _id as a number
 await schemaWithUserDefinedId.findOne({ _id: 5 });
 await schemaWithUserDefinedId.find({ _id: 5 });
+
+// We should be able to use a doc of type T as a filter object when performing findX operations
+interface Foo {
+  a: string;
+}
+
+const fooObj: Foo = {
+  a: 'john doe'
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const fooFilter: Filter<Foo> = fooObj;
+
+// Specifically test that arrays can be included as a part of an object
+//  ensuring that a bug reported in https://jira.mongodb.org/browse/NODE-3856 is addressed
+interface FooWithArray {
+  a: number[];
+}
+
+const fooObjWithArray: FooWithArray = {
+  a: [1, 2, 3, 4]
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const fooFilterWithArray: Filter<FooWithArray> = fooObjWithArray;
+
+declare const coll: Collection<{ a: number; b: string }>;
+expectType<WithId<{ a: number; b: string }> | null>((await coll.findOneAndDelete({ a: 3 })).value);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' })).value
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (
+    await coll.findOneAndUpdate(
+      { a: 3 },
+      {
+        $set: {
+          a: 5
+        }
+      }
+    )
+  ).value
+);
+
+// projections do not change the return type - our typing doesn't support this
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndDelete({ a: 3 }, { projection: { _id: 0 } })).value
+);

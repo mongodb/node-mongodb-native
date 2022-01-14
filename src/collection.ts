@@ -102,7 +102,7 @@ import { WriteConcern, WriteConcernOptions } from './write_concern';
 
 /** @public */
 export interface ModifyResult<TSchema = Document> {
-  value: TSchema | null;
+  value: WithId<TSchema> | null;
   lastErrorObject?: Document;
   ok: 0 | 1;
 }
