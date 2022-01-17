@@ -204,8 +204,8 @@ describe('Client Side Encryption Corpus', function () {
           //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
           const tlsOptions = {
             kmip: {
-              tlsCAFile: '/Users/modetojoy/work/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem',
-              tlsCertificateKeyFile: '/Users/modetojoy/work/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem'
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
             }
           };
           const autoEncryption = {
