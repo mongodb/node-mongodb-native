@@ -202,9 +202,16 @@ describe('Client Side Encryption Corpus', function () {
           //    .. code:: javascript
           //       Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
           //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
+          const tlsOptions = {
+            kmip: {
+              tlsCAFile: '/Users/modetojoy/work/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem',
+              tlsCertificateKeyFile: '/Users/modetojoy/work/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem'
+            }
+          };
           const autoEncryption = {
             keyVaultNamespace,
-            kmsProviders
+            kmsProviders,
+            tlsOptions
           };
           if (useClientSideSchema) {
             autoEncryption.schemaMap = {
@@ -217,7 +224,8 @@ describe('Client Side Encryption Corpus', function () {
             clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
               bson: BSON,
               keyVaultNamespace,
-              kmsProviders
+              kmsProviders,
+              tlsOptions
             });
           });
         });
