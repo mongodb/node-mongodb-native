@@ -14,7 +14,6 @@ interface B {
 }
 
 declare const mutuallyRecursive: Collection<A>;
-//@ts-expect-error
 mutuallyRecursive.find({});
 mutuallyRecursive.find({
   b: {}
@@ -91,6 +90,10 @@ interface Node {
 }
 
 declare const nodeCollection: Collection<Node>;
+
+nodeCollection.find({
+  'next.next.next.next.next.next.next.next.next': null
+});
 
 nodeCollection.find({
   next: null
