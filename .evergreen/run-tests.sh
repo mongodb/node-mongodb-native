@@ -15,7 +15,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 AUTH=${AUTH:-noauth}
 UNIFIED=${UNIFIED:-}
 MONGODB_URI=${MONGODB_URI:-}
-TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:test}
+TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:coverage}
 if [[ -z "${NO_EXIT}" ]]; then
   TEST_NPM_SCRIPT="$TEST_NPM_SCRIPT -- --exit"
 fi
