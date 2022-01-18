@@ -106,7 +106,8 @@ if [ $DRIVER_CSFLE_TEST_RESULT -ne 0 ]; then
   exit 1
 fi
 
-echo "Test legacy version of FLE bindings"
-rm -rf node_modules/mongodb-client-encryption
-npm install mongodb-client-encryption@"^1.2.7"
-npm run check:csfle
+# These will now obviously fail as KMIP doesn't exist in the old bindings.
+# echo "Test legacy version of FLE bindings"
+# rm -rf node_modules/mongodb-client-encryption
+# npm install mongodb-client-encryption@"^1.2.7"
+# npm run check:csfle
