@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.3.1](https://github.com/mongodb/node-mongodb-native/compare/v4.3.0...v4.3.1) (2022-01-18)
+
+
+### Bug Fixes
+
+* **NODE-3792:** remove offensive language throughout the codebase ([#3091](https://github.com/mongodb/node-mongodb-native/issues/3091)) ([8e2b0cc](https://github.com/mongodb/node-mongodb-native/commit/8e2b0ccc273d18f5d744807b990f80f014ca16f6))
+* **NODE-3852,NODE-3854,NODE-3856:** Misc typescript fixes for 4.3.1 ([#3102](https://github.com/mongodb/node-mongodb-native/issues/3102)) ([dd5195a](https://github.com/mongodb/node-mongodb-native/commit/dd5195a5a6d2ae3ae7817685270ae19c3a7f1b06))
+
 ## [4.3.0](https://github.com/mongodb/node-mongodb-native/compare/v4.2.2...v4.3.0) (2022-01-06)
 
 
