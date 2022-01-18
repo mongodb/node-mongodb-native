@@ -3,10 +3,30 @@ import { expect } from 'chai';
 import { AddUserOptions, MongoClient, MongoServerError } from '../../src';
 
 describe('listDatabases', function () {
+  let client: MongoClient;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+    await client.connect();
+  });
+
+  afterEach(async function () {
+    await client?.close();
+  });
+
+  it('should return an Array', async () => {
+    const dbInfo = await client.db().admin().listDatabases();
+    expect(Array.isArray(dbInfo.databases)).to.be.true;
+  });
+
+  it('should contain no duplicates', async () => {
+    const dbInfo = await client.db().admin().listDatabases();
+    const databaseNames = dbInfo.databases.map(({ name }) => name);
+    const databaseNamesSet = new Set(databaseNames);
+    expect(databaseNames).to.have.lengthOf(databaseNamesSet.size);
+  });
+
   // TODO(NODE-3860): Create driver test variants that require AUTH enabled
-
-  // TODO: test duplicates and array
-
   describe('authorizedDatabases flag', function () {
     const username = 'a';
     const password = 'b';
@@ -47,12 +67,12 @@ describe('listDatabases', function () {
     });
 
     afterEach(async function () {
-      await client.db('admin').removeUser(username);
-      await client.close();
-      await authorizedClient.close();
+      await client?.db('admin').removeUser(username);
+      await client?.close();
+      await authorizedClient?.close();
     });
 
-    it('should list authorized database(s) for existing authorized databases with authorizedDatabases set to true', async function () {
+    it('should list authorized databases with authorizedDatabases set to true', async function () {
       const adminListDbs = await client.db().admin().listDatabases();
       const authorizedListDbs = await authorizedClient
         .db()
@@ -69,7 +89,7 @@ describe('listDatabases', function () {
       expect(authorizedDbs.filter(db => db.name === mockAuthorizedDb)).to.have.lengthOf(1);
     });
 
-    it('should list authorized database(s) by default for existing authorized databases with authorizedDatabases unspecified', async function () {
+    it('should list authorized databases by default with authorizedDatabases unspecified', async function () {
       const adminListDbs = await client.db().admin().listDatabases();
       const authorizedListDbs = await authorizedClient.db().admin().listDatabases();
       const adminDbs = adminListDbs.databases;
