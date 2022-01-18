@@ -27,7 +27,7 @@ ABS_PATH_TO_PATCH=$(pwd)
 # CSFLE_GIT_REF - set the git reference to checkout for a custom CSFLE version
 # CDRIVER_GIT_REF - set the git reference to checkout for a custom CDRIVER version (this is for libbson)
 
-CSFLE_GIT_REF=${CSFLE_GIT_REF:-master}
+CSFLE_GIT_REF=${CSFLE_GIT_REF:-NODE-3777}
 CDRIVER_GIT_REF=${CDRIVER_GIT_REF:-1.17.6}
 
 rm -rf ../csfle-deps-tmp
@@ -56,15 +56,6 @@ npm install --production --ignore-scripts
 source ./.evergreen/find_cmake.sh
 bash ./etc/build-static.sh
 
-popd # libmongocrypt/bindings/node
-popd # ../csfle-deps-tmp
-
-# This can be removed after libmongocrypt PR merged.
-rm -rf ../csfle-deps-tmp/libmongocrypt
-pushd ../csfle-deps-tmp
-git clone --depth 1 --branch NODE-3777 https://github.com/mongodb/libmongocrypt.git
-pushd libmongocrypt/bindings/node
-npm install --production --ignore-scripts
 popd # libmongocrypt/bindings/node
 popd # ../csfle-deps-tmp
 
