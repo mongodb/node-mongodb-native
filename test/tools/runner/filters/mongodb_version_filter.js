@@ -33,7 +33,7 @@ class MongoDBVersionFilter {
 
       context.version = this.version = result.versionArray.slice(0, 3).join('.');
       console.error('running against mongodb version:');
-      console.error(util.inspect(result, { colors: true }));
+      // console.error(util.inspect(result, { colors: true }));
 
       callback();
     });
