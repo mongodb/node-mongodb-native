@@ -36,7 +36,7 @@ pushd ../csfle-deps-tmp
 
 rm -rf libmongocrypt mongo-c-driver
 
-git clone --branch NODE-3777 https://github.com/mongodb/libmongocrypt.git
+git clone https://github.com/mongodb/libmongocrypt.git
 pushd libmongocrypt
 git fetch --tags
 git checkout "$CSFLE_GIT_REF" -b csfle-custom
@@ -56,6 +56,15 @@ npm install --production --ignore-scripts
 source ./.evergreen/find_cmake.sh
 bash ./etc/build-static.sh
 
+popd # libmongocrypt/bindings/node
+popd # ../csfle-deps-tmp
+
+# This can be removed after libmongocrypt PR merged.
+rm -rf ../csfle-deps-tmp/libmongocrypt
+pushd ../csfle-deps-tmp
+git clone --depth 1 --branch NODE-3777 https://github.com/mongodb/libmongocrypt.git
+pushd libmongocrypt/bindings/node
+npm install --production --ignore-scripts
 popd # libmongocrypt/bindings/node
 popd # ../csfle-deps-tmp
 
