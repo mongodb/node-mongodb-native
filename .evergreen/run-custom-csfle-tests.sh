@@ -36,7 +36,7 @@ pushd ../csfle-deps-tmp
 
 rm -rf libmongocrypt mongo-c-driver
 
-git clone https://github.com/mongodb/libmongocrypt.git
+git clone --branch NODE-3777 https://github.com/mongodb/libmongocrypt.git
 pushd libmongocrypt
 git fetch --tags
 git checkout "$CSFLE_GIT_REF" -b csfle-custom
