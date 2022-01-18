@@ -27,7 +27,7 @@ ABS_PATH_TO_PATCH=$(pwd)
 # CSFLE_GIT_REF - set the git reference to checkout for a custom CSFLE version
 # CDRIVER_GIT_REF - set the git reference to checkout for a custom CDRIVER version (this is for libbson)
 
-CSFLE_GIT_REF=${CSFLE_GIT_REF:-NODE-3777}
+CSFLE_GIT_REF=${CSFLE_GIT_REF:-51fb6d6e4448fba9d6638dc4483062eceb5f1b75}
 CDRIVER_GIT_REF=${CDRIVER_GIT_REF:-1.17.6}
 
 rm -rf ../csfle-deps-tmp
