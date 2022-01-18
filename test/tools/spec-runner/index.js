@@ -75,6 +75,12 @@ function translateClientOptions(options) {
           kmsProviders.kmip = {
             endpoint: 'localhost:5698'
           };
+          options.autoEncryption.tlsOptions = {
+            kmip: {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          }
         }
 
         options.autoEncryption.kmsProviders = kmsProviders;

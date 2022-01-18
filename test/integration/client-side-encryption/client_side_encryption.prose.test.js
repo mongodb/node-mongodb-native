@@ -12,6 +12,9 @@ const getKmsProviders = localKey => {
   if (localKey) {
     result.local = { key: localKey };
   }
+  result.kmip = {
+    endpoint: 'localhost:5698'
+  };
 
   return result;
 };
