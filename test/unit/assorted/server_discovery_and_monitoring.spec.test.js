@@ -64,17 +64,17 @@ describe('Server Discovery and Monitoring (spec)', function () {
   };
 
   const specTests = collectTests();
-  Object.keys(specTests).forEach(specTestName => {
+  for (const specTestName of Object.keys(specTests)) {
     describe(specTestName, () => {
-      specTests[specTestName].forEach(testData => {
+      for (const testData of specTests[specTestName]) {
         const skip = shouldSkip(testData.description);
         const type = skip ? it.skip : it;
         type(testData.description, function (done) {
           executeSDAMTest(testData, done);
         });
-      });
+      }
     });
-  });
+  }
 });
 
 const OUTCOME_TRANSLATIONS = new Map();

@@ -1,4 +1,4 @@
-import type { Document, ObjectId } from '../bson';
+import type { ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { MongoError, MongoRuntimeError } from '../error';
 import { shuffle } from '../utils';
@@ -364,25 +364,9 @@ function topologyTypeForServerType(serverType: ServerType): TopologyType {
   }
 }
 
-// TODO: improve these docs when ObjectId is properly typed
-function compareObjectId(oid1: Document, oid2: Document): number {
-  if (oid1 == null) {
-    return -1;
-  }
-
-  if (oid2 == null) {
-    return 1;
-  }
-
-  if (oid1.id instanceof Buffer && oid2.id instanceof Buffer) {
-    const oid1Buffer = oid1.id;
-    const oid2Buffer = oid2.id;
-    return oid1Buffer.compare(oid2Buffer);
-  }
-
-  const oid1String = oid1.toString();
-  const oid2String = oid2.toString();
-  return oid1String.localeCompare(oid2String);
+function compareObjectId(oid1: ObjectId, oid2: ObjectId): 0 | 1 | -1 {
+  const res = oid1.id.compare(oid2.id);
+  return res === 0 ? 0 : res > 0 ? 1 : -1;
 }
 
 function updateRsFromPrimary(
@@ -398,12 +382,12 @@ function updateRsFromPrimary(
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
-  const electionId = serverDescription.electionId ? serverDescription.electionId : null;
-  if (serverDescription.setVersion && electionId) {
-    if (maxSetVersion && maxElectionId) {
+  if (serverDescription.electionId != null && serverDescription.setVersion != null) {
+    if (maxSetVersion != null && maxElectionId != null) {
       if (
-        maxSetVersion > serverDescription.setVersion ||
-        compareObjectId(maxElectionId, electionId) > 0
+        compareObjectId(maxElectionId, serverDescription.electionId) === 1 ||
+        (compareObjectId(maxElectionId, serverDescription.electionId) === 0 &&
+          maxSetVersion > serverDescription.setVersion)
       ) {
         // this primary is stale, we must remove it
         serverDescriptions.set(
@@ -415,6 +399,13 @@ function updateRsFromPrimary(
       }
     }
 
+    maxElectionId = serverDescription.electionId;
+  }
+
+  if (
+    serverDescription.electionId != null &&
+    (maxElectionId == null || compareObjectId(serverDescription.electionId, maxElectionId) === 1)
+  ) {
     maxElectionId = serverDescription.electionId;
   }
 
