@@ -81,7 +81,8 @@ BASE_TASKS.push({
       vars: {
         VERSION: 'latest',
         TOPOLOGY: 'server',
-        REQUIRE_API_VERSION: '1'
+        REQUIRE_API_VERSION: '1',
+        AUTH: 'auth'
       }
     },
     {
@@ -124,7 +125,8 @@ TASKS.push(
           func: 'bootstrap mongo-orchestration',
           vars: {
             VERSION: '5.0',
-            TOPOLOGY: 'sharded_cluster'
+            TOPOLOGY: 'sharded_cluster',
+            AUTH: 'auth'
           }
         },
         { func: 'start-load-balancer' },
@@ -135,7 +137,9 @@ TASKS.push(
     {
       name: 'test-auth-kerberos',
       tags: ['auth', 'kerberos'],
-      commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
+      commands: [{ func: 'install dependencies' }, {
+        func: 'run kerberos tests'
+      }]
     },
     {
       name: 'test-auth-ldap',
@@ -151,7 +155,8 @@ TASKS.push(
           func: 'bootstrap mongo-orchestration',
           vars: {
             VERSION: 'latest',
-            TOPOLOGY: 'replica_set'
+            TOPOLOGY: 'replica_set',
+            AUTH: 'auth'
           }
         },
         { func: 'run socks5 tests' }
@@ -167,7 +172,8 @@ TASKS.push(
           vars: {
             SSL: 'ssl',
             VERSION: 'latest',
-            TOPOLOGY: 'replica_set'
+            TOPOLOGY: 'replica_set',
+            AUTH: 'auth'
           }
         },
         { func: 'run socks5 tests', vars: { SSL: 'ssl' } }
@@ -184,7 +190,8 @@ TASKS.push(
           vars: {
             ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple.json',
             VERSION: 'latest',
-            TOPOLOGY: 'server'
+            TOPOLOGY: 'server',
+            AUTH: 'auth'
           }
         },
         { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
@@ -201,7 +208,8 @@ TASKS.push(
           vars: {
             ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple.json',
             VERSION: 'latest',
-            TOPOLOGY: 'server'
+            TOPOLOGY: 'server',
+            AUTH: 'auth'
           }
         },
         { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
@@ -218,7 +226,8 @@ TASKS.push(
           vars: {
             ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
             VERSION: 'latest',
-            TOPOLOGY: 'server'
+            TOPOLOGY: 'server',
+            AUTH: 'auth'
           }
         },
         { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
@@ -235,7 +244,8 @@ TASKS.push(
           vars: {
             ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
             VERSION: 'latest',
-            TOPOLOGY: 'server'
+            TOPOLOGY: 'server',
+            AUTH: 'auth'
           }
         },
         { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
@@ -251,7 +261,8 @@ TASKS.push(
           vars: {
             ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
             VERSION: 'latest',
-            TOPOLOGY: 'server'
+            TOPOLOGY: 'server',
+            AUTH: 'auth'
           }
         },
         { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
@@ -268,7 +279,8 @@ TASKS.push(
           vars: {
             ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple-disableStapling.json',
             VERSION: 'latest',
-            TOPOLOGY: 'server'
+            TOPOLOGY: 'server',
+            AUTH: 'auth'
           }
         },
         { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
@@ -284,7 +296,8 @@ TASKS.push(
           vars: {
             ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple-disableStapling.json',
             VERSION: 'latest',
-            TOPOLOGY: 'server'
+            TOPOLOGY: 'server',
+            AUTH: 'auth'
           }
         },
         { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
@@ -304,7 +317,8 @@ TLS_VERSIONS.forEach(VERSION => {
         vars: {
           VERSION,
           SSL: 'ssl',
-          TOPOLOGY: 'server'
+          TOPOLOGY: 'server',
+          AUTH: 'auth'
         }
       },
       { func: 'run tls tests' }
@@ -327,7 +341,8 @@ OCSP_VERSIONS.forEach(VERSION => {
             vars: {
               ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple.json',
               VERSION: VERSION,
-              TOPOLOGY: 'server'
+              TOPOLOGY: 'server',
+              AUTH: 'auth'
             }
           },
           { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
@@ -344,7 +359,8 @@ OCSP_VERSIONS.forEach(VERSION => {
             vars: {
               ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple.json',
               VERSION: VERSION,
-              TOPOLOGY: 'server'
+              TOPOLOGY: 'server',
+              AUTH: 'auth'
             }
           },
           { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
@@ -361,7 +377,8 @@ OCSP_VERSIONS.forEach(VERSION => {
             vars: {
               ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
               VERSION: VERSION,
-              TOPOLOGY: 'server'
+              TOPOLOGY: 'server',
+              AUTH: 'auth'
             }
           },
           { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
@@ -378,7 +395,8 @@ OCSP_VERSIONS.forEach(VERSION => {
             vars: {
               ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
               VERSION: VERSION,
-              TOPOLOGY: 'server'
+              TOPOLOGY: 'server',
+              AUTH: 'auth'
             }
           },
           { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
@@ -394,7 +412,8 @@ OCSP_VERSIONS.forEach(VERSION => {
             vars: {
               ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
               VERSION: VERSION,
-              TOPOLOGY: 'server'
+              TOPOLOGY: 'server',
+              AUTH: 'auth'
             }
           },
           { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
@@ -411,7 +430,8 @@ OCSP_VERSIONS.forEach(VERSION => {
             vars: {
               ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple-disableStapling.json',
               VERSION: VERSION,
-              TOPOLOGY: 'server'
+              TOPOLOGY: 'server',
+              AUTH: 'auth'
             }
           },
           { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
@@ -427,7 +447,8 @@ OCSP_VERSIONS.forEach(VERSION => {
             vars: {
               ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple-disableStapling.json',
               VERSION: VERSION,
-              TOPOLOGY: 'server'
+              TOPOLOGY: 'server',
+              AUTH: 'auth'
             }
           },
           { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
@@ -628,7 +649,8 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
       func: 'bootstrap mongo-orchestration',
       vars: {
         VERSION: '5.0',
-        TOPOLOGY: 'server'
+        TOPOLOGY: 'server',
+        AUTH: 'auth'
       }
     },
     oneOffFunc
