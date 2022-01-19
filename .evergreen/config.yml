@@ -930,6 +930,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
           REQUIRE_API_VERSION: '1'
+          AUTH: auth
       - func: run tests
         vars:
           MONGODB_API_VERSION: '1'
@@ -937,8 +938,6 @@ tasks:
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
-    vars:
-      AUTH: auth
     commands:
       - func: install dependencies
       - func: run atlas tests
@@ -958,6 +957,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
@@ -983,6 +983,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run socks5 tests
   - name: test-socks5-tls
     tags: []
@@ -993,6 +994,7 @@ tasks:
           SSL: ssl
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run socks5 tests
         vars:
           SSL: ssl
@@ -1007,6 +1009,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1021,6 +1024,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1035,6 +1039,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1049,6 +1054,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1062,6 +1068,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1076,6 +1083,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1089,6 +1097,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1102,6 +1111,7 @@ tasks:
           VERSION: latest
           SSL: ssl
           TOPOLOGY: server
+          AUTH: auth
       - func: run tls tests
   - name: test-tls-support-5.0
     tags:
@@ -1113,6 +1123,7 @@ tasks:
           VERSION: '5.0'
           SSL: ssl
           TOPOLOGY: server
+          AUTH: auth
       - func: run tls tests
   - name: test-tls-support-4.4
     tags:
@@ -1124,6 +1135,7 @@ tasks:
           VERSION: '4.4'
           SSL: ssl
           TOPOLOGY: server
+          AUTH: auth
       - func: run tls tests
   - name: test-tls-support-4.2
     tags:
@@ -1135,6 +1147,7 @@ tasks:
           VERSION: '4.2'
           SSL: ssl
           TOPOLOGY: server
+          AUTH: auth
       - func: run tls tests
   - name: test-latest-ocsp-valid-cert-server-staples
     tags:
@@ -1147,6 +1160,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1161,6 +1175,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1175,6 +1190,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1189,6 +1205,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1202,6 +1219,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1216,6 +1234,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1229,6 +1248,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1243,6 +1263,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1257,6 +1278,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1271,6 +1293,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1285,6 +1308,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1298,6 +1322,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1312,6 +1337,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1325,6 +1351,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1339,6 +1366,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1353,6 +1381,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1367,6 +1396,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1381,6 +1411,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1394,6 +1425,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1408,6 +1440,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1421,6 +1454,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1668,6 +1702,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run custom csfle tests
   - name: run-custom-snappy-tests
     tags:
@@ -1680,6 +1715,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run custom snappy tests
   - name: run-bson-ext-test
     tags:
@@ -1692,6 +1728,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
