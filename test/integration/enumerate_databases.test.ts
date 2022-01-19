@@ -16,7 +16,7 @@ describe('listDatabases', function () {
 
   it('should return an Array', async () => {
     const dbInfo = await client.db().admin().listDatabases();
-    expect(Array.isArray(dbInfo.databases)).to.be.true;
+    expect(dbInfo.databases).to.be.an('array');
   });
 
   it('should contain no duplicates', async () => {
@@ -33,7 +33,7 @@ describe('listDatabases', function () {
     const mockAuthorizedDb = 'enumerate_databases';
     const mockAuthorizedCollection = 'enumerate_databases_collection';
 
-    let client: MongoClient;
+    let adminClient: MongoClient;
     let authorizedClient: MongoClient;
 
     const authorizedUserOptions: AddUserOptions = {
@@ -51,15 +51,17 @@ describe('listDatabases', function () {
     beforeEach(async function () {
       // pass credentials from cluster_setup's mlaunch defaults
       // TODO(NODE-3860): pass credentials instead based on environment variable
-      client = this.configuration.newClient({ auth: { username: 'user', password: 'password' } });
-      await client.connect();
+      adminClient = this.configuration.newClient({
+        auth: { username: 'user', password: 'password' }
+      });
+      await adminClient.connect();
 
-      await client
+      await adminClient
         .db(mockAuthorizedDb)
         .createCollection(mockAuthorizedCollection)
         .catch(() => null);
 
-      await client.db('admin').addUser(username, password, authorizedUserOptions);
+      await adminClient.db('admin').addUser(username, password, authorizedUserOptions);
 
       authorizedClient = this.configuration.newClient({
         auth: { username: username, password: password }
@@ -68,14 +70,40 @@ describe('listDatabases', function () {
     });
 
     afterEach(async function () {
-      await client?.db('admin').removeUser(username);
-      await client?.db(mockAuthorizedDb).dropDatabase();
-      await client?.close();
+      await adminClient?.db('admin').removeUser(username);
+      await adminClient?.db(mockAuthorizedDb).dropDatabase();
+      await adminClient?.close();
       await authorizedClient?.close();
     });
 
+    it('should list all databases when admin client sets authorizedDatabases to true', async function () {
+      const adminListDbs = await adminClient
+        .db()
+        .admin()
+        .listDatabases({ authorizedDatabases: true });
+      const adminDbs = adminListDbs.databases.map(({ name }) => name);
+
+      // no change in the dbs listed since we're using the admin user
+      expect(adminDbs).to.have.length.greaterThan(1);
+      expect(adminDbs.filter(db => db === mockAuthorizedDb)).to.have.lengthOf(1);
+      expect(adminDbs.filter(db => db !== mockAuthorizedDb)).to.have.length.greaterThan(1);
+    });
+
+    it('should list all databases when admin client sets authorizedDatabases to false', async function () {
+      const adminListDbs = await adminClient
+        .db()
+        .admin()
+        .listDatabases({ authorizedDatabases: false });
+      const adminDbs = adminListDbs.databases.map(({ name }) => name);
+
+      // no change in the dbs listed since we're using the admin user
+      expect(adminDbs).to.have.length.greaterThan(1);
+      expect(adminDbs.filter(db => db === mockAuthorizedDb)).to.have.lengthOf(1);
+      expect(adminDbs.filter(db => db !== mockAuthorizedDb)).to.have.length.greaterThan(1);
+    });
+
     it('should list authorized databases with authorizedDatabases set to true', async function () {
-      const adminListDbs = await client.db().admin().listDatabases();
+      const adminListDbs = await adminClient.db().admin().listDatabases();
       const authorizedListDbs = await authorizedClient
         .db()
         .admin()
@@ -92,7 +120,7 @@ describe('listDatabases', function () {
     });
 
     it('should list authorized databases by default with authorizedDatabases unspecified', async function () {
-      const adminListDbs = await client.db().admin().listDatabases();
+      const adminListDbs = await adminClient.db().admin().listDatabases();
       const authorizedListDbs = await authorizedClient.db().admin().listDatabases();
       const adminDbs = adminListDbs.databases;
       const authorizedDbs = authorizedListDbs.databases;
