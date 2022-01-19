@@ -800,6 +800,7 @@ pre:
 
 post:
   - func: "upload test results"
+  - func: "upload coverage report"
   - func: "cleanup"
 
 ignore:

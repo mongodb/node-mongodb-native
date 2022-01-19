@@ -1735,6 +1735,7 @@ pre:
   - func: make files executable
 post:
   - func: upload test results
+  - func: upload coverage report
   - func: cleanup
 ignore:
   - '*.md'
