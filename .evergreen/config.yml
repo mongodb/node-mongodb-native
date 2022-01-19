@@ -709,7 +709,7 @@ functions:
         aws_secret: ${aws_secret}
         local_file: src/coverage/coverage-final.json
         optional: true
-        remote_file: /${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
+        remote_file: ${UPLOAD_BUCKET}/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads
         permissions: public-read
         content_type: application/json
