@@ -703,7 +703,9 @@ functions:
         script: |
           # Coverage combine merges (and removes) all the coverage files and
           # generates a new .coverage file in the current directory.
-          npx nyc report --reporter=json
+          pwd
+
+          nyc report --reporter=json
     - command: s3.put
       params:
         aws_key: ${aws_key}
