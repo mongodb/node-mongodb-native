@@ -737,17 +737,14 @@ functions:
         script: |
           ${PREPARE_SHELL}
           npx nyc report --reporter=json
-
-          # debug
-          ls .nyc_output | wc -l
     - command: s3.put
       params:
         aws_key: ${aws_key}
         aws_secret: ${aws_secret}
-        local_file:  coverage/coverage-final.json
+        local_file:  src/coverage/coverage-final.json
         optional: true
         # Upload the coverage report for all tasks in a single build to the same directory.
-        remote_file: ${UPLOAD_BUCKET}/coverage/${revision}/${version_id}/coverage/coverage.${build_variant}.${task_name}.json
+        remote_file: /${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads
         permissions: public-read
         content_type: application/json
