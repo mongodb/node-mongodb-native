@@ -712,6 +712,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-latest-replica_set
     tags:
@@ -723,6 +724,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-latest-sharded_cluster
     tags:
@@ -734,6 +736,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-5.0-server
     tags:
@@ -745,6 +748,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-5.0-replica_set
     tags:
@@ -756,6 +760,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-5.0-sharded_cluster
     tags:
@@ -767,6 +772,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-4.4-server
     tags:
@@ -778,6 +784,7 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-4.4-replica_set
     tags:
@@ -789,6 +796,7 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-4.4-sharded_cluster
     tags:
@@ -800,6 +808,7 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-4.2-server
     tags:
@@ -811,6 +820,7 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-4.2-replica_set
     tags:
@@ -822,6 +832,7 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-4.2-sharded_cluster
     tags:
@@ -833,6 +844,7 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-4.0-server
     tags:
@@ -844,6 +856,7 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-4.0-replica_set
     tags:
@@ -855,6 +868,7 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-4.0-sharded_cluster
     tags:
@@ -866,6 +880,7 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-3.6-server
     tags:
@@ -877,6 +892,7 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-3.6-replica_set
     tags:
@@ -888,6 +904,7 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-3.6-sharded_cluster
     tags:
@@ -899,6 +916,7 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-latest-server-v1-api
     tags:
@@ -919,6 +937,8 @@ tasks:
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
+    vars:
+      AUTH: auth
     commands:
       - func: install dependencies
       - func: run atlas tests
