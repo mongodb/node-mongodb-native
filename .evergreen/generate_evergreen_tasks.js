@@ -36,7 +36,7 @@ const OPERATING_SYSTEMS = [
 ].map(osConfig => ({
   mongoVersion: '>=3.6',
   nodeVersion: LOWEST_LTS,
-  auth: false, // TODO test auth?
+  auth: 'auth',
   clientEncryption: true,
   ...osConfig
 }));
@@ -108,12 +108,7 @@ TASKS.push(
       commands: [
         { func: 'install dependencies' },
         { func: 'bootstrap mongohoused' },
-        {
-          func: 'run data lake tests',
-          vars: {
-            AUTH: 'auth'
-          }
-        }
+        { func: 'run data lake tests' }
       ]
     },
     {
