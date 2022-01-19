@@ -103,7 +103,7 @@ describe('Connection String', function () {
     expect(options).to.have.nested.property('credentials.source', mockAuthSource);
   });
 
-  it('should omit credentials and throw a non-MongoAPIError if the only auth related option is authSource', async () => {
+  it('should omit credentials and not throw a MongoAPIError if the only auth related option is authSource', async () => {
     // The error we're looking to **not** see is
     // `new MongoInvalidArgumentError('No AuthProvider for ${credentials.mechanism} defined.')`
     // in `prepareHandshakeDocument` and/or `performInitialHandshake`.
