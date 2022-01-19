@@ -6,8 +6,13 @@ import { promisify } from 'util';
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
 import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
-import { MongoDriverError, MongoInvalidArgumentError, MongoParseError } from '../../src/error';
-import { MongoOptions } from '../../src/mongo_client';
+import {
+  MongoDriverError,
+  MongoInvalidArgumentError,
+  MongoParseError,
+  MongoServerSelectionError
+} from '../../src/error';
+import { MongoClient, MongoOptions } from '../../src/mongo_client';
 
 describe('Connection String', function () {
   it('should not support auth passed with user', function () {
@@ -96,6 +101,24 @@ describe('Connection String', function () {
     expect(options).to.have.nested.property('credentials.username', '');
     expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
     expect(options).to.have.nested.property('credentials.source', mockAuthSource);
+  });
+
+  it('should omit credentials if the only auth related option is authSource', async () => {
+    const client = new MongoClient('mongodb://localhost:123/?authSource=someDb', {
+      serverSelectionTimeoutMS: 500
+    });
+
+    let thrownError: Error;
+    try {
+      // relies on us not running a mongod on port 123, fairly likely assumption
+      await client.connect();
+    } catch (error) {
+      thrownError = error;
+    }
+
+    // We should fail to connect, not fail to find an auth provider
+    expect(thrownError).to.be.instanceOf(MongoServerSelectionError);
+    expect(client.options).to.not.have.a.property('credentials');
   });
 
   it('should parse a numeric authSource with variable width', function () {
