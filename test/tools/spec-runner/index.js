@@ -169,10 +169,16 @@ function generateTopologyTests(testSuites, testContext, filter) {
 }
 
 function shouldRunSpecTest(configuration, requires, spec, filter) {
-  if (requires.authEnabled && process.env.AUTH !== 'auth') {
+  if (requires.authEnabled) {
     // TODO(NODE-3488): We do not have a way to determine if auth is enabled in our mocha metadata
     // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
-    return false;
+    if (process.env.AUTH !== 'auth') {
+      return false;
+    }
+
+    if (spec.failPoint.configureFailPoint === 'failCommand') {
+      return false;
+    }
   }
 
   if (
@@ -396,18 +402,13 @@ function runTestSuiteTest(configuration, spec, context) {
     let testPromise = Promise.resolve();
     return testPromise
       .then(() => testOperations(spec, operationContext))
-      .catch(err => {
-        // If the driver throws an exception / returns an error while executing this series
-        // of operations, store the error message.
-        throw err;
-      })
-      .then(() => {
+      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData))
+      .finally(() => {
         const promises = [];
         if (session0) promises.push(session0.endSession());
         if (session1) promises.push(session1.endSession());
         return Promise.all(promises);
-      })
-      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));
+      });
   });
 }
 

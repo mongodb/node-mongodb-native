@@ -108,7 +108,8 @@ const SKIP_TESTS = [
 
   // Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
-  'Client side error when transaction is in progress'
+  'Client side error when transaction is in progress',
+  'implicit abort'
 ];
 
 describe('Transactions Spec Legacy Tests', function () {

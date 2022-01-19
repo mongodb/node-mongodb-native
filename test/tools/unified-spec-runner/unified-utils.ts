@@ -78,7 +78,7 @@ export async function topologySatisfies(
       // but in node you'll run into auth errors / successes at client.connect() time.
       // so we cannot run into saslContinue failPoints that get configured for an operation to fail with
       // Ex. 'errors during authentication are processed' in test/spec/load-balancers/sdam-error-handling.yml
-      ok &&= false; // process.env.AUTH === 'auth';
+      ok &&= process.env.AUTH === 'auth';
       if (!ok && skipReason == null) {
         skipReason = `requires auth but auth cannot be tested in the unified format - TODO(NODE-2471)`;
       }

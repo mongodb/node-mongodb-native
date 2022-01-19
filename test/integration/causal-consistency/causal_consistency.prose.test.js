@@ -42,7 +42,7 @@ describe('Causal Consistency - prose tests', function () {
      */
     {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'] },
+        requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
         // Skipping session leak tests b/c these are explicit sessions
         sessions: { skipLeakTests: true }
       },
@@ -80,7 +80,7 @@ describe('Causal Consistency - prose tests', function () {
 
       it('case: successful read with causal consistency', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'] },
+          requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
           // Skipping session leak tests b/c these are explicit sessions
           sessions: { skipLeakTests: true }
         },
@@ -118,7 +118,7 @@ describe('Causal Consistency - prose tests', function () {
     () => {
       it('case: second operation is findOne', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'] },
+          requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
           // Skipping session leak tests b/c these are explicit sessions
           sessions: { skipLeakTests: true }
         },
@@ -163,7 +163,7 @@ describe('Causal Consistency - prose tests', function () {
     () => {
       it('case: successful insert', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'] },
+          requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
           // Skipping session leak tests b/c these are explicit sessions
           sessions: { skipLeakTests: true }
         },
@@ -203,7 +203,7 @@ describe('Causal Consistency - prose tests', function () {
      */
     {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'] },
+        requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
         // Skipping session leak tests b/c these are explicit sessions
         sessions: { skipLeakTests: true }
       },

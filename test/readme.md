@@ -53,6 +53,15 @@ The output will show how many tests passed, failed, and are pending. Tests that 
 
 In the following subsections, we'll dig into the details of running the tests.
 
+### Testing With Authorization Enabled
+
+By default, the integration tests run with auth enabled and the cluster_setup.sh script defaults to starting servers with auth enabled.  Tests can be run locally without auth by setting the environment
+variable `AUTH` to the value of `noauth`.  This must be a two step process of starting a server without auth enabled and then running the tests without auth enabled.
+
+```shell
+AUTH='noauth' ./test/tools/cluster_setup.sh <server>
+AUTH='noauth' npm run check:test
+```
 ### Testing Different MongoDB Topologies
 
 As we mentioned earlier, the tests check the topology of the MongoDB server being used and run the tests associated with that topology. Tests that don't have a matching topology will be skipped.

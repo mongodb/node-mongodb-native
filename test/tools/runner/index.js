@@ -12,7 +12,17 @@ const { getEnvironmentalOptions } = require('../utils');
 const mock = require('../mongodb-mock/index');
 const { inspect } = require('util');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+// Default our tests to have auth enabled
+process.env.AUTH = process.env.AUTH === 'noauth' ? 'noauth' : 'auth';
+
+// If the URI exists as an environment variable, use it.  Otherwise
+//  determine the connection string based on the value of process.env.AUTH
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  (process.env.AUTH === 'auth'
+    ? 'mongodb://bob:pwd123@localhost:27017'
+    : 'mongodb://localhost:27017');
+
 const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 // Load balancer fronting 1 mongos.
 const SINGLE_MONGOS_LB_URI = process.env.SINGLE_MONGOS_LB_URI;

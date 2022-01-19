@@ -30,6 +30,29 @@ class Thread {
   }
 }
 
+function getIndicesOfAuthInUrl(connectionString) {
+  const doubleSlashIndex = connectionString.indexOf('//');
+  const atIndex = connectionString.indexOf('@');
+
+  if (doubleSlashIndex === -1 || atIndex === -1) {
+    return null;
+  }
+
+  return {
+    start: doubleSlashIndex + 2,
+    end: atIndex
+  };
+}
+
+function extractAuthString(connectionString) {
+  const indices = getIndicesOfAuthInUrl(connectionString);
+  if (!indices) {
+    return null;
+  }
+
+  return connectionString.slice(indices.start, indices.end);
+}
+
 class TestRunnerContext {
   constructor(opts) {
     const defaults = {
@@ -79,9 +102,15 @@ class TestRunnerContext {
       resolveConnectionString(config, { useMultipleMongoses: true }, this)
     );
     if (config.topologyType === 'Sharded') {
-      this.failPointClients = config.options.hostAddresses.map(proxy =>
-        config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
-      );
+      this.failPointClients = config.options.hostAddresses.map(proxy => {
+        const authString =
+          process.env.AUTH === 'auth' ? `${extractAuthString(process.env.MONGODB_URI)}@` : '';
+        return config.newClient(
+          `mongodb://${authString}${proxy.host}:${proxy.port}/${
+            process.env.AUTH === 'auth' ? '?authSource=admin' : ''
+          }`
+        );
+      });
     }
 
     return this.runForAllClients(client => client.connect());

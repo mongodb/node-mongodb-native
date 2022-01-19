@@ -37,12 +37,13 @@ describe('MongoClient integration', function () {
               return 1;
             }
           },
-          serializeFunctions: true,
-          raw: true
+          serializeFunctions: true
         }
       );
 
       client.connect(function (err, client) {
+        expect(err).to.be.undefined;
+
         const db = client.db(configuration.db);
 
         test.equal(1, db.writeConcern.w);
@@ -56,7 +57,6 @@ describe('MongoClient integration', function () {
         test.equal(true, db.s.options.forceServerObjectId);
         test.equal(1, db.s.pkFactory.createPk());
         test.equal(true, db.bsonOptions.serializeFunctions);
-        test.equal(true, db.bsonOptions.raw);
 
         client.close(done);
       });
@@ -135,14 +135,11 @@ describe('MongoClient integration', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      let url = configuration.url();
-      if (url.indexOf('replicaSet') !== -1) {
-        url = f('%s&appname=hello%20world', configuration.url());
-      } else {
-        url = f('%s?appname=hello%20world', configuration.url());
-      }
+      const options = {
+        appName: 'hello world'
+      };
+      const client = configuration.newClient(options);
 
-      const client = configuration.newClient(url);
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         test.equal('hello world', client.topology.clientMetadata.application.name);
