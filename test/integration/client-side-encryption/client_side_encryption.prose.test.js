@@ -209,6 +209,124 @@ describe('Client Side Encryption Prose Tests', function () {
         });
     });
 
+    context('when kmip is the kms provider', metadata, function () {
+      context('when encrypting with kmip', function () {
+        /**
+         * 10.
+         *  - Create data key with kmip as provider and master key of { keyId: '1' }
+         *  - Use UUID to encrypt and decrypt to value.
+         *  - Create data key with invalid encrypter and expect failure.
+         */
+        it('must create a data key', function () {
+
+        });
+
+        it('properly encrypts and decrypts', function () {
+
+        });
+
+        it('fails with invalid provider host', function () {
+
+        });
+
+        /**
+         * 11.
+         *  - Create data key with kmip as provider and master key of
+         *      { keyId: 1, endpoint: 'localhost:5698 '}
+         *  - Use UUID to encrypt and decrypt to value.
+         */
+        it('must create a data key', function () {
+
+        });
+
+        it('properly encrypts and decrypts', function () {
+
+        });
+
+        /**
+         * 12.
+         *  - Create data key with kmip as provider and master key of
+         *      { keyId: 1, endpoint: 'doesnotexist.localhost:5698 '}
+         *  - Expect failure.
+         */
+        it('fails with invalid provider host', function () {
+
+        });
+      });
+    });
+
+    /**
+     * - Create client encryption no tls
+     * - Create client encryption with tls
+     * - Create client encryption expired
+     * - Create client encryption invalid hostname
+     */
+    context('when passing through tls options', metadata, function () {
+      // Case 1.
+      context('when using aws', function () {
+        it('must create data keys', function () {
+
+        });
+
+        it('fails with expired certificates', function () {
+
+        });
+
+        it('fails with invalid hostnames', function () {
+
+        });
+      });
+
+      // Case 2.
+      context('when using azure', function () {
+        it('must create data keys', function () {
+
+        });
+
+        it('fails with expired certificates', function () {
+
+        });
+
+        it('fails with invalid hostnames', function () {
+
+        });
+      });
+
+      // Case 3.
+      context('when using gcp', function () {
+        it('must create data keys', function () {
+
+        });
+
+        it('fails with expired certificates', function () {
+
+        });
+
+        it('fails with invalid hostnames', function () {
+
+        });
+      });
+
+      // Case 4.
+      context('when using kmip', function () {
+        it('fails without endpoint', function () {
+
+        });
+
+        it('must create data keys', function () {
+
+        });
+
+        it('fails with expired certificates', function () {
+
+        });
+
+        it('fails with invalid hostnames', function () {
+
+        });
+      });
+    });
+
     it('should work for aws KMS provider', metadata, function () {
       // Then, repeat the above tests with the ``aws`` KMS provider:
       let awsDatakeyId;
