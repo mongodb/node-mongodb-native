@@ -104,6 +104,12 @@ describe('Connection String', function () {
   });
 
   it('should omit credentials if the only auth related option is authSource', async () => {
+    // The error we're looking to **not** see is
+    // `new MongoInvalidArgumentError('No AuthProvider for ${credentials.mechanism} defined.')`
+    // in `prepareHandshakeDocument` and/or `performInitialHandshake`.
+    // Neither function is exported currently but if I did export them because of the inlined callbacks
+    // I think I would need to mock quite a bit of internals to get down to that layer.
+    // My thinking is I can lean on server selection failing for th unit tests to assert we at least don't get an error related to auth.
     const client = new MongoClient('mongodb://localhost:123/?authSource=someDb', {
       serverSelectionTimeoutMS: 500
     });
