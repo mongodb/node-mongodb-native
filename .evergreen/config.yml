@@ -699,7 +699,7 @@ functions:
   upload coverage report:
     - command: shell.exec
       params:
-        working_dir: "."
+        working_dir: "src"
         script: |
           # Coverage combine merges (and removes) all the coverage files and
           # generates a new .coverage file in the current directory.
