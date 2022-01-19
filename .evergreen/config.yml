@@ -699,26 +699,20 @@ functions:
   upload coverage report:
     - command: shell.exec
       params:
-        working_dir: "src"
+        working_dir: src
         script: |
-          # Coverage combine merges (and removes) all the coverage files and
-          # generates a new .coverage file in the current directory.
-          echo $(pwd)
-          echo $(ls -a)
-
           nyc report --reporter=json
     - command: s3.put
       params:
         aws_key: ${aws_key}
         aws_secret: ${aws_secret}
-        local_file:  coverage/coverage-final.json
+        local_file: coverage/coverage-final.json
         optional: true
-        # Upload the coverage report for all tasks in a single build to the same directory.
         remote_file: ${UPLOAD_BUCKET}/coverage/${revision}/${version_id}/coverage/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads
         permissions: public-read
-        content_type: text/html
-        display_name: "Raw Coverage Report"
+        content_type: application/json
+        display_name: Raw Coverage Report
 tasks:
   - name: test-serverless
     tags:
@@ -1740,7 +1734,6 @@ pre:
   - func: fix absolute paths
   - func: make files executable
 post:
-  - func: upload coverage report
   - func: upload test results
   - func: cleanup
 ignore:
