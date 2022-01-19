@@ -30,7 +30,8 @@ describe('listDatabases', function () {
   describe('authorizedDatabases flag', function () {
     const username = 'a';
     const password = 'b';
-    const mockAuthorizedDb = 'mockAuthorizedDb';
+    const mockAuthorizedDb = 'enumerate_databases';
+    const mockAuthorizedCollection = 'enumerate_databases_collection';
 
     let client: MongoClient;
     let authorizedClient: MongoClient;
@@ -54,8 +55,8 @@ describe('listDatabases', function () {
       await client.connect();
 
       await client
-        .db('mockAuthorizedDb')
-        .createCollection('a')
+        .db(mockAuthorizedDb)
+        .createCollection(mockAuthorizedCollection)
         .catch(() => null);
 
       await client.db('admin').addUser(username, password, authorizedUserOptions);
@@ -68,6 +69,7 @@ describe('listDatabases', function () {
 
     afterEach(async function () {
       await client?.db('admin').removeUser(username);
+      await client?.db(mockAuthorizedDb).dropDatabase();
       await client?.close();
       await authorizedClient?.close();
     });
