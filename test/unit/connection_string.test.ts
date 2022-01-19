@@ -7,10 +7,10 @@ import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
 import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
 import {
+  MongoAPIError,
   MongoDriverError,
   MongoInvalidArgumentError,
-  MongoParseError,
-  MongoServerSelectionError
+  MongoParseError
 } from '../../src/error';
 import { MongoClient, MongoOptions } from '../../src/mongo_client';
 
@@ -103,7 +103,7 @@ describe('Connection String', function () {
     expect(options).to.have.nested.property('credentials.source', mockAuthSource);
   });
 
-  it('should omit credentials if the only auth related option is authSource', async () => {
+  it('should omit credentials and throw a non-MongoAPIError if the only auth related option is authSource', async () => {
     // The error we're looking to **not** see is
     // `new MongoInvalidArgumentError('No AuthProvider for ${credentials.mechanism} defined.')`
     // in `prepareHandshakeDocument` and/or `performInitialHandshake`.
@@ -122,8 +122,8 @@ describe('Connection String', function () {
       thrownError = error;
     }
 
-    // We should fail to connect, not fail to find an auth provider
-    expect(thrownError).to.be.instanceOf(MongoServerSelectionError);
+    // We should fail to connect, not fail to find an auth provider thus we should not find a MongoAPIError
+    expect(thrownError).to.not.be.instanceOf(MongoAPIError);
     expect(client.options).to.not.have.a.property('credentials');
   });
 
