@@ -58,7 +58,8 @@ function makeTask({ mongoVersion, topology, tags = [] }) {
         func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: mongoVersion,
-          TOPOLOGY: topology
+          TOPOLOGY: topology,
+          AUTH: 'auth'
         }
       },
       { func: 'run tests' }
@@ -106,7 +107,12 @@ TASKS.push(
       commands: [
         { func: 'install dependencies' },
         { func: 'bootstrap mongohoused' },
-        { func: 'run data lake tests' }
+        {
+          func: 'run data lake tests',
+          vars: {
+            AUTH: 'auth'
+          }
+        }
       ]
     },
     {
