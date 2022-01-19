@@ -80,7 +80,7 @@ function translateClientOptions(options) {
               tlsCAFile: process.env.KMIP_TLS_CA_FILE,
               tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
             }
-          }
+          };
         }
 
         options.autoEncryption.kmsProviders = kmsProviders;

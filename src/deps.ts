@@ -304,7 +304,7 @@ export interface AutoEncryptionOptions {
     azure?: AutoEncryptionTlsOptions;
     gcp?: AutoEncryptionTlsOptions;
     kmip?: AutoEncryptionTlsOptions;
-  }
+  };
 }
 
 /** @public */

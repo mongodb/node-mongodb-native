@@ -229,7 +229,7 @@ export type {
 export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
 export type { DbOptions, DbPrivate } from './db';
-export type { AutoEncrypter, AutoEncryptionOptions } from './deps';
+export type { AutoEncrypter, AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
