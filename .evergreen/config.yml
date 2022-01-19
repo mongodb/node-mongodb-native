@@ -703,7 +703,8 @@ functions:
         script: |
           # Coverage combine merges (and removes) all the coverage files and
           # generates a new .coverage file in the current directory.
-          pwd
+          echo $(pwd)
+          echo $(ls -a)
 
           nyc report --reporter=json
     - command: s3.put
