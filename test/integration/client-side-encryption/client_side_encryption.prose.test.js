@@ -210,48 +210,135 @@ describe('Client Side Encryption Prose Tests', function () {
     });
 
     context('when kmip is the kms provider', metadata, function () {
+      before(async function () {
+        this.client = this.configuration.newClient();
+        await this.client.connect();
+        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+        this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+          bson: BSON,
+          keyVaultNamespace,
+          kmsProviders: {
+            kmip: {
+              endpoint: 'localhost:5698'
+            }
+          },
+          tlsOptions: {
+            kmip: {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          }
+        });
+        this.clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(this.client, {
+          bson: BSON,
+          keyVaultNamespace,
+          kmsProviders: {
+            kmip: {
+              endpoint: 'invalid.localhost:5698'
+            }
+          },
+          tlsOptions: {
+            kmip: {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          }
+        });
+      });
+
+      after(async function () {
+        await this.client.close();
+      });
+
       context('when encrypting with kmip', function () {
-        /**
-         * 10.
-         *  - Create data key with kmip as provider and master key of { keyId: '1' }
-         *  - Use UUID to encrypt and decrypt to value.
-         *  - Create data key with invalid encrypter and expect failure.
-         */
-        it('must create a data key', function () {
+        context('when not providing an endpoint in the master key', function () {
+          const masterKey = { keyId: '1' };
+          let dataKey;
+          let encrypted;
+          let decrypted;
 
+          /**
+           * 10.
+           *  - Create data key with kmip as provider and master key of { keyId: '1' }
+           *  - Use UUID to encrypt and decrypt to value.
+           *  - Create data key with invalid encrypter and expect failure.
+           */
+          before(async function () {
+            dataKey = await this.clientEncryption.createDataKey('kmip', { masterKey });
+            encrypted = await this.clientEncryption.encrypt('test', {
+              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+              keyId: dataKey
+            });
+            decrypted = await this.clientEncryption.decrypt(encrypted);
+          });
+
+          it('must create a data key', function () {
+            expect(dataKey).to.have.property('sub_type', 4);
+          });
+
+          it('properly encrypts and decrypts', function () {
+            expect(decrypted).to.equal('test');
+          });
+
+          it('fails with invalid provider host', async function () {
+            try {
+              await this.clientEncryptionInvalid.createDataKey('kmip', { masterKey });
+            } catch (e) {
+              expect(e.message).to.equal('KMS request failed');
+            }
+          });
         });
 
-        it('properly encrypts and decrypts', function () {
+        context('when providing an endpoint in the master key', function () {
+          context('when the endpoint is valid', function () {
+            const masterKey = { keyId: '1', endpoint: 'localhost:5698' };
+            let dataKey;
+            let encrypted;
+            let decrypted;
 
+            /**
+             * 11.
+             *  - Create data key with kmip as provider and master key of
+             *      { keyId: 1, endpoint: 'localhost:5698 '}
+             *  - Use UUID to encrypt and decrypt to value.
+             */
+            before(async function () {
+              dataKey = await this.clientEncryption.createDataKey('kmip', { masterKey });
+              encrypted = await this.clientEncryption.encrypt('test', {
+                algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+                keyId: dataKey
+              });
+              decrypted = await this.clientEncryption.decrypt(encrypted);
+            });
+
+            it('must create a data key', function () {
+              expect(dataKey).to.have.property('sub_type', 4);
+            });
+
+            it('properly encrypts and decrypts', function () {
+              expect(decrypted).to.equal('test');
+            });
+          });
+
+          context('when the endpoint is invalid', function () {
+            const masterKey = { keyId: '1', endpoint: 'doesnotexist.localhost:5698' };
+
+            /**
+             * 12.
+             *  - Create data key with kmip as provider and master key of
+             *      { keyId: 1, endpoint: 'doesnotexist.localhost:5698 '}
+             *  - Expect failure.
+             */
+            it('fails with invalid provider host', async function () {
+              try {
+                await this.clientEncryptionInvalid.createDataKey('kmip', { masterKey });
+              } catch (e) {
+                expect(e.message).to.equal('KMS request failed');
+              }
+            });
+          });
         });
 
-        it('fails with invalid provider host', function () {
-
-        });
-
-        /**
-         * 11.
-         *  - Create data key with kmip as provider and master key of
-         *      { keyId: 1, endpoint: 'localhost:5698 '}
-         *  - Use UUID to encrypt and decrypt to value.
-         */
-        it('must create a data key', function () {
-
-        });
-
-        it('properly encrypts and decrypts', function () {
-
-        });
-
-        /**
-         * 12.
-         *  - Create data key with kmip as provider and master key of
-         *      { keyId: 1, endpoint: 'doesnotexist.localhost:5698 '}
-         *  - Expect failure.
-         */
-        it('fails with invalid provider host', function () {
-
-        });
       });
     });
 
