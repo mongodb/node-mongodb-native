@@ -744,7 +744,7 @@ functions:
         local_file:  src/coverage/coverage-final.json
         optional: true
         # Upload the coverage report for all tasks in a single build to the same directory.
-        remote_file: ${UPLOAD_BUCKET}/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
+        remote_file: mongo-node-driver/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads
         permissions: public-read
         content_type: application/json
