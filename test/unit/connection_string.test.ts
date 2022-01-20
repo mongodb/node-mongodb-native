@@ -94,13 +94,11 @@ describe('Connection String', function () {
     expect(options.credentials.source).to.equal('$external');
   });
 
-  it('should retain user-specified authSource with no credentials for non-srv URI', function () {
-    const mockAuthSource = 'thisShouldBeAuthSource';
-    const options = parseOptions(`mongodb://localhost/?authSource=${mockAuthSource}`);
-
-    expect(options).to.have.nested.property('credentials.username', '');
-    expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
-    expect(options).to.have.nested.property('credentials.source', mockAuthSource);
+  it('should retain user-specified authSource with no credentials', function () {
+    let options = parseOptions(`mongodb://a/?authSource=someDb`);
+    expect(options).to.not.have.property('credentials');
+    options = parseOptions(`mongodb+srv://a/?authSource=someDb`);
+    expect(options).to.not.have.property('credentials');
   });
 
   it('should omit credentials and throw a non-MongoAPIError if the only auth related option is authSource', async () => {
