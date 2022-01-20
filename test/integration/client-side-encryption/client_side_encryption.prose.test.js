@@ -7,14 +7,22 @@ const expect = chai.expect;
 chai.use(require('chai-subset'));
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
-const getKmsProviders = localKey => {
+const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
   if (localKey) {
     result.local = { key: localKey };
   }
   result.kmip = {
-    endpoint: 'localhost:5698'
+    endpoint: kmipEndpoint || 'localhost:5698'
   };
+
+  if (result.azure && azureEndpoint) {
+    result.azure.endpoint = azureEndpoint;
+  }
+
+  if (result.gcp && gcpEndpoint) {
+    result.gcp.endpoint = gcpEndpoint;
+  }
 
   return result;
 };
@@ -209,45 +217,46 @@ describe('Client Side Encryption Prose Tests', function () {
         });
     });
 
-    context('when kmip is the kms provider', metadata, function () {
-      before(async function () {
-        this.client = this.configuration.newClient();
-        await this.client.connect();
-        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-        this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
-          bson: BSON,
-          keyVaultNamespace,
-          kmsProviders: {
-            kmip: {
-              endpoint: 'localhost:5698'
-            }
-          },
-          tlsOptions: {
-            kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-            }
+    context.only('when kmip is the kms provider', metadata, function () {
+      const autoEncryptionOptions = {
+        keyVaultNamespace,
+        kmsProviders: {
+          kmip: {
+            endpoint: 'localhost:5698'
           }
+        },
+        tlsOptions: {
+          kmip: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          }
+        }
+      };
+      let client;
+      let clientEncryption;
+      let clientEncryptionInvalid;
+
+      before(async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+        clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
+          ...autoEncryptionOptions,
+          bson: BSON
         });
-        this.clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(this.client, {
+        clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(client, {
+          ...autoEncryptionOptions,
           bson: BSON,
-          keyVaultNamespace,
           kmsProviders: {
             kmip: {
               endpoint: 'invalid.localhost:5698'
-            }
-          },
-          tlsOptions: {
-            kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
             }
           }
         });
       });
 
       after(async function () {
-        await this.client.close();
+        await client.close(true);
       });
 
       context('when encrypting with kmip', function () {
@@ -264,12 +273,12 @@ describe('Client Side Encryption Prose Tests', function () {
            *  - Create data key with invalid encrypter and expect failure.
            */
           before(async function () {
-            dataKey = await this.clientEncryption.createDataKey('kmip', { masterKey });
-            encrypted = await this.clientEncryption.encrypt('test', {
+            dataKey = await clientEncryption.createDataKey('kmip', { masterKey });
+            encrypted = await clientEncryption.encrypt('test', {
               algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
               keyId: dataKey
             });
-            decrypted = await this.clientEncryption.decrypt(encrypted);
+            decrypted = await clientEncryption.decrypt(encrypted);
           });
 
           it('must create a data key', function () {
@@ -280,9 +289,9 @@ describe('Client Side Encryption Prose Tests', function () {
             expect(decrypted).to.equal('test');
           });
 
-          it('fails with invalid provider host', async function () {
+          it.only('fails with invalid provider host', async function () {
             try {
-              await this.clientEncryptionInvalid.createDataKey('kmip', { masterKey });
+              await clientEncryptionInvalid.createDataKey('kmip', { masterKey });
             } catch (e) {
               expect(e.message).to.equal('KMS request failed');
             }
@@ -303,12 +312,12 @@ describe('Client Side Encryption Prose Tests', function () {
              *  - Use UUID to encrypt and decrypt to value.
              */
             before(async function () {
-              dataKey = await this.clientEncryption.createDataKey('kmip', { masterKey });
-              encrypted = await this.clientEncryption.encrypt('test', {
+              dataKey = await clientEncryption.createDataKey('kmip', { masterKey });
+              encrypted = await clientEncryption.encrypt('test', {
                 algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
                 keyId: dataKey
               });
-              decrypted = await this.clientEncryption.decrypt(encrypted);
+              decrypted = await clientEncryption.decrypt(encrypted);
             });
 
             it('must create a data key', function () {
@@ -331,7 +340,7 @@ describe('Client Side Encryption Prose Tests', function () {
              */
             it('fails with invalid provider host', async function () {
               try {
-                await this.clientEncryptionInvalid.createDataKey('kmip', { masterKey });
+                await clientEncryption.createDataKey('kmip', { masterKey });
               } catch (e) {
                 expect(e.message).to.equal('KMS request failed');
               }
@@ -349,6 +358,80 @@ describe('Client Side Encryption Prose Tests', function () {
      * - Create client encryption invalid hostname
      */
     context('when passing through tls options', metadata, function () {
+      const tlsCaOptions = {
+        aws: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        azure: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        gcp: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        kmip: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        }
+      }
+      const clientNoTlsOptions = {
+        kmsProviders: getKmsProviders()
+      };
+      const clientWithTlsOptions = {
+        kmsProviders: getKmsProviders(),
+        tlsOptions: {
+          aws: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          azure: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          gcp: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          kmip: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          }
+        }
+      };
+      const clientWithTlsExpiredOptions = {
+        kmsProviders: getKmsProviders('127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
+        tlsOptions: tlsCaOptions
+      };
+      const clientWithInvalidHostnameOptions = {
+        kmsProviders: getKmsProviders('127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
+        tlsOptions: tlsCaOptions
+      };
+
+      let clientNoTls;
+      let clientWithTls;
+      let clientWithTlsExpired;
+      let clientWithInvalidHostname;
+
+      beforeEach(async function () {
+        clientNoTls = this.configuration.newClient({}, {
+          autoEncryption: clientNoTlsOptions
+        });
+        clientWithTls = this.configuration.newClient({}, {
+          autoEncryption: clientWithTlsOptions
+        });
+        clientWithTlsExpired = this.configuration.newClient({}, {
+          autoEncryption: clientWithTlsExpiredOptions
+        });
+        clientWithInvalidHostname = this.configuration.newClient({}, {
+          autoEncryption: clientWithInvalidHostnameOptions
+        });
+      });
+
+      afterEach(async function () {
+        await clientNoTls.close(true);
+        await clientWithTls.close(true);
+        await clientWithTlsExpired.close(true);
+        await clientWithInvalidHostname.close(true);
+      });
+
       // Case 1.
       context('when using aws', function () {
         it('must create data keys', function () {
