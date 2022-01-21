@@ -1999,7 +1999,8 @@ buildvariants:
   - name: generate-combined-coverage
     display_name: Generate Combined Coverage
     run_on: ubuntu1804-large
-    tasks: download and merge coverage
+    tasks:
+      - download and merge coverage
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-test
