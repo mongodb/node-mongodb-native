@@ -629,6 +629,19 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
+oneOffFuncAsTasks.push({
+  name: 'download and merge coverage'.split(' ').join('-'),
+  tags: [],
+  commands: [
+    {
+      func: 'download and merge coverage'
+    }
+  ],
+  depends_on: [
+    { name: '*', variant: '*', status: '*' }
+  ]
+})
+
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
 BUILD_VARIANTS.push({
