@@ -6,8 +6,13 @@ import { promisify } from 'util';
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
 import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
-import { MongoDriverError, MongoInvalidArgumentError, MongoParseError } from '../../src/error';
-import { MongoOptions } from '../../src/mongo_client';
+import {
+  MongoAPIError,
+  MongoDriverError,
+  MongoInvalidArgumentError,
+  MongoParseError
+} from '../../src/error';
+import { MongoClient, MongoOptions } from '../../src/mongo_client';
 
 describe('Connection String', function () {
   it('should not support auth passed with user', function () {
@@ -87,6 +92,37 @@ describe('Connection String', function () {
       'mongodb+srv://jira-sync.pw0q4.mongodb.net/testDB?authMechanism=MONGODB-AWS&retryWrites=true&w=majority'
     );
     expect(options.credentials.source).to.equal('$external');
+  });
+
+  it('should omit credentials option when the only authSource is provided', function () {
+    let options = parseOptions(`mongodb://a/?authSource=someDb`);
+    expect(options).to.not.have.property('credentials');
+    options = parseOptions(`mongodb+srv://a/?authSource=someDb`);
+    expect(options).to.not.have.property('credentials');
+  });
+
+  it('should omit credentials and not throw a MongoAPIError if the only auth related option is authSource', async () => {
+    // The error we're looking to **not** see is
+    // `new MongoInvalidArgumentError('No AuthProvider for ${credentials.mechanism} defined.')`
+    // in `prepareHandshakeDocument` and/or `performInitialHandshake`.
+    // Neither function is exported currently but if I did export them because of the inlined callbacks
+    // I think I would need to mock quite a bit of internals to get down to that layer.
+    // My thinking is I can lean on server selection failing for th unit tests to assert we at least don't get an error related to auth.
+    const client = new MongoClient('mongodb://localhost:123/?authSource=someDb', {
+      serverSelectionTimeoutMS: 500
+    });
+
+    let thrownError: Error;
+    try {
+      // relies on us not running a mongod on port 123, fairly likely assumption
+      await client.connect();
+    } catch (error) {
+      thrownError = error;
+    }
+
+    // We should fail to connect, not fail to find an auth provider thus we should not find a MongoAPIError
+    expect(thrownError).to.not.be.instanceOf(MongoAPIError);
+    expect(client.options).to.not.have.a.property('credentials');
   });
 
   it('should parse a numeric authSource with variable width', function () {
@@ -333,6 +369,22 @@ describe('Connection String', function () {
       // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
       expect(options).property('credentials').to.equal(credentials);
       expect(options).to.have.nested.property('credentials.source', 'admin');
+    });
+
+    it('should retain specified authSource with no provided credentials', async function () {
+      makeStub('authSource=thisShouldBeAuthSource');
+      const credentials = {};
+      const options = {
+        credentials,
+        srvHost: 'test.mock.test.build.10gen.cc',
+        srvServiceName: 'mongodb',
+        userSpecifiedAuthSource: false
+      } as MongoOptions;
+
+      await resolveSRVRecordAsync(options as any);
+      expect(options).to.have.nested.property('credentials.username', '');
+      expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
+      expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
     });
   });
 });
