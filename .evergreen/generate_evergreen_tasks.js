@@ -636,7 +636,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
-oneOffFuncAsTasks.push({
+const coverageTask = {
   name: 'download and merge coverage'.split(' ').join('-'),
   tags: [],
   commands: [
@@ -647,7 +647,7 @@ oneOffFuncAsTasks.push({
   depends_on: [
     { name: '*', variant: '*', status: '*' }
   ]
-})
+}
 
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
@@ -670,7 +670,7 @@ BUILD_VARIANTS.push({
 });
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
+fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS).concat([coverageTask]);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.dump(fileData, { lineWidth: 120 }), 'utf8');
