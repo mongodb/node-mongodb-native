@@ -42,7 +42,7 @@ describe('Causal Consistency - prose tests', function () {
      */
     {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded', 'sharded'], mongodb: '>3.6.0-rc0' },
+        requires: { topology: ['replicaset', 'sharded'] },
         // Skipping session leak tests b/c these are explicit sessions
         sessions: { skipLeakTests: true }
       },
@@ -80,7 +80,7 @@ describe('Causal Consistency - prose tests', function () {
 
       it('case: successful read with causal consistency', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded', 'sharded'], mongodb: '>3.6.0-rc0' },
+          requires: { topology: ['replicaset', 'sharded'] },
           // Skipping session leak tests b/c these are explicit sessions
           sessions: { skipLeakTests: true }
         },
@@ -118,7 +118,7 @@ describe('Causal Consistency - prose tests', function () {
     () => {
       it('case: second operation is findOne', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded', 'sharded'], mongodb: '>3.6.0-rc0' },
+          requires: { topology: ['replicaset', 'sharded'] },
           // Skipping session leak tests b/c these are explicit sessions
           sessions: { skipLeakTests: true }
         },
@@ -163,7 +163,7 @@ describe('Causal Consistency - prose tests', function () {
     () => {
       it('case: successful insert', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded', 'sharded'], mongodb: '>3.6.0-rc0' },
+          requires: { topology: ['replicaset', 'sharded'] },
           // Skipping session leak tests b/c these are explicit sessions
           sessions: { skipLeakTests: true }
         },
@@ -203,7 +203,7 @@ describe('Causal Consistency - prose tests', function () {
      */
     {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded', 'sharded'], mongodb: '>3.6.0-rc0' },
+        requires: { topology: ['replicaset', 'sharded'] },
         // Skipping session leak tests b/c these are explicit sessions
         sessions: { skipLeakTests: true }
       },
@@ -237,7 +237,7 @@ describe('Causal Consistency - prose tests', function () {
      * assert that the command does not have an afterClusterTime field
      */
     {
-      metadata: { requires: { topology: ['single'], mongodb: '>3.6.0-rc0' } },
+      metadata: { requires: { topology: ['single'] } },
 
       test: function () {
         const db = test.client.db(this.configuration.db);
@@ -267,7 +267,7 @@ describe('Causal Consistency - prose tests', function () {
      * assert session.operationTime does not have a value
      */
     {
-      metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>3.6.0-rc0' } },
+      metadata: { requires: { topology: ['replicaset', 'sharded'] } },
       test: function () {
         const session = test.client.startSession({ causalConsistency: true });
         const db = test.client.db(this.configuration.db);
