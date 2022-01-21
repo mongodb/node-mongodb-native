@@ -255,31 +255,5 @@ describe('Causal Consistency - prose tests', function () {
     }
   );
 
-  // TODO[CHECK WITH TEAM]: This may be an invalid spec test case in light of SPEC-1019
-  // NOTE: this is likely to change such that unacknowledged writes are required to use an
-  //       implicit session.
-  it.skip(
-    '10. When an unacknowledged write is executed in a causally consistent ClientSession the operationTime property of the ClientSession is not updated',
-    /**
-     * session = client.startSession(causalConsistency = true)
-     * configure the collection to use { w : 0 } unacknowledged writes
-     * collection.anyWriteOperation(session, ...)
-     * assert session.operationTime does not have a value
-     */
-    {
-      metadata: { requires: { topology: ['replicaset', 'sharded'] } },
-      test: function () {
-        const session = test.client.startSession({ causalConsistency: true });
-        const db = test.client.db(this.configuration.db);
-        // expect(session.operationTime).to.be.null;
-
-        return db
-          .collection('causal_test')
-          .insert({}, { session: session, writeConcern: { w: 0 } })
-          .then(() => {
-            expect(session.operationTime).to.be.null;
-          });
-      }
-    }
-  );
+  // #10 is removed by DRIVERS-1374/NODE-3883
 });
