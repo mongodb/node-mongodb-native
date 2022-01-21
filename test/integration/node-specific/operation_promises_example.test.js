@@ -4110,7 +4110,7 @@ describe('Operation (Promises)', function () {
 
     test: function () {
       var configuration = this.configuration;
-      const client = configuration.newClient('mongodb://localhost:27017/integration_tests');
+      const client = configuration.newClient();
 
       // DOC_START
       // Connect using the connection string
