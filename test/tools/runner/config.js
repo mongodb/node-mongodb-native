@@ -247,14 +247,16 @@ class TestConfiguration {
 
     url.pathname = `/${options.db}`;
 
-    if (options.username) url.username = options.username;
-    if (options.password) url.password = options.password;
+    let { username, password } = this.options.auth;
+
+    if (username) url.username = username;
+    if (password) url.password = password;
 
     if (this.isLoadBalanced) {
       url.searchParams.append('loadBalanced', true);
     }
 
-    if (options.username || options.password) {
+    if (username || password) {
       if (options.authMechanism) {
         url.searchParams.append('authMechanism', options.authMechanism);
       }
@@ -294,6 +296,8 @@ class TestConfiguration {
         actualHostsString = this.options.hostAddresses[0].toString();
       }
     }
+
+    url.searchParams.append('authSource', 'admin');
 
     const connectionString = url.toString().replace(FILLER_HOST, actualHostsString);
 
