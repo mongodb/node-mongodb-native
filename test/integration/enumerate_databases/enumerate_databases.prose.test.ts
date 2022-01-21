@@ -13,6 +13,7 @@ describe('listDatabases() spec prose', function () {
    * - Verify that the result set does not contain duplicates
    */
   let client: MongoClient;
+  let ENTIRE_DB_LIST: string[];
 
   beforeEach(async function () {
     client = this.configuration.newClient();
@@ -28,6 +29,11 @@ describe('listDatabases() spec prose', function () {
     }
 
     await client.db(DB_NAME).createCollection(DB_NAME);
+
+    ENTIRE_DB_LIST = (await client.db('admin').command({ listDatabases: 1 })).databases.map(
+      ({ name }) => name
+    );
+    ENTIRE_DB_LIST.sort();
   });
 
   afterEach(async function () {
@@ -39,23 +45,20 @@ describe('listDatabases() spec prose', function () {
     const dbInfo = await client.db().admin().listDatabases();
     expect(dbInfo).to.have.property('databases');
     expect(dbInfo.databases).to.be.an('array');
-    expect(dbInfo.databases).to.have.lengthOf.at.least(1);
+    expect(dbInfo.databases).to.have.lengthOf(ENTIRE_DB_LIST.length);
     for (const db of dbInfo.databases) {
       expect(db).to.be.a('object');
     }
   });
 
   it('Verify that all databases on the server are present in the result set', async () => {
-    const dbInfoFromCommand = await client.db('admin').command({ listDatabases: 1 });
     const dbInfo = await client.db().admin().listDatabases();
 
-    const namesFromCommand = dbInfoFromCommand.databases.map(({ name }) => name);
-    namesFromCommand.sort();
     const namesFromHelper = dbInfo.databases.map(({ name }) => name);
     namesFromHelper.sort();
 
-    expect(namesFromHelper).to.have.lengthOf.at.least(1);
-    expect(namesFromHelper).to.deep.equal(namesFromCommand);
+    expect(namesFromHelper).to.have.lengthOf(ENTIRE_DB_LIST.length);
+    expect(namesFromHelper).to.deep.equal(ENTIRE_DB_LIST);
     expect(namesFromHelper).to.include(DB_NAME);
   });
 
