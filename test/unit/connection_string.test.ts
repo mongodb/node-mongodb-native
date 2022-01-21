@@ -94,7 +94,7 @@ describe('Connection String', function () {
     expect(options.credentials.source).to.equal('$external');
   });
 
-  it('should retain user-specified authSource with no credentials', function () {
+  it('should omit credentials option when the only authSource is provided', function () {
     let options = parseOptions(`mongodb://a/?authSource=someDb`);
     expect(options).to.not.have.property('credentials');
     options = parseOptions(`mongodb+srv://a/?authSource=someDb`);
