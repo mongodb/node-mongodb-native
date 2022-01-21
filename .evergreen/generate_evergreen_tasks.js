@@ -563,6 +563,13 @@ BUILD_VARIANTS.push({
   tasks: ['run-checks']
 });
 
+BUILD_VARIANTS.push({
+  name: 'generate-combined-coverage',
+  display_name: 'Generate Combined Coverage',
+  run_on: DEFAULT_OS,
+  tasks: 'download and merge coverage'
+});
+
 // singleton build variant for mongosh integration tests
 SINGLETON_TASKS.push({
   name: 'run-mongosh-integration-tests',
