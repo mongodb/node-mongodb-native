@@ -22,8 +22,8 @@ describe('TLS Support', function () {
     makeConnectionTest(connectionString, tlsSettings)
   );
 
-  const maybeSkip = AUTH_ENABLED ? it.skip : it;
-  maybeSkip(
+  const maybeIt = AUTH_ENABLED ? it.skip : it;
+  maybeIt(
     'should connect with tls via url options',
     makeConnectionTest(
       `${connectionString}?${Object.keys(tlsSettings)
