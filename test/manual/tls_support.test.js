@@ -3,6 +3,7 @@ const { MongoClient } = require('../../src');
 const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
 
 const REQUIRED_ENV = ['MONGODB_URI', 'SSL_KEY_FILE', 'SSL_CA_FILE'];
+const AUTH_ENABLED = process.env.AUTH === 'auth';
 
 describe('TLS Support', function () {
   for (let key of REQUIRED_ENV) {
@@ -21,12 +22,9 @@ describe('TLS Support', function () {
     makeConnectionTest(connectionString, tlsSettings)
   );
 
-  it(
+  const maybeSkip = AUTH_ENABLED ? it.skip : it;
+  maybeSkip(
     'should connect with tls via url options',
-    {
-      requires: { auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
-    },
     makeConnectionTest(
       `${connectionString}?${Object.keys(tlsSettings)
         .map(key => `${key}=${tlsSettings[key]}`)
