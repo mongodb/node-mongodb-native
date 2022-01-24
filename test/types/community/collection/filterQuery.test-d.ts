@@ -126,6 +126,11 @@ expectType<WithId<PetModel>[]>(
 expectType<WithId<PetModel>[]>(
   await collectionT.find({ name: new BSONRegExp('MrMeow', 'i') }).toArray()
 );
+
+/// it should not accept fields that are not in the schema
+type FT = Filter<PetModel>;
+expectNotType<FT>({ missing: true });
+
 /// it should not accept wrong types for string fields
 expectNotType<Filter<PetModel>>({ name: 23 });
 expectNotType<Filter<PetModel>>({ name: { suffix: 'Jr' } });
@@ -361,9 +366,11 @@ expectError(
     otherField: new ObjectId()
   })
 );
-nonObjectIdCollection.find({
-  fieldThatDoesNotExistOnSchema: new ObjectId()
-});
+expectError(
+  nonObjectIdCollection.find({
+    fieldThatDoesNotExistOnSchema: new ObjectId()
+  })
+);
 
 // we only forbid objects that "look like" object ids, so other random objects are permitted
 nonObjectIdCollection.find({

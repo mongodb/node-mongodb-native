@@ -90,7 +90,7 @@ export type AlternativeType<T> = T extends ReadonlyArray<infer U>
 export type RegExpOrString<T> = T extends string ? BSONRegExp | RegExp | T : T;
 
 /** @public */
-export interface RootFilterOperators<TSchema> extends Document {
+export interface RootFilterOperators<TSchema> {
   $and?: Filter<TSchema>[];
   $nor?: Filter<TSchema>[];
   $or?: Filter<TSchema>[];
