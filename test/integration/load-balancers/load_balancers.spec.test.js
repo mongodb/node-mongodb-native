@@ -48,6 +48,14 @@ const SKIP = [
         'wait queue timeout errors include cursor statistics',
         'wait queue timeout errors include transaction statistics'
       ]
+    : []),
+
+  ...(process.env.AUTH === 'auth'
+    ? [
+        'errors during authentication are processed',
+        'wait queue timeout errors include cursor statistics',
+        'wait queue timeout errors include transaction statistics'
+      ]
     : [])
 ];
 
