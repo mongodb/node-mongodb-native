@@ -23,6 +23,10 @@ describe('TLS Support', function () {
 
   it(
     'should connect with tls via url options',
+    {
+      requires: { auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
     makeConnectionTest(
       `${connectionString}?${Object.keys(tlsSettings)
         .map(key => `${key}=${tlsSettings[key]}`)
