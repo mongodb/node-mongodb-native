@@ -8,6 +8,7 @@ const client = new MongoClient('');
 const session = client.startSession();
 
 interface Account {
+  name: string;
   balance: number;
 }
 
