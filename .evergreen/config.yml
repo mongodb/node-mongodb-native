@@ -720,31 +720,16 @@ functions:
         silent: true
         working_dir: src
         script: |
+          ${PREPARE_SHELL}
           export AWS_ACCESS_KEY_ID=${aws_key}
           export AWS_SECRET_ACCESS_KEY=${aws_secret}
           # Download all the task coverage files.
-          aws s3 cp --recursive s3://mciuploads/${UPLOAD_BUCKET}/coverage/${revision}/${version_id}/coverage/ coverage/
-    - command: shell.exec
-      params:
-        working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          # Coverage combine merges (and removes) all the coverage files and
-          # generates a new .coverage file in the current directory.
-          ls -la coverage/
+          aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ coverage/
+
           npx nyc merge coverage/ merged-coverage/coverage.json
           npx nyc report -t merged-coverage --reporter=lcov --report-dir output
-    - command: shell.exec
-      params:
-        silent: true
-        working_dir: src
-        script: >
-          export AWS_ACCESS_KEY_ID=${aws_key}
 
-          export AWS_SECRET_ACCESS_KEY=${aws_secret}
-
-          aws s3 cp output/lcov-report s3://mciuploads/${UPLOAD_BUCKET}/coverage/${revision}/${version_id}/lcov-report/
-          --recursive --acl public-read --region us-east-1
+          aws s3 cp output/lcov-report s3://mciuploads/mongo-node-driver/${revision}/${version_id}//lcov-report/
 tasks:
   - name: test-serverless
     tags:
