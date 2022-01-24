@@ -34,6 +34,7 @@ describe('listDatabases() spec prose', function () {
       ({ name }) => name
     );
     ENTIRE_DB_LIST.sort();
+    expect(ENTIRE_DB_LIST).to.have.lengthOf.at.least(1);
   });
 
   afterEach(async function () {
