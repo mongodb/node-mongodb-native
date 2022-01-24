@@ -1732,6 +1732,7 @@ tasks:
       - name: '*'
         variant: '*'
         status: '*'
+        patch_optional: true
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true

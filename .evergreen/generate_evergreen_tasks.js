@@ -645,7 +645,7 @@ const coverageTask = {
     }
   ],
   depends_on: [
-    { name: '*', variant: '*', status: '*' }
+    { name: '*', variant: '*', status: '*', patch_optional: true }
   ]
 }
 
