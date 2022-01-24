@@ -240,7 +240,7 @@ await collectionT.find({ name: { $eq: /Spot/ } }).toArray();
 await collectionT.find({ type: { $eq: 'dog' } }).toArray();
 await collectionT.find({ age: { $gt: 12, $lt: 13 } }).toArray();
 await collectionT.find({ treats: { $eq: 'kibble' } }).toArray();
-await collectionT.find({ scores: { $gte: 23 } }).toArray();
+await collectionT.find({ age: { $gte: 23 } }).toArray();
 await collectionT.find({ createdAt: { $lte: new Date() } }).toArray();
 await collectionT.find({ friends: { $ne: spot } }).toArray();
 /// it should not accept wrong queries
