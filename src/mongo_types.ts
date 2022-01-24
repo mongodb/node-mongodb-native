@@ -66,7 +66,9 @@ export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
 export type Filter<TSchema> =
-  | Partial<TSchema>
+  | Partial<{
+      [Property in keyof TSchema]: Condition<TSchema[Property]>;
+    }>
   | ({
       [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
         PropertyType<WithId<TSchema>, Property>
