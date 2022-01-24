@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Filter for the MongoDB API Version required for the test
+ * Filter for authorization enabled or disabled on the server
  *
  * example:
  * metadata: {
@@ -10,9 +10,8 @@
  *    }
  * }
  */
-class ApiVersionFilter {
+class AuthFilter {
   constructor() {
-    // Get environmental variables that are known
     this.isAuthEnabled = process.env.AUTH === 'auth';
   }
 
@@ -21,15 +20,15 @@ class ApiVersionFilter {
     if (!test.metadata.requires) return true;
     const auth = test.metadata.requires.auth;
 
-    // setting to false skips this test when an apiVersion is required
     if (auth === 'enabled') {
       return this.isAuthEnabled;
     } else if (auth === 'disabled') {
       return !this.isAuthEnabled;
     }
 
+    // defaults to 'disabled' because it's gotta default to something.
     return false;
   }
 }
 
-module.exports = ApiVersionFilter;
+module.exports = AuthFilter;
