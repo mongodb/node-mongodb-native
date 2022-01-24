@@ -55,6 +55,286 @@ describe('Client Side Encryption Prose Tests', function () {
     'base64'
   );
 
+  context.only('when kmip is the kms provider', metadata, function () {
+    const autoEncryptionOptions = {
+      keyVaultNamespace,
+      kmsProviders: {
+        kmip: {
+          endpoint: 'localhost:5698'
+        }
+      },
+      tlsOptions: {
+        kmip: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+        }
+      }
+    };
+    let client;
+    let clientEncryption;
+    let clientEncryptionInvalid;
+
+    before(async function () {
+      client = this.configuration.newClient();
+      await client.connect();
+      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+      clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
+        ...autoEncryptionOptions,
+        bson: BSON
+      });
+      clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(client, {
+        ...autoEncryptionOptions,
+        bson: BSON,
+        kmsProviders: {
+          kmip: {
+            endpoint: 'invalid.localhost:5698'
+          }
+        }
+      });
+    });
+
+    after(async function () {
+      await client.close(true);
+    });
+
+    context.only('when encrypting with kmip', function () {
+      context('when not providing an endpoint in the master key', function () {
+        const masterKey = { keyId: '1' };
+        let dataKey;
+        let encrypted;
+        let decrypted;
+
+        /**
+         * 10.
+         *  - Create data key with kmip as provider and master key of { keyId: '1' }
+         *  - Use UUID to encrypt and decrypt to value.
+         *  - Create data key with invalid encrypter and expect failure.
+         */
+        before(async function () {
+          dataKey = await clientEncryption.createDataKey('kmip', { masterKey });
+          encrypted = await clientEncryption.encrypt('test', {
+            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+            keyId: dataKey
+          });
+          decrypted = await clientEncryption.decrypt(encrypted);
+        });
+
+        it('must create a data key', function () {
+          expect(dataKey).to.have.property('sub_type', 4);
+        });
+
+        it('properly encrypts and decrypts', function () {
+          expect(decrypted).to.equal('test');
+        });
+
+        it('fails with invalid provider host', async function () {
+          try {
+            await clientEncryptionInvalid.createDataKey('kmip', { masterKey });
+          } catch (e) {
+            expect(e.message).to.equal('KMS request failed');
+          }
+        });
+      });
+
+      context('when providing an endpoint in the master key', function () {
+        context('when the endpoint is valid', function () {
+          const masterKey = { keyId: '1', endpoint: 'localhost:5698' };
+          let dataKey;
+          let encrypted;
+          let decrypted;
+
+          /**
+           * 11.
+           *  - Create data key with kmip as provider and master key of
+           *      { keyId: 1, endpoint: 'localhost:5698 '}
+           *  - Use UUID to encrypt and decrypt to value.
+           */
+          before(async function () {
+            dataKey = await clientEncryption.createDataKey('kmip', { masterKey });
+            encrypted = await clientEncryption.encrypt('test', {
+              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+              keyId: dataKey
+            });
+            decrypted = await clientEncryption.decrypt(encrypted);
+          });
+
+          it('must create a data key', function () {
+            expect(dataKey).to.have.property('sub_type', 4);
+          });
+
+          it('properly encrypts and decrypts', function () {
+            expect(decrypted).to.equal('test');
+          });
+        });
+
+        context('when the endpoint is invalid', function () {
+          const masterKey = { keyId: '1', endpoint: 'doesnotexist.localhost:5698' };
+
+          /**
+           * 12.
+           *  - Create data key with kmip as provider and master key of
+           *      { keyId: 1, endpoint: 'doesnotexist.localhost:5698 '}
+           *  - Expect failure.
+           */
+          it('fails with invalid provider host', async function () {
+            try {
+              await clientEncryption.createDataKey('kmip', { masterKey });
+            } catch (e) {
+              expect(e.message).to.equal('KMS request failed');
+            }
+          });
+        });
+      });
+
+    });
+  });
+
+  /**
+   * - Create client encryption no tls
+   * - Create client encryption with tls
+   * - Create client encryption expired
+   * - Create client encryption invalid hostname
+   */
+  context('when passing through tls options', metadata, function () {
+    const tlsCaOptions = {
+      aws: {
+        tlsCAFile: process.env.KMIP_TLS_CA_FILE
+      },
+      azure: {
+        tlsCAFile: process.env.KMIP_TLS_CA_FILE
+      },
+      gcp: {
+        tlsCAFile: process.env.KMIP_TLS_CA_FILE
+      },
+      kmip: {
+        tlsCAFile: process.env.KMIP_TLS_CA_FILE
+      }
+    }
+    const clientNoTlsOptions = {
+      kmsProviders: getKmsProviders()
+    };
+    const clientWithTlsOptions = {
+      kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+      tlsOptions: {
+        aws: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+        },
+        azure: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+        },
+        gcp: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+        },
+        kmip: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+        }
+      }
+    };
+    const clientWithTlsExpiredOptions = {
+      kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
+      tlsOptions: tlsCaOptions
+    };
+    const clientWithInvalidHostnameOptions = {
+      kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
+      tlsOptions: tlsCaOptions
+    };
+
+    let clientNoTls;
+    let clientWithTls;
+    let clientWithTlsExpired;
+    let clientWithInvalidHostname;
+
+    beforeEach(async function () {
+      clientNoTls = this.configuration.newClient({}, {
+        autoEncryption: clientNoTlsOptions
+      });
+      clientWithTls = this.configuration.newClient({}, {
+        autoEncryption: clientWithTlsOptions
+      });
+      clientWithTlsExpired = this.configuration.newClient({}, {
+        autoEncryption: clientWithTlsExpiredOptions
+      });
+      clientWithInvalidHostname = this.configuration.newClient({}, {
+        autoEncryption: clientWithInvalidHostnameOptions
+      });
+    });
+
+    afterEach(async function () {
+      await clientNoTls.close(true);
+      await clientWithTls.close(true);
+      await clientWithTlsExpired.close(true);
+      await clientWithInvalidHostname.close(true);
+    });
+
+    // Case 1.
+    context('when using aws', function () {
+      it('must create data keys', function () {
+
+      });
+
+      it('fails with expired certificates', function () {
+
+      });
+
+      it('fails with invalid hostnames', function () {
+
+      });
+    });
+
+    // Case 2.
+    context('when using azure', function () {
+      it('must create data keys', function () {
+
+      });
+
+      it('fails with expired certificates', function () {
+
+      });
+
+      it('fails with invalid hostnames', function () {
+
+      });
+    });
+
+    // Case 3.
+    context('when using gcp', function () {
+      it('must create data keys', function () {
+
+      });
+
+      it('fails with expired certificates', function () {
+
+      });
+
+      it('fails with invalid hostnames', function () {
+
+      });
+    });
+
+    // Case 4.
+    context('when using kmip', function () {
+      it('fails without endpoint', function () {
+
+      });
+
+      it('must create data keys', function () {
+
+      });
+
+      it('fails with expired certificates', function () {
+
+      });
+
+      it('fails with invalid hostnames', function () {
+
+      });
+    });
+  });
+
   describe('Data key and double encryption', function () {
     // Data key and double encryption
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,286 +495,6 @@ describe('Client Side Encryption Prose Tests', function () {
               expect(encrypted).to.deep.equal(localEncrypted);
             });
         });
-    });
-
-    context.only('when kmip is the kms provider', metadata, function () {
-      const autoEncryptionOptions = {
-        keyVaultNamespace,
-        kmsProviders: {
-          kmip: {
-            endpoint: 'localhost:5698'
-          }
-        },
-        tlsOptions: {
-          kmip: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          }
-        }
-      };
-      let client;
-      let clientEncryption;
-      let clientEncryptionInvalid;
-
-      before(async function () {
-        client = this.configuration.newClient();
-        await client.connect();
-        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-        clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
-          ...autoEncryptionOptions,
-          bson: BSON
-        });
-        clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(client, {
-          ...autoEncryptionOptions,
-          bson: BSON,
-          kmsProviders: {
-            kmip: {
-              endpoint: 'invalid.localhost:5698'
-            }
-          }
-        });
-      });
-
-      after(async function () {
-        await client.close(true);
-      });
-
-      context('when encrypting with kmip', function () {
-        context('when not providing an endpoint in the master key', function () {
-          const masterKey = { keyId: '1' };
-          let dataKey;
-          let encrypted;
-          let decrypted;
-
-          /**
-           * 10.
-           *  - Create data key with kmip as provider and master key of { keyId: '1' }
-           *  - Use UUID to encrypt and decrypt to value.
-           *  - Create data key with invalid encrypter and expect failure.
-           */
-          before(async function () {
-            dataKey = await clientEncryption.createDataKey('kmip', { masterKey });
-            encrypted = await clientEncryption.encrypt('test', {
-              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
-              keyId: dataKey
-            });
-            decrypted = await clientEncryption.decrypt(encrypted);
-          });
-
-          it('must create a data key', function () {
-            expect(dataKey).to.have.property('sub_type', 4);
-          });
-
-          it('properly encrypts and decrypts', function () {
-            expect(decrypted).to.equal('test');
-          });
-
-          it.only('fails with invalid provider host', async function () {
-            try {
-              await clientEncryptionInvalid.createDataKey('kmip', { masterKey });
-            } catch (e) {
-              expect(e.message).to.equal('KMS request failed');
-            }
-          });
-        });
-
-        context('when providing an endpoint in the master key', function () {
-          context('when the endpoint is valid', function () {
-            const masterKey = { keyId: '1', endpoint: 'localhost:5698' };
-            let dataKey;
-            let encrypted;
-            let decrypted;
-
-            /**
-             * 11.
-             *  - Create data key with kmip as provider and master key of
-             *      { keyId: 1, endpoint: 'localhost:5698 '}
-             *  - Use UUID to encrypt and decrypt to value.
-             */
-            before(async function () {
-              dataKey = await clientEncryption.createDataKey('kmip', { masterKey });
-              encrypted = await clientEncryption.encrypt('test', {
-                algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
-                keyId: dataKey
-              });
-              decrypted = await clientEncryption.decrypt(encrypted);
-            });
-
-            it('must create a data key', function () {
-              expect(dataKey).to.have.property('sub_type', 4);
-            });
-
-            it('properly encrypts and decrypts', function () {
-              expect(decrypted).to.equal('test');
-            });
-          });
-
-          context('when the endpoint is invalid', function () {
-            const masterKey = { keyId: '1', endpoint: 'doesnotexist.localhost:5698' };
-
-            /**
-             * 12.
-             *  - Create data key with kmip as provider and master key of
-             *      { keyId: 1, endpoint: 'doesnotexist.localhost:5698 '}
-             *  - Expect failure.
-             */
-            it('fails with invalid provider host', async function () {
-              try {
-                await clientEncryption.createDataKey('kmip', { masterKey });
-              } catch (e) {
-                expect(e.message).to.equal('KMS request failed');
-              }
-            });
-          });
-        });
-
-      });
-    });
-
-    /**
-     * - Create client encryption no tls
-     * - Create client encryption with tls
-     * - Create client encryption expired
-     * - Create client encryption invalid hostname
-     */
-    context('when passing through tls options', metadata, function () {
-      const tlsCaOptions = {
-        aws: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
-        },
-        azure: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
-        },
-        gcp: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
-        },
-        kmip: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
-        }
-      }
-      const clientNoTlsOptions = {
-        kmsProviders: getKmsProviders()
-      };
-      const clientWithTlsOptions = {
-        kmsProviders: getKmsProviders(),
-        tlsOptions: {
-          aws: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          },
-          azure: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          },
-          gcp: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          },
-          kmip: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          }
-        }
-      };
-      const clientWithTlsExpiredOptions = {
-        kmsProviders: getKmsProviders('127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
-        tlsOptions: tlsCaOptions
-      };
-      const clientWithInvalidHostnameOptions = {
-        kmsProviders: getKmsProviders('127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
-        tlsOptions: tlsCaOptions
-      };
-
-      let clientNoTls;
-      let clientWithTls;
-      let clientWithTlsExpired;
-      let clientWithInvalidHostname;
-
-      beforeEach(async function () {
-        clientNoTls = this.configuration.newClient({}, {
-          autoEncryption: clientNoTlsOptions
-        });
-        clientWithTls = this.configuration.newClient({}, {
-          autoEncryption: clientWithTlsOptions
-        });
-        clientWithTlsExpired = this.configuration.newClient({}, {
-          autoEncryption: clientWithTlsExpiredOptions
-        });
-        clientWithInvalidHostname = this.configuration.newClient({}, {
-          autoEncryption: clientWithInvalidHostnameOptions
-        });
-      });
-
-      afterEach(async function () {
-        await clientNoTls.close(true);
-        await clientWithTls.close(true);
-        await clientWithTlsExpired.close(true);
-        await clientWithInvalidHostname.close(true);
-      });
-
-      // Case 1.
-      context('when using aws', function () {
-        it('must create data keys', function () {
-
-        });
-
-        it('fails with expired certificates', function () {
-
-        });
-
-        it('fails with invalid hostnames', function () {
-
-        });
-      });
-
-      // Case 2.
-      context('when using azure', function () {
-        it('must create data keys', function () {
-
-        });
-
-        it('fails with expired certificates', function () {
-
-        });
-
-        it('fails with invalid hostnames', function () {
-
-        });
-      });
-
-      // Case 3.
-      context('when using gcp', function () {
-        it('must create data keys', function () {
-
-        });
-
-        it('fails with expired certificates', function () {
-
-        });
-
-        it('fails with invalid hostnames', function () {
-
-        });
-      });
-
-      // Case 4.
-      context('when using kmip', function () {
-        it('fails without endpoint', function () {
-
-        });
-
-        it('must create data keys', function () {
-
-        });
-
-        it('fails with expired certificates', function () {
-
-        });
-
-        it('fails with invalid hostnames', function () {
-
-        });
-      });
     });
 
     it('should work for aws KMS provider', metadata, function () {
