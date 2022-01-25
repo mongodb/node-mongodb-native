@@ -724,6 +724,8 @@ functions:
           export AWS_ACCESS_KEY_ID=${aws_key}
           export AWS_SECRET_ACCESS_KEY=${aws_secret}
           # Download all the task coverage files.
+          # TODO NODE-3897 - finish this function.  the code below this point is untested because
+          #   aws s3 cp fails due to permissions errors
           aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ coverage/
 
           npx nyc merge coverage/ merged-coverage/coverage.json
@@ -1709,15 +1711,6 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
-  - name: download-and-merge-coverage
-    tags: []
-    commands:
-      - func: download and merge coverage
-    depends_on:
-      - name: '*'
-        variant: '*'
-        status: '*'
-        patch_optional: true
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true

@@ -670,7 +670,7 @@ BUILD_VARIANTS.push({
 });
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS).concat([coverageTask]);
+fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.dump(fileData, { lineWidth: 120 }), 'utf8');
