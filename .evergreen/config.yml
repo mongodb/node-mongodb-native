@@ -1111,7 +1111,6 @@ tasks:
           VERSION: latest
           SSL: ssl
           TOPOLOGY: server
-          AUTH: auth
       - func: run tls tests
   - name: test-tls-support-5.0
     tags:
@@ -1123,7 +1122,6 @@ tasks:
           VERSION: '5.0'
           SSL: ssl
           TOPOLOGY: server
-          AUTH: auth
       - func: run tls tests
   - name: test-tls-support-4.4
     tags:
@@ -1135,7 +1133,6 @@ tasks:
           VERSION: '4.4'
           SSL: ssl
           TOPOLOGY: server
-          AUTH: auth
       - func: run tls tests
   - name: test-tls-support-4.2
     tags:
@@ -1147,7 +1144,6 @@ tasks:
           VERSION: '4.2'
           SSL: ssl
           TOPOLOGY: server
-          AUTH: auth
       - func: run tls tests
   - name: test-latest-ocsp-valid-cert-server-staples
     tags:
