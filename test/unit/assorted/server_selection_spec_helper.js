@@ -82,7 +82,7 @@ function readPreferenceFromDefinition(definition) {
   return new ReadPreference(mode, tags, options);
 }
 
-function executeServerSelectionTest(testDefinition, options, testDone) {
+function executeServerSelectionTest(testDefinition, testDone) {
   const topologyDescription = testDefinition.topology_description;
   const seedData = topologyDescription.servers.reduce(
     (result, seed) => {
@@ -140,15 +140,9 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
     // expectations
     let expectedServers;
     if (!testDefinition.error) {
-      if (options.checkLatencyWindow) {
-        expectedServers = testDefinition.in_latency_window.map(s =>
-          serverDescriptionFromDefinition(s)
-        );
-      } else {
-        expectedServers = testDefinition.suitable_servers.map(s =>
-          serverDescriptionFromDefinition(s)
-        );
-      }
+      expectedServers = testDefinition.in_latency_window.map(s =>
+        serverDescriptionFromDefinition(s)
+      );
     }
 
     // default to serverSelectionTimeoutMS of `100` for unit tests
