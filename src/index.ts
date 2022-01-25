@@ -284,6 +284,7 @@ export type {
   InferIdType,
   IntegerType,
   IsAny,
+  IsInUnion,
   Join,
   KeysOfAType,
   KeysOfOtherType,
@@ -306,6 +307,7 @@ export type {
   RootFilterOperators,
   SchemaMember,
   SetFields,
+  TypeEquals,
   UpdateFilter,
   WithId,
   WithoutId

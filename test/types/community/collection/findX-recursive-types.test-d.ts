@@ -87,6 +87,7 @@ recursiveOptionalCollection.find({
  * recursive union types are supported
  */
 interface Node {
+  value?: string;
   next: Node | null;
 }
 
@@ -103,10 +104,12 @@ expectError(
 );
 
 nodeCollection.find({
-  'next.next': 'asdf'
+  'next.value': 'asdf'
 });
 
-nodeCollection.find({ 'next.next.next': 'yoohoo' });
+// type safety is lost through recursive relations; callers will
+// need to annotate queries with `ts-expect-error` comments
+expectError(nodeCollection.find({ 'next.next.value': 'yoohoo' }));
 
 /**
  * Recursive schemas with arrays are also supported
@@ -149,9 +152,11 @@ expectError(
 
 // type safety breaks after the first
 //   level of nested types
-recursiveSchemaWithArray.findOne({
-  'branches.0.directories.0.files.0.id': 'hello'
-});
+expectError(
+  recursiveSchemaWithArray.findOne({
+    'branches.0.directories.0.files.0.id': 'hello'
+  })
+);
 
 recursiveSchemaWithArray.findOne({
   branches: [

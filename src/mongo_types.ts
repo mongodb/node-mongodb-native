@@ -482,6 +482,24 @@ export type PropertyType<Type, Property extends string> = string extends Propert
   : unknown;
 
 /**
+ * Check if two types are exactly equal
+ *
+ * From https://github.com/microsoft/TypeScript/issues/27024#issuecomment-421529650,
+ * credit to https://github.com/mattmccutchen.
+ * @public
+ */
+// prettier-ignore
+export type TypeEquals<X, Y> =
+    (<T>() => T extends X ? 1 : 2) extends
+    (<T>() => T extends Y ? 1 : 2) ? true : false
+
+/**
+ * Check if A is a union type that includes B
+ * @public
+ */
+export type IsInUnion<A, B> = TypeEquals<Extract<A, B>, B>;
+
+/**
  * @public
  * returns tuple of strings (keys to be joined on '.') that represent every path into a schema
  * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
@@ -506,9 +524,7 @@ export type NestedPaths<Type> = Type extends
   ? {
       [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
         ? [Key]
-        : // for a recursive union type, the child will never extend the parent type.
-        // but the parent will still extend the child
-        Type extends Type[Key]
+        : IsInUnion<Type[Key], Type> extends true
         ? [Key]
         : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
         ? Type extends ArrayType // is the type of the parent the same as the type of the array?
