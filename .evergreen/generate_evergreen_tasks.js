@@ -475,7 +475,6 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
         func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: VERSION,
-          AUTH: 'auth',
           ORCHESTRATION_FILE: 'auth-aws.json',
           TOPOLOGY: 'server'
         }
