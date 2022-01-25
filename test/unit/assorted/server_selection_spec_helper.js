@@ -7,10 +7,7 @@ const { MongoServerSelectionError } = require('../../../src/error');
 const ServerSelectors = require('../../../src/sdam/server_selection');
 
 const sinon = require('sinon');
-const chai = require('chai');
-
-const expect = chai.expect;
-chai.use(require('chai-subset'));
+const { expect } = require('chai');
 
 function serverDescriptionFromDefinition(definition, hosts) {
   hosts = hosts || [];
@@ -177,7 +174,20 @@ function executeServerSelectionTest(testDefinition, testDone) {
           return done(new Error('No suitable servers found!'));
         }
 
-        expect(selectedServerDescription).to.include.containSubset(expectedServerArray[0]);
+        if (expectedServerArray.length > 1) {
+          return done(new Error('This test does not support a multiple expected servers'));
+        }
+
+        for (const [prop, value] of Object.entries(expectedServerArray[0])) {
+          if (prop === 'hosts') {
+            // we dynamically modify this prop during sever selection
+            continue;
+          }
+          expect(selectedServerDescription[prop]).to.deep.equal(
+            value,
+            `Mismatched selected server "${prop}"`
+          );
+        }
         done();
       } catch (e) {
         done(e);
