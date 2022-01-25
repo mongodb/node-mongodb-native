@@ -7,12 +7,9 @@ const { EventCollector, getSymbolFrom } = require('../../tools/utils');
 const { expect } = require('chai');
 
 const sinon = require('sinon');
-const { ObjectId, Timestamp, Long, ReadPreference, MongoNetworkError } = require('../../../src');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+const { Long, ReadPreference, MongoNetworkError } = require('../../../src');
+
 const crypto = require('crypto');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { isHello } = require('../../../src/utils');
 
 function withChangeStream(dbName, collectionName, callback) {
