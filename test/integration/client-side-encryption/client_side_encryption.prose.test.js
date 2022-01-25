@@ -17,7 +17,7 @@ const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => 
   };
 
   if (result.azure && azureEndpoint) {
-    result.azure.endpoint = azureEndpoint;
+    result.azure.identityPlatformEndpoint = azureEndpoint;
   }
 
   if (result.gcp && gcpEndpoint) {
@@ -55,7 +55,7 @@ describe('Client Side Encryption Prose Tests', function () {
     'base64'
   );
 
-  context.only('when kmip is the kms provider', metadata, function () {
+  context('when kmip is the kms provider', metadata, function () {
     const autoEncryptionOptions = {
       keyVaultNamespace,
       kmsProviders: {
@@ -97,7 +97,7 @@ describe('Client Side Encryption Prose Tests', function () {
       await client.close(true);
     });
 
-    context.only('when encrypting with kmip', function () {
+    context('when encrypting with kmip', function () {
       context('when not providing an endpoint in the master key', function () {
         const masterKey = { keyId: '1' };
         let dataKey;
@@ -185,7 +185,6 @@ describe('Client Side Encryption Prose Tests', function () {
           });
         });
       });
-
     });
   });
 
@@ -209,11 +208,13 @@ describe('Client Side Encryption Prose Tests', function () {
       kmip: {
         tlsCAFile: process.env.KMIP_TLS_CA_FILE
       }
-    }
+    };
     const clientNoTlsOptions = {
+      keyVaultNamespace,
       kmsProviders: getKmsProviders()
     };
     const clientWithTlsOptions = {
+      keyVaultNamespace,
       kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
       tlsOptions: {
         aws: {
@@ -235,10 +236,12 @@ describe('Client Side Encryption Prose Tests', function () {
       }
     };
     const clientWithTlsExpiredOptions = {
+      keyVaultNamespace,
       kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
       tlsOptions: tlsCaOptions
     };
     const clientWithInvalidHostnameOptions = {
+      keyVaultNamespace,
       kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
       tlsOptions: tlsCaOptions
     };
@@ -248,22 +251,20 @@ describe('Client Side Encryption Prose Tests', function () {
     let clientWithTlsExpired;
     let clientWithInvalidHostname;
 
-    beforeEach(async function () {
-      clientNoTls = this.configuration.newClient({}, {
-        autoEncryption: clientNoTlsOptions
-      });
-      clientWithTls = this.configuration.newClient({}, {
-        autoEncryption: clientWithTlsOptions
-      });
-      clientWithTlsExpired = this.configuration.newClient({}, {
-        autoEncryption: clientWithTlsExpiredOptions
-      });
-      clientWithInvalidHostname = this.configuration.newClient({}, {
-        autoEncryption: clientWithInvalidHostnameOptions
-      });
+    before(async function () {
+      clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
+      clientWithTls = this.configuration.newClient({}, { autoEncryption: clientWithTlsOptions });
+      clientWithTlsExpired = this.configuration.newClient(
+        {},
+        { autoEncryption: clientWithTlsExpiredOptions }
+      );
+      clientWithInvalidHostname = this.configuration.newClient(
+        {},
+        { autoEncryption: clientWithInvalidHostnameOptions }
+      );
     });
 
-    afterEach(async function () {
+    after(async function () {
       await clientNoTls.close(true);
       await clientWithTls.close(true);
       await clientWithTlsExpired.close(true);
@@ -272,65 +273,247 @@ describe('Client Side Encryption Prose Tests', function () {
 
     // Case 1.
     context('when using aws', function () {
-      it('must create data keys', function () {
+      const masterKey = {
+        region: 'us-east-1',
+        key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+        endpoint: '127.0.0.1:8002'
+      };
+      let clientEncryptionNoTls;
+      let clientEncryptionWithTlsExpired;
+      let clientEncryptionWithInvalidHostname;
 
+      before(async function () {
+        await clientNoTls.connect();
+        await clientWithTlsExpired.connect();
+        await clientWithInvalidHostname.connect();
+        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+        clientEncryptionNoTls = new mongodbClientEncryption.ClientEncryption(clientNoTls, {
+          ...clientNoTlsOptions,
+          bson: BSON
+        });
+        clientEncryptionWithTlsExpired = new mongodbClientEncryption.ClientEncryption(
+          clientWithTlsExpired,
+          { ...clientWithTlsExpiredOptions, bson: BSON }
+        );
+        clientEncryptionWithInvalidHostname = new mongodbClientEncryption.ClientEncryption(
+          clientWithInvalidHostname,
+          { ...clientWithInvalidHostnameOptions, bson: BSON }
+        );
       });
 
-      it('fails with expired certificates', function () {
-
+      it('fails with no tls', async function () {
+        try {
+          await clientEncryptionNoTls.createDataKey('aws', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('self signed certificate');
+        }
       });
 
-      it('fails with invalid hostnames', function () {
+      it('fails with expired certificates', async function () {
+        try {
+          await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('SSL alert');
+        }
+      });
 
+      it('fails with invalid hostnames', async function () {
+        try {
+          await clientEncryptionWithInvalidHostname.createDataKey('aws', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('SSL alert');
+        }
       });
     });
 
     // Case 2.
     context('when using azure', function () {
-      it('must create data keys', function () {
+      const masterKey = {
+        keyVaultEndpoint: 'doesnotexist.local',
+        keyName: 'foo'
+      };
 
+      let clientEncryptionNoTls;
+      let clientEncryptionWithTls;
+      let clientEncryptionWithTlsExpired;
+      let clientEncryptionWithInvalidHostname;
+
+      before(async function () {
+        await clientNoTls.connect();
+        await clientWithTls.connect();
+        await clientWithTlsExpired.connect();
+        await clientWithInvalidHostname.connect();
+        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+        clientEncryptionNoTls = new mongodbClientEncryption.ClientEncryption(clientNoTls, {
+          ...clientNoTlsOptions,
+          bson: BSON
+        });
+        clientEncryptionWithTls = new mongodbClientEncryption.ClientEncryption(clientWithTls, {
+          ...clientWithTlsOptions,
+          bson: BSON
+        });
+        clientEncryptionWithTlsExpired = new mongodbClientEncryption.ClientEncryption(
+          clientWithTlsExpired,
+          { ...clientWithTlsExpiredOptions, bson: BSON }
+        );
+        clientEncryptionWithInvalidHostname = new mongodbClientEncryption.ClientEncryption(
+          clientWithInvalidHostname,
+          { ...clientWithInvalidHostnameOptions, bson: BSON }
+        );
       });
 
-      it('fails with expired certificates', function () {
-
+      it('fails with no tls', async function () {
+        try {
+          await clientEncryptionNoTls.createDataKey('azure', { masterKey });
+        } catch (e) {
+          expect(e.message).to.include('HTTP status=400');
+        }
       });
 
-      it('fails with invalid hostnames', function () {
+      it('fails with invalid host', async function () {
+        try {
+          await clientEncryptionWithTls.createDataKey('azure', { masterKey });
+        } catch (e) {
+          expect(e.message).to.include('HTTP status=404');
+        }
+      });
 
+      it('fails with expired certificates', async function () {
+        try {
+          await clientEncryptionWithTlsExpired.createDataKey('azure', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('certificate has expired');
+        }
+      });
+
+      it('fails with invalid hostnames', async function () {
+        try {
+          await clientEncryptionWithInvalidHostname.createDataKey('azure', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('does not match certificate');
+        }
       });
     });
 
     // Case 3.
     context('when using gcp', function () {
-      it('must create data keys', function () {
+      const masterKey = {
+        projectId: 'foo',
+        location: 'bar',
+        keyRing: 'baz',
+        keyName: 'foo'
+      };
 
+      let clientEncryptionNoTls;
+      let clientEncryptionWithTls;
+      let clientEncryptionWithTlsExpired;
+      let clientEncryptionWithInvalidHostname;
+
+      before(async function () {
+        await clientNoTls.connect();
+        await clientWithTlsExpired.connect();
+        await clientWithInvalidHostname.connect();
+        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+        clientEncryptionNoTls = new mongodbClientEncryption.ClientEncryption(clientNoTls, {
+          ...clientNoTlsOptions,
+          bson: BSON
+        });
+        clientEncryptionWithTls = new mongodbClientEncryption.ClientEncryption(clientWithTls, {
+          ...clientWithTlsOptions,
+          bson: BSON
+        });
+        clientEncryptionWithTlsExpired = new mongodbClientEncryption.ClientEncryption(
+          clientWithTlsExpired,
+          { ...clientWithTlsExpiredOptions, bson: BSON }
+        );
+        clientEncryptionWithInvalidHostname = new mongodbClientEncryption.ClientEncryption(
+          clientWithInvalidHostname,
+          { ...clientWithInvalidHostnameOptions, bson: BSON }
+        );
       });
 
-      it('fails with expired certificates', function () {
-
+      it('fails with no tls', async function () {
+        try {
+          await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
+        } catch (e) {
+          expect(e.message).to.include('HTTP status=403');
+        }
       });
 
-      it('fails with invalid hostnames', function () {
+      it('fails with invalid host', async function () {
+        try {
+          await clientEncryptionWithTls.createDataKey('gcp', { masterKey });
+        } catch (e) {
+          expect(e.message).to.include('HTTP status=404');
+        }
+      });
 
+      it('fails with expired certificates', async function () {
+        try {
+          await clientEncryptionWithTlsExpired.createDataKey('gcp', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('certificate has expired');
+        }
+      });
+
+      it('fails with invalid hostnames', async function () {
+        try {
+          await clientEncryptionWithInvalidHostname.createDataKey('gcp', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('does not match certificate');
+        }
       });
     });
 
     // Case 4.
     context('when using kmip', function () {
-      it('fails without endpoint', function () {
+      const masterKey = {};
+      let clientEncryptionNoTls;
+      let clientEncryptionWithTlsExpired;
+      let clientEncryptionWithInvalidHostname;
 
+      before(async function () {
+        await clientNoTls.connect();
+        await clientWithTls.connect();
+        await clientWithTlsExpired.connect();
+        await clientWithInvalidHostname.connect();
+        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+        clientEncryptionNoTls = new mongodbClientEncryption.ClientEncryption(clientNoTls, {
+          ...clientNoTlsOptions,
+          bson: BSON
+        });
+        clientEncryptionWithTlsExpired = new mongodbClientEncryption.ClientEncryption(
+          clientWithTlsExpired,
+          { ...clientWithTlsExpiredOptions, bson: BSON }
+        );
+        clientEncryptionWithInvalidHostname = new mongodbClientEncryption.ClientEncryption(
+          clientWithInvalidHostname,
+          { ...clientWithInvalidHostnameOptions, bson: BSON }
+        );
       });
 
-      it('must create data keys', function () {
-
+      it('fails with no tls', async function () {
+        try {
+          await clientEncryptionNoTls.createDataKey('kmip', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('before secure TLS connection');
+        }
       });
 
-      it('fails with expired certificates', function () {
-
+      it('fails with expired certificates', async function () {
+        try {
+          await clientEncryptionWithTlsExpired.createDataKey('kmip', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('certificate has expired');
+        }
       });
 
-      it('fails with invalid hostnames', function () {
-
+      it('fails with invalid hostnames', async function () {
+        try {
+          await clientEncryptionWithInvalidHostname.createDataKey('kmip', { masterKey });
+        } catch (e) {
+          expect(e.originalError.message).to.include('does not match certificate');
+        }
       });
     });
   });
