@@ -288,6 +288,9 @@ expectNotType<Filter<PetModel>>({ name: { $or: ['Spot', 'Bubbles'] } });
 /// it should not accept single objects for __$and, $or, $nor operator__ query
 expectNotType<Filter<PetModel>>({ $and: { name: 'Spot' } });
 
+/// it allows using unknown root operators with any value
+expectAssignable<Filter<PetModel>>({ $fakeOp: 123 });
+
 /**
  * test 'element' query operators
  */

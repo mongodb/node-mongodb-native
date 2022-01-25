@@ -91,8 +91,23 @@ export type AlternativeType<T> = T extends ReadonlyArray<infer U>
 /** @public */
 export type RegExpOrString<T> = T extends string ? BSONRegExp | RegExp | T : T;
 
+/**
+ * This is a type that allows any `$` prefixed keys and makes no assumptions
+ * about their value types. This stems from a design decision that newly added
+ * filter operators should be accepted without needing to upgrade this package.
+ *
+ * This has the unfortunate side effect of preventing type errors on unknown
+ * operator keys, so we should prefer not to extend this type whenever possible.
+ *
+ * @see https://github.com/mongodb/node-mongodb-native/pull/3115#issuecomment-1021303302
+ * @public
+ */
+export type OpenOperatorQuery = {
+  [key: `$${string}`]: unknown;
+};
+
 /** @public */
-export interface RootFilterOperators<TSchema> {
+export interface RootFilterOperators<TSchema> extends OpenOperatorQuery {
   $and?: Filter<TSchema>[];
   $nor?: Filter<TSchema>[];
   $or?: Filter<TSchema>[];
