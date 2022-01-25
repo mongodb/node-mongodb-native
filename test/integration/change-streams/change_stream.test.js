@@ -1078,150 +1078,6 @@ describe('Change Streams', function () {
     }
   });
 
-  it.skip('should resume piping of Change Streams when a resumable error is encountered', {
-    // TODO(2704)
-    metadata: {
-      requires: {
-        os: '!win32', // (fs.watch isn't reliable on win32)
-        generators: true,
-        topology: 'single',
-        mongodb: '>=3.6'
-      }
-    },
-    test: function (done) {
-      const filename = path.join(os.tmpdir(), '_nodemongodbnative_resumepipe.txt');
-      this.defer(() => fs.unlinkSync(filename));
-      const configuration = this.configuration;
-
-      // Default message fields
-      const defaultFields = {
-        setName: 'rs',
-        setVersion: 1,
-        electionId: new ObjectId(0),
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
-        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
-
-      mock.createServer(32000, 'localhost').then(primaryServer => {
-        this.defer(() => mock.cleanup());
-        let counter = 0;
-        primaryServer.setMessageHandler(request => {
-          const doc = request.document;
-
-          // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
-          if (isHello(doc)) {
-            request.reply(
-              Object.assign(
-                {
-                  [LEGACY_HELLO_COMMAND]: true,
-                  secondary: false,
-                  me: primaryServer.uri(),
-                  primary: primaryServer.uri(),
-                  tags: { loc: 'ny' }
-                },
-                defaultFields
-              )
-            );
-          } else if (doc.getMore) {
-            var changeDoc = {
-              cursor: {
-                id: new Long(1407, 1407),
-                nextBatch: [
-                  {
-                    _id: {
-                      ts: new Timestamp(4, 1501511802),
-                      ns: 'integration_tests.docsDataEvent',
-                      _id: new ObjectId('597f407a8fd4abb616feca93')
-                    },
-                    operationType: 'insert',
-                    ns: {
-                      db: 'integration_tests',
-                      coll: 'docsDataEvent'
-                    },
-                    fullDocument: {
-                      _id: new ObjectId('597f407a8fd4abb616feca93'),
-                      a: 1,
-                      counter: counter++
-                    }
-                  }
-                ]
-              },
-              ok: 1
-            };
-            request.reply(changeDoc, {
-              cursorId: new Long(1407, 1407)
-            });
-          } else if (doc.aggregate) {
-            changeDoc = {
-              _id: {
-                ts: new Timestamp(4, 1501511802),
-                ns: 'integration_tests.docsDataEvent',
-                _id: new ObjectId('597f407a8fd4abb616feca93')
-              },
-              operationType: 'insert',
-              ns: {
-                db: 'integration_tests',
-                coll: 'docsDataEvent'
-              },
-              fullDocument: {
-                _id: new ObjectId('597f407a8fd4abb616feca93'),
-                a: 1,
-                counter: counter++
-              }
-            };
-
-            request.reply({
-              ok: 1,
-              cursor: {
-                id: new Long(1407, 1407),
-                firstBatch: [changeDoc]
-              }
-            });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        const client = configuration.newClient(`mongodb://${primaryServer.uri()}/`, {
-          socketTimeoutMS: 500
-        });
-
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
-
-          const database = client.db('integration_tests5');
-          const collection = database.collection('MongoNetworkErrorTestPromises');
-          const changeStream = collection.watch(pipeline);
-
-          const outStream = fs.createWriteStream(filename, { flags: 'w' });
-          this.defer(() => outStream.close());
-
-          changeStream
-            .stream({ transform: change => JSON.stringify(change) + '\n' })
-            .pipe(outStream);
-          this.defer(() => changeStream.close());
-          // Listen for changes to the file
-          const watcher = fs.watch(filename, eventType => {
-            this.defer(() => watcher.close());
-            expect(eventType).to.equal('change');
-
-            const fileContents = fs.readFileSync(filename, 'utf8');
-            const parsedFileContents = JSON.parse(fileContents.split(/\n/)[0]);
-            expect(parsedFileContents).to.have.nested.property('fullDocument.a', 1);
-            done();
-          });
-        });
-      });
-    }
-  });
-
   it('should support piping of Change Streams through multiple pipes', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: function (done) {
@@ -1707,7 +1563,7 @@ describe('Change Stream Resume Error Tests', function () {
     })
   });
 
-  it('should continue piping changes after a resumable error', {
+  it.skip('should continue piping changes after a resumable error', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
     test: withChangeStream((collection, changeStream, done) => {
       const d = new PassThrough({ objectMode: true });
@@ -1734,7 +1590,7 @@ describe('Change Stream Resume Error Tests', function () {
         });
       });
     })
-  });
+  }).skipReason = 'TODO(NODE-3884): Fix when implementing prose case #3';
 });
 context('NODE-2626 - handle null changes without error', function () {
   let mockServer;
