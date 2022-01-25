@@ -6,6 +6,7 @@ const mock = require('../../tools/mongodb-mock/index');
 
 const sinon = require('sinon');
 const { ObjectId, Timestamp, Long, MongoNetworkError } = require('../../../src');
+const { isHello } = require('../../../src/utils');
 
 /**
  * Triggers a fake resumable error on a change stream
@@ -61,6 +62,13 @@ function waitForStarted(changeStream, callback) {
     callback();
   });
 }
+
+// Define the pipeline processing changes
+const pipeline = [
+  { $addFields: { addedField: 'This is a field added using $addFields' } },
+  { $project: { documentKey: false } },
+  { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
+];
 
 describe('Change Stream prose tests', function () {
   before(async function () {
