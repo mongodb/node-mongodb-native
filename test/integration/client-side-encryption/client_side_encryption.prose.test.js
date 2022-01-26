@@ -194,7 +194,7 @@ describe('Client Side Encryption Prose Tests', function () {
    * - Create client encryption expired
    * - Create client encryption invalid hostname
    */
-  context('when passing through tls options', metadata, function () {
+  context.only('when passing through tls options', metadata, function () {
     const tlsCaOptions = {
       aws: {
         tlsCAFile: process.env.KMIP_TLS_CA_FILE
@@ -211,7 +211,8 @@ describe('Client Side Encryption Prose Tests', function () {
     };
     const clientNoTlsOptions = {
       keyVaultNamespace,
-      kmsProviders: getKmsProviders()
+      kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+      tlsOptions: tlsCaOptions
     };
     const clientWithTlsOptions = {
       keyVaultNamespace,
@@ -254,6 +255,13 @@ describe('Client Side Encryption Prose Tests', function () {
     let clientEncryptionWithTls;
     let clientEncryptionWithTlsExpired;
     let clientEncryptionWithInvalidHostname;
+
+    before(function () {
+      console.log('clientNoTlsOptions', clientNoTlsOptions);
+      console.log('clientWithTlsOptions', clientWithTlsOptions);
+      console.log('clientWithTlsExpiredOptions', clientWithTlsExpiredOptions);
+      console.log('clientWithInvalidHostnameOptions', clientWithInvalidHostnameOptions);
+    });
 
     beforeEach(async function () {
       clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
@@ -310,7 +318,7 @@ describe('Client Side Encryption Prose Tests', function () {
         try {
           await clientEncryptionNoTls.createDataKey('aws', { masterKey });
         } catch (e) {
-          expect(e.originalError.message).to.include('self signed certificate');
+          expect(e.originalError.message).to.include('certificate required');
         }
       });
 
@@ -326,7 +334,7 @@ describe('Client Side Encryption Prose Tests', function () {
         try {
           await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKeyExpired });
         } catch (e) {
-          expect(e.message).to.include('expected UTF-8 key');
+          expect(e.originalError.message).to.include('expected UTF-8 key');
         }
       });
 
@@ -334,7 +342,7 @@ describe('Client Side Encryption Prose Tests', function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('aws', { masterKeyInvalidHostname });
         } catch (e) {
-          expect(e.message).to.include('expected UTF-8 key');
+          expect(e.originalError.message).to.include('expected UTF-8 key');
         }
       });
     });
@@ -350,7 +358,7 @@ describe('Client Side Encryption Prose Tests', function () {
         try {
           await clientEncryptionNoTls.createDataKey('azure', { masterKey });
         } catch (e) {
-          expect(e.message).to.include('HTTP status=400');
+          expect(e.originalError.message).to.include('certificate required');
         }
       });
 
@@ -392,7 +400,7 @@ describe('Client Side Encryption Prose Tests', function () {
         try {
           await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
         } catch (e) {
-          expect(e.message).to.include('HTTP status=403');
+          expect(e.originalError.message).to.include('certificate required');
         }
       });
 
@@ -437,7 +445,7 @@ describe('Client Side Encryption Prose Tests', function () {
       // Client is being connected in the beforeEach block above, and has no error on
       // connect. So why does it say this only in this particular case? We prove this
       // works in previous tests for kmip above.
-      it.skip('passes with tls', async function () {
+      it('passes with tls', async function () {
         const dataKey = await clientEncryptionWithTls.createDataKey('kmip', { masterKey });
         expect(dataKey).to.have.property('sub_type', 4);
       });
