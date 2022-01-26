@@ -394,6 +394,16 @@ export function parseOptions(
     }
 
     mongoOptions.credentials.validate();
+
+    // Check if the only auth related option provided was authSource, if so we can remove credentials
+    if (
+      mongoOptions.credentials.password === '' &&
+      mongoOptions.credentials.username === '' &&
+      mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_DEFAULT &&
+      Object.keys(mongoOptions.credentials.mechanismProperties).length === 0
+    ) {
+      delete mongoOptions.credentials;
+    }
   }
 
   if (!mongoOptions.dbName) {

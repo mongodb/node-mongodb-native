@@ -4,11 +4,8 @@ const { expect } = require('chai');
 const { withMonitoredClient } = require('../shared');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
-// WriteConcernError test requires
-const { once } = require('events');
-
 const mock = require('../../tools/mongodb-mock/index');
-const { MongoClient, MongoServerError } = require('../../../src');
+const { MongoClient } = require('../../../src');
 
 describe('Write Concern', function () {
   it(
@@ -106,59 +103,6 @@ describe('Write Concern', function () {
         .then(() => {
           return client.close();
         });
-    });
-  });
-
-  // This test was moved from the WriteConcernError unit test file, there is probably a better place for it
-  describe('WriteConcernError', () => {
-    let client;
-
-    beforeEach(async function () {
-      client = this.configuration.newClient({ monitorCommands: true });
-      await client.connect();
-    });
-
-    afterEach(async () => {
-      if (client) {
-        await client.close();
-        client.removeAllListeners();
-      }
-    });
-
-    it('should always have the errInfo property accessible', {
-      metadata: { requires: { mongodb: '>=5.0.0' } },
-      async test() {
-        try {
-          await client.db().collection('wc_details').drop();
-        } catch {
-          // don't care
-        }
-
-        const collection = await client
-          .db()
-          .createCollection('wc_details', { validator: { x: { $type: 'string' } } });
-
-        const evCapture = once(client, 'commandSucceeded');
-
-        let errInfoFromError;
-        try {
-          await collection.insertOne({ x: /not a string/ });
-          expect.fail('The insert should fail the validation that x must be a string');
-        } catch (error) {
-          expect(error).to.be.instanceOf(MongoServerError);
-          expect(error).to.have.property('code', 121);
-          expect(error).to.have.property('errInfo').that.is.an('object');
-          errInfoFromError = error.errInfo;
-        }
-
-        const commandSucceededEvents = await evCapture;
-        expect(commandSucceededEvents).to.have.lengthOf(1);
-        const ev = commandSucceededEvents[0];
-        expect(ev).to.have.nested.property('reply.writeErrors[0].errInfo').that.is.an('object');
-
-        const errInfoFromEvent = ev.reply.writeErrors[0].errInfo;
-        expect(errInfoFromError).to.deep.equal(errInfoFromEvent);
-      }
     });
   });
 });
