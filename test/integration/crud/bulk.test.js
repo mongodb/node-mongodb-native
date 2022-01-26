@@ -10,7 +10,6 @@ const {
 const { Long, MongoBatchReExecutionError, MongoDriverError } = require('../../../src');
 const crypto = require('crypto');
 const chai = require('chai');
-const { format: f } = require('util');
 
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -25,13 +24,8 @@ describe('Bulk', function () {
   context('promise tests', () => {
     it('Should correctly execute unordered bulk operation in promise form', function (done) {
       const configuration = this.configuration;
-      let url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=100')
-          : f('%s?%s', url, 'maxPoolSize=100');
 
-      const client = configuration.newClient(url);
+      const client = configuration.newClient({}, { maxPoolSize: 100 });
       client.connect().then(function (client) {
         const db = client.db(configuration.db);
         const bulk = db
@@ -52,13 +46,8 @@ describe('Bulk', function () {
 
     it('Should correctly execute ordered bulk operation in promise form', function (done) {
       var configuration = this.configuration;
-      var url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=100')
-          : f('%s?%s', url, 'maxPoolSize=100');
 
-      const client = configuration.newClient(url);
+      const client = configuration.newClient({}, { maxPoolSize: 100 });
       client.connect().then(function (client) {
         var db = client.db(configuration.db);
         var bulk = db
