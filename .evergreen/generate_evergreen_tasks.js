@@ -135,9 +135,7 @@ TASKS.push(
     {
       name: 'test-auth-kerberos',
       tags: ['auth', 'kerberos'],
-      commands: [{ func: 'install dependencies' }, {
-        func: 'run kerberos tests'
-      }]
+      commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
     },
     {
       name: 'test-auth-ldap',
@@ -476,6 +474,7 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
         func: 'bootstrap mongo-orchestration',
         vars: {
           VERSION: VERSION,
+          AUTH: 'auth',
           ORCHESTRATION_FILE: 'auth-aws.json',
           TOPOLOGY: 'server'
         }
