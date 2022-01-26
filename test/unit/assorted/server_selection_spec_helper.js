@@ -175,7 +175,7 @@ function executeServerSelectionTest(testDefinition, testDone) {
         }
 
         if (expectedServerArray.length > 1) {
-          return done(new Error('This test does not support a multiple expected servers'));
+          return done(new Error('This test does not support multiple expected servers'));
         }
 
         for (const [prop, value] of Object.entries(expectedServerArray[0])) {
