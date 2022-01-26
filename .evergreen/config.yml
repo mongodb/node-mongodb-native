@@ -1710,6 +1710,84 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
+  - name: test-latest-server-noauth
+    tags:
+      - latest
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-5.0-server-noauth
+    tags:
+      - '5.0'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.4-server-noauth
+    tags:
+      - '4.4'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.2-server-noauth
+    tags:
+      - '4.2'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.0-server-noauth
+    tags:
+      - '4.0'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-3.6-server-noauth
+    tags:
+      - '3.6'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -2016,3 +2094,13 @@ buildvariants:
       NODE_LTS_NAME: erbium
     tasks:
       - serverless_task_group
+  - name: no-auth-tests
+    display_name: No Auth Tests
+    run_on: ubuntu1804-test
+    tasks:
+      - test-latest-server-noauth
+      - test-5.0-server-noauth
+      - test-4.4-server-noauth
+      - test-4.2-server-noauth
+      - test-4.0-server-noauth
+      - test-3.6-server-noauth
