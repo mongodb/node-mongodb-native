@@ -983,7 +983,6 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
-          AUTH: auth
       - func: run socks5 tests
   - name: test-socks5-tls
     tags: []
@@ -994,7 +993,6 @@ tasks:
           SSL: ssl
           VERSION: latest
           TOPOLOGY: replica_set
-          AUTH: auth
       - func: run socks5 tests
         vars:
           SSL: ssl

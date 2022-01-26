@@ -153,8 +153,7 @@ TASKS.push(
           func: 'bootstrap mongo-orchestration',
           vars: {
             VERSION: 'latest',
-            TOPOLOGY: 'replica_set',
-            AUTH: 'auth'
+            TOPOLOGY: 'replica_set'
           }
         },
         { func: 'run socks5 tests' }
@@ -170,8 +169,7 @@ TASKS.push(
           vars: {
             SSL: 'ssl',
             VERSION: 'latest',
-            TOPOLOGY: 'replica_set',
-            AUTH: 'auth'
+            TOPOLOGY: 'replica_set'
           }
         },
         { func: 'run socks5 tests', vars: { SSL: 'ssl' } }
