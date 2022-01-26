@@ -274,10 +274,6 @@ describe('Client Side Encryption Prose Tests', function () {
         {},
         { autoEncryption: clientWithInvalidHostnameOptions }
       );
-      await clientNoTls.connect();
-      await clientWithTls.connect();
-      await clientWithTlsExpired.connect();
-      await clientWithInvalidHostname.connect();
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       clientEncryptionNoTls = new mongodbClientEncryption.ClientEncryption(clientNoTls, {
         ...clientNoTlsOptions,
@@ -295,6 +291,10 @@ describe('Client Side Encryption Prose Tests', function () {
         clientWithInvalidHostname,
         { ...clientWithInvalidHostnameOptions, bson: BSON }
       );
+      await clientNoTls.connect();
+      await clientWithTls.connect();
+      await clientWithTlsExpired.connect();
+      await clientWithInvalidHostname.connect();
     });
 
     afterEach(async function () {
@@ -334,7 +334,7 @@ describe('Client Side Encryption Prose Tests', function () {
         try {
           await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKeyExpired });
         } catch (e) {
-          expect(e.originalError.message).to.include('expected UTF-8 key');
+          expect(e.message).to.include('expected UTF-8 key');
         }
       });
 
@@ -342,7 +342,7 @@ describe('Client Side Encryption Prose Tests', function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('aws', { masterKeyInvalidHostname });
         } catch (e) {
-          expect(e.originalError.message).to.include('expected UTF-8 key');
+          expect(e.message).to.include('expected UTF-8 key');
         }
       });
     });
@@ -431,11 +431,9 @@ describe('Client Side Encryption Prose Tests', function () {
 
     // Case 4.
     context('when using kmip', function () {
-      const masterKey = {};
-
       it('fails with no tls', async function () {
         try {
-          await clientEncryptionNoTls.createDataKey('kmip', { masterKey });
+          await clientEncryptionNoTls.createDataKey('kmip');
         } catch (e) {
           expect(e.originalError.message).to.include('before secure TLS connection');
         }
@@ -446,13 +444,13 @@ describe('Client Side Encryption Prose Tests', function () {
       // connect. So why does it say this only in this particular case? We prove this
       // works in previous tests for kmip above.
       it('passes with tls', async function () {
-        const dataKey = await clientEncryptionWithTls.createDataKey('kmip', { masterKey });
+        const dataKey = await clientEncryptionWithTls.createDataKey('kmip');
         expect(dataKey).to.have.property('sub_type', 4);
       });
 
       it('fails with expired certificates', async function () {
         try {
-          await clientEncryptionWithTlsExpired.createDataKey('kmip', { masterKey });
+          await clientEncryptionWithTlsExpired.createDataKey('kmip');
         } catch (e) {
           expect(e.originalError.message).to.include('certificate has expired');
         }
@@ -460,7 +458,7 @@ describe('Client Side Encryption Prose Tests', function () {
 
       it('fails with invalid hostnames', async function () {
         try {
-          await clientEncryptionWithInvalidHostname.createDataKey('kmip', { masterKey });
+          await clientEncryptionWithInvalidHostname.createDataKey('kmip');
         } catch (e) {
           expect(e.originalError.message).to.include('does not match certificate');
         }
