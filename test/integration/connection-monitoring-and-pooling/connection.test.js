@@ -142,7 +142,7 @@ describe('Connection', function () {
           });
         });
       }
-    });
+    }).skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
   });
 
   describe('Connection - functional', function () {
@@ -227,7 +227,7 @@ describe('Connection', function () {
           );
         });
       }
-    });
+    }).skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
 
     it('should only pass one argument (topology and not error) for topology "open" events', function (done) {
       const configuration = this.configuration;

@@ -17,7 +17,6 @@ describe('Socks5 Connectivity', function () {
     return;
   }
 
-  // skip failing tests if auth is enabled
   const maybeIt = process.env.AUTH === 'auth' ? it.skip : it;
 
   this.timeout(10000);
