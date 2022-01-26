@@ -18,6 +18,8 @@ class AuthFilter {
   filter(test) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
+    if (!test.metadata.requires.auth) return true;
+
     const auth = test.metadata.requires.auth;
 
     if (auth === 'enabled') {
@@ -27,7 +29,7 @@ class AuthFilter {
     }
 
     // defaults to 'disabled' because it's gotta default to something.
-    return false;
+    return true;
   }
 }
 
