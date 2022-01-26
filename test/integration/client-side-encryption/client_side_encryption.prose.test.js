@@ -91,10 +91,12 @@ describe('Client Side Encryption Prose Tests', function () {
           }
         }
       });
+      await dropCollection(client.db(keyVaultDbName), keyVaultCollName);
+      await dropCollection(client.db(keyVaultDbName), keyVaultCollName);
     });
 
     after(async function () {
-      await client.close(true);
+      await client.close();
     });
 
     context('when encrypting with kmip', function () {
@@ -194,7 +196,7 @@ describe('Client Side Encryption Prose Tests', function () {
    * - Create client encryption expired
    * - Create client encryption invalid hostname
    */
-  context.only('when passing through tls options', metadata, function () {
+  context('when passing through tls options', metadata, function () {
     const tlsCaOptions = {
       aws: {
         tlsCAFile: process.env.KMIP_TLS_CA_FILE
@@ -256,13 +258,6 @@ describe('Client Side Encryption Prose Tests', function () {
     let clientEncryptionWithTlsExpired;
     let clientEncryptionWithInvalidHostname;
 
-    before(function () {
-      console.log('clientNoTlsOptions', clientNoTlsOptions);
-      console.log('clientWithTlsOptions', clientWithTlsOptions);
-      console.log('clientWithTlsExpiredOptions', clientWithTlsExpiredOptions);
-      console.log('clientWithInvalidHostnameOptions', clientWithInvalidHostnameOptions);
-    });
-
     beforeEach(async function () {
       clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
       clientWithTls = this.configuration.newClient({}, { autoEncryption: clientWithTlsOptions });
@@ -295,13 +290,15 @@ describe('Client Side Encryption Prose Tests', function () {
       await clientWithTls.connect();
       await clientWithTlsExpired.connect();
       await clientWithInvalidHostname.connect();
+      await dropCollection(clientNoTls.db(keyVaultDbName), keyVaultCollName);
+      await dropCollection(clientNoTls.db(keyVaultDbName), keyVaultCollName);
     });
 
     afterEach(async function () {
-      await clientNoTls.close(true);
-      await clientWithTls.close(true);
-      await clientWithTlsExpired.close(true);
-      await clientWithInvalidHostname.close(true);
+      await clientNoTls.close();
+      await clientWithTls.close();
+      await clientWithTlsExpired.close();
+      await clientWithInvalidHostname.close();
     });
 
     // Case 1.
