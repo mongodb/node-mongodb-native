@@ -50,6 +50,7 @@ const SKIP = [
       ]
     : []),
 
+  // TODO: NODE-3891 - fix tests broken when AUTH enabled
   ...(process.env.AUTH === 'auth'
     ? [
         'errors during authentication are processed',

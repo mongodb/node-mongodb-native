@@ -13,7 +13,6 @@ describe('URI', function () {
     test: function (done) {
       var self = this;
 
-      // TODO - revist this logic
       const authInformation = process.env.AUTH === 'auth' ? 'bob:pwd123@' : '';
       // Connect using the connection string
       const client = this.configuration.newClient(
