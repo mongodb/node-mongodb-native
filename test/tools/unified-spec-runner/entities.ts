@@ -211,6 +211,7 @@ export class FailPointMap extends Map<string, Document> {
         try {
           await client.connect();
         } catch (error) {
+          console.error(`failed to connect disableFailPoints ${hostAddress}`);
           throw error;
         }
         const admin = client.db('admin');
