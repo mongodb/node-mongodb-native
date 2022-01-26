@@ -48,9 +48,9 @@ const MACOS_SKIP_TAGS = new Set(['load_balancer']);
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
-function makeTask({ mongoVersion, topology, tags = [] }) {
+function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
   return {
-    name: `test-${mongoVersion}-${topology}`,
+    name: `test-${mongoVersion}-${topology}${ auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
       { func: 'install dependencies' },
@@ -59,7 +59,7 @@ function makeTask({ mongoVersion, topology, tags = [] }) {
         vars: {
           VERSION: mongoVersion,
           TOPOLOGY: topology,
-          AUTH: 'auth'
+          AUTH: auth
         }
       },
       { func: 'run tests' }
@@ -71,6 +71,9 @@ const BASE_TASKS = [];
 MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology => BASE_TASKS.push(makeTask({ mongoVersion, topology })));
 });
+
+const AUTH_DISABLED_TASKS = MONGODB_VERSIONS.map(version => makeTask({ mongoVersion: version, topology: 'server', auth: 'noauth', tags: ['noauth'] }));
+
 BASE_TASKS.push({
   name: `test-latest-server-v1-api`,
   tags: ['latest', 'server', 'v1-api'],
@@ -672,8 +675,15 @@ BUILD_VARIANTS.push({
   tasks: ['serverless_task_group']
 });
 
+BUILD_VARIANTS.push({
+  name: 'no-auth-tests',
+  display_name: 'No Auth Tests',
+  run_on: 'ubuntu1804-test',
+  tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
+})
+
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS);
+fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS).concat(AUTH_DISABLED_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.dump(fileData, { lineWidth: 120 }), 'utf8');
