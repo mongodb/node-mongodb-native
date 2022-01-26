@@ -4015,7 +4015,7 @@ describe('Operation (Promises)', function () {
    * @example-class MongoClient
    */
   it('Should correctly connect to a replicaset With Promises', {
-    metadata: { requires: { topology: 'replicaset' } },
+    metadata: { requires: { topology: 'replicaset', auth: 'disabled' } },
 
     test: function () {
       var configuration = this.configuration;

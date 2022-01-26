@@ -11,6 +11,7 @@ interface MongoDBMetadataUI {
     apiVersion?: '1';
     clientSideEncryption?: boolean;
     serverless?: 'forbid' | 'allow' | 'require';
+    auth: 'enabled' | 'disabled'
   };
 
   sessions?: {
@@ -58,7 +59,7 @@ declare global {
        * - my test
        *   - TODO(NODE-XXXX): Feature implementation impending!
        * ```
-       * 
+       *
        * You can also skip a set of tests via beforeEach:
        * ```
        * beforeEach(() => {

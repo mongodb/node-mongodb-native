@@ -5487,7 +5487,7 @@ describe('Operation Examples', function () {
    * @example-class MongoClient
    */
   it('Should correctly connect to a replicaset', {
-    metadata: { requires: { topology: 'replicaset' } },
+    metadata: { requires: { topology: 'replicaset', auth: 'disabled' } },
 
     test: function (done) {
       var configuration = this.configuration;
