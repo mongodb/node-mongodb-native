@@ -45,7 +45,7 @@
       }
     },
     {
-      "description": "Invalid tlsAllowInvalidCertificates causes a warning 2",
+      "description": "Invalid tlsAllowInvalidCertificates causes a warning",
       "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=invalid",
       "valid": true,
       "warning": true,
