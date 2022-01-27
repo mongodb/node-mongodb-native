@@ -216,6 +216,7 @@ export function executeUriValidationTest(
           .equal(optionValue);
         break;
       case 'wTimeoutMS':
+      case 'wtimeoutms':
         expectedProp = 'writeConcern.wtimeout';
         expect(options, `${errorMessage} ${optionKey} -> ${expectedProp}`)
           .to.have.nested.property(expectedProp)
