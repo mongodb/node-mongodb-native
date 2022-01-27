@@ -104,7 +104,7 @@ export function executeUriValidationTest(
   let optionsToTest: Record<string, any> = 'options' in test ? test.options || {} : {};
 
   if (!('options' in test) && test.credential != null) {
-    // handle AuthTest credential and (default) dbName testing
+    // handle AuthTest credential testing
     const credentialOptions = [
       'username',
       'password',
@@ -124,9 +124,6 @@ export function executeUriValidationTest(
       password,
       source
     }))(test.credential);
-
-    // test dbName
-    expect(options, `${errorMessage} default dbName`).to.have.property('dbName').equal('test');
   } else if ('auth' in test && test.auth !== null) {
     // handle UriTest credential and dbName testing
     const credentialOptions = ['username', 'password', 'db'];
