@@ -63,18 +63,7 @@ describe('Server Selection (spec)', function () {
             const maybeIt = test.name.match(/Possible/) ? it.skip : it;
 
             maybeIt(test.name, function (done) {
-              executeServerSelectionTest(test, { checkLatencyWindow: false }, done);
-            });
-          });
-        });
-
-        describe(subType + ' (within latency window)', function () {
-          specTests[topologyType][subType].forEach(test => {
-            // NOTE: node does not support PossiblePrimary
-            const maybeIt = test.name.match(/Possible/) ? it.skip : it;
-
-            maybeIt(test.name, function (done) {
-              executeServerSelectionTest(test, { checkLatencyWindow: true }, done);
+              executeServerSelectionTest(test, done);
             });
           });
         });

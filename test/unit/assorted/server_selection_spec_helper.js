@@ -7,10 +7,7 @@ const { MongoServerSelectionError } = require('../../../src/error');
 const ServerSelectors = require('../../../src/sdam/server_selection');
 
 const sinon = require('sinon');
-const chai = require('chai');
-
-const expect = chai.expect;
-chai.use(require('chai-subset'));
+const { expect } = require('chai');
 
 function serverDescriptionFromDefinition(definition, hosts) {
   hosts = hosts || [];
@@ -82,7 +79,7 @@ function readPreferenceFromDefinition(definition) {
   return new ReadPreference(mode, tags, options);
 }
 
-function executeServerSelectionTest(testDefinition, options, testDone) {
+function executeServerSelectionTest(testDefinition, testDone) {
   const topologyDescription = testDefinition.topology_description;
   const seedData = topologyDescription.servers.reduce(
     (result, seed) => {
@@ -140,15 +137,9 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
     // expectations
     let expectedServers;
     if (!testDefinition.error) {
-      if (options.checkLatencyWindow) {
-        expectedServers = testDefinition.in_latency_window.map(s =>
-          serverDescriptionFromDefinition(s)
-        );
-      } else {
-        expectedServers = testDefinition.suitable_servers.map(s =>
-          serverDescriptionFromDefinition(s)
-        );
-      }
+      expectedServers = testDefinition.in_latency_window.map(s =>
+        serverDescriptionFromDefinition(s)
+      );
     }
 
     // default to serverSelectionTimeoutMS of `100` for unit tests
@@ -183,7 +174,20 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
           return done(new Error('No suitable servers found!'));
         }
 
-        expect(selectedServerDescription).to.include.containSubset(expectedServerArray[0]);
+        if (expectedServerArray.length > 1) {
+          return done(new Error('This test does not support multiple expected servers'));
+        }
+
+        for (const [prop, value] of Object.entries(expectedServerArray[0])) {
+          if (prop === 'hosts') {
+            // we dynamically modify this prop during sever selection
+            continue;
+          }
+          expect(selectedServerDescription[prop]).to.deep.equal(
+            value,
+            `Mismatched selected server "${prop}"`
+          );
+        }
         done();
       } catch (e) {
         done(e);

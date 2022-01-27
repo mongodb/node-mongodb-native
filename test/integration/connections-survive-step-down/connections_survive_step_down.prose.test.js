@@ -25,8 +25,9 @@ function expectPoolWasNotCleared(initialCount) {
 }
 
 // TODO: NODE-3819: Unskip flaky MacOS tests.
+// TODO: NODE-3903: check events as specified in the corresponding prose test description
 const maybeDescribe = process.platform === 'darwin' ? describe.skip : describe;
-maybeDescribe('Connections survive primary step down', function () {
+maybeDescribe('Connections survive primary step down - prose', function () {
   let client;
   let checkClient;
   let db;

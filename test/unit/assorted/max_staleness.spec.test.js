@@ -47,11 +47,8 @@ describe('Max Staleness (spec)', function () {
   Object.keys(specTests).forEach(specTestName => {
     describe(specTestName, () => {
       specTests[specTestName].forEach(testData => {
-        it(testData.description, {
-          metadata: { requires: { topology: 'single' } },
-          test: function (done) {
-            executeServerSelectionTest(testData, { checkLatencyWindow: false }, done);
-          }
+        it(testData.description, function (done) {
+          executeServerSelectionTest(testData, done);
         });
       });
     });
