@@ -4,12 +4,13 @@ import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 
 const metadata = {
   requires: {
+    mongodb: '>=4.0.6',
     auth: 'enabled',
-    mongodb: '>=4.0.6'
+    topology: ['single', 'replicaset', 'sharded']
   }
 } as any;
 
-describe.only('listDatabases() authorizedDatabases flag', function () {
+describe('listDatabases() authorizedDatabases flag', function () {
   // TODO(NODE-3860): Create driver test variants that require AUTH enabled
   const username = 'a';
   const password = 'b';
