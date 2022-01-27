@@ -4060,7 +4060,7 @@ describe('Operation (Promises)', function () {
    * @example-class MongoClient
    */
   it('Should connect to mongos proxies using connectiong string With Promises', {
-    metadata: { requires: { topology: 'sharded' } },
+    metadata: { requires: { topology: 'sharded', auth: 'disabled' } },
 
     test: function () {
       var configuration = this.configuration;
