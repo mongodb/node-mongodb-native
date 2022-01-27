@@ -5,11 +5,11 @@ import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 const metadata = {
   requires: {
     auth: 'enabled',
-    mongodbVersion: '>= 4.0.6'
+    mongodb: '>=4.0.6'
   }
 } as any;
 
-describe.only('listDatabases() authorizedDatabases flag', function () {
+describe('listDatabases() authorizedDatabases flag', function () {
   // TODO(NODE-3860): Create driver test variants that require AUTH enabled
   const username = 'a';
   const password = 'b';
@@ -22,14 +22,6 @@ describe.only('listDatabases() authorizedDatabases flag', function () {
   const authorizedUserOptions: AddUserOptions = {
     roles: [{ role: 'read', db: mockAuthorizedDb }]
   };
-
-  beforeEach(function () {
-    if (process.env.AUTH !== 'auth') {
-      this.currentTest.skipReason =
-        'TODO(NODE-3860): Create driver test variants that require AUTH enabled';
-      this.skip();
-    }
-  });
 
   beforeEach(async function () {
     adminClient = this.configuration.newClient();
