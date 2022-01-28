@@ -87,11 +87,13 @@ class TestRunnerContext {
     return this.runForAllClients(client => client.connect());
   }
 
-  teardown() {
-    return Promise.all([
-      this.runForAllClients(client => client.close()),
-      this.sharedClient.close()
-    ]);
+  async teardown() {
+    await this.runForAllClients(async client => {
+      if (client) await client.close();
+    });
+    if (this.sharedClient) {
+      this.sharedClient.close();
+    }
   }
 
   cleanupAfterSuite() {

@@ -93,7 +93,15 @@ export async function topologySatisfies(
     if (!ok && skipReason == null) skipReason = `has serverless set to ${r.serverless}`;
   }
 
-  if (!ok && skipReason != null && ctx.test) ctx.test.skipReason = skipReason;
+  if (!ok && skipReason != null) {
+    if (ctx.currentTest) {
+      // called from beforeEach hook
+      ctx.currentTest.skipReason = skipReason;
+    } else if (ctx.test) {
+      // called from within a test
+      ctx.test.skipReason = skipReason;
+    }
+  }
 
   return ok;
 }

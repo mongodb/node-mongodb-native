@@ -29,7 +29,7 @@ function unifiedTopologyIsConnected(client) {
   );
 }
 
-after(function () {
+const afterClientLeakHook = function () {
   const traces = [];
   const openClientCount = activeClients.reduce((count, client) => {
     if (unifiedTopologyIsConnected(client)) {
@@ -46,4 +46,10 @@ after(function () {
   }
 
   activeClients = [];
-});
+};
+
+module.exports = {
+  mochaHooks: {
+    afterAll: [afterClientLeakHook]
+  }
+};

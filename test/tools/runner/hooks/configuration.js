@@ -6,11 +6,13 @@ require('source-map-support').install({
 
 const path = require('path');
 const fs = require('fs');
-const { MongoClient } = require('../../../src');
-const { TestConfiguration } = require('./config');
-const { getEnvironmentalOptions } = require('../utils');
-const mock = require('../mongodb-mock/index');
+const { MongoClient } = require('../../../../src');
+const { TestConfiguration } = require('../config');
+const { getEnvironmentalOptions } = require('../../utils');
+const mock = require('../../mongodb-mock/index');
 const { inspect } = require('util');
+
+const IS_UNIT = process.argv.length >= 3 && process.argv[2].includes('unit');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
@@ -30,11 +32,11 @@ async function initializeFilters(client) {
   const context = {};
 
   const filterFiles = fs
-    .readdirSync(path.join(__dirname, 'filters'))
+    .readdirSync(path.join(__dirname, '../filters'))
     .filter(x => x.indexOf('js') !== -1);
 
   for (const filterName of filterFiles) {
-    const FilterModule = require(path.join(__dirname, 'filters', filterName));
+    const FilterModule = require(path.join(__dirname, '../filters', filterName));
     const filter = new FilterModule();
 
     console.assert(typeof filter === 'object');
@@ -52,7 +54,7 @@ async function initializeFilters(client) {
   return context;
 }
 
-beforeEach(async function () {
+const testSkipBeforeEachHook = async function () {
   // `metadata` always exists, `requires` is optional
   const requires = this.currentTest.metadata.requires;
   if (requires && Object.keys(requires).length > 0) {
@@ -72,13 +74,18 @@ beforeEach(async function () {
       this.skip();
     }
   }
-});
+};
 
-before(async function () {
-  const client = new MongoClient(
-    loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
-    getEnvironmentalOptions()
-  );
+const testConfigBeforeHook = async function () {
+  if (IS_UNIT) {
+    // unit tests don't connect to a MongoClient, so do not create a TestConfiguration
+    console.error(inspect({ unit: IS_UNIT }, { colors: true }));
+    return;
+  }
+
+  const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
+    ...getEnvironmentalOptions()
+  });
 
   await client.connect();
 
@@ -98,15 +105,42 @@ before(async function () {
     context
   );
   await client.close();
-});
+
+  const currentEnv = {
+    topology: this.configuration.topologyType,
+    version: this.configuration.buildInfo.version,
+    node: process.version,
+    os: process.platform,
+    serverless: process.env.SERVERLESS === '1',
+    auth: process.env.AUTH === 'auth',
+    tls: process.env.SSL === 'ssl',
+    csfle: this.configuration.clientSideEncryption.enabled,
+    serverApi: MONGODB_API_VERSION,
+    atlas: process.env.ATLAS_CONNECTIVITY != null,
+    adl: 'unknown', // TODO
+    kerberos: process.env.KRB5_PRINCIPAL != null,
+    ldap: 'unknown', // TODO
+    ocsp: !(process.env.OCSP_TLS_SHOULD_SUCCEED == null || process.env.CA_FILE == null),
+    socks5: 'unknown' // TODO
+  };
+
+  console.error(inspect(currentEnv, { colors: true }));
+};
 
 // ensure all mock connections are closed after the suite is run
-after(() => mock.cleanup());
+const cleanUpMocksAfterHook = () => mock.cleanup();
 
-// optionally enable test runner-wide plugins
-require('./plugins/deferred');
-require('./plugins/session_leak_checker');
-require('./plugins/client_leak_checker');
+const beforeAllPluginImports = () => {
+  // optionally enable test runner-wide plugins
+  require('../plugins/deferred');
+  // configure mocha
+  require('mocha-sinon');
+};
 
-// configure mocha
-require('mocha-sinon');
+module.exports = {
+  mochaHooks: {
+    beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
+    beforeEach: [testSkipBeforeEachHook],
+    afterAll: [cleanUpMocksAfterHook]
+  }
+};
