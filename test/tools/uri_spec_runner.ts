@@ -36,6 +36,14 @@ interface AuthTest extends UriTestBase {
   };
 }
 
+function isAuthTest(test: AuthTest | UriTest): test is AuthTest {
+  return !('options' in test);
+}
+
+function isUriTest(test: AuthTest | UriTest): test is UriTest {
+  return 'options' in test;
+}
+
 export function executeUriValidationTest(
   test: UriTest | AuthTest,
   shouldNotThrowOnWarn = false
@@ -81,7 +89,8 @@ export function executeUriValidationTest(
   const options = client.options;
   expect(options, errorMessage).to.be.an('object').that.is.not.empty;
 
-  if ('hosts' in test && test.hosts != null) {
+  // non-auth tests can have an expected value for hosts
+  if (isUriTest(test) && test.hosts != null) {
     for (const [index, { host, port }] of test.hosts.entries()) {
       const actualHost = options.hosts[index];
       if (actualHost.host == null && actualHost.socketPath == null) {
@@ -97,14 +106,18 @@ export function executeUriValidationTest(
     }
   }
 
-  // depending on whether this is a UriTest or an AuthTest, credential option values are
-  // defined in test.credential or test.auth, respectively, and additional properties
-  // to test are defined in test.options or mixed into test.credential, respectively
+  // depending on whether this is a UriTest or an AuthTest,
+  // expected credential option values are defined in test.auth or test.credential, respectively,
+  // and additional expected property values are defined in test.options or mixed into test.credential, respectively
   let credentialsToTest: { source?: string; password?: string; username?: string } = {};
-  let optionsToTest: Record<string, any> = 'options' in test ? test.options || {} : {};
+  let optionsToTest: Record<string, any> = isUriTest(test) ? test.options || {} : {};
 
-  if (!('options' in test) && test.credential != null) {
+  if (isAuthTest(test) && test.credential != null) {
     // handle AuthTest credential testing
+
+    // Note: unlike the other URI tests, we cannot test dbName
+    // because the auth tests do not provide an expected value for it
+
     const credentialOptions = [
       'username',
       'password',
@@ -124,15 +137,16 @@ export function executeUriValidationTest(
       password,
       source
     }))(test.credential);
-  } else if ('auth' in test && test.auth !== null) {
+  } else if (isUriTest(test) && test.auth !== null) {
     // handle UriTest credential and dbName testing
     const credentialOptions = ['username', 'password', 'db'];
+    expect(test).property('auth').to.have.all.keys(credentialOptions);
+
     credentialsToTest = (({ username, password, db }) => ({
       username,
       password,
       source: db
     }))(test.auth);
-    expect(test).property('auth').to.have.all.keys(credentialOptions);
 
     if (test.auth.db !== null) {
       expect(options, `${errorMessage} dbName`).to.have.property('dbName').equal(test.auth.db);
@@ -179,7 +193,7 @@ export function executeUriValidationTest(
             options.credentials.mechanismProperties &&
             !options.credentials.mechanismProperties.SERVICE_NAME
           ) {
-            // TODO: FIX THE NO DEFAULT SERVICE NAME BUG
+            // TODO(NODE-3925): Ensure default SERVICE_NAME is set on the parsed mechanism properties
             continue;
           }
           expect(options, `${errorMessage} credentials.mechanismProperties.${expectedMechProp}`)
