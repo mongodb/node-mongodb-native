@@ -1,3 +1,5 @@
+import { unlinkSync, writeFileSync } from 'fs';
+
 import { loadSpecTests } from '../../spec';
 import { executeUriValidationTest } from '../../tools/uri_spec_runner';
 
@@ -5,17 +7,14 @@ describe('URI option spec tests', function () {
   const suites = loadSpecTests('uri-options');
 
   const skipTests = [
-    // TODO: fix?
+    // TODO(NODE-3917): Fix directConnection and loadBalanced option validation
     'directConnection=true with multiple seeds',
     'loadBalanced=true with directConnection=false causes an error',
 
-    // TODO:? serverSelectionTryOnce is not implemented, should it be?
+    // Skipped because this does not apply to Node
     'Valid options specific to single-threaded drivers are parsed correctly',
 
-    // TODO?: need to implement test to have the files in the correct place in order to make sure it doesn't throw
-    'Valid required tls options are parsed correctly',
-
-    // TODO?: need to implement tls validation
+    // TODO(NODE-3921): fix tls option validation
     'tlsInsecure and tlsAllowInvalidCertificates both present (and true) raises an error',
     'tlsInsecure and tlsAllowInvalidCertificates both present (and false) raises an error',
     'tlsAllowInvalidCertificates and tlsInsecure both present (and true) raises an error',
@@ -25,25 +24,40 @@ describe('URI option spec tests', function () {
     'tlsInsecure and tlsAllowInvalidHostnames both present (and true) raises an error',
     'tlsInsecure and tlsAllowInvalidHostnames both present (and false) raises an error',
 
-    // TODO?: have not implemented option support
+    // TODO(NODE-3922): have not implemented option support
     'tlsDisableCertificateRevocationCheck can be set to true',
     'tlsDisableCertificateRevocationCheck can be set to false',
     'tlsDisableOCSPEndpointCheck can be set to true',
     'tlsDisableOCSPEndpointCheck can be set to false',
 
-    // TODO?: read preference tag issue: parsing rack:1 as rack:true
+    // TODO(NODE-3813): read preference tag issue: parsing rack:1 as rack:true
     'Valid read preference options are parsed correctly'
   ];
 
-  // TODO: make these throw
   const testsThatDoNotThrowOnWarn = [
+    // TODO(NODE-3923): compression option validation
     'Too high zlibCompressionLevel causes a warning',
     'Too low zlibCompressionLevel causes a warning',
+
+    // TODO(NODE-3917): Fix directConnection and loadBalanced option validation
     'Invalid loadBalanced value'
   ];
 
   for (const suite of suites) {
     describe(suite.name, function () {
+      // set up files for tlsCAfile and tlsCertificateKeyFile
+      // until we implement NODE-3924, the contents of the files is what is stored
+      // in the corresponding properties, so we make the contents equal the file names
+      // for the sake of the test expectations
+      before(() => {
+        writeFileSync('ca.pem', 'ca.pem');
+        writeFileSync('cert.pem', 'cert.pem');
+      });
+      after(() => {
+        unlinkSync('ca.pem');
+        unlinkSync('cert.pem');
+      });
+
       for (const test of suite.tests) {
         it(`${test.description}`, function () {
           if (skipTests.includes(test.description)) {

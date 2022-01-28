@@ -2,17 +2,15 @@ import { loadSpecTests } from '../spec';
 import { executeUriValidationTest } from '../tools/uri_spec_runner';
 
 const skipTests = [
-  // TODO: supposedly this one test should be caught by node, but it isn't
+  // TODO(NODE-3919): fix to match expected behavior
   'Missing delimiting slash between hosts and options',
 
-  // TODO: fix? we still respect the deprecated wtimeout and not wtimeoutms
-  // but wtimeoutms has recently also been deprecated via DRIVERS-555 (NODE-3078)
-  // so not sure what the right answer is here
+  // TODO(NODE-3914): Fix; note that wtimeoutms will be deprecated via DRIVERS-555 (NODE-3078)
   'Deprecated (or unknown) options are ignored if replacement exists'
 ];
 
 describe('Connection String spec tests', function () {
-  // TODO: make these throw?
+  // TODO(NODE-3920): validate repeated options
   const testsThatDoNotThrowOnWarn = ['Repeated option keys'];
   const suites = loadSpecTests('connection-string');
 

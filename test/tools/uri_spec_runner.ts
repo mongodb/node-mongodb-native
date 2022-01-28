@@ -256,6 +256,18 @@ export function executeUriValidationTest(
           .to.have.property(expectedProp)
           .equal(optionValue);
         break;
+      case 'tlsCertificateKeyFile':
+        expectedProp = 'key';
+        expect(options, `${errorMessage} ${optionKey} -> ${expectedProp}`)
+          .to.have.property(expectedProp)
+          .equal(optionValue);
+        break;
+      case 'tlsCAFile':
+        expectedProp = 'ca';
+        expect(options, `${errorMessage} ${optionKey} -> ${expectedProp}`)
+          .to.have.property(expectedProp)
+          .equal(optionValue);
+        break;
 
       //** MISC SPECIAL PARSE RULE OPTIONS **/
       case 'appname':
@@ -267,7 +279,7 @@ export function executeUriValidationTest(
       case 'compressors':
         expect(options, `${errorMessage} ${optionKey}`)
           .to.have.property(optionKey)
-          .deep.equal(optionValue.concat('none')); // TODO: FIX THE UNNECESSARY APPENDING
+          .deep.equal(optionValue.concat('none')); // TODO(NODE-3923): remove unnecessary appending
         break;
       case 'replicaset': // replicaset appears with both casings in the test expectations
         expect(options, `${errorMessage} replicaSet`)
@@ -291,6 +303,7 @@ export function executeUriValidationTest(
       case 'replicaSet':
       case 'srvServiceName':
       case 'srvMaxHosts':
+      case 'tls':
         expect(options, `${errorMessage} ${optionKey}`)
           .to.have.property(optionKey)
           .equal(optionValue);
