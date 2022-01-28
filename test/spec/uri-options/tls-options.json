@@ -45,15 +45,6 @@
       }
     },
     {
-      "description": "Invalid tlsAllowInvalidCertificates causes a warning",
-      "uri": "mongodb://example.com/?tlsAllowInvalidCertificates=invalid",
-      "valid": true,
-      "warning": true,
-      "hosts": null,
-      "auth": null,
-      "options": {}
-    },
-    {
       "description": "tlsAllowInvalidHostnames is parsed correctly",
       "uri": "mongodb://example.com/?tlsAllowInvalidHostnames=true",
       "valid": true,
