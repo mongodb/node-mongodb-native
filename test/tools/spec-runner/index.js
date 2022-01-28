@@ -360,67 +360,56 @@ function runTestSuiteTest(configuration, spec, context) {
     }
   });
 
-  return client
-    .connect()
-    .then(client => {
-      context.testClient = client;
-      const sessionOptions = Object.assign({}, spec.transactionOptions);
+  return client.connect().then(client => {
+    context.testClient = client;
+    const sessionOptions = Object.assign({}, spec.transactionOptions);
 
-      spec.sessionOptions = spec.sessionOptions || {};
-      const database = client.db(context.dbName);
+    spec.sessionOptions = spec.sessionOptions || {};
+    const database = client.db(context.dbName);
 
-      let session0, session1;
-      let savedSessionData;
+    let session0, session1;
+    let savedSessionData;
 
-      if (context.useSessions) {
-        try {
-          session0 = client.startSession(
-            Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
-          );
-          session1 = client.startSession(
-            Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
-          );
+    if (context.useSessions) {
+      try {
+        session0 = client.startSession(
+          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session0))
+        );
+        session1 = client.startSession(
+          Object.assign({}, sessionOptions, parseSessionOptions(spec.sessionOptions.session1))
+        );
 
-          savedSessionData = {
-            session0: JSON.parse(EJSON.stringify(session0.id)),
-            session1: JSON.parse(EJSON.stringify(session1.id))
-          };
-        } catch (err) {
-          // ignore
-        }
+        savedSessionData = {
+          session0: JSON.parse(EJSON.stringify(session0.id)),
+          session1: JSON.parse(EJSON.stringify(session1.id))
+        };
+      } catch (err) {
+        // ignore
       }
-      // enable to see useful APM debug information at the time of actual test run
-      // displayCommands = true;
+    }
+    // enable to see useful APM debug information at the time of actual test run
+    // displayCommands = true;
 
-      const operationContext = {
-        client,
-        database,
-        collectionName: context.collectionName,
-        session0,
-        session1,
-        testRunner: context
-      };
+    const operationContext = {
+      client,
+      database,
+      collectionName: context.collectionName,
+      session0,
+      session1,
+      testRunner: context
+    };
 
-      let testPromise = Promise.resolve();
-      return testPromise
-        .then(() => testOperations(spec, operationContext))
-        .catch(err => {
-          // If the driver throws an exception / returns an error while executing this series
-          // of operations, store the error message.
-          throw err;
-        })
-        .then(() => {
-          const promises = [];
-          if (session0) promises.push(session0.endSession());
-          if (session1) promises.push(session1.endSession());
-          return Promise.all(promises);
-        })
-        .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));
-    })
-    .catch(err => {
-      console.error('error', err);
-      return err;
-    });
+    let testPromise = Promise.resolve();
+    return testPromise
+      .then(() => testOperations(spec, operationContext))
+      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData))
+      .finally(() => {
+        const promises = [];
+        if (session0) promises.push(session0.endSession());
+        if (session1) promises.push(session1.endSession());
+        return Promise.all(promises);
+      });
+  });
 }
 
 function validateOutcome(testData, testContext) {

@@ -72,7 +72,7 @@ MONGODB_VERSIONS.forEach(mongoVersion => {
   TOPOLOGIES.forEach(topology => BASE_TASKS.push(makeTask({ mongoVersion, topology })));
 });
 
-const AUTH_DISABLED_TASKS = MONGODB_VERSIONS.map(version => makeTask({ mongoVersion: version, topology: 'server', auth: 'noauth', tags: ['noauth'] }));
+const AUTH_DISABLED_TASKS = MONGODB_VERSIONS.map(version => makeTask({ mongoVersion: version, topology: 'replica_set', auth: 'noauth', tags: ['noauth'] }));
 
 BASE_TASKS.push({
   name: `test-latest-server-v1-api`,
