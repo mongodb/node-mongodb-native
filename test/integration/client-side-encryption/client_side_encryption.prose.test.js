@@ -258,7 +258,7 @@ describe('Client Side Encryption Prose Tests', function () {
     let clientEncryptionWithTlsExpired;
     let clientEncryptionWithInvalidHostname;
 
-    beforeEach(async function () {
+    before(async function () {
       clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
       clientWithTls = this.configuration.newClient({}, { autoEncryption: clientWithTlsOptions });
       clientWithTlsExpired = this.configuration.newClient(
@@ -294,7 +294,7 @@ describe('Client Side Encryption Prose Tests', function () {
       await dropCollection(clientNoTls.db(keyVaultDbName), keyVaultCollName);
     });
 
-    afterEach(async function () {
+    after(async function () {
       await clientNoTls.close();
       await clientWithTls.close();
       await clientWithTlsExpired.close();
@@ -428,21 +428,19 @@ describe('Client Side Encryption Prose Tests', function () {
 
     // Case 4.
     context('when using kmip', function () {
+      it('passes with tls', async function () {
+        const dataKey = await clientEncryptionWithTls.createDataKey('kmip');
+        // TODO: NODE-3927
+        await clientWithTls.close();
+        expect(dataKey).to.have.property('sub_type', 4);
+      });
+
       it('fails with no tls', async function () {
         try {
           await clientEncryptionNoTls.createDataKey('kmip');
         } catch (e) {
           expect(e.originalError.message).to.include('before secure TLS connection');
         }
-      });
-
-      // MongoNotConnectedError: MongoClient must be connected to perform this operation
-      // Client is being connected in the beforeEach block above, and has no error on
-      // connect. So why does it say this only in this particular case? We prove this
-      // works in previous tests for kmip above.
-      it('passes with tls', async function () {
-        const dataKey = await clientEncryptionWithTls.createDataKey('kmip');
-        expect(dataKey).to.have.property('sub_type', 4);
       });
 
       it('fails with expired certificates', async function () {
