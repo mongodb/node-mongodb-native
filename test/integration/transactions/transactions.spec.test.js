@@ -109,6 +109,8 @@ const SKIP_TESTS = [
   // Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
   'Client side error when transaction is in progress',
+
+  // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
   'implicit abort'
 ];
 

@@ -22,6 +22,7 @@ describe('TLS Support', function () {
     makeConnectionTest(connectionString, tlsSettings)
   );
 
+  // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
   const maybeIt = AUTH_ENABLED ? it.skip : it;
   maybeIt(
     'should connect with tls via url options',

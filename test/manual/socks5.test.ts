@@ -17,6 +17,7 @@ describe('Socks5 Connectivity', function () {
     return;
   }
 
+  // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
   const maybeIt = process.env.AUTH === 'auth' ? it.skip : it;
 
   this.timeout(10000);

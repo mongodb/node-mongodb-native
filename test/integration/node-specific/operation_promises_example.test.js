@@ -4015,7 +4015,10 @@ describe('Operation (Promises)', function () {
    * @example-class MongoClient
    */
   it('Should correctly connect to a replicaset With Promises', {
-    metadata: { requires: { topology: 'replicaset', auth: 'disabled' } },
+    metadata: {
+      requires: { topology: 'replicaset', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
 
     test: function () {
       var configuration = this.configuration;
@@ -4060,7 +4063,10 @@ describe('Operation (Promises)', function () {
    * @example-class MongoClient
    */
   it('Should connect to mongos proxies using connectiong string With Promises', {
-    metadata: { requires: { topology: 'sharded', auth: 'disabled' } },
+    metadata: {
+      requires: { topology: 'sharded', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
 
     test: function () {
       var configuration = this.configuration;

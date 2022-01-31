@@ -44,7 +44,8 @@ describe('Causal Consistency - prose tests', function () {
       metadata: {
         requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
         // Skipping session leak tests b/c these are explicit sessions
-        sessions: { skipLeakTests: true }
+        sessions: { skipLeakTests: true },
+        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
       },
 
       test: function () {
@@ -82,7 +83,8 @@ describe('Causal Consistency - prose tests', function () {
         metadata: {
           requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
           // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true }
+          sessions: { skipLeakTests: true },
+          skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
         },
 
         test: function () {
@@ -120,7 +122,8 @@ describe('Causal Consistency - prose tests', function () {
         metadata: {
           requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
           // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true }
+          sessions: { skipLeakTests: true },
+          skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
         },
 
         test: function () {
@@ -165,7 +168,8 @@ describe('Causal Consistency - prose tests', function () {
         metadata: {
           requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
           // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true }
+          sessions: { skipLeakTests: true },
+          skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
         },
 
         test: function () {
@@ -205,7 +209,8 @@ describe('Causal Consistency - prose tests', function () {
       metadata: {
         requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
         // Skipping session leak tests b/c these are explicit sessions
-        sessions: { skipLeakTests: true }
+        sessions: { skipLeakTests: true },
+        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
       },
 
       test: function () {

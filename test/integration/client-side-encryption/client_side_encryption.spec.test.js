@@ -8,6 +8,8 @@ const {
 } = require('../../tools/spec-runner');
 
 const isAuthEnabled = process.env.AUTH === 'auth';
+
+// 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
 const skippedAuthTests = [
   'Insert a document with auto encryption using the AWS provider with temporary credentials',
   'Insert a document with auto encryption using Azure KMS provider',

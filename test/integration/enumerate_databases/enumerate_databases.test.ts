@@ -11,7 +11,6 @@ const metadata = {
 } as any;
 
 describe('listDatabases() authorizedDatabases flag', function () {
-  // TODO(NODE-3860): Create driver test variants that require AUTH enabled
   const username = 'a';
   const password = 'b';
   const mockAuthorizedDb = 'enumerate_databases';
