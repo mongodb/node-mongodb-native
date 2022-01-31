@@ -156,7 +156,7 @@ export class TestConfiguration {
       return new MongoClient(dbOptions, serverOptions);
     }
 
-    dbOptions = { ...dbOptions };
+    dbOptions = dbOptions || {};
     // Fall back
     let dbHost = (serverOptions && serverOptions.host) || this.options.host;
     const dbPort = (serverOptions && serverOptions.port) || this.options.port;
