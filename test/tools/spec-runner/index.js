@@ -5,12 +5,11 @@ const chai = require('chai');
 
 const expect = chai.expect;
 const { EJSON } = require('bson');
-const { isRecord, isSuperset } = require('../../../src/utils');
+const { isRecord } = require('../../../src/utils');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
-const { topologySatisfies, patchVersion } = require('../unified-spec-runner/unified-utils');
-const { TopologyType } = require('../unified-spec-runner/schema');
+const { topologySatisfies } = require('../unified-spec-runner/unified-utils');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
