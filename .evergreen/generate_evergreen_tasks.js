@@ -563,7 +563,7 @@ BUILD_VARIANTS.push({
   tasks: ['run-checks']
 });
 
-// TODO NODE-3897
+// TODO NODE-3897 - generate combined coverage report
 // BUILD_VARIANTS.push({
 //   name: 'generate-combined-coverage',
 //   display_name: 'Generate Combined Coverage',
@@ -637,6 +637,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
+// TODO NODE-3897 - generate combined coverage report
 const coverageTask = {
   name: 'download and merge coverage'.split(' ').join('-'),
   tags: [],
