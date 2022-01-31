@@ -337,7 +337,9 @@ describe('Client Side Encryption Prose Tests', function () {
 
       it('fails with invalid hostnames', async function () {
         try {
-          await clientEncryptionWithInvalidHostname.createDataKey('aws', { masterKeyInvalidHostname });
+          await clientEncryptionWithInvalidHostname.createDataKey('aws', {
+            masterKeyInvalidHostname
+          });
         } catch (e) {
           expect(e.message).to.include('expected UTF-8 key');
         }
