@@ -93,44 +93,40 @@ function gatherTestSuites(specPath) {
     );
 }
 
+/**
+ * Transforms the legacy specification into the unified format specification
+ * @param {Record<string, any>} runOn - a legacy runOn specification
+ * @returns {import('../unified-spec-runner/schema').RunOnRequirement}
+ */
 function legacyRunOnToRunOnRequirement(runOn) {
-  const runOnRequirement = new Map();
+  /** @type {import('../unified-spec-runner/schema').RunOnRequirement} */
+  const runOnRequirement = {};
 
   if (Array.isArray(runOn.topology)) {
     expect(
       isSuperset(Object.values(TopologyType), runOn.topology),
       `${runOn.topology} includes topology not declared in ${TopologyType}`
     ).to.be.true;
-    runOnRequirement.set('topologies', runOn.topology);
+    runOnRequirement.topologies = runOn.topology;
   }
 
   if (runOn.minServerVersion) {
-    runOnRequirement.set('minServerVersion', patchVersion(runOn.minServerVersion));
+    runOnRequirement.minServerVersion = patchVersion(runOn.minServerVersion);
   }
 
   if (runOn.maxServerVersion) {
-    runOnRequirement.set('maxServerVersion', patchVersion(runOn.maxServerVersion));
+    runOnRequirement.maxServerVersion = patchVersion(runOn.maxServerVersion);
   }
 
   if (typeof runOn.authEnabled === 'boolean') {
-    runOnRequirement.set('auth', runOn.authEnabled);
+    runOnRequirement.auth = runOn.authEnabled;
   }
 
   if (typeof runOn.serverless === 'string') {
-    runOnRequirement.set('serverless', runOn.serverless);
+    runOnRequirement.serverless = runOn.serverless;
   }
 
-  /*
-  {
-    serverless: 'forbid' | 'allow' | 'require';
-    auth: boolean;
-    maxServerVersion?: string;
-    minServerVersion?: string;
-    topologies?: TopologyId[];
-    // serverParameters?: Document;
-  }
-  */
-  return Object.fromEntries(runOnRequirement.entries());
+  return runOnRequirement;
 }
 
 function generateTopologyTests(testSuites, testContext, filter) {
