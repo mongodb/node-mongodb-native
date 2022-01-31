@@ -1726,82 +1726,82 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
-  - name: test-latest-server-noauth
+  - name: test-latest-replica_set-noauth
     tags:
       - latest
-      - server
+      - replica_set
       - noauth
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
-  - name: test-5.0-server-noauth
+  - name: test-5.0-replica_set-noauth
     tags:
       - '5.0'
-      - server
+      - replica_set
       - noauth
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
-  - name: test-4.4-server-noauth
+  - name: test-4.4-replica_set-noauth
     tags:
       - '4.4'
-      - server
+      - replica_set
       - noauth
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
-  - name: test-4.2-server-noauth
+  - name: test-4.2-replica_set-noauth
     tags:
       - '4.2'
-      - server
+      - replica_set
       - noauth
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
-  - name: test-4.0-server-noauth
+  - name: test-4.0-replica_set-noauth
     tags:
       - '4.0'
-      - server
+      - replica_set
       - noauth
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
-  - name: test-3.6-server-noauth
+  - name: test-3.6-replica_set-noauth
     tags:
       - '3.6'
-      - server
+      - replica_set
       - noauth
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
 task_groups:
@@ -2114,9 +2114,9 @@ buildvariants:
     display_name: No Auth Tests
     run_on: ubuntu1804-test
     tasks:
-      - test-latest-server-noauth
-      - test-5.0-server-noauth
-      - test-4.4-server-noauth
-      - test-4.2-server-noauth
-      - test-4.0-server-noauth
-      - test-3.6-server-noauth
+      - test-latest-replica_set-noauth
+      - test-5.0-replica_set-noauth
+      - test-4.4-replica_set-noauth
+      - test-4.2-replica_set-noauth
+      - test-4.0-replica_set-noauth
+      - test-3.6-replica_set-noauth
