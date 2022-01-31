@@ -239,7 +239,7 @@ describe('Command Monitoring spec tests', function () {
     }
 
     loadSpecTests('command-monitoring/legacy').forEach(scenario => {
-      if (scenario.name === 'command') return; // FIXME(NODE-3074): remove when `count` spec tests have been fixed
+      if (scenario.name === 'command') return; // TODO(NODE-3369): remove when `count` spec tests have been fixed
       describe(scenario.name, function () {
         scenario.tests.forEach(test => {
           const requirements = { topology: ['single', 'replicaset', 'sharded'] };
@@ -259,6 +259,7 @@ describe('Command Monitoring spec tests', function () {
             metadata: { requires: requirements },
             test: function () {
               if (
+                // TODO(NODE-3308): update spec file
                 test.description ===
                 'A successful find event with a getmore and the server kills the cursor'
               ) {
