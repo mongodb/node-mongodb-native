@@ -92,7 +92,7 @@ class TestRunnerContext {
       if (client) await client.close();
     });
     if (this.sharedClient) {
-      this.sharedClient.close();
+      await this.sharedClient.close();
     }
   }
 

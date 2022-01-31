@@ -22,7 +22,7 @@ describe('Retryable Writes', function () {
 
         await utilClient.connect();
 
-        const allRequirements = suite.runOn.map(r => legacyRunOnToRunOnRequirement(r));
+        const allRequirements = suite.runOn.map(legacyRunOnToRunOnRequirement);
 
         let shouldRun = true;
         for (const requirement of allRequirements) {

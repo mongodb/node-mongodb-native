@@ -3,6 +3,7 @@ import ConnectionString from 'mongodb-connection-string-url';
 import * as qs from 'querystring';
 import * as url from 'url';
 
+import { AuthMechanism } from '../../../src';
 import { MongoClient } from '../../../src/mongo_client';
 import { TopologyType } from '../../../src/sdam/common';
 import { Topology } from '../../../src/sdam/topology';
@@ -17,14 +18,23 @@ interface ProxyParams {
 }
 
 interface UrlOptions {
+  /** name of the default db */
   db?: string;
-  replicaSet?: string; //{string} [replicaSet] - replicaSet name override
-  username?: string; // {string} [username] - Username for auth section
-  password?: string; // [password] - Password for auth section
-  authMechanism?: string; // [authMechanism] - Authmechanism name
-  authMechanismProperties?: Record<string, any>; // [authMechanismProperties] - additional options for auth mechanism
-  authSource?: string; // [authSource] - authSource override in searchParams of URI
-  useMultipleMongoses?: boolean; // [useMultipleMongoses] - if set will use concatenate all known HostAddresses in URI
+  /** replSet name */
+  replicaSet?: string;
+  /** Username to authenticate with */
+  username?: string;
+  /** Password to authenticate with */
+  password?: string;
+  /** Name of the auth mechanism to use */
+  authMechanism?: AuthMechanism;
+  /** Additional properties used by the mechanism */
+  authMechanismProperties?: Record<string, any>;
+  /** The database to specify as the authentication source */
+  authSource?: string;
+  /** If set will use concatenate all known HostAddresses in URI */
+  useMultipleMongoses?: boolean;
+  /** Parameters for configuring a proxy connection */
   proxyURIParams?: ProxyParams;
 }
 

@@ -95,35 +95,19 @@ function gatherTestSuites(specPath) {
 
 /**
  * Transforms the legacy specification into the unified format specification
+ * **NOTE:** Called directly as a .map() callback
  * @param {Record<string, any>} runOn - a legacy runOn specification
  * @returns {import('../unified-spec-runner/schema').RunOnRequirement}
  */
 function legacyRunOnToRunOnRequirement(runOn) {
-  /** @type {import('../unified-spec-runner/schema').RunOnRequirement} */
-  const runOnRequirement = {};
+  const runOnRequirement = { ...runOn };
 
-  if (Array.isArray(runOn.topology)) {
-    expect(
-      isSuperset(Object.values(TopologyType), runOn.topology),
-      `${runOn.topology} includes topology not declared in ${TopologyType}`
-    ).to.be.true;
+  if (typeof runOn.topology !== 'undefined') {
     runOnRequirement.topologies = runOn.topology;
   }
 
-  if (runOn.minServerVersion) {
-    runOnRequirement.minServerVersion = patchVersion(runOn.minServerVersion);
-  }
-
-  if (runOn.maxServerVersion) {
-    runOnRequirement.maxServerVersion = patchVersion(runOn.maxServerVersion);
-  }
-
-  if (typeof runOn.authEnabled === 'boolean') {
+  if (typeof runOn.authEnabled !== 'undefined') {
     runOnRequirement.auth = runOn.authEnabled;
-  }
-
-  if (typeof runOn.serverless === 'string') {
-    runOnRequirement.serverless = runOn.serverless;
   }
 
   return runOnRequirement;
