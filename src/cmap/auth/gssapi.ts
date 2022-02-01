@@ -13,8 +13,6 @@ import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 type MechanismProperties = {
-  // TODO: Remove in 5.0
-  gssapiCanonicalizeHostName?: boolean;
   CANONICALIZE_HOST_NAME?: boolean;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
@@ -176,10 +174,7 @@ function performGssapiCanonicalizeHostName(
   mechanismProperties: MechanismProperties,
   callback: Callback<string>
 ): void {
-  if (
-    !mechanismProperties.gssapiCanonicalizeHostName &&
-    !mechanismProperties.CANONICALIZE_HOST_NAME
-  ) return callback(undefined, host);
+  if (!mechanismProperties.CANONICALIZE_HOST_NAME) return callback(undefined, host);
 
   // Attempt to resolve the host name
   dns.resolveCname(host, (err, r) => {
