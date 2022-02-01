@@ -184,6 +184,8 @@ function performGssapiCanonicalizeHostName(
 
     // Get the first resolve host id
     if (Array.isArray(r) && r.length > 0) {
+      /* eslint no-console: 0 */
+      console.log('######################', host, r);
       return callback(undefined, r[0]);
     }
 

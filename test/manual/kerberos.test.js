@@ -82,6 +82,7 @@ describe('Kerberos', function () {
     client.connect(function (err, client) {
       if (err) return done(err);
       expect(dns.resolveCname).to.be.calledOnce;
+      expect(err).to.not.exist;
       verifyKerberosAuthentication(client, done);
     });
   });
