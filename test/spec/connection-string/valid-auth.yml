@@ -206,7 +206,7 @@ tests:
             authmechanism: "MONGODB-X509"
     -
         description: "Escaped username (GSSAPI)"
-        uri: "mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true&authMechanism=GSSAPI"
+        uri: "mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com&authMechanism=GSSAPI"
         valid: true
         warning: false
         hosts:
@@ -222,7 +222,8 @@ tests:
             authmechanism: "GSSAPI"
             authmechanismproperties:
                 SERVICE_NAME: "other"
-                CANONICALIZE_HOST_NAME: true
+                CANONICALIZE_HOST_NAME: true,
+                SERVICE_HOST: "example.com"
     -
         description: "At-signs in options aren't part of the userinfo"
         uri: "mongodb://alice:secret@example.com/admin?replicaset=my@replicaset"

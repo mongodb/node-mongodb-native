@@ -80,7 +80,7 @@
     },
     {
       "description": "should accept generic mechanism property (GSSAPI)",
-      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true",
+      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com",
       "valid": true,
       "credential": {
         "username": "user@DOMAIN.COM",
@@ -89,7 +89,8 @@
         "mechanism": "GSSAPI",
         "mechanism_properties": {
           "SERVICE_NAME": "other",
-          "CANONICALIZE_HOST_NAME": true
+          "CANONICALIZE_HOST_NAME": true,
+          "SERVICE_HOST": "example.com"
         }
       }
     },
