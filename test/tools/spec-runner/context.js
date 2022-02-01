@@ -63,8 +63,9 @@ class TestRunnerContext {
     this.threads = new Map();
   }
 
-  runForAllClients(fn) {
-    const allClients = [this.sharedClient].concat(this.failPointClients);
+  async runForAllClients(fn) {
+    const allClients = [...this.failPointClients];
+    if (this.sharedClient) allClients.unshift(this.sharedClient);
     return Promise.all(allClients.map(fn));
   }
 
@@ -88,12 +89,7 @@ class TestRunnerContext {
   }
 
   async teardown() {
-    await this.runForAllClients(async client => {
-      if (client) await client.close();
-    });
-    if (this.sharedClient) {
-      await this.sharedClient.close();
-    }
+    await this.runForAllClients(client => client.close());
   }
 
   cleanupAfterSuite() {

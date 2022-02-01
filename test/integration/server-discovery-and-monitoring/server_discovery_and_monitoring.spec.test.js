@@ -45,7 +45,7 @@ describe('SDAM', function () {
 
     beforeEach(async function () {
       if (this.configuration.isLoadBalanced) {
-        this.currentTest.skipReason = 'Can not run in a loadBalanced environment';
+        this.currentTest.skipReason = 'Cannot run in a loadBalanced environment';
         this.skip();
       }
     });
