@@ -122,6 +122,14 @@ functions:
   "run tests":
     - command: shell.exec
       params:
+        script: |
+          ${PREPARE_SHELL}
+          if [ -n "${CLIENT_ENCRYPTION}" ]; then
+            cd ${DRIVERS_TOOLS}/.evergreen/csfle
+            . ./activate_venv.sh
+          fi
+    - command: shell.exec
+      params:
         background: true
         script: |
           if [ -n "${CLIENT_ENCRYPTION}" ]; then
@@ -130,7 +138,6 @@ functions:
             ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000 &
             ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001 &
             ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert &
-          EOT
           fi
     - command: shell.exec
       type: test
