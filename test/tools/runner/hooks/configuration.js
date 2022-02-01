@@ -12,8 +12,6 @@ const { getEnvironmentalOptions } = require('../../utils');
 const mock = require('../../mongodb-mock/index');
 const { inspect } = require('util');
 
-const IS_UNIT = process.argv.length >= 3 && process.argv[2].includes('unit');
-
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const MONGODB_API_VERSION = process.env.MONGODB_API_VERSION;
 // Load balancer fronting 1 mongos.
@@ -77,12 +75,6 @@ const testSkipBeforeEachHook = async function () {
 };
 
 const testConfigBeforeHook = async function () {
-  if (IS_UNIT) {
-    // unit tests don't connect to a MongoClient, so do not create a TestConfiguration
-    console.error(inspect({ unit: IS_UNIT }, { colors: true }));
-    return;
-  }
-
   const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
     ...getEnvironmentalOptions()
   });
