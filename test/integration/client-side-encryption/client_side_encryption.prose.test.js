@@ -28,6 +28,7 @@ const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => 
 };
 
 const noop = () => {};
+const metadata = { requires: { clientSideEncryption: true, mongodb: '>=4.2.0' } };
 
 // Tests for the ClientEncryption type are not included as part of the YAML tests.
 
@@ -37,8 +38,7 @@ const noop = () => {};
 
 //   Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
 
-describe('Client Side Encryption Prose Tests', function () {
-  const metadata = { requires: { clientSideEncryption: true, mongodb: '>=4.2.0' } };
+describe('Client Side Encryption Prose Tests', metadata, function () {
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const dataNamespace = `${dataDbName}.${dataCollName}`;
@@ -99,8 +99,8 @@ describe('Client Side Encryption Prose Tests', function () {
       await client.close();
     });
 
-    context('when encrypting with kmip', function () {
-      context('when not providing an endpoint in the master key', function () {
+    context('when encrypting with kmip', metadata, function () {
+      context('when not providing an endpoint in the master key', metadata, function () {
         const masterKey = { keyId: '1' };
         let dataKey;
         let encrypted;
@@ -121,15 +121,15 @@ describe('Client Side Encryption Prose Tests', function () {
           decrypted = await clientEncryption.decrypt(encrypted);
         });
 
-        it('must create a data key', function () {
+        it('must create a data key', metadata, function () {
           expect(dataKey).to.have.property('sub_type', 4);
         });
 
-        it('properly encrypts and decrypts', function () {
+        it('properly encrypts and decrypts', metadata, function () {
           expect(decrypted).to.equal('test');
         });
 
-        it('fails with invalid provider host', async function () {
+        it('fails with invalid provider host', metadata, async function () {
           try {
             await clientEncryptionInvalid.createDataKey('kmip', { masterKey });
           } catch (e) {
@@ -138,8 +138,8 @@ describe('Client Side Encryption Prose Tests', function () {
         });
       });
 
-      context('when providing an endpoint in the master key', function () {
-        context('when the endpoint is valid', function () {
+      context('when providing an endpoint in the master key', metadata, function () {
+        context('when the endpoint is valid', metadata, function () {
           const masterKey = { keyId: '1', endpoint: 'localhost:5698' };
           let dataKey;
           let encrypted;
@@ -160,16 +160,16 @@ describe('Client Side Encryption Prose Tests', function () {
             decrypted = await clientEncryption.decrypt(encrypted);
           });
 
-          it('must create a data key', function () {
+          it('must create a data key', metadata, function () {
             expect(dataKey).to.have.property('sub_type', 4);
           });
 
-          it('properly encrypts and decrypts', function () {
+          it('properly encrypts and decrypts', metadata, function () {
             expect(decrypted).to.equal('test');
           });
         });
 
-        context('when the endpoint is invalid', function () {
+        context('when the endpoint is invalid', metadata, function () {
           const masterKey = { keyId: '1', endpoint: 'doesnotexist.localhost:5698' };
 
           /**
@@ -178,7 +178,7 @@ describe('Client Side Encryption Prose Tests', function () {
            *      { keyId: 1, endpoint: 'doesnotexist.localhost:5698 '}
            *  - Expect failure.
            */
-          it('fails with invalid provider host', async function () {
+          it('fails with invalid provider host', metadata, async function () {
             try {
               await clientEncryption.createDataKey('kmip', { masterKey });
             } catch (e) {
@@ -302,7 +302,7 @@ describe('Client Side Encryption Prose Tests', function () {
     });
 
     // Case 1.
-    context('when using aws', function () {
+    context('when using aws', metadata, function () {
       const masterKey = {
         region: 'us-east-1',
         key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
@@ -311,7 +311,7 @@ describe('Client Side Encryption Prose Tests', function () {
       const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:8000' };
       const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:8001' };
 
-      it('fails with no tls', async function () {
+      it('fails with no tls', metadata, async function () {
         try {
           await clientEncryptionNoTls.createDataKey('aws', { masterKey });
         } catch (e) {
@@ -319,7 +319,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('passes with tls but fails to parse', async function () {
+      it('passes with tls but fails to parse', metadata, async function () {
         try {
           await clientEncryptionWithTls.createDataKey('aws', { masterKey });
         } catch (e) {
@@ -327,7 +327,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with expired certificates', async function () {
+      it('fails with expired certificates', metadata, async function () {
         try {
           await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKeyExpired });
         } catch (e) {
@@ -335,7 +335,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with invalid hostnames', async function () {
+      it('fails with invalid hostnames', metadata, async function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('aws', {
             masterKeyInvalidHostname
@@ -347,13 +347,13 @@ describe('Client Side Encryption Prose Tests', function () {
     });
 
     // Case 2.
-    context('when using azure', function () {
+    context('when using azure', metadata, function () {
       const masterKey = {
         keyVaultEndpoint: 'doesnotexist.local',
         keyName: 'foo'
       };
 
-      it('fails with no tls', async function () {
+      it('fails with no tls', metadata, async function () {
         try {
           await clientEncryptionNoTls.createDataKey('azure', { masterKey });
         } catch (e) {
@@ -361,7 +361,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with invalid host', async function () {
+      it('fails with invalid host', metadata, async function () {
         try {
           await clientEncryptionWithTls.createDataKey('azure', { masterKey });
         } catch (e) {
@@ -369,7 +369,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with expired certificates', async function () {
+      it('fails with expired certificates', metadata, async function () {
         try {
           await clientEncryptionWithTlsExpired.createDataKey('azure', { masterKey });
         } catch (e) {
@@ -377,7 +377,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with invalid hostnames', async function () {
+      it('fails with invalid hostnames', metadata, async function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('azure', { masterKey });
         } catch (e) {
@@ -387,7 +387,7 @@ describe('Client Side Encryption Prose Tests', function () {
     });
 
     // Case 3.
-    context('when using gcp', function () {
+    context('when using gcp', metadata, function () {
       const masterKey = {
         projectId: 'foo',
         location: 'bar',
@@ -395,7 +395,7 @@ describe('Client Side Encryption Prose Tests', function () {
         keyName: 'foo'
       };
 
-      it('fails with no tls', async function () {
+      it('fails with no tls', metadata, async function () {
         try {
           await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
         } catch (e) {
@@ -403,7 +403,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with invalid host', async function () {
+      it('fails with invalid host', metadata, async function () {
         try {
           await clientEncryptionWithTls.createDataKey('gcp', { masterKey });
         } catch (e) {
@@ -411,7 +411,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with expired certificates', async function () {
+      it('fails with expired certificates', metadata, async function () {
         try {
           await clientEncryptionWithTlsExpired.createDataKey('gcp', { masterKey });
         } catch (e) {
@@ -419,7 +419,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with invalid hostnames', async function () {
+      it('fails with invalid hostnames', metadata, async function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('gcp', { masterKey });
         } catch (e) {
@@ -429,7 +429,7 @@ describe('Client Side Encryption Prose Tests', function () {
     });
 
     // Case 4.
-    context('when using kmip', function () {
+    context('when using kmip', metadata, function () {
       it('passes with tls', async function () {
         const dataKey = await clientEncryptionWithTls.createDataKey('kmip');
         // TODO: NODE-3927
@@ -437,7 +437,7 @@ describe('Client Side Encryption Prose Tests', function () {
         expect(dataKey).to.have.property('sub_type', 4);
       });
 
-      it('fails with no tls', async function () {
+      it('fails with no tls', metadata, async function () {
         try {
           await clientEncryptionNoTls.createDataKey('kmip');
         } catch (e) {
@@ -445,7 +445,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with expired certificates', async function () {
+      it('fails with expired certificates', metadata, async function () {
         try {
           await clientEncryptionWithTlsExpired.createDataKey('kmip');
         } catch (e) {
@@ -453,7 +453,7 @@ describe('Client Side Encryption Prose Tests', function () {
         }
       });
 
-      it('fails with invalid hostnames', async function () {
+      it('fails with invalid hostnames', metadata, async function () {
         try {
           await clientEncryptionWithInvalidHostname.createDataKey('kmip');
         } catch (e) {
