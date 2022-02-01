@@ -107,6 +107,7 @@ const testConfigBeforeHook = async function () {
   await client.close();
 
   const currentEnv = {
+    // TODO(NODE-3714): Improve environment detection
     topology: this.configuration.topologyType,
     version: this.configuration.buildInfo.version,
     node: process.version,
@@ -117,11 +118,14 @@ const testConfigBeforeHook = async function () {
     csfle: this.configuration.clientSideEncryption.enabled,
     serverApi: MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,
-    adl: 'unknown', // TODO
+    aws: MONGODB_URI.includes('authMechanism=MONGODB-AWS'),
+    adl: this.configuration.buildInfo.dataLake
+      ? this.configuration.buildInfo.dataLake.version
+      : false,
     kerberos: process.env.KRB5_PRINCIPAL != null,
-    ldap: 'unknown', // TODO
-    ocsp: !(process.env.OCSP_TLS_SHOULD_SUCCEED == null || process.env.CA_FILE == null),
-    socks5: 'unknown' // TODO
+    ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
+    ocsp: process.env.OCSP_TLS_SHOULD_SUCCEED != null && process.env.CA_FILE != null,
+    socks5: MONGODB_URI.includes('proxyHost=')
   };
 
   console.error(inspect(currentEnv, { colors: true }));
