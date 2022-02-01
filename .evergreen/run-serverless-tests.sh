@@ -12,6 +12,7 @@ if [ -z ${SERVERLESS_ATLAS_USER+omitted} ]; then echo "SERVERLESS_ATLAS_USER is 
 if [ -z ${SERVERLESS_ATLAS_PASSWORD+omitted} ]; then echo "SERVERLESS_ATLAS_PASSWORD is unset" && exit 1; fi
 
 npx mocha \
+  --config test/mocha_mongodb.json \
   test/integration/crud/crud.spec.test.js \
   test/integration/crud/crud.prose.test.js \
   test/integration/retryable-reads/retryable_reads.spec.test.js \
