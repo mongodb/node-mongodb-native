@@ -28,6 +28,7 @@ describe('Kerberos', function () {
     return;
   }
   let krb5Uri = process.env.MONGODB_URI;
+  const parts = krb5Uri.split('@', 2);
 
   if (!process.env.KRB5_PRINCIPAL) {
     console.error('skipping Kerberos tests, KRB5_PRINCIPAL environment variable is not defined');
@@ -39,7 +40,6 @@ describe('Kerberos', function () {
     if (process.env.LDAPTEST_PASSWORD == null) {
       throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
     }
-    const parts = krb5Uri.split('@', 2);
     krb5Uri = `${parts[0]}:${process.env.LDAPTEST_PASSWORD}@${parts[1]}`;
   }
 
@@ -68,6 +68,37 @@ describe('Kerberos', function () {
     client.connect(function (err, client) {
       expect(err).to.not.exist;
       verifyKerberosAuthentication(client, done);
+    });
+  });
+
+  context('when passsing SERVICE_HOST', function () {
+    context('when the SERVICE_HOST is invalid', function () {
+      const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+        authMechanismProperties: {
+          SERVICE_HOST: 'example.com'
+        }
+      });
+
+      it('fails to authenticate', function () {
+        return client.connect().catch(e => {
+          expect(e).to.exist;
+        });
+      });
+    });
+
+    context('when the SERVICE_HOST is valid', function () {
+      const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+        authMechanismProperties: {
+          SERVICE_HOST: 'ldaptest.10gen.cc'
+        }
+      });
+
+      it('authenticates', function (done) {
+        client.connect(function (err, client) {
+          expect(err).to.not.exist;
+          verifyKerberosAuthentication(client, done);
+        });
+      });
     });
   });
 

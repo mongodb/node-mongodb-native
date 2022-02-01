@@ -64,7 +64,7 @@ tests:
                 SERVICE_NAME: "mongodb"
     -
         description: "should accept generic mechanism property (GSSAPI)"
-        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true"
+        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com"
         valid: true
         credential:
             username: "user@DOMAIN.COM"
@@ -74,6 +74,7 @@ tests:
             mechanism_properties:
                 SERVICE_NAME: "other"
                 CANONICALIZE_HOST_NAME: true
+                SERVICE_HOST: "example.com"
     -
         description: "should accept the password (GSSAPI)"
         uri: "mongodb://user%40DOMAIN.COM:password@localhost/?authMechanism=GSSAPI&authSource=$external"

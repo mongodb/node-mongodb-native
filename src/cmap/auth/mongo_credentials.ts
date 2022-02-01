@@ -27,6 +27,7 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
 
 /** @public */
 export interface AuthMechanismProperties extends Document {
+  SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: boolean;
