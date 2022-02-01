@@ -16,6 +16,7 @@ type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
   gssapiCanonicalizeHostName?: boolean;
   CANONICALIZE_HOST_NAME?: boolean;
+  SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
 };
@@ -72,6 +73,7 @@ export class GSSAPI extends AuthProvider {
     });
   }
 }
+
 function makeKerberosClient(authContext: AuthContext, callback: Callback<KerberosClient>): void {
   const { hostAddress } = authContext.options;
   const { credentials } = authContext;
@@ -102,7 +104,8 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
         Object.assign(initOptions, { user: username, password: password });
       }
 
-      let spn = `${serviceName}${process.platform === 'win32' ? '/' : '@'}${host}`;
+      const spnHost = mechanismProperties.SERVICE_HOST ?? host;
+      let spn = `${serviceName}${process.platform === 'win32' ? '/' : '@'}${spnHost}`;
       if ('SERVICE_REALM' in mechanismProperties) {
         spn = `${spn}@${mechanismProperties.SERVICE_REALM}`;
       }
@@ -184,8 +187,6 @@ function performGssapiCanonicalizeHostName(
 
     // Get the first resolve host id
     if (Array.isArray(r) && r.length > 0) {
-      /* eslint no-console: 0 */
-      console.log('######################', host, r);
       return callback(undefined, r[0]);
     }
 
