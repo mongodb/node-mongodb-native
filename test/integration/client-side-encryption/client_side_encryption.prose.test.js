@@ -286,179 +286,177 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         clientWithInvalidHostname,
         { ...clientWithInvalidHostnameOptions, bson: BSON }
       );
-      await clientNoTls.connect();
-      await clientWithTls.connect();
-      await clientWithTlsExpired.connect();
-      await clientWithInvalidHostname.connect();
-      await dropCollection(clientNoTls.db(keyVaultDbName), keyVaultCollName);
-      await dropCollection(clientNoTls.db(keyVaultDbName), keyVaultCollName);
     });
 
-    after(async function () {
-      await clientNoTls.close();
-      await clientWithTls.close();
-      await clientWithTlsExpired.close();
-      await clientWithInvalidHostname.close();
-    });
-
-    // Case 1.
-    context('when using aws', metadata, function () {
-      const masterKey = {
-        region: 'us-east-1',
-        key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-        endpoint: '127.0.0.1:8002'
-      };
-      const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:8000' };
-      const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:8001' };
-
-      it('fails with no tls', metadata, async function () {
-        try {
-          await clientEncryptionNoTls.createDataKey('aws', { masterKey });
-        } catch (e) {
-          expect(e.originalError.message).to.include('certificate required');
-        }
+    context('when using tls clients', metadata, function () {
+      beforeEach('connecting tls clients', async function () {
+        await clientNoTls.connect();
+        await clientWithTls.connect();
+        await clientWithTlsExpired.connect();
+        await clientWithInvalidHostname.connect();
+        await dropCollection(clientNoTls.db(keyVaultDbName), keyVaultCollName);
+        await dropCollection(clientNoTls.db(keyVaultDbName), keyVaultCollName);
       });
 
-      it('passes with tls but fails to parse', metadata, async function () {
-        try {
-          await clientEncryptionWithTls.createDataKey('aws', { masterKey });
-        } catch (e) {
-          expect(e.message).to.include('parse error');
-        }
-      });
-
-      it('fails with expired certificates', metadata, async function () {
-        try {
-          await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKeyExpired });
-        } catch (e) {
-          expect(e.message).to.include('expected UTF-8 key');
-        }
-      });
-
-      it('fails with invalid hostnames', metadata, async function () {
-        try {
-          await clientEncryptionWithInvalidHostname.createDataKey('aws', {
-            masterKeyInvalidHostname
-          });
-        } catch (e) {
-          expect(e.message).to.include('expected UTF-8 key');
-        }
-      });
-    });
-
-    // Case 2.
-    context('when using azure', metadata, function () {
-      const masterKey = {
-        keyVaultEndpoint: 'doesnotexist.local',
-        keyName: 'foo'
-      };
-
-      it('fails with no tls', metadata, async function () {
-        try {
-          await clientEncryptionNoTls.createDataKey('azure', { masterKey });
-        } catch (e) {
-          expect(e.originalError.message).to.include('certificate required');
-        }
-      });
-
-      it('fails with invalid host', metadata, async function () {
-        try {
-          await clientEncryptionWithTls.createDataKey('azure', { masterKey });
-        } catch (e) {
-          expect(e.message).to.include('HTTP status=404');
-        }
-      });
-
-      it('fails with expired certificates', metadata, async function () {
-        try {
-          await clientEncryptionWithTlsExpired.createDataKey('azure', { masterKey });
-        } catch (e) {
-          expect(e.originalError.message).to.include('certificate has expired');
-        }
-      });
-
-      it('fails with invalid hostnames', metadata, async function () {
-        try {
-          await clientEncryptionWithInvalidHostname.createDataKey('azure', { masterKey });
-        } catch (e) {
-          expect(e.originalError.message).to.include('does not match certificate');
-        }
-      });
-    });
-
-    // Case 3.
-    context('when using gcp', metadata, function () {
-      const masterKey = {
-        projectId: 'foo',
-        location: 'bar',
-        keyRing: 'baz',
-        keyName: 'foo'
-      };
-
-      it('fails with no tls', metadata, async function () {
-        try {
-          await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
-        } catch (e) {
-          expect(e.originalError.message).to.include('certificate required');
-        }
-      });
-
-      it('fails with invalid host', metadata, async function () {
-        try {
-          await clientEncryptionWithTls.createDataKey('gcp', { masterKey });
-        } catch (e) {
-          expect(e.message).to.include('HTTP status=404');
-        }
-      });
-
-      it('fails with expired certificates', metadata, async function () {
-        try {
-          await clientEncryptionWithTlsExpired.createDataKey('gcp', { masterKey });
-        } catch (e) {
-          expect(e.originalError.message).to.include('certificate has expired');
-        }
-      });
-
-      it('fails with invalid hostnames', metadata, async function () {
-        try {
-          await clientEncryptionWithInvalidHostname.createDataKey('gcp', { masterKey });
-        } catch (e) {
-          expect(e.originalError.message).to.include('does not match certificate');
-        }
-      });
-    });
-
-    // Case 4.
-    context('when using kmip', metadata, function () {
-      it('passes with tls', async function () {
-        const dataKey = await clientEncryptionWithTls.createDataKey('kmip');
-        // TODO: NODE-3927
+      afterEach(async function () {
+        await clientNoTls.close();
         await clientWithTls.close();
-        expect(dataKey).to.have.property('sub_type', 4);
+        await clientWithTlsExpired.close();
+        await clientWithInvalidHostname.close();
       });
 
-      it('fails with no tls', metadata, async function () {
-        try {
-          await clientEncryptionNoTls.createDataKey('kmip');
-        } catch (e) {
-          expect(e.originalError.message).to.include('before secure TLS connection');
-        }
+      // Case 1.
+      context('when using aws', metadata, function () {
+        const masterKey = {
+          region: 'us-east-1',
+          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+          endpoint: '127.0.0.1:8002'
+        };
+        const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:8000' };
+        const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:8001' };
+
+        it('fails with no tls', metadata, async function () {
+          try {
+            await clientEncryptionNoTls.createDataKey('aws', { masterKey });
+          } catch (e) {
+            expect(e.originalError.message).to.include('certificate required');
+          }
+        });
+
+        it('passes with tls but fails to parse', metadata, async function () {
+          try {
+            await clientEncryptionWithTls.createDataKey('aws', { masterKey });
+          } catch (e) {
+            expect(e.message).to.include('parse error');
+          }
+        });
+
+        it('fails with expired certificates', metadata, async function () {
+          try {
+            await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKeyExpired });
+          } catch (e) {
+            expect(e.message).to.include('expected UTF-8 key');
+          }
+        });
+
+        it('fails with invalid hostnames', metadata, async function () {
+          try {
+            await clientEncryptionWithInvalidHostname.createDataKey('aws', {
+              masterKeyInvalidHostname
+            });
+          } catch (e) {
+            expect(e.message).to.include('expected UTF-8 key');
+          }
+        });
       });
 
-      it('fails with expired certificates', metadata, async function () {
-        try {
-          await clientEncryptionWithTlsExpired.createDataKey('kmip');
-        } catch (e) {
-          expect(e.originalError.message).to.include('certificate has expired');
-        }
+      // Case 2.
+      context('when using azure', metadata, function () {
+        const masterKey = {
+          keyVaultEndpoint: 'doesnotexist.local',
+          keyName: 'foo'
+        };
+
+        it('fails with no tls', metadata, async function () {
+          try {
+            await clientEncryptionNoTls.createDataKey('azure', { masterKey });
+          } catch (e) {
+            expect(e.originalError.message).to.include('certificate required');
+          }
+        });
+
+        it('fails with invalid host', metadata, async function () {
+          try {
+            await clientEncryptionWithTls.createDataKey('azure', { masterKey });
+          } catch (e) {
+            expect(e.message).to.include('HTTP status=404');
+          }
+        });
+
+        it('fails with expired certificates', metadata, async function () {
+          try {
+            await clientEncryptionWithTlsExpired.createDataKey('azure', { masterKey });
+          } catch (e) {
+            expect(e.originalError.message).to.include('certificate has expired');
+          }
+        });
+
+        it('fails with invalid hostnames', metadata, async function () {
+          try {
+            await clientEncryptionWithInvalidHostname.createDataKey('azure', { masterKey });
+          } catch (e) {
+            expect(e.originalError.message).to.include('does not match certificate');
+          }
+        });
       });
 
-      it('fails with invalid hostnames', metadata, async function () {
-        try {
-          await clientEncryptionWithInvalidHostname.createDataKey('kmip');
-        } catch (e) {
-          expect(e.originalError.message).to.include('does not match certificate');
-        }
+      // Case 3.
+      context('when using gcp', metadata, function () {
+        const masterKey = {
+          projectId: 'foo',
+          location: 'bar',
+          keyRing: 'baz',
+          keyName: 'foo'
+        };
+
+        it('fails with no tls', metadata, async function () {
+          try {
+            await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
+          } catch (e) {
+            expect(e.originalError.message).to.include('certificate required');
+          }
+        });
+
+        it('fails with invalid host', metadata, async function () {
+          try {
+            await clientEncryptionWithTls.createDataKey('gcp', { masterKey });
+          } catch (e) {
+            expect(e.message).to.include('HTTP status=404');
+          }
+        });
+
+        it('fails with expired certificates', metadata, async function () {
+          try {
+            await clientEncryptionWithTlsExpired.createDataKey('gcp', { masterKey });
+          } catch (e) {
+            expect(e.originalError.message).to.include('certificate has expired');
+          }
+        });
+
+        it('fails with invalid hostnames', metadata, async function () {
+          try {
+            await clientEncryptionWithInvalidHostname.createDataKey('gcp', { masterKey });
+          } catch (e) {
+            expect(e.originalError.message).to.include('does not match certificate');
+          }
+        });
+      });
+
+      // Case 4.
+      context('when using kmip', metadata, function () {
+        it('fails with no tls', metadata, async function () {
+          try {
+            await clientEncryptionNoTls.createDataKey('kmip');
+          } catch (e) {
+            expect(e.originalError.message).to.include('before secure TLS connection');
+          }
+        });
+
+        it('fails with expired certificates', metadata, async function () {
+          try {
+            await clientEncryptionWithTlsExpired.createDataKey('kmip');
+          } catch (e) {
+            expect(e.originalError.message).to.include('certificate has expired');
+          }
+        });
+
+        it('fails with invalid hostnames', metadata, async function () {
+          try {
+            await clientEncryptionWithInvalidHostname.createDataKey('kmip');
+          } catch (e) {
+            expect(e.originalError.message).to.include('does not match certificate');
+          }
+        });
       });
     });
   });
