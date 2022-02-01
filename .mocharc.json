@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json",
   "extension": ["js", "ts"],
+  "ui": "test/tools/runner/metadata_ui.js",
   "require": [
     "source-map-support/register",
     "ts-node/register",
