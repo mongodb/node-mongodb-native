@@ -94,12 +94,19 @@ export async function runUnifiedTest(
       ...(test.runOnRequirements ?? [])
     ];
 
+    let someRequirementMet = allRequirements.length ? false : true;
+
     trace('satisfiesRequirements');
     for (const requirement of allRequirements) {
       const met = await topologySatisfies(ctx, requirement, utilClient);
-      if (!met) {
-        return ctx.skip();
+      if (met) {
+        someRequirementMet = true;
+        break;
       }
+    }
+
+    if (!someRequirementMet) {
+      return ctx.skip();
     }
 
     // If initialData is specified, for each collectionData therein the test runner MUST drop the
