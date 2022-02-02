@@ -174,6 +174,8 @@ function shouldRunSpecTest(configuration, requires, spec, filter) {
       return false;
     }
 
+    // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    // Some tests are failing when setting a failCommand when auth is enabled.
     if (spec.failPoint.configureFailPoint === 'failCommand') {
       return false;
     }
