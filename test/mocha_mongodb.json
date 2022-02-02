@@ -8,6 +8,8 @@
     "test/tools/runner/hooks/client_leak_checker.js",
     "test/tools/runner/hooks/session_leak_checker.js"
   ],
+  "extension": ["js", "ts"],
+  "ui": "test/tools/runner/metadata_ui.js",
   "recursive": true,
   "timeout": 60000,
   "failZero": true,
