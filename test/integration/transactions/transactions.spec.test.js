@@ -99,14 +99,11 @@ const SKIP_TESTS = [
   'commitTransaction retry succeeds on new mongos',
   'commitTransaction retry fails on new mongos',
   'unpin after transient error within a transaction and commit',
+
   // TODO(NODE-3369): unskip count tests when spec tests have been updated
   'count',
-  // This test needs there to be multiple mongoses
-  // 'increment txnNumber',
-  // Skipping this until SPEC-1320 is resolved
-  // 'remain pinned after non-transient error on commit',
 
-  // Will be implemented as part of NODE-2034
+  // TODO(NODE-2034): Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
   'Client side error when transaction is in progress'
 ];
@@ -121,7 +118,7 @@ describe('Transactions Spec Legacy Tests', function () {
       specPath: path.join('transactions-convenient-api')
     });
   } else {
-    // FIXME(NODE-3550): these tests should pass on serverless but currently fail
+    // TODO(NODE-3550): these tests should pass on serverless but currently fail
     SKIP_TESTS.push(
       'abortTransaction only performs a single retry',
       'abortTransaction does not retry after Interrupted',
