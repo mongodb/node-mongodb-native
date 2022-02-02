@@ -1,11 +1,13 @@
 import type { TestConfiguration } from './test/tools/unified-spec-runner/runner';
 
+type WithExclusion<T extends string> = `!${T}`
 /** Defined in test/tools/runner/filters/mongodb_topology_filter.js (topologyTypeToString) */
 type TopologyTypes = 'single' | 'replicaset' | 'sharded' | 'load-balanced';
+type TopologyTypeRequirement = WithExclusion<TopologyTypes> | WithExclusion<TopologyTypes>[]
 
 interface MongoDBMetadataUI {
   requires?: {
-    topology?: TopologyTypes | TopologyTypes[];
+    topology?: TopologyTypeRequirement;
     mongodb?: string;
     os?: NodeJS.Platform | `!${NodeJS.Platform}`;
     apiVersion?: '1';
@@ -58,7 +60,7 @@ declare global {
        * - my test
        *   - TODO(NODE-XXXX): Feature implementation impending!
        * ```
-       * 
+       *
        * You can also skip a set of tests via beforeEach:
        * ```
        * beforeEach(() => {

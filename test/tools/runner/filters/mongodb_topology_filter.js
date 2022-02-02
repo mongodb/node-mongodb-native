@@ -40,12 +40,25 @@ class MongoDBTopologyFilter {
       );
     }
 
-    return topologies.some(topology => {
-      if (topology[0] === '!' && topology !== '!' + this.runtimeTopology) {
-        return true;
+    const isExclusion = topologies[0][0] === '!';
+    if (isExclusion) {
+      if (!topologies.every(topology => topology.startsWith('!'))) {
+        // Not every topology starts with !
+        throw new Error('Cannot combine inclusion with exclusion of topologies');
       }
-      return topology === this.runtimeTopology;
-    });
+
+      // Every excluded topology does not equal the current (prefix !)
+      return topologies.every(topology => topology !== `!${this.runtimeTopology}`);
+    } else {
+      // inclusion list
+      if (topologies.some(topology => topology.startsWith('!'))) {
+        // Some topologies start with !
+        throw new Error('Cannot combine exclusion with inclusion of topologies');
+      }
+
+      // At least some (one) of the included topologies equals the current
+      return topologies.some(topology => topology === this.runtimeTopology);
+    }
   }
 }
 
