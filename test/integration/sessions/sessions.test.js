@@ -13,6 +13,9 @@ const test = {
     this.commands = { started: [], succeeded: [] };
     this.client = config.newClient({ w: 1 }, { maxPoolSize: 1, monitorCommands: true });
 
+    // Because we have a MongoClient.connect method, an extra 'ping' event is sent to the
+    // server when authentication is enabled.  We have to detect the scenario when auth is
+    // enabled for the test and ignore the initial ping.  This will be addressed in NODE-2149.
     const auth = config.options.auth;
     const isAuthEnabled = !!(auth && auth.username && auth.password);
     this.client.on('commandStarted', event => {

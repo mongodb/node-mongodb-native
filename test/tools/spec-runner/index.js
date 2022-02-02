@@ -170,8 +170,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
 function shouldRunSpecTest(configuration, requires, spec, filter) {
   if (requires.authEnabled) {
-    // TODO(NODE-3488): We do not have a way to determine if auth is enabled in our mocha metadata
-    // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
     if (process.env.AUTH !== 'auth') {
       return false;
     }

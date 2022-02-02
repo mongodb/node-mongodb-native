@@ -3,6 +3,7 @@ import type { TestConfiguration } from './test/tools/unified-spec-runner/runner'
 /** Defined in test/tools/runner/filters/mongodb_topology_filter.js (topologyTypeToString) */
 type TopologyTypes = 'single' | 'replicaset' | 'sharded' | 'load-balanced';
 
+declare global {
 interface MongoDBMetadataUI {
   requires?: {
     topology?: TopologyTypes | TopologyTypes[];
@@ -23,8 +24,6 @@ interface MetadataAndTest<Fn> {
   metadata: MongoDBMetadataUI;
   test: Fn;
 }
-
-declare global {
   namespace Mocha {
     interface TestFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;

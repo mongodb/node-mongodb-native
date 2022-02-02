@@ -1,6 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-const { resolveConnectionString } = require('./utils');
+const { resolveConnectionString, extractAuthString } = require('./utils');
 const { ns } = require('../../../src/utils');
 
 class Thread {
@@ -29,30 +29,6 @@ class Thread {
     });
   }
 }
-
-function getIndicesOfAuthInUrl(connectionString) {
-  const doubleSlashIndex = connectionString.indexOf('//');
-  const atIndex = connectionString.indexOf('@');
-
-  if (doubleSlashIndex === -1 || atIndex === -1) {
-    return null;
-  }
-
-  return {
-    start: doubleSlashIndex + 2,
-    end: atIndex
-  };
-}
-
-function extractAuthString(connectionString) {
-  const indices = getIndicesOfAuthInUrl(connectionString);
-  if (!indices) {
-    return null;
-  }
-
-  return connectionString.slice(indices.start, indices.end);
-}
-
 class TestRunnerContext {
   constructor(opts) {
     const defaults = {

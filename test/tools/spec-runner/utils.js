@@ -39,4 +39,4 @@ function resolveConnectionString(configuration, spec, context) {
   return connectionString;
 }
 
-module.exports = { resolveConnectionString };
+module.exports = { resolveConnectionString, getIndicesOfAuthInUrl, extractAuthString };

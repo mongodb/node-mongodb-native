@@ -2,13 +2,13 @@ import { expect } from 'chai';
 
 import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 
-const metadata = {
+const metadata: MongoDBMetadataUI = {
   requires: {
     mongodb: '>=4.0.6',
     auth: 'enabled',
     topology: ['single', 'replicaset', 'sharded']
   }
-} as any;
+};
 
 describe('listDatabases() authorizedDatabases flag', function () {
   const username = 'a';

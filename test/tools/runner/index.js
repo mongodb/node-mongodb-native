@@ -13,6 +13,7 @@ const mock = require('../mongodb-mock/index');
 const { inspect } = require('util');
 
 // Default our tests to have auth enabled
+// A better solution will be tackled in NODE-3714
 process.env.AUTH = process.env.AUTH === 'noauth' ? 'noauth' : 'auth';
 
 process.env.MONGODB_URI =

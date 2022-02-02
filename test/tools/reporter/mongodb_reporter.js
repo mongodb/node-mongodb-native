@@ -33,7 +33,7 @@ const os = require('os');
  * @property {Error} [error] - The possible error from a test
  * @property {true} [skipped] - Set if test was skipped
  * @typedef {MongoMochaSuiteExtension & Mocha.Suite} MongoMochaSuite
- * @typedef {MongoMochaTestExtension & Mocha.Test} MongoMochaTest
+ * @typedef {MongoMochaTestExtension & Mocha.Test & {skipReason?: string} & { metadata?: { skipReason?: string }}} MongoMochaTest
  */
 
 // Turn this on if you have to debug this custom reporter!
@@ -229,7 +229,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
   }
 
   /**
-   * @param {MongoMochaTest & {skipReason?: string} & { metadata?: { skipReason?: string }} } test
+   * @param {MongoMochaTest} test
    */
   pending(test) {
     if (REPORT_TO_STDIO) console.log(chalk.cyan(`↬ ${test.fullTitle()}`));
