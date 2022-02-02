@@ -3,7 +3,7 @@
 const path = require('path');
 const { expect } = require('chai');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
-const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
+const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const { loadSpecTests } = require('../../spec');
 
 function ignoreNsNotFoundForListIndexes(err) {
@@ -79,19 +79,7 @@ class TransactionsRunnerContext extends TestRunnerContext {
 }
 
 describe('Transactions Spec Unified Tests', function () {
-  for (const transactionTest of loadSpecTests(path.join('transactions', 'unified'))) {
-    expect(transactionTest).to.exist;
-    context(String(transactionTest.description), function () {
-      for (const test of transactionTest.tests) {
-        it(String(test.description), {
-          metadata: { sessions: { skipLeakTests: true } },
-          test: async function () {
-            await runUnifiedTest(this, transactionTest, test);
-          }
-        });
-      }
-    });
-  }
+  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')));
 });
 
 const SKIP_TESTS = [

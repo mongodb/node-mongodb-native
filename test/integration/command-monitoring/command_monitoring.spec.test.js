@@ -1,10 +1,11 @@
 'use strict';
 
+const path = require('path');
 const { setupDatabase, filterOutCommands } = require('../shared');
 const { loadSpecTests } = require('../../spec');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { expect } = require('chai');
-const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
+const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 
 describe('Command Monitoring spec tests', function () {
   describe('command monitoring legacy spec tests', function () {
@@ -279,18 +280,6 @@ describe('Command Monitoring spec tests', function () {
   });
 
   describe('command monitoring unified spec tests', () => {
-    for (const loadedSpec of loadSpecTests('command-monitoring/unified')) {
-      expect(loadedSpec).to.include.all.keys(['description', 'tests']);
-      context(String(loadedSpec.description), function () {
-        for (const test of loadedSpec.tests) {
-          it(String(test.description), {
-            metadata: { sessions: { skipLeakTests: true } },
-            test: async function () {
-              await runUnifiedTest(this, loadedSpec, test);
-            }
-          });
-        }
-      });
-    }
+    runUnifiedSuite(loadSpecTests(path.join('command-monitoring', 'unified')));
   });
 });

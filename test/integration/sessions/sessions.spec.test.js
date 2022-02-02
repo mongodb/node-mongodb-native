@@ -3,11 +3,11 @@
 const path = require('path');
 const { expect } = require('chai');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
-const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
+const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const { loadSpecTests } = require('../../spec');
 
-describe('Sessions', function () {
-  describe('legacy spec tests', function () {
+describe('Sessions spec tests', function () {
+  describe('Sessions legacy spec tests', function () {
     class SessionSpecTestContext extends TestRunnerContext {
       assertSessionNotDirty(options) {
         const session = options.session;
@@ -53,19 +53,7 @@ describe('Sessions', function () {
     generateTopologyTests(testSuites, testContext, testFilter);
   });
 
-  describe('unified spec tests', function () {
-    for (const sessionTests of loadSpecTests(path.join('sessions', 'unified'))) {
-      expect(sessionTests).to.be.an('object');
-      context(String(sessionTests.description), function () {
-        for (const test of sessionTests.tests) {
-          it(String(test.description), {
-            metadata: { sessions: { skipLeakTests: true } },
-            test: async function () {
-              await runUnifiedTest(this, sessionTests, test);
-            }
-          });
-        }
-      });
-    }
+  describe('Sessions unified spec tests', function () {
+    runUnifiedSuite(loadSpecTests(path.join('sessions', 'unified')));
   });
 });
