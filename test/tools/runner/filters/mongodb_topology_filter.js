@@ -40,7 +40,12 @@ class MongoDBTopologyFilter {
       );
     }
 
-    return topologies.some(topology => topology === this.runtimeTopology);
+    return topologies.some(topology => {
+      if (topology[0] === '!' && topology !== '!' + this.runtimeTopology) {
+        return true;
+      }
+      return topology === this.runtimeTopology;
+    });
   }
 }
 
