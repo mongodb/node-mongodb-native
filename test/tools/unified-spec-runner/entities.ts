@@ -204,7 +204,9 @@ export class FailPointMap extends Map<string, Document> {
     const entries = Array.from(this.entries());
     await Promise.all(
       entries.map(async ([hostAddress, configureFailPoint]) => {
-        if (process.env.SERVERLESS) hostAddress += '?loadBalanced=true';
+        if (process.env.SERVERLESS || process.env.LOAD_BALANCER) {
+          hostAddress += '?loadBalanced=true';
+        }
         const client = getClient(hostAddress);
         try {
           await client.connect();
