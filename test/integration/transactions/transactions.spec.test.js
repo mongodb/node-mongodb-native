@@ -95,8 +95,12 @@ describe('Transactions Spec Unified Tests', function () {
 });
 
 const SKIP_TESTS = [
+  // TODO: DISCUSS WITH TEAM
+  // retry succeeds seems to work fine; do we know what's wrong with the other two?
+  // should we file a ticket to investigate?
+  // OLD COMMENT:
   // commitTransaction retry seems to be swallowed by mongos in these three cases
-  'commitTransaction retry succeeds on new mongos',
+  // 'commitTransaction retry succeeds on new mongos',
   'commitTransaction retry fails on new mongos',
   'unpin after transient error within a transaction and commit',
 
