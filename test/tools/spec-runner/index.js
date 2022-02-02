@@ -8,8 +8,8 @@ const { EJSON } = require('bson');
 const { isRecord } = require('../../../src/utils');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
-const { shouldRunServerlessTest } = require('../../tools/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { topologySatisfies } = require('../unified-spec-runner/unified-utils');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -92,109 +92,103 @@ function gatherTestSuites(specPath) {
     );
 }
 
-function parseTopologies(topologies) {
-  if (topologies == null) {
-    return ['replicaset', 'sharded', 'single'];
+/**
+ * Transforms the legacy specification into the unified format specification
+ * **NOTE:** Called directly as a .map() callback
+ * @param {Record<string, any>} runOn - a legacy runOn specification
+ * @returns {import('../unified-spec-runner/schema').RunOnRequirement}
+ */
+function legacyRunOnToRunOnRequirement(runOn) {
+  const runOnRequirement = { ...runOn };
+
+  if (typeof runOn.topology !== 'undefined') {
+    runOnRequirement.topologies = runOn.topology;
   }
 
-  return topologies;
-}
+  if (typeof runOn.authEnabled !== 'undefined') {
+    runOnRequirement.auth = runOn.authEnabled;
+  }
 
-function parseRunOn(runOn) {
-  return runOn.map(config => {
-    const topology = parseTopologies(config.topology);
-    const version = [];
-    if (config.minServerVersion) {
-      version.push(`>= ${config.minServerVersion}`);
-    }
-
-    if (config.maxServerVersion) {
-      version.push(`<= ${config.maxServerVersion}`);
-    }
-
-    const mongodb = version.join(' ');
-    return {
-      topology,
-      mongodb,
-      authEnabled: !!config.authEnabled,
-      serverless: config.serverless
-    };
-  });
+  return runOnRequirement;
 }
 
 function generateTopologyTests(testSuites, testContext, filter) {
-  testSuites.forEach(testSuite => {
-    // TODO: remove this when SPEC-1255 is completed
+  for (const testSuite of testSuites) {
     let runOn = testSuite.runOn;
-    if (!testSuite.runOn) {
-      runOn = [{ minServerVersion: testSuite.minServerVersion }];
-      if (testSuite.maxServerVersion) {
-        runOn.push({ maxServerVersion: testSuite.maxServerVersion });
-      }
+    if (!testSuite.runOn && !Array.isArray(runOn)) {
+      throw new Error('no runOn requirement? it should be required');
     }
-    const environmentRequirementList = parseRunOn(runOn);
 
-    environmentRequirementList.forEach(requires => {
-      const suiteName = `${testSuite.name} - ${requires.topology.join()}`;
-      describe(suiteName, {
-        metadata: { requires },
-        test: function () {
-          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-          afterEach(() => testContext.cleanupAfterSuite());
-          testSuite.tests.forEach(spec => {
-            const maybeIt = shouldRunSpecTest(this.configuration, requires, spec, filter)
-              ? it
-              : it.skip;
-            maybeIt(spec.description, function () {
-              let testPromise = Promise.resolve();
-              if (spec.failPoint) {
-                testPromise = testPromise.then(() => testContext.enableFailPoint(spec.failPoint));
-              }
+    const beforeEachFilter = async function () {
+      let utilClient;
+      if (this.configuration.isLoadBalanced) {
+        // The util client can always point at the single mongos LB frontend.
+        utilClient = this.configuration.newClient(this.configuration.singleMongosLoadBalancerUri);
+      } else {
+        utilClient = this.configuration.newClient();
+      }
 
-              // run the actual test
-              testPromise = testPromise.then(() =>
-                runTestSuiteTest(this.configuration, spec, testContext)
-              );
+      await utilClient.connect();
 
-              if (spec.failPoint) {
-                testPromise = testPromise.then(() => testContext.disableFailPoint(spec.failPoint));
-              }
-              return testPromise.then(() => validateOutcome(spec, testContext));
-            });
-          });
-        }
-      });
+      const allRequirements = runOn.map(legacyRunOnToRunOnRequirement);
+
+      let shouldRun = true;
+      for (const requirement of allRequirements) {
+        shouldRun =
+          shouldRun && (await topologySatisfies(this.currentTest.ctx, requirement, utilClient));
+      }
+
+      const spec = this.currentTest.spec;
+
+      if (
+        shouldRun &&
+        spec.operations.some(
+          op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
+        )
+      ) {
+        this.currentTest.skipReason =
+          'TODO(NODE-2994): Connection storms work will add new events to connection pool';
+        shouldRun = false;
+      }
+
+      if (shouldRun && spec.skipReason) {
+        this.currentTest.skipReason = spec.skipReason;
+        shouldRun = false;
+      }
+
+      if (typeof filter === 'function' && !filter(spec, this.configuration)) {
+        this.currentTest.skipReason = `filtered by custom filter passed to generateTopologyTests`;
+        shouldRun = false;
+      }
+      await utilClient.close();
+
+      if (!shouldRun) this.skip();
+    };
+
+    describe(testSuite.name, function () {
+      beforeEach(beforeEachFilter);
+      beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+      afterEach(() => testContext.cleanupAfterSuite());
+      for (const spec of testSuite.tests) {
+        const mochaTest = it(spec.description, async function () {
+          if (spec.failPoint) {
+            await testContext.enableFailPoint(spec.failPoint);
+          }
+
+          // run the actual test
+          await runTestSuiteTest(this.configuration, spec, testContext);
+
+          if (spec.failPoint) {
+            await testContext.disableFailPoint(spec.failPoint);
+          }
+
+          await validateOutcome(spec, testContext);
+        });
+        // Make the spec test available to the beforeEach filter
+        mochaTest.spec = spec;
+      }
     });
-  });
-}
-
-function shouldRunSpecTest(configuration, requires, spec, filter) {
-  if (requires.authEnabled && process.env.AUTH !== 'auth') {
-    // TODO(NODE-3488): We do not have a way to determine if auth is enabled in our mocha metadata
-    // We need to do a admin.command({getCmdLineOpts: 1}) if it errors (code=13) auth is on
-    return false;
   }
-
-  if (
-    requires.serverless &&
-    !shouldRunServerlessTest(requires.serverless, !!process.env.SERVERLESS)
-  ) {
-    return false;
-  }
-
-  if (
-    spec.operations.some(
-      op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
-    )
-  ) {
-    // TODO(NODE-2994): Connection storms work will add new events to connection pool
-    return false;
-  }
-
-  if (spec.skipReason || (filter && typeof filter === 'function' && !filter(spec, configuration))) {
-    return false;
-  }
-  return true;
 }
 
 // Test runner helpers
@@ -880,5 +874,5 @@ module.exports = {
   TestRunnerContext,
   gatherTestSuites,
   generateTopologyTests,
-  parseRunOn
+  legacyRunOnToRunOnRequirement
 };

@@ -12,10 +12,6 @@ import { executeOperationAndCheck } from './operations';
 import * as uni from './schema';
 import { patchVersion, topologySatisfies, zip } from './unified-utils';
 
-export type TestConfiguration = InstanceType<
-  typeof import('../../tools/runner/config')['TestConfiguration']
->;
-
 export function trace(message: string): void {
   if (process.env.UTR_TRACE) {
     console.error(` > ${message}`);
@@ -57,7 +53,7 @@ export async function runUnifiedTest(
   // If test.skipReason is specified, the test runner MUST skip this
   // test and MAY use the string value to log a message.
   if (test.skipReason) {
-    console.warn(`Skipping test ${test.description}: ${test.skipReason}.`);
+    ctx.skipReason = test.skipReason;
     ctx.skip();
   }
 

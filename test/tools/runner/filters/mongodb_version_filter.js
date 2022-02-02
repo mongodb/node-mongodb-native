@@ -1,7 +1,6 @@
 'use strict';
 
 const semver = require('semver');
-const util = require('util');
 
 /**
  * Filter for the MongoDB version required for the test
@@ -30,11 +29,8 @@ class MongoDBVersionFilter {
         callback(err);
         return;
       }
-
       context.version = this.version = result.versionArray.slice(0, 3).join('.');
-      console.error('running against mongodb version:');
-      console.error(util.inspect(result, { colors: true }));
-
+      context.buildInfo = result;
       callback();
     });
   }

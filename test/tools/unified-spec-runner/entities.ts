@@ -32,7 +32,8 @@ import { ReadPreference } from '../../../src/read_preference';
 import { ClientSession } from '../../../src/sessions';
 import { WriteConcern } from '../../../src/write_concern';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
-import { TestConfiguration, trace } from './runner';
+import type { TestConfiguration } from '../runner/config';
+import { trace } from './runner';
 import type { ClientEntity, EntityDescription } from './schema';
 import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 

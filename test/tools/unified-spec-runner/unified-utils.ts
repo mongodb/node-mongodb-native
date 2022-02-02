@@ -44,6 +44,10 @@ export async function topologySatisfies(
       LoadBalanced: 'load-balanced'
     }[config.topologyType];
 
+    if (!Array.isArray(r.topologies)) {
+      throw new Error('Topology specification must be an array');
+    }
+
     if (r.topologies.includes('sharded-replicaset') && topologyType === 'sharded') {
       const shards = await utilClient.db('config').collection('shards').find({}).toArray();
       ok &&= shards.length > 0 && shards.every(shard => shard.host.split(',').length > 1);
@@ -93,7 +97,15 @@ export async function topologySatisfies(
     if (!ok && skipReason == null) skipReason = `has serverless set to ${r.serverless}`;
   }
 
-  if (!ok && skipReason != null && ctx.test) ctx.test.skipReason = skipReason;
+  if (!ok && skipReason != null) {
+    if (ctx.currentTest) {
+      // called from beforeEach hook
+      ctx.currentTest.skipReason = skipReason;
+    } else if (ctx.test) {
+      // called from within a test
+      ctx.test.skipReason = skipReason;
+    }
+  }
 
   return ok;
 }

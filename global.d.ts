@@ -1,4 +1,4 @@
-import type { TestConfiguration } from './test/tools/unified-spec-runner/runner';
+import type { TestConfiguration } from './test/tools/runner/config';
 
 type WithExclusion<T extends string> = `!${T}`
 /** Defined in test/tools/runner/filters/mongodb_topology_filter.js (topologyTypeToString) */

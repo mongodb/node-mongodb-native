@@ -1,6 +1,6 @@
 'use strict';
 
-const expect = require('chai').expect;
+const { expect } = require('chai');
 const sinon = require('sinon');
 const { Topology } = require('../../../../src/sdam/topology');
 const { MongoClient } = require('../../../../src/mongo_client');
@@ -23,14 +23,14 @@ function dumpSessionInfo(which, sessions) {
   });
 }
 
-beforeEach('Session Leak Before Each - Set up clean test environment', () => {
+const sessionLeakCheckBeforeEachEnvReset = () => {
   sandbox.restore();
   activeSessions = new Set();
   pooledSessions = new Set();
   activeSessionsBeforeClose = new Set();
-});
+};
 
-beforeEach('Session Leak Before Each - setup session tracking', function () {
+const sessionLeakCheckBeforeEach = function () {
   if (!this.currentTest || getSessionLeakMetadata(this.currentTest).skipLeakTests) {
     return;
   }
@@ -92,9 +92,9 @@ beforeEach('Session Leak Before Each - setup session tracking', function () {
     activeSessionsBeforeClose = new Set(activeSessions);
     return _close.apply(this, arguments);
   });
-});
+};
 
-afterEach('Session Leak After Each - ensure no leaks', function () {
+const sessionLeakCheckAfterEach = function () {
   if (
     this.currentTest == null ||
     this.currentTest.state === 'failed' ||
@@ -102,6 +102,8 @@ afterEach('Session Leak After Each - ensure no leaks', function () {
   ) {
     return;
   }
+
+  const testName = this.currentTest.fullTitle();
 
   try {
     if (activeSessionsBeforeClose.size) {
@@ -123,12 +125,12 @@ afterEach('Session Leak After Each - ensure no leaks', function () {
     ).to.equal(0);
 
     if (pooledSessions.size) {
-      dumpSessionInfo('pooled sessions', pooledSessions);
+      dumpSessionInfo(`pooled sessions in "${testName}"`, pooledSessions);
     }
 
     expect(
       pooledSessions.size,
-      `client close failed to clean up ${pooledSessions.size} pooled sessions`
+      `client close failed to clean up ${pooledSessions.size} pooled sessions, did you use an after hook to clean up a client?`
     ).to.equal(0);
   } catch (e) {
     if (activeSessions) activeSessions.clear();
@@ -136,4 +138,11 @@ afterEach('Session Leak After Each - ensure no leaks', function () {
     if (activeSessionsBeforeClose) activeSessionsBeforeClose.clear();
     this.test.error(e);
   }
-});
+};
+
+module.exports = {
+  mochaHooks: {
+    beforeEach: [sessionLeakCheckBeforeEachEnvReset, sessionLeakCheckBeforeEach],
+    afterEach: [sessionLeakCheckAfterEach]
+  }
+};

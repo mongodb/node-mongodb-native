@@ -1,32 +1,45 @@
-'use strict';
-const ConnectionString = require('mongodb-connection-string-url').default;
-const url = require('url');
-const qs = require('querystring');
-const { expect } = require('chai');
+import { expect } from 'chai';
+import ConnectionString from 'mongodb-connection-string-url';
+import * as qs from 'querystring';
+import * as url from 'url';
 
-const { MongoClient } = require('../../../src/mongo_client');
-const { Topology } = require('../../../src/sdam/topology');
-const { TopologyType } = require('../../../src/sdam/common');
-const { HostAddress } = require('../../../src/utils');
-const { getEnvironmentalOptions } = require('../utils');
+import { AuthMechanism } from '../../../src';
+import { MongoClient } from '../../../src/mongo_client';
+import { TopologyType } from '../../../src/sdam/common';
+import { Topology } from '../../../src/sdam/topology';
+import { HostAddress } from '../../../src/utils';
+import { getEnvironmentalOptions } from '../utils';
 
-/**
- * @typedef {Object} UrlOptions
- * @property {string} [db] - dbName to put in the path section override
- * @property {string} [replicaSet] - replicaSet name override
- * @property {string} [username] - Username for auth section
- * @property {string} [password] - Password for auth section
- * @property {string} [authMechanism] - Authmechanism name
- * @property {Record<string, any>} [authMechanismProperties] - additional options for auth mechanism
- * @property {string} [authSource] - authSource override in searchParams of URI
- * @property {boolean} [useMultipleMongoses] - if set will use concatenate all known HostAddresses in URI
- */
+interface ProxyParams {
+  proxyHost?: string;
+  proxyPort?: number;
+  proxyUsername?: string;
+  proxyPassword?: string;
+}
 
-/**
- * @param {Record<string, any>} obj
- */
-function convertToConnStringMap(obj) {
-  let result = [];
+interface UrlOptions {
+  /** name of the default db */
+  db?: string;
+  /** replSet name */
+  replicaSet?: string;
+  /** Username to authenticate with */
+  username?: string;
+  /** Password to authenticate with */
+  password?: string;
+  /** Name of the auth mechanism to use */
+  authMechanism?: AuthMechanism;
+  /** Additional properties used by the mechanism */
+  authMechanismProperties?: Record<string, any>;
+  /** The database to specify as the authentication source */
+  authSource?: string;
+  /** If set will use concatenate all known HostAddresses in URI */
+  useMultipleMongoses?: boolean;
+  /** Parameters for configuring a proxy connection */
+  proxyURIParams?: ProxyParams;
+}
+
+function convertToConnStringMap(obj: Record<string, any>) {
+  const result = [];
   Object.keys(obj).forEach(key => {
     result.push(`${key}:${obj[key]}`);
   });
@@ -34,8 +47,30 @@ function convertToConnStringMap(obj) {
   return result.join(',');
 }
 
-class TestConfiguration {
-  constructor(uri, context) {
+export class TestConfiguration {
+  version: string;
+  clientSideEncryption: Record<string, any>;
+  parameters: Record<string, any>;
+  singleMongosLoadBalancerUri: string;
+  multiMongosLoadBalancerUri: string;
+  isServerless: boolean;
+  topologyType: TopologyType;
+  buildInfo: Record<string, any>;
+  options: {
+    hosts?: string[];
+    hostAddresses?: HostAddress[];
+    hostAddress?: HostAddress;
+    host?: string;
+    port?: number;
+    db?: string;
+    replicaSet?: string;
+    authMechanism?: string;
+    authMechanismProperties?: Record<string, any>;
+    auth?: { username: string; password: string; authSource?: string };
+    proxyURIParams?: ProxyParams;
+  };
+
+  constructor(uri: string, context: Record<string, any>) {
     const url = new ConnectionString(uri);
     const { hosts } = url;
     const hostAddresses = hosts.map(HostAddress.fromString);
@@ -46,6 +81,7 @@ class TestConfiguration {
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
     this.isServerless = !!process.env.SERVERLESS;
     this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
+    this.buildInfo = context.buildInfo;
     this.options = {
       hosts,
       hostAddresses,
@@ -57,7 +93,7 @@ class TestConfiguration {
       proxyURIParams: url.searchParams.get('proxyHost')
         ? {
             proxyHost: url.searchParams.get('proxyHost'),
-            proxyPort: url.searchParams.get('proxyPort'),
+            proxyPort: Number(url.searchParams.get('proxyPort')),
             proxyUsername: url.searchParams.get('proxyUsername'),
             proxyPassword: url.searchParams.get('proxyPassword')
           }
@@ -108,15 +144,7 @@ class TestConfiguration {
     return this.options.replicaSet;
   }
 
-  get mongo() {
-    throw new TypeError('fix this!');
-  }
-
-  get require() {
-    throw new TypeError('fix this!');
-  }
-
-  newClient(dbOptions, serverOptions) {
+  newClient(dbOptions?: string | Record<string, any>, serverOptions?: Record<string, any>) {
     serverOptions = Object.assign(
       { minHeartbeatFrequencyMS: 100 },
       getEnvironmentalOptions(),
@@ -170,7 +198,7 @@ class TestConfiguration {
       dbOptions.loadBalanced = true;
     }
 
-    const urlOptions = {
+    const urlOptions: url.UrlObject = {
       protocol: 'mongodb',
       slashes: true,
       hostname: dbHost,
@@ -191,6 +219,10 @@ class TestConfiguration {
       if (username) {
         urlOptions.auth = `${encodeURIComponent(username)}:${encodeURIComponent(password)}`;
       }
+    }
+
+    if (typeof urlOptions.query === 'object') {
+      // Auth goes at the top of the uri, not in the searchParams
       delete urlOptions.query.auth;
     }
 
@@ -219,9 +251,9 @@ class TestConfiguration {
    * Construct a connection URL using nodejs's whatwg URL similar to how connection_string.ts
    * works
    *
-   * @param {UrlOptions} [options] - overrides and settings for URI generation
+   * @param options - overrides and settings for URI generation
    */
-  url(options) {
+  url(options?: UrlOptions) {
     options = {
       db: this.options.db,
       replicaSet: this.options.replicaSet,
@@ -251,7 +283,7 @@ class TestConfiguration {
     if (options.password) url.password = options.password;
 
     if (this.isLoadBalanced) {
-      url.searchParams.append('loadBalanced', true);
+      url.searchParams.append('loadBalanced', 'true');
     }
 
     if (options.username || options.password) {
@@ -270,7 +302,7 @@ class TestConfiguration {
         url.searchParams.append('authSource', options.authSource);
       }
     } else if (this.isServerless) {
-      url.searchParams.append('ssl', true);
+      url.searchParams.append('ssl', 'true');
       url.searchParams.append('authSource', 'admin');
     }
 
@@ -314,7 +346,7 @@ class TestConfiguration {
   }
 
   kmsProviders(type, localKey) {
-    const kmsProviders = {};
+    const kmsProviders: Record<string, any> = {};
     if (typeof type !== 'string' || type === 'aws') {
       kmsProviders.aws = {
         accessKeyId: this.clientSideEncryption.AWS_ACCESS_KEY_ID,
@@ -329,5 +361,3 @@ class TestConfiguration {
     return kmsProviders;
   }
 }
-
-module.exports = { TestConfiguration };

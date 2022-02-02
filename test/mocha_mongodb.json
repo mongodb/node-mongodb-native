@@ -3,7 +3,10 @@
   "require": [
     "source-map-support/register",
     "ts-node/register",
-    "test/tools/runner/chai-addons.js"
+    "test/tools/runner/chai-addons.js",
+    "test/tools/runner/hooks/configuration.js",
+    "test/tools/runner/hooks/client_leak_checker.js",
+    "test/tools/runner/hooks/session_leak_checker.js"
   ],
   "extension": ["js", "ts"],
   "ui": "test/tools/runner/metadata_ui.js",
