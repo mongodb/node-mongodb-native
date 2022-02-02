@@ -118,7 +118,7 @@ describe('Transactions Spec Legacy Tests', function () {
   if (!process.env.SERVERLESS) {
     suitesToRun.push({
       name: 'withTransaction spec tests',
-      specPath: path.join('transactions', 'convenient-api')
+      specPath: path.join('transactions-convenient-api')
     });
   } else {
     // FIXME(NODE-3550): these tests should pass on serverless but currently fail
