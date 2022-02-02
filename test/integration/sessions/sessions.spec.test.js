@@ -44,9 +44,7 @@ describe('Sessions', function () {
 
     function testFilter(spec) {
       const SKIP_TESTS = [
-        // These two tests need to run against multiple mongoses
-        'Dirty explicit session is discarded',
-        'Dirty implicit session is discarded (write)'
+        // placeholder for skips
       ];
 
       return SKIP_TESTS.indexOf(spec.description) === -1;

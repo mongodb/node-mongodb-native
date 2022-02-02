@@ -132,11 +132,14 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
       const allRequirements = runOn.map(legacyRunOnToRunOnRequirement);
 
-      let shouldRun = true;
+      let someRequirementMatches = allRequirements.length ? false : true;
       for (const requirement of allRequirements) {
-        shouldRun =
-          shouldRun && (await topologySatisfies(this.currentTest.ctx, requirement, utilClient));
+        someRequirementMatches =
+          someRequirementMatches ||
+          (await topologySatisfies(this.currentTest.ctx, requirement, utilClient));
       }
+
+      let shouldRun = someRequirementMatches;
 
       const spec = this.currentTest.spec;
 
