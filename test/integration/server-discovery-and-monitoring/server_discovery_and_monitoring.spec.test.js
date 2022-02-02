@@ -38,6 +38,23 @@ class SDAMRunnerContext extends TestRunnerContext {
   }
 }
 
+// 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+// Some tests are failing when setting a failCommand when auth is enabled.
+const isAuthEnabled = process.env.AUTH === 'auth';
+const failpointTests = [
+  'Reset server and pool after AuthenticationFailure error',
+  'Reset server and pool after misc command error',
+  'Reset server and pool after network error during authentication',
+  'Reset server and pool after network timeout error during authentication',
+  'Reset server and pool after shutdown error during authentication'
+];
+const skippedTests = isAuthEnabled ? failpointTests : [];
+
+function sdamDisabledTestFilter(test) {
+  const { description } = test;
+  return !skippedTests.includes(description);
+}
+
 describe('SDAM', function () {
   describe('integration spec tests', function () {
     const testContext = new SDAMRunnerContext();
@@ -58,6 +75,6 @@ describe('SDAM', function () {
       await testContext.teardown();
     });
 
-    generateTopologyTests(testSuites, testContext);
+    generateTopologyTests(testSuites, testContext, sdamDisabledTestFilter);
   });
 });

@@ -158,13 +158,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
           if (process.env.AUTH !== 'auth') {
             shouldRun = false;
           }
-
-          // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
-          // Some tests are failing when setting a failCommand when auth is enabled.
-          if (spec.failPoint.configureFailPoint === 'failCommand') {
-            shouldRun = false;
-            this.currentTest.skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
-          }
         }
       }
 
