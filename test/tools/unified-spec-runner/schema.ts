@@ -19,7 +19,7 @@ export interface OperationDescription {
 export interface UnifiedSuite {
   description: string;
   schemaVersion: string;
-  runOnRequirements?: [RunOnRequirement, ...RunOnRequirement[]];
+  runOnRequirements?: RunOnRequirement[];
   createEntities?: [EntityDescription, ...EntityDescription[]];
   initialData?: [CollectionData, ...CollectionData[]];
   tests: [Test, ...Test[]];
@@ -34,8 +34,8 @@ export const TopologyType = Object.freeze({
 } as const);
 export type TopologyId = typeof TopologyType[keyof typeof TopologyType];
 export interface RunOnRequirement {
-  serverless: 'forbid' | 'allow' | 'require';
-  auth: boolean;
+  serverless?: 'forbid' | 'allow' | 'require';
+  auth?: boolean;
   maxServerVersion?: string;
   minServerVersion?: string;
   topologies?: TopologyId[];

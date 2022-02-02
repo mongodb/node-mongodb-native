@@ -2,47 +2,64 @@
 
 const { expect } = require('chai');
 const { loadSpecTests } = require('../../spec');
-const { parseRunOn } = require('../../tools/spec-runner');
+const { legacyRunOnToRunOnRequirement } = require('../../tools/spec-runner');
+const { topologySatisfies } = require('../../tools/unified-spec-runner/unified-utils');
 
 describe('Retryable Writes', function () {
   let ctx = {};
-  loadSpecTests('retryable-writes').forEach(suite => {
-    const environmentRequirementList = parseRunOn(suite.runOn);
-    environmentRequirementList.forEach(requires => {
-      const suiteName = `${suite.name} - ${requires.topology.join()}`;
+  const retryableWrites = loadSpecTests('retryable-writes');
 
-      describe(suiteName, {
-        metadata: { requires },
-        test: function () {
-          // Step 3: Test Teardown. Turn off failpoints, and close client
-          afterEach(function () {
-            if (!ctx.db || !ctx.client) {
-              return;
-            }
-
-            return Promise.resolve()
-              .then(() =>
-                ctx.failPointName ? turnOffFailPoint(ctx.client, ctx.failPointName) : {}
-              )
-              .then(() => ctx.client.close())
-              .then(() => (ctx = {}));
-          });
-
-          suite.tests.forEach(test => {
-            it(test.description, function () {
-              // Step 1: Test Setup. Includes a lot of boilerplate stuff
-              // like creating a client, dropping and refilling data collections,
-              // and enabling failpoints
-              return executeScenarioSetup(suite, test, this.configuration, ctx).then(() =>
-                // Step 2: Run the test
-                executeScenarioTest(test, ctx)
-              );
-            });
-          });
+  for (const suite of retryableWrites) {
+    describe(suite.name, function () {
+      beforeEach(async function () {
+        let utilClient;
+        if (this.configuration.isLoadBalanced) {
+          // The util client can always point at the single mongos LB frontend.
+          utilClient = this.configuration.newClient(this.configuration.singleMongosLoadBalancerUri);
+        } else {
+          utilClient = this.configuration.newClient();
         }
+
+        await utilClient.connect();
+
+        const allRequirements = suite.runOn.map(legacyRunOnToRunOnRequirement);
+
+        let shouldRun = true;
+        for (const requirement of allRequirements) {
+          shouldRun =
+            shouldRun && (await topologySatisfies(this.currentTest.ctx, requirement, utilClient));
+        }
+
+        await utilClient.close();
+
+        if (!shouldRun) this.skip();
       });
+
+      afterEach(async function () {
+        // Step 3: Test Teardown. Turn off failpoints, and close client
+        if (!ctx.db || !ctx.client) {
+          return;
+        }
+
+        if (ctx.failPointName) {
+          await turnOffFailPoint(ctx.client, ctx.failPointName);
+        }
+        await ctx.client.close();
+        ctx = {}; // reset context
+      });
+
+      for (const test of suite.tests) {
+        it(test.description, async function () {
+          // Step 1: Test Setup. Includes a lot of boilerplate stuff
+          // like creating a client, dropping and refilling data collections,
+          // and enabling failpoints
+          await executeScenarioSetup(suite, test, this.configuration, ctx);
+          // Step 2: Run the test
+          await executeScenarioTest(test, ctx);
+        });
+      }
     });
-  });
+  }
 });
 
 function executeScenarioSetup(scenario, test, config, ctx) {

@@ -26,7 +26,7 @@ describe('Compression', function () {
     client = new MongoClient(`mongodb://${server.uri()}`, { compressors: 'snappy' });
   });
 
-  after(async function () {
+  afterEach(async function () {
     if (server) await mock.cleanup();
     if (client) await client.close();
   });

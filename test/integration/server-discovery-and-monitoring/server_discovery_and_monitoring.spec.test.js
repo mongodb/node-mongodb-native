@@ -39,12 +39,23 @@ class SDAMRunnerContext extends TestRunnerContext {
 }
 
 describe('SDAM', function () {
-  context('integration spec tests', function () {
+  describe('integration spec tests', function () {
     const testContext = new SDAMRunnerContext();
     const testSuites = loadSpecTests('server-discovery-and-monitoring/integration');
-    after(() => testContext.teardown());
-    before(function () {
-      return testContext.setup(this.configuration);
+
+    beforeEach(async function () {
+      if (this.configuration.isLoadBalanced) {
+        this.currentTest.skipReason = 'Cannot run in a loadBalanced environment';
+        this.skip();
+      }
+    });
+
+    beforeEach(async function () {
+      await testContext.setup(this.configuration);
+    });
+
+    afterEach(async () => {
+      await testContext.teardown();
     });
 
     generateTopologyTests(testSuites, testContext);

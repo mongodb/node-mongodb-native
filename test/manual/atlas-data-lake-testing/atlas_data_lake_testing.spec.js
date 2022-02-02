@@ -24,5 +24,7 @@ describe('Atlas Data Lake - spec', function () {
     return testContext.setup(this.configuration);
   });
 
+  for (const suite of testSuites) suite.runOn = []; // patched in for the spec runner
+
   generateTopologyTests(testSuites, testContext);
 });

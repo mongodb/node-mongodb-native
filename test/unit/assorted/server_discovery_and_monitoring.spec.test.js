@@ -69,11 +69,8 @@ describe('Server Discovery and Monitoring (spec)', function () {
       specTests[specTestName].forEach(testData => {
         const skip = shouldSkip(testData.description);
         const type = skip ? it.skip : it;
-        type(testData.description, {
-          metadata: { requires: { topology: 'single' } },
-          test: function (done) {
-            executeSDAMTest(testData, done);
-          }
+        type(testData.description, function (done) {
+          executeSDAMTest(testData, done);
         });
       });
     });
