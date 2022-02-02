@@ -16,7 +16,7 @@ describe('Connection', function () {
 
   describe('Connection - functional/cmap', function () {
     it('should execute a command against a server', {
-      metadata: { requires: { apiVersion: false } },
+      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: function (done) {
         const connectOptions = Object.assign(
           { connectionType: Connection },
@@ -38,7 +38,7 @@ describe('Connection', function () {
     });
 
     it('should emit command monitoring events', {
-      metadata: { requires: { apiVersion: false } },
+      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: function (done) {
         const connectOptions = Object.assign(
           { connectionType: Connection, monitorCommands: true },

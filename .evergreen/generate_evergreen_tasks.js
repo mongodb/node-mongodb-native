@@ -124,7 +124,8 @@ TASKS.push(
           vars: {
             VERSION: '5.0',
             TOPOLOGY: 'sharded_cluster',
-            AUTH: 'auth'
+            AUTH: 'auth',
+            LOAD_BALANCER: 'true'
           }
         },
         { func: 'start-load-balancer' },

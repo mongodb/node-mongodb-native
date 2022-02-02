@@ -458,37 +458,44 @@ describe('Topology (unit)', function () {
       this.sinon.restore();
     });
 
-    it('should schedule monitoring if no suitable server is found', function (done) {
-      const topology = new Topology('someserver:27019');
-      const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
+    it('should schedule monitoring if no suitable server is found', {
+      metadata: { requires: { topology: '!load-balanced' } },
+      test: function (done) {
+        const topology = new Topology('someserver:27019');
+        const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
 
-      // satisfy the initial connect, then restore the original method
-      const selectServer = this.sinon
-        .stub(Topology.prototype, 'selectServer')
-        .callsFake(function (selector, options, callback) {
-          const server = Array.from(this.s.servers.values())[0];
-          selectServer.restore();
-          callback(null, server);
+        // satisfy the initial connect, then restore the original method
+        const selectServer = this.sinon
+          .stub(Topology.prototype, 'selectServer')
+          .callsFake(function (selector, options, callback) {
+            const server = Array.from(this.s.servers.values())[0];
+            selectServer.restore();
+            callback(null, server);
+          });
+
+        this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
+          this.s.state = 'connected';
+          this.emit('connect');
         });
 
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
-        this.s.state = 'connected';
-        this.emit('connect');
-      });
+        topology.connect(() => {
+          topology.selectServer(
+            ReadPreference.secondary,
+            { serverSelectionTimeoutMS: 1000 },
+            err => {
+              expect(err).to.exist;
+              expect(err).to.match(/Server selection timed out/);
+              expect(err).to.have.property('reason');
 
-      topology.connect(() => {
-        topology.selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 }, err => {
-          expect(err).to.exist;
-          expect(err).to.match(/Server selection timed out/);
-          expect(err).to.have.property('reason');
+              // When server is created `connect` is called on the monitor. When server selection
+              // occurs `requestCheck` will be called for an immediate check.
+              expect(requestCheck).property('callCount').to.equal(1);
 
-          // When server is created `connect` is called on the monitor. When server selection
-          // occurs `requestCheck` will be called for an immediate check.
-          expect(requestCheck).property('callCount').to.equal(1);
-
-          topology.close(done);
+              topology.close(done);
+            }
+          );
         });
-      });
+      }
     });
 
     it('should disallow selection when the topology is explicitly closed', function (done) {

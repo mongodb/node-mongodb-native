@@ -82,6 +82,7 @@ functions:
           AUTH=${AUTH} SSL=${SSL} \
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
           REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
+          LOAD_BALANCER=${LOAD_BALANCER} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
@@ -201,7 +202,7 @@ functions:
           TOPOLOGY="${TOPOLOGY}" \
           SKIP_DEPS=${SKIP_DEPS|1} \
           NO_EXIT=${NO_EXIT|1} \
-          FAKE_MONGODB_SERVICE_ID="true" \
+          LOAD_BALANCER="${LOAD_BALANCER}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run checks:
     - command: shell.exec
@@ -994,6 +995,7 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: sharded_cluster
           AUTH: auth
+          LOAD_BALANCER: 'true'
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
