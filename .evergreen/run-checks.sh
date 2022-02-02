@@ -18,7 +18,7 @@ set -o xtrace
 ## Checks typescript, eslint, and prettier
 npm run check:lint
 
-npm run check:unit
+npx nyc npm run check:unit
 
 export TSC="./node_modules/typescript/bin/tsc"
 

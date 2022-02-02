@@ -144,7 +144,7 @@ export interface ChangeStreamDocument<TSchema extends Document = Document> {
    * this will contain all the components of the shard key in order,
    * followed by the _id if the _id isn’t part of the shard key.
    */
-  documentKey?: InferIdType<TSchema>;
+  documentKey?: { _id: InferIdType<TSchema> };
 
   /**
    * Only present for ops of type ‘update’.
