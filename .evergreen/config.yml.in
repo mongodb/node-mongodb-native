@@ -119,7 +119,7 @@ functions:
           ${PREPARE_SHELL}
           DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-local.sh
 
-  "run tests":
+  "bootstrap kms servers":
     - command: shell.exec
       params:
         script: |
@@ -139,6 +139,7 @@ functions:
             ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001 &
             ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert &
           fi
+  "run tests":
     - command: shell.exec
       type: test
       params:
@@ -708,21 +709,6 @@ functions:
           export CSFLE_GIT_REF="${CSFLE_GIT_REF}"
           export CDRIVER_GIT_REF="${CDRIVER_GIT_REF}"
           EOT
-    - command: shell.exec
-      params:
-        script: |
-          ${PREPARE_SHELL}
-          cd ${DRIVERS_TOOLS}/.evergreen/csfle
-          . ./activate_venv.sh
-    - command: shell.exec
-      params:
-        background: true
-        script: |
-          cd ${DRIVERS_TOOLS}/.evergreen/csfle
-          ./kmstlsvenv/bin/python3 -u kms_kmip_server.py &
-          ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000 &
-          ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001 &
-          ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert &
     - command: shell.exec
       type: test
       params:

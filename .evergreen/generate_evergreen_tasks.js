@@ -62,6 +62,7 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
           AUTH: auth
         }
       },
+      { func: 'bootstrap kms servers' },
       { func: 'run tests' }
     ]
   };
@@ -137,6 +138,7 @@ TASKS.push(
           }
         },
         { func: 'start-load-balancer' },
+        { func: 'bootstrap kms servers' },
         { func: 'run-lb-tests' },
         { func: 'stop-load-balancer' }
       ]
@@ -163,6 +165,7 @@ TASKS.push(
             TOPOLOGY: 'replica_set'
           }
         },
+        { func: 'bootstrap kms servers' },
         { func: 'run socks5 tests' }
       ]
     },
