@@ -252,6 +252,11 @@ functions:
         script: |
           ${PREPARE_SHELL}
 
+          # Disable xtrace (just in case it was accidentally set).
+          set +x
+          . ./prepare_client_encryption.sh
+          rm -f ./prepare_client_encryption.sh
+
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} \
           SSL=${SSL} \
