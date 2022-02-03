@@ -203,58 +203,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
    * - Create client encryption invalid hostname
    */
   context('when passing through tls options', metadata, function () {
-    const tlsCaOptions = {
-      aws: {
-        tlsCAFile: process.env.KMIP_TLS_CA_FILE
-      },
-      azure: {
-        tlsCAFile: process.env.KMIP_TLS_CA_FILE
-      },
-      gcp: {
-        tlsCAFile: process.env.KMIP_TLS_CA_FILE
-      },
-      kmip: {
-        tlsCAFile: process.env.KMIP_TLS_CA_FILE
-      }
-    };
-    const clientNoTlsOptions = {
-      keyVaultNamespace,
-      kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
-      tlsOptions: tlsCaOptions
-    };
-    const clientWithTlsOptions = {
-      keyVaultNamespace,
-      kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
-      tlsOptions: {
-        aws: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-        },
-        azure: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-        },
-        gcp: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-        },
-        kmip: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-        }
-      }
-    };
-    const clientWithTlsExpiredOptions = {
-      keyVaultNamespace,
-      kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
-      tlsOptions: tlsCaOptions
-    };
-    const clientWithInvalidHostnameOptions = {
-      keyVaultNamespace,
-      kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
-      tlsOptions: tlsCaOptions
-    };
-
+    let tlsCaOptions;
+    let clientNoTlsOptions;
+    let clientWithTlsOptions;
+    let clientWithTlsExpiredOptions;
+    let clientWithInvalidHostnameOptions;
     let clientNoTls;
     let clientWithTls;
     let clientWithTlsExpired;
@@ -265,6 +218,57 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     let clientEncryptionWithInvalidHostname;
 
     before(async function () {
+      tlsCaOptions = {
+        aws: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        azure: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        gcp: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        kmip: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        }
+      };
+      clientNoTlsOptions = {
+        keyVaultNamespace,
+        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+        tlsOptions: tlsCaOptions
+      };
+      clientWithTlsOptions = {
+        keyVaultNamespace,
+        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+        tlsOptions: {
+          aws: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          azure: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          gcp: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          kmip: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          }
+        }
+      };
+      clientWithTlsExpiredOptions = {
+        keyVaultNamespace,
+        kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
+        tlsOptions: tlsCaOptions
+      };
+      clientWithInvalidHostnameOptions = {
+        keyVaultNamespace,
+        kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
+        tlsOptions: tlsCaOptions
+      };
       clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
       clientWithTls = this.configuration.newClient({}, { autoEncryption: clientWithTlsOptions });
       clientWithTlsExpired = this.configuration.newClient(
