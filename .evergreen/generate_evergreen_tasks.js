@@ -118,6 +118,7 @@ TASKS.push(
           func: 'bootstrap mongo-orchestration',
           vars: {
             VERSION: 'latest',
+            SSL: 'ssl',
             TOPOLOGY: 'sharded_cluster',
             LOAD_BALANCER: 'true'
           }

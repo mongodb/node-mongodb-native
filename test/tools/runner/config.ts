@@ -196,6 +196,7 @@ export class TestConfiguration {
 
     if (this.topologyType === TopologyType.LoadBalanced) {
       dbOptions.loadBalanced = true;
+      dbOptions.tls = true
     }
 
     const urlOptions: url.UrlObject = {
