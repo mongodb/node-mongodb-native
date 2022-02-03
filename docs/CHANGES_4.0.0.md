@@ -96,6 +96,13 @@ for await (const doc of cursor) {
 Prior to the this release there was inconsistency surrounding how the cursor would error if a setting like limit was applied after cursor execution had begun.
 Now, an error along the lines of: `Cursor is already initialized` is thrown.
 
+##### Cursor.count always respects skip and limit
+
+> Updated: Feb 3rd 2022
+
+The `applySkipLimit` argument has been removed from `cursor.count`, cursors will always passthrough the skip and limit to the underlying count operation.
+It is recommended that users utilize the `collection.countDocuments` or `collection.estimatedDocumentCount` APIs.
+
 #### ChangeStream must be used as an iterator or an event emitter
 
 You cannot use ChangeStream as an iterator after using as an EventEmitter nor visa versa.
