@@ -61,7 +61,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'base64'
   );
 
-  context('when kmip is the kms provider', metadata, function () {
+  context('when kmip is the kms provider', metadata, async function () {
     const autoEncryptionOptions = {
       keyVaultNamespace,
       kmsProviders: {
@@ -105,8 +105,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       await client.close();
     });
 
-    context('when encrypting with kmip', metadata, function () {
-      context('when not providing an endpoint in the master key', metadata, function () {
+    context('when encrypting with kmip', metadata, async function () {
+      context('when not providing an endpoint in the master key', metadata, async function () {
         const masterKey = { keyId: '1' };
         let dataKey;
         let encrypted;
@@ -202,7 +202,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
    * - Create client encryption expired
    * - Create client encryption invalid hostname
    */
-  context('when passing through tls options', metadata, function () {
+  context('when passing through tls options', metadata, async function () {
     let tlsCaOptions;
     let clientNoTlsOptions;
     let clientWithTlsOptions;
