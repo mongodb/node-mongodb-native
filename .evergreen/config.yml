@@ -1028,6 +1028,7 @@ tasks:
           TOPOLOGY: server
           REQUIRE_API_VERSION: '1'
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
         vars:
           MONGODB_API_VERSION: '1'

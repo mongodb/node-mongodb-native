@@ -97,6 +97,7 @@ BASE_TASKS.push({
         AUTH: 'auth'
       }
     },
+    { func: 'bootstrap kms servers' },
     {
       func: 'run tests',
       vars: {
