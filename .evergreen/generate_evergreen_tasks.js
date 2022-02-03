@@ -139,7 +139,6 @@ TASKS.push(
           }
         },
         { func: 'start-load-balancer' },
-        { func: 'bootstrap kms servers' },
         { func: 'run-lb-tests' },
         { func: 'stop-load-balancer' }
       ]

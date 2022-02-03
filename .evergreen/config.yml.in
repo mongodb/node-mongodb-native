@@ -232,30 +232,10 @@ functions:
     - command: shell.exec
       type: test
       params:
-        silent: true
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          cat <<EOT > prepare_client_encryption.sh
-          export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
-          export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
-          export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
-          export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
-          export CSFLE_GIT_REF="${CSFLE_GIT_REF}"
-          export CDRIVER_GIT_REF="${CDRIVER_GIT_REF}"
-          EOT
-    - command: shell.exec
-      type: test
-      params:
         working_dir: src
         timeout_secs: 300
         script: |
           ${PREPARE_SHELL}
-
-          # Disable xtrace (just in case it was accidentally set).
-          set +x
-          . ./prepare_client_encryption.sh
-          rm -f ./prepare_client_encryption.sh
 
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} \

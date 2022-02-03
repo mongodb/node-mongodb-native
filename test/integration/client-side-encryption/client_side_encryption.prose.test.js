@@ -28,7 +28,13 @@ const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => 
 };
 
 const noop = () => {};
-const metadata = { requires: { clientSideEncryption: true, mongodb: '>=4.2.0' } };
+const metadata = {
+  requires: {
+    clientSideEncryption: true,
+    mongodb: '>=4.2.0',
+    topology: '!load-balanced'
+  }
+};
 
 // Tests for the ClientEncryption type are not included as part of the YAML tests.
 
