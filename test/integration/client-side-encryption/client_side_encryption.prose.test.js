@@ -8,7 +8,7 @@ chai.use(require('chai-subset'));
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
-  const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || 'NOT_PROVIDED');
+  const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
   if (localKey) {
     result.local = { key: localKey };
   }
