@@ -89,23 +89,32 @@ export async function runUnifiedTest(
 
     // If test.runOnRequirements is specified, the test runner MUST skip the test unless one or more
     // runOnRequirement objects are satisfied.
-    const allRequirements = [
-      ...(unifiedSuite.runOnRequirements ?? []),
-      ...(test.runOnRequirements ?? [])
-    ];
+    const suiteRequirements = unifiedSuite.runOnRequirements ?? [];
+    const testRequirements = test.runOnRequirements ?? [];
 
-    let someRequirementMet = allRequirements.length ? false : true;
+    let someSuiteRequirementMet = suiteRequirements.length ? false : true;
+    let someTestRequirementMet = testRequirements.length ? false : true;
 
     trace('satisfiesRequirements');
-    for (const requirement of allRequirements) {
-      const met = await topologySatisfies(ctx, requirement, utilClient);
-      if (met) {
-        someRequirementMet = true;
+    for (const reqType of ['suite', 'test']) {
+      if (reqType === 'test' && !someSuiteRequirementMet) {
         break;
+      }
+      const requirements = reqType === 'suite' ? suiteRequirements : testRequirements;
+      for (const requirement of requirements) {
+        const met = await topologySatisfies(ctx, requirement, utilClient);
+        if (met) {
+          if (reqType === 'suite') {
+            someSuiteRequirementMet = true;
+          } else {
+            someTestRequirementMet = true;
+          }
+          break;
+        }
       }
     }
 
-    if (!someRequirementMet) {
+    if (!someSuiteRequirementMet || !someTestRequirementMet) {
       return ctx.skip();
     }
 
