@@ -50,7 +50,7 @@ const SINGLETON_TASKS = [];
 
 function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
   return {
-    name: `test-${mongoVersion}-${topology}${ auth === 'noauth' ? '-noauth' : ''}`,
+    name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
       { func: 'install dependencies' },
@@ -67,12 +67,20 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
   };
 }
 
-const BASE_TASKS = [];
-MONGODB_VERSIONS.forEach(mongoVersion => {
-  TOPOLOGIES.forEach(topology => BASE_TASKS.push(makeTask({ mongoVersion, topology })));
-});
+function generateVersionTopologyMatrix() {
+  function* _generate() {
+    for (const mongoVersion of MONGODB_VERSIONS) {
+      for (const topology of TOPOLOGIES) {
+        yield { mongoVersion, topology}
+      }
+    }
+  }
 
-const AUTH_DISABLED_TASKS = MONGODB_VERSIONS.map(version => makeTask({ mongoVersion: version, topology: 'replica_set', auth: 'noauth', tags: ['noauth'] }));
+  return Array.from(_generate());
+}
+
+const BASE_TASKS = generateVersionTopologyMatrix().map(makeTask)
+const AUTH_DISABLED_TASKS = generateVersionTopologyMatrix().map((test) => makeTask({ ...test, auth: 'noauth', tags: ['noauth'] }))
 
 BASE_TASKS.push({
   name: `test-latest-server-v1-api`,

@@ -79,7 +79,7 @@ export async function topologySatisfies(
     if (r.auth === true) {
       ok &&= process.env.AUTH === 'auth';
       if (!ok && skipReason == null) {
-        skipReason = `requires auth but auth cannot be tested in the unified format - TODO(NODE-2471)`;
+        skipReason = `requires auth but auth is not enabled`;
       }
     } else if (r.auth === false) {
       ok &&= process.env.AUTH === 'noauth' || process.env.AUTH == null;

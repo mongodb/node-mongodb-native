@@ -28,8 +28,9 @@ class AuthFilter {
       return !this.isAuthEnabled;
     }
 
-    // defaults to 'disabled' because it's gotta default to something.
-    return true;
+    throw new Error(
+      "Invalid value for 'auth' filter.  'auth' must be set to 'enabled' or 'disabled'."
+    );
   }
 }
 

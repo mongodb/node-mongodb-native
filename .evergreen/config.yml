@@ -1764,6 +1764,19 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
+  - name: test-latest-server-noauth
+    tags:
+      - latest
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
   - name: test-latest-replica_set-noauth
     tags:
       - latest
@@ -1775,6 +1788,32 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-latest-sharded_cluster-noauth
+    tags:
+      - latest
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-5.0-server-noauth
+    tags:
+      - '5.0'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: server
           AUTH: noauth
       - func: run tests
   - name: test-5.0-replica_set-noauth
@@ -1790,6 +1829,32 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
+  - name: test-5.0-sharded_cluster-noauth
+    tags:
+      - '5.0'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.4-server-noauth
+    tags:
+      - '4.4'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
   - name: test-4.4-replica_set-noauth
     tags:
       - '4.4'
@@ -1801,6 +1866,32 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.4-sharded_cluster-noauth
+    tags:
+      - '4.4'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.2-server-noauth
+    tags:
+      - '4.2'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: server
           AUTH: noauth
       - func: run tests
   - name: test-4.2-replica_set-noauth
@@ -1816,6 +1907,32 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
+  - name: test-4.2-sharded_cluster-noauth
+    tags:
+      - '4.2'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.0-server-noauth
+    tags:
+      - '4.0'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
   - name: test-4.0-replica_set-noauth
     tags:
       - '4.0'
@@ -1829,6 +1946,32 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: run tests
+  - name: test-4.0-sharded_cluster-noauth
+    tags:
+      - '4.0'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-3.6-server-noauth
+    tags:
+      - '3.6'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
   - name: test-3.6-replica_set-noauth
     tags:
       - '3.6'
@@ -1840,6 +1983,19 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-3.6-sharded_cluster-noauth
+    tags:
+      - '3.6'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: run tests
 task_groups:
@@ -2153,9 +2309,21 @@ buildvariants:
     display_name: No Auth Tests
     run_on: ubuntu1804-test
     tasks:
+      - test-latest-server-noauth
       - test-latest-replica_set-noauth
+      - test-latest-sharded_cluster-noauth
+      - test-5.0-server-noauth
       - test-5.0-replica_set-noauth
+      - test-5.0-sharded_cluster-noauth
+      - test-4.4-server-noauth
       - test-4.4-replica_set-noauth
+      - test-4.4-sharded_cluster-noauth
+      - test-4.2-server-noauth
       - test-4.2-replica_set-noauth
+      - test-4.2-sharded_cluster-noauth
+      - test-4.0-server-noauth
       - test-4.0-replica_set-noauth
+      - test-4.0-sharded_cluster-noauth
+      - test-3.6-server-noauth
       - test-3.6-replica_set-noauth
+      - test-3.6-sharded_cluster-noauth
