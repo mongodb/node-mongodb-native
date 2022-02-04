@@ -6,7 +6,7 @@ import * as MongoDBDriver from '../../src';
 import type { ChangeStreamDocument } from '../../src/change_stream';
 import { Collection } from '../../src/collection';
 import { AggregationCursor } from '../../src/cursor/aggregation_cursor';
-import type { FindCursor } from '../../src/cursor/find_cursor';
+import { FindCursor } from '../../src/cursor/find_cursor';
 import { MongoClient } from '../../src/mongo_client';
 import { Topology } from '../../src/sdam/topology';
 
@@ -17,6 +17,7 @@ expectDeprecated(Collection.prototype.remove);
 expectDeprecated(Collection.prototype.count);
 expectDeprecated(Collection.prototype.mapReduce);
 expectDeprecated(AggregationCursor.prototype.geoNear);
+expectDeprecated(FindCursor.prototype.count);
 expectDeprecated(Topology.prototype.unref);
 expectDeprecated(Db.prototype.unref);
 expectDeprecated(MongoDBDriver.ObjectID);
