@@ -64,7 +64,7 @@ tests:
                 SERVICE_NAME: "mongodb"
     -
         description: "should accept generic mechanism property (GSSAPI)"
-        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com"
+        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:forward,SERVICE_HOST:example.com"
         valid: true
         credential:
             username: "user@DOMAIN.COM"
@@ -73,8 +73,36 @@ tests:
             mechanism: "GSSAPI"
             mechanism_properties:
                 SERVICE_NAME: "other"
-                CANONICALIZE_HOST_NAME: true
                 SERVICE_HOST: "example.com"
+                CANONICALIZE_HOST_NAME: "forward"
+    -
+        description: "should accept forwardAndReverse hostname canonicalization (GSSAPI)"
+        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:forwardAndReverse"
+        valid: true
+        credential:
+            username: "user@DOMAIN.COM"
+            password: ~
+            source: "$external"
+            mechanism: "GSSAPI"
+            mechanism_properties:
+                SERVICE_NAME: "other"
+                CANONICALIZE_HOST_NAME: "forwardAndReverse"
+    -
+        description: "should accept no hostname canonicalization (GSSAPI)"
+        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:none"
+        valid: true
+        credential:
+            username: "user@DOMAIN.COM"
+            password: ~
+            source: "$external"
+            mechanism: "GSSAPI"
+            mechanism_properties:
+                SERVICE_NAME: "other"
+                CANONICALIZE_HOST_NAME: "none"
+    -
+        description: "must raise an error when the hostname canonicalization is invalid"
+        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:invalid"
+        valid: false
     -
         description: "should accept the password (GSSAPI)"
         uri: "mongodb://user%40DOMAIN.COM:password@localhost/?authMechanism=GSSAPI&authSource=$external"
@@ -86,6 +114,14 @@ tests:
             mechanism: "GSSAPI"
             mechanism_properties:
                 SERVICE_NAME: "mongodb"
+    -
+        description: "must raise an error when the authSource is empty"
+        uri: "mongodb://user:password@localhost/foo?authSource="
+        valid: false
+    -
+        description: "must raise an error when the authSource is empty without credentials"
+        uri: "mongodb://localhost/admin?authSource="
+        valid: false
     -
         description: "should throw an exception if authSource is invalid (GSSAPI)"
         uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authSource=foo"
@@ -161,6 +197,16 @@ tests:
     -
         description: "should recognize the mechanism with no username (MONGODB-X509)"
         uri: "mongodb://localhost/?authMechanism=MONGODB-X509"
+        valid: true
+        credential:
+            username: ~
+            password: ~
+            source: "$external"
+            mechanism: "MONGODB-X509"
+            mechanism_properties: ~
+    -
+        description: "should recognize the mechanism with no username when auth source is explicitly specified (MONGODB-X509)"
+        uri: "mongodb://localhost/?authMechanism=MONGODB-X509&authSource=$external"
         valid: true
         credential:
             username: ~
@@ -289,7 +335,7 @@ tests:
         valid: true
         credential: ~
     -
-        description: "authSource without username doesn't create credential"
+        description: "authSource without username doesn't create credential (default mechanism)"
         uri: "mongodb://localhost/?authSource=foo"
         valid: true
         credential: ~
@@ -301,3 +347,49 @@ tests:
         description: "should throw an exception if no username/password provided (userinfo implies default mechanism)"
         uri: "mongodb://:@localhost.com/"
         valid: false
+    -
+        description: "should recognise the mechanism (MONGODB-AWS)"
+        uri: "mongodb://localhost/?authMechanism=MONGODB-AWS"
+        valid: true
+        credential:
+            username: ~
+            password: ~
+            source: "$external"
+            mechanism: "MONGODB-AWS"
+            mechanism_properties: ~
+    -
+        description: "should recognise the mechanism when auth source is explicitly specified (MONGODB-AWS)"
+        uri: "mongodb://localhost/?authMechanism=MONGODB-AWS&authSource=$external"
+        valid: true
+        credential:
+            username: ~
+            password: ~
+            source: "$external"
+            mechanism: "MONGODB-AWS"
+            mechanism_properties: ~
+    -
+        description: "should throw an exception if username and no password (MONGODB-AWS)"
+        uri: "mongodb://user@localhost/?authMechanism=MONGODB-AWS"
+        valid: false
+        credential: ~
+    -
+      description: "should use username and password if specified (MONGODB-AWS)"
+      uri: "mongodb://user%21%40%23%24%25%5E%26%2A%28%29_%2B:pass%21%40%23%24%25%5E%26%2A%28%29_%2B@localhost/?authMechanism=MONGODB-AWS"
+      valid: true
+      credential:
+          username: "user!@#$%^&*()_+"
+          password: "pass!@#$%^&*()_+"
+          source: "$external"
+          mechanism: "MONGODB-AWS"
+          mechanism_properties: ~
+    -
+      description: "should use username, password and session token if specified (MONGODB-AWS)"
+      uri: "mongodb://user:password@localhost/?authMechanism=MONGODB-AWS&authMechanismProperties=AWS_SESSION_TOKEN:token%21%40%23%24%25%5E%26%2A%28%29_%2B"
+      valid: true
+      credential:
+          username: "user"
+          password: "password"
+          source: "$external"
+          mechanism: "MONGODB-AWS"
+          mechanism_properties:
+              AWS_SESSION_TOKEN: "token!@#$%^&*()_+"

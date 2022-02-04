@@ -12,10 +12,12 @@ import {
 import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
+type CanonicalizationOptions = boolean | 'none' | 'forward' | 'forwardAndReverse';
+
 type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
   gssapiCanonicalizeHostName?: boolean;
-  CANONICALIZE_HOST_NAME?: boolean;
+  CANONICALIZE_HOST_NAME?: CanonicalizationOptions;
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
@@ -179,14 +181,41 @@ function performGssapiCanonicalizeHostName(
   mechanismProperties: MechanismProperties,
   callback: Callback<string>
 ): void {
-  if (!mechanismProperties.CANONICALIZE_HOST_NAME) return callback(undefined, host);
+  const mode = mechanismProperties.CANONICALIZE_HOST_NAME;
+  if (!mode || mode === 'none') return callback(undefined, host);
 
+  // If forward and reverse or true
+  if (mode === true || mode === 'forwardAndReverse') {
+    // Perform the lookup of the ip address.
+    dns.lookup(host, (error, address) => {
+      // No ip found, return the error.
+      if (error) return callback(error);
+
+      // Perform a reverse ptr lookup on the ip address.
+      dns.resolvePtr(address, (err, results) => {
+        // This can error as ptr records may not exist for all ips. In this case
+        // fallback to a cname lookup as dns.lookup() does not return the
+        // cname.
+        if (err) {
+          return resolveCname(host, callback);
+        }
+        // If the ptr did not error but had no results, return the host.
+        callback(undefined, results.length > 0 ? results[0] : host);
+      });
+    });
+  }
+  // The case for forward is just to resolve the cname as dns.lookup()
+  // will not return it.
+  resolveCname(host, callback);
+}
+
+function resolveCname(host: string, callback: Callback<string>): void {
   // Attempt to resolve the host name
   dns.resolveCname(host, (err, r) => {
     if (err) return callback(err);
 
     // Get the first resolve host id
-    if (Array.isArray(r) && r.length > 0) {
+    if (r.length > 0) {
       return callback(undefined, r[0]);
     }
 

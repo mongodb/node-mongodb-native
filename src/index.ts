@@ -178,6 +178,7 @@ export type {
 } from './change_stream';
 export type {
   AuthMechanismProperties,
+  CanonicalizationProperties,
   MongoCredentials,
   MongoCredentialsOptions
 } from './cmap/auth/mongo_credentials';
