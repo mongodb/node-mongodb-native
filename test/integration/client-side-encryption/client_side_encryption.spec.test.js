@@ -35,10 +35,6 @@ describe('Client Side Encryption', function () {
   });
 
   generateTopologyTests(testSuites, testContext, spec => {
-    return (
-      !spec.description.match(/type=symbol/) &&
-      !spec.description.match(/maxWireVersion < 8/) &&
-      !spec.description.match(/Count with deterministic encryption/) // TODO(NODE-3369): Unskip
-    );
+    return !spec.description.match(/type=symbol/) && !spec.description.match(/maxWireVersion < 8/);
   });
 });

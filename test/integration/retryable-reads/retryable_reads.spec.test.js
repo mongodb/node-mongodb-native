@@ -23,8 +23,6 @@ describe('Retryable Reads', function () {
       spec.description.match(/listCollections/i) ||
       spec.description.match(/listCollectionNames/i) ||
       spec.description.match(/estimatedDocumentCount/i) ||
-      // FIXME(NODE-3369): uncomment when `count` spec tests have been fixed
-      // spec.description.match(/count/i) ||
       spec.description.match(/find/i)
     );
   });
