@@ -25,12 +25,17 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
+const CANONICALIZATION_VALUES = [true, false, 'none', 'forward', 'forwardAndReverse'];
+
+/** @public */
+export type CanonicalizationProperties = boolean | 'none' | 'forward' | 'forwardAndReverse';
+
 /** @public */
 export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
-  CANONICALIZE_HOST_NAME?: boolean;
+  CANONICALIZE_HOST_NAME?: CanonicalizationProperties;
   AWS_SESSION_TOKEN?: string;
 }
 
@@ -158,6 +163,11 @@ export class MongoCredentials {
       }
       // TODO(NODE-3485): Replace this with a MongoAuthValidationError
       throw new MongoAPIError(`Password not allowed for mechanism MONGODB-X509`);
+    }
+
+    const canonicalization = this.mechanismProperties.CANONICALIZE_HOST_NAME ?? false;
+    if (!CANONICALIZATION_VALUES.includes(canonicalization)) {
+      throw new MongoAPIError(`Invalid CANONICALIZE_HOST_NAME value: ${canonicalization}`);
     }
   }
 
