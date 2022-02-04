@@ -10,7 +10,7 @@ import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
 import { matchesEvents } from './match';
 import { executeOperationAndCheck } from './operations';
 import * as uni from './schema';
-import { patchVersion, topologySatisfies, zip } from './unified-utils';
+import { isAnyRequirementSatisfied, patchVersion, zip } from './unified-utils';
 
 export function trace(message: string): void {
   if (process.env.UTR_TRACE) {
@@ -92,29 +92,16 @@ export async function runUnifiedTest(
     const suiteRequirements = unifiedSuite.runOnRequirements ?? [];
     const testRequirements = test.runOnRequirements ?? [];
 
-    let someSuiteRequirementMet = suiteRequirements.length ? false : true;
-    let someTestRequirementMet = testRequirements.length ? false : true;
-
     trace('satisfiesRequirements');
-    for (const reqType of ['suite', 'test']) {
-      if (reqType === 'test' && !someSuiteRequirementMet) {
-        break;
-      }
-      const requirements = reqType === 'suite' ? suiteRequirements : testRequirements;
-      for (const requirement of requirements) {
-        const met = await topologySatisfies(ctx, requirement, utilClient);
-        if (met) {
-          if (reqType === 'suite') {
-            someSuiteRequirementMet = true;
-          } else {
-            someTestRequirementMet = true;
-          }
-          break;
-        }
-      }
-    }
+    const isSomeSuiteRequirementMet =
+      !suiteRequirements.length ||
+      (await isAnyRequirementSatisfied(ctx, suiteRequirements, utilClient));
+    const isSomeTestRequirementMet =
+      isSomeSuiteRequirementMet &&
+      (!testRequirements.length ||
+        (await isAnyRequirementSatisfied(ctx, testRequirements, utilClient)));
 
-    if (!someSuiteRequirementMet || !someTestRequirementMet) {
+    if (!isSomeTestRequirementMet) {
       return ctx.skip();
     }
 
