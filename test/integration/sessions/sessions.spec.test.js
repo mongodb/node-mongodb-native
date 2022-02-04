@@ -3,11 +3,11 @@
 const path = require('path');
 const { expect } = require('chai');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
-const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
+const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const { loadSpecTests } = require('../../spec');
 
-describe('Sessions', function () {
-  describe('legacy spec tests', function () {
+describe('Sessions spec tests', function () {
+  describe('legacy suite', function () {
     class SessionSpecTestContext extends TestRunnerContext {
       assertSessionNotDirty(options) {
         const session = options.session;
@@ -42,32 +42,10 @@ describe('Sessions', function () {
       return testContext.setup(this.configuration);
     });
 
-    function testFilter(spec) {
-      const SKIP_TESTS = [
-        // These two tests need to run against multiple mongoses
-        'Dirty explicit session is discarded',
-        'Dirty implicit session is discarded (write)'
-      ];
-
-      return SKIP_TESTS.indexOf(spec.description) === -1;
-    }
-
-    generateTopologyTests(testSuites, testContext, testFilter);
+    generateTopologyTests(testSuites, testContext);
   });
 
-  describe('unified spec tests', function () {
-    for (const sessionTests of loadSpecTests(path.join('sessions', 'unified'))) {
-      expect(sessionTests).to.be.an('object');
-      context(String(sessionTests.description), function () {
-        for (const test of sessionTests.tests) {
-          it(String(test.description), {
-            metadata: { sessions: { skipLeakTests: true } },
-            test: async function () {
-              await runUnifiedTest(this, sessionTests, test);
-            }
-          });
-        }
-      });
-    }
+  describe('unified suite', function () {
+    runUnifiedSuite(loadSpecTests(path.join('sessions', 'unified')));
   });
 });

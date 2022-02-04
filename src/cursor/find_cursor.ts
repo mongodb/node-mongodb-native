@@ -9,8 +9,7 @@ import type { Hint } from '../operations/operation';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
-import type { Callback, MongoDBNamespace } from '../utils';
-import { mergeOptions } from '../utils';
+import { Callback, emitWarningOnce, mergeOptions, MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
 /** @internal */
@@ -118,15 +117,24 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     });
   }
 
-  /** Get the count of documents for this cursor */
+  /**
+   * Get the count of documents for this cursor
+   * @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead
+   */
   count(): Promise<number>;
+  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead */
   count(callback: Callback<number>): void;
+  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead */
   count(options: CountOptions): Promise<number>;
+  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead */
   count(options: CountOptions, callback: Callback<number>): void;
   count(
     options?: CountOptions | Callback<number>,
     callback?: Callback<number>
   ): Promise<number> | void {
+    emitWarningOnce(
+      'cursor.count is deprecated and will be removed in the next major version, please use `collection.estimatedDocumentCount` or `collection.countDocuments` instead '
+    );
     if (typeof options === 'boolean') {
       throw new MongoInvalidArgumentError('Invalid first parameter to count');
     }

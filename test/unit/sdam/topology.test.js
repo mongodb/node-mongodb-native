@@ -34,20 +34,15 @@ describe('Topology (unit)', function () {
     before(() => mock.createServer().then(server => (mockServer = server)));
     after(() => mock.cleanup());
 
-    it('should correctly pass appname', {
-      metadata: { requires: { topology: 'single' } },
+    it('should correctly pass appname', function (done) {
+      const server = new Topology([`localhost:27017`], {
+        metadata: makeClientMetadata({
+          appName: 'My application name'
+        })
+      });
 
-      test: function (done) {
-        // Attempt to connect
-        var server = new Topology([`localhost:27017`], {
-          metadata: makeClientMetadata({
-            appName: 'My application name'
-          })
-        });
-
-        expect(server.clientMetadata.application.name).to.equal('My application name');
-        done();
-      }
+      expect(server.clientMetadata.application.name).to.equal('My application name');
+      done();
     });
 
     it('should report the correct platform in client metadata', function (done) {
@@ -458,44 +453,37 @@ describe('Topology (unit)', function () {
       this.sinon.restore();
     });
 
-    it('should schedule monitoring if no suitable server is found', {
-      metadata: { requires: { topology: '!load-balanced' } },
-      test: function (done) {
-        const topology = new Topology('someserver:27019');
-        const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
+    it('should schedule monitoring if no suitable server is found', function (done) {
+      const topology = new Topology('someserver:27019');
+      const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
 
-        // satisfy the initial connect, then restore the original method
-        const selectServer = this.sinon
-          .stub(Topology.prototype, 'selectServer')
-          .callsFake(function (selector, options, callback) {
-            const server = Array.from(this.s.servers.values())[0];
-            selectServer.restore();
-            callback(null, server);
-          });
-
-        this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
-          this.s.state = 'connected';
-          this.emit('connect');
+      // satisfy the initial connect, then restore the original method
+      const selectServer = this.sinon
+        .stub(Topology.prototype, 'selectServer')
+        .callsFake(function (selector, options, callback) {
+          const server = Array.from(this.s.servers.values())[0];
+          selectServer.restore();
+          callback(null, server);
         });
 
-        topology.connect(() => {
-          topology.selectServer(
-            ReadPreference.secondary,
-            { serverSelectionTimeoutMS: 1000 },
-            err => {
-              expect(err).to.exist;
-              expect(err).to.match(/Server selection timed out/);
-              expect(err).to.have.property('reason');
+      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
+        this.s.state = 'connected';
+        this.emit('connect');
+      });
 
-              // When server is created `connect` is called on the monitor. When server selection
-              // occurs `requestCheck` will be called for an immediate check.
-              expect(requestCheck).property('callCount').to.equal(1);
+      topology.connect(() => {
+        topology.selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 }, err => {
+          expect(err).to.exist;
+          expect(err).to.match(/Server selection timed out/);
+          expect(err).to.have.property('reason');
 
-              topology.close(done);
-            }
-          );
+          // When server is created `connect` is called on the monitor. When server selection
+          // occurs `requestCheck` will be called for an immediate check.
+          expect(requestCheck).property('callCount').to.equal(1);
+
+          topology.close(done);
         });
-      }
+      });
     });
 
     it('should disallow selection when the topology is explicitly closed', function (done) {

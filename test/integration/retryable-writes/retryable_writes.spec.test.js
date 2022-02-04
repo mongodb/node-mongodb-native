@@ -3,7 +3,7 @@
 const { expect } = require('chai');
 const { loadSpecTests } = require('../../spec');
 const { legacyRunOnToRunOnRequirement } = require('../../tools/spec-runner');
-const { topologySatisfies } = require('../../tools/unified-spec-runner/unified-utils');
+const { isAnyRequirementSatisfied } = require('../../tools/unified-spec-runner/unified-utils');
 
 describe('Retryable Writes', function () {
   let ctx = {};
@@ -24,15 +24,13 @@ describe('Retryable Writes', function () {
 
         const allRequirements = suite.runOn.map(legacyRunOnToRunOnRequirement);
 
-        let shouldRun = true;
-        for (const requirement of allRequirements) {
-          shouldRun =
-            shouldRun && (await topologySatisfies(this.currentTest.ctx, requirement, utilClient));
-        }
+        const someRequirementMet =
+          !allRequirements.length ||
+          (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
 
         await utilClient.close();
 
-        if (!shouldRun) this.skip();
+        if (!someRequirementMet) this.skip();
       });
 
       afterEach(async function () {

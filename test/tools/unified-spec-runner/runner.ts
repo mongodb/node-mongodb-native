@@ -10,7 +10,7 @@ import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
 import { matchesEvents } from './match';
 import { executeOperationAndCheck } from './operations';
 import * as uni from './schema';
-import { patchVersion, topologySatisfies, zip } from './unified-utils';
+import { isAnyRequirementSatisfied, patchVersion, zip } from './unified-utils';
 
 export function trace(message: string): void {
   if (process.env.UTR_TRACE) {
@@ -89,17 +89,20 @@ export async function runUnifiedTest(
 
     // If test.runOnRequirements is specified, the test runner MUST skip the test unless one or more
     // runOnRequirement objects are satisfied.
-    const allRequirements = [
-      ...(unifiedSuite.runOnRequirements ?? []),
-      ...(test.runOnRequirements ?? [])
-    ];
+    const suiteRequirements = unifiedSuite.runOnRequirements ?? [];
+    const testRequirements = test.runOnRequirements ?? [];
 
     trace('satisfiesRequirements');
-    for (const requirement of allRequirements) {
-      const met = await topologySatisfies(ctx, requirement, utilClient);
-      if (!met) {
-        return ctx.skip();
-      }
+    const isSomeSuiteRequirementMet =
+      !suiteRequirements.length ||
+      (await isAnyRequirementSatisfied(ctx, suiteRequirements, utilClient));
+    const isSomeTestRequirementMet =
+      isSomeSuiteRequirementMet &&
+      (!testRequirements.length ||
+        (await isAnyRequirementSatisfied(ctx, testRequirements, utilClient)));
+
+    if (!isSomeTestRequirementMet) {
+      return ctx.skip();
     }
 
     // If initialData is specified, for each collectionData therein the test runner MUST drop the
