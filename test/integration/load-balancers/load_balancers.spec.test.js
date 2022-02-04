@@ -6,7 +6,8 @@ const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const SKIP = [
   // Verified they use the same connection but the Node implementation executes
   // a getMore before the killCursors even though the stream is immediately
-  // closed.
+  // closed. Do not believe we need to do anything here but to leave the test
+  // skipped.
   'change streams pin to a connection',
   // NOTE: The following three tests are skipped pending a decision made on DRIVERS-1847, since
   //       pinning the connection on any getMore error is very awkward in node and likely results
@@ -14,6 +15,9 @@ const SKIP = [
   'pinned connections are not returned after an network error during getMore',
   'pinned connections are not returned to the pool after a non-network error on getMore',
   'stale errors are ignored',
+  // This test is skipped because it assumes drivers attempt connections on the first operation,
+  // but Node has a connect() method that is called before the first operation is ever run. It
+  // does not seem that we will ever get to changing this so we leave as skipped.
   'errors during the initial connection hello are ignored',
 
   ...(process.env.SERVERLESS
