@@ -51,12 +51,13 @@ describe('Kerberos', function () {
     });
   });
 
-  it('validate that CANONICALIZE_HOST_NAME can be passed in', async function () {
+  it('validate that CANONICALIZE_HOST_NAME can be passed in', function (done) {
     const client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1`
     );
-    await client.connect();
-    verifyKerberosAuthentication(client, done);
+    client.connect(function (err, client) {
+      if (err) return done(err);
+      verifyKerberosAuthentication(client, done);
     });
   });
 
