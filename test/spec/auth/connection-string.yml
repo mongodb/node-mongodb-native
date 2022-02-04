@@ -76,6 +76,18 @@ tests:
                 SERVICE_HOST: "example.com"
                 CANONICALIZE_HOST_NAME: "forward"
     -
+        description: "should accept true as hostname canonicalization (GSSAPI)"
+        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true"
+        valid: true
+        credential:
+            username: "user@DOMAIN.COM"
+            password: ~
+            source: "$external"
+            mechanism: "GSSAPI"
+            mechanism_properties:
+                SERVICE_NAME: "other"
+                CANONICALIZE_HOST_NAME: true
+    -
         description: "should accept forwardAndReverse hostname canonicalization (GSSAPI)"
         uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:forwardAndReverse"
         valid: true
@@ -99,6 +111,18 @@ tests:
             mechanism_properties:
                 SERVICE_NAME: "other"
                 CANONICALIZE_HOST_NAME: "none"
+    -
+        description: "should accept false hostname canonicalization (GSSAPI)"
+        uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:false"
+        valid: true
+        credential:
+            username: "user@DOMAIN.COM"
+            password: ~
+            source: "$external"
+            mechanism: "GSSAPI"
+            mechanism_properties:
+                SERVICE_NAME: "other"
+                CANONICALIZE_HOST_NAME: false
     -
         description: "must raise an error when the hostname canonicalization is invalid"
         uri: "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:invalid"

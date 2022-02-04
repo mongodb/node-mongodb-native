@@ -79,18 +79,72 @@ describe('Kerberos', function () {
     });
   });
 
-  it('validate that CANONICALIZE_HOST_NAME can be passed in', function (done) {
-    if (process.platform === 'darwin') {
-      this.test.skipReason = 'DNS does not resolve with proper CNAME record on evergreen MacOS';
-      this.skip();
-    }
-    const client = new MongoClient(
-      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1`
-    );
-    client.connect(function (err, client) {
-      if (err) return done(err);
-      expect(dns.resolveCname).to.be.calledOnce;
-      verifyKerberosAuthentication(client, done);
+  context('when passing in CANONICALIZE_HOST_NAME', function () {
+    beforeEach(function () {
+      if (process.platform === 'darwin') {
+        this.currentTest.skipReason = 'DNS does not resolve with proper CNAME record on evergreen MacOS';
+        this.skip();
+      }
+    });
+
+    context('when the value is true', function () {
+      it('successfully authenticates', function (done) {
+        const client = new MongoClient(
+          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1`
+        );
+        client.connect(function (err, client) {
+          if (err) return done(err);
+          verifyKerberosAuthentication(client, done);
+        });
+      });
+    });
+
+    context('when the value is forward', function () {
+      it('successfully authenticates', function (done) {
+        const client = new MongoClient(
+          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forward&maxPoolSize=1`
+        );
+        client.connect(function (err, client) {
+          if (err) return done(err);
+          verifyKerberosAuthentication(client, done);
+        });
+      });
+    });
+
+    context('when the value is forwardAndReverse', function () {
+      it('successfully authenticates', function (done) {
+        const client = new MongoClient(
+          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
+        );
+        client.connect(function (err, client) {
+          if (err) return done(err);
+          verifyKerberosAuthentication(client, done);
+        });
+      });
+    });
+
+    context('when the value is false', function () {
+      it('successfully authenticates', function (done) {
+        const client = new MongoClient(
+          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1`
+        );
+        client.connect(function (err, client) {
+          if (err) return done(err);
+          verifyKerberosAuthentication(client, done);
+        });
+      });
+    });
+
+    context('when the value is none', function () {
+      it('successfully authenticates', function (done) {
+        const client = new MongoClient(
+          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:none&maxPoolSize=1`
+        );
+        client.connect(function (err, client) {
+          if (err) return done(err);
+          verifyKerberosAuthentication(client, done);
+        });
+      });
     });
   });
 
