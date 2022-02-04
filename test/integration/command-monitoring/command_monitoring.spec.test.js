@@ -260,10 +260,10 @@ describe('Command Monitoring spec tests', function () {
             metadata: { requires: requirements },
             test: function () {
               if (
-                // TODO(NODE-3308): update spec file
                 test.description ===
                 'A successful find event with a getmore and the server kills the cursor'
               ) {
+                this.skipReason = 'TODO(NODE-3308): update spec file';
                 this.skip();
               }
 
