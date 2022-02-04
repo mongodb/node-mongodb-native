@@ -117,7 +117,10 @@
           "a:27017": {
             "type": "RSPrimary",
             "setName": "rs",
-            "setVersion": 1
+            "setVersion": 1,
+            "electionId": {
+              "$oid": "000000000000000000000002"
+            }
           },
           "b:27017": {
             "type": "Unknown",

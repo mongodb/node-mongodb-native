@@ -4,7 +4,7 @@ uri: "mongodb://a/?replicaSet=rs"
 
 phases: [
 
-    # Primary A has setVersion and electionId, tells us about B.
+    # Primary A has electionId and setVersion, tells us about B.
     {
         responses: [
             ["a:27017", {
@@ -42,7 +42,7 @@ phases: [
         }
     },
 
-    # Reconfig the set and elect B, it has a new setVersion but no electionId.
+    # Reconfig, B reports as primary, B is missing the electionId but reports setVersion
     {
         responses: [
             ["b:27017", {
@@ -78,8 +78,8 @@ phases: [
         }
     },
 
-    # Delayed response from A, reporting its reelection. Its setVersion shows
-    # the election preceded B's so we ignore it.
+    # A reports as primary, A has been reelection (electionId greater than our recorded maxElectionId).
+    # A's setVersion is less than our maxSetVersion, but electionId takes precedence so B's primary claim is ignored
     {
         responses: [
             ["a:27017", {
@@ -99,7 +99,8 @@ phases: [
                 "a:27017": {
                     type: "RSPrimary",
                     setName: "rs",
-                    setVersion: 1
+                    setVersion: 1,
+                    electionId: {"$oid": "000000000000000000000002"}
                 },
                 "b:27017":{
                     type: "Unknown",
