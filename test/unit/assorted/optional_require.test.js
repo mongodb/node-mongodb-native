@@ -53,24 +53,17 @@ describe('optionalRequire', function () {
     });
   });
 
-  context('aws4', {
-    metadata: {
-      requires: {
-        mongodb: '>=4.4'
+  context('aws4', function () {
+    it('should error if not installed', function () {
+      const moduleName = 'aws4';
+      if (moduleExistsSync(moduleName)) {
+        return this.skip();
       }
-    },
-    test: function () {
-      it('should error if not installed', function () {
-        const moduleName = 'aws4';
-        if (moduleExistsSync(moduleName)) {
-          return this.skip();
-        }
-        const mdbAWS = new MongoDBAWS();
-        mdbAWS.auth(new AuthContext({ hello: { maxWireVersion: 9 } }, true, null), error => {
-          expect(error).to.exist;
-          expect(error.message).includes('not found');
-        });
+      const mdbAWS = new MongoDBAWS();
+      mdbAWS.auth(new AuthContext({ hello: { maxWireVersion: 9 } }, true, null), error => {
+        expect(error).to.exist;
+        expect(error.message).includes('not found');
       });
-    }
+    });
   });
 });

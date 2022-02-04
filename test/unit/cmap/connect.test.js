@@ -99,24 +99,16 @@ describe('Connect Tests', function () {
     });
   });
 
-  // FIXME: NODE-2941
-  it.skip('should allow a cancellaton token', {
-    metadata: {
-      requires: {
-        os: '!win32' // 240.0.0.1 doesnt work for windows
-      }
-    },
-    test: function (done) {
-      const cancellationToken = new EventEmitter();
-      setTimeout(() => cancellationToken.emit('cancel'), 500);
-      // set no response handler for mock server, effecively blackhole requests
+  it.skip('should allow a cancellaton token', function (done) {
+    const cancellationToken = new EventEmitter();
+    setTimeout(() => cancellationToken.emit('cancel'), 500);
+    // set no response handler for mock server, effecively blackhole requests
 
-      connect({ hostAddress: new HostAddress('240.0.0.1'), cancellationToken }, (err, conn) => {
-        expect(err).to.exist;
-        expect(err).to.match(/connection establishment was cancelled/);
-        expect(conn).to.not.exist;
-        done();
-      });
-    }
-  });
+    connect({ hostAddress: new HostAddress('240.0.0.1'), cancellationToken }, (err, conn) => {
+      expect(err).to.exist;
+      expect(err).to.match(/connection establishment was cancelled/);
+      expect(conn).to.not.exist;
+      done();
+    });
+  }).skipReason = 'TODO(NODE-2941): stop using 240.0.0.1 in tests';
 });

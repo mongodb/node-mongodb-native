@@ -8,7 +8,7 @@ const expect = chai.expect;
 chai.use(require('chai-subset'));
 
 const { loadSpecTests } = require('../../spec/index');
-const { runUnifiedTest } = require('../../tools/unified-spec-runner/runner');
+const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 
 function enforceServerVersionLimits(requires, scenario) {
   const versionLimits = [];
@@ -426,18 +426,5 @@ describe('CRUD spec v1', function () {
 });
 
 describe('CRUD unified', function () {
-  for (const crudSpecTest of loadSpecTests('crud/unified')) {
-    expect(crudSpecTest).to.exist;
-    const testDescription = String(crudSpecTest.description);
-    context(testDescription, function () {
-      for (const test of crudSpecTest.tests) {
-        it(String(test.description), {
-          metadata: { sessions: { skipLeakTests: true } },
-          test: async function () {
-            await runUnifiedTest(this, crudSpecTest, test);
-          }
-        });
-      }
-    });
-  }
+  runUnifiedSuite(loadSpecTests(path.join('crud', 'unified')));
 });

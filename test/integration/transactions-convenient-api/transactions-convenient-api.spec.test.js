@@ -1,9 +1,7 @@
 'use strict';
 
-const path = require('path');
 const { expect } = require('chai');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const { loadSpecTests } = require('../../spec');
 
 function ignoreNsNotFoundForListIndexes(err) {
@@ -78,47 +76,14 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
-describe('Transactions Spec Unified Tests', function () {
-  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')));
-});
-
-const SKIP_TESTS = [
-  // TODO(NODE-3943): Investigate these commit test failures
-  // OLD COMMENT: commitTransaction retry seems to be swallowed by mongos in these two cases
-  'commitTransaction retry fails on new mongos',
-  'unpin after transient error within a transaction and commit',
-
-  // TODO(NODE-3369): unskip count tests when spec tests have been updated
-  'count',
-
-  // TODO(NODE-2034): Will be implemented as part of NODE-2034
-  'Client side error in command starting transaction',
-  'Client side error when transaction is in progress'
-];
-
-describe('Transactions Spec Legacy Tests', function () {
+describe('Transactions Convenient API Spec Legacy Tests', function () {
   const testContext = new TransactionsRunnerContext();
-  if (process.env.SERVERLESS) {
-    // TODO(NODE-3550): these tests should pass on serverless but currently fail
-    SKIP_TESTS.push(
-      'abortTransaction only performs a single retry',
-      'abortTransaction does not retry after Interrupted',
-      'abortTransaction does not retry after WriteConcernError Interrupted',
-      'commitTransaction does not retry error without RetryableWriteError label',
-      'commitTransaction is not retried after UnsatisfiableWriteConcern error',
-      'commitTransaction fails after Interrupted'
-    );
-  }
+  const testSuites = loadSpecTests('transactions-convenient-api');
 
-  const testSuites = loadSpecTests(path.join('transactions', 'legacy'));
   after(() => testContext.teardown());
   before(function () {
     return testContext.setup(this.configuration);
   });
 
-  function testFilter(spec) {
-    return SKIP_TESTS.indexOf(spec.description) === -1;
-  }
-
-  generateTopologyTests(testSuites, testContext, testFilter);
+  generateTopologyTests(testSuites, testContext);
 });

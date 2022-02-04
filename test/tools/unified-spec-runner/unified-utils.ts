@@ -110,6 +110,16 @@ export async function topologySatisfies(
   return ok;
 }
 
+export async function isAnyRequirementSatisfied(ctx, requirements, client) {
+  for (const requirement of requirements) {
+    const met = await topologySatisfies(ctx, requirement, client);
+    if (met) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /** Turns two lists into a joined list of tuples. Uses longer array length */
 export function* zip<T = unknown, U = unknown>(
   iter1: T[],

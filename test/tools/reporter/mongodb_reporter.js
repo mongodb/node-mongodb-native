@@ -175,7 +175,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
         stderr: captureStream(process.stderr)
       });
     } else {
-      console.warn(`${chalk.yellow('WARNING:')} ${suite.fullTitle()} started twice`);
+      throw new Error(`${suite.fullTitle()} started twice`);
     }
   }
 

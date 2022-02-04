@@ -88,9 +88,9 @@ operations.set('assertIndexNotExists', async ({ operation, client }) => {
 
 operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.arguments.client);
-  expect(client.observedEvents.includes('commandStarted')).to.be.true;
+  expect(client.observedCommandEvents.includes('commandStarted')).to.be.true;
 
-  const startedEvents = client.events.filter(
+  const startedEvents = client.commandEvents.filter(
     ev => ev instanceof CommandStartedEvent
   ) as CommandStartedEvent[];
 
