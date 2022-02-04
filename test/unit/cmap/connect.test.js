@@ -99,7 +99,6 @@ describe('Connect Tests', function () {
     });
   });
 
-  // FIXME: NODE-2941
   it.skip('should allow a cancellaton token', function (done) {
     const cancellationToken = new EventEmitter();
     setTimeout(() => cancellationToken.emit('cancel'), 500);
@@ -111,5 +110,5 @@ describe('Connect Tests', function () {
       expect(conn).to.not.exist;
       done();
     });
-  });
+  }).skipReason = 'TODO(NODE-2941): stop using 240.0.0.1 in tests';
 });

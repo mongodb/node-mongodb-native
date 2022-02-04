@@ -35,8 +35,7 @@ describe('Topology (unit)', function () {
     after(() => mock.cleanup());
 
     it('should correctly pass appname', function (done) {
-      // Attempt to connect
-      var server = new Topology([`localhost:27017`], {
+      const server = new Topology([`localhost:27017`], {
         metadata: makeClientMetadata({
           appName: 'My application name'
         })

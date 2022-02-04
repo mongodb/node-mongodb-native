@@ -6,7 +6,6 @@
     "test/tools/runner/chai-addons.js"
   ],
   "extension": ["js", "ts"],
-  "ui": "test/tools/runner/metadata_ui.js",
   "recursive": true,
   "timeout": 60000,
   "failZero": true,

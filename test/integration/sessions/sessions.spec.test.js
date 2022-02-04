@@ -7,7 +7,7 @@ const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const { loadSpecTests } = require('../../spec');
 
 describe('Sessions spec tests', function () {
-  describe('Sessions legacy spec tests', function () {
+  describe('legacy suite', function () {
     class SessionSpecTestContext extends TestRunnerContext {
       assertSessionNotDirty(options) {
         const session = options.session;
@@ -42,18 +42,10 @@ describe('Sessions spec tests', function () {
       return testContext.setup(this.configuration);
     });
 
-    function testFilter(spec) {
-      const SKIP_TESTS = [
-        // placeholder for skips
-      ];
-
-      return SKIP_TESTS.indexOf(spec.description) === -1;
-    }
-
-    generateTopologyTests(testSuites, testContext, testFilter);
+    generateTopologyTests(testSuites, testContext);
   });
 
-  describe('Sessions unified spec tests', function () {
+  describe('unified suite', function () {
     runUnifiedSuite(loadSpecTests(path.join('sessions', 'unified')));
   });
 });
