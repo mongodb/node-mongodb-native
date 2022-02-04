@@ -188,11 +188,15 @@ function performGssapiCanonicalizeHostName(
   if (mode === true || mode === 'forwardAndReverse') {
     // Perform the lookup of the ip address.
     dns.lookup(host, (error, address) => {
+      /* eslint no-console: 0 */
+      console.log('lookup', host, error, address);
       // No ip found, return the error.
       if (error) return callback(error);
 
       // Perform a reverse ptr lookup on the ip address.
       dns.resolvePtr(address, (err, results) => {
+        /* eslint no-console: 0 */
+        console.log('resolvePtr', err, results);
         // This can error as ptr records may not exist for all ips. In this case
         // fallback to a cname lookup as dns.lookup() does not return the
         // cname.
@@ -203,16 +207,19 @@ function performGssapiCanonicalizeHostName(
         callback(undefined, results.length > 0 ? results[0] : host);
       });
     });
+  } else {
+    // The case for forward is just to resolve the cname as dns.lookup()
+    // will not return it.
+    resolveCname(host, callback);
   }
-  // The case for forward is just to resolve the cname as dns.lookup()
-  // will not return it.
-  resolveCname(host, callback);
 }
 
 function resolveCname(host: string, callback: Callback<string>): void {
   // Attempt to resolve the host name
   dns.resolveCname(host, (err, r) => {
-    if (err) return callback(err);
+    /* eslint no-console: 0 */
+    console.log('resolveCname', err, r);
+    if (err) return callback(undefined, host);
 
     // Get the first resolve host id
     if (r.length > 0) {
