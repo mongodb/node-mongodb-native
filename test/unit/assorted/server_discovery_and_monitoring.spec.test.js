@@ -56,20 +56,11 @@ describe('Server Discovery and Monitoring (spec)', function () {
     serverConnect.restore();
   });
 
-  const shouldSkip = desc => {
-    const descriptions = [
-      // placeholder for potential skips
-    ];
-    return descriptions.includes(desc);
-  };
-
   const specTests = collectTests();
   for (const specTestName of Object.keys(specTests)) {
     describe(specTestName, () => {
       for (const testData of specTests[specTestName]) {
-        const skip = shouldSkip(testData.description);
-        const type = skip ? it.skip : it;
-        type(testData.description, function (done) {
+        it(testData.description, function (done) {
           executeSDAMTest(testData, done);
         });
       }
