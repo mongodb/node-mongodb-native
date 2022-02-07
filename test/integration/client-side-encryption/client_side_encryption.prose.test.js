@@ -81,8 +81,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     let clientEncryptionInvalid;
 
     before(async function () {
-      if (process.env.LOAD_BALANCER) this.skip();
       client = this.configuration.newClient();
+      if (process.env.LOAD_BALANCER) this.skip();
       await client.connect();
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
