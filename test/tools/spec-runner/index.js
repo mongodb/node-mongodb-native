@@ -133,7 +133,7 @@ function generateTopologyTests(testSuites, testContext, filter) {
       const allRequirements = runOn.map(legacyRunOnToRunOnRequirement);
 
       const someRequirementMet =
-        !allRequirements.length ||
+        allRequirements.length === 0 ||
         (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
 
       let shouldRun = someRequirementMet;
