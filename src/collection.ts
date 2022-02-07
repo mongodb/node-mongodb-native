@@ -21,7 +21,7 @@ import type {
 import type { AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
 import type { IndexInformationOptions } from './operations/common_functions';
-import type { CountOptions } from './operations/count';
+import { CountOperation, CountOptions } from './operations/count';
 import { CountDocumentsOperation, CountDocumentsOptions } from './operations/count_documents';
 import {
   DeleteManyOperation,
@@ -1637,7 +1637,11 @@ export class Collection<TSchema extends Document = Document> {
     filter ??= {};
     return executeOperation(
       getTopology(this),
-      new CountDocumentsOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options)),
+      new CountOperation(
+        MongoDBNamespace.fromString(this.namespace),
+        filter,
+        resolveOptions(this, options)
+      ),
       callback
     );
   }
