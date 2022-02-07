@@ -49,25 +49,29 @@ describe('Server Selection (spec)', function () {
     });
   });
 
+  beforeEach(function () {
+    if (this.currentTest.title.match(/Possible/)) {
+      this.currentTest.skipReason = 'Nodejs driver does not support PossiblePrimary';
+      this.skip();
+    }
+  });
+
   after(() => {
     serverConnect.restore();
   });
 
   const specTests = collectSelectionTests(selectionSpecDir);
-  Object.keys(specTests).forEach(topologyType => {
+  for (const topologyType of Object.keys(specTests)) {
     describe(topologyType, function () {
-      Object.keys(specTests[topologyType]).forEach(subType => {
+      for (const subType of Object.keys(specTests[topologyType])) {
         describe(subType, function () {
-          specTests[topologyType][subType].forEach(test => {
-            // NOTE: node does not support PossiblePrimary
-            const maybeIt = test.name.match(/Possible/) ? it.skip : it;
-
-            maybeIt(test.name, function (done) {
+          for (const test of specTests[topologyType][subType]) {
+            it(test.name, function (done) {
               executeServerSelectionTest(test, done);
             });
-          });
+          }
         });
-      });
+      }
     });
-  });
+  }
 });
