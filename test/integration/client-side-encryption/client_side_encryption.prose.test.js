@@ -141,6 +141,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with invalid provider host', metadata, async function () {
           try {
             await clientEncryptionInvalid.createDataKey('kmip', { masterKey });
+            expect.fail('it must fail with invlalid host');
           } catch (e) {
             expect(e.message).to.equal('KMS request failed');
           }
@@ -190,6 +191,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           it('fails with invalid provider host', metadata, async function () {
             try {
               await clientEncryption.createDataKey('kmip', { masterKey });
+              expect.fail('it must fail with invlalid host');
             } catch (e) {
               expect(e.message).to.equal('KMS request failed');
             }
@@ -334,6 +336,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with no tls', metadata, async function () {
           try {
             await clientEncryptionNoTls.createDataKey('aws', { masterKey });
+            expect.fail('it must fail with no tls');
           } catch (e) {
             expect(e.originalError.message).to.include('certificate required');
           }
@@ -342,6 +345,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('passes with tls but fails to parse', metadata, async function () {
           try {
             await clientEncryptionWithTls.createDataKey('aws', { masterKey });
+            expect.fail('it must fail to parse response');
           } catch (e) {
             expect(e.message).to.include('parse error');
           }
@@ -350,6 +354,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with expired certificates', metadata, async function () {
           try {
             await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKeyExpired });
+            expect.fail('it must fail with invalid certificate');
           } catch (e) {
             expect(e.message).to.include('expected UTF-8 key');
           }
@@ -360,6 +365,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             await clientEncryptionWithInvalidHostname.createDataKey('aws', {
               masterKeyInvalidHostname
             });
+            expect.fail('it must fail with invalid hostnames');
           } catch (e) {
             expect(e.message).to.include('expected UTF-8 key');
           }
@@ -376,6 +382,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with no tls', metadata, async function () {
           try {
             await clientEncryptionNoTls.createDataKey('azure', { masterKey });
+            expect.fail('it must fail with no tls');
           } catch (e) {
             expect(e.originalError.message).to.include('certificate required');
           }
@@ -384,6 +391,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with invalid host', metadata, async function () {
           try {
             await clientEncryptionWithTls.createDataKey('azure', { masterKey });
+            expect.fail('it must fail with invalid host');
           } catch (e) {
             expect(e.message).to.include('HTTP status=404');
           }
@@ -392,6 +400,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with expired certificates', metadata, async function () {
           try {
             await clientEncryptionWithTlsExpired.createDataKey('azure', { masterKey });
+            expect.fail('it must fail with expired certificates');
           } catch (e) {
             expect(e.originalError.message).to.include('certificate has expired');
           }
@@ -400,6 +409,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with invalid hostnames', metadata, async function () {
           try {
             await clientEncryptionWithInvalidHostname.createDataKey('azure', { masterKey });
+            expect.fail('it must fail with invalid hostnames');
           } catch (e) {
             expect(e.originalError.message).to.include('does not match certificate');
           }
@@ -418,6 +428,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with no tls', metadata, async function () {
           try {
             await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
+            expect.fail('it must fail with no tls');
           } catch (e) {
             expect(e.originalError.message).to.include('certificate required');
           }
@@ -426,6 +437,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with invalid host', metadata, async function () {
           try {
             await clientEncryptionWithTls.createDataKey('gcp', { masterKey });
+            expect.fail('it must fail with invalid host');
           } catch (e) {
             expect(e.message).to.include('HTTP status=404');
           }
@@ -434,6 +446,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with expired certificates', metadata, async function () {
           try {
             await clientEncryptionWithTlsExpired.createDataKey('gcp', { masterKey });
+            expect.fail('it must fail with expired certificates');
           } catch (e) {
             expect(e.originalError.message).to.include('certificate has expired');
           }
@@ -442,6 +455,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with invalid hostnames', metadata, async function () {
           try {
             await clientEncryptionWithInvalidHostname.createDataKey('gcp', { masterKey });
+            expect.fail('it must fail with invalid hostnames');
           } catch (e) {
             expect(e.originalError.message).to.include('does not match certificate');
           }
@@ -453,6 +467,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with no tls', metadata, async function () {
           try {
             await clientEncryptionNoTls.createDataKey('kmip');
+            expect.fail('it must fail with no tls');
           } catch (e) {
             expect(e.originalError.message).to.include('before secure TLS connection');
           }
@@ -461,6 +476,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with expired certificates', metadata, async function () {
           try {
             await clientEncryptionWithTlsExpired.createDataKey('kmip');
+            expect.fail('it must fail with expired certificates');
           } catch (e) {
             expect(e.originalError.message).to.include('certificate has expired');
           }
@@ -469,6 +485,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         it('fails with invalid hostnames', metadata, async function () {
           try {
             await clientEncryptionWithInvalidHostname.createDataKey('kmip');
+            expect.fail('it must fail with invalid hostnames');
           } catch (e) {
             expect(e.originalError.message).to.include('does not match certificate');
           }
