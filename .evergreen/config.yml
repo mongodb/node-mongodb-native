@@ -108,7 +108,7 @@ functions:
             cd ${DRIVERS_TOOLS}/.evergreen/csfle
             . ./activate_venv.sh
           fi
-    - command: subprocess.exec
+    - command: shell.exec
       params:
         background: true
         script: |
