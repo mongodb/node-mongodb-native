@@ -88,9 +88,6 @@ const SKIP_TESTS = [
   'commitTransaction retry fails on new mongos',
   'unpin after transient error within a transaction and commit',
 
-  // TODO(NODE-3369): unskip count tests when spec tests have been updated
-  'count',
-
   // TODO(NODE-2034): Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
   'Client side error when transaction is in progress'

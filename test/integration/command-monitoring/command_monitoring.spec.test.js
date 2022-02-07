@@ -240,7 +240,6 @@ describe('Command Monitoring spec tests', function () {
     }
 
     loadSpecTests('command-monitoring/legacy').forEach(scenario => {
-      if (scenario.name === 'command') return; // TODO(NODE-3369): remove when `count` spec tests have been fixed
       describe(scenario.name, function () {
         scenario.tests.forEach(test => {
           const requirements = { topology: ['single', 'replicaset', 'sharded'] };
