@@ -347,6 +347,23 @@ The following steps will walk you through how to run the tests for CSFLE.
 
    The output of the tests will include sections like "Client Side Encryption Corpus," "Client Side Encryption Functional," "Client Side Encryption Prose Tests," and "Client Side Encryption."
 
+#### KMIP FLE support tests
+
+1. Install virtualenv: `pip install virtualenv`
+2. Source the ./activate_venv.sh script in driver evergreen tools `.evergreen/csfle/activate_venv.sh`
+    1. This will install all the dependencies needed to run a python kms_kmip simulated server
+3. In 4 separate terminals launch the following:
+    - `./kmstlsvenv/bin/python3 -u kms_kmip_server.py` # by default it always runs on port 5698
+    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000`
+    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001`
+    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert`
+4. Set the following environment variables:
+    - `export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"`
+    - `export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"`
+5. Install the FLE lib: `npm i --no-save mongodb-client-encryption`
+6. Launch a mongodb server
+7. Run the full suite `npm run check:test` or more specifically `npx mocha --config test/mocha_mongodb.json test/integration/client-side-encryption/`
+
 ### TODO Special Env Sections
 
 - Kerberos
