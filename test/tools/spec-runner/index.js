@@ -151,16 +151,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
         shouldRun = false;
       }
 
-      // check auth requirements
-      for (const requirement of allRequirements) {
-        const { auth } = requirement;
-        if (auth) {
-          if (process.env.AUTH !== 'auth') {
-            shouldRun = false;
-          }
-        }
-      }
-
       if (shouldRun && spec.skipReason) {
         this.currentTest.skipReason = spec.skipReason;
         shouldRun = false;
