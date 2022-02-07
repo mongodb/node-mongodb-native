@@ -226,6 +226,39 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
  */
 const processTick = () => new Promise(resolve => process.nextTick(resolve));
 
+function getIndicesOfAuthInUrl(connectionString) {
+  const doubleSlashIndex = connectionString.indexOf('//');
+  const atIndex = connectionString.indexOf('@');
+
+  if (doubleSlashIndex === -1 || atIndex === -1) {
+    return null;
+  }
+
+  return {
+    start: doubleSlashIndex + 2,
+    end: atIndex
+  };
+}
+
+function removeAuthFromConnectionString(connectionString) {
+  const { start, end } = getIndicesOfAuthInUrl(connectionString);
+
+  if (start === -1 || end === -1) {
+    return connectionString;
+  }
+
+  return connectionString.slice(0, start + 2) + connectionString.slice(end + 1);
+}
+
+function extractAuthFromConnectionString(connectionString) {
+  const indices = getIndicesOfAuthInUrl(connectionString);
+  if (!indices) {
+    return null;
+  }
+
+  return connectionString.slice(indices.start, indices.end);
+}
+
 module.exports = {
   processTick,
   sleep,
@@ -239,5 +272,7 @@ module.exports = {
   ClassWithUndefinedLogger,
   getSymbolFrom,
   getEnvironmentalOptions,
-  shouldRunServerlessTest
+  shouldRunServerlessTest,
+  removeAuthFromConnectionString,
+  extractAuthFromConnectionString
 };

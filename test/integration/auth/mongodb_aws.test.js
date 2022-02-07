@@ -1,16 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-
-function removeAuth(connectionString) {
-  const doubleSlashIndex = connectionString.indexOf('//');
-  const atIndex = connectionString.indexOf('@');
-
-  if (doubleSlashIndex === -1 || atIndex === -1) {
-    return connectionString;
-  }
-
-  return connectionString.slice(0, doubleSlashIndex + 2) + connectionString.slice(atIndex + 1);
-}
+const { removeAuthFromConnectionString } = require('../../tools/utils');
 
 describe('MONGODB-AWS', function () {
   beforeEach(function () {
@@ -23,7 +13,7 @@ describe('MONGODB-AWS', function () {
 
   it('should not authorize when not authenticated', function (done) {
     const config = this.configuration;
-    const url = removeAuth(config.url());
+    const url = removeAuthFromConnectionString(config.url());
     const client = config.newClient(url); // strip provided URI of credentials
     client.connect(err => {
       expect(err).to.not.exist;
