@@ -7,13 +7,12 @@ const SKIP = [
   // Verified they use the same connection but the Node implementation executes
   // a getMore before the killCursors even though the stream is immediately
   // closed.
-  // TODO: should we implement and reference a node specific integration test for this?
+  // TODO(NODE-3970): implement and reference a node specific integration test for this
   'change streams pin to a connection',
 
-  // NOTE: The following three tests are skipped pending a decision made on DRIVERS-1847, since
-  //       pinning the connection on any getMore error is very awkward in node and likely results
-  //       in sub-optimal pinning.
-  // TODO(DRIVERS-1847)
+  // TODO(DRIVERS-1847): The following three tests are skipped pending a decision made on DRIVERS-1847,
+  // since pinning the connection on any getMore error is very awkward in node and likely results
+  // in sub-optimal pinning.
   'pinned connections are not returned after an network error during getMore',
   'pinned connections are not returned to the pool after a non-network error on getMore',
   'stale errors are ignored',
