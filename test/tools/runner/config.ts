@@ -357,24 +357,7 @@ export class TestConfiguration {
     return this.clientSideEncryption && this.clientSideEncryption.mongodbClientEncryption;
   }
 
-  kmsProviders(type, localKey) {
-    const kmsProviders: Record<string, any> = {};
-    if (typeof type !== 'string' || type === 'aws') {
-      kmsProviders.aws = {
-        accessKeyId: this.clientSideEncryption.AWS_ACCESS_KEY_ID,
-        secretAccessKey: this.clientSideEncryption.AWS_SECRET_ACCESS_KEY
-      };
-    }
-    if (typeof type !== 'string' || type === 'local') {
-      kmsProviders.local = {
-        key: localKey
-      };
-    }
-    if (typeof type !== 'string' || type === 'kmip') {
-      kmsProviders.kmip = {
-        endpoint: 'localhost:5698'
-      };
-    }
-    return kmsProviders;
+  kmsProviders(localKey): Record<string, any> {
+    return { local: { key: localKey }};
   }
 }

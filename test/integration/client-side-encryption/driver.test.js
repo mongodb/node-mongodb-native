@@ -73,7 +73,7 @@ describe('Client Side Encryption Functional', function () {
       let keyVaultDb;
 
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-      const kmsProviders = this.configuration.kmsProviders('local', crypto.randomBytes(96));
+      const kmsProviders = this.configuration.kmsProviders(crypto.randomBytes(96));
       return this.client
         .connect()
         .then(() => {
