@@ -1,0 +1,11 @@
+topology_description:
+  type: Unknown
+  servers:
+  - address: a:27017
+    avg_rtt_ms: 5
+    type: RSGhost
+operation: read
+read_preference:
+  mode: Nearest
+suitable_servers: []
+in_latency_window: []

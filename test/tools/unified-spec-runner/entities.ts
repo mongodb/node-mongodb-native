@@ -105,7 +105,6 @@ export class UnifiedMongoClient extends MongoClient {
   constructor(uri: string, description: ClientEntity) {
     super(uri, {
       monitorCommands: true,
-      ...description.uriOptions,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
