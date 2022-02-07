@@ -103,7 +103,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
 
     after(async function () {
-      if (process.env.LOAD_BALANCER) this.skip();
       await client.close();
     });
 
@@ -316,7 +315,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
 
       afterEach(async function () {
-        if (process.env.LOAD_BALANCER) this.skip();
         await clientNoTls.close();
         await clientWithTls.close();
         await clientWithTlsExpired.close();
