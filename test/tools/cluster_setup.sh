@@ -13,7 +13,7 @@ SHARDED_DIR=${SHARDED_DIR:-$DATA_DIR/sharded_cluster}
 
 if [[ $1 == "replica_set" ]]; then
     mkdir -p $REPLICASET_DIR # user / password
-    mlaunch init --dir $REPLICASET_DIR --auth --username bob --password pwd123 --replicaset --nodes 3 --arbiter --name rs --port 31000 --enableMajorityReadConcern --setParameter enableTestCommands=1
+    mlaunch init --dir $REPLICASET_DIR --auth --username "bob" --password "pwd123" --replicaset --nodes 3 --arbiter --name rs --port 31000 --enableMajorityReadConcern --setParameter enableTestCommands=1
     echo "mongodb://bob:pwd123@localhost:31000,localhost:31001,localhost:31002/?replicaSet=rs"
 elif [[ $1 == "sharded_cluster" ]]; then
     mkdir -p $SHARDED_DIR

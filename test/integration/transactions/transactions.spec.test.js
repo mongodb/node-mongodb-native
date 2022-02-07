@@ -91,13 +91,16 @@ const SKIP_TESTS = [
   // TODO(NODE-3369): unskip count tests when spec tests have been updated
   'count',
 
+  // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
   // TODO(NODE-2034): Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
-  'Client side error when transaction is in progress',
-
-  // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
-  'implicit abort'
+  'Client side error when transaction is in progress'
 ];
+
+// 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+if (process.env.AUTH === 'auth') {
+  SKIP_TESTS.push('implicit abort');
+}
 
 describe('Transactions Spec Legacy Tests', function () {
   const testContext = new TransactionsRunnerContext();

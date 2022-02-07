@@ -28,8 +28,7 @@ function resolveConnectionString(configuration, spec, context) {
   const useMultipleMongoses = spec && !!spec.useMultipleMongoses;
   const username = context && context.user;
   const password = context && context.password;
-  const authSource =
-    context && context.authSource && context.authSource !== 'admin' ? context.authSource : 'admin';
+  const authSource = (context && context.authSource) || 'admin';
   const authString =
     process.env.AUTH === 'auth' ? `${extractAuthString(process.env.MONGODB_URI)}@` : '';
   const connectionString =

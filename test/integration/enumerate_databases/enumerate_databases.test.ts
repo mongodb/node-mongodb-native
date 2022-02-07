@@ -5,8 +5,7 @@ import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 const metadata: MongoDBMetadataUI = {
   requires: {
     mongodb: '>=4.0.6',
-    auth: 'enabled',
-    topology: ['single', 'replicaset', 'sharded']
+    auth: 'enabled'
   }
 };
 
