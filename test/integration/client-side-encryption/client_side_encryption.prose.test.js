@@ -926,9 +926,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           this.clientEncryption.createDataKey(testCase.provider, { masterKey }).then(
             keyId => {
               if (!testCase.succeed) {
-                throw new Error(
-                  'Expected test case to fail to create data key, but it succeeded'
-                );
+                throw new Error('Expected test case to fail to create data key, but it succeeded');
               }
               return this.clientEncryption
                 .encrypt('test', {
@@ -957,9 +955,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           promises.push(
             this.clientEncryptionInvalid.createDataKey(testCase.provider, { masterKey }).then(
               () => {
-                throw new Error(
-                  'Expected test case to fail to create data key, but it succeeded'
-                );
+                throw new Error('Expected test case to fail to create data key, but it succeeded');
               },
               err => {
                 expect(err)
@@ -1040,13 +1036,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       );
       return this.clientEncrypted.connect().then(() => {
         this.encryptedColl = this.clientEncrypted.db(dataDbName).collection(dataCollName);
-        this.commandStartedEvents = new APMEventCollector(
-          this.clientEncrypted,
-          'commandStarted',
-          {
-            include: ['insert']
-          }
-        );
+        this.commandStartedEvents = new APMEventCollector(this.clientEncrypted, 'commandStarted', {
+          include: ['insert']
+        });
       });
     });
 
@@ -1257,9 +1249,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     const { EJSON } = BSON;
     function loadExternal(file) {
       return EJSON.parse(
-        fs.readFileSync(
-          path.resolve(__dirname, '../../spec/client-side-encryption/external', file)
-        )
+        fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/external', file))
       );
     }
 
