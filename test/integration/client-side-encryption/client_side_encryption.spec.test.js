@@ -84,6 +84,7 @@ describe('Client Side Encryption', function () {
     return (
       !spec.description.match(/type=symbol/) &&
       !spec.description.match(/maxWireVersion < 8/) &&
+      !spec.description.match(/Count with deterministic encryption/) &&
       !SKIPPED_TESTS.has(spec.description)
     );
   });
