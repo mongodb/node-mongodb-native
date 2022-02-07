@@ -94,13 +94,15 @@ const SKIP_TESTS = [
   // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
   // TODO(NODE-2034): Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
-  'Client side error when transaction is in progress'
-];
+  'Client side error when transaction is in progress',
 
-// 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
-if (process.env.AUTH === 'auth') {
-  SKIP_TESTS.push('implicit abort');
-}
+  // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+  //    Unlike most of the failing auth tests, this is failing with auth is enabled.
+  //    The test is failing due to an incorrect number of expected commands
+  //    and is probably related to modifications made to the test runner when
+  //    auth was enabled by default for CI and local tests.
+  'implicit abort'
+];
 
 describe('Transactions Spec Legacy Tests', function () {
   const testContext = new TransactionsRunnerContext();

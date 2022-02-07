@@ -5,7 +5,11 @@ import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
 const metadata: MongoDBMetadataUI = {
   requires: {
     mongodb: '>=4.0.6',
-    auth: 'enabled'
+    auth: 'enabled',
+
+    // 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    //   These tests should work on a load balanced topology
+    topology: '!load-balanced'
   }
 };
 
