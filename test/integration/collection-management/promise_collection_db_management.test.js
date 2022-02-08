@@ -1,6 +1,5 @@
 'use strict';
 const { assert: test, setupDatabase } = require('../shared');
-const f = require('util').format;
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
@@ -12,11 +11,8 @@ describe('Collection Management and Db Management (promise tests)', function () 
 
   it('Should correctly createCollection using Promise', function (done) {
     const configuration = this.configuration;
-    let url = configuration.url();
-    url =
-      url.indexOf('?') !== -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
+    const client = configuration.newClient({}, { maxPoolSize: 5 });
 
-    const client = configuration.newClient(url);
     client.connect().then(function (client) {
       client
         .db(configuration.db)
@@ -34,11 +30,8 @@ describe('Collection Management and Db Management (promise tests)', function () 
 
   it('Should correctly rename and drop collection using Promise', function (done) {
     const configuration = this.configuration;
-    let url = configuration.url();
-    url =
-      url.indexOf('?') !== -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
+    const client = configuration.newClient({}, { maxPoolSize: 5 });
 
-    const client = configuration.newClient(url);
     client.connect().then(function (client) {
       const db = client.db(configuration.db);
 
@@ -61,11 +54,8 @@ describe('Collection Management and Db Management (promise tests)', function () 
 
   it('Should correctly drop database using Promise', function (done) {
     const configuration = this.configuration;
-    let url = configuration.url();
-    url =
-      url.indexOf('?') !== -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
+    const client = configuration.newClient({}, { maxPoolSize: 5 });
 
-    const client = configuration.newClient(url);
     client.connect().then(function (client) {
       client
         .db(configuration.db)
@@ -83,11 +73,7 @@ describe('Collection Management and Db Management (promise tests)', function () 
 
   it('Should correctly createCollections and call collections with Promise', function (done) {
     const configuration = this.configuration;
-    let url = configuration.url();
-    url =
-      url.indexOf('?') !== -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
-
-    const client = configuration.newClient(url);
+    const client = configuration.newClient({}, { maxPoolSize: 5 });
     client.connect().then(function (client) {
       const db = client.db(configuration.db);
 

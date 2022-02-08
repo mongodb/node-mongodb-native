@@ -46,6 +46,17 @@ const SKIP = [
         'wait queue timeout errors include cursor statistics',
         'wait queue timeout errors include transaction statistics'
       ]
+    : []),
+
+  // TODO: NODE-3891 - fix tests broken when AUTH enabled
+  ...(process.env.AUTH === 'auth'
+    ? [
+        'errors during authentication are processed',
+        'wait queue timeout errors include cursor statistics',
+        'wait queue timeout errors include transaction statistics',
+        'operations against non-load balanced clusters fail if URI contains loadBalanced=true',
+        'operations against non-load balanced clusters succeed if URI contains loadBalanced=false'
+      ]
     : [])
 ];
 

@@ -72,7 +72,10 @@ maybeDescribe('Connections survive primary step down - prose', function () {
   });
 
   it('getMore iteration', {
-    metadata: { requires: { mongodb: '>=4.2.0', topology: 'replicaset' } },
+    metadata: {
+      requires: { mongodb: '>=4.2.0', topology: 'replicaset', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
 
     test: function () {
       return collection
@@ -138,28 +141,40 @@ maybeDescribe('Connections survive primary step down - prose', function () {
   }
 
   it('Not Primary - Keep Connection Pool', {
-    metadata: { requires: { mongodb: '>=4.2.0', topology: 'replicaset' } },
+    metadata: {
+      requires: { mongodb: '>=4.2.0', topology: 'replicaset', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
     test: function () {
       return runStepownScenario(10107, expectPoolWasNotCleared);
     }
   });
 
   it('Not Primary - Reset Connection Pool', {
-    metadata: { requires: { mongodb: '4.0.x', topology: 'replicaset' } },
+    metadata: {
+      requires: { mongodb: '4.0.x', topology: 'replicaset', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
     test: function () {
       return runStepownScenario(10107, expectPoolWasCleared);
     }
   });
 
   it('Shutdown in progress - Reset Connection Pool', {
-    metadata: { requires: { mongodb: '>=4.0.0', topology: 'replicaset' } },
+    metadata: {
+      requires: { mongodb: '>=4.0.0', topology: 'replicaset', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
     test: function () {
       return runStepownScenario(91, expectPoolWasCleared);
     }
   });
 
   it('Interrupted at shutdown - Reset Connection Pool', {
-    metadata: { requires: { mongodb: '>=4.0.0', topology: 'replicaset' } },
+    metadata: {
+      requires: { mongodb: '>=4.0.0', topology: 'replicaset', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
     test: function () {
       return runStepownScenario(11600, expectPoolWasCleared);
     }

@@ -1,5 +1,6 @@
 'use strict';
 const { expect } = require('chai');
+const { removeAuthFromConnectionString } = require('../../tools/utils');
 
 describe('MONGODB-AWS', function () {
   beforeEach(function () {
@@ -12,7 +13,8 @@ describe('MONGODB-AWS', function () {
 
   it('should not authorize when not authenticated', function (done) {
     const config = this.configuration;
-    const client = config.newClient(config.url()); // strip provided URI of credentials
+    const url = removeAuthFromConnectionString(config.url());
+    const client = config.newClient(url); // strip provided URI of credentials
     client.connect(err => {
       expect(err).to.not.exist;
       this.defer(() => client.close());

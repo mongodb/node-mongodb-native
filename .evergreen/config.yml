@@ -749,6 +749,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-latest-replica_set
     tags:
@@ -760,6 +761,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-latest-sharded_cluster
     tags:
@@ -771,6 +773,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-5.0-server
     tags:
@@ -782,6 +785,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-5.0-replica_set
     tags:
@@ -793,6 +797,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-5.0-sharded_cluster
     tags:
@@ -804,6 +809,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-4.4-server
     tags:
@@ -815,6 +821,7 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-4.4-replica_set
     tags:
@@ -826,6 +833,7 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-4.4-sharded_cluster
     tags:
@@ -837,6 +845,7 @@ tasks:
         vars:
           VERSION: '4.4'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-4.2-server
     tags:
@@ -848,6 +857,7 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-4.2-replica_set
     tags:
@@ -859,6 +869,7 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-4.2-sharded_cluster
     tags:
@@ -870,6 +881,7 @@ tasks:
         vars:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-4.0-server
     tags:
@@ -881,6 +893,7 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-4.0-replica_set
     tags:
@@ -892,6 +905,7 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-4.0-sharded_cluster
     tags:
@@ -903,6 +917,7 @@ tasks:
         vars:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-3.6-server
     tags:
@@ -914,6 +929,7 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: server
+          AUTH: auth
       - func: run tests
   - name: test-3.6-replica_set
     tags:
@@ -925,6 +941,7 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: replica_set
+          AUTH: auth
       - func: run tests
   - name: test-3.6-sharded_cluster
     tags:
@@ -936,6 +953,7 @@ tasks:
         vars:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
+          AUTH: auth
       - func: run tests
   - name: test-latest-server-v1-api
     tags:
@@ -949,6 +967,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
           REQUIRE_API_VERSION: '1'
+          AUTH: auth
       - func: run tests
         vars:
           MONGODB_API_VERSION: '1'
@@ -975,6 +994,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: sharded_cluster
+          AUTH: auth
           LOAD_BALANCER: 'true'
       - func: start-load-balancer
       - func: run-lb-tests
@@ -1025,6 +1045,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1039,6 +1060,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1053,6 +1075,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1067,6 +1090,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1080,6 +1104,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1094,6 +1119,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1107,6 +1133,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1165,6 +1192,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1179,6 +1207,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1193,6 +1222,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1207,6 +1237,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1220,6 +1251,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1234,6 +1266,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1247,6 +1280,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: latest
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1261,6 +1295,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1275,6 +1310,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1289,6 +1325,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1303,6 +1340,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1316,6 +1354,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1330,6 +1369,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1343,6 +1383,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1357,6 +1398,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1371,6 +1413,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1385,6 +1428,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1399,6 +1443,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1412,6 +1457,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 1
@@ -1426,6 +1472,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1439,6 +1486,7 @@ tasks:
           ORCHESTRATION_FILE: rsa-basic-tls-ocsp-mustStaple-disableStapling.json
           VERSION: '4.4'
           TOPOLOGY: server
+          AUTH: auth
       - func: run-ocsp-test
         vars:
           OCSP_TLS_SHOULD_SUCCEED: 0
@@ -1686,6 +1734,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run custom csfle tests
   - name: run-custom-snappy-tests
     tags:
@@ -1698,6 +1747,7 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run custom snappy tests
   - name: run-bson-ext-test
     tags:
@@ -1710,9 +1760,244 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
+          AUTH: auth
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
+  - name: test-latest-server-noauth
+    tags:
+      - latest
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-latest-replica_set-noauth
+    tags:
+      - latest
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-latest-sharded_cluster-noauth
+    tags:
+      - latest
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-5.0-server-noauth
+    tags:
+      - '5.0'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-5.0-replica_set-noauth
+    tags:
+      - '5.0'
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-5.0-sharded_cluster-noauth
+    tags:
+      - '5.0'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.4-server-noauth
+    tags:
+      - '4.4'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.4-replica_set-noauth
+    tags:
+      - '4.4'
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.4-sharded_cluster-noauth
+    tags:
+      - '4.4'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.2-server-noauth
+    tags:
+      - '4.2'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.2-replica_set-noauth
+    tags:
+      - '4.2'
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.2-sharded_cluster-noauth
+    tags:
+      - '4.2'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.0-server-noauth
+    tags:
+      - '4.0'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.0-replica_set-noauth
+    tags:
+      - '4.0'
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-4.0-sharded_cluster-noauth
+    tags:
+      - '4.0'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
+  - name: test-3.6-server-noauth
+    tags:
+      - '3.6'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run tests
+  - name: test-3.6-replica_set-noauth
+    tags:
+      - '3.6'
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: run tests
+  - name: test-3.6-sharded_cluster-noauth
+    tags:
+      - '3.6'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: run tests
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -2020,3 +2305,25 @@ buildvariants:
       NODE_LTS_NAME: erbium
     tasks:
       - serverless_task_group
+  - name: no-auth-tests
+    display_name: No Auth Tests
+    run_on: ubuntu1804-test
+    tasks:
+      - test-latest-server-noauth
+      - test-latest-replica_set-noauth
+      - test-latest-sharded_cluster-noauth
+      - test-5.0-server-noauth
+      - test-5.0-replica_set-noauth
+      - test-5.0-sharded_cluster-noauth
+      - test-4.4-server-noauth
+      - test-4.4-replica_set-noauth
+      - test-4.4-sharded_cluster-noauth
+      - test-4.2-server-noauth
+      - test-4.2-replica_set-noauth
+      - test-4.2-sharded_cluster-noauth
+      - test-4.0-server-noauth
+      - test-4.0-replica_set-noauth
+      - test-4.0-sharded_cluster-noauth
+      - test-3.6-server-noauth
+      - test-3.6-replica_set-noauth
+      - test-3.6-sharded_cluster-noauth

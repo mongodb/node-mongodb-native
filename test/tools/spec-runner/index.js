@@ -133,12 +133,12 @@ function generateTopologyTests(testSuites, testContext, filter) {
       const allRequirements = runOn.map(legacyRunOnToRunOnRequirement);
 
       const someRequirementMet =
-        !allRequirements.length ||
+        allRequirements.length === 0 ||
         (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
 
       let shouldRun = someRequirementMet;
 
-      const spec = this.currentTest.spec;
+      const { spec } = this.currentTest;
 
       if (
         shouldRun &&
@@ -390,12 +390,7 @@ function runTestSuiteTest(configuration, spec, context) {
     let testPromise = Promise.resolve();
     return testPromise
       .then(() => testOperations(spec, operationContext))
-      .catch(err => {
-        // If the driver throws an exception / returns an error while executing this series
-        // of operations, store the error message.
-        throw err;
-      })
-      .then(() => {
+      .finally(() => {
         const promises = [];
         if (session0) promises.push(session0.endSession());
         if (session1) promises.push(session1.endSession());

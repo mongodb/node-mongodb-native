@@ -13,9 +13,10 @@ describe('URI', function () {
     test: function (done) {
       var self = this;
 
+      const authInformation = process.env.AUTH === 'auth' ? 'bob:pwd123@' : '';
       // Connect using the connection string
       const client = this.configuration.newClient(
-        'mongodb://localhost:27017/integration_tests?w=0'
+        `mongodb://${authInformation}localhost:27017/?w=0`
       );
 
       client.connect(function (err, client) {
@@ -79,7 +80,7 @@ describe('URI', function () {
     test: function (done) {
       var self = this;
       const configuration = this.configuration;
-      const client = configuration.newClient('mongodb://localhost:27017/integration_tests');
+      const client = configuration.newClient();
 
       client.connect(function (err, client) {
         expect(err).to.not.exist;

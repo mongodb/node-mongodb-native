@@ -88,7 +88,10 @@ describe('Connection', function () {
     });
 
     it('should support calling back multiple times on exhaust commands', {
-      metadata: { requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'] } },
+      metadata: {
+        requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'], auth: 'disabled' },
+        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      },
       test: function (done) {
         const namespace = ns(`${this.configuration.db}.$cmd`);
         const connectOptions = Object.assign(
@@ -196,7 +199,10 @@ describe('Connection', function () {
     });
 
     it('should correctly connect to server using domain socket', {
-      metadata: { requires: { topology: 'single', os: '!win32' } },
+      metadata: {
+        requires: { topology: 'single', os: '!win32', auth: 'disabled' },
+        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      },
 
       test: function (done) {
         var configuration = this.configuration;
@@ -360,7 +366,7 @@ describe('Connection', function () {
           expect(err).to.not.exist;
           var db = client.db(configuration.db);
 
-          db.addUser(username, password, { roles: ['read'] }, function (err) {
+          db.addUser(username, password, { roles: ['readWrite', 'dbAdmin'] }, function (err) {
             expect(err).to.not.exist;
             restOfTest();
           });
@@ -385,9 +391,12 @@ describe('Connection', function () {
 
       test: function (done) {
         var configuration = this.configuration;
-        client = configuration.newClient(
-          configuration.url({ username: 'slithy', password: 'toves' })
-        );
+        client = configuration.newClient({
+          auth: {
+            username: 'slithy',
+            password: 'toves'
+          }
+        });
         client.connect(function (err, client) {
           expect(err).to.exist;
           expect(client).to.not.exist;

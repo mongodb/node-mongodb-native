@@ -1,10 +1,12 @@
+import { OneOrMore } from './src/mongo_types';
 import type { TestConfiguration } from './test/tools/runner/config';
 
 type WithExclusion<T extends string> = `!${T}`
 /** Defined in test/tools/runner/filters/mongodb_topology_filter.js (topologyTypeToString) */
 type TopologyTypes = 'single' | 'replicaset' | 'sharded' | 'load-balanced';
-type TopologyTypeRequirement = WithExclusion<TopologyTypes> | WithExclusion<TopologyTypes>[]
+type TopologyTypeRequirement = OneOrMore<TopologyTypes> | OneOrMore<WithExclusion<TopologyTypes>>
 
+declare global {
 interface MongoDBMetadataUI {
   requires?: {
     topology?: TopologyTypeRequirement;
@@ -13,6 +15,7 @@ interface MongoDBMetadataUI {
     apiVersion?: '1';
     clientSideEncryption?: boolean;
     serverless?: 'forbid' | 'allow' | 'require';
+    auth: 'enabled' | 'disabled'
   };
 
   sessions?: {
@@ -24,8 +27,6 @@ interface MetadataAndTest<Fn> {
   metadata: MongoDBMetadataUI;
   test: Fn;
 }
-
-declare global {
   namespace Mocha {
     interface TestFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;

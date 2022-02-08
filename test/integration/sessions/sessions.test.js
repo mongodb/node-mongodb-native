@@ -6,13 +6,23 @@ const { setupDatabase, withMonitoredClient } = require('../shared');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND];
+let hasInitialPingOccurred = false;
 const test = {
   commands: { started: [], succeeded: [] },
   setup: function (config) {
     this.commands = { started: [], succeeded: [] };
     this.client = config.newClient({ w: 1 }, { maxPoolSize: 1, monitorCommands: true });
 
+    // Because we have a MongoClient.connect method, an extra 'ping' event is sent to the
+    // server when authentication is enabled.  We have to detect the scenario when auth is
+    // enabled for the test and ignore the initial ping.  This will be addressed in NODE-2149.
+    const auth = config.options.auth;
+    const isAuthEnabled = !!(auth && auth.username && auth.password);
     this.client.on('commandStarted', event => {
+      if (event.commandName === 'ping' && isAuthEnabled && !hasInitialPingOccurred) {
+        hasInitialPingOccurred = true;
+        return;
+      }
       if (ignoredCommands.indexOf(event.commandName) === -1) {
         this.commands.started.push(event);
       }

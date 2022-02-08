@@ -2,6 +2,7 @@
 const { expect } = require('chai');
 const { resolveConnectionString } = require('./utils');
 const { ns } = require('../../../src/utils');
+const { extractAuthFromConnectionString } = require('../utils');
 
 class Thread {
   constructor() {
@@ -29,7 +30,6 @@ class Thread {
     });
   }
 }
-
 class TestRunnerContext {
   constructor(opts) {
     const defaults = {
@@ -80,9 +80,17 @@ class TestRunnerContext {
       resolveConnectionString(config, { useMultipleMongoses: true }, this)
     );
     if (config.topologyType === 'Sharded') {
-      this.failPointClients = config.options.hostAddresses.map(proxy =>
-        config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
-      );
+      this.failPointClients = config.options.hostAddresses.map(proxy => {
+        const authString =
+          process.env.AUTH === 'auth'
+            ? `${extractAuthFromConnectionString(process.env.MONGODB_URI)}@`
+            : '';
+        return config.newClient(
+          `mongodb://${authString}${proxy.host}:${proxy.port}/${
+            process.env.AUTH === 'auth' ? '?authSource=admin' : ''
+          }`
+        );
+      });
     }
 
     return this.runForAllClients(client => client.connect());

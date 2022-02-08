@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 
 import { ChangeStream } from '../../../src/change_stream';
-import type {
+import {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent
 } from '../../../src/cmap/command_monitoring_events';
-import type {
+import {
   ConnectionCheckedInEvent,
   ConnectionCheckedOutEvent,
   ConnectionCheckOutFailedEvent,
@@ -25,7 +25,8 @@ import {
   Document,
   GridFSBucket,
   HostAddress,
-  MongoClient
+  MongoClient,
+  MongoCredentials
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
@@ -78,6 +79,9 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedOut'
     | 'connectionCheckedIn'
   )[];
+  _credentials: MongoCredentials | null;
+  _pingEvents = [];
+  _initialPingCmapEvents = [];
 
   static COMMAND_EVENT_NAME_LOOKUP = {
     commandStartedEvent: 'commandStarted',
@@ -136,6 +140,19 @@ export class UnifiedMongoClient extends MongoClient {
 
   // NOTE: pushCommandEvent must be an arrow function
   pushCommandEvent: (e: CommandEvent) => void = e => {
+    if (e.commandName === 'ping' && this.credentials) {
+      // initial ping command
+      if (this._pingEvents.length === 0) {
+        this._pingEvents.push(e);
+        return;
+      }
+      // if there is a CommandSucceedEvent, add that as well
+      if (this._pingEvents.length === 1 && e instanceof CommandSucceededEvent) {
+        this._pingEvents.push(e);
+        return;
+      }
+    }
+
     if (!this.isIgnored(e)) {
       this.commandEvents.push(e);
     }
@@ -143,6 +160,12 @@ export class UnifiedMongoClient extends MongoClient {
 
   // NOTE: pushCmapEvent must be an arrow function
   pushCmapEvent: (e: CmapEvent) => void = e => {
+    if (this.credentials && this._initialPingCmapEvents.length !== 2) {
+      if (e instanceof ConnectionCheckedOutEvent || e instanceof ConnectionCheckedInEvent) {
+        this._initialPingCmapEvents.push(e);
+        return;
+      }
+    }
     this.cmapEvents.push(e);
   };
 
@@ -162,6 +185,14 @@ export class UnifiedMongoClient extends MongoClient {
   stopCapturingCmapEvents(): CmapEvent[] {
     this.stopCapturingEvents(this.pushCmapEvent);
     return this.cmapEvents;
+  }
+
+  get credentials() {
+    if (this._credentials == null) {
+      this._credentials = this.options.credentials;
+    }
+
+    return this._credentials;
   }
 }
 

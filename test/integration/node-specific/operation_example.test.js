@@ -5487,7 +5487,10 @@ describe('Operation Examples', function () {
    * @example-class MongoClient
    */
   it('Should correctly connect to a replicaset', {
-    metadata: { requires: { topology: 'replicaset' } },
+    metadata: {
+      requires: { topology: 'replicaset', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -5540,7 +5543,10 @@ describe('Operation Examples', function () {
    * @example-class MongoClient
    */
   it('Should connect to mongos proxies using connectiong string', {
-    metadata: { requires: { topology: 'sharded' } },
+    metadata: {
+      requires: { topology: 'sharded', auth: 'disabled' },
+      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+    },
 
     test: function (done) {
       var configuration = this.configuration;
@@ -5596,7 +5602,7 @@ describe('Operation Examples', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      const client = configuration.newClient('mongodb://localhost:27017/integration_tests');
+      const client = configuration.newClient();
 
       // DOC_START
       // Connect using the connection string

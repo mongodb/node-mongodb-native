@@ -279,14 +279,22 @@ export class TestConfiguration {
 
     url.pathname = `/${options.db}`;
 
-    if (options.username) url.username = options.username;
-    if (options.password) url.password = options.password;
+    const username = this.options.username || (this.options.auth && this.options.auth.username);
+    const password = this.options.password || (this.options.auth && this.options.auth.password);
+
+    if (username) {
+      url.username = username;
+    }
+
+    if (password) {
+      url.password = password;
+    }
 
     if (this.isLoadBalanced) {
       url.searchParams.append('loadBalanced', 'true');
     }
 
-    if (options.username || options.password) {
+    if (username || password) {
       if (options.authMechanism) {
         url.searchParams.append('authMechanism', options.authMechanism);
       }
@@ -325,6 +333,10 @@ export class TestConfiguration {
       } else {
         actualHostsString = this.options.hostAddresses[0].toString();
       }
+    }
+
+    if (!options.authSource) {
+      url.searchParams.append('authSource', 'admin');
     }
 
     const connectionString = url.toString().replace(FILLER_HOST, actualHostsString);
