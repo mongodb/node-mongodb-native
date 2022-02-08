@@ -1,7 +1,7 @@
 // Resolves the default auth mechanism according to
-
 import type { Document } from '../../bson';
 import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
+import { emitWarningOnce } from '../../utils';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -90,6 +90,9 @@ export class MongoCredentials {
     }
 
     if ('gssapiCanonicalizeHostName' in this.mechanismProperties) {
+      emitWarningOnce(
+        'gssapiCanonicalizeHostName is deprecated. Please use CANONICALIZE_HOST_NAME instead.'
+      );
       this.mechanismProperties.CANONICALIZE_HOST_NAME =
         this.mechanismProperties.gssapiCanonicalizeHostName;
     }
