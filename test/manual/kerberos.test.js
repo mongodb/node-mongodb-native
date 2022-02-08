@@ -5,6 +5,7 @@ const sinon = require('sinon');
 const dns = require('dns');
 
 const expect = chai.expect;
+chai.use(require('sinon-chai'));
 
 function verifyKerberosAuthentication(client, done) {
   client
@@ -69,7 +70,7 @@ describe('Kerberos', function () {
     );
     client.connect(function (err, client) {
       if (err) return done(err);
-      expect(dns.resolveCname.calledOnce).to.be.true;
+      expect(dns.resolveCname).to.be.calledOnce;
       verifyKerberosAuthentication(client, done);
     });
   });
@@ -80,7 +81,7 @@ describe('Kerberos', function () {
     );
     client.connect(function (err, client) {
       if (err) return done(err);
-      expect(dns.resolveCname.calledOnce).to.be.true;
+      expect(dns.resolveCname).to.be.calledOnce;
       verifyKerberosAuthentication(client, done);
     });
   });
