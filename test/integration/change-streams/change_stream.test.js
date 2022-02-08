@@ -1254,7 +1254,11 @@ describe('Change Streams', function () {
       return coll.insertOne({ c: 3 });
     }
 
-    beforeEach(testSkipBrokenAuthTestBeforeEachHook(['when invoked using eventEmitter API']));
+    beforeEach(
+      testSkipBrokenAuthTestBeforeEachHook({
+        skippedTests: ['when invoked using eventEmitter API']
+      })
+    );
 
     beforeEach(function () {
       client = this.configuration.newClient();

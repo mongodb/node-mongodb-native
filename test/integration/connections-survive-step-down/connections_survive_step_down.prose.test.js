@@ -35,13 +35,15 @@ maybeDescribe('Connections survive primary step down - prose', function () {
   let collection;
 
   beforeEach(
-    testSkipBrokenAuthTestBeforeEachHook([
-      'getMore iteration',
-      'Not Primary - Keep Connection Pool',
-      'Not Primary - Reset Connection Pool',
-      'Shutdown in progress - Reset Connection Pool',
-      'Interrupted at shutdown - Reset Connection Pool'
-    ])
+    testSkipBrokenAuthTestBeforeEachHook({
+      skippedTests: [
+        'getMore iteration',
+        'Not Primary - Keep Connection Pool',
+        'Not Primary - Reset Connection Pool',
+        'Shutdown in progress - Reset Connection Pool',
+        'Interrupted at shutdown - Reset Connection Pool'
+      ]
+    })
   );
 
   beforeEach(function () {

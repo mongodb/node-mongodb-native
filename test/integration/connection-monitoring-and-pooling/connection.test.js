@@ -12,10 +12,12 @@ const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hoo
 
 describe('Connection', function () {
   beforeEach(
-    testSkipBrokenAuthTestBeforeEachHook([
-      'should support calling back multiple times on exhaust commands',
-      'should correctly connect to server using domain socket'
-    ])
+    testSkipBrokenAuthTestBeforeEachHook({
+      skippedTests: [
+        'should support calling back multiple times on exhaust commands',
+        'should correctly connect to server using domain socket'
+      ]
+    })
   );
 
   before(function () {

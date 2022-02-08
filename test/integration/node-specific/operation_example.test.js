@@ -16,10 +16,12 @@ describe('Operation Examples', function () {
   });
 
   beforeEach(
-    testSkipBrokenAuthTestBeforeEachHook([
-      'Should correctly connect to a replicaset',
-      'Should connect to mongos proxies using connectiong string'
-    ])
+    testSkipBrokenAuthTestBeforeEachHook({
+      skippedTests: [
+        'Should correctly connect to a replicaset',
+        'Should connect to mongos proxies using connectiong string'
+      ]
+    })
   );
 
   /**************************************************************************
