@@ -69,7 +69,7 @@ describe('Kerberos', function () {
     );
     client.connect(function (err, client) {
       if (err) return done(err);
-      expect(dns.resolveCname.calledOnce);
+      expect(dns.resolveCname.calledOnce).to.be.true;
       verifyKerberosAuthentication(client, done);
     });
   });
@@ -80,7 +80,7 @@ describe('Kerberos', function () {
     );
     client.connect(function (err, client) {
       if (err) return done(err);
-      expect(dns.resolveCname.calledOnce);
+      expect(dns.resolveCname.calledOnce).to.be.true;
       verifyKerberosAuthentication(client, done);
     });
   });
