@@ -1,6 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
+const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 function ignoreNsNotFound(err) {
   if (!err.message.match(/ns not found/)) {
@@ -32,6 +33,16 @@ maybeDescribe('Connections survive primary step down - prose', function () {
   let checkClient;
   let db;
   let collection;
+
+  beforeEach(
+    testSkipBrokenAuthTestBeforeEachHook([
+      'getMore iteration',
+      'Not Primary - Keep Connection Pool',
+      'Not Primary - Reset Connection Pool',
+      'Shutdown in progress - Reset Connection Pool',
+      'Interrupted at shutdown - Reset Connection Pool'
+    ])
+  );
 
   beforeEach(function () {
     const clientOptions = {
@@ -73,8 +84,7 @@ maybeDescribe('Connections survive primary step down - prose', function () {
 
   it('getMore iteration', {
     metadata: {
-      requires: { mongodb: '>=4.2.0', topology: 'replicaset', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { mongodb: '>=4.2.0', topology: 'replicaset' }
     },
 
     test: function () {
@@ -142,8 +152,7 @@ maybeDescribe('Connections survive primary step down - prose', function () {
 
   it('Not Primary - Keep Connection Pool', {
     metadata: {
-      requires: { mongodb: '>=4.2.0', topology: 'replicaset', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { mongodb: '>=4.2.0', topology: 'replicaset' }
     },
     test: function () {
       return runStepownScenario(10107, expectPoolWasNotCleared);
@@ -152,8 +161,7 @@ maybeDescribe('Connections survive primary step down - prose', function () {
 
   it('Not Primary - Reset Connection Pool', {
     metadata: {
-      requires: { mongodb: '4.0.x', topology: 'replicaset', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { mongodb: '4.0.x', topology: 'replicaset' }
     },
     test: function () {
       return runStepownScenario(10107, expectPoolWasCleared);
@@ -162,8 +170,7 @@ maybeDescribe('Connections survive primary step down - prose', function () {
 
   it('Shutdown in progress - Reset Connection Pool', {
     metadata: {
-      requires: { mongodb: '>=4.0.0', topology: 'replicaset', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { mongodb: '>=4.0.0', topology: 'replicaset' }
     },
     test: function () {
       return runStepownScenario(91, expectPoolWasCleared);
@@ -172,8 +179,7 @@ maybeDescribe('Connections survive primary step down - prose', function () {
 
   it('Interrupted at shutdown - Reset Connection Pool', {
     metadata: {
-      requires: { mongodb: '>=4.0.0', topology: 'replicaset', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { mongodb: '>=4.0.0', topology: 'replicaset' }
     },
     test: function () {
       return runStepownScenario(11600, expectPoolWasCleared);

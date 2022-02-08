@@ -5,6 +5,7 @@ const { Topology } = require('../../../src/sdam/topology');
 const { Code, ObjectId, ReturnDocument } = require('../../../src');
 
 const chai = require('chai');
+const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -13,6 +14,13 @@ describe('Operation Examples', function () {
   before(function () {
     return setupDatabase(this.configuration, ['integration_tests_2']);
   });
+
+  beforeEach(
+    testSkipBrokenAuthTestBeforeEachHook([
+      'Should correctly connect to a replicaset',
+      'Should connect to mongos proxies using connectiong string'
+    ])
+  );
 
   /**************************************************************************
    *
@@ -5488,8 +5496,7 @@ describe('Operation Examples', function () {
    */
   it('Should correctly connect to a replicaset', {
     metadata: {
-      requires: { topology: 'replicaset', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { topology: 'replicaset' }
     },
 
     test: function (done) {
@@ -5544,8 +5551,7 @@ describe('Operation Examples', function () {
    */
   it('Should connect to mongos proxies using connectiong string', {
     metadata: {
-      requires: { topology: 'sharded', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { topology: 'sharded' }
     },
 
     test: function (done) {

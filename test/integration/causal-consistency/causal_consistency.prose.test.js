@@ -4,15 +4,26 @@ const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const { setupDatabase } = require('../shared');
 const { expect } = require('chai');
+const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND, 'endSessions'];
 const test = { commands: { started: [], succeeded: [] } };
 
 // TODO(NODE-3882) - properly implement all prose tests and add missing cases 1, 8, 9, 11, 12
-describe('Causal Consistency - prose tests', function () {
+describe.only('Causal Consistency - prose tests', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
+
+  beforeEach(
+    testSkipBrokenAuthTestBeforeEachHook([
+      '2. The first read in a causally consistent session must not send afterClusterTime to the server',
+      '3. The first read or write on a ClientSession should update the operationTime of the ClientSession, even if there is an error',
+      'case: second operation is findOne',
+      'case: successful insert',
+      '6. A read operation in a ClientSession that is not causally consistent should not include the afterClusterTime parameter in the command sent to the server'
+    ])
+  );
 
   beforeEach(function () {
     test.commands = { started: [], succeeded: [] };
@@ -42,16 +53,17 @@ describe('Causal Consistency - prose tests', function () {
      */
     {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
+        requires: { topology: ['replicaset', 'sharded'] },
         // Skipping session leak tests b/c these are explicit sessions
-        sessions: { skipLeakTests: true },
-        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+        sessions: { skipLeakTests: true }
       },
 
       test: function () {
         const session = test.client.startSession({ causalConsistency: true });
         const db = test.client.db(this.configuration.db);
 
+        console.error(this.currentTest);
+        console.error(this.configuration);
         return db
           .collection('causal_test')
           .findOne({}, { session: session })
@@ -81,10 +93,9 @@ describe('Causal Consistency - prose tests', function () {
 
       it('case: successful read with causal consistency', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
+          requires: { topology: ['replicaset', 'sharded'] },
           // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true },
-          skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+          sessions: { skipLeakTests: true }
         },
 
         test: function () {
@@ -120,10 +131,9 @@ describe('Causal Consistency - prose tests', function () {
     () => {
       it('case: second operation is findOne', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
+          requires: { topology: ['replicaset', 'sharded'] },
           // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true },
-          skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+          sessions: { skipLeakTests: true }
         },
 
         test: function () {
@@ -166,10 +176,9 @@ describe('Causal Consistency - prose tests', function () {
     () => {
       it('case: successful insert', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
+          requires: { topology: ['replicaset', 'sharded'] },
           // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true },
-          skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+          sessions: { skipLeakTests: true }
         },
 
         test: function () {
@@ -207,10 +216,9 @@ describe('Causal Consistency - prose tests', function () {
      */
     {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'], auth: 'disabled' },
+        requires: { topology: ['replicaset', 'sharded'] },
         // Skipping session leak tests b/c these are explicit sessions
-        sessions: { skipLeakTests: true },
-        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+        sessions: { skipLeakTests: true }
       },
 
       test: function () {

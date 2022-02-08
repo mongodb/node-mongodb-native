@@ -88,6 +88,15 @@ const testSkipBeforeEachHook = async function () {
   }
 };
 
+const testSkipBrokenAuthTestBeforeEachHook = function (skippedTests = []) {
+  return function () {
+    if (process.env.AUTH === 'auth' && skippedTests.includes(this.currentTest.title)) {
+      this.currentTest.skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
+      this.skip();
+    }
+  };
+};
+
 const testConfigBeforeHook = async function () {
   const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
     ...getEnvironmentalOptions()
@@ -152,5 +161,6 @@ module.exports = {
     beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
     beforeEach: [testSkipBeforeEachHook],
     afterAll: [cleanUpMocksAfterHook]
-  }
+  },
+  testSkipBrokenAuthTestBeforeEachHook
 };
