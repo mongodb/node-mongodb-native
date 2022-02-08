@@ -89,6 +89,11 @@ export class MongoCredentials {
       }
     }
 
+    if ('gssapiCanonicalizeHostName' in this.mechanismProperties) {
+      this.mechanismProperties.CANONICALIZE_HOST_NAME =
+        this.mechanismProperties.gssapiCanonicalizeHostName;
+    }
+
     Object.freeze(this.mechanismProperties);
     Object.freeze(this);
   }

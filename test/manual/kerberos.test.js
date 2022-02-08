@@ -1,6 +1,8 @@
 'use strict';
 const { MongoClient } = require('../../src');
 const chai = require('chai');
+const sinon = require('sinon');
+const dns = require('dns');
 
 const expect = chai.expect;
 
@@ -23,6 +25,16 @@ function verifyKerberosAuthentication(client, done) {
 }
 
 describe('Kerberos', function () {
+  const sandbox = sinon.createSandbox();
+
+  beforeEach(function () {
+    sandbox.spy(dns);
+  });
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
   if (process.env.MONGODB_URI == null) {
     console.error('skipping Kerberos tests, MONGODB_URI environment variable is not defined');
     return;
@@ -51,12 +63,24 @@ describe('Kerberos', function () {
     });
   });
 
+  it('validate that gssapiCanonicalizeHostName can be passed in', function (done) {
+    const client = new MongoClient(
+      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,gssapiCanonicalizeHostName:true&maxPoolSize=1`
+    );
+    client.connect(function (err, client) {
+      if (err) return done(err);
+      expect(dns.resolveCname.calledOnce);
+      verifyKerberosAuthentication(client, done);
+    });
+  });
+
   it('validate that CANONICALIZE_HOST_NAME can be passed in', function (done) {
     const client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1`
     );
     client.connect(function (err, client) {
       if (err) return done(err);
+      expect(dns.resolveCname.calledOnce);
       verifyKerberosAuthentication(client, done);
     });
   });
