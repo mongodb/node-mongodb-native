@@ -83,7 +83,7 @@ functions:
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
           REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
           LOAD_BALANCER=${LOAD_BALANCER} \
-          sh ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+          bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
         file: mo-expansion.yml
@@ -104,7 +104,9 @@ functions:
       params:
         background: true
         working_dir: src
-        binary: bash .evergreen/run-kms-servers.sh
+        binary: bash
+        args:
+          - .evergreen/run-kms-servers.sh
         env:
           CLIENT_ENCRYPTION: ${CLIENT_ENCRYPTION}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
