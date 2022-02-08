@@ -830,7 +830,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             .and.to.have.property('message')
             .that.matches(/KMS request failed/);
         }
-      },
+      }
     ];
 
     testCases.forEach(testCase => {
