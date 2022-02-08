@@ -668,6 +668,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
         AUTH: 'auth'
       }
     },
+    { func: 'bootstrap kms servers' },
     oneOffFunc
   ]
 }));
