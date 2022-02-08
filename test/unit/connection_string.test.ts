@@ -46,11 +46,20 @@ describe('Connection String', function () {
     expect(options.hosts[0].port).to.equal(27017);
   });
 
-  it('should parse multiple readPreferenceTags', function () {
-    const options = parseOptions(
-      'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar'
-    );
-    expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
+  context('readPreferenceTags', function () {
+    it('should parse multiple readPreferenceTags when passed in the uri', () => {
+      const options = parseOptions(
+        'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar'
+      );
+      expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
+    });
+
+    it('should parse multiple readPreferenceTags when passed in options object', () => {
+      const options = parseOptions('mongodb://hostname?', {
+        readPreferenceTags: [{ bar: 'foo' }, { baz: 'bar' }]
+      });
+      expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
+    });
   });
 
   it('should parse boolean values', function () {

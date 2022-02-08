@@ -228,7 +228,7 @@ function toRecord(value: string): Record<string, any> {
   return record;
 }
 
-class CaseInsensitiveMap extends Map<string, any> {
+class CaseInsensitiveMap<Value = any> extends Map<string, Value> {
   constructor(entries: Array<[string, any]> = []) {
     super(entries.map(([k, v]) => [k.toLowerCase(), v]));
   }
@@ -262,7 +262,7 @@ export function parseOptions(
   const mongoOptions = Object.create(null);
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
 
-  const urlOptions = new CaseInsensitiveMap();
+  const urlOptions = new CaseInsensitiveMap<any[]>();
 
   if (url.pathname !== '/' && url.pathname !== '') {
     const dbName = decodeURIComponent(
@@ -326,13 +326,16 @@ export function parseOptions(
   for (const key of allKeys) {
     const values = [];
     if (objectOptions.has(key)) {
-      values.push(objectOptions.get(key));
+      const options = [objectOptions.get(key)].flat();
+      values.push(...options);
     }
     if (urlOptions.has(key)) {
-      values.push(...urlOptions.get(key));
+      const options = urlOptions.get(key) ?? [];
+      values.push(...options);
     }
     if (DEFAULT_OPTIONS.has(key)) {
-      values.push(DEFAULT_OPTIONS.get(key));
+      const options = [DEFAULT_OPTIONS.get(key)].flat();
+      values.push(...options);
     }
     allOptions.set(key, values);
   }
@@ -478,12 +481,11 @@ export function parseOptions(
     throw new MongoParseError('Can only specify both of proxy username/password or neither');
   }
 
-  if (
-    urlOptions.get('proxyHost')?.length > 1 ||
-    urlOptions.get('proxyPort')?.length > 1 ||
-    urlOptions.get('proxyUsername')?.length > 1 ||
-    urlOptions.get('proxyPassword')?.length > 1
-  ) {
+  const proxyOptions = ['proxyHost', 'proxyPort', 'proxyUsername', 'proxyPassword'].map(
+    key => urlOptions.get(key) ?? []
+  );
+
+  if (proxyOptions.some(options => options.length > 1)) {
     throw new MongoParseError(
       'Proxy options cannot be specified multiple times in the connection string'
     );
