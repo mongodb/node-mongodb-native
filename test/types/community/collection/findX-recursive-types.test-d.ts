@@ -1,6 +1,6 @@
 import { expectError } from 'tsd';
 
-import type { Collection } from '../../../../src';
+import type { Collection, Filter } from '../../../../src';
 
 /**
  * mutually recursive types are not supported and will not get type safety

@@ -313,6 +313,16 @@ const fooObj: Foo = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const fooFilter: Filter<Foo> = fooObj;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const fooFilterBuiltNow: Filter<Foo> = {
+  a: 'foo',
+  $or: [{ a: 'bar' }]
+};
+
+const fooFilterBuiltLater: Filter<Foo> = {};
+fooFilterBuiltLater.a = 'foo';
+fooFilterBuiltLater.$or = [{ a: 'bar' }];
+
 // Specifically test that arrays can be included as a part of an object
 //  ensuring that a bug reported in https://jira.mongodb.org/browse/NODE-3856 is addressed
 interface FooWithArray {
