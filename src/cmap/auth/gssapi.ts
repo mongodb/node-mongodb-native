@@ -13,6 +13,8 @@ import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 type MechanismProperties = {
+  /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
+  gssapiCanonicalizeHostName?: boolean;
   CANONICALIZE_HOST_NAME?: boolean;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
