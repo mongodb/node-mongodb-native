@@ -64,8 +64,6 @@ describe('Causal Consistency - prose tests', function () {
         const session = test.client.startSession({ causalConsistency: true });
         const db = test.client.db(this.configuration.db);
 
-        console.error(this.currentTest);
-        console.error(this.configuration);
         return db
           .collection('causal_test')
           .findOne({}, { session: session })
