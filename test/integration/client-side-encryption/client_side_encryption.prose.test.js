@@ -643,18 +643,31 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const invalidKmsProviders = getKmsProviders();
       invalidKmsProviders.azure.identityPlatformEndpoint = 'doesnotexist.invalid:443';
       invalidKmsProviders.gcp.endpoint = 'doesnotexist.invalid:443';
+      invalidKmsProviders.kmip.endpoint = 'doesnotexist.local:5698';
 
       return this.client.connect().then(() => {
         const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
         this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
           bson: BSON,
           keyVaultNamespace,
-          kmsProviders: customKmsProviders
+          kmsProviders: customKmsProviders,
+          tlsOptions: {
+            kmip: {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          }
         });
 
         this.clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(this.client, {
           keyVaultNamespace,
-          kmsProviders: invalidKmsProviders
+          kmsProviders: invalidKmsProviders,
+          tlsOptions: {
+            kmip: {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          }
         });
       });
     });
@@ -736,11 +749,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         },
         succeed: false,
         errorValidator: err => {
-          //    Expect this to fail with an exception with a message containing the string: "parse error"
+          // Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
           expect(err)
             .to.be.an.instanceOf(Error)
             .and.to.have.property('message')
-            .that.matches(/parse error/);
+            .that.matches(/KMS request failed/);
         }
       },
       {
@@ -778,7 +791,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         },
         succeed: false,
         errorValidator: err => {
-          //    Expect this to fail with an exception with a message containing the string: "parse error"
+          // Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
           expect(err)
             .to.be.an.instanceOf(Error)
             .and.to.have.property('message')
@@ -815,7 +828,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect(err)
             .to.be.an.instanceOf(Error)
             .and.to.have.property('message')
-            .that.matches(/Invalid KMS response/);
+            .that.matches(/KMS request failed/);
         }
       },
     ];
@@ -869,7 +882,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               err => {
                 expect(err)
                   .property('message')
-                  .to.match(/parse error/);
+                  .to.match(/KMS request failed/);
               }
             )
           );
