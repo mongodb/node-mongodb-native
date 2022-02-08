@@ -13,9 +13,11 @@ const { ConnectionPool } = require('../../../src/cmap/connection_pool');
 const {
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoServerError
+  MongoServerError,
+  MongoError
 } = require('../../../src/error');
-const { eachAsyncSeries, ns } = require('../../../src/utils');
+const { ns } = require('../../../src/utils');
+const { promisify } = require('util');
 const { expect } = require('chai');
 
 const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
@@ -60,8 +62,8 @@ describe('Server Discovery and Monitoring (spec)', function () {
   for (const specTestName of Object.keys(specTests)) {
     describe(specTestName, () => {
       for (const testData of specTests[specTestName]) {
-        it(testData.description, function (done) {
-          executeSDAMTest(testData, done);
+        it(testData.description, async function () {
+          await executeSDAMTest(testData);
         });
       }
     });
@@ -157,7 +159,19 @@ function cloneForCompare(event) {
   return result;
 }
 
-function executeSDAMTest(testData, testDone) {
+const SDAM_EVENTS = [
+  'serverOpening',
+  'serverClosed',
+  'serverDescriptionChanged',
+  'topologyOpening',
+  'topologyClosed',
+  'topologyDescriptionChanged',
+  'serverHeartbeatStarted',
+  'serverHeartbeatSucceeded',
+  'serverHeartbeatFailed'
+];
+
+async function executeSDAMTest(testData) {
   const options = parseOptions(testData.uri);
   // create the topology
   const topology = new Topology(options.hosts, options);
@@ -173,22 +187,9 @@ function executeSDAMTest(testData, testDone) {
     });
   // listen for SDAM monitoring events
   let events = [];
-  [
-    'serverOpening',
-    'serverClosed',
-    'serverDescriptionChanged',
-    'topologyOpening',
-    'topologyClosed',
-    'topologyDescriptionChanged',
-    'serverHeartbeatStarted',
-    'serverHeartbeatSucceeded',
-    'serverHeartbeatFailed'
-  ].forEach(eventName => {
-    topology.on(eventName, event => events.push(event));
-  });
 
-  function done(err) {
-    topology.close(e => testDone(e || err));
+  for (const eventName of SDAM_EVENTS) {
+    topology.on(eventName, event => events.push(event));
   }
 
   const incompatibilityHandler = err => {
@@ -197,70 +198,44 @@ function executeSDAMTest(testData, testDone) {
   };
 
   // connect the topology
-  topology.connect(options, err => {
-    expect(err).to.not.exist;
+  await promisify(topology.connect.bind(topology))(options);
 
-    eachAsyncSeries(
-      testData.phases,
-      (phase, cb) => {
-        function phaseDone() {
-          if (phase.outcome) {
-            assertOutcomeExpectations(topology, events, phase.outcome);
-          }
+  for (const phase of testData.phases) {
+    const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
 
-          // remove error handler
-          topology.removeListener('error', incompatibilityHandler);
-          // reset the captured events for each phase
-          events = [];
-          cb();
-        }
+    if (incompatibilityExpected) {
+      topology.on('error', incompatibilityHandler);
+    }
 
-        const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
-        if (incompatibilityExpected) {
-          topology.on('error', incompatibilityHandler);
-        }
-
-        // if (phase.description) {
-        //   console.log(`[phase] ${phase.description}`);
-        // }
-
-        if (phase.responses) {
-          // simulate each hello response
-          phase.responses.forEach(response =>
-            topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
-          );
-          phaseDone();
-        } else if (phase.applicationErrors) {
-          eachAsyncSeries(
-            phase.applicationErrors,
-            (appError, phaseCb) => {
-              let withConnectionStub = sinon
-                .stub(ConnectionPool.prototype, 'withConnection')
-                .callsFake(withConnectionStubImpl(appError));
-
-              const server = topology.s.servers.get(appError.address);
-              server.command(ns('admin.$cmd'), { ping: 1 }, undefined, err => {
-                expect(err).to.exist;
-                withConnectionStub.restore();
-
-                phaseCb();
-              });
-            },
-            err => {
-              expect(err).to.not.exist;
-              phaseDone();
-            }
-          );
-        } else {
-          phaseDone();
-        }
-      },
-      err => {
-        expect(err).to.not.exist;
-        done();
+    if (phase.responses) {
+      for (const [address, hello] of phase.responses) {
+        topology.serverUpdateHandler(new ServerDescription(address, hello));
       }
-    );
-  });
+      if (phase.outcome) {
+        assertOutcomeExpectations(topology, events, phase.outcome);
+      }
+      topology.removeListener('error', incompatibilityHandler);
+      events = [];
+    } else if (phase.applicationErrors) {
+      for (const appError of phase.applicationErrors) {
+        let withConnectionStub = sinon
+          .stub(ConnectionPool.prototype, 'withConnection')
+          .callsFake(withConnectionStubImpl(appError));
+
+        const server = topology.s.servers.get(appError.address);
+        const res = promisify(server.command.bind(server))(ns('admin.$cmd'), { ping: 1 });
+        withConnectionStub.restore();
+
+        let thrownError;
+        try {
+          await res;
+        } catch (error) {
+          thrownError = error;
+        }
+        expect(thrownError).to.be.instanceOf(MongoError); // TODO: Can we narrow this check more?
+      }
+    }
+  }
 }
 
 function withConnectionStubImpl(appError) {
@@ -370,7 +345,7 @@ function assertOutcomeExpectations(topology, events, outcome) {
     if (outcomeValue == null) {
       expect(description[translatedKey]).to.not.exist;
     } else {
-      expect(description).property(translatedKey).to.eql(outcomeValue, `(key="${translatedKey}")`);
+      expect(description).to.have.property(translatedKey).that.deep.equals(outcomeValue);
     }
   });
 }
