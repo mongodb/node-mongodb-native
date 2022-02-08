@@ -108,7 +108,6 @@ functions:
         args:
           - .evergreen/run-kms-servers.sh
         env:
-          CLIENT_ENCRYPTION: ${CLIENT_ENCRYPTION}
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
   run tests:
     - command: shell.exec
