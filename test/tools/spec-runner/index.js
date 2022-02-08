@@ -390,13 +390,13 @@ function runTestSuiteTest(configuration, spec, context) {
     let testPromise = Promise.resolve();
     return testPromise
       .then(() => testOperations(spec, operationContext))
-      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData))
       .finally(() => {
         const promises = [];
         if (session0) promises.push(session0.endSession());
         if (session1) promises.push(session1.endSession());
         return Promise.all(promises);
-      });
+      })
+      .then(() => validateExpectations(context.commandEvents, spec, savedSessionData));
   });
 }
 
