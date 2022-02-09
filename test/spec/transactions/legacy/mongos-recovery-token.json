@@ -307,7 +307,8 @@
               "data": {
                 "failCommands": [
                   "commitTransaction",
-                  "isMaster"
+                  "isMaster",
+                  "hello"
                 ],
                 "closeConnection": true
               }

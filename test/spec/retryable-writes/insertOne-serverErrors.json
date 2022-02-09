@@ -118,7 +118,7 @@
       }
     },
     {
-      "description": "InsertOne succeeds after NotMaster",
+      "description": "InsertOne succeeds after NotWritablePrimary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -167,7 +167,7 @@
       }
     },
     {
-      "description": "InsertOne succeeds after NotMasterOrSecondary",
+      "description": "InsertOne succeeds after NotPrimaryOrSecondary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -216,7 +216,7 @@
       }
     },
     {
-      "description": "InsertOne succeeds after NotMasterNoSlaveOk",
+      "description": "InsertOne succeeds after NotPrimaryNoSecondaryOk",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {

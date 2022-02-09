@@ -464,7 +464,7 @@ tests:
         result:
           insertedId: 3
       # Enable the fail point only on the Mongos that session0 is pinned to.
-      # Fail isMaster to prevent the heartbeat requested directly after the
+      # Fail hello/legacy hello to prevent the heartbeat requested directly after the
       # insert error from racing with server selection for the commit.
       # Note: times: 7 is slightly artbitrary but it accounts for one failed
       # insert and some SDAM heartbeats. A test runner will have multiple
@@ -478,7 +478,7 @@ tests:
             configureFailPoint: failCommand
             mode: { times: 7 }
             data:
-              failCommands: ["insert", "isMaster"]
+              failCommands: ["insert", "isMaster", "hello"]
               closeConnection: true
       - name: insertOne
         object: collection
@@ -498,7 +498,7 @@ tests:
       #
       # Note that the commit attempt should not select the original mongos
       # because that server's SDAM state is reset by the connection error,
-      # heartbeatFrequencyMS is high, and subsequent isMaster heartbeats
+      # heartbeatFrequencyMS is high, and subsequent heartbeats
       # should fail.
       - name: commitTransaction
         object: session0
