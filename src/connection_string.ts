@@ -204,6 +204,13 @@ function getUint(name: string, value: unknown): number {
   return parsedValue;
 }
 
+
+function toArray<T>(value: T): T[];
+function toArray<T>(value: T[]): T[];
+function toArray<T>(value: T | T[]): T[] {
+  return Array.isArray(value) ? value : [value];
+}
+
 function toRecord(value: string): Record<string, any> {
   const record = Object.create(null);
   const keyValuePairs = value.split(',');
@@ -324,23 +331,11 @@ export function parseOptions(
   ]);
 
   for (const key of allKeys) {
-    const values = [];
-    if (objectOptions.has(key)) {
-      const options = Array.isArray(objectOptions.get(key))
-        ? objectOptions.get(key)
-        : [objectOptions.get(key)];
-      values.push(...options);
-    }
-    if (urlOptions.has(key)) {
-      const options = urlOptions.get(key) ?? [];
-      values.push(...options);
-    }
-    if (DEFAULT_OPTIONS.has(key)) {
-      const options = Array.isArray(DEFAULT_OPTIONS.get(key))
-        ? DEFAULT_OPTIONS.get(key)
-        : [DEFAULT_OPTIONS.get(key)];
-      values.push(...options);
-    }
+    const values = [objectOptions, urlOptions, DEFAULT_OPTIONS].flatMap(optionsObject => {
+      const options = optionsObject.get(key) ?? [];
+      return toArray(options);
+    });
+
     allOptions.set(key, values);
   }
 
