@@ -26,7 +26,7 @@
   ],
   "tests": [
     {
-      "description": "UpdateOne succeeds after PrimarySteppedDown",
+      "description": "ReplaceOne succeeds after PrimarySteppedDown",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -43,15 +43,14 @@
         }
       },
       "operation": {
-        "name": "updateOne",
+        "name": "replaceOne",
         "arguments": {
           "filter": {
             "_id": 1
           },
-          "update": {
-            "$inc": {
-              "x": 1
-            }
+          "replacement": {
+            "_id": 1,
+            "x": 111
           }
         }
       },
@@ -65,7 +64,7 @@
           "data": [
             {
               "_id": 1,
-              "x": 12
+              "x": 111
             },
             {
               "_id": 2,
@@ -76,7 +75,7 @@
       }
     },
     {
-      "description": "UpdateOne succeeds after WriteConcernError ShutdownInProgress",
+      "description": "ReplaceOne succeeds after WriteConcernError ShutdownInProgress",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -86,25 +85,24 @@
           "failCommands": [
             "update"
           ],
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "writeConcernError": {
             "code": 91,
-            "errmsg": "Replication is being shut down",
-            "errorLabels": [
-              "RetryableWriteError"
-            ]
+            "errmsg": "Replication is being shut down"
           }
         }
       },
       "operation": {
-        "name": "updateOne",
+        "name": "replaceOne",
         "arguments": {
           "filter": {
             "_id": 1
           },
-          "update": {
-            "$inc": {
-              "x": 1
-            }
+          "replacement": {
+            "_id": 1,
+            "x": 111
           }
         }
       },
@@ -118,7 +116,7 @@
           "data": [
             {
               "_id": 1,
-              "x": 12
+              "x": 111
             },
             {
               "_id": 2,
@@ -129,7 +127,7 @@
       }
     },
     {
-      "description": "UpdateOne fails with a RetryableWriteError label after two connection failures",
+      "description": "ReplaceOne fails with a RetryableWriteError label after two connection failures",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -143,15 +141,14 @@
         }
       },
       "operation": {
-        "name": "updateOne",
+        "name": "replaceOne",
         "arguments": {
           "filter": {
             "_id": 1
           },
-          "update": {
-            "$inc": {
-              "x": 1
-            }
+          "replacement": {
+            "_id": 1,
+            "x": 111
           }
         }
       },

@@ -12,64 +12,57 @@ data:
 
 tests:
     -
-        description: "FindOneAndReplace succeeds after PrimarySteppedDown"
+        description: "DeleteOne succeeds after PrimarySteppedDown"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
-                failCommands: ["findAndModify"]
+                failCommands: ["delete"]
                 errorCode: 189
                 errorLabels: ["RetryableWriteError"]
         operation:
-            name: "findOneAndReplace"
+            name: "deleteOne"
             arguments:
                 filter: { _id: 1 }
-                replacement: { _id: 1, x: 111 }
-                returnDocument: "Before"
         outcome:
-            result: { _id: 1, x: 11 }
+            result:
+                deletedCount: 1
             collection:
                 data:
-                    - { _id: 1, x: 111 }
                     - { _id: 2, x: 22 }
     -
-        description: "FindOneAndReplace succeeds after WriteConcernError ShutdownInProgress"
+        description: "DeleteOne succeeds after WriteConcernError ShutdownInProgress"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
-                failCommands: ["findAndModify"]
+                failCommands: ["delete"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
-            name: "findOneAndReplace"
+            name: "deleteOne"
             arguments:
                 filter: { _id: 1 }
-                replacement: { _id: 1, x: 111 }
-                returnDocument: "Before"
         outcome:
-            result: { _id: 1, x: 11 }
+            result:
+                deletedCount: 1
             collection:
                 data:
-                    - { _id: 1, x: 111 }
                     - { _id: 2, x: 22 }
-
     -
-        description: "FindOneAndReplace fails with a RetryableWriteError label after two connection failures"
+        description: "DeleteOne fails with RetryableWriteError label after two connection failures"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-                failCommands: ["findAndModify"]
+                failCommands: ["delete"]
                 closeConnection: true
         operation:
-            name: "findOneAndReplace"
+            name: "deleteOne"
             arguments:
                 filter: { _id: 1 }
-                replacement: { _id: 1, x: 111 }
-                returnDocument: "Before"
         outcome:
             error: true
             result:

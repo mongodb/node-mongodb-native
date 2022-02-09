@@ -18,11 +18,15 @@
     {
       "_id": 1,
       "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
     }
   ],
   "tests": [
     {
-      "description": "InsertMany succeeds after PrimarySteppedDown",
+      "description": "FindOneAndUpdate succeeds after PrimarySteppedDown",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -30,7 +34,7 @@
         },
         "data": {
           "failCommands": [
-            "insert"
+            "findAndModify"
           ],
           "errorCode": 189,
           "errorLabels": [
@@ -39,50 +43,40 @@
         }
       },
       "operation": {
-        "name": "insertMany",
+        "name": "findOneAndUpdate",
         "arguments": {
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
+          "filter": {
+            "_id": 1
+          },
+          "update": {
+            "$inc": {
+              "x": 1
             }
-          ],
-          "options": {
-            "ordered": true
-          }
+          },
+          "returnDocument": "Before"
         }
       },
       "outcome": {
         "result": {
-          "insertedIds": {
-            "0": 2,
-            "1": 3
-          }
+          "_id": 1,
+          "x": 11
         },
         "collection": {
           "data": [
             {
               "_id": 1,
-              "x": 11
+              "x": 12
             },
             {
               "_id": 2,
               "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
             }
           ]
         }
       }
     },
     {
-      "description": "InsertMany succeeds after WriteConcernError ShutdownInProgress",
+      "description": "FindOneAndUpdate succeeds after WriteConcernError ShutdownInProgress",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -90,62 +84,52 @@
         },
         "data": {
           "failCommands": [
-            "insert"
+            "findAndModify"
+          ],
+          "errorLabels": [
+            "RetryableWriteError"
           ],
           "writeConcernError": {
             "code": 91,
-            "errmsg": "Replication is being shut down",
-            "errorLabels": [
-              "RetryableWriteError"
-            ]
+            "errmsg": "Replication is being shut down"
           }
         }
       },
       "operation": {
-        "name": "insertMany",
+        "name": "findOneAndUpdate",
         "arguments": {
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
+          "filter": {
+            "_id": 1
+          },
+          "update": {
+            "$inc": {
+              "x": 1
             }
-          ],
-          "options": {
-            "ordered": true
-          }
+          },
+          "returnDocument": "Before"
         }
       },
       "outcome": {
         "result": {
-          "insertedIds": {
-            "0": 2,
-            "1": 3
-          }
+          "_id": 1,
+          "x": 11
         },
         "collection": {
           "data": [
             {
               "_id": 1,
-              "x": 11
+              "x": 12
             },
             {
               "_id": 2,
               "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
             }
           ]
         }
       }
     },
     {
-      "description": "InsertMany fails with a RetryableWriteError label after two connection failures",
+      "description": "FindOneAndUpdate fails with a RetryableWriteError label after two connection failures",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -153,27 +137,23 @@
         },
         "data": {
           "failCommands": [
-            "insert"
+            "findAndModify"
           ],
           "closeConnection": true
         }
       },
       "operation": {
-        "name": "insertMany",
+        "name": "findOneAndUpdate",
         "arguments": {
-          "documents": [
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
+          "filter": {
+            "_id": 1
+          },
+          "update": {
+            "$inc": {
+              "x": 1
             }
-          ],
-          "options": {
-            "ordered": true
-          }
+          },
+          "returnDocument": "Before"
         }
       },
       "outcome": {
@@ -188,6 +168,10 @@
             {
               "_id": 1,
               "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
             }
           ]
         }

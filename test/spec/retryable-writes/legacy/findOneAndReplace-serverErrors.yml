@@ -12,7 +12,7 @@ data:
 
 tests:
     -
-        description: "FindOneAndUpdate succeeds after PrimarySteppedDown"
+        description: "FindOneAndReplace succeeds after PrimarySteppedDown"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
@@ -21,42 +21,43 @@ tests:
                 errorCode: 189
                 errorLabels: ["RetryableWriteError"]
         operation:
-            name: "findOneAndUpdate"
+            name: "findOneAndReplace"
             arguments:
                 filter: { _id: 1 }
-                update: { $inc: { x : 1 }}
+                replacement: { _id: 1, x: 111 }
                 returnDocument: "Before"
         outcome:
             result: { _id: 1, x: 11 }
             collection:
                 data:
-                    - { _id: 1, x: 12 }
+                    - { _id: 1, x: 111 }
                     - { _id: 2, x: 22 }
     -
-        description: "FindOneAndUpdate succeeds after WriteConcernError ShutdownInProgress"
+        description: "FindOneAndReplace succeeds after WriteConcernError ShutdownInProgress"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
                 failCommands: ["findAndModify"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
-            name: "findOneAndUpdate"
+            name: "findOneAndReplace"
             arguments:
                 filter: { _id: 1 }
-                update: { $inc: { x : 1 }}
+                replacement: { _id: 1, x: 111 }
                 returnDocument: "Before"
         outcome:
             result: { _id: 1, x: 11 }
             collection:
                 data:
-                    - { _id: 1, x: 12 }
+                    - { _id: 1, x: 111 }
                     - { _id: 2, x: 22 }
+
     -
-        description: "FindOneAndUpdate fails with a RetryableWriteError label after two connection failures"
+        description: "FindOneAndReplace fails with a RetryableWriteError label after two connection failures"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 2 }
@@ -64,10 +65,10 @@ tests:
                 failCommands: ["findAndModify"]
                 closeConnection: true
         operation:
-            name: "findOneAndUpdate"
+            name: "findOneAndReplace"
             arguments:
                 filter: { _id: 1 }
-                update: { $inc: { x: 1 } }
+                replacement: { _id: 1, x: 111 }
                 returnDocument: "Before"
         outcome:
             error: true

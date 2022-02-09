@@ -26,7 +26,7 @@
   ],
   "tests": [
     {
-      "description": "FindOneAndDelete succeeds after PrimarySteppedDown",
+      "description": "FindOneAndReplace succeeds after PrimarySteppedDown",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -43,16 +43,16 @@
         }
       },
       "operation": {
-        "name": "findOneAndDelete",
+        "name": "findOneAndReplace",
         "arguments": {
           "filter": {
-            "x": {
-              "$gte": 11
-            }
+            "_id": 1
           },
-          "sort": {
-            "x": 1
-          }
+          "replacement": {
+            "_id": 1,
+            "x": 111
+          },
+          "returnDocument": "Before"
         }
       },
       "outcome": {
@@ -63,6 +63,10 @@
         "collection": {
           "data": [
             {
+              "_id": 1,
+              "x": 111
+            },
+            {
               "_id": 2,
               "x": 22
             }
@@ -71,7 +75,7 @@
       }
     },
     {
-      "description": "FindOneAndDelete succeeds after WriteConcernError ShutdownInProgress",
+      "description": "FindOneAndReplace succeeds after WriteConcernError ShutdownInProgress",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -81,26 +85,26 @@
           "failCommands": [
             "findAndModify"
           ],
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "writeConcernError": {
             "code": 91,
-            "errmsg": "Replication is being shut down",
-            "errorLabels": [
-              "RetryableWriteError"
-            ]
+            "errmsg": "Replication is being shut down"
           }
         }
       },
       "operation": {
-        "name": "findOneAndDelete",
+        "name": "findOneAndReplace",
         "arguments": {
           "filter": {
-            "x": {
-              "$gte": 11
-            }
+            "_id": 1
           },
-          "sort": {
-            "x": 1
-          }
+          "replacement": {
+            "_id": 1,
+            "x": 111
+          },
+          "returnDocument": "Before"
         }
       },
       "outcome": {
@@ -111,6 +115,10 @@
         "collection": {
           "data": [
             {
+              "_id": 1,
+              "x": 111
+            },
+            {
               "_id": 2,
               "x": 22
             }
@@ -119,7 +127,7 @@
       }
     },
     {
-      "description": "FindOneAndDelete fails with a RetryableWriteError label after two connection failures",
+      "description": "FindOneAndReplace fails with a RetryableWriteError label after two connection failures",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -133,16 +141,16 @@
         }
       },
       "operation": {
-        "name": "findOneAndDelete",
+        "name": "findOneAndReplace",
         "arguments": {
           "filter": {
-            "x": {
-              "$gte": 11
-            }
+            "_id": 1
           },
-          "sort": {
-            "x": 1
-          }
+          "replacement": {
+            "_id": 1,
+            "x": 111
+          },
+          "returnDocument": "Before"
         }
       },
       "outcome": {

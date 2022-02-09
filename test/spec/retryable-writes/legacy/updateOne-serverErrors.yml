@@ -12,57 +12,66 @@ data:
 
 tests:
     -
-        description: "DeleteOne succeeds after PrimarySteppedDown"
+        description: "UpdateOne succeeds after PrimarySteppedDown"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
-                failCommands: ["delete"]
+                failCommands: ["update"]
                 errorCode: 189
                 errorLabels: ["RetryableWriteError"]
         operation:
-            name: "deleteOne"
+            name: "updateOne"
             arguments:
                 filter: { _id: 1 }
+                update: { $inc: { x : 1 }}
         outcome:
             result:
-                deletedCount: 1
+                matchedCount: 1
+                modifiedCount: 1
+                upsertedCount: 0
             collection:
                 data:
+                    - { _id: 1, x: 12 }
                     - { _id: 2, x: 22 }
     -
-        description: "DeleteOne succeeds after WriteConcernError ShutdownInProgress"
+        description: "UpdateOne succeeds after WriteConcernError ShutdownInProgress"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
-                failCommands: ["delete"]
+                failCommands: ["update"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
-            name: "deleteOne"
+            name: "updateOne"
             arguments:
                 filter: { _id: 1 }
+                update: { $inc: { x : 1 }}
         outcome:
             result:
-                deletedCount: 1
+                matchedCount: 1
+                modifiedCount: 1
+                upsertedCount: 0
             collection:
                 data:
+                    - { _id: 1, x: 12 }
                     - { _id: 2, x: 22 }
     -
-        description: "DeleteOne fails with RetryableWriteError label after two connection failures"
+        description: "UpdateOne fails with a RetryableWriteError label after two connection failures"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-                failCommands: ["delete"]
+                failCommands: ["update"]
                 closeConnection: true
         operation:
-            name: "deleteOne"
+            name: "updateOne"
             arguments:
                 filter: { _id: 1 }
+                update: { $inc: { x: 1 } }
         outcome:
             error: true
             result:

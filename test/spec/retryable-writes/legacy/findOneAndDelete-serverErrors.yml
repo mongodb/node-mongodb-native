@@ -12,66 +12,58 @@ data:
 
 tests:
     -
-        description: "UpdateOne succeeds after PrimarySteppedDown"
+        description: "FindOneAndDelete succeeds after PrimarySteppedDown"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
-                failCommands: ["update"]
+                failCommands: ["findAndModify"]
                 errorCode: 189
                 errorLabels: ["RetryableWriteError"]
         operation:
-            name: "updateOne"
+            name: "findOneAndDelete"
             arguments:
-                filter: { _id: 1 }
-                update: { $inc: { x : 1 }}
+                filter: { x: { $gte: 11 }}
+                sort: { x: 1 }
         outcome:
-            result:
-                matchedCount: 1
-                modifiedCount: 1
-                upsertedCount: 0
+            result: { _id: 1, x: 11 }
             collection:
                 data:
-                    - { _id: 1, x: 12 }
                     - { _id: 2, x: 22 }
     -
-        description: "UpdateOne succeeds after WriteConcernError ShutdownInProgress"
+        description: "FindOneAndDelete succeeds after WriteConcernError ShutdownInProgress"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
-                failCommands: ["update"]
+                failCommands: ["findAndModify"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
-            name: "updateOne"
+            name: "findOneAndDelete"
             arguments:
-                filter: { _id: 1 }
-                update: { $inc: { x : 1 }}
+                filter: { x: { $gte: 11 }}
+                sort: { x: 1 }
         outcome:
-            result:
-                matchedCount: 1
-                modifiedCount: 1
-                upsertedCount: 0
+            result: { _id: 1, x: 11 }
             collection:
                 data:
-                    - { _id: 1, x: 12 }
                     - { _id: 2, x: 22 }
     -
-        description: "UpdateOne fails with a RetryableWriteError label after two connection failures"
+        description: "FindOneAndDelete fails with a RetryableWriteError label after two connection failures"
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-                failCommands: ["update"]
+                failCommands: ["findAndModify"]
                 closeConnection: true
         operation:
-            name: "updateOne"
+            name: "findOneAndDelete"
             arguments:
-                filter: { _id: 1 }
-                update: { $inc: { x: 1 } }
+                filter: { x: { $gte: 11 } }
+                sort: { x: 1 }
         outcome:
             error: true
             result:

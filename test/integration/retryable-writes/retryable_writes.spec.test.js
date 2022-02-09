@@ -5,9 +5,9 @@ const { loadSpecTests } = require('../../spec');
 const { legacyRunOnToRunOnRequirement } = require('../../tools/spec-runner');
 const { isAnyRequirementSatisfied } = require('../../tools/unified-spec-runner/unified-utils');
 
-describe('Retryable Writes', function () {
+describe('Legacy Retryable Writes specs', function () {
   let ctx = {};
-  const retryableWrites = loadSpecTests('retryable-writes');
+  const retryableWrites = loadSpecTests('retryable-writes/legacy');
 
   for (const suite of retryableWrites) {
     describe(suite.name, function () {

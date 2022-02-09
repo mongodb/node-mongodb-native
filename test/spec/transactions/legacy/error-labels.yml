@@ -590,10 +590,10 @@ tests:
       mode: { times: 2 }
       data:
           failCommands: ["commitTransaction"]
+          errorLabels: ["RetryableWriteError"]
           writeConcernError:
             code: 91
             errmsg: Replication is being shut down
-            errorLabels: ["RetryableWriteError"]
 
     operations:
       - name: startTransaction

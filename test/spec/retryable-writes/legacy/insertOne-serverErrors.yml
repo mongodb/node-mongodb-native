@@ -347,10 +347,10 @@ tests:
             mode: { times: 1 }
             data:
                 failCommands: ["insert"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 11600
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
             name: "insertOne"
             arguments:
@@ -370,10 +370,10 @@ tests:
             mode: { times: 1 }
             data:
                 failCommands: ["insert"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 11602
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
             name: "insertOne"
             arguments:
@@ -393,10 +393,10 @@ tests:
             mode: { times: 1 }
             data:
                 failCommands: ["insert"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 189
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
             name: "insertOne"
             arguments:
@@ -416,10 +416,10 @@ tests:
             mode: { times: 1 }
             data:
                 failCommands: ["insert"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
             name: "insertOne"
             arguments:
@@ -439,10 +439,10 @@ tests:
             mode: { times: 2 }
             data:
                 failCommands: ["insert"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
             name: "insertOne"
             arguments:

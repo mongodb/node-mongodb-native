@@ -118,10 +118,10 @@ tests:
             mode: { times: 1 }
             data:
               failCommands: ["commitTransaction"]
+              errorLabels: ["RetryableWriteError"]
               writeConcernError:
                 code: 91
                 errmsg: Replication is being shut down
-                errorLabels: ["RetryableWriteError"]
       # The client sees a retryable writeConcernError on the first
       # commitTransaction due to the fail point but it actually succeeds on the
       # server (SERVER-39346). The retry will succeed both on a new mongos and
