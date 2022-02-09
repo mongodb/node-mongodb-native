@@ -640,7 +640,6 @@ BUILD_VARIANTS.push({
 });
 
 const oneOffFuncs = [
-  { func: 'run custom csfle tests' },
   { func: 'run custom snappy tests' },
   {
     func: 'run bson-ext test',
@@ -664,13 +663,35 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
       func: 'bootstrap mongo-orchestration',
       vars: {
         VERSION: '5.0',
+        TOPOLOGY: 'server',
+        AUTH: 'auth'
+      }
+    },
+    oneOffFunc
+  ]
+}));
+
+oneOffFuncAsTasks.push({
+  name: 'run-custom-csfle-tests',
+  tags: ['run-custom-dependency-tests'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: LOWEST_LTS
+      }
+    },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'latest',
         TOPOLOGY: 'server'
       }
     },
     { func: 'bootstrap kms servers' },
-    oneOffFunc
+    { func: 'run custom csfle tests' }
   ]
-}));
+});
 
 // TODO NODE-3897 - generate combined coverage report
 const coverageTask = {
