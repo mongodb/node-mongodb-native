@@ -41,10 +41,10 @@ tests:
             mode: { times: 1 }
             data:
                 failCommands: ["update"]
+                errorLabels: ["RetryableWriteError"]
                 writeConcernError:
                     code: 91
                     errmsg: Replication is being shut down
-                    errorLabels: ["RetryableWriteError"]
         operation:
             name: "updateOne"
             arguments:
