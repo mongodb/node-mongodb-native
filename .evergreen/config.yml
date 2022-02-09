@@ -1764,7 +1764,6 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
-          AUTH: auth
       - func: bootstrap kms servers
       - func: run custom csfle tests
   - name: run-custom-snappy-tests
@@ -1778,7 +1777,6 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
-          AUTH: auth
       - func: bootstrap kms servers
       - func: run custom snappy tests
   - name: run-bson-ext-test
@@ -1792,7 +1790,6 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: server
-          AUTH: auth
       - func: bootstrap kms servers
       - func: run bson-ext test
         vars:

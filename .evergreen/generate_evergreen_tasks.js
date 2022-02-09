@@ -664,8 +664,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
       func: 'bootstrap mongo-orchestration',
       vars: {
         VERSION: '5.0',
-        TOPOLOGY: 'server',
-        AUTH: 'auth'
+        TOPOLOGY: 'server'
       }
     },
     { func: 'bootstrap kms servers' },
