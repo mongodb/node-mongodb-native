@@ -5,18 +5,18 @@ collection_name: &collection_name "default"
 
 data: []
 json_schema: {'properties': {'encrypted_string_aws': {'encrypt': {'keyId': [{'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}}], 'bsonType': 'string', 'algorithm': 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'}}, 'encrypted_string_azure': {'encrypt': {'keyId': [{'$binary': {'base64': 'AZURE+AAAAAAAAAAAAAAAA==', 'subType': '04'}}], 'bsonType': 'string', 'algorithm': 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'}}, 'encrypted_string_gcp': {'encrypt': {'keyId': [{'$binary': {'base64': 'GCP+AAAAAAAAAAAAAAAAAA==', 'subType': '04'}}], 'bsonType': 'string', 'algorithm': 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'}}, 'encrypted_string_local': {'encrypt': {'keyId': [{'$binary': {'base64': 'AAAAAAAAAAAAAAAAAAAAAA==', 'subType': '04'}}], 'bsonType': 'string', 'algorithm': 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'}}, 'encrypted_string_kmip': {'encrypt': {'keyId': [{'$binary': {'base64': 'dBHpr8aITfeBQ15grpbLpQ==', 'subType': '04'}}], 'bsonType': 'string', 'algorithm': 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'}}}, 'bsonType': 'object'}
-key_vault_data: [{'_id': {'$binary': {'base64': 'GCP+AAAAAAAAAAAAAAAAAA==', 'subType': '04'}}, 'keyMaterial': {'$binary': {'base64': 'CiQAIgLj0WyktnB4dfYHo5SLZ41K4ASQrjJUaSzl5vvVH0G12G0SiQEAjlV8XPlbnHDEDFbdTO4QIe8ER2/172U1ouLazG0ysDtFFIlSvWX5ZnZUrRMmp/R2aJkzLXEt/zf8Mn4Lfm+itnjgo5R9K4pmPNvvPKNZX5C16lrPT+aA+rd+zXFSmlMg3i5jnxvTdLHhg3G7Q/Uv1ZIJskKt95bzLoe0tUVzRWMYXLIEcohnQg==', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1601574333107'}}, 'updateDate': {'$date': {'$numberLong': '1601574333107'}}, 'status': {'$numberInt': '0'}, 'masterKey': {'provider': 'gcp', 'projectId': 'devprod-drivers', 'location': 'global', 'keyRing': 'key-ring-csfle', 'keyName': 'key-name-csfle'}, 'keyAltNames': ['altname', 'gcp_altname']}]
+key_vault_data: [{'_id': {'$binary': {'base64': 'dBHpr8aITfeBQ15grpbLpQ==', 'subType': '04'}}, 'keyMaterial': {'$binary': {'base64': 'eUYDyB0HuWb+lQgUwO+6qJQyTTDTY2gp9FbemL7ZFo0pvr0x6rm6Ff9OVUTGH6HyMKipaeHdiIJU1dzsLwvqKvi7Beh+U4iaIWX/K0oEg1GOsJc0+Z/in8gNHbGUYLmycHViM3LES3kdt7FdFSUl5rEBHrM71yoNEXImz17QJWMGOuT4x6yoi2pvnaRJwfrI4DjpmnnTrDMac92jgZehbg==', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1634220190041'}}, 'updateDate': {'$date': {'$numberLong': '1634220190041'}}, 'status': {'$numberInt': '0'}, 'masterKey': {'provider': 'kmip', 'keyId': '1'}, 'keyAltNames': ['altname', 'kmip_altname']}]
 
 tests:
-  - description: "Insert a document with auto encryption using GCP KMS provider"
+  - description: "Insert a document with auto encryption using KMIP KMS provider"
     clientOptions:
       autoEncryptOpts:
         kmsProviders:
-          gcp: {}
+          kmip: {}
     operations:
       - name: insertOne
         arguments:
-          document: &doc0 { _id: 1, encrypted_string_gcp: "string0" }
+          document: &doc0 { _id: 1, encrypted_string_kmip: "string0" }
     expectations:
     # Auto encryption will request the collection info.
     - command_started_event:
@@ -29,14 +29,14 @@ tests:
     - command_started_event:
         command:
           find: datakeys
-          filter: { $or: [ { _id: { $in: [ {'$binary': {'base64': 'GCP+AAAAAAAAAAAAAAAAAA==', 'subType': '04'}} ] } }, { keyAltNames: { $in: [] } } ] }
+          filter: { $or: [ { _id: { $in: [ {'$binary': {'base64': 'dBHpr8aITfeBQ15grpbLpQ==', 'subType': '04'}} ] } }, { keyAltNames: { $in: [] } } ] }
           $db: keyvault
         command_name: find
     - command_started_event:
         command:
           insert: *collection_name
           documents:
-            - &doc0_encrypted { _id: 1, encrypted_string_gcp: {'$binary': {'base64': 'ARgj/gAAAAAAAAAAAAAAAAACwFd+Y5Ojw45GUXNvbcIpN9YkRdoHDHkR4kssdn0tIMKlDQOLFkWFY9X07IRlXsxPD8DcTiKnl6XINK28vhcGlg==', 'subType': '06'}} }
+            - &doc0_encrypted { _id: 1, encrypted_string_kmip: {'$binary': {'base64': 'AXQR6a/GiE33gUNeYK6Wy6UCKCwtKFIsL8eKObDVxvqGupJNUk7kXswHhB7G5j/C1D+6no+Asra0KgSU43bTL3ooIBLVyIzbV5CDJYqzAsa4WQ==', 'subType': '06'}} }
           ordered: true
         command_name: insert
     outcome:

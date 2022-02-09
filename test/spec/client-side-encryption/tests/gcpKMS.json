@@ -64,6 +64,20 @@
           "bsonType": "string",
           "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
         }
+      },
+      "encrypted_string_kmip": {
+        "encrypt": {
+          "keyId": [
+            {
+              "$binary": {
+                "base64": "dBHpr8aITfeBQ15grpbLpQ==",
+                "subType": "04"
+              }
+            }
+          ],
+          "bsonType": "string",
+          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+        }
       }
     },
     "bsonType": "object"

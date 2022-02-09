@@ -63,6 +63,8 @@ popd # ../csfle-deps-tmp
 cp -R ../csfle-deps-tmp/libmongocrypt/bindings/node node_modules/mongodb-client-encryption
 
 export MONGODB_URI=${MONGODB_URI}
+export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
+export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
 set +o errexit # We want to run both test suites even if the first fails
 npm run check:csfle
 DRIVER_CSFLE_TEST_RESULT=$?
@@ -103,8 +105,3 @@ if [ $DRIVER_CSFLE_TEST_RESULT -ne 0 ]; then
   echo "Driver tests failed, look above for results"
   exit 1
 fi
-
-echo "Test legacy version of FLE bindings"
-rm -rf node_modules/mongodb-client-encryption
-npm install mongodb-client-encryption@"^1.2.7"
-npm run check:csfle

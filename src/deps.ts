@@ -175,6 +175,28 @@ export type AutoEncryptionLoggerLevel =
   typeof AutoEncryptionLoggerLevel[keyof typeof AutoEncryptionLoggerLevel];
 
 /** @public */
+export interface AutoEncryptionTlsOptions {
+  /**
+   * Specifies the location of a local .pem file that contains
+   * either the client's TLS/SSL certificate and key or only the
+   * client's TLS/SSL key when tlsCertificateFile is used to
+   * provide the certificate.
+   */
+  tlsCertificateKeyFile?: string;
+  /**
+   * Specifies the password to de-crypt the tlsCertificateKeyFile.
+   */
+  tlsCertificateKeyFilePassword?: string;
+  /**
+   * Specifies the location of a local .pem file that contains the
+   * root certificate chain from the Certificate Authority.
+   * This file is used to validate the certificate presented by the
+   * KMS provider.
+   */
+  tlsCAFile?: string;
+}
+
+/** @public */
 export interface AutoEncryptionOptions {
   /** @internal */
   bson?: { serialize: typeof serialize; deserialize: typeof deserialize };
@@ -234,6 +256,17 @@ export interface AutoEncryptionOptions {
        */
       endpoint?: string | undefined;
     };
+    /**
+     * Configuration options for using 'kmip' as your KMS provider
+     */
+    kmip?: {
+      /**
+       * The output endpoint string.
+       * The endpoint consists of a hostname and port separated by a colon.
+       * E.g. "example.com:123". A port is always present.
+       */
+      endpoint?: string;
+    };
   };
   /**
    * A map of namespaces to a local JSON schema for encryption
@@ -264,6 +297,14 @@ export interface AutoEncryptionOptions {
     mongocryptdSpawnArgs?: string[];
   };
   proxyOptions?: ProxyOptions;
+  /** The TLS options to use connecting to the KMS provider */
+  tlsOptions?: {
+    aws?: AutoEncryptionTlsOptions;
+    local?: AutoEncryptionTlsOptions;
+    azure?: AutoEncryptionTlsOptions;
+    gcp?: AutoEncryptionTlsOptions;
+    kmip?: AutoEncryptionTlsOptions;
+  };
 }
 
 /** @public */

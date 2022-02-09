@@ -29,6 +29,9 @@ describe('Client Side Encryption Corpus', function () {
       'base64'
     )
   };
+  kmsProviders.kmip = {
+    endpoint: 'localhost:5698'
+  };
 
   // TODO: build this into EJSON
   // TODO: make a custom chai assertion for this
@@ -55,6 +58,7 @@ describe('Client Side Encryption Corpus', function () {
   const corpusKeyLocal = loadCorpusData('corpus-key-local.json');
   const corpusKeyAws = loadCorpusData('corpus-key-aws.json');
   const corpusKeyAzure = loadCorpusData('corpus-key-azure.json');
+  const corpusKeyKmip = loadCorpusData('corpus-key-kmip.json');
   const corpusKeyGcp = loadCorpusData('corpus-key-gcp.json');
   const corpusAll = filterImportedObject(loadCorpusData('corpus.json'));
   const corpusEncryptedExpectedAll = filterImportedObject(loadCorpusData('corpus-encrypted.json'));
@@ -74,20 +78,23 @@ describe('Client Side Encryption Corpus', function () {
     ['local', corpusKeyLocal._id],
     ['aws', corpusKeyAws._id],
     ['azure', corpusKeyAzure._id],
-    ['gcp', corpusKeyGcp._id]
+    ['gcp', corpusKeyGcp._id],
+    ['kmip', corpusKeyKmip._id]
   ]);
   const keyAltNameMap = new Map([
     ['local', 'local'],
     ['aws', 'aws'],
     ['azure', 'azure'],
-    ['gcp', 'gcp']
+    ['gcp', 'gcp'],
+    ['kmip', 'kmip']
   ]);
   const copyOverValues = new Set([
     '_id',
     'altname_aws',
     'altname_local',
     'altname_azure',
-    'altname_gcp'
+    'altname_gcp',
+    'altname_kmip'
   ]);
 
   let client;
@@ -153,7 +160,13 @@ describe('Client Side Encryption Corpus', function () {
           .catch(() => {})
           .then(() => keyDb.collection(keyVaultCollName))
           .then(keyColl =>
-            keyColl.insertMany([corpusKeyLocal, corpusKeyAws, corpusKeyAzure, corpusKeyGcp])
+            keyColl.insertMany([
+              corpusKeyLocal,
+              corpusKeyAws,
+              corpusKeyAzure,
+              corpusKeyGcp,
+              corpusKeyKmip
+            ])
           );
       });
   });
@@ -195,9 +208,16 @@ describe('Client Side Encryption Corpus', function () {
           //    .. code:: javascript
           //       Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
           //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
+          const tlsOptions = {
+            kmip: {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          };
           const autoEncryption = {
             keyVaultNamespace,
-            kmsProviders
+            kmsProviders,
+            tlsOptions
           };
           if (useClientSideSchema) {
             autoEncryption.schemaMap = {
@@ -210,7 +230,8 @@ describe('Client Side Encryption Corpus', function () {
             clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
               bson: BSON,
               keyVaultNamespace,
-              kmsProviders
+              kmsProviders,
+              tlsOptions
             });
           });
         });

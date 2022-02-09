@@ -119,6 +119,16 @@ functions:
           ${PREPARE_SHELL}
           DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-local.sh
 
+  "bootstrap kms servers":
+    - command: subprocess.exec
+      params:
+        background: true
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/run-kms-servers.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
   "run tests":
     - command: shell.exec
       type: test
@@ -133,6 +143,8 @@ functions:
             export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
             export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
             export AWS_DEFAULT_REGION='us-east-1'
+            export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
+            export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
           EOT
           fi
     - command: shell.exec
@@ -193,8 +205,7 @@ functions:
     - command: shell.exec
       params:
         script: |
-          DRIVERS_TOOLS=${DRIVERS_TOOLS} MONGODB_URI=${MONGODB_URI} \
-            bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh start
+          MONGODB_URI=${MONGODB_URI} bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh start
     - command: expansions.update
       params:
         file: lb-expansion.yml
@@ -203,7 +214,6 @@ functions:
     - command: shell.exec
       params:
         script: |
-          DRIVERS_TOOLS=${DRIVERS_TOOLS} MONGODB_URI=${MONGODB_URI} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh stop
 
   "run-lb-tests":

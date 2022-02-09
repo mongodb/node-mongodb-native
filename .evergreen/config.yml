@@ -99,6 +99,16 @@ functions:
         script: |
           ${PREPARE_SHELL}
           DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-local.sh
+  bootstrap kms servers:
+    - command: subprocess.exec
+      params:
+        background: true
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/run-kms-servers.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
   run tests:
     - command: shell.exec
       type: test
@@ -113,6 +123,8 @@ functions:
             export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
             export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
             export AWS_DEFAULT_REGION='us-east-1'
+            export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
+            export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
           EOT
           fi
     - command: shell.exec
@@ -171,8 +183,7 @@ functions:
     - command: shell.exec
       params:
         script: |
-          DRIVERS_TOOLS=${DRIVERS_TOOLS} MONGODB_URI=${MONGODB_URI} \
-            bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh start
+          MONGODB_URI=${MONGODB_URI} bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh start
     - command: expansions.update
       params:
         file: lb-expansion.yml
@@ -180,7 +191,6 @@ functions:
     - command: shell.exec
       params:
         script: |
-          DRIVERS_TOOLS=${DRIVERS_TOOLS} MONGODB_URI=${MONGODB_URI} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-load-balancer.sh stop
   run-lb-tests:
     - command: shell.exec
@@ -750,6 +760,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-replica_set
     tags:
@@ -762,6 +773,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: replica_set
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-sharded_cluster
     tags:
@@ -774,6 +786,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: sharded_cluster
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-server
     tags:
@@ -786,6 +799,7 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: server
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-replica_set
     tags:
@@ -798,6 +812,7 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: replica_set
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-sharded_cluster
     tags:
@@ -810,6 +825,7 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: sharded_cluster
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-server
     tags:
@@ -822,6 +838,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: server
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-replica_set
     tags:
@@ -834,6 +851,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: replica_set
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-sharded_cluster
     tags:
@@ -846,6 +864,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: sharded_cluster
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-server
     tags:
@@ -858,6 +877,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: server
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-replica_set
     tags:
@@ -870,6 +890,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: replica_set
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-sharded_cluster
     tags:
@@ -882,6 +903,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-server
     tags:
@@ -894,6 +916,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: server
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-replica_set
     tags:
@@ -906,6 +929,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: replica_set
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-sharded_cluster
     tags:
@@ -918,6 +942,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-3.6-server
     tags:
@@ -930,6 +955,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: server
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-3.6-replica_set
     tags:
@@ -942,6 +968,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: replica_set
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-3.6-sharded_cluster
     tags:
@@ -954,6 +981,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-server-v1-api
     tags:
@@ -968,6 +996,7 @@ tasks:
           TOPOLOGY: server
           REQUIRE_API_VERSION: '1'
           AUTH: auth
+      - func: bootstrap kms servers
       - func: run tests
         vars:
           MONGODB_API_VERSION: '1'
@@ -1021,6 +1050,7 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+      - func: bootstrap kms servers
       - func: run socks5 tests
   - name: test-socks5-tls
     tags: []
@@ -1723,19 +1753,6 @@ tasks:
         vars:
           NODE_LTS_NAME: fermium
       - func: run mongosh integration tests
-  - name: run-custom-csfle-tests
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_NAME: erbium
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: server
-          AUTH: auth
-      - func: run custom csfle tests
   - name: run-custom-snappy-tests
     tags:
       - run-custom-dependency-tests
@@ -1764,6 +1781,19 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
+  - name: run-custom-csfle-tests
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+      - func: bootstrap kms servers
+      - func: run custom csfle tests
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -1776,6 +1806,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: server
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-replica_set-noauth
     tags:
@@ -1789,6 +1820,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: replica_set
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-latest-sharded_cluster-noauth
     tags:
@@ -1802,6 +1834,7 @@ tasks:
           VERSION: latest
           TOPOLOGY: sharded_cluster
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-server-noauth
     tags:
@@ -1815,6 +1848,7 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: server
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-replica_set-noauth
     tags:
@@ -1828,6 +1862,7 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: replica_set
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-5.0-sharded_cluster-noauth
     tags:
@@ -1841,6 +1876,7 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: sharded_cluster
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-server-noauth
     tags:
@@ -1854,6 +1890,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: server
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-replica_set-noauth
     tags:
@@ -1867,6 +1904,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: replica_set
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.4-sharded_cluster-noauth
     tags:
@@ -1880,6 +1918,7 @@ tasks:
           VERSION: '4.4'
           TOPOLOGY: sharded_cluster
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-server-noauth
     tags:
@@ -1893,6 +1932,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: server
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-replica_set-noauth
     tags:
@@ -1906,6 +1946,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: replica_set
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.2-sharded_cluster-noauth
     tags:
@@ -1919,6 +1960,7 @@ tasks:
           VERSION: '4.2'
           TOPOLOGY: sharded_cluster
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-server-noauth
     tags:
@@ -1932,6 +1974,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: server
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-replica_set-noauth
     tags:
@@ -1945,6 +1988,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: replica_set
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-4.0-sharded_cluster-noauth
     tags:
@@ -1958,6 +2002,7 @@ tasks:
           VERSION: '4.0'
           TOPOLOGY: sharded_cluster
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-3.6-server-noauth
     tags:
@@ -1971,6 +2016,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: server
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-3.6-replica_set-noauth
     tags:
@@ -1984,6 +2030,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: replica_set
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
   - name: test-3.6-sharded_cluster-noauth
     tags:
@@ -1997,6 +2044,7 @@ tasks:
           VERSION: '3.6'
           TOPOLOGY: sharded_cluster
           AUTH: noauth
+      - func: bootstrap kms servers
       - func: run tests
 task_groups:
   - name: serverless_task_group
@@ -2295,9 +2343,9 @@ buildvariants:
     display_name: Custom Dependency Version Test
     run_on: ubuntu1804-large
     tasks:
-      - run-custom-csfle-tests
       - run-custom-snappy-tests
       - run-bson-ext-test
+      - run-custom-csfle-tests
   - name: ubuntu1804-test-serverless
     display_name: Serverless Test
     run_on: ubuntu1804-test
