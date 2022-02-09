@@ -241,7 +241,12 @@ function getIndicesOfAuthInUrl(connectionString) {
 }
 
 function removeAuthFromConnectionString(connectionString) {
-  const { start, end } = getIndicesOfAuthInUrl(connectionString);
+  const indices = getIndicesOfAuthInUrl(connectionString);
+  if (!indices) {
+    return connectionString;
+  }
+
+  const { start, end } = indices;
 
   if (start === -1 || end === -1) {
     return connectionString;
