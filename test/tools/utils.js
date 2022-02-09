@@ -252,7 +252,7 @@ function removeAuthFromConnectionString(connectionString) {
     return connectionString;
   }
 
-  return connectionString.slice(0, start + 2) + connectionString.slice(end + 1);
+  return connectionString.slice(0, start) + connectionString.slice(end + 1);
 }
 
 function extractAuthFromConnectionString(connectionString) {
