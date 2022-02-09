@@ -57,7 +57,6 @@ describe('URI option spec tests', function () {
 
       for (const test of suite.tests) {
         it(`${test.description}`, function () {
-          console.error(test);
           if (skipTests.includes(test.description)) {
             return this.skip();
           }
