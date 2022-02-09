@@ -80,7 +80,7 @@ maybeDescribe('Connections survive primary step down - prose', function () {
   afterEach(function () {
     return Promise.all(deferred.map(d => d())).then(() => {
       deferred = [];
-      return Promise.all([client.close(), checkClient.close()]);
+      return Promise.all([client, checkClient].filter(x => !!x).map(client => client.close()));
     });
   });
 

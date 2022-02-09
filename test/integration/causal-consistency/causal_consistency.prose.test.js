@@ -42,7 +42,7 @@ describe('Causal Consistency - prose tests', function () {
   });
 
   afterEach(() => {
-    return test.client.close();
+    return test.client ? test.client.close() : Promise.resolve();
   });
 
   it(
