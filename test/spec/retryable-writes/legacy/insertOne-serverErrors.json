@@ -761,12 +761,12 @@
           "failCommands": [
             "insert"
           ],
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "writeConcernError": {
             "code": 11600,
-            "errmsg": "Replication is being shut down",
-            "errorLabels": [
-              "RetryableWriteError"
-            ]
+            "errmsg": "Replication is being shut down"
           }
         }
       },
@@ -812,12 +812,12 @@
           "failCommands": [
             "insert"
           ],
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "writeConcernError": {
             "code": 11602,
-            "errmsg": "Replication is being shut down",
-            "errorLabels": [
-              "RetryableWriteError"
-            ]
+            "errmsg": "Replication is being shut down"
           }
         }
       },
@@ -863,12 +863,12 @@
           "failCommands": [
             "insert"
           ],
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "writeConcernError": {
             "code": 189,
-            "errmsg": "Replication is being shut down",
-            "errorLabels": [
-              "RetryableWriteError"
-            ]
+            "errmsg": "Replication is being shut down"
           }
         }
       },
@@ -914,12 +914,12 @@
           "failCommands": [
             "insert"
           ],
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "writeConcernError": {
             "code": 91,
-            "errmsg": "Replication is being shut down",
-            "errorLabels": [
-              "RetryableWriteError"
-            ]
+            "errmsg": "Replication is being shut down"
           }
         }
       },
@@ -965,12 +965,12 @@
           "failCommands": [
             "insert"
           ],
+          "errorLabels": [
+            "RetryableWriteError"
+          ],
           "writeConcernError": {
             "code": 91,
-            "errmsg": "Replication is being shut down",
-            "errorLabels": [
-              "RetryableWriteError"
-            ]
+            "errmsg": "Replication is being shut down"
           }
         }
       },
