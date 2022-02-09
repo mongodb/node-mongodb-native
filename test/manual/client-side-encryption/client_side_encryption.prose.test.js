@@ -43,12 +43,7 @@ const metadata = {
 // .. code:: javascript
 
 //   Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
-// TODO: NODE-3927 - these cannot run in lb mode but are not skipping based on metadata.
 describe('Client Side Encryption Prose Tests', metadata, function () {
-  // https://github.com/mochajs/mocha/issues/2456
-  if (process.env.LOAD_BALANCER || !process.env.CSFLE_KMS_PROVIDERS) {
-    this.skip();
-  }
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const dataNamespace = `${dataDbName}.${dataCollName}`;
@@ -56,7 +51,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
-  const shared = require('../shared');
+  const shared = require('../../integration/shared');
   const dropCollection = shared.dropCollection;
   const APMEventCollector = shared.APMEventCollector;
 
