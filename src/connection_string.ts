@@ -204,6 +204,18 @@ function getUint(name: string, value: unknown): number {
   return parsedValue;
 }
 
+function parseType(value: string): number | boolean | string {
+  try {
+    return getBoolean('', value);
+  } catch {
+    try {
+      return getInt('', value);
+    } catch {
+      return value;
+    }
+  }
+}
+
 function toRecord(value: string): Record<string, any> {
   const record = Object.create(null);
   const keyValuePairs = value.split(',');
@@ -212,18 +224,7 @@ function toRecord(value: string): Record<string, any> {
     if (value == null) {
       throw new MongoParseError('Cannot have undefined values in key value pairs');
     }
-    try {
-      // try to get a boolean
-      record[key] = getBoolean('', value);
-    } catch {
-      try {
-        // try to get a number
-        record[key] = getInt('', value);
-      } catch {
-        // keep value as a string
-        record[key] = value;
-      }
-    }
+    record[key] = value;
   }
   return record;
 }
@@ -631,7 +632,9 @@ export const OPTIONS = {
     target: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
       if (typeof value === 'string') {
-        value = toRecord(value);
+        value = Object.fromEntries(
+          Object.entries(toRecord(value)).map(([key, value]) => [key, parseType(value)])
+        );
       }
       if (!isRecord(value)) {
         throw new MongoParseError('AuthMechanismProperties must be an object');

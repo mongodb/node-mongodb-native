@@ -221,6 +221,12 @@ export function executeUriValidationTest(
           .to.have.nested.property(expectedProp)
           .deep.equal(optionValue);
         break;
+      case 'maxStalenessSeconds':
+        expectedProp = 'readPreference.maxStalenessSeconds';
+        expect(options, `${errorMessage} ${optionKey} -> ${expectedProp}`)
+          .to.have.nested.property(expectedProp)
+          .deep.equal(optionValue);
+        break;
 
       //** WRITE CONCERN OPTIONS **/
       case 'w':
