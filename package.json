@@ -116,7 +116,7 @@
     "check:tls": "mocha --config test/manual/mocharc.json test/manual/tls_support.test.js",
     "check:ldap": "mocha --config test/manual/mocharc.json test/manual/ldap.test.js",
     "check:socks5": "mocha --config test/manual/mocharc.json test/manual/socks5.test.ts",
-    "check:csfle": "mocha --config test/mocha_mongodb.json test/manual/client-side-encryption",
+    "check:csfle": "mocha --config test/mocha_mongodb.json test/integration/client-side-encryption",
     "check:snappy": "mocha test/unit/assorted/snappy.test.js",
     "prepare": "node etc/prepare.js",
     "release": "standard-version -i HISTORY.md",
