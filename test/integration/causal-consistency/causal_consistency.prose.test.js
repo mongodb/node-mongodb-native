@@ -19,7 +19,7 @@ describe('Causal Consistency - prose tests', function () {
     testSkipBrokenAuthTestBeforeEachHook({
       skippedTests: [
         '2. The first read in a causally consistent session must not send afterClusterTime to the server',
-        '3. The first read or write on a ClientSession should update the operationTime of the ClientSession, even if there is an error',
+        'case: successful read with causal consistency',
         'case: second operation is findOne',
         'case: successful insert',
         '6. A read operation in a ClientSession that is not causally consistent should not include the afterClusterTime parameter in the command sent to the server'

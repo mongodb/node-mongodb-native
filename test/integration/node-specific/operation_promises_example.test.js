@@ -17,7 +17,8 @@ describe('Operation (Promises)', function () {
     testSkipBrokenAuthTestBeforeEachHook({
       skippedTests: [
         'Should correctly connect to a replicaset',
-        'Should connect to mongos proxies using connectiong string With Promises'
+        'Should connect to mongos proxies using connectiong string With Promises',
+        'Should correctly connect to a replicaset With Promises'
       ]
     })
   );
