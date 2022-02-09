@@ -97,7 +97,7 @@ describe('Kerberos', function () {
     });
   });
 
-  context('when passsing SERVICE_HOST', function () {
+  context('when passing SERVICE_HOST as an auth mech option', function () {
     context('when the SERVICE_HOST is invalid', function () {
       const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
         authMechanismProperties: {
@@ -105,10 +105,15 @@ describe('Kerberos', function () {
         }
       });
 
-      it('fails to authenticate', function () {
-        return client.connect().catch(e => {
-          expect(e).to.exist;
+      it('fails to authenticate', async function () {
+        let expectedError;
+        await client.connect().catch(e => {
+          expectedError = e;
         });
+        if (!expectedError) {
+          expect.fail('Expected connect with invalid SERVICE_HOST to fail');
+        }
+        expect(expectedError).property('message').to.include('Authentication failed');
       });
     });
 
