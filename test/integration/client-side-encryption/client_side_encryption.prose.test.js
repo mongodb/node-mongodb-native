@@ -66,7 +66,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
    * - Create client encryption expired
    * - Create client encryption invalid hostname
    */
-  context('KMS TLS Options Tests', metadata, async function () {
+  context('KMS TLS Options Tests', metadata, function () {
     let tlsCaOptions;
     let clientNoTlsOptions;
     let clientWithTlsOptions;
@@ -81,7 +81,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     let clientEncryptionWithTlsExpired;
     let clientEncryptionWithInvalidHostname;
 
-    before(async function () {
+    before(function () {
       tlsCaOptions = {
         aws: {
           tlsCAFile: process.env.KMIP_TLS_CA_FILE

@@ -48,7 +48,8 @@ const skippedAuthTests = [
   'insertMany with encryption',
   'insertOne with encryption',
   'findOneAndDelete with deterministic encryption',
-  '$unset works with an encrypted field'
+  '$unset works with an encrypted field',
+  'Insert a document with auto encryption using KMIP KMS provider'
 ];
 
 const SKIPPED_TESTS = new Set(isAuthEnabled ? skippedAuthTests : []);
