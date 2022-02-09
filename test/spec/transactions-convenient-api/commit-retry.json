@@ -293,7 +293,7 @@
       }
     },
     {
-      "description": "commit is retried after commitTransaction UnknownTransactionCommitResult (NotMaster)",
+      "description": "commit is retried after commitTransaction UnknownTransactionCommitResult (NotWritablePrimary)",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {

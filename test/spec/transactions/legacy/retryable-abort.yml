@@ -266,7 +266,7 @@ tests:
       collection:
         data: []
 
-  - description: abortTransaction succeeds after NotMaster
+  - description: abortTransaction succeeds after NotWritablePrimary
 
     failPoint:
       configureFailPoint: failCommand
@@ -334,7 +334,7 @@ tests:
       collection:
         data: []
 
-  - description: abortTransaction succeeds after NotMasterOrSecondary
+  - description: abortTransaction succeeds after NotPrimaryOrSecondary
 
     failPoint:
       configureFailPoint: failCommand
@@ -402,7 +402,7 @@ tests:
       collection:
         data: []
 
-  - description: abortTransaction succeeds after NotMasterNoSlaveOk
+  - description: abortTransaction succeeds after NotPrimaryNoSecondaryOk
 
     failPoint:
       configureFailPoint: failCommand

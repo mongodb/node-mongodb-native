@@ -624,7 +624,7 @@
       }
     },
     {
-      "description": "commitTransaction succeeds after NotMaster",
+      "description": "commitTransaction succeeds after NotWritablePrimary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -735,7 +735,7 @@
       }
     },
     {
-      "description": "commitTransaction succeeds after NotMasterOrSecondary",
+      "description": "commitTransaction succeeds after NotPrimaryOrSecondary",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -846,7 +846,7 @@
       }
     },
     {
-      "description": "commitTransaction succeeds after NotMasterNoSlaveOk",
+      "description": "commitTransaction succeeds after NotPrimaryNoSecondaryOk",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {

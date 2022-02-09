@@ -185,13 +185,13 @@ tests:
         data:
           - { _id: 1 }
   -
-    description: commit is retried after commitTransaction UnknownTransactionCommitResult (NotMaster)
+    description: commit is retried after commitTransaction UnknownTransactionCommitResult (NotWritablePrimary)
     failPoint:
       configureFailPoint: failCommand
       mode: { times: 2 }
       data:
           failCommands: ["commitTransaction"]
-          errorCode: 10107 # NotMaster
+          errorCode: 10107 # NotWritablePrimary
           errorLabels: ["RetryableWriteError"] # SPEC-1565
           closeConnection: false
     operations:
