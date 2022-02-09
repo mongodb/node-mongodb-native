@@ -326,7 +326,9 @@ export function parseOptions(
   for (const key of allKeys) {
     const values = [];
     if (objectOptions.has(key)) {
-      const options = [objectOptions.get(key)].flat();
+      const options = Array.isArray(objectOptions.get(key))
+        ? objectOptions.get(key)
+        : [objectOptions.get(key)];
       values.push(...options);
     }
     if (urlOptions.has(key)) {
@@ -334,7 +336,9 @@ export function parseOptions(
       values.push(...options);
     }
     if (DEFAULT_OPTIONS.has(key)) {
-      const options = [DEFAULT_OPTIONS.get(key)].flat();
+      const options = Array.isArray(DEFAULT_OPTIONS.get(key))
+        ? DEFAULT_OPTIONS.get(key)
+        : [DEFAULT_OPTIONS.get(key)];
       values.push(...options);
     }
     allOptions.set(key, values);
