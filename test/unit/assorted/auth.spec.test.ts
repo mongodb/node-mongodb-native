@@ -9,12 +9,11 @@ describe('Auth option spec tests', function () {
   for (const suite of suites) {
     describe(suite.name, function () {
       for (const test of suite.tests) {
-        if (SKIP.includes(test.description)) {
-          beforeEach(function () {
-            this.currentTest.skipReason = 'NODE-3986: Fix MONGODB-AWS Spec Test';
-          });
-        }
         it(`${test.description}`, function () {
+          if (SKIP.includes(test.description)) {
+            this.test.skipReason = 'NODE-3986: Fix MONGODB-AWS Spec Test';
+            this.skip();
+          }
           executeUriValidationTest(test);
         });
       }
