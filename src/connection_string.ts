@@ -236,25 +236,6 @@ function* entriesFromString(value: string) {
   }
 }
 
-function* parseAuthMechanismParameters(stringValue: string) {
-  const validKeys = [
-    'SERVICE_NAME',
-    'SERVICE_REALM',
-    'CANONICALIZE_HOST_NAME',
-    'AWS_SESSION_TOKEN'
-  ];
-
-  for (const [key, value] of entriesFromString(stringValue)) {
-    if (validKeys.includes(key)) {
-      if (key === 'CANONICALIZE_HOST_NAME') {
-        yield [key, getBoolean(key, value)];
-      } else {
-        yield [key, value];
-      }
-    }
-  }
-}
-
 class CaseInsensitiveMap<Value = any> extends Map<string, Value> {
   constructor(entries: Array<[string, any]> = []) {
     super(entries.map(([k, v]) => [k.toLowerCase(), v]));
@@ -652,7 +633,26 @@ export const OPTIONS = {
     target: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
       if (typeof value === 'string') {
-        value = Object.fromEntries(parseAuthMechanismParameters(value));
+        const validKeys = [
+          'SERVICE_NAME',
+          'SERVICE_REALM',
+          'CANONICALIZE_HOST_NAME',
+          'AWS_SESSION_TOKEN'
+        ];
+
+        const properties = Object.create(null);
+
+        for (const [key, _value] of entriesFromString(value)) {
+          if (validKeys.includes(key)) {
+            if (key === 'CANONICALIZE_HOST_NAME') {
+              properties[key] = getBoolean(key, _value);
+            } else {
+              properties[key] = _value;
+            }
+          }
+        }
+
+        value = properties;
       }
       if (!isRecord(value)) {
         throw new MongoParseError('AuthMechanismProperties must be an object');
