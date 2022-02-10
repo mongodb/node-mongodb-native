@@ -224,7 +224,7 @@ function toArray<T>(value: OneOrMore<T>): T[] {
   return Array.isArray(value) ? value : [value];
 }
 
-function* parseObjectString(value: string) {
+function* entriesFromString(value: string) {
   const keyValuePairs = value.split(',');
   for (const keyValue of keyValuePairs) {
     const [key, value] = keyValue.split(':');
@@ -244,7 +244,7 @@ function* parseAuthMechanismParameters(stringValue: string) {
     'AWS_SESSION_TOKEN'
   ];
 
-  for (const [key, value] of parseObjectString(stringValue)) {
+  for (const [key, value] of entriesFromString(stringValue)) {
     if (validKeys.includes(key)) {
       if (key === 'CANONICALIZE_HOST_NAME') {
         yield [key, getBoolean(key, value)];
@@ -986,7 +986,7 @@ export const OPTIONS = {
       for (const tag of values) {
         const readPreferenceTag: TagSet = Object.create(null);
         if (typeof tag === 'string') {
-          for (const [k, v] of parseObjectString(tag)) {
+          for (const [k, v] of entriesFromString(tag)) {
             readPreferenceTag[k] = v;
           }
         }
