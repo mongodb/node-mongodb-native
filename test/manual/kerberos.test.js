@@ -65,8 +65,10 @@ describe('Kerberos', function () {
   });
 
   it('validate that gssapiCanonicalizeHostName can be passed in', function (done) {
-    // CNAME resolution on evg macos boxes resolves to a ec2 CNAME which is not associated with the KDC.
-    if (process.platform === 'darwin') this.skip();
+    if (process.platform === 'darwin') {
+      this.test.skipReason = 'DNS does not resolve with proper CNAME record on evergreen MacOS';
+      this.skip();
+    }
     const client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,gssapiCanonicalizeHostName:true&maxPoolSize=1`
     );
@@ -78,8 +80,10 @@ describe('Kerberos', function () {
   });
 
   it('validate that CANONICALIZE_HOST_NAME can be passed in', function (done) {
-    // CNAME resolution on evg macos boxes resolves to a ec2 CNAME which is not associated with the KDC.
-    if (process.platform === 'darwin') this.skip();
+    if (process.platform === 'darwin') {
+      this.test.skipReason = 'DNS does not resolve with proper CNAME record on evergreen MacOS';
+      this.skip();
+    }
     const client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1`
     );
@@ -117,7 +121,6 @@ describe('Kerberos', function () {
         if (!expectedError) {
           expect.fail('Expected connect with invalid SERVICE_HOST to fail');
         }
-        console.log(expectedError);
         expect(expectedError.message).to.match(/GSS failure|UNKNOWN_SERVER/);
       });
     });
