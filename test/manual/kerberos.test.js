@@ -41,6 +41,7 @@ describe('Kerberos', function () {
     return;
   }
   let krb5Uri = process.env.MONGODB_URI;
+  const parts = krb5Uri.split('@', 2);
 
   if (!process.env.KRB5_PRINCIPAL) {
     console.error('skipping Kerberos tests, KRB5_PRINCIPAL environment variable is not defined');
@@ -52,7 +53,6 @@ describe('Kerberos', function () {
     if (process.env.LDAPTEST_PASSWORD == null) {
       throw new Error('The env parameter LDAPTEST_PASSWORD must be set');
     }
-    const parts = krb5Uri.split('@', 2);
     krb5Uri = `${parts[0]}:${process.env.LDAPTEST_PASSWORD}@${parts[1]}`;
   }
 
@@ -65,6 +65,10 @@ describe('Kerberos', function () {
   });
 
   it('validate that gssapiCanonicalizeHostName can be passed in', function (done) {
+    if (process.platform === 'darwin') {
+      this.test.skipReason = 'DNS does not resolve with proper CNAME record on evergreen MacOS';
+      this.skip();
+    }
     const client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,gssapiCanonicalizeHostName:true&maxPoolSize=1`
     );
@@ -76,6 +80,10 @@ describe('Kerberos', function () {
   });
 
   it('validate that CANONICALIZE_HOST_NAME can be passed in', function (done) {
+    if (process.platform === 'darwin') {
+      this.test.skipReason = 'DNS does not resolve with proper CNAME record on evergreen MacOS';
+      this.skip();
+    }
     const client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1`
     );
@@ -94,6 +102,42 @@ describe('Kerberos', function () {
     client.connect(function (err, client) {
       expect(err).to.not.exist;
       verifyKerberosAuthentication(client, done);
+    });
+  });
+
+  context('when passing SERVICE_HOST as an auth mech option', function () {
+    context('when the SERVICE_HOST is invalid', function () {
+      const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+        authMechanismProperties: {
+          SERVICE_HOST: 'example.com'
+        }
+      });
+
+      it('fails to authenticate', async function () {
+        let expectedError;
+        await client.connect().catch(e => {
+          expectedError = e;
+        });
+        if (!expectedError) {
+          expect.fail('Expected connect with invalid SERVICE_HOST to fail');
+        }
+        expect(expectedError.message).to.match(/GSS failure|UNKNOWN_SERVER/);
+      });
+    });
+
+    context('when the SERVICE_HOST is valid', function () {
+      const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+        authMechanismProperties: {
+          SERVICE_HOST: 'ldaptest.10gen.cc'
+        }
+      });
+
+      it('authenticates', function (done) {
+        client.connect(function (err, client) {
+          expect(err).to.not.exist;
+          verifyKerberosAuthentication(client, done);
+        });
+      });
     });
   });
 

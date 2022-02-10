@@ -77,9 +77,10 @@ describe('Connection String', function () {
 
   it('should parse `authMechanismProperties`', function () {
     const options = parseOptions(
-      'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true&authMechanism=GSSAPI'
+      'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com&authMechanism=GSSAPI'
     );
     expect(options.credentials.mechanismProperties).to.deep.include({
+      SERVICE_HOST: 'example.com',
       SERVICE_NAME: 'other',
       SERVICE_REALM: 'blah',
       CANONICALIZE_HOST_NAME: true
