@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
 
+import type { OneOrMore } from '.';
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
@@ -204,9 +205,8 @@ function getUint(name: string, value: unknown): number {
   return parsedValue;
 }
 
-function toArray<T>(value: T): T[];
-function toArray<T>(value: T[]): T[];
-function toArray<T>(value: T | T[]): T[] {
+/** Wrap a single value in an array if the value is not an array */
+function toArray<T>(value: OneOrMore<T>): T[] {
   return Array.isArray(value) ? value : [value];
 }
 
