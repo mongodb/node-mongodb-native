@@ -8,8 +8,18 @@ const { setupDatabase, withClient, assert: test } = require('../shared');
 const { ns, HostAddress } = require('../../../src/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { Topology } = require('../../../src/sdam/topology');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 describe('Connection', function () {
+  beforeEach(
+    skipBrokenAuthTestBeforeEachHook({
+      skippedTests: [
+        'should support calling back multiple times on exhaust commands',
+        'should correctly connect to server using domain socket'
+      ]
+    })
+  );
+
   before(function () {
     return setupDatabase(this.configuration);
   });
@@ -89,8 +99,7 @@ describe('Connection', function () {
 
     it('should support calling back multiple times on exhaust commands', {
       metadata: {
-        requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'], auth: 'disabled' },
-        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+        requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'] }
       },
       test: function (done) {
         const namespace = ns(`${this.configuration.db}.$cmd`);
@@ -200,8 +209,7 @@ describe('Connection', function () {
 
     it('should correctly connect to server using domain socket', {
       metadata: {
-        requires: { topology: 'single', os: '!win32', auth: 'disabled' },
-        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+        requires: { topology: 'single', os: '!win32' }
       },
 
       test: function (done) {

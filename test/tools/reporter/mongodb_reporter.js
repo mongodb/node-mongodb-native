@@ -233,11 +233,6 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
    */
   pending(test) {
     if (REPORT_TO_STDIO) console.log(chalk.cyan(`↬ ${test.fullTitle()}`));
-    if (test.metadata && test.metadata.skipReason && typeof test.metadata.skipReason === 'string') {
-      console.log(
-        chalk.cyan(`${'  '.repeat(test.titlePath().length + 1)}↬ ${test.metadata.skipReason}`)
-      );
-    }
     if (typeof test.skipReason === 'string') {
       console.log(chalk.cyan(`${'  '.repeat(test.titlePath().length + 1)}↬ ${test.skipReason}`));
     }

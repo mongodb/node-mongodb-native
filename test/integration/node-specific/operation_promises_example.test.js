@@ -6,11 +6,22 @@ const { enumToString } = require('../../../src/utils');
 const { ProfilingLevel } = require('../../../src/operations/set_profiling_level');
 const { Code, ReturnDocument } = require('../../../src');
 const { expect } = require('chai');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 describe('Operation (Promises)', function () {
   before(function () {
     return setupDatabase(this.configuration, ['integration_tests_2', 'hr', 'reporting']);
   });
+
+  beforeEach(
+    skipBrokenAuthTestBeforeEachHook({
+      skippedTests: [
+        'Should correctly connect to a replicaset',
+        'Should connect to mongos proxies using connectiong string With Promises',
+        'Should correctly connect to a replicaset With Promises'
+      ]
+    })
+  );
 
   /**************************************************************************
    *
@@ -4016,8 +4027,7 @@ describe('Operation (Promises)', function () {
    */
   it('Should correctly connect to a replicaset With Promises', {
     metadata: {
-      requires: { topology: 'replicaset', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { topology: 'replicaset' }
     },
 
     test: function () {
@@ -4064,8 +4074,7 @@ describe('Operation (Promises)', function () {
    */
   it('Should connect to mongos proxies using connectiong string With Promises', {
     metadata: {
-      requires: { topology: 'sharded', auth: 'disabled' },
-      skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+      requires: { topology: 'sharded' }
     },
 
     test: function () {

@@ -11,6 +11,7 @@ const { Long, ReadPreference, MongoNetworkError } = require('../../../src');
 
 const crypto = require('crypto');
 const { isHello } = require('../../../src/utils');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 function withChangeStream(dbName, collectionName, callback) {
   if (arguments.length === 1) {
@@ -1253,6 +1254,12 @@ describe('Change Streams', function () {
       return coll.insertOne({ c: 3 });
     }
 
+    beforeEach(
+      skipBrokenAuthTestBeforeEachHook({
+        skippedTests: ['when invoked using eventEmitter API']
+      })
+    );
+
     beforeEach(function () {
       client = this.configuration.newClient();
       return client.connect().then(_client => {
@@ -1334,8 +1341,7 @@ describe('Change Streams', function () {
 
     it('when invoked using eventEmitter API', {
       metadata: {
-        requires: { topology: 'replicaset', mongodb: '>=3.6', auth: 'disabled' },
-        skipReason: 'TODO: NODE-3891 - fix tests broken when AUTH enabled'
+        requires: { topology: 'replicaset', mongodb: '>=3.6', auth: 'disabled' }
       },
       test: function (done) {
         let closed = false;
