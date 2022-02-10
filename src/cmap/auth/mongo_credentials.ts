@@ -2,6 +2,7 @@
 import type { Document } from '../../bson';
 import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
 import { emitWarningOnce } from '../../utils';
+import { CANONICALIZATION_VALUES, CanonicalizationProperties } from './gssapi';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -24,11 +25,6 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   // Default for wireprotocol < 3
   return AuthMechanism.MONGODB_CR;
 }
-
-const CANONICALIZATION_VALUES = [true, false, 'none', 'forward', 'forwardAndReverse'];
-
-/** @public */
-export type CanonicalizationProperties = boolean | 'none' | 'forward' | 'forwardAndReverse';
 
 /** @public */
 export interface AuthMechanismProperties extends Document {

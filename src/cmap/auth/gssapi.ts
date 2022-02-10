@@ -12,12 +12,22 @@ import {
 import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
-type CanonicalizationOptions = boolean | 'none' | 'forward' | 'forwardAndReverse';
+/** @public */
+export const CANONICALIZATION_VALUES = [
+  true,
+  false,
+  'none',
+  'forward',
+  'forwardAndReverse'
+] as const;
+
+/** @public */
+export type CanonicalizationProperties = typeof CANONICALIZATION_VALUES[number];
 
 type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
   gssapiCanonicalizeHostName?: boolean;
-  CANONICALIZE_HOST_NAME?: CanonicalizationOptions;
+  CANONICALIZE_HOST_NAME?: CanonicalizationProperties;
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;

@@ -82,7 +82,8 @@ describe('Kerberos', function () {
   context('when passing in CANONICALIZE_HOST_NAME', function () {
     beforeEach(function () {
       if (process.platform === 'darwin') {
-        this.currentTest.skipReason = 'DNS does not resolve with proper CNAME record on evergreen MacOS';
+        this.currentTest.skipReason =
+          'DNS does not resolve with proper CNAME record on evergreen MacOS';
         this.skip();
       }
     });
