@@ -113,7 +113,7 @@ describe('Kerberos', function () {
         if (!expectedError) {
           expect.fail('Expected connect with invalid SERVICE_HOST to fail');
         }
-        expect(expectedError).property('message').to.include('Authentication failed');
+        expect(expectedError).property('message').to.include('GSS failure');
       });
     });
 
