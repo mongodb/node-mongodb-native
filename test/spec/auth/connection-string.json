@@ -95,21 +95,6 @@
       }
     },
     {
-      "description": "should accept true as hostname canonicalization (GSSAPI)",
-      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true",
-      "valid": true,
-      "credential": {
-        "username": "user@DOMAIN.COM",
-        "password": null,
-        "source": "$external",
-        "mechanism": "GSSAPI",
-        "mechanism_properties": {
-          "SERVICE_NAME": "other",
-          "CANONICALIZE_HOST_NAME": true
-        }
-      }
-    },
-    {
       "description": "should accept forwardAndReverse hostname canonicalization (GSSAPI)",
       "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:forwardAndReverse",
       "valid": true,
@@ -136,21 +121,6 @@
         "mechanism_properties": {
           "SERVICE_NAME": "other",
           "CANONICALIZE_HOST_NAME": "none"
-        }
-      }
-    },
-    {
-      "description": "should accept false hostname canonicalization (GSSAPI)",
-      "uri": "mongodb://user%40DOMAIN.COM@localhost/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:false",
-      "valid": true,
-      "credential": {
-        "username": "user@DOMAIN.COM",
-        "password": null,
-        "source": "$external",
-        "mechanism": "GSSAPI",
-        "mechanism_properties": {
-          "SERVICE_NAME": "other",
-          "CANONICALIZE_HOST_NAME": false
         }
       }
     },
