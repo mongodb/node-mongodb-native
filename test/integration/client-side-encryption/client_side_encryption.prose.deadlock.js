@@ -2,7 +2,7 @@
 
 const BSON = require('bson');
 const { expect } = require('chai');
-const { dropCollection } = require('../../integration/shared');
+const { dropCollection } = require('../shared');
 const util = require('util');
 const fs = require('fs');
 const path = require('path');
