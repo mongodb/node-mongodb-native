@@ -11,7 +11,7 @@ const { Long, ReadPreference, MongoNetworkError } = require('../../../src');
 
 const crypto = require('crypto');
 const { isHello } = require('../../../src/utils');
-const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 function withChangeStream(dbName, collectionName, callback) {
   if (arguments.length === 1) {
@@ -1255,7 +1255,7 @@ describe('Change Streams', function () {
     }
 
     beforeEach(
-      testSkipBrokenAuthTestBeforeEachHook({
+      skipBrokenAuthTestBeforeEachHook({
         skippedTests: ['when invoked using eventEmitter API']
       })
     );

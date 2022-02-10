@@ -8,11 +8,11 @@ const { setupDatabase, withClient, assert: test } = require('../shared');
 const { ns, HostAddress } = require('../../../src/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { Topology } = require('../../../src/sdam/topology');
-const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 describe('Connection', function () {
   beforeEach(
-    testSkipBrokenAuthTestBeforeEachHook({
+    skipBrokenAuthTestBeforeEachHook({
       skippedTests: [
         'should support calling back multiple times on exhaust commands',
         'should correctly connect to server using domain socket'

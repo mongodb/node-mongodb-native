@@ -5,7 +5,7 @@ const { Topology } = require('../../../src/sdam/topology');
 const { Code, ObjectId, ReturnDocument } = require('../../../src');
 
 const chai = require('chai');
-const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -16,7 +16,7 @@ describe('Operation Examples', function () {
   });
 
   beforeEach(
-    testSkipBrokenAuthTestBeforeEachHook({
+    skipBrokenAuthTestBeforeEachHook({
       skippedTests: [
         'Should correctly connect to a replicaset',
         'Should connect to mongos proxies using connectiong string'

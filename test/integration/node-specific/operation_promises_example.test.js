@@ -6,7 +6,7 @@ const { enumToString } = require('../../../src/utils');
 const { ProfilingLevel } = require('../../../src/operations/set_profiling_level');
 const { Code, ReturnDocument } = require('../../../src');
 const { expect } = require('chai');
-const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 describe('Operation (Promises)', function () {
   before(function () {
@@ -14,7 +14,7 @@ describe('Operation (Promises)', function () {
   });
 
   beforeEach(
-    testSkipBrokenAuthTestBeforeEachHook({
+    skipBrokenAuthTestBeforeEachHook({
       skippedTests: [
         'Should correctly connect to a replicaset',
         'Should connect to mongos proxies using connectiong string With Promises',

@@ -4,7 +4,7 @@ const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const { setupDatabase } = require('../shared');
 const { expect } = require('chai');
-const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND, 'endSessions'];
 const test = { commands: { started: [], succeeded: [] } };
@@ -16,7 +16,7 @@ describe('Causal Consistency - prose tests', function () {
   });
 
   beforeEach(
-    testSkipBrokenAuthTestBeforeEachHook({
+    skipBrokenAuthTestBeforeEachHook({
       skippedTests: [
         '2. The first read in a causally consistent session must not send afterClusterTime to the server',
         'case: successful read with causal consistency',

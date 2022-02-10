@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { testSkipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
+const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
 
 function ignoreNsNotFound(err) {
   if (!err.message.match(/ns not found/)) {
@@ -35,7 +35,7 @@ maybeDescribe('Connections survive primary step down - prose', function () {
   let collection;
 
   beforeEach(
-    testSkipBrokenAuthTestBeforeEachHook({
+    skipBrokenAuthTestBeforeEachHook({
       skippedTests: [
         'getMore iteration',
         'Not Primary - Keep Connection Pool',
