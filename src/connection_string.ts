@@ -185,8 +185,22 @@ const FALSEHOODS = new Set(['false', 'f', '0', 'n', 'no', '-1']);
 function getBoolean(name: string, value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   const valueString = String(value).toLowerCase();
-  if (TRUTHS.has(valueString)) return true;
-  if (FALSEHOODS.has(valueString)) return false;
+  if (TRUTHS.has(valueString)) {
+    if (valueString !== 'true') {
+      emitWarning(
+        `deprecated value for ${name} : ${valueString} - please update to ${name} : true instead`
+      );
+    }
+    return true;
+  }
+  if (FALSEHOODS.has(valueString)) {
+    if (valueString !== 'false') {
+      emitWarning(
+        `deprecated value for ${name} : ${valueString} - please update to ${name} : false instead`
+      );
+    }
+    return false;
+  }
   throw new MongoParseError(`Expected ${name} to be stringified boolean value, got: ${value}`);
 }
 
@@ -210,29 +224,35 @@ function toArray<T>(value: OneOrMore<T>): T[] {
   return Array.isArray(value) ? value : [value];
 }
 
-function parseType(value: string): number | boolean | string {
-  try {
-    return getBoolean('', value);
-  } catch {
-    try {
-      return getInt('', value);
-    } catch {
-      return value;
-    }
-  }
-}
-
-function toRecord(value: string): Record<string, any> {
-  const record = Object.create(null);
+function* parseObjectString(value: string) {
   const keyValuePairs = value.split(',');
   for (const keyValue of keyValuePairs) {
     const [key, value] = keyValue.split(':');
     if (value == null) {
       throw new MongoParseError('Cannot have undefined values in key value pairs');
     }
-    record[key] = value;
+
+    yield [key, value];
   }
-  return record;
+}
+
+function* parseAuthMechanismParameters(stringValue: string) {
+  const validKeys = [
+    'SERVICE_NAME',
+    'SERVICE_REALM',
+    'CANONICALIZE_HOST_NAME',
+    'AWS_SESSION_TOKEN'
+  ];
+
+  for (const [key, value] of parseObjectString(stringValue)) {
+    if (validKeys.includes(key)) {
+      if (key === 'CANONICALIZE_HOST_NAME') {
+        yield [key, getBoolean(key, value)];
+      } else {
+        yield [key, value];
+      }
+    }
+  }
 }
 
 class CaseInsensitiveMap<Value = any> extends Map<string, Value> {
@@ -632,9 +652,7 @@ export const OPTIONS = {
     target: 'credentials',
     transform({ options, values: [value] }): MongoCredentials {
       if (typeof value === 'string') {
-        value = Object.fromEntries(
-          Object.entries(toRecord(value)).map(([key, value]) => [key, parseType(value)])
-        );
+        value = Object.fromEntries(parseAuthMechanismParameters(value));
       }
       if (!isRecord(value)) {
         throw new MongoParseError('AuthMechanismProperties must be an object');
@@ -968,7 +986,7 @@ export const OPTIONS = {
       for (const tag of values) {
         const readPreferenceTag: TagSet = Object.create(null);
         if (typeof tag === 'string') {
-          for (const [k, v] of Object.entries(toRecord(tag))) {
+          for (const [k, v] of parseObjectString(tag)) {
             readPreferenceTag[k] = v;
           }
         }
