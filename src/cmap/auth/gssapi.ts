@@ -198,15 +198,11 @@ function performGssapiCanonicalizeHostName(
   if (mode === true || mode === 'forwardAndReverse') {
     // Perform the lookup of the ip address.
     dns.lookup(host, (error, address) => {
-      /* eslint no-console: 0 */
-      console.log('lookup', host, error, address);
       // No ip found, return the error.
       if (error) return callback(error);
 
       // Perform a reverse ptr lookup on the ip address.
       dns.resolvePtr(address, (err, results) => {
-        /* eslint no-console: 0 */
-        console.log('resolvePtr', err, results);
         // This can error as ptr records may not exist for all ips. In this case
         // fallback to a cname lookup as dns.lookup() does not return the
         // cname.
