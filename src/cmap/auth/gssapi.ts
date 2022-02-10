@@ -217,8 +217,6 @@ function performGssapiCanonicalizeHostName(
 function resolveCname(host: string, callback: Callback<string>): void {
   // Attempt to resolve the host name
   dns.resolveCname(host, (err, r) => {
-    /* eslint no-console: 0 */
-    console.log('resolveCname', err, r);
     if (err) return callback(undefined, host);
 
     // Get the first resolve host id
