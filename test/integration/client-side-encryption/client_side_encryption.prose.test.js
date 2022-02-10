@@ -51,7 +51,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
-  const shared = require('../../integration/shared');
+  const shared = require('../shared');
   const dropCollection = shared.dropCollection;
   const APMEventCollector = shared.APMEventCollector;
 

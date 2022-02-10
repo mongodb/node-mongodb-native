@@ -48,6 +48,6 @@ else
   . $DRIVERS_TOOLS/.evergreen/csfle/set-temp-creds.sh
 fi
 
-npm install mongodb-client-encryption@">=2.0.0-beta.3"
+npm install mongodb-client-encryption@">=2.0.0-beta.4"
 
 AUTH=$AUTH SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI} MULTI_MONGOS_LB_URI=${MULTI_MONGOS_LB_URI} MONGODB_API_VERSION=${MONGODB_API_VERSION} MONGODB_UNIFIED_TOPOLOGY=${UNIFIED} MONGODB_URI=${MONGODB_URI} LOAD_BALANCER=${LOAD_BALANCER} npm run ${TEST_NPM_SCRIPT}
