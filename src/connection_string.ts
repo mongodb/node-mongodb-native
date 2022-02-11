@@ -28,6 +28,7 @@ import {
   AnyOptions,
   Callback,
   DEFAULT_PK_FACTORY,
+  emitWarning,
   emitWarningOnce,
   HostAddress,
   isRecord,
@@ -640,19 +641,21 @@ export const OPTIONS = {
           'AWS_SESSION_TOKEN'
         ];
 
-        const properties = Object.create(null);
+        const mechanismProperties = Object.create(null);
 
         for (const [key, _value] of entriesFromString(value)) {
           if (validKeys.includes(key)) {
             if (key === 'CANONICALIZE_HOST_NAME') {
-              properties[key] = getBoolean(key, _value);
+              mechanismProperties[key] = getBoolean(key, _value);
             } else {
-              properties[key] = _value;
+              mechanismProperties[key] = _value;
             }
           }
         }
 
-        value = properties;
+        return MongoCredentials.merge(options.credentials, {
+          mechanismProperties
+        });
       }
       if (!isRecord(value)) {
         throw new MongoParseError('AuthMechanismProperties must be an object');
