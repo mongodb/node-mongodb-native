@@ -10,6 +10,7 @@ const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
+const ClientSideEncryptionFilter = require('../runner/filters/client_encryption_filter');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -168,10 +169,20 @@ function generateTopologyTests(testSuites, testContext, filter) {
         shouldRun = false;
       }
 
-      if (typeof filter === 'function' && !filter(spec, this.configuration)) {
+      if (shouldRun && typeof filter === 'function' && !filter(spec, this.configuration)) {
         this.currentTest.skipReason = `filtered by custom filter passed to generateTopologyTests`;
         shouldRun = false;
       }
+
+      if (shouldRun && testContext.requiresCSFLE) {
+        const csfleFilter = new ClientSideEncryptionFilter();
+        csfleFilter.initializeFilter(null, {}, () => null);
+        if (!csfleFilter.filter({ metadata: { requires: { clientSideEncryption: true } } })) {
+          shouldRun = false;
+          this.currentTest.skipReason = `filtered by ClientSideEncryptionFilter`;
+        }
+      }
+
       await utilClient.close();
 
       if (!shouldRun) this.skip();

@@ -55,27 +55,11 @@ const skippedAuthTests = [
 const SKIPPED_TESTS = new Set(isAuthEnabled ? skippedAuthTests : []);
 
 describe('Client Side Encryption', function () {
-  // TODO: Replace this with using the filter once the filter works on describe blocks
-  const skipTests = process.env.CSFLE_KMS_PROVIDERS == null;
-  if (skipTests) {
-    // console.log('skipping Client Side Encryption Spec tests due to lack of AWS credentials');
-    return;
-  }
-
-  try {
-    require('mongodb-client-encryption');
-  } catch (e) {
-    console.error(
-      'skipping Client Side Encryption Spec tests due to inability to load mongodb-client-encryption'
-    );
-    return;
-  }
-
   const testContext = new TestRunnerContext();
+  testContext.requiresCSFLE = true;
   const testSuites = gatherTestSuites(
     path.join(__dirname, '../../spec/client-side-encryption/tests')
   );
-
   after(() => testContext.teardown());
   before(function () {
     return testContext.setup(this.configuration);
