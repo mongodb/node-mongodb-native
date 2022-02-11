@@ -121,7 +121,7 @@ describe('Kerberos', function () {
         );
         client.connect(function (err, client) {
           if (err) return done(err);
-          expect(dns.lookup).to.be.calledOnce;
+          expect(dns.lookup).to.be.called;
           expect(dns.resolvePtr).to.be.calledOnce;
           verifyKerberosAuthentication(client, done);
         });

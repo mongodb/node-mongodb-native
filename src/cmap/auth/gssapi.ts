@@ -13,16 +13,17 @@ import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 /** @public */
-export const CANONICALIZATION_VALUES = [
-  true,
-  false,
-  'none',
-  'forward',
-  'forwardAndReverse'
-] as const;
+export const CanonicalizationProperties = Object.freeze({
+  on: true,
+  off: false,
+  none: 'none',
+  forward: 'forward',
+  forwardAndReverse: 'forwardAndReverse'
+} as const);
 
 /** @public */
-export type CanonicalizationProperties = typeof CANONICALIZATION_VALUES[number];
+export type CanonicalizationProperties =
+  typeof CanonicalizationProperties[keyof typeof CanonicalizationProperties];
 
 type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
@@ -192,10 +193,15 @@ function performGssapiCanonicalizeHostName(
   callback: Callback<string>
 ): void {
   const mode = mechanismProperties.CANONICALIZE_HOST_NAME;
-  if (!mode || mode === 'none') return callback(undefined, host);
+  if (!mode || mode === CanonicalizationProperties.none) {
+    return callback(undefined, host);
+  }
 
   // If forward and reverse or true
-  if (mode === true || mode === 'forwardAndReverse') {
+  if (
+    mode === CanonicalizationProperties.on ||
+    mode === CanonicalizationProperties.forwardAndReverse
+  ) {
     // Perform the lookup of the ip address.
     dns.lookup(host, (error, address) => {
       // No ip found, return the error.

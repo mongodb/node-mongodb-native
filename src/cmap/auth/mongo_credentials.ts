@@ -2,7 +2,7 @@
 import type { Document } from '../../bson';
 import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
 import { emitWarningOnce } from '../../utils';
-import { CANONICALIZATION_VALUES, CanonicalizationProperties } from './gssapi';
+import { CanonicalizationProperties } from './gssapi';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -170,7 +170,7 @@ export class MongoCredentials {
     }
 
     const canonicalization = this.mechanismProperties.CANONICALIZE_HOST_NAME ?? false;
-    if (!CANONICALIZATION_VALUES.includes(canonicalization)) {
+    if (!Object.values(CanonicalizationProperties).includes(canonicalization)) {
       throw new MongoAPIError(`Invalid CANONICALIZE_HOST_NAME value: ${canonicalization}`);
     }
   }
