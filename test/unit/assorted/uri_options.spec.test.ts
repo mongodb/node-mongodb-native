@@ -28,10 +28,7 @@ describe('URI option spec tests', function () {
     'tlsDisableCertificateRevocationCheck can be set to true',
     'tlsDisableCertificateRevocationCheck can be set to false',
     'tlsDisableOCSPEndpointCheck can be set to true',
-    'tlsDisableOCSPEndpointCheck can be set to false',
-
-    // TODO(NODE-3813): read preference tag issue: parsing rack:1 as rack:true
-    'Valid read preference options are parsed correctly'
+    'tlsDisableOCSPEndpointCheck can be set to false'
   ];
 
   const testsThatDoNotThrowOnWarn = [

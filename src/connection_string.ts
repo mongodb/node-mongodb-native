@@ -19,6 +19,7 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
+import type { OneOrMore } from './mongo_types';
 import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -28,6 +29,7 @@ import {
   Callback,
   DEFAULT_PK_FACTORY,
   emitWarning,
+  emitWarningOnce,
   HostAddress,
   isRecord,
   makeClientMetadata,
@@ -184,8 +186,22 @@ const FALSEHOODS = new Set(['false', 'f', '0', 'n', 'no', '-1']);
 function getBoolean(name: string, value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   const valueString = String(value).toLowerCase();
-  if (TRUTHS.has(valueString)) return true;
-  if (FALSEHOODS.has(valueString)) return false;
+  if (TRUTHS.has(valueString)) {
+    if (valueString !== 'true') {
+      emitWarningOnce(
+        `deprecated value for ${name} : ${valueString} - please update to ${name} : true instead`
+      );
+    }
+    return true;
+  }
+  if (FALSEHOODS.has(valueString)) {
+    if (valueString !== 'false') {
+      emitWarningOnce(
+        `deprecated value for ${name} : ${valueString} - please update to ${name} : false instead`
+      );
+    }
+    return false;
+  }
   throw new MongoParseError(`Expected ${name} to be stringified boolean value, got: ${value}`);
 }
 
@@ -204,31 +220,24 @@ function getUint(name: string, value: unknown): number {
   return parsedValue;
 }
 
-function toRecord(value: string): Record<string, any> {
-  const record = Object.create(null);
+/** Wrap a single value in an array if the value is not an array */
+function toArray<T>(value: OneOrMore<T>): T[] {
+  return Array.isArray(value) ? value : [value];
+}
+
+function* entriesFromString(value: string) {
   const keyValuePairs = value.split(',');
   for (const keyValue of keyValuePairs) {
     const [key, value] = keyValue.split(':');
     if (value == null) {
       throw new MongoParseError('Cannot have undefined values in key value pairs');
     }
-    try {
-      // try to get a boolean
-      record[key] = getBoolean('', value);
-    } catch {
-      try {
-        // try to get a number
-        record[key] = getInt('', value);
-      } catch {
-        // keep value as a string
-        record[key] = value;
-      }
-    }
+
+    yield [key, value];
   }
-  return record;
 }
 
-class CaseInsensitiveMap extends Map<string, any> {
+class CaseInsensitiveMap<Value = any> extends Map<string, Value> {
   constructor(entries: Array<[string, any]> = []) {
     super(entries.map(([k, v]) => [k.toLowerCase(), v]));
   }
@@ -262,7 +271,7 @@ export function parseOptions(
   const mongoOptions = Object.create(null);
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
 
-  const urlOptions = new CaseInsensitiveMap();
+  const urlOptions = new CaseInsensitiveMap<any[]>();
 
   if (url.pathname !== '/' && url.pathname !== '') {
     const dbName = decodeURIComponent(
@@ -324,16 +333,11 @@ export function parseOptions(
   ]);
 
   for (const key of allKeys) {
-    const values = [];
-    if (objectOptions.has(key)) {
-      values.push(objectOptions.get(key));
-    }
-    if (urlOptions.has(key)) {
-      values.push(...urlOptions.get(key));
-    }
-    if (DEFAULT_OPTIONS.has(key)) {
-      values.push(DEFAULT_OPTIONS.get(key));
-    }
+    const values = [objectOptions, urlOptions, DEFAULT_OPTIONS].flatMap(optionsObject => {
+      const options = optionsObject.get(key) ?? [];
+      return toArray(options);
+    });
+
     allOptions.set(key, values);
   }
 
@@ -478,12 +482,11 @@ export function parseOptions(
     throw new MongoParseError('Can only specify both of proxy username/password or neither');
   }
 
-  if (
-    urlOptions.get('proxyHost')?.length > 1 ||
-    urlOptions.get('proxyPort')?.length > 1 ||
-    urlOptions.get('proxyUsername')?.length > 1 ||
-    urlOptions.get('proxyPassword')?.length > 1
-  ) {
+  const proxyOptions = ['proxyHost', 'proxyPort', 'proxyUsername', 'proxyPassword'].map(
+    key => urlOptions.get(key) ?? []
+  );
+
+  if (proxyOptions.some(options => options.length > 1)) {
     throw new MongoParseError(
       'Proxy options cannot be specified multiple times in the connection string'
     );
@@ -629,14 +632,26 @@ export const OPTIONS = {
   },
   authMechanismProperties: {
     target: 'credentials',
-    transform({ options, values: [value] }): MongoCredentials {
-      if (typeof value === 'string') {
-        value = toRecord(value);
+    transform({ options, values: [optionValue] }): MongoCredentials {
+      if (typeof optionValue === 'string') {
+        const mechanismProperties = Object.create(null);
+
+        for (const [key, value] of entriesFromString(optionValue)) {
+          try {
+            mechanismProperties[key] = getBoolean(key, value);
+          } catch {
+            mechanismProperties[key] = value;
+          }
+        }
+
+        return MongoCredentials.merge(options.credentials, {
+          mechanismProperties
+        });
       }
-      if (!isRecord(value)) {
+      if (!isRecord(optionValue)) {
         throw new MongoParseError('AuthMechanismProperties must be an object');
       }
-      return MongoCredentials.merge(options.credentials, { mechanismProperties: value });
+      return MongoCredentials.merge(options.credentials, { mechanismProperties: optionValue });
     }
   },
   authSource: {
@@ -965,7 +980,7 @@ export const OPTIONS = {
       for (const tag of values) {
         const readPreferenceTag: TagSet = Object.create(null);
         if (typeof tag === 'string') {
-          for (const [k, v] of Object.entries(toRecord(tag))) {
+          for (const [k, v] of entriesFromString(tag)) {
             readPreferenceTag[k] = v;
           }
         }
