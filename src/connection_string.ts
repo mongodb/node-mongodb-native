@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
 
-import type { OneOrMore } from '.';
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
@@ -20,6 +19,7 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
+import type { OneOrMore } from './mongo_types';
 import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
