@@ -174,16 +174,24 @@ function generateTopologyTests(testSuites, testContext, filter) {
         shouldRun = false;
       }
 
+      let csfleFilterError = null;
       if (shouldRun && testContext.requiresCSFLE) {
         const csfleFilter = new ClientSideEncryptionFilter();
         csfleFilter.initializeFilter(null, {}, () => null);
-        if (!csfleFilter.filter({ metadata: { requires: { clientSideEncryption: true } } })) {
-          shouldRun = false;
-          this.currentTest.skipReason = `filtered by ClientSideEncryptionFilter`;
+        try {
+          if (!csfleFilter.filter({ metadata: { requires: { clientSideEncryption: true } } })) {
+            shouldRun = false;
+            this.currentTest.skipReason = `filtered by ClientSideEncryptionFilter`;
+          }
+        } catch (err) {
+          csfleFilterError = err;
         }
       }
 
       await utilClient.close();
+      if (csfleFilterError) {
+        throw csfleFilterError;
+      }
 
       if (!shouldRun) this.skip();
     };

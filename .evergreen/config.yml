@@ -2353,9 +2353,11 @@ buildvariants:
       NODE_LTS_NAME: erbium
     tasks:
       - serverless_task_group
-  - name: no-auth-tests
+  - name: ubuntu1804-no-auth-tests
     display_name: No Auth Tests
-    run_on: ubuntu1804-test
+    run_on: ubuntu1804-large
+    expansions:
+      CLIENT_ENCRYPTION: true
     tasks:
       - test-latest-server-noauth
       - test-latest-replica_set-noauth

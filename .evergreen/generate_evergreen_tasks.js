@@ -72,7 +72,7 @@ function generateVersionTopologyMatrix() {
   function* _generate() {
     for (const mongoVersion of MONGODB_VERSIONS) {
       for (const topology of TOPOLOGIES) {
-        yield { mongoVersion, topology}
+        yield { mongoVersion, topology };
       }
     }
   }
@@ -80,8 +80,10 @@ function generateVersionTopologyMatrix() {
   return Array.from(_generate());
 }
 
-const BASE_TASKS = generateVersionTopologyMatrix().map(makeTask)
-const AUTH_DISABLED_TASKS = generateVersionTopologyMatrix().map((test) => makeTask({ ...test, auth: 'noauth', tags: ['noauth'] }))
+const BASE_TASKS = generateVersionTopologyMatrix().map(makeTask);
+const AUTH_DISABLED_TASKS = generateVersionTopologyMatrix().map(test =>
+  makeTask({ ...test, auth: 'noauth', tags: ['noauth'] })
+);
 
 BASE_TASKS.push({
   name: `test-latest-server-v1-api`,
@@ -323,7 +325,7 @@ TLS_VERSIONS.forEach(VERSION => {
         vars: {
           VERSION,
           SSL: 'ssl',
-          TOPOLOGY: 'server',
+          TOPOLOGY: 'server'
           // TODO: NODE-3891 - fix tests broken when AUTH enabled
           // AUTH: 'auth'
         }
@@ -702,10 +704,8 @@ const coverageTask = {
       func: 'download and merge coverage'
     }
   ],
-  depends_on: [
-    { name: '*', variant: '*', status: '*', patch_optional: true }
-  ]
-}
+  depends_on: [{ name: '*', variant: '*', status: '*', patch_optional: true }]
+};
 
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
@@ -728,14 +728,21 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
-  name: 'no-auth-tests',
+  name: 'ubuntu1804-no-auth-tests',
   display_name: 'No Auth Tests',
-  run_on: 'ubuntu1804-test',
+  run_on: DEFAULT_OS,
+  expansions: {
+    CLIENT_ENCRYPTION: true
+  },
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
-})
+});
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
-fileData.tasks = (fileData.tasks || []).concat(BASE_TASKS).concat(TASKS).concat(SINGLETON_TASKS).concat(AUTH_DISABLED_TASKS);
+fileData.tasks = (fileData.tasks || [])
+  .concat(BASE_TASKS)
+  .concat(TASKS)
+  .concat(SINGLETON_TASKS)
+  .concat(AUTH_DISABLED_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.dump(fileData, { lineWidth: 120 }), 'utf8');
