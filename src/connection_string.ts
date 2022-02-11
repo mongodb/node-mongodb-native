@@ -28,7 +28,7 @@ import {
   AnyOptions,
   Callback,
   DEFAULT_PK_FACTORY,
-  emitWarning,
+  emitWarningOnce,
   HostAddress,
   isRecord,
   makeClientMetadata,
@@ -187,7 +187,7 @@ function getBoolean(name: string, value: unknown): boolean {
   const valueString = String(value).toLowerCase();
   if (TRUTHS.has(valueString)) {
     if (valueString !== 'true') {
-      emitWarning(
+      emitWarningOnce(
         `deprecated value for ${name} : ${valueString} - please update to ${name} : true instead`
       );
     }
@@ -195,7 +195,7 @@ function getBoolean(name: string, value: unknown): boolean {
   }
   if (FALSEHOODS.has(valueString)) {
     if (valueString !== 'false') {
-      emitWarning(
+      emitWarningOnce(
         `deprecated value for ${name} : ${valueString} - please update to ${name} : false instead`
       );
     }
