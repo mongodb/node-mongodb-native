@@ -468,6 +468,10 @@ export function parseOptions(
     }
   }
 
+  if (mongoOptions.directConnection && mongoOptions.hosts.length !== 1) {
+    throw new MongoParseError('directConnection option requires exactly one host');
+  }
+
   if (
     !mongoOptions.proxyHost &&
     (mongoOptions.proxyPort || mongoOptions.proxyUsername || mongoOptions.proxyPassword)
