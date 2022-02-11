@@ -632,24 +632,15 @@ export const OPTIONS = {
   },
   authMechanismProperties: {
     target: 'credentials',
-    transform({ options, values: [value] }): MongoCredentials {
-      if (typeof value === 'string') {
-        const validKeys = [
-          'SERVICE_NAME',
-          'SERVICE_REALM',
-          'CANONICALIZE_HOST_NAME',
-          'AWS_SESSION_TOKEN'
-        ];
-
+    transform({ options, values: [optionValue] }): MongoCredentials {
+      if (typeof optionValue === 'string') {
         const mechanismProperties = Object.create(null);
 
-        for (const [key, _value] of entriesFromString(value)) {
-          if (validKeys.includes(key)) {
-            if (key === 'CANONICALIZE_HOST_NAME') {
-              mechanismProperties[key] = getBoolean(key, _value);
-            } else {
-              mechanismProperties[key] = _value;
-            }
+        for (const [key, value] of entriesFromString(optionValue)) {
+          try {
+            mechanismProperties[key] = getBoolean(key, value);
+          } catch {
+            mechanismProperties[key] = value;
           }
         }
 
@@ -657,10 +648,10 @@ export const OPTIONS = {
           mechanismProperties
         });
       }
-      if (!isRecord(value)) {
+      if (!isRecord(optionValue)) {
         throw new MongoParseError('AuthMechanismProperties must be an object');
       }
-      return MongoCredentials.merge(options.credentials, { mechanismProperties: value });
+      return MongoCredentials.merge(options.credentials, { mechanismProperties: optionValue });
     }
   },
   authSource: {
