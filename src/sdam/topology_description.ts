@@ -58,9 +58,6 @@ export class TopologyDescription {
   ) {
     options = options ?? {};
 
-    // TODO: consider assigning all these values to a temporary value `s` which
-    //       we use `Object.freeze` on, ensuring the internal state of this type
-    //       is immutable.
     this.type = topologyType ?? TopologyType.Unknown;
     this.servers = serverDescriptions ?? new Map();
     this.stale = false;

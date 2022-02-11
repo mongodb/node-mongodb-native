@@ -458,26 +458,25 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
   const actualEvents = normalizeCommandShapes(commandEvents);
   const rawExpectedEvents = spec.expectations.map(x => x.command_started_event);
   const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
-  expect(actualEvents).to.have.length(expectedEvents.length);
 
-  expectedEvents.forEach((expected, idx) => {
-    const actual = actualEvents[idx];
+  for (const [idx, expectedEvent] of expectedEvents.entries()) {
+    const actualEvent = actualEvents[idx];
 
-    if (expected.commandName != null) {
-      expect(actual.commandName).to.equal(expected.commandName);
+    if (typeof expectedEvent.commandName === 'string') {
+      expect(actualEvent).to.have.property('commandName', expectedEvent.commandName);
     }
 
-    if (expected.databaseName != null) {
-      expect(actual.databaseName).to.equal(expected.databaseName);
+    if (typeof expectedEvent.databaseName === 'string') {
+      expect(actualEvent).to.have.property('databaseName', expectedEvent.databaseName);
     }
 
-    const actualCommand = actual.command;
-    const expectedCommand = expected.command;
+    const actualCommand = actualEvent.command;
+    const expectedCommand = expectedEvent.command;
     if (expectedCommand.sort) {
-      // TODO: This is a workaround that works because all sorts in the specs
+      // TODO(NODE-3235): This is a workaround that works because all sorts in the specs
       // are objects with one key; ideally we'd want to adjust the spec definitions
       // to indicate whether order matters for any given key and set general
-      // expectations accordingly (see NODE-3235)
+      // expectations accordingly
       expect(Object.keys(expectedCommand.sort)).to.have.lengthOf(1);
       expect(actualCommand.sort).to.be.instanceOf(Map);
       expect(actualCommand.sort.size).to.equal(1);
@@ -487,7 +486,7 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
     }
 
     expect(actualCommand).withSessionData(savedSessionData).to.matchMongoSpec(expectedCommand);
-  });
+  }
 }
 
 function normalizeCommandShapes(commands) {
@@ -875,25 +874,23 @@ function convertCollectionOptions(options) {
   return result;
 }
 
-function testOperations(testData, operationContext, options) {
+async function testOperations(testData, operationContext, options) {
   options = options || { swallowOperationErrors: true };
-  return testData.operations.reduce((combined, operation) => {
-    return combined.then(() => {
-      const object = operation.object || 'collection';
-      if (object === 'collection') {
-        const db = operationContext.database;
-        const collectionName = operationContext.collectionName;
-        const collectionOptions = operation.collectionOptions || {};
 
-        operationContext[object] = db.collection(
-          collectionName,
-          convertCollectionOptions(collectionOptions)
-        );
-      }
+  for (const operation of testData.operations) {
+    const object = operation.object || 'collection';
+    if (object === 'collection') {
+      const db = operationContext.database;
+      const collectionName = operationContext.collectionName;
+      const collectionOptions = operation.collectionOptions || {};
 
-      return testOperation(operation, operationContext[object], operationContext, options);
-    });
-  }, Promise.resolve());
+      operationContext[object] = db.collection(
+        collectionName,
+        convertCollectionOptions(collectionOptions)
+      );
+    }
+    await testOperation(operation, operationContext[object], operationContext, options);
+  }
 }
 
 module.exports = {

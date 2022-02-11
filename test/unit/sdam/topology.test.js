@@ -218,7 +218,7 @@ describe('Topology (unit)', function () {
           let poolCleared = false;
           topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, (err, result) => {
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
@@ -235,7 +235,7 @@ describe('Topology (unit)', function () {
         if (isHello(doc)) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
-          request.reply({ ok: 0, message: LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE });
+          request.reply({ ok: 0, message: LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE.source });
         } else {
           request.reply({ ok: 1 });
         }
@@ -254,7 +254,7 @@ describe('Topology (unit)', function () {
           let poolCleared = false;
           topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, (err, result) => {
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
@@ -287,7 +287,7 @@ describe('Topology (unit)', function () {
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, (err, result) => {
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);

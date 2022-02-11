@@ -272,7 +272,7 @@ function validEmptyCmapEvent(
 
 export function matchesEvents(
   expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
-  actual: (CommandEvent & CmapEvent)[],
+  actual: CommandEvent[] | CmapEvent[],
   entities: EntitiesMap
 ): void {
   if (actual.length !== expected.length) {
@@ -300,7 +300,9 @@ export function matchesEvents(
       ]);
     } else if (expectedEvent.commandFailedEvent) {
       expect(actualEvent).to.be.instanceOf(CommandFailedEvent);
-      expect(actualEvent.commandName).to.equal(expectedEvent.commandFailedEvent.commandName);
+      expect(actualEvent)
+        .to.have.property('commandName')
+        .that.equals(expectedEvent.commandFailedEvent.commandName);
     } else if (expectedEvent.connectionClosedEvent) {
       expect(actualEvent).to.be.instanceOf(ConnectionClosedEvent);
       if (expectedEvent.connectionClosedEvent.hasServiceId) {

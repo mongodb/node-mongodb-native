@@ -14,6 +14,7 @@
   - [`MongoDriverError`](#MongoDriverError)
     - [`MongoAPIError`](#MongoAPIError)
     - [`MongoRuntimeError`](#MongoRuntimeError)
+      - [`MongoUnexpectedServerResponseError`](#MongoUnexpectedServerResponseError)
   - [`MongoNetworkError`](#MongoNetworkError)
   - [`MongoServerError`](#MongoServerError)
   - [`MongoSystemError`](#MongoSystemError)
@@ -38,7 +39,31 @@ There are four main error classes which stem from `MongoError`: `MongoDriverErro
 
 The base class from which all errors in the Node driver subclass.
 `MongoError` should **never** be be directly instantiated.
-![(MongoError hierarchy tree)](../charts/imgs/MongoError.svg)
+
+```mermaid
+graph TD
+    MongoError --- MongoDriverError
+    MongoError --- MongoNetworkError
+    MongoError --- MongoServerError
+    MongoError --- MongoSystemError
+    MongoDriverError --- MongoAPIError
+    MongoDriverError --- MongoRuntimeError
+
+linkStyle 0 stroke:#116149
+linkStyle 1 stroke:#116149
+linkStyle 2 stroke:#116149
+linkStyle 3 stroke:#116149
+linkStyle 4 stroke:#116149
+linkStyle 5 stroke:#116149
+
+style MongoError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoSystemError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoNetworkError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoServerError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoDriverError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoAPIError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoRuntimeError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+```
 
 Children of `MongoError` include:
 
@@ -90,6 +115,15 @@ This class should **never** be directly instantiated.
 | **MongoChangeStreamError**  | Thrown when an error is encountered when operating on a ChangeStream.                      |
 | **MongoGridFSStreamError**  | Thrown when an unexpected state is reached when operating on a GridFS Stream.              |
 | **MongoGridFSChunkError**   | Thrown when a malformed or invalid chunk is encountered when reading from a GridFS Stream. |
+| **MongoUnexpectedServerResponseError**   | Thrown when the driver receives a **parsable** response it did not expect from the server. |
+
+### MongoUnexpectedServerResponseError
+
+Intended for the scenario where the MongoDB returns an unexpected response in relation to some state the driver is in.
+This error should **NOT** represent a response that couldn't be parsed due to errors in protocol formatting.
+
+Ex. Server selection results in a feature detection change: this is not usually an unexpected response, but if while retrying an operation serverSelection returns a server with a lower wireVersion than expected, we can no longer proceed with the retry, so the response is unexpected in that case.
+
 
 ### `MongoNetworkError`
 

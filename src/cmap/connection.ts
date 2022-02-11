@@ -22,6 +22,7 @@ import {
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import type { HandleOperationResultCallback } from '../sdam/server';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   calculateDurationInMs,
@@ -33,7 +34,7 @@ import {
   now,
   uuidV4
 } from '../utils';
-import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
+import type { WriteConcern } from '../write_concern';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import {
   CommandFailedEvent,
@@ -109,11 +110,12 @@ export interface CommandOptions extends BSONSerializeOptions {
   noResponse?: boolean;
   omitReadPreference?: boolean;
 
-  // FIXME: NODE-2802
-  willRetryWrite?: boolean;
+  // TODO(NODE-2802): Currently the CommandOptions take a property willRetryWrite which is a hint from executeOperation that the txnNum should be applied to this command.
+  // Applying a session to a command should happen as part of command construction, most likely in the CommandOperation#executeCommand method,
+  // where we have access to the details we need to determine if a txnNum should also be applied.
+  willRetryWrite?: true;
 
-  // FIXME: NODE-2781
-  writeConcern?: WriteConcernOptions | WriteConcern | W;
+  writeConcern?: WriteConcern;
 }
 
 /** @internal */
@@ -381,7 +383,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     ns: MongoDBNamespace,
     cmd: Document,
     options: CommandOptions | undefined,
-    callback: Callback
+    callback: HandleOperationResultCallback
   ): void {
     if (!(ns instanceof MongoDBNamespace)) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
@@ -411,7 +413,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         clusterTime = session.clusterTime;
       }
 
-      const err = applySession(session, finalCmd, options as CommandOptions);
+      const err = applySession(session, finalCmd, options);
       if (err) {
         return callback(err);
       }
@@ -454,7 +456,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   /** @internal */
-  query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
+  query(
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: QueryOptions,
+    callback: HandleOperationResultCallback
+  ): void {
     const isExplain = cmd.$explain != null;
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const batchSize = options.batchSize || 0;
@@ -531,7 +538,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     ns: MongoDBNamespace,
     cursorId: Long,
     options: GetMoreOptions,
-    callback: Callback<Document>
+    callback: HandleOperationResultCallback
   ): void {
     const fullResult = !!options[kFullResult];
     const wireVersion = maxWireVersion(this);
@@ -588,7 +595,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     ns: MongoDBNamespace,
     cursorIds: Long[],
     options: CommandOptions,
-    callback: Callback
+    callback: HandleOperationResultCallback
   ): void {
     if (!cursorIds || !Array.isArray(cursorIds)) {
       // TODO(NODE-3483): Replace this with a MongoCommandError
@@ -617,7 +624,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       (err, response) => {
         if (err || !response) return callback(err);
         if (response.cursorNotFound) {
-          return callback(new MongoNetworkError('cursor killed or timed out'), null);
+          return callback(new MongoNetworkError('cursor killed or timed out'));
         }
 
         if (!Array.isArray(response.documents) || response.documents.length === 0) {

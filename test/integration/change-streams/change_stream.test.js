@@ -1422,6 +1422,7 @@ describe('Change Streams', function () {
     let client;
     let coll;
     let startAfter;
+    let changeStream;
 
     beforeEach(function (done) {
       const configuration = this.configuration;
@@ -1449,15 +1450,15 @@ describe('Change Streams', function () {
       });
     });
 
-    afterEach(function (done) {
-      client.close(done);
+    afterEach(async function () {
+      await changeStream.close();
+      await client.close();
     });
 
     it('should work with events', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.1.1' } },
       test: function (done) {
-        const changeStream = coll.watch([], { startAfter });
-        this.defer(() => changeStream.close());
+        changeStream = coll.watch([], { startAfter });
 
         coll.insertOne({ x: 2 }, { writeConcern: { w: 'majority', j: true } }, err => {
           expect(err).to.not.exist;

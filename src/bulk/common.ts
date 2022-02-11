@@ -1289,10 +1289,7 @@ export abstract class BulkOperationBase {
    * Handles the write error before executing commands
    * @internal
    */
-  handleWriteError(
-    callback: Callback<BulkWriteResult>,
-    writeResult: BulkWriteResult
-  ): boolean | undefined {
+  handleWriteError(callback: Callback<BulkWriteResult>, writeResult: BulkWriteResult): boolean {
     if (this.s.bulkResult.writeErrors.length > 0) {
       const msg = this.s.bulkResult.writeErrors[0].errmsg
         ? this.s.bulkResult.writeErrors[0].errmsg
@@ -1317,7 +1314,8 @@ export abstract class BulkOperationBase {
       callback(new MongoBulkWriteError(writeConcernError, writeResult));
       return true;
     }
-    return;
+
+    return false;
   }
 
   abstract addToOperationsList(

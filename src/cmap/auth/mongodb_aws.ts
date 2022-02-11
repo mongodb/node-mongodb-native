@@ -90,7 +90,9 @@ export class MongoDBAWS extends AuthProvider {
       };
 
       connection.command(ns(`${db}.$cmd`), saslStart, undefined, (err, res) => {
-        if (err) return callback(err);
+        if (err || !res) {
+          return callback(err);
+        }
 
         const serverResponse = BSON.deserialize(res.payload.buffer, bsonOptions) as {
           s: Binary;

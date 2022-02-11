@@ -17,6 +17,8 @@ chai.use(require('chai-subset'));
 const MAX_BSON_SIZE = 16777216;
 
 describe('Bulk', function () {
+  /** @type {MongoClient} */
+  let client;
   before(function () {
     return setupDatabase(this.configuration);
   });
@@ -94,6 +96,17 @@ describe('Bulk', function () {
           client.close(done);
         });
     });
+  });
+
+  beforeEach(async function () {
+    client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+      maxPoolSize: 1
+    });
+    await client.connect();
+  });
+
+  afterEach(async function () {
+    if (client) await client.close();
   });
 
   it('should correctly handle ordered single batch api write command error', {
@@ -490,61 +503,40 @@ describe('Bulk', function () {
     }
   });
 
-  it(
-    'should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates',
-    {
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+  it('should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates', async function () {
+    const db = client.db(this.configuration.db);
+    const col = db.collection('batch_write_ordered_ops_6');
+    // Add unique index on b field causing all updates to fail
+    await col.createIndex({ b: 1 }, { unique: true, sparse: false });
+    const batch = col.initializeOrderedBulkOp();
 
-      test: function (done) {
-        var self = this;
-        var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-          maxPoolSize: 1
-        });
+    // Add some operations to be executed in order
+    batch.insert({ a: 1 });
+    batch.find({ a: 1 }).update({ $set: { b: 1 } });
+    batch.insert({ b: 1 });
 
-        client.connect(function (err, client) {
-          var db = client.db(self.configuration.db);
-          var col = db.collection('batch_write_ordered_ops_6');
+    const thrownError = await batch.execute().catch(error => error);
+    expect(thrownError).to.instanceOf(Error);
 
-          // Add unique index on b field causing all updates to fail
-          col.createIndex({ b: 1 }, { unique: true, sparse: false }, function (err) {
-            expect(err).to.not.exist;
+    // Test basic settings
+    const result = thrownError.result;
+    expect(result).to.have.property('nInserted', 1);
+    expect(result).to.have.property('nMatched', 1);
+    expect(result)
+      .to.have.property('nModified')
+      .that.satisfies(v => v == null || v === 1);
+    expect(result).to.have.property('hasWriteErrors').that.is.a('function');
+    expect(result).to.have.property('getWriteErrorCount').that.is.a('function');
+    expect(result.hasWriteErrors()).to.be.true;
+    expect(result.getWriteErrorCount()).to.equal(1);
 
-            var batch = col.initializeOrderedBulkOp();
-
-            // Add some operations to be executed in order
-            batch.insert({ a: 1 });
-            batch.find({ a: 1 }).update({ $set: { b: 1 } });
-            batch.insert({ b: 1 });
-
-            // Execute the operations
-            batch.execute(function (err, result) {
-              expect(err).to.exist;
-              expect(result).to.not.exist;
-
-              // Test basic settings
-              result = err.result;
-              test.equal(1, result.nInserted);
-              test.equal(1, result.nMatched);
-              test.ok(1 === result.nModified || result.nModified == null);
-              test.equal(true, result.hasWriteErrors());
-              test.ok(1, result.getWriteErrorCount());
-
-              // Individual error checking
-              var error = result.getWriteErrorAt(0);
-              test.equal(2, error.index);
-              test.equal(11000, error.code);
-              test.ok(error.errmsg != null);
-              test.equal(1, error.getOperation().b);
-
-              client.close(done);
-            });
-          });
-        });
-      }
-    }
-  );
+    // Individual error checking
+    const writeError = result.getWriteErrorAt(0);
+    expect(writeError).to.have.property('index', 2);
+    expect(writeError).to.have.property('code', 11000);
+    expect(writeError).to.have.property('errmsg').that.is.a('string');
+    expect(writeError.getOperation()).to.have.property('b', 1);
+  });
 
   it(
     'should Correctly Execute Ordered Batch of Write Operations with upserts causing duplicate key errors on updates',

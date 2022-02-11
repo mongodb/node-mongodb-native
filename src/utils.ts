@@ -35,8 +35,6 @@ import { W, WriteConcern, WriteConcernOptions } from './write_concern';
  * @public
  */
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
-/** @public */
-export type CallbackWithType<E = AnyError, T0 = any> = (error?: E, result?: T0) => void;
 
 export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
@@ -1313,13 +1311,25 @@ export function enumToString(en: Record<string, unknown>): string {
  *
  * @internal
  */
-export function supportsRetryableWrites(server: Server): boolean {
-  return (
-    !!server.loadBalanced ||
-    (server.description.maxWireVersion >= 6 &&
-      !!server.description.logicalSessionTimeoutMinutes &&
-      server.description.type !== ServerType.Standalone)
-  );
+export function supportsRetryableWrites(server?: Server): boolean {
+  if (!server) {
+    return false;
+  }
+
+  if (server.loadBalanced) {
+    // Loadbalanced topologies will always support retry writes
+    return true;
+  }
+
+  if (server.description.logicalSessionTimeoutMinutes != null) {
+    // that supports sessions
+    if (server.description.type !== ServerType.Standalone) {
+      // and that is not a standalone
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function parsePackageVersion({ version }: { version: string }): {
