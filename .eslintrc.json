@@ -59,6 +59,17 @@
       "global"
     ],
     "@typescript-eslint/no-explicit-any": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": ".",
+            "message": "Please import directly from the relevant file instead."
+          }
+        ]
+      }
+    ],
     "no-restricted-syntax": [
       "error",
       {
