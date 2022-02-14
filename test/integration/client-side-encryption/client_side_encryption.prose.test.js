@@ -68,7 +68,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     beforeEach(function () {
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
 
-      // #. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
+      // 1. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
       this.client = this.configuration.newClient({}, { monitorCommands: true });
 
       this.commandStartedEvents = new APMEventCollector(this.client, 'commandStarted', {
@@ -93,10 +93,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       return (
         Promise.resolve()
           .then(() => this.client.connect())
-          // #. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
+          // 2. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
           .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
           .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
-          // #. Create the following:
+          // 3. Create the following:
           //   - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
           //   - A ``ClientEncryption`` object (referred to as ``client_encryption``)
           //   Configure both objects with ``aws`` and the ``local`` KMS providers as follows:
@@ -331,7 +331,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  // TODO(NODE-): We cannot implement these tests according to spec b/c the tests require a
+  // TODO(NODE-4000): We cannot implement these tests according to spec b/c the tests require a
   // connect-less client. So instead we are implementing the tests via APM,
   // and confirming that the externalClient is firing off keyVault requests during
   // encrypted operations
@@ -351,11 +351,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     beforeEach(function () {
       this.client = this.configuration.newClient();
 
-      // #. Create a MongoClient without encryption enabled (referred to as ``client``).
+      // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
       return (
         this.client
           .connect()
-          // #. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
+          // 2. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
           //    Insert the document `external/external-key.json <../external/external-key.json>`_ into ``keyvault.datakeys``.
           .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
           .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
@@ -406,7 +406,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 );
                 return this.externalClient.connect();
               })
-              // #. Create the following:
+              // 3. Create the following:
               //    - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
               //    - A ``ClientEncryption`` object (referred to as ``client_encryption``)
               //    Configure both objects with the ``local`` KMS providers as follows:
@@ -442,7 +442,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 return this.clientEncrypted.connect();
               })
               .then(() => {
-                // #. Use ``client_encrypted`` to insert the document ``{"encrypted": "test"}`` into ``db.coll``.
+                // 4. Use ``client_encrypted`` to insert the document ``{"encrypted": "test"}`` into ``db.coll``.
                 //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
                 this.commandStartedEvents.clear();
                 return this.clientEncrypted
@@ -486,7 +486,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 // );
               })
               .then(() => {
-                // #. Use ``client_encryption`` to explicitly encrypt the string ``"test"`` with key ID ``LOCALAAAAAAAAAAAAAAAAA==`` and deterministic algorithm.
+                // 5. Use ``client_encryption`` to explicitly encrypt the string ``"test"`` with key ID ``LOCALAAAAAAAAAAAAAAAAA==`` and deterministic algorithm.
                 //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
                 this.commandStartedEvents.clear();
                 return this.clientEncryption
@@ -564,19 +564,19 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       hasRunFirstTimeSetup = true;
       // First, perform the setup.
 
-      // #. Create a MongoClient without encryption enabled (referred to as ``client``).
+      // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
       this.client = this.configuration.newClient();
 
       await this.client
         .connect()
-        // #. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
+        // 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `limits/limits-schema.json <../limits/limits-schema.json>`_.
         .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
         .then(() => {
           return this.client.db(dataDbName).createCollection(dataCollName, {
             validator: { $jsonSchema: limitsSchema }
           });
         })
-        // #. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
+        // 3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the document `limits/limits-key.json <../limits/limits-key.json>`_
         .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
         .then(() => {
           return this.client
@@ -587,7 +587,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
 
     beforeEach(function () {
-      // #. Create a MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+      // 4. Create a MongoClient configured with auto encryption (referred to as ``client_encrypted``)
       //    Configure with the ``local`` KMS provider as follows:
       //    .. code:: javascript
       //       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
@@ -633,14 +633,14 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     }
 
     const testCases = [
-      // #. Insert ``{ "_id": "over_2mib_under_16mib", "unencrypted": <the string "a" repeated 2097152 times> }``.
+      // 1. Insert ``{ "_id": "over_2mib_under_16mib", "unencrypted": <the string "a" repeated 2097152 times> }``.
       //    Expect this to succeed since this is still under the ``maxBsonObjectSize`` limit.
       {
         description: 'should succeed for over_2mib_under_16mib',
         docs: () => [{ _id: 'over_2mib_under_16mib', unencrypted: repeatedChar('a', 2097152) }],
         expectedEvents: [{ commandName: 'insert' }]
       },
-      // #. Insert the document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_2mib", "unencrypted": < the string "a" repeated (2097152 - 2000) times > }``
+      // 2. Insert the document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_2mib", "unencrypted": < the string "a" repeated (2097152 - 2000) times > }``
       //    Note: limits-doc.json is a 1005 byte BSON document that encrypts to a ~10,000 byte document.
       //    Expect this to succeed since after encryption this still is below the normal maximum BSON document size.
       //    Note, before auto encryption this document is under the 2 MiB limit. After encryption it exceeds the 2 MiB limit, but does NOT exceed the 16 MiB limit.
@@ -654,7 +654,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         ],
         expectedEvents: [{ commandName: 'insert' }]
       },
-      // #. Bulk insert the following:
+      // 3. Bulk insert the following:
       //    - ``{ "_id": "over_2mib_1", "unencrypted": <the string "a" repeated (2097152) times> }``
       //    - ``{ "_id": "over_2mib_2", "unencrypted": <the string "a" repeated (2097152) times> }``
       //    Expect the bulk write to succeed and split after first doc (i.e. two inserts occur). This may be verified using `command monitoring <https://github.com/mongodb/specifications/tree/master/source/command-monitoring/command-monitoring.rst>`_.
@@ -666,7 +666,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         ],
         expectedEvents: [{ commandName: 'insert' }, { commandName: 'insert' }]
       },
-      // #. Bulk insert the following:
+      // 4. Bulk insert the following:
       //    - The document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_2mib_1", "unencrypted": < the string "a" repeated (2097152 - 2000) times > }``
       //    - The document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_2mib_2", "unencrypted": < the string "a" repeated (2097152 - 2000) times > }``
       //    Expect the bulk write to succeed and split after first doc (i.e. two inserts occur). This may be verified using `command monitoring <https://github.com/mongodb/specifications/tree/master/source/command-monitoring/command-monitoring.rst>`_.
@@ -684,14 +684,14 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         ],
         expectedEvents: [{ commandName: 'insert' }, { commandName: 'insert' }]
       },
-      // #. Insert ``{ "_id": "under_16mib", "unencrypted": <the string "a" repeated 16777216 - 2000 times>``.
+      // 5. Insert ``{ "_id": "under_16mib", "unencrypted": <the string "a" repeated 16777216 - 2000 times>``.
       //    Expect this to succeed since this is still (just) under the ``maxBsonObjectSize`` limit.
       {
         description: 'should succeed for under_16mib',
         docs: () => [{ _id: 'under_16mib', unencrypted: repeatedChar('a', 16777216 - 2000) }],
         expectedEvents: [{ commandName: 'insert' }]
       },
-      // #. Insert the document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_16mib", "unencrypted": < the string "a" repeated (16777216 - 2000) times > }``
+      // 6. Insert the document `limits/limits-doc.json <../limits/limits-doc.json>`_ concatenated with ``{ "_id": "encryption_exceeds_16mib", "unencrypted": < the string "a" repeated (16777216 - 2000) times > }``
       //    Expect this to fail since encryption results in a document exceeding the ``maxBsonObjectSize`` limit.
       {
         description: 'should fail for encryption_exceeds_16mib',
@@ -747,12 +747,14 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   });
 
   describe('Views are prohibited', function () {
-    before(function () {
+    beforeEach(function () {
       // First, perform the setup.
 
-      // #. Create a MongoClient without encryption enabled (referred to as ``client``).
+      // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
       this.client = this.configuration.newClient();
 
+      // 2. Using client, drop and create a view named db.view with an empty pipeline.
+      // E.g. using the command { "create": "view", "viewOn": "coll" }.
       return this.client
         .connect()
         .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
@@ -767,11 +769,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }, noop);
     });
 
-    after(function () {
+    afterEach(function () {
       return this.client && this.client.close();
     });
 
     beforeEach(function () {
+      // 3. Create a MongoClient configured with auto encryption (referred to as client_encrypted)
+      // Configure with the local KMS provider
       this.clientEncrypted = this.configuration.newClient(
         {},
         {
@@ -789,6 +793,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       return this.clientEncrypted && this.clientEncrypted.close();
     });
 
+    // 4. Using client_encrypted, attempt to insert a document into db.view.
+    // Expect an exception to be thrown containing the message: "cannot auto encrypt a view".
     it('should error when inserting into a view with autoEncryption', metadata, function () {
       return this.clientEncrypted
         .db(dataDbName)
@@ -868,7 +874,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     const testCases = [
       {
-        description: 'no custom endpoint',
+        description: '1. aws: no custom endpoint',
         provider: 'aws',
         masterKey: {
           region: 'us-east-1',
@@ -877,7 +883,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         succeed: true
       },
       {
-        description: 'custom endpoint',
+        description: '2. aws: custom endpoint',
         provider: 'aws',
         masterKey: {
           region: 'us-east-1',
@@ -887,7 +893,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         succeed: true
       },
       {
-        description: 'custom endpoint with port',
+        description: '3. aws: custom endpoint with port',
         provider: 'aws',
         masterKey: {
           region: 'us-east-1',
@@ -897,7 +903,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         succeed: true
       },
       {
-        description: 'custom endpoint with bad url',
+        description: '4. aws: custom endpoint with bad url',
         provider: 'aws',
         masterKey: {
           region: 'us-east-1',
@@ -913,7 +919,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       },
       {
-        description: 'custom endpoint that does not match region',
+        description: '5. aws: custom endpoint that does not match region',
         provider: 'aws',
         masterKey: {
           region: 'us-east-1',
@@ -930,7 +936,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       },
       {
-        description: 'custom endpoint with parse error',
+        description: '6. aws: custom endpoint with parse error',
         provider: 'aws',
         masterKey: {
           region: 'us-east-1',
@@ -947,7 +953,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       },
       {
-        description: 'azure custom endpoint',
+        description: '7. azure: custom endpoint',
         provider: 'azure',
         masterKey: {
           keyVaultEndpoint: 'key-vault-csfle.vault.azure.net',
@@ -957,7 +963,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         checkAgainstInvalid: true
       },
       {
-        description: 'gcp custom endpoint',
+        description: '8. gcp: custom endpoint',
         provider: 'gcp',
         masterKey: {
           projectId: 'devprod-drivers',
@@ -970,7 +976,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         checkAgainstInvalid: true
       },
       {
-        description: 'gcp invalid custom endpoint',
+        description: '9. gcp: invalid custom endpoint',
         provider: 'gcp',
         masterKey: {
           projectId: 'devprod-drivers',
@@ -989,7 +995,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
       },
       {
-        description: 'kmip no custom endpoint',
+        description: '10. kmip: no custom endpoint',
         provider: 'kmip',
         masterKey: {
           keyId: '1'
@@ -998,7 +1004,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         checkAgainstInvalid: true
       },
       {
-        description: 'kmip custom endpoint',
+        description: '11. kmip: custom endpoint',
         provider: 'kmip',
         masterKey: {
           keyId: '1',
@@ -1007,7 +1013,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         succeed: true
       },
       {
-        description: 'kmip invalid custom endpoint',
+        description: '12. kmip: invalid custom endpoint',
         provider: 'kmip',
         masterKey: {
           keyId: '1',
@@ -1025,12 +1031,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     testCases.forEach(testCase => {
       it(testCase.description, metadata, function () {
-        // 2. Call `client_encryption.createDataKey()` with "aws" as the provider and the following masterKey:
+        // Call `client_encryption.createDataKey()` with <provider> as the provider and the following masterKey:
         // .. code:: javascript
         //    {
         //      ...
         //    }
-        // Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
         const masterKey = testCase.masterKey;
 
         const promises = [];
