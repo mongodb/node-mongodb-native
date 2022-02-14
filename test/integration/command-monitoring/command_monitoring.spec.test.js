@@ -262,7 +262,7 @@ describe('Command Monitoring spec tests', function () {
                 test.description ===
                 'A successful find event with a getmore and the server kills the cursor'
               ) {
-                this.skipReason = 'TODO(NODE-3308): update spec file';
+                this.test.skipReason = 'TODO(NODE-3308): update spec file';
                 this.skip();
               }
 
