@@ -13,7 +13,7 @@ import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 /** @public */
-export const CanonicalizationProperties = Object.freeze({
+export const CanonicalizationValues = Object.freeze({
   on: true,
   off: false,
   none: 'none',
@@ -22,13 +22,13 @@ export const CanonicalizationProperties = Object.freeze({
 } as const);
 
 /** @public */
-export type CanonicalizationProperties =
-  typeof CanonicalizationProperties[keyof typeof CanonicalizationProperties];
+export type CanonicalizationValues =
+  typeof CanonicalizationValues[keyof typeof CanonicalizationValues];
 
 type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
   gssapiCanonicalizeHostName?: boolean;
-  CANONICALIZE_HOST_NAME?: CanonicalizationProperties;
+  CANONICALIZE_HOST_NAME?: CanonicalizationValues;
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
@@ -193,15 +193,12 @@ function performGssapiCanonicalizeHostName(
   callback: Callback<string>
 ): void {
   const mode = mechanismProperties.CANONICALIZE_HOST_NAME;
-  if (!mode || mode === CanonicalizationProperties.none) {
+  if (!mode || mode === CanonicalizationValues.none) {
     return callback(undefined, host);
   }
 
   // If forward and reverse or true
-  if (
-    mode === CanonicalizationProperties.on ||
-    mode === CanonicalizationProperties.forwardAndReverse
-  ) {
+  if (mode === CanonicalizationValues.on || mode === CanonicalizationValues.forwardAndReverse) {
     // Perform the lookup of the ip address.
     dns.lookup(host, (error, address) => {
       // No ip found, return the error.

@@ -88,34 +88,39 @@ describe('Kerberos', function () {
       }
     });
 
-    context('when the value is true', function () {
-      it('successfully authenticates', function (done) {
-        const client = new MongoClient(
-          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1`
-        );
-        client.connect(function (err, client) {
-          if (err) return done(err);
-          expect(dns.resolveCname).to.be.calledOnce;
-          verifyKerberosAuthentication(client, done);
+    for (const option of [true, 'forward']) {
+      context(`when the value is ${option}`, function () {
+        it('authenticates with a forward cname lookup', function (done) {
+          const client = new MongoClient(
+            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
+          );
+          client.connect(function (err, client) {
+            if (err) return done(err);
+            expect(dns.resolveCname).to.be.calledOnce;
+            verifyKerberosAuthentication(client, done);
+          });
         });
       });
-    });
+    }
 
-    context('when the value is forward', function () {
-      it('successfully authenticates', function (done) {
-        const client = new MongoClient(
-          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forward&maxPoolSize=1`
-        );
-        client.connect(function (err, client) {
-          if (err) return done(err);
-          expect(dns.resolveCname).to.be.calledOnce;
-          verifyKerberosAuthentication(client, done);
+    for (const option of [false, 'none']) {
+      context(`when the value is ${option}`, function () {
+        it('authenticates with no dns lookups', function (done) {
+          const client = new MongoClient(
+            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
+          );
+          client.connect(function (err, client) {
+            if (err) return done(err);
+            expect(dns.resolveCname).to.not.be.called;
+            expect(dns.lookup).to.not.be.called;
+            verifyKerberosAuthentication(client, done);
+          });
         });
       });
-    });
+    }
 
     context('when the value is forwardAndReverse', function () {
-      it('successfully authenticates', function (done) {
+      it('authenticates with a forward dns lookup and a reverse ptr lookup', function (done) {
         const client = new MongoClient(
           `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
         );
@@ -123,34 +128,6 @@ describe('Kerberos', function () {
           if (err) return done(err);
           expect(dns.lookup).to.be.called;
           expect(dns.resolvePtr).to.be.calledOnce;
-          verifyKerberosAuthentication(client, done);
-        });
-      });
-    });
-
-    context('when the value is false', function () {
-      it('successfully authenticates', function (done) {
-        const client = new MongoClient(
-          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1`
-        );
-        client.connect(function (err, client) {
-          if (err) return done(err);
-          expect(dns.resolveCname).to.not.be.calledOnce;
-          expect(dns.lookup).to.not.be.calledOnce;
-          verifyKerberosAuthentication(client, done);
-        });
-      });
-    });
-
-    context('when the value is none', function () {
-      it('successfully authenticates', function (done) {
-        const client = new MongoClient(
-          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:none&maxPoolSize=1`
-        );
-        client.connect(function (err, client) {
-          if (err) return done(err);
-          expect(dns.resolveCname).to.not.be.calledOnce;
-          expect(dns.lookup).to.not.be.calledOnce;
           verifyKerberosAuthentication(client, done);
         });
       });
