@@ -32,7 +32,7 @@ describe('URI option spec tests', function () {
     'Too high zlibCompressionLevel causes a warning',
     'Too low zlibCompressionLevel causes a warning',
 
-    // TODO(NODE-3917): Fix directConnection and loadBalanced option validation
+    // TODO(NODE-3989): Fix legacy boolean parsing
     'Invalid loadBalanced value'
   ];
 
