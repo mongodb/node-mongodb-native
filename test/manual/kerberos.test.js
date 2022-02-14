@@ -112,7 +112,8 @@ describe('Kerberos', function () {
           client.connect(function (err, client) {
             if (err) return done(err);
             expect(dns.resolveCname).to.not.be.called;
-            expect(dns.lookup).to.not.be.called;
+            // 2 calls when establishing connection - expect no third call.
+            expect(dns.lookup).to.be.calledTwice;
             verifyKerberosAuthentication(client, done);
           });
         });
@@ -126,7 +127,8 @@ describe('Kerberos', function () {
         );
         client.connect(function (err, client) {
           if (err) return done(err);
-          expect(dns.lookup).to.be.called;
+          // 2 calls to establish connection, 1 call in canonicalization.
+          expect(dns.lookup).to.be.calledThrice;
           expect(dns.resolvePtr).to.be.calledOnce;
           verifyKerberosAuthentication(client, done);
         });
