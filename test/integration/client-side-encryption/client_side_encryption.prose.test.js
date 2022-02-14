@@ -1,6 +1,7 @@
 'use strict';
 const BSON = require('bson');
 const chai = require('chai');
+const fs = require('fs');
 const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
 
 const expect = chai.expect;
@@ -806,10 +807,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  // TODO: move the call here? See separate file
   describe('Corpus Test', function () {
     it('runs in a separate suite', () => {
-      //
+      expect(() => fs.statSync('./client_side_encryption.prose.corpus.test.js')).not.to.throw();
     });
   });
 
@@ -1083,17 +1083,22 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
+  // TODO(NODE-2422): Implement bypass prose tests
   describe('Bypass spawning mongocryptd', () => {
-    it.skip('TBD', () => {}).skipReason =
-      'TODO(NODE-xxxx): Implement "Bypass spawning mongocryptd" tests';
+    it.skip('Via mongocryptdBypassSpawn', () => {}).skipReason =
+      'TODO(NODE-2422): Implement "Bypass spawning mongocryptd" tests';
+
+    it.skip('Via bypassAutoEncryption', () => {}).skipReason =
+      'TODO(NODE-2422): Implement "Bypass spawning mongocryptd" tests';
   });
 
   describe('Deadlock tests', () => {
     deadlockTests(metadata);
   });
 
+  // TODO(NODE-3151): Implement kms prose tests
   describe('KMS TLS Tests', () => {
-    it.skip('TBD', () => {}).skipReason = 'TODO(NODE-xxxx): Implement "KMS TLS Tests"';
+    it.skip('TBD', () => {}).skipReason = 'TODO(NODE-3151): Implement "KMS TLS Tests"';
   });
 
   /**
