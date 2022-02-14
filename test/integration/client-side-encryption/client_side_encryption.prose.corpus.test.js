@@ -8,7 +8,7 @@ const BSON = require('bson');
 const { EJSON } = require('bson');
 const { expect } = require('chai');
 
-describe('Client Side Encryption Corpus', function () {
+describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {
     requires: {
       mongodb: '>=4.2.0',
