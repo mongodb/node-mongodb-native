@@ -60,275 +60,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'base64'
   );
 
-  /**
-   * - Create client encryption no tls
-   * - Create client encryption with tls
-   * - Create client encryption expired
-   * - Create client encryption invalid hostname
-   */
-  context('KMS TLS Options Tests', metadata, function () {
-    let tlsCaOptions;
-    let clientNoTlsOptions;
-    let clientWithTlsOptions;
-    let clientWithTlsExpiredOptions;
-    let clientWithInvalidHostnameOptions;
-    let clientNoTls;
-    let clientWithTls;
-    let clientWithTlsExpired;
-    let clientWithInvalidHostname;
-    let clientEncryptionNoTls;
-    let clientEncryptionWithTls;
-    let clientEncryptionWithTlsExpired;
-    let clientEncryptionWithInvalidHostname;
-
-    before(function () {
-      tlsCaOptions = {
-        aws: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
-        },
-        azure: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
-        },
-        gcp: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
-        },
-        kmip: {
-          tlsCAFile: process.env.KMIP_TLS_CA_FILE
-        }
-      };
-      clientNoTlsOptions = {
-        keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
-        tlsOptions: tlsCaOptions
-      };
-      clientWithTlsOptions = {
-        keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
-        tlsOptions: {
-          aws: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          },
-          azure: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          },
-          gcp: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          },
-          kmip: {
-            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-          }
-        }
-      };
-      clientWithTlsExpiredOptions = {
-        keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
-        tlsOptions: tlsCaOptions
-      };
-      clientWithInvalidHostnameOptions = {
-        keyVaultNamespace,
-        kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
-        tlsOptions: tlsCaOptions
-      };
-      clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
-      clientWithTls = this.configuration.newClient({}, { autoEncryption: clientWithTlsOptions });
-      clientWithTlsExpired = this.configuration.newClient(
-        {},
-        { autoEncryption: clientWithTlsExpiredOptions }
-      );
-      clientWithInvalidHostname = this.configuration.newClient(
-        {},
-        { autoEncryption: clientWithInvalidHostnameOptions }
-      );
-      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-      clientEncryptionNoTls = new mongodbClientEncryption.ClientEncryption(clientNoTls, {
-        ...clientNoTlsOptions,
-        bson: BSON
-      });
-      clientEncryptionWithTls = new mongodbClientEncryption.ClientEncryption(clientWithTls, {
-        ...clientWithTlsOptions,
-        bson: BSON
-      });
-      clientEncryptionWithTlsExpired = new mongodbClientEncryption.ClientEncryption(
-        clientWithTlsExpired,
-        { ...clientWithTlsExpiredOptions, bson: BSON }
-      );
-      clientEncryptionWithInvalidHostname = new mongodbClientEncryption.ClientEncryption(
-        clientWithInvalidHostname,
-        { ...clientWithInvalidHostnameOptions, bson: BSON }
-      );
-    });
-
-    // Case 1.
-    context('Case 1: AWS', metadata, function () {
-      const masterKey = {
-        region: 'us-east-1',
-        key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-        endpoint: '127.0.0.1:8002'
-      };
-      const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:8000' };
-      const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:8001' };
-
-      it('fails with various invalid tls options', metadata, async function () {
-        try {
-          await clientNoTls.connect();
-          await clientEncryptionNoTls.createDataKey('aws', { masterKey });
-          expect.fail('it must fail with no tls');
-        } catch (e) {
-          expect(e.originalError.message).to.include('certificate required');
-          await clientNoTls.close();
-        }
-        try {
-          await clientWithTls.connect();
-          await clientEncryptionWithTls.createDataKey('aws', { masterKey });
-          expect.fail('it must fail to parse response');
-        } catch (e) {
-          await clientWithTls.close();
-          expect(e.message).to.include('parse error');
-        }
-        try {
-          await clientWithTlsExpired.connect();
-          await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKeyExpired });
-          expect.fail('it must fail with invalid certificate');
-        } catch (e) {
-          await clientWithTlsExpired.close();
-          expect(e.message).to.include('expected UTF-8 key');
-        }
-        try {
-          await clientWithInvalidHostname.connect();
-          await clientEncryptionWithInvalidHostname.createDataKey('aws', {
-            masterKeyInvalidHostname
-          });
-          expect.fail('it must fail with invalid hostnames');
-        } catch (e) {
-          await clientWithInvalidHostname.close();
-          expect(e.message).to.include('expected UTF-8 key');
-        }
-      });
-    });
-
-    // Case 2.
-    context('Case 2: Azure', metadata, function () {
-      const masterKey = {
-        keyVaultEndpoint: 'doesnotexist.local',
-        keyName: 'foo'
-      };
-
-      it('fails with various invalid tls options', metadata, async function () {
-        try {
-          await clientNoTls.connect();
-          await clientEncryptionNoTls.createDataKey('azure', { masterKey });
-          expect.fail('it must fail with no tls');
-        } catch (e) {
-          await clientNoTls.close();
-          expect(e.originalError.message).to.include('certificate required');
-        }
-        try {
-          await clientWithTls.connect();
-          await clientEncryptionWithTls.createDataKey('azure', { masterKey });
-          expect.fail('it must fail with invalid host');
-        } catch (e) {
-          await clientWithTls.close();
-          expect(e.message).to.include('HTTP status=404');
-        }
-        try {
-          await clientWithTlsExpired.connect();
-          await clientEncryptionWithTlsExpired.createDataKey('azure', { masterKey });
-          expect.fail('it must fail with expired certificates');
-        } catch (e) {
-          await clientWithTlsExpired.close();
-          expect(e.originalError.message).to.include('certificate has expired');
-        }
-        try {
-          await clientWithInvalidHostname.connect();
-          await clientEncryptionWithInvalidHostname.createDataKey('azure', { masterKey });
-          expect.fail('it must fail with invalid hostnames');
-        } catch (e) {
-          await clientWithInvalidHostname.close();
-          expect(e.originalError.message).to.include('does not match certificate');
-        }
-      });
-    });
-
-    // Case 3.
-    context('Case 3: GCP', metadata, function () {
-      const masterKey = {
-        projectId: 'foo',
-        location: 'bar',
-        keyRing: 'baz',
-        keyName: 'foo'
-      };
-
-      it('fails with various invalid tls options', metadata, async function () {
-        try {
-          await clientNoTls.connect();
-          await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
-          expect.fail('it must fail with no tls');
-        } catch (e) {
-          await clientNoTls.close();
-          expect(e.originalError.message).to.include('certificate required');
-        }
-        try {
-          await clientWithTls.connect();
-          await clientEncryptionWithTls.createDataKey('gcp', { masterKey });
-          expect.fail('it must fail with invalid host');
-        } catch (e) {
-          await clientWithTls.close();
-          expect(e.message).to.include('HTTP status=404');
-        }
-        try {
-          await clientWithTlsExpired.connect();
-          await clientEncryptionWithTlsExpired.createDataKey('gcp', { masterKey });
-          expect.fail('it must fail with expired certificates');
-        } catch (e) {
-          await clientWithTlsExpired.close();
-          expect(e.originalError.message).to.include('certificate has expired');
-        }
-        try {
-          await clientWithInvalidHostname.connect();
-          await clientEncryptionWithInvalidHostname.createDataKey('gcp', { masterKey });
-          expect.fail('it must fail with invalid hostnames');
-        } catch (e) {
-          await clientWithInvalidHostname.close();
-          expect(e.originalError.message).to.include('does not match certificate');
-        }
-      });
-    });
-
-    // Case 4.
-    context('Case 4: KMIP', metadata, function () {
-      it('fails with various invalid tls options', metadata, async function () {
-        try {
-          await clientNoTls.connect();
-          await clientEncryptionNoTls.createDataKey('kmip');
-          expect.fail('it must fail with no tls');
-        } catch (e) {
-          await clientNoTls.close();
-          expect(e.originalError.message).to.include('before secure TLS connection');
-        }
-        try {
-          await clientWithTlsExpired.connect();
-          await clientEncryptionWithTlsExpired.createDataKey('kmip');
-          expect.fail('it must fail with expired certificates');
-        } catch (e) {
-          await clientWithTlsExpired.close();
-          expect(e.originalError.message).to.include('certificate has expired');
-        }
-        try {
-          await clientWithInvalidHostname.connect();
-          await clientEncryptionWithInvalidHostname.createDataKey('kmip');
-          expect.fail('it must fail with invalid hostnames');
-        } catch (e) {
-          await clientWithInvalidHostname.close();
-          expect(e.originalError.message).to.include('does not match certificate');
-        }
-      });
-    });
-  });
-
   describe('Data key and double encryption', function () {
     // Data key and double encryption
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -599,274 +330,212 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  describe('Custom Endpoint', function () {
-    // Data keys created with AWS KMS may specify a custom endpoint to contact (instead of the default endpoint derived from the AWS region).
+  // TODO(NODE-): We cannot implement these tests according to spec b/c the tests require a
+  // connect-less client. So instead we are implementing the tests via APM,
+  // and confirming that the externalClient is firing off keyVault requests during
+  // encrypted operations
+  describe('External Key Vault Test', function () {
+    const fs = require('fs');
+    const path = require('path');
+    const { EJSON } = BSON;
+    function loadExternal(file) {
+      return EJSON.parse(
+        fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/external', file))
+      );
+    }
+
+    const externalKey = loadExternal('external-key.json');
+    const externalSchema = loadExternal('external-schema.json');
 
     beforeEach(function () {
-      // 1. Create a ``ClientEncryption`` object (referred to as ``client_encryption``)
-      //    Configure with ``aws`` KMS providers as follows:
-      //    .. code:: javascript
-      //       {
-      //           "aws": { <AWS credentials> }
-      //       }
-      //    Configure with ``keyVaultNamespace`` set to ``keyvault.datakeys``, and a default MongoClient as the ``keyVaultClient``.
       this.client = this.configuration.newClient();
 
-      const customKmsProviders = getKmsProviders();
-      customKmsProviders.azure.identityPlatformEndpoint = 'login.microsoftonline.com:443';
-      customKmsProviders.gcp.endpoint = 'oauth2.googleapis.com:443';
-
-      const invalidKmsProviders = getKmsProviders();
-      invalidKmsProviders.azure.identityPlatformEndpoint = 'doesnotexist.invalid:443';
-      invalidKmsProviders.gcp.endpoint = 'doesnotexist.invalid:443';
-      invalidKmsProviders.kmip.endpoint = 'doesnotexist.local:5698';
-
-      return this.client.connect().then(() => {
-        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-        this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
-          bson: BSON,
-          keyVaultNamespace,
-          kmsProviders: customKmsProviders,
-          tlsOptions: {
-            kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-            }
-          }
-        });
-
-        this.clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(this.client, {
-          keyVaultNamespace,
-          kmsProviders: invalidKmsProviders,
-          tlsOptions: {
-            kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-            }
-          }
-        });
-      });
+      // #. Create a MongoClient without encryption enabled (referred to as ``client``).
+      return (
+        this.client
+          .connect()
+          // #. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
+          //    Insert the document `external/external-key.json <../external/external-key.json>`_ into ``keyvault.datakeys``.
+          .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
+          .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
+          .then(() => {
+            return this.client
+              .db(keyVaultDbName)
+              .collection(keyVaultCollName)
+              .insertOne(externalKey, { writeConcern: { w: 'majority' } });
+          })
+      );
     });
 
     afterEach(function () {
-      return this.client && this.client.close();
+      if (this.commandStartedEvents) {
+        this.commandStartedEvents.teardown();
+        this.commandStartedEvents = undefined;
+      }
+      return Promise.resolve()
+        .then(() => this.externalClient && this.externalClient.close())
+        .then(() => this.clientEncrypted && this.clientEncrypted.close())
+        .then(() => this.client && this.client.close());
     });
 
-    const testCases = [
-      {
-        description: 'no custom endpoint',
-        provider: 'aws',
-        masterKey: {
-          region: 'us-east-1',
-          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
-        },
-        succeed: true
-      },
-      {
-        description: 'custom endpoint',
-        provider: 'aws',
-        masterKey: {
-          region: 'us-east-1',
-          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-          endpoint: 'kms.us-east-1.amazonaws.com'
-        },
-        succeed: true
-      },
-      {
-        description: 'custom endpoint with port',
-        provider: 'aws',
-        masterKey: {
-          region: 'us-east-1',
-          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-          endpoint: 'kms.us-east-1.amazonaws.com:443'
-        },
-        succeed: true
-      },
-      {
-        description: 'custom endpoint with bad url',
-        provider: 'aws',
-        masterKey: {
-          region: 'us-east-1',
-          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-          endpoint: 'kms.us-east-1.amazonaws.com:12345'
-        },
-        succeed: false,
-        errorValidator: err => {
-          expect(err)
-            .to.be.an.instanceOf(Error)
-            .and.to.have.property('message')
-            .that.matches(/KMS request failed/);
-        }
-      },
-      {
-        description: 'custom endpoint that does not match region',
-        provider: 'aws',
-        masterKey: {
-          region: 'us-east-1',
-          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-          endpoint: 'kms.us-east-2.amazonaws.com'
-        },
-        succeed: false,
-        errorValidator: err => {
-          //    Expect this to fail with an exception with a message containing the string: "us-east-1"
-          expect(err)
-            .to.be.an.instanceOf(Error)
-            .and.to.have.property('message')
-            .that.matches(/us-east-1/);
-        }
-      },
-      {
-        description: 'custom endpoint with parse error',
-        provider: 'aws',
-        masterKey: {
-          region: 'us-east-1',
-          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
-          endpoint: 'doesnotexist.invalid'
-        },
-        succeed: false,
-        errorValidator: err => {
-          // Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
-          expect(err)
-            .to.be.an.instanceOf(Error)
-            .and.to.have.property('message')
-            .that.matches(/KMS request failed/);
-        }
-      },
-      {
-        description: 'azure custom endpoint',
-        provider: 'azure',
-        masterKey: {
-          keyVaultEndpoint: 'key-vault-csfle.vault.azure.net',
-          keyName: 'key-name-csfle'
-        },
-        succeed: true,
-        checkAgainstInvalid: true
-      },
-      {
-        description: 'gcp custom endpoint',
-        provider: 'gcp',
-        masterKey: {
-          projectId: 'devprod-drivers',
-          location: 'global',
-          keyRing: 'key-ring-csfle',
-          keyName: 'key-name-csfle',
-          endpoint: 'cloudkms.googleapis.com:443'
-        },
-        succeed: true,
-        checkAgainstInvalid: true
-      },
-      {
-        description: 'gcp invalid custom endpoint',
-        provider: 'gcp',
-        masterKey: {
-          projectId: 'devprod-drivers',
-          location: 'global',
-          keyRing: 'key-ring-csfle',
-          keyName: 'key-name-csfle',
-          endpoint: 'doesnotexist.invalid:443'
-        },
-        succeed: false,
-        errorValidator: err => {
-          // Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
-          expect(err)
-            .to.be.an.instanceOf(Error)
-            .and.to.have.property('message')
-            .that.matches(/Invalid KMS response/);
-        }
-      },
-      {
-        description: 'kmip no custom endpoint',
-        provider: 'kmip',
-        masterKey: {
-          keyId: '1'
-        },
-        succeed: true,
-        checkAgainstInvalid: true
-      },
-      {
-        description: 'kmip custom endpoint',
-        provider: 'kmip',
-        masterKey: {
-          keyId: '1',
-          endpoint: 'localhost:5698'
-        },
-        succeed: true
-      },
-      {
-        description: 'kmip invalid custom endpoint',
-        provider: 'kmip',
-        masterKey: {
-          keyId: '1',
-          endpoint: 'doesnotexist.local:5698'
-        },
-        succeed: false,
-        errorValidator: err => {
-          expect(err)
-            .to.be.an.instanceOf(Error)
-            .and.to.have.property('message')
-            .that.matches(/KMS request failed/);
-        }
-      }
-    ];
+    function defineTest(withExternalKeyVault) {
+      it(
+        `should work ${withExternalKeyVault ? 'with' : 'without'} external key vault`,
+        metadata,
+        function () {
+          const ClientEncryption = this.configuration.mongodbClientEncryption.ClientEncryption;
+          return (
+            Promise.resolve()
+              .then(() => {
+                //    If ``withExternalKeyVault == true``, configure both objects with an external key vault client. The external client MUST connect to the same
+                //    MongoDB cluster that is being tested against, except it MUST use the username ``fake-user`` and password ``fake-pwd``.
+                this.externalClient = this.configuration.newClient(
+                  // this.configuration.url('fake-user', 'fake-pwd'),
+                  // TODO: Do this properly
+                  {},
+                  { monitorCommands: true }
+                );
 
-    testCases.forEach(testCase => {
-      it(testCase.description, metadata, function () {
-        // 2. Call `client_encryption.createDataKey()` with "aws" as the provider and the following masterKey:
-        // .. code:: javascript
-        //    {
-        //      ...
-        //    }
-        // Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
-        const masterKey = testCase.masterKey;
+                this.commandStartedEvents = new APMEventCollector(
+                  this.externalClient,
+                  'commandStarted',
+                  {
+                    include: ['find']
+                  }
+                );
+                return this.externalClient.connect();
+              })
+              // #. Create the following:
+              //    - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+              //    - A ``ClientEncryption`` object (referred to as ``client_encryption``)
+              //    Configure both objects with the ``local`` KMS providers as follows:
+              //    .. code:: javascript
+              //       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+              //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
+              //    Configure ``client_encrypted`` to use the schema `external/external-schema.json <../external/external-schema.json>`_  for ``db.coll`` by setting a schema map like: ``{ "db.coll": <contents of external-schema.json>}``
+              .then(() => {
+                const options = {
+                  bson: BSON,
+                  keyVaultNamespace,
+                  kmsProviders: getKmsProviders(LOCAL_KEY)
+                };
 
-        const promises = [];
-        promises.push(
-          this.clientEncryption.createDataKey(testCase.provider, { masterKey }).then(
-            keyId => {
-              if (!testCase.succeed) {
-                throw new Error('Expected test case to fail to create data key, but it succeeded');
-              }
-              return this.clientEncryption
-                .encrypt('test', {
-                  keyId,
-                  algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-                })
-                .then(encrypted => this.clientEncryption.decrypt(encrypted))
-                .then(result => {
-                  expect(result).to.equal('test');
-                });
-            },
-            err => {
-              if (testCase.succeed) {
-                throw err;
-              }
-              if (!testCase.errorValidator) {
-                throw new Error('Invalid Error validator');
-              }
+                if (withExternalKeyVault) {
+                  options.keyVaultClient = this.externalClient;
+                }
 
-              testCase.errorValidator(err);
-            }
-          )
-        );
-
-        if (testCase.checkAgainstInvalid) {
-          promises.push(
-            this.clientEncryptionInvalid.createDataKey(testCase.provider, { masterKey }).then(
-              () => {
-                throw new Error('Expected test case to fail to create data key, but it succeeded');
-              },
-              err => {
-                expect(err)
-                  .property('message')
-                  .to.match(/KMS request failed/);
-              }
-            )
+                this.clientEncryption = new ClientEncryption(
+                  this.client,
+                  Object.assign({}, options)
+                );
+                this.clientEncrypted = this.configuration.newClient(
+                  {},
+                  {
+                    autoEncryption: Object.assign({}, options, {
+                      schemaMap: {
+                        'db.coll': externalSchema
+                      }
+                    })
+                  }
+                );
+                return this.clientEncrypted.connect();
+              })
+              .then(() => {
+                // #. Use ``client_encrypted`` to insert the document ``{"encrypted": "test"}`` into ``db.coll``.
+                //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
+                this.commandStartedEvents.clear();
+                return this.clientEncrypted
+                  .db(dataDbName)
+                  .collection(dataCollName)
+                  .insertOne({ encrypted: 'test' })
+                  .then(() => {
+                    if (withExternalKeyVault) {
+                      expect(this.commandStartedEvents.events).to.containSubset([
+                        {
+                          commandName: 'find',
+                          databaseName: keyVaultDbName,
+                          command: { find: keyVaultCollName }
+                        }
+                      ]);
+                    } else {
+                      expect(this.commandStartedEvents.events).to.not.containSubset([
+                        {
+                          commandName: 'find',
+                          databaseName: keyVaultDbName,
+                          command: { find: keyVaultCollName }
+                        }
+                      ]);
+                    }
+                  });
+                // TODO: Do this in the spec-compliant way using bad auth credentials
+                // .then(
+                //   () => {
+                //     if (withExternalKeyVault) {
+                //       throw new Error(
+                //         'expected insert to fail with authentication error, but it passed'
+                //       );
+                //     }
+                //   },
+                //   err => {
+                //     if (!withExternalKeyVault) {
+                //       throw err;
+                //     }
+                //     expect(err).to.be.an.instanceOf(Error);
+                //   }
+                // );
+              })
+              .then(() => {
+                // #. Use ``client_encryption`` to explicitly encrypt the string ``"test"`` with key ID ``LOCALAAAAAAAAAAAAAAAAA==`` and deterministic algorithm.
+                //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
+                this.commandStartedEvents.clear();
+                return this.clientEncryption
+                  .encrypt('test', {
+                    keyId: externalKey._id,
+                    algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+                  })
+                  .then(() => {
+                    if (withExternalKeyVault) {
+                      expect(this.commandStartedEvents.events).to.containSubset([
+                        {
+                          commandName: 'find',
+                          databaseName: keyVaultDbName,
+                          command: { find: keyVaultCollName }
+                        }
+                      ]);
+                    } else {
+                      expect(this.commandStartedEvents.events).to.not.containSubset([
+                        {
+                          commandName: 'find',
+                          databaseName: keyVaultDbName,
+                          command: { find: keyVaultCollName }
+                        }
+                      ]);
+                    }
+                  });
+                // TODO: Do this in the spec-compliant way using bad auth credentials
+                // .then(
+                //   () => {
+                //     if (withExternalKeyVault) {
+                //       throw new Error(
+                //         'expected insert to fail with authentication error, but it passed'
+                //       );
+                //     }
+                //   },
+                //   err => {
+                //     if (!withExternalKeyVault) {
+                //       throw err;
+                //     }
+                //     expect(err).to.be.an.instanceOf(Error);
+                //   }
+                // );
+              })
           );
         }
-
-        return Promise.all(promises);
-      });
-    });
+      );
+    }
+    // Run the following tests twice, parameterized by a boolean ``withExternalKeyVault``.
+    defineTest(true);
+    defineTest(false);
   });
 
   describe('BSON size limits and batch splitting', function () {
@@ -1137,213 +806,562 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  // TODO: We cannot implement these tests according to spec b/c the tests require a
-  // connect-less client. So instead we are implementing the tests via APM,
-  // and confirming that the externalClient is firing off keyVault requests during
-  // encrypted operations
-  describe('External Key Vault', function () {
-    const fs = require('fs');
-    const path = require('path');
-    const { EJSON } = BSON;
-    function loadExternal(file) {
-      return EJSON.parse(
-        fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/external', file))
-      );
-    }
+  // TODO: move the call here? See separate file
+  describe('Corpus Test', function () {
+    it('runs in a separate suite', () => {
+      //
+    });
+  });
 
-    const externalKey = loadExternal('external-key.json');
-    const externalSchema = loadExternal('external-schema.json');
+  describe('Custom Endpoint Test', function () {
+    // Data keys created with AWS KMS may specify a custom endpoint to contact (instead of the default endpoint derived from the AWS region).
 
     beforeEach(function () {
+      // 1. Create a ``ClientEncryption`` object (referred to as ``client_encryption``)
+      //    Configure with ``aws`` KMS providers as follows:
+      //    .. code:: javascript
+      //       {
+      //           "aws": { <AWS credentials> }
+      //       }
+      //    Configure with ``keyVaultNamespace`` set to ``keyvault.datakeys``, and a default MongoClient as the ``keyVaultClient``.
       this.client = this.configuration.newClient();
 
-      // #. Create a MongoClient without encryption enabled (referred to as ``client``).
-      return (
-        this.client
-          .connect()
-          // #. Using ``client``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
-          //    Insert the document `external/external-key.json <../external/external-key.json>`_ into ``keyvault.datakeys``.
-          .then(() => dropCollection(this.client.db(dataDbName), dataCollName))
-          .then(() => dropCollection(this.client.db(keyVaultDbName), keyVaultCollName))
-          .then(() => {
-            return this.client
-              .db(keyVaultDbName)
-              .collection(keyVaultCollName)
-              .insertOne(externalKey, { writeConcern: { w: 'majority' } });
-          })
-      );
+      const customKmsProviders = getKmsProviders();
+      customKmsProviders.azure.identityPlatformEndpoint = 'login.microsoftonline.com:443';
+      customKmsProviders.gcp.endpoint = 'oauth2.googleapis.com:443';
+
+      const invalidKmsProviders = getKmsProviders();
+      invalidKmsProviders.azure.identityPlatformEndpoint = 'doesnotexist.invalid:443';
+      invalidKmsProviders.gcp.endpoint = 'doesnotexist.invalid:443';
+      invalidKmsProviders.kmip.endpoint = 'doesnotexist.local:5698';
+
+      return this.client.connect().then(() => {
+        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+        this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+          bson: BSON,
+          keyVaultNamespace,
+          kmsProviders: customKmsProviders,
+          tlsOptions: {
+            kmip: {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          }
+        });
+
+        this.clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(this.client, {
+          keyVaultNamespace,
+          kmsProviders: invalidKmsProviders,
+          tlsOptions: {
+            kmip: {
+              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+            }
+          }
+        });
+      });
     });
 
     afterEach(function () {
-      if (this.commandStartedEvents) {
-        this.commandStartedEvents.teardown();
-        this.commandStartedEvents = undefined;
-      }
-      return Promise.resolve()
-        .then(() => this.externalClient && this.externalClient.close())
-        .then(() => this.clientEncrypted && this.clientEncrypted.close())
-        .then(() => this.client && this.client.close());
+      return this.client && this.client.close();
     });
 
-    function defineTest(withExternalKeyVault) {
-      it(
-        `should work ${withExternalKeyVault ? 'with' : 'without'} external key vault`,
-        metadata,
-        function () {
-          const ClientEncryption = this.configuration.mongodbClientEncryption.ClientEncryption;
-          return (
-            Promise.resolve()
-              .then(() => {
-                //    If ``withExternalKeyVault == true``, configure both objects with an external key vault client. The external client MUST connect to the same
-                //    MongoDB cluster that is being tested against, except it MUST use the username ``fake-user`` and password ``fake-pwd``.
-                this.externalClient = this.configuration.newClient(
-                  // this.configuration.url('fake-user', 'fake-pwd'),
-                  // TODO: Do this properly
-                  {},
-                  { monitorCommands: true }
-                );
+    const testCases = [
+      {
+        description: 'no custom endpoint',
+        provider: 'aws',
+        masterKey: {
+          region: 'us-east-1',
+          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+        },
+        succeed: true
+      },
+      {
+        description: 'custom endpoint',
+        provider: 'aws',
+        masterKey: {
+          region: 'us-east-1',
+          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+          endpoint: 'kms.us-east-1.amazonaws.com'
+        },
+        succeed: true
+      },
+      {
+        description: 'custom endpoint with port',
+        provider: 'aws',
+        masterKey: {
+          region: 'us-east-1',
+          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+          endpoint: 'kms.us-east-1.amazonaws.com:443'
+        },
+        succeed: true
+      },
+      {
+        description: 'custom endpoint with bad url',
+        provider: 'aws',
+        masterKey: {
+          region: 'us-east-1',
+          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+          endpoint: 'kms.us-east-1.amazonaws.com:12345'
+        },
+        succeed: false,
+        errorValidator: err => {
+          expect(err)
+            .to.be.an.instanceOf(Error)
+            .and.to.have.property('message')
+            .that.matches(/KMS request failed/);
+        }
+      },
+      {
+        description: 'custom endpoint that does not match region',
+        provider: 'aws',
+        masterKey: {
+          region: 'us-east-1',
+          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+          endpoint: 'kms.us-east-2.amazonaws.com'
+        },
+        succeed: false,
+        errorValidator: err => {
+          //    Expect this to fail with an exception with a message containing the string: "us-east-1"
+          expect(err)
+            .to.be.an.instanceOf(Error)
+            .and.to.have.property('message')
+            .that.matches(/us-east-1/);
+        }
+      },
+      {
+        description: 'custom endpoint with parse error',
+        provider: 'aws',
+        masterKey: {
+          region: 'us-east-1',
+          key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+          endpoint: 'doesnotexist.invalid'
+        },
+        succeed: false,
+        errorValidator: err => {
+          // Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
+          expect(err)
+            .to.be.an.instanceOf(Error)
+            .and.to.have.property('message')
+            .that.matches(/KMS request failed/);
+        }
+      },
+      {
+        description: 'azure custom endpoint',
+        provider: 'azure',
+        masterKey: {
+          keyVaultEndpoint: 'key-vault-csfle.vault.azure.net',
+          keyName: 'key-name-csfle'
+        },
+        succeed: true,
+        checkAgainstInvalid: true
+      },
+      {
+        description: 'gcp custom endpoint',
+        provider: 'gcp',
+        masterKey: {
+          projectId: 'devprod-drivers',
+          location: 'global',
+          keyRing: 'key-ring-csfle',
+          keyName: 'key-name-csfle',
+          endpoint: 'cloudkms.googleapis.com:443'
+        },
+        succeed: true,
+        checkAgainstInvalid: true
+      },
+      {
+        description: 'gcp invalid custom endpoint',
+        provider: 'gcp',
+        masterKey: {
+          projectId: 'devprod-drivers',
+          location: 'global',
+          keyRing: 'key-ring-csfle',
+          keyName: 'key-name-csfle',
+          endpoint: 'doesnotexist.invalid:443'
+        },
+        succeed: false,
+        errorValidator: err => {
+          // Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
+          expect(err)
+            .to.be.an.instanceOf(Error)
+            .and.to.have.property('message')
+            .that.matches(/Invalid KMS response/);
+        }
+      },
+      {
+        description: 'kmip no custom endpoint',
+        provider: 'kmip',
+        masterKey: {
+          keyId: '1'
+        },
+        succeed: true,
+        checkAgainstInvalid: true
+      },
+      {
+        description: 'kmip custom endpoint',
+        provider: 'kmip',
+        masterKey: {
+          keyId: '1',
+          endpoint: 'localhost:5698'
+        },
+        succeed: true
+      },
+      {
+        description: 'kmip invalid custom endpoint',
+        provider: 'kmip',
+        masterKey: {
+          keyId: '1',
+          endpoint: 'doesnotexist.local:5698'
+        },
+        succeed: false,
+        errorValidator: err => {
+          expect(err)
+            .to.be.an.instanceOf(Error)
+            .and.to.have.property('message')
+            .that.matches(/KMS request failed/);
+        }
+      }
+    ];
 
-                this.commandStartedEvents = new APMEventCollector(
-                  this.externalClient,
-                  'commandStarted',
-                  {
-                    include: ['find']
-                  }
-                );
-                return this.externalClient.connect();
-              })
-              // #. Create the following:
-              //    - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
-              //    - A ``ClientEncryption`` object (referred to as ``client_encryption``)
-              //    Configure both objects with the ``local`` KMS providers as follows:
-              //    .. code:: javascript
-              //       { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
-              //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
-              //    Configure ``client_encrypted`` to use the schema `external/external-schema.json <../external/external-schema.json>`_  for ``db.coll`` by setting a schema map like: ``{ "db.coll": <contents of external-schema.json>}``
-              .then(() => {
-                const options = {
-                  bson: BSON,
-                  keyVaultNamespace,
-                  kmsProviders: getKmsProviders(LOCAL_KEY)
-                };
+    testCases.forEach(testCase => {
+      it(testCase.description, metadata, function () {
+        // 2. Call `client_encryption.createDataKey()` with "aws" as the provider and the following masterKey:
+        // .. code:: javascript
+        //    {
+        //      ...
+        //    }
+        // Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
+        const masterKey = testCase.masterKey;
 
-                if (withExternalKeyVault) {
-                  options.keyVaultClient = this.externalClient;
-                }
+        const promises = [];
+        promises.push(
+          this.clientEncryption.createDataKey(testCase.provider, { masterKey }).then(
+            keyId => {
+              if (!testCase.succeed) {
+                throw new Error('Expected test case to fail to create data key, but it succeeded');
+              }
+              return this.clientEncryption
+                .encrypt('test', {
+                  keyId,
+                  algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+                })
+                .then(encrypted => this.clientEncryption.decrypt(encrypted))
+                .then(result => {
+                  expect(result).to.equal('test');
+                });
+            },
+            err => {
+              if (testCase.succeed) {
+                throw err;
+              }
+              if (!testCase.errorValidator) {
+                throw new Error('Invalid Error validator');
+              }
 
-                this.clientEncryption = new ClientEncryption(
-                  this.client,
-                  Object.assign({}, options)
-                );
-                this.clientEncrypted = this.configuration.newClient(
-                  {},
-                  {
-                    autoEncryption: Object.assign({}, options, {
-                      schemaMap: {
-                        'db.coll': externalSchema
-                      }
-                    })
-                  }
-                );
-                return this.clientEncrypted.connect();
-              })
-              .then(() => {
-                // #. Use ``client_encrypted`` to insert the document ``{"encrypted": "test"}`` into ``db.coll``.
-                //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
-                this.commandStartedEvents.clear();
-                return this.clientEncrypted
-                  .db(dataDbName)
-                  .collection(dataCollName)
-                  .insertOne({ encrypted: 'test' })
-                  .then(() => {
-                    if (withExternalKeyVault) {
-                      expect(this.commandStartedEvents.events).to.containSubset([
-                        {
-                          commandName: 'find',
-                          databaseName: keyVaultDbName,
-                          command: { find: keyVaultCollName }
-                        }
-                      ]);
-                    } else {
-                      expect(this.commandStartedEvents.events).to.not.containSubset([
-                        {
-                          commandName: 'find',
-                          databaseName: keyVaultDbName,
-                          command: { find: keyVaultCollName }
-                        }
-                      ]);
-                    }
-                  });
-                // TODO: Do this in the spec-compliant way using bad auth credentials
-                // .then(
-                //   () => {
-                //     if (withExternalKeyVault) {
-                //       throw new Error(
-                //         'expected insert to fail with authentication error, but it passed'
-                //       );
-                //     }
-                //   },
-                //   err => {
-                //     if (!withExternalKeyVault) {
-                //       throw err;
-                //     }
-                //     expect(err).to.be.an.instanceOf(Error);
-                //   }
-                // );
-              })
-              .then(() => {
-                // #. Use ``client_encryption`` to explicitly encrypt the string ``"test"`` with key ID ``LOCALAAAAAAAAAAAAAAAAA==`` and deterministic algorithm.
-                //    If ``withExternalKeyVault == true``, expect an authentication exception to be thrown. Otherwise, expect the insert to succeed.
-                this.commandStartedEvents.clear();
-                return this.clientEncryption
-                  .encrypt('test', {
-                    keyId: externalKey._id,
-                    algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-                  })
-                  .then(() => {
-                    if (withExternalKeyVault) {
-                      expect(this.commandStartedEvents.events).to.containSubset([
-                        {
-                          commandName: 'find',
-                          databaseName: keyVaultDbName,
-                          command: { find: keyVaultCollName }
-                        }
-                      ]);
-                    } else {
-                      expect(this.commandStartedEvents.events).to.not.containSubset([
-                        {
-                          commandName: 'find',
-                          databaseName: keyVaultDbName,
-                          command: { find: keyVaultCollName }
-                        }
-                      ]);
-                    }
-                  });
-                // TODO: Do this in the spec-compliant way using bad auth credentials
-                // .then(
-                //   () => {
-                //     if (withExternalKeyVault) {
-                //       throw new Error(
-                //         'expected insert to fail with authentication error, but it passed'
-                //       );
-                //     }
-                //   },
-                //   err => {
-                //     if (!withExternalKeyVault) {
-                //       throw err;
-                //     }
-                //     expect(err).to.be.an.instanceOf(Error);
-                //   }
-                // );
-              })
+              testCase.errorValidator(err);
+            }
+          )
+        );
+
+        if (testCase.checkAgainstInvalid) {
+          promises.push(
+            this.clientEncryptionInvalid.createDataKey(testCase.provider, { masterKey }).then(
+              () => {
+                throw new Error('Expected test case to fail to create data key, but it succeeded');
+              },
+              err => {
+                expect(err)
+                  .property('message')
+                  .to.match(/KMS request failed/);
+              }
+            )
           );
         }
-      );
-    }
-    // Run the following tests twice, parameterized by a boolean ``withExternalKeyVault``.
-    defineTest(true);
-    defineTest(false);
+
+        return Promise.all(promises);
+      });
+    });
   });
 
-  deadlockTests(metadata);
+  describe('Bypass spawning mongocryptd', () => {
+    it.skip('TBD', () => {}).skipReason =
+      'TODO(NODE-xxxx): Implement "Bypass spawning mongocryptd" tests';
+  });
+
+  describe('Deadlock tests', () => {
+    deadlockTests(metadata);
+  });
+
+  describe('KMS TLS Tests', () => {
+    it.skip('TBD', () => {}).skipReason = 'TODO(NODE-xxxx): Implement "KMS TLS Tests"';
+  });
+
+  /**
+   * - Create client encryption no tls
+   * - Create client encryption with tls
+   * - Create client encryption expired
+   * - Create client encryption invalid hostname
+   */
+  context('KMS TLS Options Tests', metadata, function () {
+    let tlsCaOptions;
+    let clientNoTlsOptions;
+    let clientWithTlsOptions;
+    let clientWithTlsExpiredOptions;
+    let clientWithInvalidHostnameOptions;
+    let clientNoTls;
+    let clientWithTls;
+    let clientWithTlsExpired;
+    let clientWithInvalidHostname;
+    let clientEncryptionNoTls;
+    let clientEncryptionWithTls;
+    let clientEncryptionWithTlsExpired;
+    let clientEncryptionWithInvalidHostname;
+
+    before(function () {
+      tlsCaOptions = {
+        aws: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        azure: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        gcp: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        },
+        kmip: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE
+        }
+      };
+      clientNoTlsOptions = {
+        keyVaultNamespace,
+        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+        tlsOptions: tlsCaOptions
+      };
+      clientWithTlsOptions = {
+        keyVaultNamespace,
+        kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
+        tlsOptions: {
+          aws: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          azure: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          gcp: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          },
+          kmip: {
+            tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+            tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+          }
+        }
+      };
+      clientWithTlsExpiredOptions = {
+        keyVaultNamespace,
+        kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
+        tlsOptions: tlsCaOptions
+      };
+      clientWithInvalidHostnameOptions = {
+        keyVaultNamespace,
+        kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
+        tlsOptions: tlsCaOptions
+      };
+      clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
+      clientWithTls = this.configuration.newClient({}, { autoEncryption: clientWithTlsOptions });
+      clientWithTlsExpired = this.configuration.newClient(
+        {},
+        { autoEncryption: clientWithTlsExpiredOptions }
+      );
+      clientWithInvalidHostname = this.configuration.newClient(
+        {},
+        { autoEncryption: clientWithInvalidHostnameOptions }
+      );
+      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+      clientEncryptionNoTls = new mongodbClientEncryption.ClientEncryption(clientNoTls, {
+        ...clientNoTlsOptions,
+        bson: BSON
+      });
+      clientEncryptionWithTls = new mongodbClientEncryption.ClientEncryption(clientWithTls, {
+        ...clientWithTlsOptions,
+        bson: BSON
+      });
+      clientEncryptionWithTlsExpired = new mongodbClientEncryption.ClientEncryption(
+        clientWithTlsExpired,
+        { ...clientWithTlsExpiredOptions, bson: BSON }
+      );
+      clientEncryptionWithInvalidHostname = new mongodbClientEncryption.ClientEncryption(
+        clientWithInvalidHostname,
+        { ...clientWithInvalidHostnameOptions, bson: BSON }
+      );
+    });
+
+    // Case 1.
+    context('Case 1: AWS', metadata, function () {
+      const masterKey = {
+        region: 'us-east-1',
+        key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0',
+        endpoint: '127.0.0.1:8002'
+      };
+      const masterKeyExpired = { ...masterKey, endpoint: '127.0.0.1:8000' };
+      const masterKeyInvalidHostname = { ...masterKey, endpoint: '127.0.0.1:8001' };
+
+      it('fails with various invalid tls options', metadata, async function () {
+        try {
+          await clientNoTls.connect();
+          await clientEncryptionNoTls.createDataKey('aws', { masterKey });
+          expect.fail('it must fail with no tls');
+        } catch (e) {
+          expect(e.originalError.message).to.include('certificate required');
+          await clientNoTls.close();
+        }
+        try {
+          await clientWithTls.connect();
+          await clientEncryptionWithTls.createDataKey('aws', { masterKey });
+          expect.fail('it must fail to parse response');
+        } catch (e) {
+          await clientWithTls.close();
+          expect(e.message).to.include('parse error');
+        }
+        try {
+          await clientWithTlsExpired.connect();
+          await clientEncryptionWithTlsExpired.createDataKey('aws', { masterKeyExpired });
+          expect.fail('it must fail with invalid certificate');
+        } catch (e) {
+          await clientWithTlsExpired.close();
+          expect(e.message).to.include('expected UTF-8 key');
+        }
+        try {
+          await clientWithInvalidHostname.connect();
+          await clientEncryptionWithInvalidHostname.createDataKey('aws', {
+            masterKeyInvalidHostname
+          });
+          expect.fail('it must fail with invalid hostnames');
+        } catch (e) {
+          await clientWithInvalidHostname.close();
+          expect(e.message).to.include('expected UTF-8 key');
+        }
+      });
+    });
+
+    // Case 2.
+    context('Case 2: Azure', metadata, function () {
+      const masterKey = {
+        keyVaultEndpoint: 'doesnotexist.local',
+        keyName: 'foo'
+      };
+
+      it('fails with various invalid tls options', metadata, async function () {
+        try {
+          await clientNoTls.connect();
+          await clientEncryptionNoTls.createDataKey('azure', { masterKey });
+          expect.fail('it must fail with no tls');
+        } catch (e) {
+          await clientNoTls.close();
+          expect(e.originalError.message).to.include('certificate required');
+        }
+        try {
+          await clientWithTls.connect();
+          await clientEncryptionWithTls.createDataKey('azure', { masterKey });
+          expect.fail('it must fail with invalid host');
+        } catch (e) {
+          await clientWithTls.close();
+          expect(e.message).to.include('HTTP status=404');
+        }
+        try {
+          await clientWithTlsExpired.connect();
+          await clientEncryptionWithTlsExpired.createDataKey('azure', { masterKey });
+          expect.fail('it must fail with expired certificates');
+        } catch (e) {
+          await clientWithTlsExpired.close();
+          expect(e.originalError.message).to.include('certificate has expired');
+        }
+        try {
+          await clientWithInvalidHostname.connect();
+          await clientEncryptionWithInvalidHostname.createDataKey('azure', { masterKey });
+          expect.fail('it must fail with invalid hostnames');
+        } catch (e) {
+          await clientWithInvalidHostname.close();
+          expect(e.originalError.message).to.include('does not match certificate');
+        }
+      });
+    });
+
+    // Case 3.
+    context('Case 3: GCP', metadata, function () {
+      const masterKey = {
+        projectId: 'foo',
+        location: 'bar',
+        keyRing: 'baz',
+        keyName: 'foo'
+      };
+
+      it('fails with various invalid tls options', metadata, async function () {
+        try {
+          await clientNoTls.connect();
+          await clientEncryptionNoTls.createDataKey('gcp', { masterKey });
+          expect.fail('it must fail with no tls');
+        } catch (e) {
+          await clientNoTls.close();
+          expect(e.originalError.message).to.include('certificate required');
+        }
+        try {
+          await clientWithTls.connect();
+          await clientEncryptionWithTls.createDataKey('gcp', { masterKey });
+          expect.fail('it must fail with invalid host');
+        } catch (e) {
+          await clientWithTls.close();
+          expect(e.message).to.include('HTTP status=404');
+        }
+        try {
+          await clientWithTlsExpired.connect();
+          await clientEncryptionWithTlsExpired.createDataKey('gcp', { masterKey });
+          expect.fail('it must fail with expired certificates');
+        } catch (e) {
+          await clientWithTlsExpired.close();
+          expect(e.originalError.message).to.include('certificate has expired');
+        }
+        try {
+          await clientWithInvalidHostname.connect();
+          await clientEncryptionWithInvalidHostname.createDataKey('gcp', { masterKey });
+          expect.fail('it must fail with invalid hostnames');
+        } catch (e) {
+          await clientWithInvalidHostname.close();
+          expect(e.originalError.message).to.include('does not match certificate');
+        }
+      });
+    });
+
+    // Case 4.
+    context('Case 4: KMIP', metadata, function () {
+      it('fails with various invalid tls options', metadata, async function () {
+        try {
+          await clientNoTls.connect();
+          await clientEncryptionNoTls.createDataKey('kmip');
+          expect.fail('it must fail with no tls');
+        } catch (e) {
+          await clientNoTls.close();
+          expect(e.originalError.message).to.include('before secure TLS connection');
+        }
+        try {
+          await clientWithTlsExpired.connect();
+          await clientEncryptionWithTlsExpired.createDataKey('kmip');
+          expect.fail('it must fail with expired certificates');
+        } catch (e) {
+          await clientWithTlsExpired.close();
+          expect(e.originalError.message).to.include('certificate has expired');
+        }
+        try {
+          await clientWithInvalidHostname.connect();
+          await clientEncryptionWithInvalidHostname.createDataKey('kmip');
+          expect.fail('it must fail with invalid hostnames');
+        } catch (e) {
+          await clientWithInvalidHostname.close();
+          expect(e.originalError.message).to.include('does not match certificate');
+        }
+      });
+    });
+  });
 });
