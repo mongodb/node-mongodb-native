@@ -13,7 +13,7 @@ import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 /** @public */
-export const CanonicalizationValues = Object.freeze({
+export const GSSAPICanonicalizationValues = Object.freeze({
   on: true,
   off: false,
   none: 'none',
@@ -22,13 +22,13 @@ export const CanonicalizationValues = Object.freeze({
 } as const);
 
 /** @public */
-export type CanonicalizationValues =
-  typeof CanonicalizationValues[keyof typeof CanonicalizationValues];
+export type GSSAPICanonicalizationValues =
+  typeof GSSAPICanonicalizationValues[keyof typeof GSSAPICanonicalizationValues];
 
 type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
   gssapiCanonicalizeHostName?: boolean;
-  CANONICALIZE_HOST_NAME?: CanonicalizationValues;
+  CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValues;
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
@@ -106,7 +106,7 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
 
   const serviceName = mechanismProperties.SERVICE_NAME ?? 'mongodb';
 
-  performGssapiCanonicalizeHostName(
+  performGSSAPICanonicalizeHostName(
     hostAddress.host,
     mechanismProperties,
     (err?: Error | MongoError, host?: string) => {
@@ -187,18 +187,21 @@ function finalize(
   });
 }
 
-function performGssapiCanonicalizeHostName(
+function performGSSAPICanonicalizeHostName(
   host: string,
   mechanismProperties: MechanismProperties,
   callback: Callback<string>
 ): void {
   const mode = mechanismProperties.CANONICALIZE_HOST_NAME;
-  if (!mode || mode === CanonicalizationValues.none) {
+  if (!mode || mode === GSSAPICanonicalizationValues.none) {
     return callback(undefined, host);
   }
 
   // If forward and reverse or true
-  if (mode === CanonicalizationValues.on || mode === CanonicalizationValues.forwardAndReverse) {
+  if (
+    mode === GSSAPICanonicalizationValues.on ||
+    mode === GSSAPICanonicalizationValues.forwardAndReverse
+  ) {
     // Perform the lookup of the ip address.
     dns.lookup(host, (error, address) => {
       // No ip found, return the error.

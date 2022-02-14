@@ -176,7 +176,7 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
-export type { CanonicalizationValues } from './cmap/auth/gssapi';
+export type { GSSAPICanonicalizationValues } from './cmap/auth/gssapi';
 export type {
   AuthMechanismProperties,
   MongoCredentials,
