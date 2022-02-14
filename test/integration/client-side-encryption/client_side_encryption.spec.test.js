@@ -68,11 +68,7 @@ describe('Client Side Encryption', function () {
   });
 
   generateTopologyTests(testSuites, testContext, spec => {
-    return (
-      !spec.description.match(/type=symbol/) &&
-      !spec.description.match(/maxWireVersion < 8/) &&
-      !spec.description.match(/Count with deterministic encryption/) &&
-      !SKIPPED_TESTS.has(spec.description)
-    );
+    // TODO(NODE-xxxx): Investigate csfle test "operation fails with maxWireVersion < 8"
+    return !spec.description.match(/maxWireVersion < 8/) && !SKIPPED_TESTS.has(spec.description);
   });
 });
