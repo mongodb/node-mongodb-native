@@ -135,7 +135,8 @@
       "valid": false,
       "warning": false,
       "hosts": null,
-      "auth": null
+      "auth": null,
+      "options": {}
     },
     {
       "description": "directConnection=false",
@@ -180,6 +181,18 @@
       }
     },
     {
+      "description": "loadBalanced=true with directConnection=false",
+      "uri": "mongodb://example.com/?loadBalanced=true&directConnection=false",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "loadBalanced": true,
+        "directConnection": false
+      }
+    },
+    {
       "description": "loadBalanced=false",
       "uri": "mongodb://example.com/?loadBalanced=false",
       "valid": true,
@@ -211,15 +224,6 @@
     {
       "description": "loadBalanced=true with directConnection=true causes an error",
       "uri": "mongodb://example.com/?loadBalanced=true&directConnection=true",
-      "valid": false,
-      "warning": false,
-      "hosts": null,
-      "auth": null,
-      "options": {}
-    },
-    {
-      "description": "loadBalanced=true with directConnection=false causes an error",
-      "uri": "mongodb://example.com/?loadBalanced=true&directConnection=false",
       "valid": false,
       "warning": false,
       "hosts": null,

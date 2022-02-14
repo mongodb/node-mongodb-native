@@ -157,6 +157,19 @@ describe('Connection String', function () {
     expect(options.replicaSet).to.equal('123abc');
   });
 
+  context('when directionConnection is set', () => {
+    it('sets directConnection successfully when there is one host', () => {
+      const options = parseOptions('mongodb://localhost:27027/?directConnection=true');
+      expect(options.directConnection).to.be.true;
+    });
+
+    it('throws when directConnection is true and there is more than one host', () => {
+      expect(() =>
+        parseOptions('mongodb://localhost:27027,localhost:27018/?directConnection=true')
+      ).to.throw(MongoParseError, 'directConnection option requires exactly one host');
+    });
+  });
+
   context('when both tls and ssl options are provided', function () {
     context('when the options are provided in the URI', function () {
       context('when the options are equal', function () {

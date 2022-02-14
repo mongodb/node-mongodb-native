@@ -64,7 +64,7 @@ tests:
         hosts: ~
         auth: ~
         options: {}
-    - 
+    -
         description: "Invalid retryWrites causes a warning"
         uri: "mongodb://example.com/?retryWrites=invalid"
         valid: true
@@ -104,7 +104,6 @@ tests:
         hosts: ~
         auth: ~
         options: {}
-
     -
       description: directConnection=true
       uri: "mongodb://example.com/?directConnection=true"
@@ -121,6 +120,7 @@ tests:
       warning: false
       hosts: ~
       auth: ~
+      options: {}
     -
       description: directConnection=false
       uri: "mongodb://example.com/?directConnection=false"
@@ -157,6 +157,16 @@ tests:
       options:
           loadBalanced: true
     -
+      description: loadBalanced=true with directConnection=false
+      uri: "mongodb://example.com/?loadBalanced=true&directConnection=false"
+      valid: true
+      warning: false
+      hosts: ~
+      auth: ~
+      options:
+          loadBalanced: true
+          directConnection: false
+    -
       description: loadBalanced=false
       uri: "mongodb://example.com/?loadBalanced=false"
       valid: true
@@ -184,14 +194,6 @@ tests:
     -
       description: loadBalanced=true with directConnection=true causes an error
       uri: "mongodb://example.com/?loadBalanced=true&directConnection=true"
-      valid: false
-      warning: false
-      hosts: ~
-      auth: ~
-      options: {}
-    -
-      description: loadBalanced=true with directConnection=false causes an error
-      uri: "mongodb://example.com/?loadBalanced=true&directConnection=false"
       valid: false
       warning: false
       hosts: ~

@@ -7,10 +7,6 @@ describe('URI option spec tests', function () {
   const suites = loadSpecTests('uri-options');
 
   const skipTests = [
-    // TODO(NODE-3917): Fix directConnection and loadBalanced option validation
-    'directConnection=true with multiple seeds',
-    'loadBalanced=true with directConnection=false causes an error',
-
     // Skipped because this does not apply to Node
     'Valid options specific to single-threaded drivers are parsed correctly',
 
@@ -36,7 +32,7 @@ describe('URI option spec tests', function () {
     'Too high zlibCompressionLevel causes a warning',
     'Too low zlibCompressionLevel causes a warning',
 
-    // TODO(NODE-3917): Fix directConnection and loadBalanced option validation
+    // TODO(NODE-3989): Fix legacy boolean parsing
     'Invalid loadBalanced value'
   ];
 
