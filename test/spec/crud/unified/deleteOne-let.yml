@@ -46,6 +46,7 @@ tests:
                 deletes:
                   -
                     q: *filter
+                    limit: 1
                 let: *let0
     outcome:
       -
@@ -79,6 +80,7 @@ tests:
                 deletes:
                   -
                     q: *filter1
+                    limit: 1
                 let: *let1
     outcome:
       -

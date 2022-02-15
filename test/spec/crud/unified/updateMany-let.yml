@@ -55,6 +55,7 @@ tests:
                   -
                     q: *filter
                     u: *update
+                    multi: true
                 let: *let0
     outcome:
       -
@@ -92,6 +93,7 @@ tests:
                   -
                     q: *filter1
                     u: *update1
+                    multi: true
                 let: *let1
     outcome:
       -
