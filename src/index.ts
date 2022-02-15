@@ -86,6 +86,7 @@ export {
 
 // enums
 export { BatchType } from './bulk/common';
+export { GSSAPICanonicalizationValues } from './cmap/auth/gssapi';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
 export { CURSOR_FLAGS } from './cursor/abstract_cursor';
@@ -176,7 +177,6 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
-export type { GSSAPICanonicalizationValues } from './cmap/auth/gssapi';
 export type {
   AuthMechanismProperties,
   MongoCredentials,
