@@ -43,7 +43,7 @@ else
   # Get access to the AWS temporary credentials:
   echo "adding temporary AWS credentials to environment"
   # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
-  . "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
+  source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 fi
 
 npm install mongodb-client-encryption@">=2.0.0-beta.4"
