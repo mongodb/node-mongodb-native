@@ -10,6 +10,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 #       TEST_NPM_SCRIPT         Script to npm run. Defaults to "integration-coverage"
 #       SKIP_DEPS               Skip installing dependencies
 #       NO_EXIT                 Don't exit early from tests that leak resources
+#       TEST_CSFLE              Set to enforce running csfle tests
 
 AUTH=${AUTH:-noauth}
 MONGODB_URI=${MONGODB_URI:-}
@@ -54,6 +55,6 @@ export MULTI_MONGOS_LB_URI=${MULTI_MONGOS_LB_URI}
 export MONGODB_API_VERSION=${MONGODB_API_VERSION}
 export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
-export TEST_CSFLE=true
+export TEST_CSFLE=${TEST_CSFLE}
 # Do not add quotes, due to the way NO_EXIT is handled
 npm run ${TEST_NPM_SCRIPT}

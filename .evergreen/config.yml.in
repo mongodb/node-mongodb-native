@@ -163,7 +163,7 @@ functions:
           fi
 
           MONGODB_URI="${MONGODB_URI}" \
-          AUTH=${AUTH} SSL=${SSL} UNIFIED=${UNIFIED} \
+          AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
@@ -228,7 +228,6 @@ functions:
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} \
           SSL=${SSL} \
-          UNIFIED=${UNIFIED} \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
           NODE_VERSION=${NODE_VERSION} \
           SINGLE_MONGOS_LB_URI="${SINGLE_MONGOS_LB_URI}" \
@@ -629,7 +628,6 @@ functions:
         script: |
           ${PREPARE_SHELL}
 
-          UNIFIED=${UNIFIED} \
           CA_FILE="$DRIVERS_TOOLS/.evergreen/ocsp/rsa/ca.pem" \
           OCSP_TLS_SHOULD_SUCCEED="${OCSP_TLS_SHOULD_SUCCEED}" \
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ocsp-tests.sh
