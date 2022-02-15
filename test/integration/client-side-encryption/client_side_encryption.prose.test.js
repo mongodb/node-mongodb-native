@@ -2,6 +2,7 @@
 const BSON = require('bson');
 const chai = require('chai');
 const fs = require('fs');
+const path = require('path');
 const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
 
 const expect = chai.expect;
@@ -815,7 +816,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
   describe('Corpus Test', function () {
     it('runs in a separate suite', () => {
-      expect(() => fs.statSync('./client_side_encryption.prose.corpus.test.js')).not.to.throw();
+      expect(() =>
+        fs.statSync(path.resolve(__dirname, './client_side_encryption.prose.corpus.test.js'))
+      ).not.to.throw();
     });
   });
 
