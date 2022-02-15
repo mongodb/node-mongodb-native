@@ -199,6 +199,60 @@ describe('Kerberos', function () {
           });
         });
       });
+
+      context('when the cname lookup fails', function () {
+        const resolveStub = (address, callback) => {
+          callback(new Error('not found'), null);
+        };
+
+        beforeEach(function () {
+          dns.resolvePtr.restore();
+          sinon.stub(dns, 'resolveCname').callsFake(resolveStub);
+        });
+
+        it('authenticates with a fallback host name', function (done) {
+          const client = new MongoClient(
+            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
+          );
+          client.connect(function (err, client) {
+            if (err) return done(err);
+            // 2 calls to establish connection, 1 call in canonicalization.
+            expect(dns.lookup).to.be.calledThrice;
+            // This fails.
+            expect(dns.resolvePtr).to.be.calledOnce;
+            // Expect the fallback to be called.
+            expect(dns.resolveCname).to.be.calledOnce;
+            verifyKerberosAuthentication(client, done);
+          });
+        });
+      });
+
+      context('when the cname lookup is empty', function () {
+        const resolveStub = (address, callback) => {
+          callback(null, []);
+        };
+
+        beforeEach(function () {
+          dns.resolvePtr.restore();
+          sinon.stub(dns, 'resolveCname').callsFake(resolveStub);
+        });
+
+        it('authenticates with a fallback host name', function (done) {
+          const client = new MongoClient(
+            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
+          );
+          client.connect(function (err, client) {
+            if (err) return done(err);
+            // 2 calls to establish connection, 1 call in canonicalization.
+            expect(dns.lookup).to.be.calledThrice;
+            // This fails.
+            expect(dns.resolvePtr).to.be.calledOnce;
+            // Expect the fallback to be called.
+            expect(dns.resolveCname).to.be.calledOnce;
+            verifyKerberosAuthentication(client, done);
+          });
+        });
+      });
     });
   });
 
