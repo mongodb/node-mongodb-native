@@ -54,7 +54,12 @@ const skippedAuthTests = [
   'Insert a document with auto encryption using KMIP KMS provider'
 ];
 
-const SKIPPED_TESTS = new Set(isAuthEnabled ? skippedAuthTests : []);
+// TODO(NODE-4006): Investigate csfle test "operation fails with maxWireVersion < 8"
+const skippedMaxWireVersionTest = 'operation fails with maxWireVersion < 8';
+
+const SKIPPED_TESTS = new Set(
+  isAuthEnabled ? skippedAuthTests.concat(skippedMaxWireVersionTest) : [skippedMaxWireVersionTest]
+);
 
 describe('Client Side Encryption', function () {
   const testContext = new TestRunnerContext();
@@ -68,7 +73,6 @@ describe('Client Side Encryption', function () {
   });
 
   generateTopologyTests(testSuites, testContext, spec => {
-    // TODO(NODE-xxxx): Investigate csfle test "operation fails with maxWireVersion < 8"
-    return !spec.description.match(/maxWireVersion < 8/) && !SKIPPED_TESTS.has(spec.description);
+    return !SKIPPED_TESTS.has(spec.description);
   });
 });
