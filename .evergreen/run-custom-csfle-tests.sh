@@ -65,7 +65,7 @@ cp -R ../csfle-deps-tmp/libmongocrypt/bindings/node node_modules/mongodb-client-
 export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
 export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
-export CI=true
+export TEST_CSFLE=true
 set +o errexit # We want to run both test suites even if the first fails
 npm run check:csfle
 DRIVER_CSFLE_TEST_RESULT=$?
