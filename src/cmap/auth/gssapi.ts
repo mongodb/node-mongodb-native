@@ -13,7 +13,7 @@ import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 /** @public */
-export const GSSAPICanonicalizationValues = Object.freeze({
+export const GSSAPICanonicalizationValue = Object.freeze({
   on: true,
   off: false,
   none: 'none',
@@ -22,13 +22,13 @@ export const GSSAPICanonicalizationValues = Object.freeze({
 } as const);
 
 /** @public */
-export type GSSAPICanonicalizationValues =
-  typeof GSSAPICanonicalizationValues[keyof typeof GSSAPICanonicalizationValues];
+export type GSSAPICanonicalizationValue =
+  typeof GSSAPICanonicalizationValue[keyof typeof GSSAPICanonicalizationValue];
 
 type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
   gssapiCanonicalizeHostName?: boolean;
-  CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValues;
+  CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
@@ -193,14 +193,14 @@ function performGSSAPICanonicalizeHostName(
   callback: Callback<string>
 ): void {
   const mode = mechanismProperties.CANONICALIZE_HOST_NAME;
-  if (!mode || mode === GSSAPICanonicalizationValues.none) {
+  if (!mode || mode === GSSAPICanonicalizationValue.none) {
     return callback(undefined, host);
   }
 
   // If forward and reverse or true
   if (
-    mode === GSSAPICanonicalizationValues.on ||
-    mode === GSSAPICanonicalizationValues.forwardAndReverse
+    mode === GSSAPICanonicalizationValue.on ||
+    mode === GSSAPICanonicalizationValue.forwardAndReverse
   ) {
     // Perform the lookup of the ip address.
     dns.lookup(host, (error, address) => {

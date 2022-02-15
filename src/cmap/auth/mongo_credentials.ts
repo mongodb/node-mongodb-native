@@ -2,7 +2,7 @@
 import type { Document } from '../../bson';
 import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
 import { emitWarningOnce } from '../../utils';
-import { GSSAPICanonicalizationValues } from './gssapi';
+import { GSSAPICanonicalizationValue } from './gssapi';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -31,7 +31,7 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
-  CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValues;
+  CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
 }
 
@@ -170,7 +170,7 @@ export class MongoCredentials {
     }
 
     const canonicalization = this.mechanismProperties.CANONICALIZE_HOST_NAME ?? false;
-    if (!Object.values(GSSAPICanonicalizationValues).includes(canonicalization)) {
+    if (!Object.values(GSSAPICanonicalizationValue).includes(canonicalization)) {
       throw new MongoAPIError(`Invalid CANONICALIZE_HOST_NAME value: ${canonicalization}`);
     }
   }
