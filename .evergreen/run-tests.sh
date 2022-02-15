@@ -55,4 +55,5 @@ export MONGODB_API_VERSION=${MONGODB_API_VERSION}
 export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
 export TEST_CSFLE=true
-npm run "${TEST_NPM_SCRIPT}"
+# Do not add quotes, due to the way NO_EXIT is handled
+npm run ${TEST_NPM_SCRIPT}
