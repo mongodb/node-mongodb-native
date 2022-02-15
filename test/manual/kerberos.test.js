@@ -42,6 +42,7 @@ describe('Kerberos', function () {
   }
   let krb5Uri = process.env.MONGODB_URI;
   const parts = krb5Uri.split('@', 2);
+  const host = parts[1].split('/')[0];
 
   if (!process.env.KRB5_PRINCIPAL) {
     console.error('skipping Kerberos tests, KRB5_PRINCIPAL environment variable is not defined');
@@ -122,6 +123,15 @@ describe('Kerberos', function () {
 
     context('when the value is forwardAndReverse', function () {
       context('when the reverse lookup succeeds', function () {
+        const resolveStub = (address, callback) => {
+          callback(null, [host]);
+        };
+
+        beforeEach(function () {
+          dns.resolvePtr.restore();
+          sinon.stub(dns, 'resolvePtr').callsFake(resolveStub);
+        });
+
         it('authenticates with a forward dns lookup and a reverse ptr lookup', function (done) {
           const client = new MongoClient(
             `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
@@ -131,6 +141,33 @@ describe('Kerberos', function () {
             // 2 calls to establish connection, 1 call in canonicalization.
             expect(dns.lookup).to.be.calledThrice;
             expect(dns.resolvePtr).to.be.calledOnce;
+            verifyKerberosAuthentication(client, done);
+          });
+        });
+      });
+
+      context('when the reverse lookup is empty', function () {
+        const resolveStub = (address, callback) => {
+          callback(null, []);
+        };
+
+        beforeEach(function () {
+          dns.resolvePtr.restore();
+          sinon.stub(dns, 'resolvePtr').callsFake(resolveStub);
+        });
+
+        it('authenticates with a fallback cname lookup', function (done) {
+          const client = new MongoClient(
+            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
+          );
+          client.connect(function (err, client) {
+            if (err) return done(err);
+            // 2 calls to establish connection, 1 call in canonicalization.
+            expect(dns.lookup).to.be.calledThrice;
+            // This fails.
+            expect(dns.resolvePtr).to.be.calledOnce;
+            // Expect the fallback to be called.
+            expect(dns.resolveCname).to.be.calledOnce;
             verifyKerberosAuthentication(client, done);
           });
         });
