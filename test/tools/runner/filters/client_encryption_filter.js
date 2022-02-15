@@ -48,7 +48,7 @@ class ClientSideEncryptionFilter {
     }
 
     // TODO(NODE-3401): unskip csfle tests on windows
-    if (process.env.CI && !this.enabled && process.platform !== 'win32') {
+    if (process.env.TEST_CSFLE && !this.enabled && process.platform !== 'win32') {
       throw new Error('Expected CSFLE to be enabled in the CI');
     }
 
