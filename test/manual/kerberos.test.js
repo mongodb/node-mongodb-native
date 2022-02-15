@@ -166,8 +166,8 @@ describe('Kerberos', function () {
             expect(dns.lookup).to.be.calledThrice;
             // This fails.
             expect(dns.resolvePtr).to.be.calledOnce;
-            // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnce;
+            // Expect the fallback to the host name.
+            expect(dns.resolveCname).to.not.be.called;
             verifyKerberosAuthentication(client, done);
           });
         });
