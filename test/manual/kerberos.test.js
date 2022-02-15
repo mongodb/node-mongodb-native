@@ -206,7 +206,7 @@ describe('Kerberos', function () {
         };
 
         beforeEach(function () {
-          dns.resolvePtr.restore();
+          dns.resolveCname.restore();
           sinon.stub(dns, 'resolveCname').callsFake(resolveStub);
         });
 
@@ -233,7 +233,7 @@ describe('Kerberos', function () {
         };
 
         beforeEach(function () {
-          dns.resolvePtr.restore();
+          dns.resolveCname.restore();
           sinon.stub(dns, 'resolveCname').callsFake(resolveStub);
         });
 
