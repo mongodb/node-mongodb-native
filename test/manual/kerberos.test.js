@@ -75,7 +75,7 @@ describe('Kerberos', function () {
     );
     client.connect(function (err, client) {
       if (err) return done(err);
-      expect(dns.resolveCname).to.be.calledOnce;
+      expect(dns.resolveCname).to.be.calledOnceWith(host);
       verifyKerberosAuthentication(client, done);
     });
   });
@@ -97,7 +97,7 @@ describe('Kerberos', function () {
           );
           client.connect(function (err, client) {
             if (err) return done(err);
-            expect(dns.resolveCname).to.be.calledOnce;
+            expect(dns.resolveCname).to.be.calledOnceWith(host);
             verifyKerberosAuthentication(client, done);
           });
         });
@@ -194,7 +194,7 @@ describe('Kerberos', function () {
             // This fails.
             expect(dns.resolvePtr).to.be.calledOnce;
             // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnce;
+            expect(dns.resolveCname).to.be.calledOnceWith(host);
             verifyKerberosAuthentication(client, done);
           });
         });
@@ -221,7 +221,7 @@ describe('Kerberos', function () {
             // This fails.
             expect(dns.resolvePtr).to.be.calledOnce;
             // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnce;
+            expect(dns.resolveCname).to.be.calledOnceWith(host);
             verifyKerberosAuthentication(client, done);
           });
         });
@@ -248,7 +248,7 @@ describe('Kerberos', function () {
             // This fails.
             expect(dns.resolvePtr).to.be.calledOnce;
             // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnce;
+            expect(dns.resolveCname).to.be.calledOnceWith(host);
             verifyKerberosAuthentication(client, done);
           });
         });
