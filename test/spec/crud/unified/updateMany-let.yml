@@ -36,7 +36,7 @@ tests:
             $expr:
               $eq: [ "$name", "$$name" ]
           update: &update
-            $set: {x: "$$x", y: "$$y" }
+            - $set: {x: "$$x", y: "$$y" }
           let: &let0
             name: name
             x: foo
@@ -77,7 +77,7 @@ tests:
           filter: &filter1
             _id: 1
           update: &update1
-            $set: {x: "$$x"}
+            - $set: {x: "$$x"}
           let: &let1
             x: foo
         expectError:
