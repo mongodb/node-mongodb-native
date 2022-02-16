@@ -40,9 +40,11 @@ const skippedAuthTests = [
   'type=binData',
   'type=int',
   'type=objectId',
+  'type=symbol',
   'replaceOne with encryption',
   'Insert with encryption on a missing key',
   'A local schema should override',
+  'Count with deterministic encryption',
   'Insert a document with auto encryption using local KMS provider',
   'Insert with encryption using key alt name',
   'insertMany with encryption',
@@ -52,41 +54,25 @@ const skippedAuthTests = [
   'Insert a document with auto encryption using KMIP KMS provider'
 ];
 
-const SKIPPED_TESTS = new Set(isAuthEnabled ? skippedAuthTests : []);
+// TODO(NODE-4006): Investigate csfle test "operation fails with maxWireVersion < 8"
+const skippedMaxWireVersionTest = 'operation fails with maxWireVersion < 8';
+
+const SKIPPED_TESTS = new Set(
+  isAuthEnabled ? skippedAuthTests.concat(skippedMaxWireVersionTest) : [skippedMaxWireVersionTest]
+);
 
 describe('Client Side Encryption', function () {
-  // TODO: Replace this with using the filter once the filter works on describe blocks
-  const skipTests = process.env.CSFLE_KMS_PROVIDERS == null;
-  if (skipTests) {
-    // console.log('skipping Client Side Encryption Spec tests due to lack of AWS credentials');
-    return;
-  }
-
-  try {
-    require('mongodb-client-encryption');
-  } catch (e) {
-    console.error(
-      'skipping Client Side Encryption Spec tests due to inability to load mongodb-client-encryption'
-    );
-    return;
-  }
-
   const testContext = new TestRunnerContext();
+  testContext.requiresCSFLE = true;
   const testSuites = gatherTestSuites(
     path.join(__dirname, '../../spec/client-side-encryption/tests')
   );
-
   after(() => testContext.teardown());
   before(function () {
     return testContext.setup(this.configuration);
   });
 
   generateTopologyTests(testSuites, testContext, spec => {
-    return (
-      !spec.description.match(/type=symbol/) &&
-      !spec.description.match(/maxWireVersion < 8/) &&
-      !spec.description.match(/Count with deterministic encryption/) &&
-      !SKIPPED_TESTS.has(spec.description)
-    );
+    return !SKIPPED_TESTS.has(spec.description);
   });
 });

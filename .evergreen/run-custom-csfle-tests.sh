@@ -19,7 +19,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 # Get access to the AWS temporary credentials:
 echo "adding temporary AWS credentials to environment"
 # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
-. $DRIVERS_TOOLS/.evergreen/csfle/set-temp-creds.sh
+. "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 
 ABS_PATH_TO_PATCH=$(pwd)
 
@@ -65,6 +65,7 @@ cp -R ../csfle-deps-tmp/libmongocrypt/bindings/node node_modules/mongodb-client-
 export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
 export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
+export TEST_CSFLE=true
 set +o errexit # We want to run both test suites even if the first fails
 npm run check:csfle
 DRIVER_CSFLE_TEST_RESULT=$?

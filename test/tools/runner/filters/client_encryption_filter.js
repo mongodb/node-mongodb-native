@@ -39,7 +39,20 @@ class ClientSideEncryptionFilter {
     const clientSideEncryption =
       test.metadata && test.metadata.requires && test.metadata.requires.clientSideEncryption;
 
-    return typeof clientSideEncryption !== 'boolean' || clientSideEncryption === this.enabled;
+    if (clientSideEncryption == null) {
+      return true;
+    }
+
+    if (clientSideEncryption !== true) {
+      throw new Error('ClientSideEncryptionFilter can only be set to true');
+    }
+
+    // TODO(NODE-3401): unskip csfle tests on windows
+    if (process.env.TEST_CSFLE && !this.enabled && process.platform !== 'win32') {
+      throw new Error('Expected CSFLE to be enabled in the CI');
+    }
+
+    return this.enabled;
   }
 }
 
