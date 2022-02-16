@@ -52,7 +52,7 @@ class ClientSideEncryptionFilter {
       throw new Error('Expected CSFLE to be enabled in the CI');
     }
 
-    return clientSideEncryption === this.enabled;
+    return this.enabled;
   }
 }
 
