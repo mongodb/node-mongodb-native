@@ -425,12 +425,6 @@ describe('CRUD spec v1', function () {
   }
 });
 
-// TODO(NODE-4013): Unskip failing update with `let` tests when spec tests are updated
-const SKIPPED_TESTS = [
-  'updateMany with let option unsupported (server-side error)',
-  'UpdateOne with let option unsupported (server-side error)'
-];
-
 describe('CRUD unified', function () {
-  runUnifiedSuite(loadSpecTests(path.join('crud', 'unified')), SKIPPED_TESTS);
+  runUnifiedSuite(loadSpecTests(path.join('crud', 'unified')));
 });
