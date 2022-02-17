@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.4.0](https://github.com/mongodb/node-mongodb-native/compare/v4.3.1...v4.4.0) (2022-02-17)
+
+
+### Features
+
+* **NODE-2938:** add service host mechanism property ([#3130](https://github.com/mongodb/node-mongodb-native/issues/3130)) ([46d5821](https://github.com/mongodb/node-mongodb-native/commit/46d5821088e5897cd707246ef55f3474bc1c130c))
+* **NODE-2939:** add new hostname canonicalization opts ([#3131](https://github.com/mongodb/node-mongodb-native/issues/3131)) ([d0390d0](https://github.com/mongodb/node-mongodb-native/commit/d0390d02f53bd385f65d749f6a019568b0b98210))
+* **NODE-3351:** use hostname canonicalization ([#3122](https://github.com/mongodb/node-mongodb-native/issues/3122)) ([f5c76f3](https://github.com/mongodb/node-mongodb-native/commit/f5c76f3ef61bc319790c6b8072c72489c2a2041f))
+* **NODE-3777:** add csfle kmip support ([#3070](https://github.com/mongodb/node-mongodb-native/issues/3070)) ([44bbd6e](https://github.com/mongodb/node-mongodb-native/commit/44bbd6e94d58fac9eb07a07e5437662eb6409dc5))
+* **NODE-3867:** deprecate cursor count and update v4 docs ([#3127](https://github.com/mongodb/node-mongodb-native/issues/3127)) ([a48d7e2](https://github.com/mongodb/node-mongodb-native/commit/a48d7e2c69e7d9010f65a34859afcbaee7f01d9b))
+
+
+### Bug Fixes
+
+* fix csfle imports ([#3142](https://github.com/mongodb/node-mongodb-native/issues/3142)) ([541e939](https://github.com/mongodb/node-mongodb-native/commit/541e939e2ef3376930efd1b0077d984a578fa205))
+* **NODE-3621:** fixed type of documentKey property on ChangeStreamDocument ([#3118](https://github.com/mongodb/node-mongodb-native/issues/3118)) ([c63a21b](https://github.com/mongodb/node-mongodb-native/commit/c63a21b1d42f10359cfe7c34ff18ff73b70379a2))
+* **NODE-3795:** unexpected No auth provider for DEFAULT defined error ([#3092](https://github.com/mongodb/node-mongodb-native/issues/3092)) ([fb38a56](https://github.com/mongodb/node-mongodb-native/commit/fb38a561a3025f21b3c926e54336ce2fd2f79d17))
+* **NODE-3813:** unexpected type conversion of read preference tags ([#3138](https://github.com/mongodb/node-mongodb-native/issues/3138)) ([3e7b894](https://github.com/mongodb/node-mongodb-native/commit/3e7b89483ed858c54b8378526e28346d0ea8ba19))
+* **NODE-3878:** use legacy count operation on collection.count ([#3126](https://github.com/mongodb/node-mongodb-native/issues/3126)) ([12c6835](https://github.com/mongodb/node-mongodb-native/commit/12c6835155c256eefac8fed7bd36c41120731b91))
+* **NODE-3917:** Throw an error when directConnection is set with multiple hosts ([#3143](https://github.com/mongodb/node-mongodb-native/issues/3143)) ([b192493](https://github.com/mongodb/node-mongodb-native/commit/b192493cd790e5fd7c05ca4926535e06ceffb55e))
+
 ### [4.3.1](https://github.com/mongodb/node-mongodb-native/compare/v4.3.0...v4.3.1) (2022-01-18)
 
 
