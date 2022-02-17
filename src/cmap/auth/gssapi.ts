@@ -12,10 +12,23 @@ import {
 import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
+/** @public */
+export const GSSAPICanonicalizationValue = Object.freeze({
+  on: true,
+  off: false,
+  none: 'none',
+  forward: 'forward',
+  forwardAndReverse: 'forwardAndReverse'
+} as const);
+
+/** @public */
+export type GSSAPICanonicalizationValue =
+  typeof GSSAPICanonicalizationValue[keyof typeof GSSAPICanonicalizationValue];
+
 type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
   gssapiCanonicalizeHostName?: boolean;
-  CANONICALIZE_HOST_NAME?: boolean;
+  CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
@@ -93,7 +106,7 @@ function makeKerberosClient(authContext: AuthContext, callback: Callback<Kerbero
 
   const serviceName = mechanismProperties.SERVICE_NAME ?? 'mongodb';
 
-  performGssapiCanonicalizeHostName(
+  performGSSAPICanonicalizeHostName(
     hostAddress.host,
     mechanismProperties,
     (err?: Error | MongoError, host?: string) => {
@@ -174,19 +187,52 @@ function finalize(
   });
 }
 
-function performGssapiCanonicalizeHostName(
+export function performGSSAPICanonicalizeHostName(
   host: string,
   mechanismProperties: MechanismProperties,
   callback: Callback<string>
 ): void {
-  if (!mechanismProperties.CANONICALIZE_HOST_NAME) return callback(undefined, host);
+  const mode = mechanismProperties.CANONICALIZE_HOST_NAME;
+  if (!mode || mode === GSSAPICanonicalizationValue.none) {
+    return callback(undefined, host);
+  }
 
+  // If forward and reverse or true
+  if (
+    mode === GSSAPICanonicalizationValue.on ||
+    mode === GSSAPICanonicalizationValue.forwardAndReverse
+  ) {
+    // Perform the lookup of the ip address.
+    dns.lookup(host, (error, address) => {
+      // No ip found, return the error.
+      if (error) return callback(error);
+
+      // Perform a reverse ptr lookup on the ip address.
+      dns.resolvePtr(address, (err, results) => {
+        // This can error as ptr records may not exist for all ips. In this case
+        // fallback to a cname lookup as dns.lookup() does not return the
+        // cname.
+        if (err) {
+          return resolveCname(host, callback);
+        }
+        // If the ptr did not error but had no results, return the host.
+        callback(undefined, results.length > 0 ? results[0] : host);
+      });
+    });
+  } else {
+    // The case for forward is just to resolve the cname as dns.lookup()
+    // will not return it.
+    resolveCname(host, callback);
+  }
+}
+
+export function resolveCname(host: string, callback: Callback<string>): void {
   // Attempt to resolve the host name
   dns.resolveCname(host, (err, r) => {
-    if (err) return callback(err);
+    if (err) return callback(undefined, host);
 
     // Get the first resolve host id
-    if (Array.isArray(r) && r.length > 0) {
+    if (r.length > 0) {
       return callback(undefined, r[0]);
     }
 

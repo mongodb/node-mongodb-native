@@ -2,7 +2,7 @@
   "tests": [
     {
       "description": "Valid auth options are parsed correctly (GSSAPI)",
-      "uri": "mongodb://foo:bar@example.com/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com&authSource=$external",
+      "uri": "mongodb://foo:bar@example.com/?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:other,CANONICALIZE_HOST_NAME:forward,SERVICE_HOST:example.com&authSource=$external",
       "valid": true,
       "warning": false,
       "hosts": null,
@@ -11,8 +11,8 @@
         "authMechanism": "GSSAPI",
         "authMechanismProperties": {
           "SERVICE_NAME": "other",
-          "CANONICALIZE_HOST_NAME": true,
-          "SERVICE_HOST": "example.com"
+          "SERVICE_HOST": "example.com",
+          "CANONICALIZE_HOST_NAME": "forward"
         },
         "authSource": "$external"
       }
