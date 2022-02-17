@@ -187,7 +187,7 @@ function finalize(
   });
 }
 
-function performGSSAPICanonicalizeHostName(
+export function performGSSAPICanonicalizeHostName(
   host: string,
   mechanismProperties: MechanismProperties,
   callback: Callback<string>
@@ -226,7 +226,7 @@ function performGSSAPICanonicalizeHostName(
   }
 }
 
-function resolveCname(host: string, callback: Callback<string>): void {
+export function resolveCname(host: string, callback: Callback<string>): void {
   // Attempt to resolve the host name
   dns.resolveCname(host, (err, r) => {
     if (err) return callback(undefined, host);

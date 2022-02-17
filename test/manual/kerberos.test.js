@@ -89,20 +89,18 @@ describe('Kerberos', function () {
       }
     });
 
-    for (const option of [true, 'forward']) {
-      context(`when the value is ${option}`, function () {
-        it('authenticates with a forward cname lookup', function (done) {
-          const client = new MongoClient(
-            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
-          );
-          client.connect(function (err, client) {
-            if (err) return done(err);
-            expect(dns.resolveCname).to.be.calledOnceWith(host);
-            verifyKerberosAuthentication(client, done);
-          });
+    context('when the value is forward', function () {
+      it('authenticates with a forward cname lookup', function (done) {
+        const client = new MongoClient(
+          `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forward&maxPoolSize=1`
+        );
+        client.connect(function (err, client) {
+          if (err) return done(err);
+          expect(dns.resolveCname).to.be.calledOnceWith(host);
+          verifyKerberosAuthentication(client, done);
         });
       });
-    }
+    });
 
     for (const option of [false, 'none']) {
       context(`when the value is ${option}`, function () {
@@ -121,139 +119,141 @@ describe('Kerberos', function () {
       });
     }
 
-    context('when the value is forwardAndReverse', function () {
-      context('when the reverse lookup succeeds', function () {
-        const resolveStub = (address, callback) => {
-          callback(null, [host]);
-        };
+    for (const option of [true, 'forwardAndReverse']) {
+      context(`when the value is ${option}`, function () {
+        context('when the reverse lookup succeeds', function () {
+          const resolveStub = (address, callback) => {
+            callback(null, [host]);
+          };
 
-        beforeEach(function () {
-          dns.resolvePtr.restore();
-          sinon.stub(dns, 'resolvePtr').callsFake(resolveStub);
+          beforeEach(function () {
+            dns.resolvePtr.restore();
+            sinon.stub(dns, 'resolvePtr').callsFake(resolveStub);
+          });
+
+          it('authenticates with a forward dns lookup and a reverse ptr lookup', function (done) {
+            const client = new MongoClient(
+              `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
+            );
+            client.connect(function (err, client) {
+              if (err) return done(err);
+              // 2 calls to establish connection, 1 call in canonicalization.
+              expect(dns.lookup).to.be.calledThrice;
+              expect(dns.resolvePtr).to.be.calledOnce;
+              verifyKerberosAuthentication(client, done);
+            });
+          });
         });
 
-        it('authenticates with a forward dns lookup and a reverse ptr lookup', function (done) {
-          const client = new MongoClient(
-            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
-          );
-          client.connect(function (err, client) {
-            if (err) return done(err);
-            // 2 calls to establish connection, 1 call in canonicalization.
-            expect(dns.lookup).to.be.calledThrice;
-            expect(dns.resolvePtr).to.be.calledOnce;
-            verifyKerberosAuthentication(client, done);
+        context('when the reverse lookup is empty', function () {
+          const resolveStub = (address, callback) => {
+            callback(null, []);
+          };
+
+          beforeEach(function () {
+            dns.resolvePtr.restore();
+            sinon.stub(dns, 'resolvePtr').callsFake(resolveStub);
+          });
+
+          it('authenticates with a fallback cname lookup', function (done) {
+            const client = new MongoClient(
+              `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
+            );
+            client.connect(function (err, client) {
+              if (err) return done(err);
+              // 2 calls to establish connection, 1 call in canonicalization.
+              expect(dns.lookup).to.be.calledThrice;
+              // This fails.
+              expect(dns.resolvePtr).to.be.calledOnce;
+              // Expect the fallback to the host name.
+              expect(dns.resolveCname).to.not.be.called;
+              verifyKerberosAuthentication(client, done);
+            });
+          });
+        });
+
+        context('when the reverse lookup fails', function () {
+          const resolveStub = (address, callback) => {
+            callback(new Error('not found'), null);
+          };
+
+          beforeEach(function () {
+            dns.resolvePtr.restore();
+            sinon.stub(dns, 'resolvePtr').callsFake(resolveStub);
+          });
+
+          it('authenticates with a fallback cname lookup', function (done) {
+            const client = new MongoClient(
+              `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
+            );
+            client.connect(function (err, client) {
+              if (err) return done(err);
+              // 2 calls to establish connection, 1 call in canonicalization.
+              expect(dns.lookup).to.be.calledThrice;
+              // This fails.
+              expect(dns.resolvePtr).to.be.calledOnce;
+              // Expect the fallback to be called.
+              expect(dns.resolveCname).to.be.calledOnceWith(host);
+              verifyKerberosAuthentication(client, done);
+            });
+          });
+        });
+
+        context('when the cname lookup fails', function () {
+          const resolveStub = (address, callback) => {
+            callback(new Error('not found'), null);
+          };
+
+          beforeEach(function () {
+            dns.resolveCname.restore();
+            sinon.stub(dns, 'resolveCname').callsFake(resolveStub);
+          });
+
+          it('authenticates with a fallback host name', function (done) {
+            const client = new MongoClient(
+              `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
+            );
+            client.connect(function (err, client) {
+              if (err) return done(err);
+              // 2 calls to establish connection, 1 call in canonicalization.
+              expect(dns.lookup).to.be.calledThrice;
+              // This fails.
+              expect(dns.resolvePtr).to.be.calledOnce;
+              // Expect the fallback to be called.
+              expect(dns.resolveCname).to.be.calledOnceWith(host);
+              verifyKerberosAuthentication(client, done);
+            });
+          });
+        });
+
+        context('when the cname lookup is empty', function () {
+          const resolveStub = (address, callback) => {
+            callback(null, []);
+          };
+
+          beforeEach(function () {
+            dns.resolveCname.restore();
+            sinon.stub(dns, 'resolveCname').callsFake(resolveStub);
+          });
+
+          it('authenticates with a fallback host name', function (done) {
+            const client = new MongoClient(
+              `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
+            );
+            client.connect(function (err, client) {
+              if (err) return done(err);
+              // 2 calls to establish connection, 1 call in canonicalization.
+              expect(dns.lookup).to.be.calledThrice;
+              // This fails.
+              expect(dns.resolvePtr).to.be.calledOnce;
+              // Expect the fallback to be called.
+              expect(dns.resolveCname).to.be.calledOnceWith(host);
+              verifyKerberosAuthentication(client, done);
+            });
           });
         });
       });
-
-      context('when the reverse lookup is empty', function () {
-        const resolveStub = (address, callback) => {
-          callback(null, []);
-        };
-
-        beforeEach(function () {
-          dns.resolvePtr.restore();
-          sinon.stub(dns, 'resolvePtr').callsFake(resolveStub);
-        });
-
-        it('authenticates with a fallback cname lookup', function (done) {
-          const client = new MongoClient(
-            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
-          );
-          client.connect(function (err, client) {
-            if (err) return done(err);
-            // 2 calls to establish connection, 1 call in canonicalization.
-            expect(dns.lookup).to.be.calledThrice;
-            // This fails.
-            expect(dns.resolvePtr).to.be.calledOnce;
-            // Expect the fallback to the host name.
-            expect(dns.resolveCname).to.not.be.called;
-            verifyKerberosAuthentication(client, done);
-          });
-        });
-      });
-
-      context('when the reverse lookup fails', function () {
-        const resolveStub = (address, callback) => {
-          callback(new Error('not found'), null);
-        };
-
-        beforeEach(function () {
-          dns.resolvePtr.restore();
-          sinon.stub(dns, 'resolvePtr').callsFake(resolveStub);
-        });
-
-        it('authenticates with a fallback cname lookup', function (done) {
-          const client = new MongoClient(
-            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
-          );
-          client.connect(function (err, client) {
-            if (err) return done(err);
-            // 2 calls to establish connection, 1 call in canonicalization.
-            expect(dns.lookup).to.be.calledThrice;
-            // This fails.
-            expect(dns.resolvePtr).to.be.calledOnce;
-            // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnceWith(host);
-            verifyKerberosAuthentication(client, done);
-          });
-        });
-      });
-
-      context('when the cname lookup fails', function () {
-        const resolveStub = (address, callback) => {
-          callback(new Error('not found'), null);
-        };
-
-        beforeEach(function () {
-          dns.resolveCname.restore();
-          sinon.stub(dns, 'resolveCname').callsFake(resolveStub);
-        });
-
-        it('authenticates with a fallback host name', function (done) {
-          const client = new MongoClient(
-            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
-          );
-          client.connect(function (err, client) {
-            if (err) return done(err);
-            // 2 calls to establish connection, 1 call in canonicalization.
-            expect(dns.lookup).to.be.calledThrice;
-            // This fails.
-            expect(dns.resolvePtr).to.be.calledOnce;
-            // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnceWith(host);
-            verifyKerberosAuthentication(client, done);
-          });
-        });
-      });
-
-      context('when the cname lookup is empty', function () {
-        const resolveStub = (address, callback) => {
-          callback(null, []);
-        };
-
-        beforeEach(function () {
-          dns.resolveCname.restore();
-          sinon.stub(dns, 'resolveCname').callsFake(resolveStub);
-        });
-
-        it('authenticates with a fallback host name', function (done) {
-          const client = new MongoClient(
-            `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forwardAndReverse&maxPoolSize=1`
-          );
-          client.connect(function (err, client) {
-            if (err) return done(err);
-            // 2 calls to establish connection, 1 call in canonicalization.
-            expect(dns.lookup).to.be.calledThrice;
-            // This fails.
-            expect(dns.resolvePtr).to.be.calledOnce;
-            // Expect the fallback to be called.
-            expect(dns.resolveCname).to.be.calledOnceWith(host);
-            verifyKerberosAuthentication(client, done);
-          });
-        });
-      });
-    });
+    }
   });
 
   // Unskip this test when a proper setup is available - see NODE-3060
