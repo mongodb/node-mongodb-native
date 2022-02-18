@@ -10,7 +10,7 @@ import {
   CURSOR_FLAGS,
   CursorFlag,
   ExplainVerbosity,
-  // GSSAPICanonicalizationValues,
+  GSSAPICanonicalizationValue,
   LoggerLevel,
   ProfilingLevel,
   ReadConcernLevel,
@@ -32,7 +32,7 @@ expectType<BatchType>(Object.values(BatchType)[0]);
 expectType<BSONType>(Object.values(BSONType)[0]);
 expectType<Compressor>(Object.values(Compressor)[0]);
 expectType<ExplainVerbosity>(Object.values(ExplainVerbosity)[0]);
-// expectType<GSSAPICanonicalizationValues>(Object.values(GSSAPICanonicalizationValues)[0]);
+expectType<GSSAPICanonicalizationValue>(Object.values(GSSAPICanonicalizationValue)[0]);
 expectType<LoggerLevel>(Object.values(LoggerLevel)[0]);
 expectType<ProfilingLevel>(Object.values(ProfilingLevel)[0]);
 expectType<ReadConcernLevel>(Object.values(ReadConcernLevel)[0]);
