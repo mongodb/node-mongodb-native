@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { expectType } from 'tsd';
+import { expectAssignable, expectType } from 'tsd';
 
 import {
   AuthMechanism,
@@ -21,23 +21,27 @@ import {
   TopologyType
 } from '../../src/index';
 
+const num: number = Math.random();
+
 // In our index.ts we clump CURSOR_FLAGS with the enums but its an array
-expectType<CursorFlag>(CURSOR_FLAGS[0]);
+expectType<CursorFlag>(CURSOR_FLAGS[num]);
+
+// Explain is kept as type string so we can automatically allow any new level to be passed through
+expectAssignable<string>(Object.values(ExplainVerbosity)[num]);
 
 // Note both the Enum name and a property on the enum are the same type
-// Object.values(x)[0] gets a union of the all the value types
-expectType<AuthMechanism>(Object.values(AuthMechanism)[0]);
-expectType<AutoEncryptionLoggerLevel>(Object.values(AutoEncryptionLoggerLevel)[0]);
-expectType<BatchType>(Object.values(BatchType)[0]);
-expectType<BSONType>(Object.values(BSONType)[0]);
-expectType<Compressor>(Object.values(Compressor)[0]);
-expectType<ExplainVerbosity>(Object.values(ExplainVerbosity)[0]);
-expectType<GSSAPICanonicalizationValue>(Object.values(GSSAPICanonicalizationValue)[0]);
-expectType<LoggerLevel>(Object.values(LoggerLevel)[0]);
-expectType<ProfilingLevel>(Object.values(ProfilingLevel)[0]);
-expectType<ReadConcernLevel>(Object.values(ReadConcernLevel)[0]);
-expectType<ReadPreferenceMode>(Object.values(ReadPreferenceMode)[0]);
-expectType<ReturnDocument>(Object.values(ReturnDocument)[0]);
-expectType<ServerApiVersion>(Object.values(ServerApiVersion)[0]);
-expectType<ServerType>(Object.values(ServerType)[0]);
-expectType<TopologyType>(Object.values(TopologyType)[0]);
+// Object.values(x)[num] gets a union of the all the value types
+expectType<AuthMechanism>(Object.values(AuthMechanism)[num]);
+expectType<AutoEncryptionLoggerLevel>(Object.values(AutoEncryptionLoggerLevel)[num]);
+expectType<BatchType>(Object.values(BatchType)[num]);
+expectType<BSONType>(Object.values(BSONType)[num]);
+expectType<Compressor>(Object.values(Compressor)[num]);
+expectType<GSSAPICanonicalizationValue>(Object.values(GSSAPICanonicalizationValue)[num]);
+expectType<LoggerLevel>(Object.values(LoggerLevel)[num]);
+expectType<ProfilingLevel>(Object.values(ProfilingLevel)[num]);
+expectType<ReadConcernLevel>(Object.values(ReadConcernLevel)[num]);
+expectType<ReadPreferenceMode>(Object.values(ReadPreferenceMode)[num]);
+expectType<ReturnDocument>(Object.values(ReturnDocument)[num]);
+expectType<ServerApiVersion>(Object.values(ServerApiVersion)[num]);
+expectType<ServerType>(Object.values(ServerType)[num]);
+expectType<TopologyType>(Object.values(TopologyType)[num]);
