@@ -222,6 +222,8 @@ export interface ReplaceOptions extends CommandOperationOptions {
   hint?: string | Document;
   /** When true, creates a new document if no document matches the query */
   upsert?: boolean;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
 }
 
 /** @internal */
