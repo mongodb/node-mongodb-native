@@ -29,45 +29,9 @@ initialData: &initialData
     documents: [ ]
 
 tests:
-  # TODO: Once SERVER-57403 is resolved, this test can be removed in favor of
-  # the "dollar-prefixed $literal value" test below.
   - description: "Aggregate with let option"
     runOnRequirements:
       - minServerVersion: "5.0"
-    operations:
-      - name: aggregate
-        object: *collection0
-        arguments:
-          pipeline: &pipeline0
-            # $match takes a query expression, so $expr is necessary to utilize
-            # an aggregate expression context and access "let" variables.
-            - $match: { $expr: { $eq: ["$_id", "$$id"] } }
-            - $project: { _id: 0, x: "$$x", y: "$$y", rand: "$$rand" }
-          # Values in "let" must be constant or closed expressions that do not
-          # depend on document values. This test demonstrates a basic constant
-          # value, a value wrapped with $literal (to avoid expression parsing),
-          # and a closed expression (e.g. $rand).
-          let: &let0
-            id: 1
-            x: foo
-            y: { $literal: "bar" }
-            rand: { $rand: {} }
-        expectResult:
-          - { x: "foo", y: "bar", rand: { $$type: "double" } }
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                aggregate: *collection0Name
-                pipeline: *pipeline0
-                let: *let0
-
-  - description: "Aggregate with let option and dollar-prefixed $literal value"
-    runOnRequirements:
-      - minServerVersion: "5.0"
-        # TODO: Remove topology restrictions once SERVER-57403 is resolved
-        topologies: ["single", "replicaset"]
     operations:
       - name: aggregate
         object: *collection0

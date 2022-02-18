@@ -1,0 +1,191 @@
+{
+  "description": "deleteOne-let",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "deleteOne with let option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "deleteOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "$expr": {
+                "$eq": [
+                  "$_id",
+                  "$$id"
+                ]
+              }
+            },
+            "let": {
+              "id": 1
+            }
+          },
+          "expectResult": {
+            "deletedCount": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll0",
+                  "deletes": [
+                    {
+                      "q": {
+                        "$expr": {
+                          "$eq": [
+                            "$_id",
+                            "$$id"
+                          ]
+                        }
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "let": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "deleteOne with let option unsupported (server-side error)",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "maxServerVersion": "4.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "deleteOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "$expr": {
+                "$eq": [
+                  "$_id",
+                  "$$id"
+                ]
+              }
+            },
+            "let": {
+              "id": 1
+            }
+          },
+          "expectError": {
+            "errorContains": "'delete.let' is an unknown field",
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "coll0",
+                  "deletes": [
+                    {
+                      "q": {
+                        "$expr": {
+                          "$eq": [
+                            "$_id",
+                            "$$id"
+                          ]
+                        }
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "let": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

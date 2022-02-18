@@ -1,0 +1,71 @@
+description: "find-let"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+      - { _id: 2 }
+
+tests:
+  - description: "Find with let option"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: find
+        object: *collection0
+        arguments:
+          filter: &filter
+            $expr:
+              $eq: [ "$_id", "$$id" ]
+          let: &let0
+            id: 1
+        expectResult:
+          - { _id: 1 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: *filter
+                let: *let0
+
+  - description: "Find with let option unsupported (server-side error)"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.4.99"
+    operations:
+      - name: find
+        object: *collection0
+        arguments:
+          filter: &filter1
+            _id: 1
+          let: &let1
+            x: 1
+        expectError:
+          errorContains: "Unrecognized field 'let'"
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: *filter1
+                let: *let1

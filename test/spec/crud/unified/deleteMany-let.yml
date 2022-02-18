@@ -1,0 +1,93 @@
+description: "deleteMany-let"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+      - { _id: 2, name: "name" }
+      - { _id: 3, name: "name" }
+
+tests:
+  - description: "deleteMany with let option"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: deleteMany
+        object: *collection0
+        arguments:
+          filter: &filter
+            $expr:
+              $eq: [ "$name", "$$name" ]
+          let: &let0
+            name: "name"
+        expectResult:
+          deletedCount: 2
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection0Name
+                deletes:
+                  -
+                    q: *filter
+                    limit: 0
+                let: *let0
+    outcome:
+      -
+        collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+
+  - description: "deleteMany with let option unsupported (server-side error)"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.4.99"
+    operations:
+      - name: deleteMany
+        object: *collection0
+        arguments:
+          filter: &filter1
+            $expr:
+              $eq: [ "$name", "$$name" ]
+          let: &let1
+            name: "name"
+        expectError:
+          errorContains: "'delete.let' is an unknown field"
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection0Name
+                deletes:
+                  -
+                    q: *filter1
+                    limit: 0
+                let: *let1
+    outcome:
+      -
+        collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2, name: "name" }
+          - { _id: 3, name: "name" }

@@ -1,0 +1,217 @@
+{
+  "description": "findOneAndUpdate-let",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "findOneAndUpdate with let option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "$expr": {
+                "$eq": [
+                  "$_id",
+                  "$$id"
+                ]
+              }
+            },
+            "update": [
+              {
+                "$set": {
+                  "x": "$$x"
+                }
+              }
+            ],
+            "let": {
+              "id": 1,
+              "x": "foo"
+            }
+          },
+          "expectResult": {
+            "_id": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll0",
+                  "query": {
+                    "$expr": {
+                      "$eq": [
+                        "$_id",
+                        "$$id"
+                      ]
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "x": "$$x"
+                      }
+                    }
+                  ],
+                  "let": {
+                    "id": 1,
+                    "x": "foo"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": "foo"
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "findOneAndUpdate with let option unsupported (server-side error)",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2.0",
+          "maxServerVersion": "4.4.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "$expr": {
+                "$eq": [
+                  "$_id",
+                  "$$id"
+                ]
+              }
+            },
+            "update": [
+              {
+                "$set": {
+                  "x": "$$x"
+                }
+              }
+            ],
+            "let": {
+              "id": 1,
+              "x": "foo"
+            }
+          },
+          "expectError": {
+            "errorContains": "field 'let' is an unknown field",
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "coll0",
+                  "query": {
+                    "$expr": {
+                      "$eq": [
+                        "$_id",
+                        "$$id"
+                      ]
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "x": "$$x"
+                      }
+                    }
+                  ],
+                  "let": {
+                    "id": 1,
+                    "x": "foo"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
