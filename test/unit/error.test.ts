@@ -1,5 +1,3 @@
-// /* eslint no-empty: ["error", { "allowEmptyCatch": true }] */
-
 import { expect } from 'chai';
 
 import {
@@ -116,8 +114,8 @@ describe('MongoErrors', () => {
   });
 
   describe('MongoSystemError#constructor', () => {
-    context('when the topology description contains a code', () => {
-      it('contains the code as a top level property', () => {
+    context('when the topology description contains an error code', () => {
+      it('contains the specified code as a top level property', () => {
         const topologyDescription = {
           error: {
             code: 123
@@ -129,8 +127,8 @@ describe('MongoErrors', () => {
       });
     });
 
-    context('when the topology description does not contain a code', () => {
-      it('contains the code as a top level property', () => {
+    context('when the topology description does not contain an error code', () => {
+      it('contains the code as a top level property that is undefined', () => {
         const topologyDescription = { error: {} } as any as TopologyDescription;
 
         const error = new MongoSystemError('something went wrong', topologyDescription);
@@ -139,7 +137,7 @@ describe('MongoErrors', () => {
     });
 
     context('when the topology description does not contain an error property', () => {
-      it('contains the code as a top level property', () => {
+      it('contains the code as a top level property that is undefined', () => {
         const topologyDescription = {} as any as TopologyDescription;
 
         const error = new MongoSystemError('something went wrong', topologyDescription);
@@ -262,7 +260,8 @@ describe('MongoErrors', () => {
       expect(getSymbolFrom(errorWithOptionFalse, 'beforeHandshake', false)).to.be.a('symbol');
 
       const errorWithBadOption = new MongoNetworkError('', {
-        beforeHandshake: 'not boolean' as any
+        // @ts-expect-error: beforeHandshake must be a boolean value
+        beforeHandshake: 'not boolean'
       });
       expect(getSymbolFrom(errorWithBadOption, 'beforeHandshake', false)).to.be.an('undefined');
 
