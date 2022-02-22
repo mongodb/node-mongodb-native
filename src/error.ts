@@ -625,6 +625,8 @@ export class MongoSystemError extends MongoError {
     if (reason) {
       this.reason = reason;
     }
+
+    this.code = reason.error?.code;
   }
 
   get name(): string {
