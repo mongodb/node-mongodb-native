@@ -22,7 +22,7 @@ import {
   TopologyDescription
 } from '../../src/index';
 import * as importsFromEntryPoint from '../../src/index';
-import { Topology } from '../../src/sdam/topology';
+import { Topology, TopologyOptions } from '../../src/sdam/topology';
 import { isHello, ns, setDifference } from '../../src/utils';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
@@ -120,7 +120,7 @@ describe('MongoErrors', () => {
           error: {
             code: 123
           }
-        } as any as TopologyDescription;
+        } as TopologyDescription;
 
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', 123);
@@ -129,7 +129,7 @@ describe('MongoErrors', () => {
 
     context('when the topology description does not contain an error code', () => {
       it('contains the code as a top level property that is undefined', () => {
-        const topologyDescription = { error: {} } as any as TopologyDescription;
+        const topologyDescription = { error: {} } as TopologyDescription;
 
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', undefined);
@@ -138,7 +138,7 @@ describe('MongoErrors', () => {
 
     context('when the topology description does not contain an error property', () => {
       it('contains the code as a top level property that is undefined', () => {
-        const topologyDescription = {} as any as TopologyDescription;
+        const topologyDescription = {} as TopologyDescription;
 
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', undefined);
@@ -321,7 +321,7 @@ describe('MongoErrors', () => {
       let invoked = false;
       const replSet = new Topology(
         [test.primaryServer.hostAddress(), test.firstSecondaryServer.hostAddress()],
-        { replicaSet: 'rs' } as any
+        { replicaSet: 'rs' } as TopologyOptions
       );
 
       replSet.once('error', err => {
