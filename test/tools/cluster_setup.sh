@@ -10,6 +10,13 @@ DATA_DIR=${DATA_DIR:-data}
 SINGLE_DIR=${SINGLE_DIR:-$DATA_DIR/server}
 REPLICASET_DIR=${REPLICASET_DIR:-$DATA_DIR/replica_set}
 SHARDED_DIR=${SHARDED_DIR:-$DATA_DIR/sharded_cluster}
+IN_MEMORY=${IN_MEMORY:-true}
+
+if [ "$IN_MEMORY" = true ] ; then
+    DIRNAME=$(dirname $0)
+    SCRIPT="$DIRNAME/in-memory-setup.sh"
+    $SCRIPT $DATA_DIR 8
+fi
 
 if [[ $1 == "replica_set" ]]; then
     mkdir -p $REPLICASET_DIR # user / password
@@ -21,7 +28,7 @@ elif [[ $1 == "sharded_cluster" ]]; then
     echo "mongodb://bob:pwd123@localhost:51000,localhost:51001"
 elif [[ $1 == "server" ]]; then
     mkdir -p $SINGLE_DIR
-    mlaunch init --dir $SINGLE_DIR --storageEngine inMemory --auth --username "bob" --password "pwd123" --single --setParameter enableTestCommands=1
+    mlaunch init --dir $SINGLE_DIR --auth --username "bob" --password "pwd123" --single --setParameter enableTestCommands=1
     echo "mongodb://bob:pwd123@localhost:27017"
 else
     echo "unsupported topology: $1"
