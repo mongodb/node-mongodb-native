@@ -6,7 +6,6 @@ const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const mock = require('../../tools/mongodb-mock/index');
 const { MongoClient } = require('../../../src');
-const { skipFailingInMemoryTests } = require('../../tools/runner/hooks/configuration');
 
 describe('Write Concern', function () {
   it(
@@ -33,14 +32,6 @@ describe('Write Concern', function () {
 
   // TODO: once `read-write-concern/connection-string` spec tests are implemented these can likely be removed
   describe('test journal connection string option', function () {
-    beforeEach(
-      skipFailingInMemoryTests({
-        skippedTests: [
-          'should set write concern with j: true client option',
-          'should set write concern with journal=true connection string option'
-        ]
-      })
-    );
     function journalOptionTest(client, events, done) {
       expect(client).to.have.nested.property('s.options.writeConcern');
       expect(client.s.options.writeConcern).to.satisfy(wc => wc.j || wc.journal);

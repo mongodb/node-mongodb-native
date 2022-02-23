@@ -98,19 +98,6 @@ const skipBrokenAuthTestBeforeEachHook = function ({ skippedTests } = { skippedT
   };
 };
 
-const skipFailingInMemoryTests = function ({ skippedTests } = { skippedTests: [] }) {
-  return function () {
-    if (
-      process.env.STORAGE_ENGINE === 'inMemory' &&
-      skippedTests.includes(this.currentTest.title)
-    ) {
-      this.currentTest.skipReason =
-        'Test skipped locally - unable to run on inMemory storage engine';
-      this.skip();
-    }
-  };
-};
-
 const testConfigBeforeHook = async function () {
   const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
     ...getEnvironmentalOptions()
@@ -134,14 +121,6 @@ const testConfigBeforeHook = async function () {
     context
   );
 
-  const db = client.db('test-db');
-  const serverStatus = await db.command({ serverStatus: 1 });
-
-  const storageEngine =
-    serverStatus && serverStatus.storageEngine && serverStatus.storageEngine.name;
-
-  process.env.STORAGE_ENGINE = storageEngine;
-
   await client.close();
 
   const currentEnv = {
@@ -163,8 +142,7 @@ const testConfigBeforeHook = async function () {
     kerberos: process.env.KRB5_PRINCIPAL != null,
     ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
     ocsp: process.env.OCSP_TLS_SHOULD_SUCCEED != null && process.env.CA_FILE != null,
-    socks5: MONGODB_URI.includes('proxyHost='),
-    storageEngine
+    socks5: MONGODB_URI.includes('proxyHost=')
   };
 
   console.error(inspect(currentEnv, { colors: true }));
@@ -186,6 +164,5 @@ module.exports = {
     beforeEach: [testSkipBeforeEachHook],
     afterAll: [cleanUpMocksAfterHook]
   },
-  skipBrokenAuthTestBeforeEachHook,
-  skipFailingInMemoryTests
+  skipBrokenAuthTestBeforeEachHook
 };
