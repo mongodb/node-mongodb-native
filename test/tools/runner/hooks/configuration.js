@@ -120,7 +120,6 @@ const testConfigBeforeHook = async function () {
     loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
     context
   );
-
   await client.close();
 
   const currentEnv = {
