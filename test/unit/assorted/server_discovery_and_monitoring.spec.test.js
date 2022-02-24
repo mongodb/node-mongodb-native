@@ -45,7 +45,7 @@ function collectTests() {
   return tests;
 }
 
-describe.only('Server Discovery and Monitoring (spec)', function () {
+describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect;
   before(() => {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {

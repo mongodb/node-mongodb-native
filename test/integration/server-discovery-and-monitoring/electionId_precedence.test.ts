@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { MongoClient } from '../../../src';
 
-describe.only('SDAM should give electionId precedence', () => {
+describe('SDAM should give electionId precedence', () => {
   let utilClient: MongoClient;
   beforeEach('setup test fail points', async function () {
     if (this.configuration.topologyType !== 'ReplicaSetWithPrimary') {
