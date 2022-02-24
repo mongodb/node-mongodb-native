@@ -275,7 +275,7 @@ function withConnectionStubImpl(appError) {
 function assertOutcomeExpectations(topology, events, outcome) {
   // then verify the resulting outcome
   const description = topology.description;
-  Object.keys(outcome).forEach(key => {
+  for (const key of Object.keys(outcome)) {
     const outcomeValue = outcome[key];
     const translatedKey = translateOutcomeKey(key);
 
@@ -347,5 +347,5 @@ function assertOutcomeExpectations(topology, events, outcome) {
     } else {
       expect(description).to.have.property(translatedKey).that.deep.equals(outcomeValue);
     }
-  });
+  }
 }
