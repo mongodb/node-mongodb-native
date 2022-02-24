@@ -33,7 +33,7 @@ function checkForNewBuild() {
     }
 }
 
-async function copyNewBuildToHistory(newVersion: any) {
+async function copyNewDocsToGeneratedSite(newVersion: any) {
     const versionName = newVersion.version_id;
     const outputDirectory = `./site/${versionName}`;
     const pathToBuiltDocs = './temp';
@@ -70,15 +70,14 @@ async function generateSiteFromTemplate() {
     return await exec(command);
 }
 
-async function copyGeneratedSiteToHostedSite() {
+async function main() {
+    await checkForNewBuild();
+    updateTomlFile(NEW_VERSION);
+    updateJsonFile(NEW_VERSION)
+    await generateSiteFromTemplate()
+    await copyNewDocsToGeneratedSite(NEW_VERSION);
     await exec(`cp -R temp/. site/.`)
+    await exec('rm -rf temp');
 }
 
-
-checkForNewBuild();
-updateTomlFile(NEW_VERSION);
-updateJsonFile(NEW_VERSION)
-generateSiteFromTemplate()
-copyNewBuildToHistory(NEW_VERSION);
-copyGeneratedSiteToHostedSite();
-exec('rm -rf temp');
+main()
