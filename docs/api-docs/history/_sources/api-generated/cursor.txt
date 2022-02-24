@@ -1,0 +1,927 @@
+========
+Cursor()
+========
+
+------------------
+Constructor
+------------------
+
+
+Constructor for a cursor object that handles all the operations on query result
+using find. This cursor object is unidirectional and cannot traverse backwards. Clients should not be creating a cursor directly,
+but use find to acquire a cursor. (INTERNAL TYPE)
+
+
+  .. js:class:: Cursor()
+
+   :param db db: the database object to work with.
+   :param collection collection: the collection to query.
+   :param object selector: the query selector.
+   :param object fields: an object containing what fields to include or exclude from objects returned.
+   :param object [options]: additional options for the collection.
+
+
+Options
+ - **skip** {Number} skip number of documents to skip.
+ - **limit** {Number}, limit the number of results to return. -1 has a special meaning and is used by Db.eval. A value of 1 will also be treated as if it were -1.
+ - **sort** {Array | Object}, set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc.
+ - **hint**  {Object}, hint force the query to use a specific index.
+ - **explain** {Boolean}, explain return the explaination of the query.
+ - **snapshot** {Boolean}, snapshot Snapshot mode assures no duplicates are returned.
+ - **timeout** {Boolean}, timeout allow the query to timeout.
+ - **tailable** {Boolean}, tailable allow the cursor to be tailable.
+ - **awaitdata** {Boolean}, awaitdata allow the cursor to wait for data, only applicable for tailable cursor.
+ - **oplogReplay** {Boolean}, sets an internal flag, only applicable for tailable cursor.
+ - **batchSize** {Number}, batchSize the number of the subset of results to request the database to return for every request. This should initially be greater than 1 otherwise the database will automatically close the cursor. The batch size can be set to 1 with cursorInstance.batchSize after performing the initial query to the database.
+ - **raw** {Boolean}, raw return all query documents as raw buffers (default false).
+ - **read** {Boolean}, read specify override of read from source (primary/secondary).
+ - **returnKey** {Boolean}, returnKey only return the index key.
+ - **maxScan** {Number}, maxScan limit the number of items to scan.
+ - **min** {Number}, min set index bounds.
+ - **max** {Number}, max set index bounds.
+ - **maxTimeMS** {Number}, number of miliseconds to wait before aborting the query.
+ - **showDiskLoc** {Boolean}, showDiskLoc show disk location of results.
+ - **comment** {String}, comment you can put a $comment field on a query to make looking in the profiler logs simpler.
+ - **numberOfRetries** {Number}, numberOfRetries if using awaidata specifies the number of times to retry on timeout.
+ - **dbName** {String}, dbName override the default dbName.
+ - **tailableRetryInterval** {Number}, tailableRetryInterval specify the miliseconds between getMores on tailable cursor.
+ - **exhaust** {Boolean}, exhaust have the server send all the documents at once as getMore packets.
+ - **partial** {Boolean}, partial have the sharded system return a partial result from mongos.
+
+
+------------------
+Constants
+------------------
+
+.. csv-table:: 
+   :header: "Constant Name", "Value", "Description"
+   :widths: 15, 10, 30
+
+   "Cursor.INIT", "0", "Init state"
+   "Cursor.OPEN", "1", "Cursor open"
+   "Cursor.CLOSED", "2", "Cursor closed"
+   "Cursor.GET_MORE", "3", "Cursor performing a get more"
+
+-----------------------
+Cursor.cloneWithOptions
+-----------------------
+
+
+Clones a given cursor but uses new options
+
+.. js:function:: Cursor.cloneWithOptions(cursor)
+
+   :param cursor cursor: the cursor to clone.
+   :returns: object [options] additional options for the collection when cloning.
+
+
+------
+rewind
+------
+
+
+Resets this cursor to its initial state. All settings like the query string,
+tailable, batchSizeValue, skipValue and limits are preserved.
+
+.. js:function:: rewind()
+
+   :returns: cursor returns itself with rewind applied.
+
+
+**Examples**
+
+  
+  
+  An example showing the information returned by indexInformation
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       var docs = [];
+     
+       // Insert 100 documents with some data
+       for(var i = 0; i < 100; i++) {
+         var d = new Date().getTime() + i*1000;
+         docs[i] = {'a':i, createdAt:new Date(d)};
+       }
+     
+       // Create collection
+       db.createCollection('Should_correctly_rewind_and_restart_cursor', function(err, collection) {
+         assert.equal(null, err);
+     
+         // insert all docs
+         collection.insert(docs, {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Grab a cursor using the find
+           var cursor = collection.find({});
+           // Fetch the first object off the cursor
+           cursor.nextObject(function(err, item) {
+             assert.equal(0, item.a)
+             // Rewind the cursor, resetting it to point to the start of the query
+             cursor.rewind();
+     
+             // Grab the first object again
+             cursor.nextObject(function(err, item) {
+               assert.equal(0, item.a)
+     
+               db.close();
+             })
+           })
+         })
+       });
+     });
+
+
+-------
+toArray
+-------
+
+
+Returns an array of documents. The caller is responsible for making sure that there
+is enough memory to store the results. Note that the array only contain partial
+results when this cursor had been previouly accessed. In that case,
+cursor.rewind() can be used to reset the cursor.
+
+.. js:function:: toArray(callback)
+
+   :param function callback: This will be called after executing this method successfully. The first parameter will contain the Error object if an error occured, or null otherwise. The second parameter will contain an array of BSON deserialized objects as a result of the query.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example showing the information returned by indexInformation
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection to hold our documents
+       db.createCollection('test_array', function(err, collection) {
+     
+         // Insert a test document
+         collection.insert({'b':[1, 2, 3]}, {w:1}, function(err, ids) {
+     
+           // Retrieve all the documents in the collection
+           collection.find().toArray(function(err, documents) {
+             assert.equal(1, documents.length);
+             assert.deepEqual([1, 2, 3], documents[0].b);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+----
+each
+----
+
+
+Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
+not all of the elements will be iterated if this cursor had been previouly accessed.
+In that case, **{cursor.rewind}** can be used to reset the cursor. However, unlike
+**{cursor.toArray}**, the cursor will only hold a maximum of batch size elements
+at any given time if batch size is specified. Otherwise, the caller is responsible
+for making sure that the entire result can fit the memory.
+
+.. js:function:: each(callback)
+
+   :param function callback: this will be called for while iterating every document of the query result. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the document.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example iterating over a query using the each function of the cursor.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection
+       db.createCollection('test_to_a_after_each', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a document in the collection
+         collection.insert({'a':1}, {w:1}, function(err, ids) {
+     
+           // Grab a cursor
+           var cursor = collection.find();
+     
+           // Execute the each command, triggers for each document
+           cursor.each(function(err, item) {
+     
+             // If the item is null then the cursor is exhausted/empty and closed
+             if(item == null) {
+     
+               // Show that the cursor is closed
+               cursor.toArray(function(err, items) {
+                 assert.ok(err != null);
+     
+                 // Let's close the db
+                 db.close();
+               });
+             };
+           });
+         });
+       });
+     });
+
+
+-----
+count
+-----
+
+
+Determines how many result the query for this cursor will return
+
+.. js:function:: count(applySkipLimit, callback)
+
+   :param boolean applySkipLimit: if set to true will apply the skip and limits set on the cursor. Defaults to false.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the number of results or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the count function of the cursor.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Creat collection
+       db.createCollection('cursor_count_collection', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some docs
+         collection.insert([{a:1}, {a:2}], {w:1}, function(err, docs) {
+           assert.equal(null, err);
+     
+           // Do a find and get the cursor count
+           collection.find().count(function(err, count) {
+             assert.equal(null, err);
+             assert.equal(2, count);
+     
+             db.close();
+           })
+         });
+       });
+     });
+
+
+----
+sort
+----
+
+
+Sets the sort parameter of this cursor to the given value.
+
+
+
+This method has the following method signatures:
+(keyOrList, callback)
+(keyOrList, direction, callback)
+
+.. js:function:: sort(keyOrList, direction, callback)
+
+   :param string keyOrList: This can be a string or an array. If passed as a string, the string will be the field to sort. If passed an array, each element will represent a field to be sorted and should be an array that contains the format [string, direction].
+   :param string direction: this determines how the results are sorted. &quot;asc&quot;, &quot;ascending&quot; or 1 for asceding order while &quot;desc&quot;, &quot;desceding or -1 for descending order. Note that the strings are case insensitive.
+   :param function callback: this will be called after executing this method. The first parameter will contain an error object when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :returns: cursor an instance of this object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of sort on the cursor.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection
+       db.createCollection('simple_sort_collection', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some documents we can sort on
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+           assert.equal(null, err);
+     
+           // Do normal ascending sort
+           collection.find().sort([['a', 1]]).nextObject(function(err, item) {
+             assert.equal(null, err);
+             assert.equal(1, item.a);
+     
+             // Do normal descending sort
+             collection.find().sort([['a', -1]]).nextObject(function(err, item) {
+               assert.equal(null, err);
+               assert.equal(3, item.a);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+-----
+limit
+-----
+
+
+Sets the limit parameter of this cursor to the given value.
+
+.. js:function:: limit(limit[, callback])
+
+   :param number limit: the new limit.
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :returns: cursor an instance of this object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of limit on the cursor
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection
+       db.createCollection('simple_limit_collection', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some documents we can sort on
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+           assert.equal(null, err);
+     
+           // Limit to only one document returned
+           collection.find().limit(1).toArray(function(err, items) {
+             assert.equal(null, err);
+             assert.equal(1, items.length);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+---------
+maxTimeMS
+---------
+
+
+Specifies a time limit for a query operation. After the specified
+time is exceeded, the operation will be aborted and an error will be
+returned to the client. If maxTimeMS is null, no limit is applied.
+
+.. js:function:: maxTimeMS(maxTimeMS[, callback])
+
+   :param number maxTimeMS: the maxTimeMS for the query.
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :returns: cursor an instance of this object.
+
+
+-----------------
+setReadPreference
+-----------------
+
+
+Sets the read preference for the cursor
+
+.. js:function:: setReadPreference(the[, callback])
+
+   :param string the: read preference for the cursor, one of Server.READ_PRIMARY, Server.READ_SECONDARY, Server.READ_SECONDARY_ONLY
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the read preference given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :returns: cursor an instance of this object.
+
+
+----
+skip
+----
+
+
+Sets the skip parameter of this cursor to the given value.
+
+.. js:function:: skip(skip[, callback])
+
+   :param number skip: the new skip value.
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the skip value given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :returns: cursor an instance of this object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of skip on the cursor
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection
+       db.createCollection('simple_skip_collection', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some documents we can sort on
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+           assert.equal(null, err);
+     
+           // Skip one document
+           collection.find().skip(1).nextObject(function(err, item) {
+             assert.equal(null, err);
+             assert.equal(2, item.a);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+---------
+batchSize
+---------
+
+
+Sets the batch size parameter of this cursor to the given value.
+
+.. js:function:: batchSize(batchSize[, callback])
+
+   :param number batchSize: the new batch size.
+   :param function [callback]: this optional callback will be called after executing this method. The first parameter will contain an error object when the batchSize given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.
+   :returns: cursor an instance of this object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
+  documents are returned for each batch using the getMoreCommand against the MongoDB server
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection
+       db.createCollection('simple_batch_size_collection', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some documents we can sort on
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+           assert.equal(null, err);
+     
+           // Do normal ascending sort
+           collection.find().batchSize(1).nextObject(function(err, item) {
+             assert.equal(null, err);
+             assert.equal(1, item.a);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+----------
+nextObject
+----------
+
+
+Gets the next document from the cursor.
+
+.. js:function:: nextObject(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain an error object on error while the second parameter will contain a document from the returned result or null if there are no more results.
+
+**Examples**
+
+  
+  
+  A simple example showing the use of nextObject.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection
+       db.createCollection('simple_next_object_collection', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some documents we can sort on
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+           assert.equal(null, err);
+     
+           // Do normal ascending sort
+           collection.find().nextObject(function(err, item) {
+             assert.equal(null, err);
+             assert.equal(1, item.a);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+-------
+explain
+-------
+
+
+Gets a detailed information about how the query is performed on this cursor and how
+long it took the database to process it.
+
+.. js:function:: explain(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will always be null while the second parameter will be an object containing the details.
+
+**Examples**
+
+  
+  
+  A simple example showing the use of the cursor explain function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection
+       db.createCollection('simple_explain_collection', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some documents we can sort on
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+           assert.equal(null, err);
+     
+           // Do normal ascending sort
+           collection.find().explain(function(err, explaination) {
+             assert.equal(null, err);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+------
+stream
+------
+
+
+Returns a Node Transform Stream interface for this cursor.
+
+
+
+Options
+ - **transform** {Function} function of type function(object) { return transformed }, allows for transformation of data before emitting.
+
+.. js:function:: stream()
+
+   :returns: cursorstream returns a stream object.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of the cursor stream function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a lot of documents to insert
+       var docs = []
+       for(var i = 0; i < 100; i++) {
+         docs.push({'a':i})
+       }
+     
+       // Create a collection
+       db.createCollection('test_stream_function', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert documents into collection
+         collection.insert(docs, {w:1}, function(err, ids) {
+           // Peform a find to get a cursor
+           var stream = collection.find().stream();
+     
+           // Execute find on all the documents
+           stream.on('close', function() {
+             db.close();
+           });
+     
+           stream.on('data', function(data) {
+             assert.ok(data != null);
+           });
+         });
+       });
+     });
+
+
+-----
+close
+-----
+
+
+Close the cursor.
+
+.. js:function:: close(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will always contain null while the second parameter will contain a reference to this cursor.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of the cursor close function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a lot of documents to insert
+       var docs = []
+       for(var i = 0; i < 100; i++) {
+         docs.push({'a':i})
+       }
+     
+       // Create a collection
+       db.createCollection('test_close_function_on_cursor', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert documents into collection
+         collection.insert(docs, {w:1}, function(err, ids) {
+           // Peform a find to get a cursor
+           var cursor = collection.find();
+     
+           // Fetch the first object
+           cursor.nextObject(function(err, object) {
+             assert.equal(null, err);
+     
+             // Close the cursor, this is the same as reseting the query
+             cursor.close(function(err, result) {
+               assert.equal(null, err);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+--------
+isClosed
+--------
+
+
+Check if the cursor is closed or open.
+
+.. js:function:: isClosed()
+
+   :returns: boolean returns the state of the cursor.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the use of the cursor close function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a lot of documents to insert
+       var docs = []
+       for(var i = 0; i < 100; i++) {
+         docs.push({'a':i})
+       }
+     
+       // Create a collection
+       db.createCollection('test_is_close_function_on_cursor', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert documents into collection
+         collection.insert(docs, {w:1}, function(err, ids) {
+           // Peform a find to get a cursor
+           var cursor = collection.find();
+     
+           // Fetch the first object
+           cursor.nextObject(function(err, object) {
+             assert.equal(null, err);
+     
+             // Close the cursor, this is the same as reseting the query
+             cursor.close(function(err, result) {
+               assert.equal(null, err);
+               assert.equal(true, cursor.isClosed());
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+

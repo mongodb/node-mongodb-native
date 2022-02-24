@@ -1,0 +1,586 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Mongo Driver and Mongo DB 2.2 Features &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mongo-driver-and-mongo-db-2-2-features">
+<h1>Mongo Driver and Mongo DB 2.2 Features<a class="headerlink" href="#mongo-driver-and-mongo-db-2-2-features" title="Permalink to this headline">¶</a></h1>
+<p>For Mongo DB there are multiple new features and improvements in the
+driver. This include Mongos failover support, authentication, replicaset
+support, read preferences and aggregation. Let&#8217;s move throught the
+different new features starting with.</p>
+<div class="section" id="read-preferences">
+<h2>Read preferences<a class="headerlink" href="#read-preferences" title="Permalink to this headline">¶</a></h2>
+<p>Read preferences is now backed by a specification and is more consistent
+across drivers. With read preferences you can control from where your
+Reads are happing in a Replicaset and from Mongo DB also in a shard.
+Let&#8217;s go through the different types of read Preferences that are
+available and what they mean.</p>
+<ul class="simple">
+<li><strong>ReadPreference.PRIMARY:</strong> Read from primary only. All operations
+produce an error (throw an exception where applicable) if primary is
+unavailable. Cannot be combined with tags <strong>(This is the default.)</strong></li>
+<li><strong>ReadPreference.PRIMARY_PREFERRED:</strong> Read from primary if
+available, otherwise a secondary.</li>
+<li><strong>ReadPreference.SECONDARY:</strong> Read from secondary if available,
+otherwise error.</li>
+<li><strong>ReadPreference.SECONDARY_PREFERRED:</strong> Read from a secondary if
+available, otherwise read from the primary.</li>
+<li><strong>ReadPreference.NEAREST:</strong> All modes read from among the nearest
+candidates, but unlike other modes, NEAREST will include both the
+primary and all secondaries in the random selection. The name NEAREST
+is chosen to emphasize its use, when latency is most important. For
+I/O-bound users who want to distribute reads across all members
+evenly regardless of ping time, set secondaryAcceptableLatencyMS very
+high. See &#8220;Ping Times&#8221; below. <strong>A strategy must be enabled on the
+ReplSet instance to use NEAREST as it requires intermittent
+setTimeout events, see Db class documentation</strong></li>
+</ul>
+<p>Additionally you can now use tags with all the read preferences to
+actively choose specific sets of servers in a replicatset or sharded
+system located in different data centers. The rules are fairly simple as
+outline below. A server member matches a tag set if its tags match all
+the tags in the set. For example, a member tagged <strong>{ dc: &#8216;ny&#8217;, rack: 2,
+size: &#8216;large&#8217; }</strong> matches the tag set <strong>{ dc: &#8216;ny&#8217;, rack: 2 }</strong>. A
+member&#8217;s extra tags don&#8217;t affect whether it&#8217;s a match.</p>
+<p>Using a read preference is very simple. Below are some examples using it
+at the db level, collection level and individual query level as well as
+an example using tags.</p>
+<p>Below is a simple example using readpreferences at the db level.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , format = require('util').format;
+
+var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&amp;readPreference=%s"
+  , "localhost:27017",
+  , "localhost:27018"
+  , "localhost:27019"
+  , "exampleDb"
+  , "foo"
+  , "secondaryPreferred");
+
+MongoClient.connect(url, function(err db) {
+  if(!err) {
+    console.log("We are connected");
+  }
+});</pre>
+</div>
+<p>Below is a simple example using readpreferences at the collection level.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , format = require('util').format;
+
+var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&amp;readPreference=%s"
+  , "localhost:27017",
+  , "localhost:27018"
+  , "localhost:27019"
+  , "exampleDb"
+  , "foo"
+  , "secondaryPreferred");
+
+MongoClient.connect(url, function(err db) {
+  if(!err) {
+    console.log("We are connected");
+
+    var collection = db.collection('somecollection', {readPreference: ReadPreference.SECONDARY_PREFERRED});
+    collection.find({}).toArray(function(err, items) {
+      // Done reading from secondary if available
+    })
+  }
+});</pre>
+</div>
+<p>Below is a simple example using readpreferences at the query level.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , format = require('util').format;
+
+var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&amp;readPreference=%s"
+  , "localhost:27017",
+  , "localhost:27018"
+  , "localhost:27019"
+  , "exampleDb"
+  , "foo"
+  , "secondaryPreferred");
+
+MongoClient.connect(url, function(err db) {
+  if(!err) {
+    console.log("We are connected");
+
+    var collection = db.collection('somecollection');
+    collection.find({}).setReadPreference(new ReadPreference(ReadPreference.SECONDARY_PREFERRED)).toArray(function(err, items) {
+      // Done reading from secondary if available
+    })
+  }
+});</pre>
+</div>
+<p>Below is a simple example using a readpreference with tags at the query
+level. This example will pick from the set of servers tagged with
+<strong>dc1:ny</strong>.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , format = require('util').format;
+
+var url = format("mongodb://%s,%s,%s/%s?replicaSet=%s&amp;readPreference=%s"
+  , "localhost:27017",
+  , "localhost:27018"
+  , "localhost:27019"
+  , "exampleDb"
+  , "foo"
+  , "secondaryPreferred");
+
+MongoClient.connect(url, function(err db) {
+  if(!err) {
+    console.log("We are connected");
+
+    var collection = db.collection('somecollection');
+    collection.find({}).setReadPreference(new ReadPreference(ReadPreference.SECONDARY_PREFERRED, {"dc1":"ny"})).toArray(function(err, items) {
+      // Done reading from secondary if available
+    })
+  }
+});</pre>
+</div>
+</div>
+<div class="section" id="mongos">
+<h2>Mongos<a class="headerlink" href="#mongos" title="Permalink to this headline">¶</a></h2>
+<p>There is now a seperate Server type for Mongos that handles not only
+Mongos read preferences for Mongo DB but also failover and picking the
+nearest Mongos proxy to your application. To use simply do</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , format = require('util').format;
+
+var url = format("mongodb://%s,%s/%s"
+  , "localhost:50000",
+  , "localhost:50001"
+  , "exampleDb");
+
+MongoClient.connect(url, function(err db) {
+  if(!err) {
+    console.log("We are connected");
+  }
+
+  db.close();
+});</pre>
+</div>
+<p>Read preferences also work with Mongos from Mongo DB 2.2 or higher
+allowing you to create more complex deployment setups.</p>
+</div>
+<div class="section" id="aggregation-framework-helper">
+<h2>Aggregation framework helper<a class="headerlink" href="#aggregation-framework-helper" title="Permalink to this headline">¶</a></h2>
+<p>The MongoDB aggregation framework provides a means to calculate
+aggregate values without having to use map-reduce. While map-reduce is
+powerful, using map-reduce is more difficult than necessary for many
+simple aggregation tasks, such as totaling or averaging field values.</p>
+<p>The driver supports the aggregation framework by adding a helper at the
+collection level to execute an aggregation pipeline against the
+documents in that collection. Below is a simple example of using the
+aggregation framework to perform a group by tags.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+// Some docs for insertion
+var docs = [{
+    title : "this is my title", author : "bob", posted : new Date() ,
+    pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+    comments : [
+      { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+    ]}];
+
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  // Create a collection
+  db.createCollection('test', function(err, collection) {
+    // Insert the docs
+    collection.insert(docs, {safe:true}, function(err, result) {
+
+      // Execute aggregate, notice the pipeline is expressed as an Array
+      collection.aggregate([
+          { $project : {
+            author : 1,
+            tags : 1
+          }},
+          { $unwind : "$tags" },
+          { $group : {
+            _id : {tags : "$tags"},
+            authors : { $addToSet : "$author" }
+          }}
+        ], function(err, result) {
+          console.dir(result);
+          db.close();
+      });
+    });
+  });
+});</pre>
+</div>
+</div>
+<div class="section" id="replicaset-improvements-and-changes">
+<h2>Replicaset improvements and changes<a class="headerlink" href="#replicaset-improvements-and-changes" title="Permalink to this headline">¶</a></h2>
+<p>Replicasets now return to the driver when a primary has been identified
+allowing for faster connect time meaning the application does not have
+to wait for the whole set to be identified before being able to run.
+That said any secondary queries using read preference
+<strong>ReadPreference.SECONDARY</strong> might fail until at least one secondary is
+up. To aid in development of layers above the driver now emits to new
+events.</p>
+<ul class="simple">
+<li><strong>open</strong> is emitted when the driver is ready to be used.</li>
+<li><strong>fullsetup</strong> is emitted once the whole replicaset is up and running</li>
+</ul>
+<p>To ensure better control over timeouts when attempting to connect to
+replicaset members that might be down there is now two timeout settings.</p>
+<ul class="simple">
+<li><strong>connectTimeoutMS:</strong> set the timeout for the intial connect to the
+mongod or mongos instance.</li>
+<li><strong>socketTimeoutMS:</strong> set the timeout for established connections to
+the mongod or mongos instance.</li>
+</ul>
+</div>
+<div class="section" id="high-availability-on-by-default">
+<h2>High availability &#8220;on&#8221; by default<a class="headerlink" href="#high-availability-on-by-default" title="Permalink to this headline">¶</a></h2>
+<p>The high availability code has been rewritten to run outside a
+setTimeout allowing for better control and handling. It&#8217;s also on by
+default now. It can be disabled using the following settings on the
+ReplSet class.</p>
+<ul class="simple">
+<li><strong>ha</strong> {Boolean, default:true}, turn on high availability.</li>
+<li><strong>haInterval</strong> {Number, default:2000}, time between each replicaset
+status check.</li>
+</ul>
+<p>This allows the driver to discover new replicaset members or replicaset
+members who left the set and then returned.</p>
+</div>
+<div class="section" id="better-stream-support-for-gridfs">
+<h2>Better stream support for GridFS<a class="headerlink" href="#better-stream-support-for-gridfs" title="Permalink to this headline">¶</a></h2>
+<p>GridFS now supports the streaming api&#8217;s for node allowing you to pipe
+content either into or out of a Gridstore object making it easy to work
+with other streaming api&#8217;s available.</p>
+<p>A simple example is shown below for how to stream from a file on disk to
+a gridstore object.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , fs = require('fs')
+  , GridStore = mongo.GridStore;
+
+// Some docs for insertion
+var docs = [{
+    title : "this is my title", author : "bob", posted : new Date() ,
+    pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+    comments : [
+      { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+    ]}];
+
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  // Set up gridStore
+  var gridStore = new GridStore(client, "test_stream_write", "w");
+  // Create a file reader stream to an object
+  var fileStream = fs.createReadStream("./test/gridstore/test_gs_working_field_read.pdf");
+  gridStore.on("close", function(err) {
+    // Just read the content and compare to the raw binary
+    GridStore.read(client, "test_stream_write", function(err, gridData) {
+      var fileData = fs.readFileSync("./test/gridstore/test_gs_working_field_read.pdf");
+      test.deepEqual(fileData, gridData);
+      test.done();
+    })
+  });
+
+  // Pipe it through to the gridStore
+  fileStream.pipe(gridStore);
+})</pre>
+</div>
+<p>A simple example is shown below for how to stream from a gridfs file to
+a file on disk.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , fs = require('fs')
+  , GridStore = mongo.GridStore;
+
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  // Set up gridStore
+  var gridStore = new GridStore(client, "test_stream_write_2", "w");
+  gridStore.writeFile("./test/gridstore/test_gs_working_field_read.pdf", function(err, result) {
+    // Open a readable gridStore
+    gridStore = new GridStore(client, "test_stream_write_2", "r");
+    // Create a file write stream
+    var fileStream = fs.createWriteStream("./test_stream_write_2.tmp");
+    fileStream.on("close", function(err) {
+      // Read the temp file and compare
+      var compareData = fs.readFileSync("./test_stream_write_2.tmp");
+      var originalData = fs.readFileSync("./test/gridstore/test_gs_working_field_read.pdf");
+      test.deepEqual(originalData, compareData);
+      test.done();
+    })
+    // Pipe out the data
+    gridStore.pipe(fileStream);
+  });
+})</pre>
+</div>
+</div>
+<div class="section" id="tobson-method">
+<h2>toBSON method<a class="headerlink" href="#tobson-method" title="Permalink to this headline">¶</a></h2>
+<p>If in an object now has a toBSON function it will be called to for
+custom serialization of the object instance. This can be used to just
+serialize wanted fields. Deserializing is not affected by this and the
+application is responsible for deflating objects again.</p>
+<p>A simple example below</p>
+<div class="highlight-python"><pre>var customObject = {
+    a:1
+    b:2
+    toBSON: function() {
+      return {a:this.a}
+    }
+  }</pre>
+</div>
+</div>
+<div class="section" id="much-faster-bson-c-parser">
+<h2>Much faster BSON C++ parser<a class="headerlink" href="#much-faster-bson-c-parser" title="Permalink to this headline">¶</a></h2>
+<p>Thanks to the awesome people at Lucasfilm Singapore we have a new BSON
+C++ serializer/deserializer that performs on average 40-50% faster than
+the current implementation.</p>
+</div>
+<div class="section" id="other-minor-changes">
+<h2>Other minor changes<a class="headerlink" href="#other-minor-changes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Connection pool is now set to 5 by default. Override if there is need
+for either a bigger or smaller pool per node process.</li>
+<li>Gridfs now ensures an index on the chunks collection on file_id.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Mongo Driver and Mongo DB 2.2 Features</a><ul>
+<li><a class="reference internal" href="#read-preferences">Read preferences</a></li>
+<li><a class="reference internal" href="#mongos">Mongos</a></li>
+<li><a class="reference internal" href="#aggregation-framework-helper">Aggregation framework helper</a></li>
+<li><a class="reference internal" href="#replicaset-improvements-and-changes">Replicaset improvements and changes</a></li>
+<li><a class="reference internal" href="#high-availability-on-by-default">High availability &#8220;on&#8221; by default</a></li>
+<li><a class="reference internal" href="#better-stream-support-for-gridfs">Better stream support for GridFS</a></li>
+<li><a class="reference internal" href="#tobson-method">toBSON method</a></li>
+<li><a class="reference internal" href="#much-faster-bson-c-parser">Much faster BSON C++ parser</a></li>
+<li><a class="reference internal" href="#other-minor-changes">Other minor changes</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

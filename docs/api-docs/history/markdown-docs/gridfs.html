@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>GridStore &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="gridstore">
+<h1>GridStore<a class="headerlink" href="#gridstore" title="Permalink to this headline">¶</a></h1>
+<p>GridFS is a scalable MongoDB <em>filesystem</em> for storing and retrieving
+large files. The default limit for a MongoDB record is 16MB, so to store
+data that is larger than this limit, GridFS can be used. GridFS shards
+the data into smaller chunks automatically. See <a class="reference external" href="http://www.mongodb.org/display/DOCS/GridFS+Specification">MongoDB
+documentation</a>
+for details.</p>
+<p>GridStore is a single file inside GridFS that can be managed by the
+script.</p>
+<div class="section" id="open-gridstore">
+<h2>Open GridStore<a class="headerlink" href="#open-gridstore" title="Permalink to this headline">¶</a></h2>
+<p>Opening a GridStore (a single file in GridFS) is a bit similar to
+opening a database. At first you need to create a GridStore object and
+then <tt class="docutils literal"><span class="pre">open</span></tt> it.</p>
+<div class="highlight-python"><pre>var gs = new mongodb.GridStore(db, filename, mode[, options])</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">db</span></tt> is the database object</li>
+<li><tt class="docutils literal"><span class="pre">filename</span></tt> is the name of the file in GridFS that needs to be
+accessed/created</li>
+<li><tt class="docutils literal"><span class="pre">mode</span></tt> indicated the operation, can be one of:<ul>
+<li>&#8220;r&#8221; (Read): Looks for the file information in fs.files collection,
+or creates a new id for this object.</li>
+<li>&#8220;w&#8221; (Write): Erases all chunks if the file already exist.</li>
+<li>&#8220;w+&#8221; (Append): Finds the last chunk, and keeps writing after it.</li>
+</ul>
+</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> can be used to specify some metadata for the file, for
+example <tt class="docutils literal"><span class="pre">content_type</span></tt>, <tt class="docutils literal"><span class="pre">metadata</span></tt> and <tt class="docutils literal"><span class="pre">chunk_size</span></tt></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-python"><pre>var gs = new mongodb.GridStore(db, "test.png", "w", {
+  "content_type": "image/png",
+  "metadata":{
+      "author": "Daniel"
+  },
+  "chunk_size": 1024*4
+});</pre>
+</div>
+<p>When GridStore object is created, it needs to be opened.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - and error object (if error occured)
+and the GridStore object.</p>
+<p>Opened GridStore object has a set of useful properties</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">gs.length</span></tt> - length of the file in bytes</li>
+<li><tt class="docutils literal"><span class="pre">gs.contentType</span></tt> - the content type for the file</li>
+<li><tt class="docutils literal"><span class="pre">gs.uploadDate</span></tt> - when the file was uploaded</li>
+<li><tt class="docutils literal"><span class="pre">gs.metadata</span></tt> - metadata that was saved with the file</li>
+<li><tt class="docutils literal"><span class="pre">gs.chunkSize</span></tt> - chunk size</li>
+</ul>
+<p>Example</p>
+<div class="highlight-python"><pre>gs.open(function(err, gs){
+    console.log("this file was uploaded at "+gs.uploadDate);
+});</pre>
+</div>
+</div>
+<div class="section" id="writing-to-gridstore">
+<h2>Writing to GridStore<a class="headerlink" href="#writing-to-gridstore" title="Permalink to this headline">¶</a></h2>
+<p>Writing can be done with <tt class="docutils literal"><span class="pre">write</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">data</span></tt> is a <tt class="docutils literal"><span class="pre">Buffer</span></tt> or a string, callback gets two parameters
+- an error object (if error occured) and result value which indicates if
+the write was successful or not.</p>
+<p>While the GridStore is not closed, every write is appended to the opened
+GridStore.</p>
+</div>
+<div class="section" id="writing-a-file-to-gridstore">
+<h2>Writing a file to GridStore<a class="headerlink" href="#writing-a-file-to-gridstore" title="Permalink to this headline">¶</a></h2>
+<p>This function opens the GridStore, streams the contents of the file into
+GridStore, and closes the GridStore.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span> <span class="nb">file</span><span class="p">,</span> <span class="n">callback</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">file</span></tt> is a file descriptor, or a string file path</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is a function with two parameters - error object (if
+error occured) and the GridStore object.</li>
+</ul>
+</div>
+<div class="section" id="reading-from-gridstore">
+<h2>Reading from GridStore<a class="headerlink" href="#reading-from-gridstore" title="Permalink to this headline">¶</a></h2>
+<p>Reading from GridStore can be done with <tt class="docutils literal"><span class="pre">read</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">read</span><span class="p">([</span><span class="n">size</span><span class="p">],</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">size</span></tt> is the length of the data to be read</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is a callback function with two parameters - error
+object (if an error occured) and data (binary string)</li>
+</ul>
+</div>
+<div class="section" id="streaming-from-gridstore">
+<h2>Streaming from GridStore<a class="headerlink" href="#streaming-from-gridstore" title="Permalink to this headline">¶</a></h2>
+<p>You can stream data as it comes from the database using <tt class="docutils literal"><span class="pre">stream</span></tt></p>
+<div class="highlight-python"><pre>gs.stream([autoclose=false])</pre>
+</div>
+<p>where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">autoclose</span></tt> If true current GridStore will be closed when EOF and
+&#8216;close&#8217; event will be fired</li>
+</ul>
+<p>The function returns <a class="reference external" href="http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream">read
+stream</a>
+based on this GridStore file. It supports the events &#8216;read&#8217;, &#8216;error&#8217;,
+&#8216;close&#8217; and &#8216;end&#8217;.</p>
+</div>
+<div class="section" id="delete-a-gridstore">
+<h2>Delete a GridStore<a class="headerlink" href="#delete-a-gridstore" title="Permalink to this headline">¶</a></h2>
+<p>GridStore files can be unlinked with <tt class="docutils literal"><span class="pre">unlink</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mongodb</span><span class="o">.</span><span class="n">GridStore</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">db</span></tt> is the database object</li>
+<li><tt class="docutils literal"><span class="pre">name</span></tt> is either the name of a GridStore object or an array of
+GridStore object names</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is the callback function</li>
+</ul>
+</div>
+<div class="section" id="closing-the-gridstore">
+<h2>Closing the GridStore<a class="headerlink" href="#closing-the-gridstore" title="Permalink to this headline">¶</a></h2>
+<p>GridStore needs to be closed after usage. This can be done with
+<tt class="docutils literal"><span class="pre">close</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="check-the-existance-of-a-gridstore-file">
+<h2>Check the existance of a GridStore file<a class="headerlink" href="#check-the-existance-of-a-gridstore-file" title="Permalink to this headline">¶</a></h2>
+<p>Checking if a file exists in GridFS can be done with <tt class="docutils literal"><span class="pre">exist</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mongodb</span><span class="o">.</span><span class="n">GridStore</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">db</span></tt> is the database object</li>
+<li><tt class="docutils literal"><span class="pre">filename</span></tt> is the name of the file to be checked or a regular
+expression</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is a callback function with two parameters - an error
+object (if an error occured) and a boolean value indicating if the
+file exists or not</li>
+</ul>
+</div>
+<div class="section" id="seeking-in-a-gridstore">
+<h2>Seeking in a GridStore<a class="headerlink" href="#seeking-in-a-gridstore" title="Permalink to this headline">¶</a></h2>
+<p>Seeking can be done with <tt class="docutils literal"><span class="pre">seek</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This function moves the internal pointer to the specified position.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">GridStore</a><ul>
+<li><a class="reference internal" href="#open-gridstore">Open GridStore</a></li>
+<li><a class="reference internal" href="#writing-to-gridstore">Writing to GridStore</a></li>
+<li><a class="reference internal" href="#writing-a-file-to-gridstore">Writing a file to GridStore</a></li>
+<li><a class="reference internal" href="#reading-from-gridstore">Reading from GridStore</a></li>
+<li><a class="reference internal" href="#streaming-from-gridstore">Streaming from GridStore</a></li>
+<li><a class="reference internal" href="#delete-a-gridstore">Delete a GridStore</a></li>
+<li><a class="reference internal" href="#closing-the-gridstore">Closing the GridStore</a></li>
+<li><a class="reference internal" href="#check-the-existance-of-a-gridstore-file">Check the existance of a GridStore file</a></li>
+<li><a class="reference internal" href="#seeking-in-a-gridstore">Seeking in a GridStore</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

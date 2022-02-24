@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/img/favicon.png">
+
+    <title>Indexes</title>
+
+    <link href="/node-mongodb-native/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+
+  <section id="container" class="">
+
+
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+
+            <a href="/node-mongodb-native/" class="logo"><img src="/node-mongodb-native/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> Indexes </h1>
+            </div>
+      </header>
+
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+
+        <ul class="sidebar-menu">
+
+
+
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+
+                <span>schema design</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+
+                    <li><a href="/node-mongodb-native/schema/chapter1/"> Introduction </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter2/"> Schema Basics </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter3/"> MongoDB Storage </a> </li>
+
+                    <li class="active"><a href="/node-mongodb-native/schema/chapter4/"> Indexes </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter5/"> Metadata </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter6/"> Time Series </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter7/"> Queues </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter8/"> Nested Categories </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter9/"> Account Transactions </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter10/"> Shopping Cart </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter11/"> Sharding </a> </li>
+
+                </ul>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>2.0 driver docs</span>
+                </a>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>1.4 driver docs</span>
+                </a>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>Core driver docs</span>
+                </a>
+
+              </li>
+
+            <li> <a href="https://groups.google.com/forum/#!forum/learn-mongo-db-the-hardway" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+
+
+        </ul>
+
+    </div>
+</aside>
+
+
+
+
+      <section id="main-content">
+          <section class="wrapper">
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <div class="row">
+                  <div class="col-md-1">
+
+
+                      <a class="navigation prev" href="/schema/chapter3">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+
+
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+
+
+
+                    <div class="panel-body">
+
+
+
+<h1 id="indexes:0336f6e2875b14063cc3d24d40aee459">Indexes</h1>
+
+<p><img src="/images/originals/btree.png" alt="A Btree Example, http://commons.wikimedia.org/wiki/File:Btree.png" />
+</p>
+
+<p>Indexes are the root to high performance in MongoDB, as it allows the database to search through less documents to satisfy a query. Without an index MongoDB has to scan through all of the documents to ensure it has answered the query correctly.</p>
+
+<p>An index increases the amount of storage needed to represent a document and the time it takes to insert a document, trading it against faster search time for the terms in the document indexed.</p>
+
+<p>One of the core issues to remember about indexes is that they are <strong>inclusive</strong>. That means they can only answer questions about documents that have been included in the index.</p>
+
+<blockquote>
+<p><strong>Index Gotchas</strong></p>
+
+<p><strong>$nin</strong> and <strong>$ne</strong> queries that cannot be answered by indexes and force collection scans. If you need to use these ensure you are filtering down using indexes as much as possible leaving the <strong>$nin</strong> and <strong>$ne</strong> terms to the very last part of the query selector.</p>
+</blockquote>
+
+<p>MongoDB have several types of indexes</p>
+
+<ul>
+<li>Single field indexes</li>
+<li>Compound indexes</li>
+<li>Multikey indexes</li>
+<li>Geo-spatial indexes</li>
+<li>Text indexes</li>
+</ul>
+
+<p>It also supports a couple of variations of the above indexes</p>
+
+<ul>
+<li>Sparse indexes</li>
+<li>Unique indexes</li>
+<li>Time To Live indexes</li>
+<li>Covered Indexes</li>
+</ul>
+
+<h2 id="single-field-indexes:0336f6e2875b14063cc3d24d40aee459">Single field indexes</h2>
+
+<p>Take the following document</p>
+
+<pre><code class="language-js">{
+  _id: ObjectId(&quot;523cba3c73a8049bcdbf6007&quot;),
+  name: 'Peter Jackson',
+  age: 50,
+  nationality: &quot;New Zealand&quot;,
+  address: {
+    street: &quot;Some Street 22&quot;
+  },
+  department: {
+    floor: 1,
+    building: 1
+  }
+}
+</code></pre>
+
+<p>Let&rsquo;s look at the different ways we can apply a single field index</p>
+
+<pre><code class="language-js">var values = db.getSisterDB(&quot;indexes&quot;).values;
+values.ensureIndex({name: 1});
+</code></pre>
+
+<p>This indexes the name field in ascending order.</p>
+
+<pre><code class="language-js">var values = db.getSisterDB(&quot;indexes&quot;).values;
+values.ensureIndex({&quot;address.street&quot;: 1});
+</code></pre>
+
+<p>This indexes the <strong>street</strong> field in the embedded document under the <strong>address</strong> field.</p>
+
+<pre><code class="language-js">var values = db.getSisterDB(&quot;indexes&quot;).values;
+values.ensureIndex({department: 1});
+</code></pre>
+
+<p>This indexes the <strong>department</strong> subdocument allowing for strict equality matches on the subdocument. That is to say it will only match on the query for a subdocument that contains all the fields in the indexed subdocument.</p>
+
+<pre><code class="language-js">var values = db.getSisterDB(&quot;indexes&quot;).values;
+values.findOne({department: {floor: 1, building: 1}});
+</code></pre>
+
+<h2 id="compound-indexes:0336f6e2875b14063cc3d24d40aee459">Compound indexes</h2>
+
+<p>A compound index is an index that contains references to multiple fields within a document.</p>
+
+<pre><code class="language-js">var values = db.getSisterDB(&quot;indexes&quot;).values;
+values.ensureIndex({nationality: 1, age: -1, name: 1});
+</code></pre>
+
+<p>The compound indexes have some interesting properties. Obviously the index is usable if you have a query that includes nationality, age and name. But it&rsquo;s also able to answer other queries using the index.</p>
+
+<ol>
+<li>Any query starting with nationality</li>
+<li>Any query starting with nationality and age</li>
+<li>Any query starting with nationality, age and name</li>
+<li>Any query starting with nationality and name</li>
+</ol>
+
+<p>The reason is that for compound indexes order matters as we match from left to right. F.ex if you reverse a query to start with name and age it will not match the order of fields in the compound index and MongoDB is not able to use the index.</p>
+
+<blockquote>
+<p><strong>Compound Index Field Order</strong></p>
+
+<p>Always make sure the order of fields in a compound index match the order of fields in the queries you want to execute against the collection.</p>
+</blockquote>
+
+<p>One additional note about using a compound index is about sorting. The ordering and direction of fields in a compound index decide if it&rsquo;s possible to use the index in the query as well as for the sort.</p>
+
+<p>Given the index above of <strong>{nationality: 1, age: -1, name: 1}</strong> we can support the following sorts using the index.</p>
+
+<pre><code class="language-js">var values = db.getSisterDB(&quot;indexes&quot;).values;
+values.find().sort({nationality: 1, age: -1}).toArray();
+values.find().sort({nationality: -1, age: 1}).toArray();
+values.find().sort({nationality: -1, age: 1, name: -1}).toArray();
+values.find().sort({nationality: 1, age: -1, name: 1}).toArray();
+</code></pre>
+
+<p>Sort can use the index if they match the order specified or the exact reverse order specified but not otherwise.</p>
+
+<h2 id="multikey-indexes:0336f6e2875b14063cc3d24d40aee459">Multikey indexes</h2>
+
+<p>Multikey indexes lets MongoDB index arrays of values. Take the following document.</p>
+
+<pre><code class="language-json">{
+  &quot;title&quot;: &quot;Superman&quot;,
+  &quot;tags&quot;: [&quot;comic&quot;, &quot;action&quot;, &quot;xray&quot;],
+  &quot;issues&quot;: [
+    {
+      &quot;number&quot;: 1,
+      &quot;published_on&quot;: &quot;June 1938&quot;
+    }
+  ]
+}
+</code></pre>
+
+<p>Multikey indexes lets us search on the values in the <strong>tags</strong> array as well as in the <strong>issues</strong> array. Let&rsquo;s create two indexes to cover both.</p>
+
+<pre><code class="language-js">var comics = db.getSisterDB(&quot;store&quot;).comics;
+comics.ensureIndex({tags: 1});
+comics.ensureIndex({issues: 1});
+</code></pre>
+
+<p>The two indexes lets you do exact matches on values in the <strong>tags</strong> and <strong>issues</strong> arrays of values.</p>
+
+<pre><code class="language-js">var comics = db.getSisterDB(&quot;store&quot;).comics;
+comics.find({tags: &quot;action&quot;});
+comics.find({issues: {number: 1, published_on: &quot;June 1938&quot;}}).toArray();
+</code></pre>
+
+<p>The first query will use the index on <strong>tags</strong> to return the document. The second query will use the index on <strong>issues</strong> to return the document. One thing to notice about the second query is that it&rsquo;s dependent on the order of the fields in the documents indexed. Meaning that if the <strong>number</strong> and <strong>published_on</strong> field change order the second query would fail. If the document changes structure it would be better to create a specific compound index on the fields needed in sub element documents. A better index would be.</p>
+
+<pre><code class="language-js">var comics = db.getSisterDB(&quot;store&quot;).comics;
+comics.ensureIndex({&quot;issues.number&quot;:1, &quot;issues.published_on&quot;:1});
+</code></pre>
+
+<p>To use the index correctly the second query can be issues as.</p>
+
+<pre><code class="language-js">var comics = db.getSisterDB(&quot;store&quot;).comics;
+comics.find({
+  &quot;issues.number&quot;:1,
+  &quot;issues.published_on&quot;: &quot;June 1938&quot;}).toArray()
+</code></pre>
+
+<h2 id="geospatial-indexes:0336f6e2875b14063cc3d24d40aee459">Geospatial indexes</h2>
+
+<p>MongoDB offers several a couple of Geospatial indexes. The indexes makes it possible to perform efficient Geospatial queries.</p>
+
+<h3 id="specialized-2d-sphere-index:0336f6e2875b14063cc3d24d40aee459">Specialized 2d Sphere index</h3>
+
+<p>The 2d Geospatial Sphere index allows to perform queries on a earth-like sphere making for better accuracy in matching locations.</p>
+
+<p>Take the following example document.</p>
+
+<pre><code class="language-json">{
+  loc: {
+    type: &quot;Point&quot;,
+    coordinates: [60, 79]
+  },
+  type: &quot;house&quot;
+}
+</code></pre>
+
+<p>Create a 2dsphere index.</p>
+
+<pre><code class="language-js">var locations = db.getSisterDB(&quot;geo&quot;).locations;
+locations.ensureIndex({loc: &quot;2dsphere&quot;, house: 1});
+</code></pre>
+
+<p>Query the index using a square box and the type.</p>
+
+<pre><code class="language-js">var locations = db.getSisterDB(&quot;geo&quot;).locations;
+locations.find({loc: {
+    $geoWithin: {
+      $geometry: {
+        type: &quot;Polygon&quot;,
+        coordinates: [[
+          [ 0 , 0 ] , [ 0 , 80 ] , [ 80 , 80 ] , [ 80 , 0 ] , [ 0 , 0 ]
+        ]]
+      }
+    }
+  }}).toArray();
+</code></pre>
+
+<blockquote>
+<p><strong>Gotchas 2dsphere</strong></p>
+
+<p>The 2d sphere index is a pure GeoSpatial index and is limited to the ranges for latitude (-90 - 90) and longitude (-180 to 180). It also only accepts <strong>$geometry</strong> like queries and supports a subset of the 2d index. In return it&rsquo;s faster and more accurate than the general 2d index.</p>
+</blockquote>
+
+<h3 id="general-2d-index:0336f6e2875b14063cc3d24d40aee459">General 2d index</h3>
+
+<p>The 2d index is a flat index that does not take into consideration any projection. One of the benefits of the 2d index is that it allows to set lower and upper bounds for the coordinate system as well as the search resolution. This makes the index a general 2d index.</p>
+
+<p>Let&rsquo;s add a sample document.</p>
+
+<pre><code class="language-json">var houses = db.getSisterDB(&quot;2d&quot;).houses;
+houses.insert({
+  price_room: [10000, 3],
+  type: &quot;house&quot;
+});
+</code></pre>
+
+<p>Notice that the price_room is just an array. This is because the 2d index is not inherently tied to the GeoJSON format in the same way as the 2dsphere index.</p>
+
+<p>Let&rsquo;s create a 2d index.</p>
+
+<pre><code class="language-js">var houses = db.getSisterDB(&quot;2d&quot;).houses;
+houses.ensureIndex({price_room: &quot;2d&quot;}, { min: 0, max: 200000, bits: 32 });
+</code></pre>
+
+<p>Now let&rsquo;s look for all houses that fall inside the range of 2000 to 20000 in price and has 0 to 5 rooms.</p>
+
+<pre><code class="language-js">db.houses.find( { price_room :
+  { $geoWithin : {
+      $box : [ [ 2000 , 0 ] , [ 20000 , 5 ] ]
+    }
+  }
+}).toArray();
+</code></pre>
+
+<blockquote>
+<p><strong>2d indexes</strong></p>
+
+<p>The <strong>min</strong> and <strong>max</strong> values lets you project any 2d data with numeric values into a 2d index where you can use geo queries like $near, $box etc to cut and slice the data. Once one realizes it&rsquo;s a generalized 2d index it becomes very useful for a range of shape queries not easily done using the normal query operators.</p>
+</blockquote>
+
+<h2 id="text-indexes:0336f6e2875b14063cc3d24d40aee459">Text indexes</h2>
+
+<p>From 2.6 on text search is integrated into the MongoDB query language (In 2.4 it was available as beta command). It relies on an underlying text index.</p>
+
+<p>Let&rsquo;s insert some sample documents.</p>
+
+<pre><code class="language-js">var entries = db.getSisterDB(&quot;blogs&quot;).entries;
+entries.insert( {
+  title : &quot;my blog post&quot;,
+  text : &quot;i am writing a blog. yay&quot;,
+  site: &quot;home&quot;,
+  language: &quot;english&quot; });
+entries.insert( {
+  title : &quot;my 2nd post&quot;,
+  text : &quot;this is a new blog i am typing. yay&quot;,
+  site: &quot;work&quot;,
+  language: &quot;english&quot; });
+entries.insert( {
+  title : &quot;knives are Fun&quot;,
+  text : &quot;this is a new blog i am writing. yay&quot;,
+  site: &quot;home&quot;,
+  language: &quot;english&quot; });
+</code></pre>
+
+<p>Let&rsquo;s define create the text index.</p>
+
+<pre><code class="language-js">var entries = db.getSisterDB(&quot;blogs&quot;).entries;
+entries.ensureIndex({title: &quot;text&quot;, text: &quot;text&quot;}, { weights: {
+    title: 10,
+    text: 5
+  },
+  name: &quot;TextIndex&quot;,
+  default_language: &quot;english&quot;,
+  language_override: &quot;language&quot; });
+</code></pre>
+
+<p>This <strong>ensureIndex</strong> command shows how weights can be used to control the weighting of fields. In this case any search that matches <strong>title</strong> should be ranked higher than a match in the <strong>text</strong> field. We also pass in a <strong>name</strong> parameter that allows to give the index a custom name. The <strong>default_language</strong> specifies that any document missing a specific language field should default to <strong>english</strong>. The option <strong>language_override</strong> tells the text index to look for individual documents language definition under the <strong>language</strong> field. If the <strong>language</strong> field for a specific document is set to f.ex spanish, MongoDB will index it using the spanish stop list and stemming.</p>
+
+<p>Now let&rsquo;s query for all the blog entries that contain the **blog(()) word and filter by the site field.</p>
+
+<pre><code class="language-js">var entries = db.getSisterDB(&quot;blogs&quot;).entries;
+entries.find({$text: {$search: &quot;blog&quot;}, site: &quot;home&quot;})
+</code></pre>
+
+<p>The query matches all the documents that contain the word <strong>blog</strong> in either the <strong>title</strong> or <strong>text</strong> field and then filters them by the <strong>site</strong> field. To include the individual search scores modify the query slightly.</p>
+
+<pre><code class="language-js">var entries = db.getSisterDB(&quot;blogs&quot;).entries;
+entries.find({$text: {$search: &quot;blog&quot;}, site: &quot;home&quot;},
+  {score: {$meta: &quot;textScore&quot;}}).sort({score: {$meta: &quot;textScore&quot;}});
+</code></pre>
+
+<p>The query includes the score given to the individual documents and sorts them in descending order by the <strong>score</strong>.</p>
+
+<blockquote>
+<p><strong>Text Indexes Can Get Big</strong></p>
+
+<p>Text indexes can grow to be bigger than the actual stored documents and can take a while to build if the collection is big. They also add additional overhead to writes such as inserts and updates compared to simpler indexes.</p>
+</blockquote>
+
+<h2 id="sparse-indexes:0336f6e2875b14063cc3d24d40aee459">Sparse indexes</h2>
+
+<p>Sparse indexes are indexes where no values are included for fields that do not exist. Take the following two documents.</p>
+
+<pre><code class="language-js">var sparse = db.getSisterDB(&quot;indexes&quot;).sparse;
+sparse.insert({ hello: &quot;world&quot;, number: 1 });
+sparse.insert({ hello: &quot;world&quot; });
+</code></pre>
+
+<p>A non-sparse index for the field <strong>number</strong> will contain an entry for both documents in the index. A sparse index will contain only the documents that contains the <strong>number</strong> field. This saves memory and disk space for the index in comparison to a normal field level index.</p>
+
+<p>To create a sparse index.</p>
+
+<pre><code class="language-js">var sparse = db.getSisterDB(&quot;indexes&quot;).sparse;
+sparse.ensureIndex({number: 1}, {sparse: true});
+</code></pre>
+
+<h2 id="unique-indexes:0336f6e2875b14063cc3d24d40aee459">Unique indexes</h2>
+
+<p>An unique index is different from a normal index in that it only allows a single document to exist for a field value. Let&rsquo;s define the index for a field.</p>
+
+<pre><code class="language-js">var unique = db.getSisterDB(&quot;indexes&quot;).unique;
+unique.ensureIndex({number: 1}, {unique: true});
+</code></pre>
+
+<p>Now let&rsquo;s try to insert some documents</p>
+
+<pre><code class="language-js">var unique = db.getSisterDB(&quot;indexes&quot;).unique;
+unique.insert({ hello: &quot;world&quot;, number: 1 });
+unique.insert({ hello: &quot;world&quot;, number: 1 });
+</code></pre>
+
+<p>The second insert will fail as there is already a document with the field <strong>number</strong> equal to <strong>1</strong>.</p>
+
+<h2 id="time-to-live-indexes:0336f6e2875b14063cc3d24d40aee459">Time To Live indexes</h2>
+
+<p>Time to live indexes (TTL) are a special type of index that will remove documents that fail to meet the index condition. One use for TTL indexes is for a cache of documents, allowing old documents to be gradually removed by MongoDB instead of bulk removing documents with an external process.</p>
+
+<p>Let&rsquo;s insert some documents.</p>
+
+<pre><code class="language-js">var ttl = db.getSisterDB(&quot;indexes&quot;).ttl;
+ttl.insert({ created_on: new Date() });
+</code></pre>
+
+<p>Let&rsquo;s define an a TTL index on <strong>created_on</strong> with a expire time of <strong>1000</strong> seconds in the future.</p>
+
+<pre><code class="language-js">var ttl = db.getSisterDB(&quot;indexes&quot;).ttl;
+ttl.ensureIndex({created_on: 1}, {expireAfterSeconds: 1000});
+</code></pre>
+
+<p>When the documents cross the <strong>created_on + 1000 seconds</strong> they will get removed.</p>
+
+<blockquote>
+<p><strong>Notes about TTL</strong></p>
+
+<p>The <strong>expireAfterSeconds</strong> is not a hard limit. MongoDB will remove and expired documents once it has time to do it. So the actual time of removal might vary.</p>
+</blockquote>
+
+<h2 id="covered-indexes:0336f6e2875b14063cc3d24d40aee459">Covered Indexes</h2>
+
+<p>Covered indexes are queries that can be answered using only the information stored in the index. Basically MongoDB answers the index using the fields stored in a covered index. Let&rsquo;s insert some documents.</p>
+
+<pre><code class="language-js">var covered = db.getSisterDB(&quot;indexes&quot;).covered;
+covered.insert({ text: &quot;hello&quot;, site: &quot;home&quot;});
+covered.insert({ text: &quot;hello&quot;, site: &quot;work&quot; });
+</code></pre>
+
+<p>Let&rsquo;s define the covered index.</p>
+
+<pre><code class="language-js">var covered = db.getSisterDB(&quot;indexes&quot;).covered;
+covered.ensureIndex({text: 1, site: 1});
+</code></pre>
+
+<p>Let&rsquo;s perform a covered index query.</p>
+
+<pre><code class="language-js">var covered = db.getSisterDB(&quot;indexes&quot;).covered;
+covered.find({text: &quot;hello&quot;}, {_id: 0, text:1, site:1});
+</code></pre>
+
+<p>Let&rsquo;s look at the query plan.</p>
+
+<pre><code class="language-js">var covered = db.getSisterDB(&quot;indexes&quot;).covered;
+covered.find({text: &quot;hello&quot;}, {_id: 0, text:1, site:1}).explain();
+</code></pre>
+
+<p>The results look like.</p>
+
+<pre><code class="language-json">{
+  &quot;cursor&quot; : &quot;BtreeCursor text_1_site_1&quot;,
+  &quot;isMultiKey&quot; : false,
+  &quot;n&quot; : 2,
+  &quot;nscannedObjects&quot; : 0,
+  &quot;nscanned&quot; : 2,
+  &quot;nscannedObjectsAllPlans&quot; : 0,
+  &quot;nscannedAllPlans&quot; : 2,
+  &quot;scanAndOrder&quot; : false,
+  &quot;indexOnly&quot; : true,
+  &quot;nYields&quot; : 0,
+  &quot;nChunkSkips&quot; : 0,
+  &quot;millis&quot; : 0,
+  ...
+  &quot;server&quot; : &quot;christkv.local:27017&quot;
+}
+</code></pre>
+
+<p>Notice how the query plan result includes <strong>indexOnly</strong> set to <strong>true</strong> meaning that the query was completely covered by the index and MongoDB never touched the documents.</p>
+
+<blockquote>
+<p><strong>Covered Index Gotchas</strong></p>
+
+<p>Noticed how <strong>{_id: 0, text:1, site:1}</strong> excludes <strong>_id</strong>. A covered index query cannot include the <strong>_id</strong> field.</p>
+</blockquote>
+
+
+
+                <div class="col-md-1">
+
+
+                    <a class="navigation next" href="/schema/chapter5">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+
+
+                </div>
+              </div>
+
+          </section>
+      </section>
+
+  </section>
+
+
+    <script src="/node-mongodb-native/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/js/bootstrap.min.js"></script>
+
+    <script src="/node-mongodb-native/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41953057-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

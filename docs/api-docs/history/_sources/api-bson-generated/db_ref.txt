@@ -1,0 +1,20 @@
+=======
+DBRef()
+=======
+
+------------------
+Constructor
+------------------
+
+
+A class representation of the BSON DBRef type.
+
+
+  .. js:class:: DBRef()
+
+   :param string namespace: the collection name.
+   :param objectid oid: the reference ObjectID.
+   :param string [db]: optional db name, if omitted the reference is local to the current db.
+   :returns: dbref 
+
+

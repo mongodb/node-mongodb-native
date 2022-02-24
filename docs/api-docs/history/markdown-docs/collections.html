@@ -1,0 +1,402 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Collections &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="collections">
+<h1>Collections<a class="headerlink" href="#collections" title="Permalink to this headline">¶</a></h1>
+<p>See also:</p>
+<ul class="simple">
+<li><a class="reference external" href="database.html">Database</a></li>
+<li><a class="reference external" href="queries.html">Queries</a></li>
+</ul>
+<div class="section" id="collection-objects">
+<h2>Collection objects<a class="headerlink" href="#collection-objects" title="Permalink to this headline">¶</a></h2>
+<p>Collection object is a pointer to a specific collection in the
+<a class="reference external" href="database.html">database</a>. If you want to <a class="reference external" href="insert.html">insert</a> new
+records or <a class="reference external" href="queries.html">query</a> existing ones then you need to have a
+valid collection object.</p>
+<p><strong>NB</strong> Collection names can&#8217;t start or end with a period nor contain a
+dollar sign! (<tt class="docutils literal"><span class="pre">.tes$t</span></tt> is not allowed)</p>
+</div>
+<div class="section" id="creating-collections">
+<h2>Creating collections<a class="headerlink" href="#creating-collections" title="Permalink to this headline">¶</a></h2>
+<p>Collections can be created with <tt class="docutils literal"><span class="pre">createCollection</span></tt></p>
+<div class="highlight-python"><pre>db.createCollection([[name[, options]], callback)</pre>
+</div>
+<p>where <tt class="docutils literal"><span class="pre">name</span></tt> is the name of the collection, options a set of
+configuration parameters and <tt class="docutils literal"><span class="pre">callback</span></tt> is a callback function. <tt class="docutils literal"><span class="pre">db</span></tt>
+is the database object.</p>
+<p>The first parameter for the callback is the error object (null if no
+error) and the second one is the pointer to the newly created
+collection. If strict mode is on and the table exists, the operation
+yields in error. With strict mode off (default) the function simple
+returns the pointer to the existing collection and does not truncate it.</p>
+<div class="highlight-python"><pre>db.createCollection("test", function(err, collection){
+    collection.insert({"test":"value"});
+});</pre>
+</div>
+</div>
+<div class="section" id="creating-collections-options">
+<h2>Creating collections options<a class="headerlink" href="#creating-collections-options" title="Permalink to this headline">¶</a></h2>
+<p>Several options can be passed to the <tt class="docutils literal"><span class="pre">createCollection</span></tt> function with
+<tt class="docutils literal"><span class="pre">options</span></tt> parameter.</p>
+<div class="highlight-python"><pre>* `raw` - driver returns documents as bson binary Buffer objects, `default:false`</pre>
+</div>
+<div class="section" id="collection-properties">
+<h3>Collection properties<a class="headerlink" href="#collection-properties" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">collectionName</span></tt> is the name of the collection (not including the
+database name as a prefix)</li>
+<li><tt class="docutils literal"><span class="pre">db</span></tt> is the pointer to the corresponding database object</li>
+</ul>
+<p>Example of usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s">&quot;Collection name: &quot;</span><span class="o">+</span><span class="n">collection</span><span class="o">.</span><span class="n">collectionName</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="list-existing-collections">
+<h2>List existing collections<a class="headerlink" href="#list-existing-collections" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="list-names">
+<h3>List names<a class="headerlink" href="#list-names" title="Permalink to this headline">¶</a></h3>
+<p>Collections can be listed with <tt class="docutils literal"><span class="pre">collectionNames</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">db</span><span class="o">.</span><span class="n">collectionNames</span><span class="p">(</span><span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if error occured)
+and an array of collection names as strings.</p>
+<p>Collection names also include database name, so a collection named
+<tt class="docutils literal"><span class="pre">posts</span></tt> in a database <tt class="docutils literal"><span class="pre">blog</span></tt> will be listed as <tt class="docutils literal"><span class="pre">blog.posts</span></tt>.</p>
+<p>Additionally there&#8217;s system collections which should not be altered
+without knowing exactly what you are doing, these sollections can be
+identified with <tt class="docutils literal"><span class="pre">system</span></tt> prefix. For example <tt class="docutils literal"><span class="pre">posts.system.indexes</span></tt>.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , format = require('util').format;
+
+MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+  if(err) throw err;
+  db.collectionNames(function(err, collections){
+      console.log(collections);
+  });
+});</pre>
+</div>
+</div>
+</div>
+<div class="section" id="list-collections">
+<h2>List collections<a class="headerlink" href="#list-collections" title="Permalink to this headline">¶</a></h2>
+<p>Collection objects can be listed with database method <tt class="docutils literal"><span class="pre">collections</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">db</span><span class="o">.</span><span class="n">collections</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where <tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error
+occured) and an array of collection objects.</p>
+</div>
+<div class="section" id="selecting-collections">
+<h2>Selecting collections<a class="headerlink" href="#selecting-collections" title="Permalink to this headline">¶</a></h2>
+<p>Existing collections can be opened with <tt class="docutils literal"><span class="pre">collection</span></tt></p>
+<div class="highlight-python"><pre>db.collection([[name[, options]], callback);</pre>
+</div>
+<p>If strict mode is off, then a new collection is created if not already
+present.</p>
+</div>
+<div class="section" id="selecting-collections-options">
+<h2>Selecting collections options<a class="headerlink" href="#selecting-collections-options" title="Permalink to this headline">¶</a></h2>
+<p>Several options can be passed to the <tt class="docutils literal"><span class="pre">collection</span></tt> function with
+<tt class="docutils literal"><span class="pre">options</span></tt> parameter.</p>
+<div class="highlight-python"><pre>* `raw` - driver returns documents as bson binary Buffer objects, `default:false`</pre>
+</div>
+</div>
+<div class="section" id="renaming-collections">
+<h2>Renaming collections<a class="headerlink" href="#renaming-collections" title="Permalink to this headline">¶</a></h2>
+<p>A collection can be renamed with collection method <tt class="docutils literal"><span class="pre">rename</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span> <span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Passing the optional dropTarget boolean as the thrid parameter will
+allow overwritting of existing collections</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span> <span class="p">{</span><span class="n">dropTarget</span><span class="p">:</span><span class="n">true</span><span class="p">},</span> <span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="removing-records-from-collections">
+<h2>Removing records from collections<a class="headerlink" href="#removing-records-from-collections" title="Permalink to this headline">¶</a></h2>
+<p>Records can be erased from a collection with <tt class="docutils literal"><span class="pre">remove</span></tt></p>
+<div class="highlight-python"><pre>collection.remove([[query[, options]], callback]);</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">query</span></tt> is the query that records to be removed need to match. If
+not set all records will be removed</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> indicate advanced options.</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> callback function that gets two parameters - an error
+object (if an error occured) and the count of removed records</li>
+</ul>
+</div>
+<div class="section" id="removing-collections">
+<h2>Removing collections<a class="headerlink" href="#removing-collections" title="Permalink to this headline">¶</a></h2>
+<p>A collection can be dropped with <tt class="docutils literal"><span class="pre">drop</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>or with <tt class="docutils literal"><span class="pre">dropCollection</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">db</span><span class="o">.</span><span class="n">dropCollection</span><span class="p">(</span><span class="n">collection_name</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Collections</a><ul>
+<li><a class="reference internal" href="#collection-objects">Collection objects</a></li>
+<li><a class="reference internal" href="#creating-collections">Creating collections</a></li>
+<li><a class="reference internal" href="#creating-collections-options">Creating collections options</a><ul>
+<li><a class="reference internal" href="#collection-properties">Collection properties</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#list-existing-collections">List existing collections</a><ul>
+<li><a class="reference internal" href="#list-names">List names</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#list-collections">List collections</a></li>
+<li><a class="reference internal" href="#selecting-collections">Selecting collections</a></li>
+<li><a class="reference internal" href="#selecting-collections-options">Selecting collections options</a></li>
+<li><a class="reference internal" href="#renaming-collections">Renaming collections</a></li>
+<li><a class="reference internal" href="#removing-records-from-collections">Removing records from collections</a></li>
+<li><a class="reference internal" href="#removing-collections">Removing collections</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

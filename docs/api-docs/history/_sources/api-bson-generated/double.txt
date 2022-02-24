@@ -1,0 +1,30 @@
+========
+Double()
+========
+
+------------------
+Constructor
+------------------
+
+
+A class representation of the BSON Double type.
+
+
+  .. js:class:: Double()
+
+   :param number value: the number we want to represent as a double.
+   :returns: double 
+
+
+
+-------
+valueOf
+-------
+
+
+Access the number value.
+
+.. js:function:: valueOf()
+
+   :returns: number returns the wrapped double number.
+

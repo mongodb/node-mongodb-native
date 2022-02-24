@@ -1,0 +1,389 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Binary JSON API &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="binary-json-api">
+<h1>Binary JSON API<a class="headerlink" href="#binary-json-api" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="objectid.html">ObjectID()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#tohexstring">toHexString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#gettimestamp">getTimestamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#objectid-createfromtime">ObjectID.createFromTime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#objectid-createfromhexstring">ObjectID.createFromHexString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#objectid-isvalid">ObjectID.isValid</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="binary.html">Binary()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#put">put</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#write">write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#read">read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#value">value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#length">length</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Code()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="code.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="db_ref.html">DBRef()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="db_ref.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="double.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double.html#valueof">valueOf</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="minkey.html">MinKey()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="minkey.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="maxkey.html">MaxKey()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="maxkey.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="symbol.html">Symbol()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="symbol.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symbol.html#valueof">valueOf</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="timestamp.html">Timestamp()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#toint">toInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#tonumber">toNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#tojson">toJSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#tostring">toString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#gethighbits">getHighBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#getlowbits">getLowBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#getlowbitsunsigned">getLowBitsUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#getnumbitsabs">getNumBitsAbs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#iszero">isZero</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#isnegative">isNegative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#isodd">isOdd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#notequals">notEquals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#lessthan">lessThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#lessthanorequal">lessThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#greaterthan">greaterThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#greaterthanorequal">greaterThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#compare">compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#negate">negate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#add">add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#subtract">subtract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#multiply">multiply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#div">div</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#modulo">modulo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#not">not</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#and">and</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#or">or</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#xor">xor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#shiftleft">shiftLeft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#shiftright">shiftRight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#shiftrightunsigned">shiftRightUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#timestamp-fromint">Timestamp.fromInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#timestamp-fromnumber">Timestamp.fromNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#timestamp-frombits">Timestamp.fromBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#timestamp-fromstring">Timestamp.fromString</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="long.html">Long()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="long.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#toint">toInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#tonumber">toNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#tojson">toJSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#tostring">toString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#gethighbits">getHighBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#getlowbits">getLowBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#getlowbitsunsigned">getLowBitsUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#getnumbitsabs">getNumBitsAbs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#iszero">isZero</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#isnegative">isNegative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#isodd">isOdd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#notequals">notEquals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#lessthan">lessThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#lessthanorequal">lessThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#greaterthan">greaterThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#greaterthanorequal">greaterThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#compare">compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#negate">negate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#add">add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#subtract">subtract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#multiply">multiply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#div">div</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#modulo">modulo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#not">not</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#and">and</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#or">or</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#xor">xor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#shiftleft">shiftLeft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#shiftright">shiftRight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#shiftrightunsigned">shiftRightUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#long-fromint">Long.fromInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#long-fromnumber">Long.fromNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#long-frombits">Long.fromBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#long-fromstring">Long.fromString</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bson.html">BSON()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#bson-calculateobjectsize">BSON.calculateObjectSize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#bson-serializewithbufferandindex">BSON.serializeWithBufferAndIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#bson-serialize">BSON.serialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#bson-deserializestream">BSON.deserializeStream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#bson-deserialize">BSON.deserialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#deserialize">deserialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#deserializestream">deserializeStream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#serialize">serialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#calculateobjectsize">calculateObjectSize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bson.html#serializewithbufferandindex">serializeWithBufferAndIndex</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Binary JSON API</a><ul>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

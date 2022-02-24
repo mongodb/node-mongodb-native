@@ -1,0 +1,723 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MongoClient or how to connect in a new and better way &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mongoclient-or-how-to-connect-in-a-new-and-better-way">
+<h1>MongoClient or how to connect in a new and better way<a class="headerlink" href="#mongoclient-or-how-to-connect-in-a-new-and-better-way" title="Permalink to this headline">¶</a></h1>
+<p>From driver version <strong>1.2</strong> we introduced a new connection Class that
+has the same name across all of our official drivers. This is to ensure
+that we present a recognizable front for all our API&#8217;s. This does not
+mean that your existing application will break, but rather that we
+encourage you to use the new connection api to simplify your application
+development.</p>
+<p>Furthermore, the new connection class <strong>MongoClient</strong> acknowledges all
+writes to MongoDB, in contrast to the existing connection class Db that
+has acknowledgements turned off. Let&#8217;s take a tour of the MongoClient
+functions.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">MongoClient</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">options</span><span class="p">);</span>
+
+<span class="n">MongoClient</span><span class="o">.</span><span class="n">prototype</span><span class="o">.</span><span class="n">open</span>
+
+<span class="n">MongoClient</span><span class="o">.</span><span class="n">prototype</span><span class="o">.</span><span class="n">close</span>
+
+<span class="n">MongoClient</span><span class="o">.</span><span class="n">prototype</span><span class="o">.</span><span class="n">db</span>
+
+<span class="n">MongoClient</span><span class="o">.</span><span class="n">connect</span>
+</pre></div>
+</div>
+<p>Outlined above is the complete MongoClient interface. The methods
+<strong>open</strong>, <strong>close</strong> and <strong>db</strong> work very similar to the existing methods
+on the <strong>Db</strong> class. The main difference is that the constructor is
+missing the <strong>database name</strong> from Db. Let&#8217;s show a simple connection
+using <strong>open</strong> as a code example speaks a thousand words.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , Server = require('mongodb').Server;
+
+var mongoClient = new MongoClient(new Server('localhost', 27017));
+mongoClient.open(function(err, mongoClient) {
+  var db1 = mongoClient.db("mydb");
+
+  mongoClient.close();
+});</pre>
+</div>
+<p>Notice that you configure the MongoClient just as you would have done
+the Db object. The main difference is that you access the db instances
+using the <strong>db</strong> method on the MongoClient object instead of using the
+Db instance directly as you would previously. MongoClient supports the
+same options as the previous Db instance you would have created.</p>
+<p>So, with a minimal change in our app, we can apply the new MongoClient
+connection code. But there is more and one direction you might consider
+int the future. That is the mongodb connection string.</p>
+<div class="section" id="the-url-connection-format">
+<h2>The URL connection format<a class="headerlink" href="#the-url-connection-format" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]</pre>
+</div>
+<p>The URL format is unified across official drivers from 10gen with some
+options not supported on some drivers due to natural reasons. The ones
+not supported by the Node.js driver are left out for simplicities sake.</p>
+<div class="section" id="basic-parts-of-the-url">
+<h3>Basic parts of the url<a class="headerlink" href="#basic-parts-of-the-url" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>mongodb://</strong> is a required prefix to identify that this is a string
+in the standard connection format.</li>
+<li><strong>username:password&#64;</strong> is optional. If given, the driver will attempt
+to login to a database after connecting to a database server.</li>
+<li><strong>host1</strong> is the only required part of the URI. It identifies either
+a hostname, IP address, or unix domain socket</li>
+<li><strong>:portX</strong> is optional and defaults to :27017 if not provided.</li>
+<li><strong>/database</strong> is the name of the database to login to and thus is
+only relevant if the username:password&#64; syntax is used. If not
+specified the &#8220;admin&#8221; database will be used by default.</li>
+<li><strong>?options</strong> are connection options. Note that if database is absent
+there is still a / required between the last host and the ?
+introducing the options. Options are name=value pairs and the pairs
+are separated by &#8220;&amp;&#8221;. For any unrecognized or unsupported option, a
+driver should log a warning and continue processing. A driver should
+not support any options that are not explicitly defined in this
+specification. This is in order to reduce the likelihood that
+different drivers will support overlapping that differ in small but
+incompatible ways (like different name, different values, or
+different default value).</li>
+</ul>
+</div>
+<div class="section" id="replica-set-configuration">
+<h3>Replica set configuration:<a class="headerlink" href="#replica-set-configuration" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>replicaSet=name</strong><ul>
+<li>The driver verifies that the name of the replica set it connects
+to matches this name. Implies that the hosts given are a seed
+list, and the driver will attempt to find all members of the set.</li>
+<li>No default value.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="connection-configuration">
+<h3>Connection Configuration:<a class="headerlink" href="#connection-configuration" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>ssl=true|false|prefer</strong><ul>
+<li>true: the driver initiates each connections with SSL</li>
+<li>false: the driver initiates each connection without SSL</li>
+<li>prefer: the driver tries to initiate each connection with SSL, and
+falls back to without SSL if it fails.</li>
+<li>Default value is false.</li>
+</ul>
+</li>
+<li><strong>connectTimeoutMS=ms</strong><ul>
+<li>How long a connection can take to be opened before timing out.</li>
+<li>Current driver behavior already differs on this, so the default
+must be left to each driver. For new implementations, the default
+should be to never timeout.</li>
+</ul>
+</li>
+<li><strong>socketTimeoutMS=ms</strong><ul>
+<li>How long a send or receive on a socket can take before timing out.</li>
+<li>Current driver behavior already differs on this, so the default
+must be left to each driver. For new implementations, the default
+should be to never timeout.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="connection-pool-configuration">
+<h3>Connection pool configuration:<a class="headerlink" href="#connection-pool-configuration" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>maxPoolSize=n:</strong> The maximum number of connections in the
+connection pool<ul>
+<li>Default value is 5</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="write-concern-configuration">
+<h3>Write concern configuration:<a class="headerlink" href="#write-concern-configuration" title="Permalink to this headline">¶</a></h3>
+<p>More detailed information about write concerns can be found at
+<a class="reference external" href="http://www.mongodb.org/display/DOCS/getLastError+Command">http://www.mongodb.org/display/DOCS/getLastError+Command</a></p>
+<ul class="simple">
+<li><strong>w=wValue</strong><ul>
+<li>For numeric values above 1, the driver adds { w : wValue } to the
+getLastError command.</li>
+<li>wValue is typically a number, but can be any string in order to
+allow for specifications like &#8220;majority&#8221;</li>
+<li>Default value is 1.</li>
+<li>wValue == -1 ignore network errors</li>
+<li>wValue == 0 no write acknowledgement</li>
+<li>wValue == 1 perform a write acknowledgement</li>
+<li>wValue == 2 perform a write acknowledgement across primary and one
+secondary</li>
+<li>wValue == &#8216;majority&#8217; perform a write acknowledgement across the
+majority of servers in the replicaset</li>
+<li>wValue == &#8216;tag name&#8217; perform a write acknowledgement against the
+replicaset tag name</li>
+</ul>
+</li>
+<li><strong>wtimeoutMS=ms</strong><ul>
+<li>The driver adds { wtimeout : ms } to the getlasterror command.</li>
+<li>Used in combination with w</li>
+<li>No default value</li>
+</ul>
+</li>
+<li><strong>journal=true|false</strong><ul>
+<li>true: Sync to journal.</li>
+<li>false: the driver does not add j to the getlasterror command</li>
+<li>Default value is false</li>
+</ul>
+</li>
+<li><strong>fsync=true|false</strong><ul>
+<li>true: Sync to disk.</li>
+<li>false: the driver does not add fsync to the getlasterror command</li>
+<li>Default value is false</li>
+<li>If conflicting values for fireAndForget, and any write concern are
+passed the driver should raise an exception about the conflict.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="auth-options">
+<h3>Auth options<a class="headerlink" href="#auth-options" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>authSource=string:</strong> Used when the user for authentication is
+stored in another database using indirect authentication.<ul>
+<li>Default value is null</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="read-preference">
+<h3>Read Preference<a class="headerlink" href="#read-preference" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><strong>slaveOk=true|false:</strong> Whether a driver connected to a replica set
+will send reads to slaves/secondaries.<ul>
+<li>Default value is false</li>
+</ul>
+</li>
+<li><strong>readPreference=enum:</strong> The read preference for this connection. If
+set, it overrides any slaveOk value.<ul>
+<li>Enumerated values:</li>
+<li>primary</li>
+<li>primaryPreferred</li>
+<li>secondary</li>
+<li>secondaryPreferred</li>
+<li>nearest</li>
+<li>Default value is primary</li>
+</ul>
+</li>
+<li><strong>readPreferenceTags=string.</strong> A representation of a tag set as a
+comma-separated list of colon-separated key-value pairs, e.g.
+<strong>dc:ny,rack:1</strong>. Spaces should be stripped from beginning and end of
+all keys and values. To specify a list of tag sets, using multiple
+readPreferenceTags, e.g.
+<strong>readPreferenceTags=dc:ny,rack:1&amp;readPreferenceTags=dc:ny&amp;readPreferenceTags=</strong><ul>
+<li>Note the empty value, it provides for fallback to any other
+secondary server if none is available</li>
+<li>Order matters when using multiple readPreferenceTags</li>
+<li>There is no default value</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="mongoclient-connect">
+<h2>MongoClient.connect<a class="headerlink" href="#mongoclient-connect" title="Permalink to this headline">¶</a></h2>
+<p>The url format can be used with MongoClient.connect. Where possible
+MongoClient will pick the best possible default values for options but
+they can be overridden. This includes setting <strong>auto_reconnect to
+true</strong> and <strong>native_parser to true if it&#8217;s available</strong>. Below are some
+example on how to connect to a single server a replicaset and a sharded
+system using <strong>MongoClient.connect</strong></p>
+<div class="section" id="the-single-server-connection">
+<h3>The single server connection<a class="headerlink" href="#the-single-server-connection" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/integration_test", function(err, db) {
+  test.equal(null, err);
+  test.ok(db != null);
+
+  db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+    test.equal(null, err);
+    test.equal(1, result);
+
+    db.close();
+    test.done();
+  });
+});</pre>
+</div>
+</div>
+<div class="section" id="a-replicaset-connect-using-no-acknowledgment-by-default-and-readpreference-for-secondary">
+<h3>A replicaset connect using no acknowledgment by default and readPreference for secondary<a class="headerlink" href="#a-replicaset-connect-using-no-acknowledgment-by-default-and-readpreference-for-secondary" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:30000,localhost:30001/integration_test_?w=0&amp;readPreference=secondary", function(err, db) {
+  test.equal(null, err);
+  test.ok(db != null);
+
+  db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+    test.equal(null, err);
+    test.equal(1, result);
+
+    db.close();
+    test.done();
+  });
+});</pre>
+</div>
+</div>
+<div class="section" id="a-sharded-connect-using-no-acknowledgment-by-default-and-readpreference-for-secondary">
+<h3>A sharded connect using no acknowledgment by default and readPreference for secondary<a class="headerlink" href="#a-sharded-connect-using-no-acknowledgment-by-default-and-readpreference-for-secondary" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:50000,localhost:50001/integration_test_?w=0&amp;readPreference=secondary", function(err, db) {
+  test.equal(null, err);
+  test.ok(db != null);
+
+  db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+    test.equal(null, err);
+    test.equal(1, result);
+
+    db.close();
+    test.done();
+  });
+});</pre>
+</div>
+<p>Notice that when connecting to the sharded system it&#8217;s pretty much the
+same url as for connecting to the replicaset. This is because the driver
+itself figures out if it&#8217;s a replicaset or a set of Mongos proxies it&#8217;s
+connecting to. No special care is needed to specify if it&#8217;s one or the
+other. This is in contrast to having to use the <strong>ReplSet</strong> or
+<strong>Mongos</strong> instances when using the <strong>open</strong> command.</p>
+</div>
+</div>
+<div class="section" id="mongoclient-connection-pooling">
+<h2>MongoClient connection pooling<a class="headerlink" href="#mongoclient-connection-pooling" title="Permalink to this headline">¶</a></h2>
+<p>A Connection Pool is a cache of database connections maintained by the
+driver so that connections can be re-used when new connections to the
+database are required. To reduce the number of connection pools created
+by your application, we recommend calling <strong>MongoClient.connect once</strong>
+and reusing the database variable returned by the callback:</p>
+<div class="highlight-python"><pre>var express = require('express');
+var mongodb = require('mongodb');
+var app = express();
+
+var MongoClient = require('mongodb').MongoClient;
+var db;
+
+// Initialize connection once
+MongoClient.connect("mongodb://localhost:27017/integration_test", function(err, database) {
+  if(err) throw err;
+
+  db = database;
+
+  // Start the application after the database connection is ready
+  app.listen(3000);
+  console.log("Listening on port 3000");
+});
+
+// Reuse database object in request handlers
+app.get("/", function(req, res) {
+  db.collection("replicaset_mongo_client_collection").find({}, function(err, docs) {
+    docs.each(function(err, doc) {
+      if(doc) {
+        console.log(doc);
+      }
+      else {
+        res.end();
+      }
+    });
+  });
+});</pre>
+</div>
+</div>
+<div class="section" id="mongoclient-connect-options">
+<h2>MongoClient.connect options<a class="headerlink" href="#mongoclient-connect-options" title="Permalink to this headline">¶</a></h2>
+<p>The connect function also takes a hash of options divided into
+db/server/replset/mongos allowing you to tweak options not directly
+supported by the unified url string format. To use these options you do
+pass in a hash like this:</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/integration_test_?", {
+    db: {
+      native_parser: false
+    },
+    server: {
+      socketOptions: {
+        connectTimeoutMS: 500
+      }
+    },
+    replSet: {},
+    mongos: {}
+  }, function(err, db) {
+  test.equal(null, err);
+  test.ok(db != null);
+
+  db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+    test.equal(null, err);
+    test.equal(1, result);
+
+    db.close();
+    test.done();
+  });
+});</pre>
+</div>
+<p>Below are all the options supported for db/server/replset/mongos.</p>
+</div>
+<div class="section" id="db-a-hash-of-options-at-the-db-level-overriding-or-adjusting-functionality-not-supported-by-the-url">
+<h2>db: A hash of options at the db level overriding or adjusting functionality not supported by the url<a class="headerlink" href="#db-a-hash-of-options-at-the-db-level-overriding-or-adjusting-functionality-not-supported-by-the-url" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217;} the write concern for
+the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w
+= &#8216;majority&#8217; acknowledges the write</li>
+<li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write
+concern to finish (combines with w option)</li>
+<li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before
+returning</li>
+<li><strong>journal</strong>, (Boolean, default:false) write waits for journal sync
+before returning</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference
+(ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED,
+ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED,
+ReadPreference.NEAREST).</li>
+<li><strong>native_parser</strong> {Boolean, default:false}, use c++ bson parser.</li>
+<li><strong>forceServerObjectId</strong> {Boolean, default:false}, force server to
+create _id fields instead of client.</li>
+<li><strong>pkFactory</strong> {Object}, object overriding the basic ObjectID primary
+key generation.</li>
+<li><strong>serializeFunctions</strong> {Boolean, default:false}, serialize functions.</li>
+<li><strong>raw</strong> {Boolean, default:false}, perform operations using raw bson
+buffers.</li>
+<li><strong>recordQueryStats</strong> {Boolean, default:false}, record query
+statistics during execution.</li>
+<li><strong>retryMiliSeconds</strong> {Number, default:5000}, number of milliseconds
+between retries.</li>
+<li><strong>numberOfRetries</strong> {Number, default:5}, number of retries off
+connection.</li>
+<li><strong>bufferMaxEntries</strong> {Number, default: -1}, sets a cap on how many
+operations the driver will buffer up before giving up on getting a
+working connection, default is -1 which is unlimited.</li>
+</ul>
+</div>
+<div class="section" id="server-a-hash-of-options-at-the-server-level-not-supported-by-the-url">
+<h2>server: A hash of options at the server level not supported by the url.<a class="headerlink" href="#server-a-hash-of-options-at-the-server-level-not-supported-by-the-url" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>readPreference</strong> {String, default:null}, set&#8217;s the read preference
+(ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED,
+ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED,
+ReadPreference.NEAREST)</li>
+<li><strong>ssl</strong> {Boolean, default:false}, use ssl connection (needs to have a
+mongod server with ssl support)</li>
+<li><strong>slaveOk</strong> {Boolean, default:false}, legacy option allowing reads
+from secondary, use <strong>readPrefrence</strong> instead.</li>
+<li><strong>poolSize</strong> {Number, default:1}, number of connections in the
+connection pool, set to 1 as default for legacy reasons.</li>
+<li><strong>socketOptions</strong> {Object, default:null}, an object containing socket
+options to use (noDelay:(boolean), keepAlive:(number),
+connectTimeoutMS:(number), socketTimeoutMS:(number))</li>
+<li><strong>logger</strong> {Object, default:null}, an object representing a logger
+that you want to use, needs to support functions debug, log, error
+<strong>({error:function(message, object) {}, log:function(message, object)
+{}, debug:function(message, object) {}})</strong>.</li>
+<li><strong>auto_reconnect</strong> {Boolean, default:false}, reconnect on error.</li>
+<li><strong>disableDriverBSONSizeCheck</strong> {Boolean, default:false}, force the
+server to error if the BSON message is to big</li>
+</ul>
+</div>
+<div class="section" id="replset-a-hash-of-options-at-the-replset-level-not-supported-by-the-url">
+<h2>replSet: A hash of options at the replSet level not supported by the url.<a class="headerlink" href="#replset-a-hash-of-options-at-the-replset-level-not-supported-by-the-url" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>ha</strong> {Boolean, default:true}, turn on high availability.</li>
+<li><strong>haInterval</strong> {Number, default:2000}, time between each replicaset
+status check.</li>
+<li><strong>reconnectWait</strong> {Number, default:1000}, time to wait in
+milliseconds before attempting reconnect.</li>
+<li><strong>retries</strong> {Number, default:30}, number of times to attempt a
+replicaset reconnect.</li>
+<li><strong>rs_name</strong> {String}, the name of the replicaset to connect to.</li>
+<li><strong>socketOptions</strong> {Object, default:null}, an object containing socket
+options to use (noDelay:(boolean), keepAlive:(number),
+connectTimeoutMS:(number), socketTimeoutMS:(number))</li>
+<li><strong>readPreference</strong> {String}, the preferred read preference
+(ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED,
+ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED,
+ReadPreference.NEAREST).</li>
+<li><strong>strategy</strong> {String, default:null}, selection strategy for reads
+choose between (ping and statistical, default is round-robin)</li>
+<li><strong>secondaryAcceptableLatencyMS</strong> {Number, default:15}, sets the range
+of servers to pick when using NEAREST (lowest ping ms + the latency
+fence, ex: range of 1 to (1 + 15) ms)</li>
+<li><strong>connectArbiter</strong> {Boolean, default:false}, sets if the driver
+should connect to arbiters or not.</li>
+</ul>
+</div>
+<div class="section" id="mongos-a-hash-of-options-at-the-mongos-level-not-supported-by-the-url">
+<h2>mongos: A hash of options at the mongos level not supported by the url.<a class="headerlink" href="#mongos-a-hash-of-options-at-the-mongos-level-not-supported-by-the-url" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>socketOptions</strong> {Object, default:null}, an object containing socket
+options to use (noDelay:(boolean), keepAlive:(number),
+connectTimeoutMS:(number), socketTimeoutMS:(number))</li>
+<li><strong>ha</strong> {Boolean, default:true}, turn on high availability, attempts
+to reconnect to down proxies</li>
+<li><strong>haInterval</strong> {Number, default:2000}, time between each replicaset
+status check.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">MongoClient or how to connect in a new and better way</a><ul>
+<li><a class="reference internal" href="#the-url-connection-format">The URL connection format</a><ul>
+<li><a class="reference internal" href="#basic-parts-of-the-url">Basic parts of the url</a></li>
+<li><a class="reference internal" href="#replica-set-configuration">Replica set configuration:</a></li>
+<li><a class="reference internal" href="#connection-configuration">Connection Configuration:</a></li>
+<li><a class="reference internal" href="#connection-pool-configuration">Connection pool configuration:</a></li>
+<li><a class="reference internal" href="#write-concern-configuration">Write concern configuration:</a></li>
+<li><a class="reference internal" href="#auth-options">Auth options</a></li>
+<li><a class="reference internal" href="#read-preference">Read Preference</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mongoclient-connect">MongoClient.connect</a><ul>
+<li><a class="reference internal" href="#the-single-server-connection">The single server connection</a></li>
+<li><a class="reference internal" href="#a-replicaset-connect-using-no-acknowledgment-by-default-and-readpreference-for-secondary">A replicaset connect using no acknowledgment by default and readPreference for secondary</a></li>
+<li><a class="reference internal" href="#a-sharded-connect-using-no-acknowledgment-by-default-and-readpreference-for-secondary">A sharded connect using no acknowledgment by default and readPreference for secondary</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mongoclient-connection-pooling">MongoClient connection pooling</a></li>
+<li><a class="reference internal" href="#mongoclient-connect-options">MongoClient.connect options</a></li>
+<li><a class="reference internal" href="#db-a-hash-of-options-at-the-db-level-overriding-or-adjusting-functionality-not-supported-by-the-url">db: A hash of options at the db level overriding or adjusting functionality not supported by the url</a></li>
+<li><a class="reference internal" href="#server-a-hash-of-options-at-the-server-level-not-supported-by-the-url">server: A hash of options at the server level not supported by the url.</a></li>
+<li><a class="reference internal" href="#replset-a-hash-of-options-at-the-replset-level-not-supported-by-the-url">replSet: A hash of options at the replSet level not supported by the url.</a></li>
+<li><a class="reference internal" href="#mongos-a-hash-of-options-at-the-mongos-level-not-supported-by-the-url">mongos: A hash of options at the mongos level not supported by the url.</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

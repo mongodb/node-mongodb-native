@@ -1,0 +1,61 @@
+{
+"protocol_version": 2,
+"mtools_version": "1.6.4",
+"parsed_args": {
+"no_progressbar": false,
+"command": "init",
+"single": false,
+"replicaset": true,
+"nodes": 3,
+"arbiter": true,
+"name": "rs",
+"priority": false,
+"sharded": null,
+"config": 1,
+"csrs": true,
+"mongos": 1,
+"verbose": false,
+"port": 31000,
+"binarypath": null,
+"dir": "/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set",
+"hostname": "localhost",
+"auth": true,
+"username": "bob",
+"password": "pwd123",
+"auth_db": "admin",
+"auth_roles": [
+"dbAdminAnyDatabase",
+"readWriteAnyDatabase",
+"userAdminAnyDatabase",
+"clusterAdmin"
+],
+"auth_role_docs": false,
+"initial-user": true,
+"sslCAFile": null,
+"sslCRLFile": null,
+"sslAllowInvalidHostnames": false,
+"sslAllowInvalidCertificates": false,
+"sslMode": null,
+"sslPEMKeyFile": null,
+"sslPEMKeyPassword": null,
+"sslClusterFile": null,
+"sslClusterPassword": null,
+"sslDisabledProtocols": null,
+"sslAllowConnectionsWithoutCertificates": false,
+"sslFIPSMode": false,
+"sslClientCertificate": null,
+"sslClientPEMKeyFile": null,
+"sslClientPEMKeyPassword": null
+},
+"unknown_args": [
+"--enableMajorityReadConcern",
+"--setParameter",
+"enableTestCommands=1"
+],
+"startup_info": {
+"31000": "\"mongod\" --replSet rs --dbpath \"/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/rs/rs1/db\" --logpath \"/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/rs/rs1/mongod.log\" --port 31000 --fork --keyFile /Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/keyfile --enableMajorityReadConcern --setParameter \"enableTestCommands=1\"  --wiredTigerCacheSizeGB 1 ",
+"31001": "\"mongod\" --replSet rs --dbpath \"/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/rs/rs2/db\" --logpath \"/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/rs/rs2/mongod.log\" --port 31001 --fork --keyFile /Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/keyfile --enableMajorityReadConcern --setParameter \"enableTestCommands=1\"  --wiredTigerCacheSizeGB 1 ",
+"31002": "\"mongod\" --replSet rs --dbpath \"/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/rs/rs3/db\" --logpath \"/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/rs/rs3/mongod.log\" --port 31002 --fork --keyFile /Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/keyfile --enableMajorityReadConcern --setParameter \"enableTestCommands=1\"  --wiredTigerCacheSizeGB 1 ",
+"31003": "\"mongod\" --replSet rs --dbpath \"/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/rs/arb/db\" --logpath \"/Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/rs/arb/mongod.log\" --port 31003 --fork --keyFile /Users/bailey.pearson/dev/node-mongodb-native/data/replica_set/keyfile --enableMajorityReadConcern --setParameter \"enableTestCommands=1\"  --wiredTigerCacheSizeGB 1 "
+}
+}

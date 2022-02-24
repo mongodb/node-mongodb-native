@@ -1,0 +1,240 @@
+==========
+ObjectID()
+==========
+
+------------------
+Constructor
+------------------
+
+
+Create a new ObjectID instance
+
+
+  .. js:class:: ObjectID()
+
+   :param string id: Can be a 24 byte hex string, 12 byte binary string or a Number.
+   :returns: object instance of ObjectID.
+
+
+
+-----------
+toHexString
+-----------
+
+
+Return the ObjectID id as a 24 byte hex string representation
+
+.. js:function:: toHexString()
+
+   :returns: string return the 24 byte hex string representation.
+
+
+**Examples**
+
+  
+  
+  Generate a 24 character hex string representation of the ObjectID
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a new ObjectID
+     var objectId = new ObjectID();  
+     // Verify that the hex string is 24 characters long
+     assert.equal(24, objectId.toHexString().length);
+
+
+------
+equals
+------
+
+
+Compares the equality of this ObjectID with <code>otherID</code>.
+
+.. js:function:: equals(otherID)
+
+   :param object otherID: ObjectID instance to compare against.
+   :returns: bool the result of comparing two ObjectID's
+
+
+**Examples**
+
+  
+  
+  Compare two different ObjectID's using the equals method
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a new ObjectID
+     var objectId = new ObjectID();
+     // Create a new ObjectID Based on the first ObjectID
+     var objectId2 = new ObjectID(objectId.id);
+     // Create another ObjectID
+     var objectId3 = new ObjectID();
+     // objectId and objectId2 should be the same
+     assert.ok(objectId.equals(objectId2));
+     // objectId and objectId2 should be different
+     assert.ok(!objectId.equals(objectId3));
+
+
+------------
+getTimestamp
+------------
+
+
+Returns the generation date (accurate up to the second) that this ID was generated.
+
+.. js:function:: getTimestamp()
+
+   :returns: date the generation date
+
+
+**Examples**
+
+  
+  
+  Generate 12 byte binary string representation using a second based timestamp or
+  default value
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Get a timestamp in seconds
+     var timestamp = Math.floor(new Date().getTime()/1000);
+     // Create a date with the timestamp
+     var timestampDate = new Date(timestamp*1000);
+     
+     // Create a new ObjectID with a specific timestamp
+     var objectId = new ObjectID(timestamp);
+     
+     // Get the timestamp and validate correctness
+     assert.equal(timestampDate.toString(), objectId.getTimestamp().toString());
+
+
+-----------------------
+ObjectID.createFromTime
+-----------------------
+
+
+Creates an ObjectID from a second based number, with the rest of the ObjectID zeroed out. Used for comparisons or sorting the ObjectID.
+
+.. js:function:: ObjectID.createFromTime(time)
+
+   :param number time: an integer number representing a number of seconds.
+   :returns: objectid return the created ObjectID
+
+
+**Examples**
+
+  
+  
+  Show the usage of the Objectid createFromTime function
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var objectId = ObjectID.createFromTime(1);
+     assert.equal("000000010000000000000000", objectId.toHexString());
+
+
+----------------------------
+ObjectID.createFromHexString
+----------------------------
+
+
+Creates an ObjectID from a hex string representation of an ObjectID.
+
+.. js:function:: ObjectID.createFromHexString(hexString)
+
+   :param string hexString: create a ObjectID from a passed in 24 byte hexstring.
+   :returns: objectid return the created ObjectID
+
+
+**Examples**
+
+  
+  
+  Convert a ObjectID into a hex string representation and then back to an ObjectID
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     // Create a new ObjectID
+     var objectId = new ObjectID();
+     // Convert the object id to a hex string
+     var originalHex = objectId.toHexString();
+     // Create a new ObjectID using the createFromHexString function
+     var newObjectId = new ObjectID.createFromHexString(originalHex)
+     // Convert the new ObjectID back into a hex string using the toHexString function
+     var newHex = newObjectId.toHexString();
+     // Compare the two hex strings
+     assert.equal(originalHex, newHex);
+
+
+----------------
+ObjectID.isValid
+----------------
+
+
+Checks if a value is a valid bson ObjectId
+
+.. js:function:: ObjectID.isValid()
+
+   :returns: boolean return true if the value is a valid bson ObjectId, return false otherwise.
+

@@ -1,0 +1,450 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>mongodb</title>
+	<meta name="description" content="Documentation for mongodb">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">mongodb</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<h1>mongodb</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#mongodb-nodejs-driver" id="mongodb-nodejs-driver" style="color: inherit; text-decoration: none;">
+					<h1>MongoDB NodeJS Driver</h1>
+				</a>
+				<p>The official <a href="https://www.mongodb.com/">MongoDB</a> driver for Node.js.</p>
+				<p><strong>Upgrading to version 4? Take a look at our <a href="https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/CHANGES_4.0.0.md">upgrade guide here</a>!</strong></p>
+				<a href="#quick-links" id="quick-links" style="color: inherit; text-decoration: none;">
+					<h2>Quick Links</h2>
+				</a>
+				<table>
+					<thead>
+						<tr>
+							<th>what</th>
+							<th>where</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td>documentation</td>
+							<td><a href="https://docs.mongodb.com/drivers/node">docs.mongodb.com/drivers/node</a></td>
+						</tr>
+						<tr>
+							<td>api-doc</td>
+							<td><a href="https://mongodb.github.io/node-mongodb-native/4.0/">mongodb.github.io/node-mongodb-native/4.0/</a></td>
+						</tr>
+						<tr>
+							<td>npm package</td>
+							<td><a href="https://www.npmjs.com/package/mongodb">www.npmjs.com/package/mongodb</a></td>
+						</tr>
+						<tr>
+							<td>source</td>
+							<td><a href="https://github.com/mongodb/node-mongodb-native">github.com/mongodb/node-mongodb-native</a></td>
+						</tr>
+						<tr>
+							<td>mongodb</td>
+							<td><a href="https://www.mongodb.com">www.mongodb.com</a></td>
+						</tr>
+						<tr>
+							<td>changelog</td>
+							<td><a href="https://github.com/mongodb/node-mongodb-native/blob/4.1/HISTORY.md">HISTORY.md</a></td>
+						</tr>
+						<tr>
+							<td>upgrade to v4</td>
+							<td><a href="https://github.com/mongodb/node-mongodb-native/blob/4.0/docs/CHANGES_4.0.0.md">docs/CHANGES_4.0.0.md</a></td>
+						</tr>
+				</tbody></table>
+				<a href="#bugs--feature-requests" id="bugs--feature-requests" style="color: inherit; text-decoration: none;">
+					<h3>Bugs / Feature Requests</h3>
+				</a>
+				<p>Think you’ve found a bug? Want to see a new feature in <code>node-mongodb-native</code>? Please open a
+				case in our issue management tool, JIRA:</p>
+				<ul>
+					<li>Create an account and login <a href="https://jira.mongodb.org">jira.mongodb.org</a>.</li>
+					<li>Navigate to the NODE project <a href="https://jira.mongodb.org/browse/NODE">jira.mongodb.org/browse/NODE</a>.</li>
+					<li>Click <strong>Create Issue</strong> - Please provide as much information as possible about the issue type and how to reproduce it.</li>
+				</ul>
+				<p>Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the
+				Core Server (i.e. SERVER) project are <strong>public</strong>.</p>
+				<a href="#support--feedback" id="support--feedback" style="color: inherit; text-decoration: none;">
+					<h3>Support / Feedback</h3>
+				</a>
+				<p>For issues with, questions about, or feedback for the Node.js driver, please look into our <a href="https://docs.mongodb.com/manual/support">support channels</a>. Please do not email any of the driver developers directly with issues or questions - you&#39;re more likely to get an answer on the <a href="https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver">MongoDB Community Forums</a>.</p>
+				<a href="#change-log" id="change-log" style="color: inherit; text-decoration: none;">
+					<h3>Change Log</h3>
+				</a>
+				<p>Change history can be found in <a href="https://github.com/mongodb/node-mongodb-native/blob/4.0/HISTORY.md"><code>HISTORY.md</code></a>.</p>
+				<a href="#compatibility" id="compatibility" style="color: inherit; text-decoration: none;">
+					<h3>Compatibility</h3>
+				</a>
+				<p>For version compatibility matrices, please refer to the following links:</p>
+				<ul>
+					<li><a href="https://docs.mongodb.com/drivers/node/compatibility#mongodb-compatibility">MongoDB</a></li>
+					<li><a href="https://docs.mongodb.com/drivers/node/compatibility#language-compatibility">NodeJS</a></li>
+				</ul>
+				<a href="#typescript-version" id="typescript-version" style="color: inherit; text-decoration: none;">
+					<h4>Typescript Version</h4>
+				</a>
+				<p>We recommend using the latest version of typescript, however we do provide a <a href="https://github.com/sandersn/downlevel-dts#readme">downleveled</a> version of the type definitions that we test compiling against <code>typescript@4.0.2</code>.
+					Since typescript <a href="https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes">does not restrict breaking changes to major versions</a> we consider this support best effort.
+				If you run into any unexpected compiler failures please let us know and we will do our best to correct it.</p>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h2>Installation</h2>
+				</a>
+				<p>The recommended way to get started using the Node.js 4.0 driver is by using the <code>npm</code> (Node Package Manager) to install the dependency in your project.</p>
+				<p>After you&#39;ve created your own project using <code>npm init</code>, you can run:</p>
+				<pre><code class="language-bash"><span style="color: #000000">npm install mongodb</span>
+<span style="color: #008000"># or ...</span>
+<span style="color: #000000">yarn add mongodb</span>
+</code></pre>
+				<p>This will download the MongoDB driver and add a dependency entry in your <code>package.json</code> file.</p>
+				<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
+					<h2>Troubleshooting</h2>
+				</a>
+				<p>The MongoDB driver depends on several other packages. These are:</p>
+				<ul>
+					<li><a href="https://github.com/mongodb/js-bson">bson</a></li>
+					<li><a href="https://github.com/mongodb-js/bson-ext">bson-ext</a></li>
+					<li><a href="https://github.com/mongodb-js/kerberos">kerberos</a></li>
+					<li><a href="https://github.com/mongodb/libmongocrypt#readme">mongodb-client-encryption</a></li>
+				</ul>
+				<p>Some of these packages include native C++ extensions, consult the <a href="https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/native-extensions.md">trouble shooting guide here</a> if you run into issues.</p>
+				<a href="#quick-start" id="quick-start" style="color: inherit; text-decoration: none;">
+					<h2>Quick Start</h2>
+				</a>
+				<p>This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the <a href="https://docs.mongodb.com/drivers/node/">official documentation</a>.</p>
+				<a href="#create-the-packagejson-file" id="create-the-packagejson-file" style="color: inherit; text-decoration: none;">
+					<h3>Create the <code>package.json</code> file</h3>
+				</a>
+				<p>First, create a directory where your application will live.</p>
+				<pre><code class="language-bash"><span style="color: #000000">mkdir myProject</span>
+<span style="color: #795E26">cd</span><span style="color: #000000"> myProject</span>
+</code></pre>
+				<p>Enter the following command and answer the questions to create the initial structure for your new project:</p>
+				<pre><code class="language-bash"><span style="color: #000000">npm init -y</span>
+</code></pre>
+				<p>Next, install the driver as a dependency.</p>
+				<pre><code class="language-bash"><span style="color: #000000">npm install mongodb</span>
+</code></pre>
+				<a href="#start-a-mongodb-server" id="start-a-mongodb-server" style="color: inherit; text-decoration: none;">
+					<h3>Start a MongoDB Server</h3>
+				</a>
+				<p>For complete MongoDB installation instructions, see <a href="https://docs.mongodb.org/manual/installation/">the manual</a>.</p>
+				<ol>
+					<li>Download the right MongoDB version from <a href="https://www.mongodb.org/downloads">MongoDB</a></li>
+					<li>Create a database directory (in this case under <strong>/data</strong>).</li>
+					<li>Install and start a <code>mongod</code> process.</li>
+				</ol>
+				<pre><code class="language-bash"><span style="color: #000000">mongod --dbpath=/data</span>
+</code></pre>
+				<p>You should see the <strong>mongod</strong> process start up and print some status information.</p>
+				<a href="#connect-to-mongodb" id="connect-to-mongodb" style="color: inherit; text-decoration: none;">
+					<h3>Connect to MongoDB</h3>
+				</a>
+				<p>Create a new <strong>app.js</strong> file and add the following code to try out some basic CRUD
+				operations using the MongoDB driver.</p>
+				<p>Add code to connect to the server and the database <strong>myProject</strong>:</p>
+				<blockquote>
+					<p><strong>NOTE:</strong> All the examples below use async/await syntax.</p>
+					<p>However, all async API calls support an optional callback as the final argument,
+					if a callback is provided a Promise will not be returned.</p>
+				</blockquote>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">MongoClient</span><span style="color: #000000"> } = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;mongodb&#039;</span><span style="color: #000000">);</span>
+<span style="color: #008000">// or as an es module:</span>
+<span style="color: #008000">// import { MongoClient } from &#039;mongodb&#039;</span>
+
+<span style="color: #008000">// Connection URL</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">url</span><span style="color: #000000"> = </span><span style="color: #A31515">&#039;mongodb://localhost:27017&#039;</span><span style="color: #000000">;</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">client</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">MongoClient</span><span style="color: #000000">(</span><span style="color: #001080">url</span><span style="color: #000000">);</span>
+
+<span style="color: #008000">// Database Name</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">dbName</span><span style="color: #000000"> = </span><span style="color: #A31515">&#039;myProject&#039;</span><span style="color: #000000">;</span>
+
+<span style="color: #0000FF">async</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">main</span><span style="color: #000000">() {</span>
+<span style="color: #000000">  </span><span style="color: #008000">// Use connect method to connect to the server</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">client</span><span style="color: #000000">.</span><span style="color: #795E26">connect</span><span style="color: #000000">();</span>
+<span style="color: #000000">  </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Connected successfully to server&#039;</span><span style="color: #000000">);</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">db</span><span style="color: #000000"> = </span><span style="color: #001080">client</span><span style="color: #000000">.</span><span style="color: #795E26">db</span><span style="color: #000000">(</span><span style="color: #001080">dbName</span><span style="color: #000000">);</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">collection</span><span style="color: #000000"> = </span><span style="color: #001080">db</span><span style="color: #000000">.</span><span style="color: #795E26">collection</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;documents&#039;</span><span style="color: #000000">);</span>
+
+<span style="color: #000000">  </span><span style="color: #008000">// the following code examples can be pasted here...</span>
+
+<span style="color: #000000">  </span><span style="color: #AF00DB">return</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;done.&#039;</span><span style="color: #000000">;</span>
+<span style="color: #000000">}</span>
+
+<span style="color: #795E26">main</span><span style="color: #000000">()</span>
+<span style="color: #000000">  .</span><span style="color: #795E26">then</span><span style="color: #000000">(</span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #001080">log</span><span style="color: #000000">)</span>
+<span style="color: #000000">  .</span><span style="color: #795E26">catch</span><span style="color: #000000">(</span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000">)</span>
+<span style="color: #000000">  .</span><span style="color: #795E26">finally</span><span style="color: #000000">(() </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">client</span><span style="color: #000000">.</span><span style="color: #795E26">close</span><span style="color: #000000">());</span>
+</code></pre>
+				<p>Run your app from the command line with:</p>
+				<pre><code class="language-bash"><span style="color: #000000">node app.js</span>
+</code></pre>
+				<p>The application should print <strong>Connected successfully to server</strong> to the console.</p>
+				<a href="#insert-a-document" id="insert-a-document" style="color: inherit; text-decoration: none;">
+					<h3>Insert a Document</h3>
+				</a>
+				<p>Add to <strong>app.js</strong> the following function which uses the <strong>insertMany</strong>
+				method to add three documents to the <strong>documents</strong> collection.</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">insertResult</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">collection</span><span style="color: #000000">.</span><span style="color: #795E26">insertMany</span><span style="color: #000000">([{ </span><span style="color: #001080">a:</span><span style="color: #000000"> </span><span style="color: #098658">1</span><span style="color: #000000"> }, { </span><span style="color: #001080">a:</span><span style="color: #000000"> </span><span style="color: #098658">2</span><span style="color: #000000"> }, { </span><span style="color: #001080">a:</span><span style="color: #000000"> </span><span style="color: #098658">3</span><span style="color: #000000"> }]);</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Inserted documents =&gt;&#039;</span><span style="color: #000000">, </span><span style="color: #001080">insertResult</span><span style="color: #000000">);</span>
+</code></pre>
+				<p>The <strong>insertMany</strong> command returns an object with information about the insert operations.</p>
+				<a href="#find-all-documents" id="find-all-documents" style="color: inherit; text-decoration: none;">
+					<h3>Find All Documents</h3>
+				</a>
+				<p>Add a query that returns all the documents.</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">findResult</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">collection</span><span style="color: #000000">.</span><span style="color: #795E26">find</span><span style="color: #000000">({}).</span><span style="color: #795E26">toArray</span><span style="color: #000000">();</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Found documents =&gt;&#039;</span><span style="color: #000000">, </span><span style="color: #001080">findResult</span><span style="color: #000000">);</span>
+</code></pre>
+				<p>This query returns all the documents in the <strong>documents</strong> collection.
+				If you add this below the insertMany example you&#39;ll see the document&#39;s you&#39;ve inserted.</p>
+				<a href="#find-documents-with-a-query-filter" id="find-documents-with-a-query-filter" style="color: inherit; text-decoration: none;">
+					<h3>Find Documents with a Query Filter</h3>
+				</a>
+				<p>Add a query filter to find only documents which meet the query criteria.</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">filteredDocs</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">collection</span><span style="color: #000000">.</span><span style="color: #795E26">find</span><span style="color: #000000">({ </span><span style="color: #001080">a:</span><span style="color: #000000"> </span><span style="color: #098658">3</span><span style="color: #000000"> }).</span><span style="color: #795E26">toArray</span><span style="color: #000000">();</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Found documents filtered by { a: 3 } =&gt;&#039;</span><span style="color: #000000">, </span><span style="color: #001080">filteredDocs</span><span style="color: #000000">);</span>
+</code></pre>
+				<p>Only the documents which match <code>&#39;a&#39; : 3</code> should be returned.</p>
+				<a href="#update-a-document" id="update-a-document" style="color: inherit; text-decoration: none;">
+					<h3>Update a document</h3>
+				</a>
+				<p>The following operation updates a document in the <strong>documents</strong> collection.</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">updateResult</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">collection</span><span style="color: #000000">.</span><span style="color: #795E26">updateOne</span><span style="color: #000000">({ </span><span style="color: #001080">a:</span><span style="color: #000000"> </span><span style="color: #098658">3</span><span style="color: #000000"> }, { </span><span style="color: #001080">$set:</span><span style="color: #000000"> { </span><span style="color: #001080">b:</span><span style="color: #000000"> </span><span style="color: #098658">1</span><span style="color: #000000"> } });</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Updated documents =&gt;&#039;</span><span style="color: #000000">, </span><span style="color: #001080">updateResult</span><span style="color: #000000">);</span>
+</code></pre>
+				<p>The method updates the first document where the field <strong>a</strong> is equal to <strong>3</strong> by adding a new field <strong>b</strong> to the document set to <strong>1</strong>. <code>updateResult</code> contains information about whether there was a matching document to update or not.</p>
+				<a href="#remove-a-document" id="remove-a-document" style="color: inherit; text-decoration: none;">
+					<h3>Remove a document</h3>
+				</a>
+				<p>Remove the document where the field <strong>a</strong> is equal to <strong>3</strong>.</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">deleteResult</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">collection</span><span style="color: #000000">.</span><span style="color: #795E26">deleteMany</span><span style="color: #000000">({ </span><span style="color: #001080">a:</span><span style="color: #000000"> </span><span style="color: #098658">3</span><span style="color: #000000"> });</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Deleted documents =&gt;&#039;</span><span style="color: #000000">, </span><span style="color: #001080">deleteResult</span><span style="color: #000000">);</span>
+</code></pre>
+				<a href="#index-a-collection" id="index-a-collection" style="color: inherit; text-decoration: none;">
+					<h3>Index a Collection</h3>
+				</a>
+				<p><a href="https://docs.mongodb.org/manual/indexes/">Indexes</a> can improve your application&#39;s
+					performance. The following function creates an index on the <strong>a</strong> field in the
+				<strong>documents</strong> collection.</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">indexName</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">collection</span><span style="color: #000000">.</span><span style="color: #795E26">createIndex</span><span style="color: #000000">({ </span><span style="color: #001080">a:</span><span style="color: #000000"> </span><span style="color: #098658">1</span><span style="color: #000000"> });</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;index name =&#039;</span><span style="color: #000000">, </span><span style="color: #001080">indexName</span><span style="color: #000000">);</span>
+</code></pre>
+				<p>For more detailed information, see the <a href="https://docs.mongodb.com/manual/applications/indexes/">indexing strategies page</a>.</p>
+				<a href="#error-handling" id="error-handling" style="color: inherit; text-decoration: none;">
+					<h2>Error Handling</h2>
+				</a>
+				<p>If you need to filter certain errors from our driver we have a helpful tree of errors described in <a href="https://github.com/mongodb/node-mongodb-native/blob/4.1/docs/errors.md">docs/errors.md</a>.</p>
+				<p>It is our recommendation to use <code>instanceof</code> checks on errors and to avoid relying on parsing <code>error.message</code> and <code>error.name</code> strings in your code.
+				We guarantee <code>instanceof</code> checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.</p>
+				<p>Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
+				This means <code>instanceof</code> will always be able to accurately capture the errors that our driver throws (or returns in a callback).</p>
+				<pre><code class="language-typescript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">client</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">MongoClient</span><span style="color: #000000">(</span><span style="color: #001080">url</span><span style="color: #000000">);</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">client</span><span style="color: #000000">.</span><span style="color: #795E26">connect</span><span style="color: #000000">();</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">collection</span><span style="color: #000000"> = </span><span style="color: #001080">client</span><span style="color: #000000">.</span><span style="color: #795E26">db</span><span style="color: #000000">().</span><span style="color: #795E26">collection</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;collection&#039;</span><span style="color: #000000">);</span>
+
+<span style="color: #AF00DB">try</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">collection</span><span style="color: #000000">.</span><span style="color: #795E26">insertOne</span><span style="color: #000000">({ </span><span style="color: #001080">_id:</span><span style="color: #000000"> </span><span style="color: #098658">1</span><span style="color: #000000"> });</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">collection</span><span style="color: #000000">.</span><span style="color: #795E26">insertOne</span><span style="color: #000000">({ </span><span style="color: #001080">_id:</span><span style="color: #000000"> </span><span style="color: #098658">1</span><span style="color: #000000"> }); </span><span style="color: #008000">// duplicate key error</span>
+<span style="color: #000000">} </span><span style="color: #AF00DB">catch</span><span style="color: #000000"> (</span><span style="color: #001080">error</span><span style="color: #000000">) {</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">if</span><span style="color: #000000"> (</span><span style="color: #001080">error</span><span style="color: #000000"> </span><span style="color: #0000FF">instanceof</span><span style="color: #000000"> </span><span style="color: #267F99">MongoServerError</span><span style="color: #000000">) {</span>
+<span style="color: #000000">    </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">`Error worth logging: </span><span style="color: #0000FF">${</span><span style="color: #001080">error</span><span style="color: #0000FF">}</span><span style="color: #A31515">`</span><span style="color: #000000">); </span><span style="color: #008000">// special case for some reason</span>
+<span style="color: #000000">  }</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">throw</span><span style="color: #000000"> </span><span style="color: #001080">error</span><span style="color: #000000">; </span><span style="color: #008000">// still want to crash</span>
+<span style="color: #000000">}</span>
+</code></pre>
+				<a href="#next-steps" id="next-steps" style="color: inherit; text-decoration: none;">
+					<h2>Next Steps</h2>
+				</a>
+				<ul>
+					<li><a href="https://docs.mongodb.com/manual/">MongoDB Documentation</a></li>
+					<li><a href="https://docs.mongodb.com/drivers/node/">MongoDB Node Driver Documentation</a></li>
+					<li><a href="https://docs.mongodb.com/manual/core/data-modeling-introduction/">Read about Schemas</a></li>
+					<li><a href="https://github.com/mongodb/node-mongodb-native">Star us on GitHub</a></li>
+				</ul>
+				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+					<h2>License</h2>
+				</a>
+				<p><a href="LICENSE.md">Apache 2.0</a></p>
+				<p>© 2009-2012 Christian Amor Kvalheim
+				© 2012-present MongoDB <a href="https://github.com/mongodb/node-mongodb-native/blob/4.1/CONTRIBUTORS.md">Contributors</a></p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="modules.html">Exports</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="classes/Admin.html" class="tsd-kind-icon">Admin</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/AggregationCursor.html" class="tsd-kind-icon">Aggregation<wbr>Cursor</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/BSONRegExp.html" class="tsd-kind-icon">BSONReg<wbr>Exp</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/Binary.html" class="tsd-kind-icon">Binary</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/ChangeStream.html" class="tsd-kind-icon">Change<wbr>Stream</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/Code.html" class="tsd-kind-icon">Code</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/Collection.html" class="tsd-kind-icon">Collection</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/Db.html" class="tsd-kind-icon">Db</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/Decimal128.html" class="tsd-kind-icon">Decimal128</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/Double.html" class="tsd-kind-icon">Double</a>
+					</li>
+					<li class=" tsd-kind-class tsd-has-type-parameter">
+						<a href="classes/FindCursor.html" class="tsd-kind-icon">Find<wbr>Cursor</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/GridFSBucket.html" class="tsd-kind-icon">GridFSBucket</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/Int32.html" class="tsd-kind-icon">Int32</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/Long.html" class="tsd-kind-icon">Long</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/MongoClient.html" class="tsd-kind-icon">Mongo<wbr>Client</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/MongoError.html" class="tsd-kind-icon">Mongo<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/MongoNetworkError.html" class="tsd-kind-icon">Mongo<wbr>Network<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/MongoParseError.html" class="tsd-kind-icon">Mongo<wbr>Parse<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/MongoServerSelectionError.html" class="tsd-kind-icon">Mongo<wbr>Server<wbr>Selection<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/MongoWriteConcernError.html" class="tsd-kind-icon">Mongo<wbr>Write<wbr>Concern<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/ObjectId.html" class="tsd-kind-icon">Object<wbr>Id</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/ReadConcern.html" class="tsd-kind-icon">Read<wbr>Concern</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/ReadPreference.html" class="tsd-kind-icon">Read<wbr>Preference</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/WriteConcern.html" class="tsd-kind-icon">Write<wbr>Concern</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/MongoClientOptions.html" class="tsd-kind-icon">Mongo<wbr>Client<wbr>Options</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
