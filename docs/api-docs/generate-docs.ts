@@ -35,8 +35,8 @@ function checkForNewBuild() {
 
 async function copyNewBuildToHistory(newVersion: any) {
     const versionName = newVersion.version_id;
-    const outputDirectory = `./history/${versionName}`;
-    const pathToBuiltDocs = './site';
+    const outputDirectory = `./site/${versionName}`;
+    const pathToBuiltDocs = './temp';
     const command = `cp -R ${pathToBuiltDocs} ${outputDirectory}`
     return await exec(command);
 }
@@ -64,14 +64,14 @@ function updateJsonFile(newVersion: any) {
 async function generateSiteFromTemplate() {
     const templateDirectory = 'template';
     // output directory is relative to the template directory
-    const outputDirectory = '../site';
+    const outputDirectory = '../temp';
     const urlPrefix = '"/node-mongodb-native"';
     const command = `hugo -s ${templateDirectory} -d ${outputDirectory} -b ${urlPrefix}`
     return await exec(command);
 }
 
 async function copyGeneratedSiteToHostedSite() {
-    await exec(`cp -R site/. history/.`)
+    await exec(`cp -R temp/. site/.`)
 }
 
 
@@ -81,4 +81,4 @@ updateJsonFile(NEW_VERSION)
 generateSiteFromTemplate()
 copyNewBuildToHistory(NEW_VERSION);
 copyGeneratedSiteToHostedSite();
-exec('rm -rf site');
+exec('rm -rf temp');
