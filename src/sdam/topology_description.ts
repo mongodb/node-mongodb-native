@@ -1,4 +1,4 @@
-import type { ObjectId } from '../bson';
+import { ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { MongoError, MongoRuntimeError } from '../error';
 import { shuffle } from '../utils';
@@ -33,8 +33,6 @@ export interface TopologyDescriptionOptions {
 export class TopologyDescription {
   type: TopologyType;
   setName?: string;
-  maxSetVersion?: number;
-  maxElectionId?: ObjectId;
   servers: Map<string, ServerDescription>;
   stale: boolean;
   compatible: boolean;
@@ -44,6 +42,15 @@ export class TopologyDescription {
   localThresholdMS: number;
   commonWireVersion?: number;
 
+  maxElectionIdSetVersionPair: ElectionIdSetVersionPair;
+
+  get maxElectionId(): ObjectId | undefined {
+    return this.maxElectionIdSetVersionPair.electionId;
+  }
+  get maxSetVersion(): number | undefined {
+    return this.maxElectionIdSetVersionPair.setVersion;
+  }
+
   /**
    * Create a TopologyDescription
    */
@@ -51,16 +58,12 @@ export class TopologyDescription {
     topologyType: TopologyType,
     serverDescriptions?: Map<string, ServerDescription>,
     setName?: string,
-    maxSetVersion?: number,
-    maxElectionId?: ObjectId,
+    maxElectionIdSetVersionPair?: ElectionIdSetVersionPair,
     commonWireVersion?: number,
     options?: TopologyDescriptionOptions
   ) {
     options = options ?? {};
 
-    // TODO: consider assigning all these values to a temporary value `s` which
-    //       we use `Object.freeze` on, ensuring the internal state of this type
-    //       is immutable.
     this.type = topologyType ?? TopologyType.Unknown;
     this.servers = serverDescriptions ?? new Map();
     this.stale = false;
@@ -72,13 +75,10 @@ export class TopologyDescription {
       this.setName = setName;
     }
 
-    if (maxSetVersion) {
-      this.maxSetVersion = maxSetVersion;
-    }
-
-    if (maxElectionId) {
-      this.maxElectionId = maxElectionId;
-    }
+    this.maxElectionIdSetVersionPair = {
+      electionId: maxElectionIdSetVersionPair?.electionId,
+      setVersion: maxElectionIdSetVersionPair?.setVersion
+    };
 
     if (commonWireVersion) {
       this.commonWireVersion = commonWireVersion;
@@ -134,6 +134,8 @@ export class TopologyDescription {
         );
       }
     }
+
+    Object.freeze(this);
   }
 
   /**
@@ -186,8 +188,7 @@ export class TopologyDescription {
       this.type,
       serverDescriptions,
       this.setName,
-      this.maxSetVersion,
-      this.maxElectionId,
+      this.maxElectionIdSetVersionPair,
       this.commonWireVersion,
       { heartbeatFrequencyMS: this.heartbeatFrequencyMS, localThresholdMS: this.localThresholdMS }
     );
@@ -201,7 +202,7 @@ export class TopologyDescription {
     const address = serverDescription.address;
 
     // potentially mutated values
-    let { type: topologyType, setName, maxSetVersion, maxElectionId, commonWireVersion } = this;
+    let { type: topologyType, setName, maxElectionIdSetVersionPair, commonWireVersion } = this;
 
     if (serverDescription.setName && setName && serverDescription.setName !== setName) {
       serverDescription = new ServerDescription(address, undefined);
@@ -228,8 +229,7 @@ export class TopologyDescription {
         TopologyType.Single,
         serverDescriptions,
         setName,
-        maxSetVersion,
-        maxElectionId,
+        maxElectionIdSetVersionPair,
         commonWireVersion,
         { heartbeatFrequencyMS: this.heartbeatFrequencyMS, localThresholdMS: this.localThresholdMS }
       );
@@ -258,15 +258,13 @@ export class TopologyDescription {
         const result = updateRsFromPrimary(
           serverDescriptions,
           serverDescription,
-          setName,
-          maxSetVersion,
-          maxElectionId
+          maxElectionIdSetVersionPair,
+          setName
         );
 
-        topologyType = result[0];
-        setName = result[1];
-        maxSetVersion = result[2];
-        maxElectionId = result[3];
+        topologyType = result.topologyType;
+        setName = result.setName;
+        maxElectionIdSetVersionPair = result.electionIdSetVersionPair;
       } else if (NON_PRIMARY_RS_MEMBERS.has(serverType)) {
         const result = updateRsNoPrimaryFromMember(serverDescriptions, serverDescription, setName);
         topologyType = result[0];
@@ -282,15 +280,13 @@ export class TopologyDescription {
         const result = updateRsFromPrimary(
           serverDescriptions,
           serverDescription,
-          setName,
-          maxSetVersion,
-          maxElectionId
+          maxElectionIdSetVersionPair,
+          setName
         );
 
-        topologyType = result[0];
-        setName = result[1];
-        maxSetVersion = result[2];
-        maxElectionId = result[3];
+        topologyType = result.topologyType;
+        setName = result.setName;
+        maxElectionIdSetVersionPair = result.electionIdSetVersionPair;
       } else if (NON_PRIMARY_RS_MEMBERS.has(serverType)) {
         topologyType = updateRsWithPrimaryFromMember(
           serverDescriptions,
@@ -306,8 +302,7 @@ export class TopologyDescription {
       topologyType,
       serverDescriptions,
       setName,
-      maxSetVersion,
-      maxElectionId,
+      maxElectionIdSetVersionPair,
       commonWireVersion,
       { heartbeatFrequencyMS: this.heartbeatFrequencyMS, localThresholdMS: this.localThresholdMS }
     );
@@ -372,48 +367,46 @@ function compareObjectId(oid1: ObjectId, oid2: ObjectId): 0 | 1 | -1 {
 function updateRsFromPrimary(
   serverDescriptions: Map<string, ServerDescription>,
   serverDescription: ServerDescription,
-  setName?: string,
-  maxSetVersion?: number,
-  maxElectionId?: ObjectId
-): [TopologyType, string?, number?, ObjectId?] {
+  maxElectionIdSetVersionPair: ElectionIdSetVersionPair,
+  setName?: string
+): {
+  topologyType: TopologyType;
+  setName?: string;
+  electionIdSetVersionPair: ElectionIdSetVersionPair;
+} {
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
     serverDescriptions.delete(serverDescription.address);
-    return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
+    return {
+      topologyType: checkHasPrimary(serverDescriptions),
+      setName,
+      electionIdSetVersionPair: maxElectionIdSetVersionPair
+    };
   }
 
-  if (serverDescription.electionId != null && serverDescription.setVersion != null) {
-    if (maxSetVersion != null && maxElectionId != null) {
-      if (
-        compareObjectId(maxElectionId, serverDescription.electionId) === 1 ||
-        (compareObjectId(maxElectionId, serverDescription.electionId) === 0 &&
-          maxSetVersion > serverDescription.setVersion)
-      ) {
-        // this primary is stale, we must remove it
-        serverDescriptions.set(
-          serverDescription.address,
-          new ServerDescription(serverDescription.address)
-        );
+  const incomingElectionIdSetVersionPair = {
+    electionId: serverDescription.electionId,
+    setVersion: serverDescription.setVersion
+  };
 
-        return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
-      }
-    }
+  const newMaxElectionIdSetVersionPair = greaterElectionIdSetVersionPair(
+    maxElectionIdSetVersionPair,
+    incomingElectionIdSetVersionPair
+  );
 
-    maxElectionId = serverDescription.electionId;
-  }
-
-  if (
-    serverDescription.electionId != null &&
-    (maxElectionId == null || compareObjectId(serverDescription.electionId, maxElectionId) === 1)
-  ) {
-    maxElectionId = serverDescription.electionId;
-  }
-
-  if (
-    serverDescription.setVersion != null &&
-    (maxSetVersion == null || serverDescription.setVersion > maxSetVersion)
-  ) {
-    maxSetVersion = serverDescription.setVersion;
+  if (newMaxElectionIdSetVersionPair !== maxElectionIdSetVersionPair) {
+    // The primary we know about has become stale
+    // make new ServerDescription for that address
+    // this makes it unknown
+    serverDescriptions.set(
+      serverDescription.address,
+      new ServerDescription(serverDescription.address)
+    );
+    return {
+      topologyType: checkHasPrimary(serverDescriptions),
+      setName,
+      electionIdSetVersionPair: newMaxElectionIdSetVersionPair
+    };
   }
 
   // We've heard from the primary. Is it the same primary as before?
@@ -443,7 +436,11 @@ function updateRsFromPrimary(
       serverDescriptions.delete(address);
     });
 
-  return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
+  return {
+    topologyType: checkHasPrimary(serverDescriptions),
+    setName,
+    electionIdSetVersionPair: newMaxElectionIdSetVersionPair
+  };
 }
 
 function updateRsWithPrimaryFromMember(
@@ -499,4 +496,32 @@ function checkHasPrimary(serverDescriptions: Map<string, ServerDescription>): To
   }
 
   return TopologyType.ReplicaSetNoPrimary;
+}
+
+interface ElectionIdSetVersionPair {
+  electionId?: ObjectId;
+  setVersion?: number;
+}
+
+const OID_ZERO = new ObjectId('00'.repeat(12));
+
+function greaterElectionIdSetVersionPair(
+  a: ElectionIdSetVersionPair,
+  b: ElectionIdSetVersionPair
+): ElectionIdSetVersionPair {
+  if (compareObjectId(a.electionId ?? OID_ZERO, b.electionId ?? OID_ZERO) === 0) {
+    // ObjectIds are equal so we have to check setVersion
+    if ((a.setVersion ?? -1) >= (b.setVersion ?? -1)) {
+      if (a.electionId == null && a.setVersion == null) {
+        return a;
+      }
+      return a;
+    } else {
+      return b;
+    }
+  } else if (compareObjectId(a.electionId ?? OID_ZERO, b.electionId ?? OID_ZERO) === 1) {
+    return a;
+  } else {
+    return b;
+  }
 }

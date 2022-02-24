@@ -317,7 +317,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         options.replicaSet,
         undefined,
         undefined,
-        undefined,
         options
       ),
       serverSelectionTimeoutMS: options.serverSelectionTimeoutMS,
