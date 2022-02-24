@@ -284,7 +284,7 @@ function assertOutcomeExpectations(topology, events, outcome) {
       const expectedServers = outcomeValue;
       const actualServers = description[translatedKey];
 
-      Object.keys(expectedServers).forEach(serverName => {
+      for (const serverName of Object.keys(expectedServers)) {
         expect(actualServers).to.include.keys(serverName);
 
         // TODO: clean all this up, always operate directly on `Server` not `ServerDescription`
@@ -304,7 +304,7 @@ function assertOutcomeExpectations(topology, events, outcome) {
         if (omittedFields.length) {
           expect(actualServer).to.not.have.all.keys(omittedFields);
         }
-      });
+      }
 
       return;
     }
