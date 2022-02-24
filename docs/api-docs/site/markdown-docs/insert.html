@@ -1,0 +1,403 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Inserting and updating &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="inserting-and-updating">
+<h1>Inserting and updating<a class="headerlink" href="#inserting-and-updating" title="Permalink to this headline">¶</a></h1>
+<p>See also:</p>
+<ul class="simple">
+<li><a class="reference external" href="database.md">Database</a></li>
+<li><a class="reference external" href="collections.md">Collections</a></li>
+</ul>
+<div class="section" id="insert">
+<h2>Insert<a class="headerlink" href="#insert" title="Permalink to this headline">¶</a></h2>
+<p>Records can be inserted to a collection with <tt class="docutils literal"><span class="pre">insert</span></tt></p>
+<div class="highlight-python"><pre>collection.insert(docs[[, options], callback])</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">docs</span></tt> is a single document object or an array of documents</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> is an options object.</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> - callback function to run after the record is inserted.</li>
+</ul>
+<p>For example</p>
+<div class="highlight-python"><pre>var document = {name:"David", title:"About MongoDB"};
+collection.insert(document, {w: 1}, function(err, records){
+  console.log("Record added as "+records[0]._id);
+});</pre>
+</div>
+<p>If trying to insert a record with an existing <tt class="docutils literal"><span class="pre">_id</span></tt> value, then the
+operation yields in error.</p>
+<div class="highlight-python"><pre>collection.insert({_id:1}, {w:1}, function(err, doc){
+  // no error, inserted new document, with _id=1
+  collection.insert({_id:1}, {w:1}, function(err, doc){
+    // error occured since _id=1 already existed
+  });
+});</pre>
+</div>
+</div>
+<div class="section" id="save">
+<h2>Save<a class="headerlink" href="#save" title="Permalink to this headline">¶</a></h2>
+<p>Shorthand for insert/update is <tt class="docutils literal"><span class="pre">save</span></tt> - if <tt class="docutils literal"><span class="pre">_id</span></tt> value set, the
+record is updated if it exists or inserted if it does not; if the
+<tt class="docutils literal"><span class="pre">_id</span></tt> value is not set, then the record is inserted as a new one.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">save</span><span class="p">({</span><span class="n">_id</span><span class="p">:</span><span class="s">&quot;abc&quot;</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span><span class="s">&quot;David&quot;</span><span class="p">},{</span><span class="n">w</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error occured)
+and the record if it was inserted or <tt class="docutils literal"><span class="pre">1</span></tt> if the record was updated.</p>
+</div>
+<div class="section" id="update">
+<h2>Update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
+<p>Updates can be done with <tt class="docutils literal"><span class="pre">update</span></tt></p>
+<div class="highlight-python"><pre>collection.update(criteria, update[[, options], callback]);</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">criteria</span></tt> is a query object to find records that need to be
+updated (see <a class="reference external" href="queries.md">Queries</a>)</li>
+<li><tt class="docutils literal"><span class="pre">update</span></tt> is the replacement object</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> is an options object (see below)</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is the callback to be run after the records are updated.
+Has three parameters, the first is an error object (if error
+occured), the second is the count of records that were modified, the
+third is an object with the status of the operation.</li>
+</ul>
+<div class="section" id="update-options">
+<h3>Update options<a class="headerlink" href="#update-options" title="Permalink to this headline">¶</a></h3>
+<p>There are several option values that can be used with an update</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">multi</span></tt> - update all records that match the query object, default
+is false (only the first one found is updated)</li>
+<li><tt class="docutils literal"><span class="pre">upsert</span></tt> - if true and no records match the query, insert
+<tt class="docutils literal"><span class="pre">update</span></tt> as a new record</li>
+<li><tt class="docutils literal"><span class="pre">raw</span></tt> - driver returns updated document as bson binary Buffer,
+<tt class="docutils literal"><span class="pre">default:false</span></tt></li>
+</ul>
+</div>
+<div class="section" id="replacement-object">
+<h3>Replacement object<a class="headerlink" href="#replacement-object" title="Permalink to this headline">¶</a></h3>
+<p>If the replacement object is a document, the matching documents will be
+replaced (except the <tt class="docutils literal"><span class="pre">_id</span></tt> values if no <tt class="docutils literal"><span class="pre">_id</span></tt> is set).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">_id</span><span class="p">:</span><span class="s">&quot;123&quot;</span><span class="p">},</span> <span class="p">{</span><span class="n">author</span><span class="p">:</span><span class="s">&quot;Jessica&quot;</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="s">&quot;Mongo facts&quot;</span><span class="p">});</span>
+</pre></div>
+</div>
+<p>The example above will replace the document contents of id=123 with the
+replacement object.</p>
+<p>To update only selected fields, <tt class="docutils literal"><span class="pre">$set</span></tt> operator needs to be used.
+Following replacement object replaces author value but leaves everything
+else intact.</p>
+<div class="highlight-python"><pre>collection.update({_id:"123"}, {$set: {author:"Jessica"}});</pre>
+</div>
+<p>See <a class="reference external" href="http://www.mongodb.org/display/DOCS/Updating">MongoDB
+documentation</a> for all
+possible operators.</p>
+</div>
+</div>
+<div class="section" id="find-and-modify">
+<h2>Find and Modify<a class="headerlink" href="#find-and-modify" title="Permalink to this headline">¶</a></h2>
+<p>To update and retrieve the contents for one single record you can use
+<tt class="docutils literal"><span class="pre">findAndModify</span></tt>.</p>
+<div class="highlight-python"><pre>collection.findAndModify(criteria[, sort[, update[, options]]], callback)</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">criteria</span></tt> is the query object to find the record</li>
+<li><tt class="docutils literal"><span class="pre">sort</span></tt> indicates the order of the matches if there&#8217;s more than one
+matching record. The first record on the result set will be used. See
+<a class="reference external" href="queries.md">Queries-&gt;find-&gt;options-&gt;sort</a> for the format.</li>
+<li><tt class="docutils literal"><span class="pre">update</span></tt> is the replacement object</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> define the behavior of the function</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is the function to run after the update is done. Has two
+parameters - error object (if error occured) and the record that was
+updated.</li>
+</ul>
+<div class="section" id="options">
+<h3>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h3>
+<p>Options object can be used for the following options:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">remove</span></tt> - if set to true (default is false), removes the record
+from the collection. Callback function still gets the object but it
+doesn&#8217;t exist in the collection any more.</li>
+<li><tt class="docutils literal"><span class="pre">new</span></tt> - if set to true, callback function returns the modified
+record. Default is false (original record is returned)</li>
+<li><tt class="docutils literal"><span class="pre">upsert</span></tt> - if set to true and no record matched to the query,
+replacement object is inserted as a new record</li>
+</ul>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient
+  , format = require('util').format;
+
+MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+if(err) throw err;
+
+db.collection('test').findAndModify(
+  {hello: 'world'}, // query
+  [['_id','asc']],  // sort order
+  {$set: {hi: 'there'}}, // replacement, replaces only the field "hi"
+  {}, // options
+  function(err, object) {
+      if (err){
+          console.warn(err.message);  // returns error if no matching object found
+      }else{
+          console.dir(object);
+      }
+  });
+});</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Inserting and updating</a><ul>
+<li><a class="reference internal" href="#insert">Insert</a></li>
+<li><a class="reference internal" href="#save">Save</a></li>
+<li><a class="reference internal" href="#update">Update</a><ul>
+<li><a class="reference internal" href="#update-options">Update options</a></li>
+<li><a class="reference internal" href="#replacement-object">Replacement object</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#find-and-modify">Find and Modify</a><ul>
+<li><a class="reference internal" href="#options">Options</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

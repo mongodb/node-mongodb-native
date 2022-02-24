@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/management/cmap-monitoring/</loc>
+    <lastmod>2020-01-14T09:03:26-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/unified-topology/</loc>
+    <lastmod>2019-07-04T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/client-side-encryption/</loc>
+    <lastmod>2019-06-13T09:00:01+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/projections/</loc>
+    <lastmod>2016-06-01T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/gridfs/streaming/</loc>
+    <lastmod>2015-10-15T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/gridfs/</loc>
+    <lastmod>2015-08-05T12:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/connect/authenticating/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/collections/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/commands/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/geospatial-search/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/gridfs/gridstore/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/management/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/text-search/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/upgrade-migration/upgrading/</loc>
+    <lastmod>2015-03-19T12:53:39-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/upgrade-migration/main/</loc>
+    <lastmod>2015-03-19T12:53:35-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/ecmascriptnext/crud/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/crud/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/collations/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/connect/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/ecmascriptnext/connecting/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/connecting/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/connecting/connection-settings/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/cursors/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/ecmascriptnext/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/faq/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/pool/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/management/apm/</loc>
+    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/connect/tls/</loc>
+    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/management/sdam-monitoring/</loc>
+    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/aggregation/</loc>
+    <lastmod>2015-03-18T21:14:20-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/management/logging/</loc>
+    <lastmod>2015-03-18T21:14:20-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/issues-help/</loc>
+    <lastmod>2015-03-18T16:56:14+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/create-indexes/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/installation-guide/installation-guide/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/quick-start/quick-start/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/main/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/main/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/installation-guide/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/</loc>
+    <lastmod>2020-01-14T09:03:26-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/quick-start/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/reference/</loc>
+    <lastmod>2020-01-14T09:03:26-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/tutorials/</loc>
+    <lastmod>2016-06-01T12:53:30-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/3.7/upgrade-migration/</loc>
+    <lastmod>2015-03-19T12:53:39-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

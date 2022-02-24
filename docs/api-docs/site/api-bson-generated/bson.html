@@ -1,0 +1,691 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>BSON() &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" />
+    <link rel="next" title="ObjectID()" href="objectid.html" />
+    <link rel="prev" title="ReadStream()" href="../api-generated/readstream.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="bson">
+<h1>BSON()<a class="headerlink" href="#bson" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>Create a new BSON instance</p>
+<blockquote>
+<div><dl class="class">
+<dt id="BSON">
+<em class="property">class </em><tt class="descname">BSON</tt><big>(</big><big>)</big><a class="headerlink" href="#BSON" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">bson instance of BSON Parser.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+</div>
+<div class="section" id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="18%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Constant Name</th>
+<th class="head">Value</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>BSON.BSON_DATA_NUMBER</td>
+<td>1</td>
+<td>Number BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_STRING</td>
+<td>2</td>
+<td>String BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_OBJECT</td>
+<td>3</td>
+<td>Object BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_ARRAY</td>
+<td>4</td>
+<td>Array BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_BINARY</td>
+<td>5</td>
+<td>Binary BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_OID</td>
+<td>7</td>
+<td>ObjectID BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_BOOLEAN</td>
+<td>8</td>
+<td>Boolean BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_DATE</td>
+<td>9</td>
+<td>Date BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_NULL</td>
+<td>10</td>
+<td>null BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_REGEXP</td>
+<td>11</td>
+<td>RegExp BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_CODE</td>
+<td>13</td>
+<td>Code BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_SYMBOL</td>
+<td>14</td>
+<td>Symbol BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_CODE_W_SCOPE</td>
+<td>15</td>
+<td>Code with Scope BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_INT</td>
+<td>16</td>
+<td>32 bit Integer BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_TIMESTAMP</td>
+<td>17</td>
+<td>Timestamp BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_LONG</td>
+<td>18</td>
+<td>Long BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_DATA_MIN_KEY</td>
+<td>0xff</td>
+<td>MinKey BSON Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_DATA_MAX_KEY</td>
+<td>0x7f</td>
+<td>MaxKey BSON Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_BINARY_SUBTYPE_DEFAULT</td>
+<td>0</td>
+<td>Binary Default Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_BINARY_SUBTYPE_FUNCTION</td>
+<td>1</td>
+<td>Binary Function Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY</td>
+<td>2</td>
+<td>Binary Byte Array Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_BINARY_SUBTYPE_UUID</td>
+<td>3</td>
+<td>Binary UUID Type</td>
+</tr>
+<tr class="row-even"><td>BSON.BSON_BINARY_SUBTYPE_MD5</td>
+<td>4</td>
+<td>Binary MD5 Type</td>
+</tr>
+<tr class="row-odd"><td>BSON.BSON_BINARY_SUBTYPE_USER_DEFINED</td>
+<td>128</td>
+<td>Binary User Defined Type</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="bson-calculateobjectsize">
+<h2>BSON.calculateObjectSize<a class="headerlink" href="#bson-calculateobjectsize" title="Permalink to this headline">¶</a></h2>
+<p>Calculate the bson size for a passed in Javascript object.</p>
+<dl class="function">
+<dt id="BSON.calculateObjectSize">
+<tt class="descclassname">BSON.</tt><tt class="descname">calculateObjectSize</tt><big>(</big><em>object</em><span class="optional">[</span>, <em>serializeFunctions</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#BSON.calculateObjectSize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to calculate the BSON byte size for.</li>
+<li><strong>[serializeFunctions]</strong> (<em>boolean</em>) &#8211; serialize all functions in the object <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the number of bytes the BSON object will take up.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="bson-serializewithbufferandindex">
+<h2>BSON.serializeWithBufferAndIndex<a class="headerlink" href="#bson-serializewithbufferandindex" title="Permalink to this headline">¶</a></h2>
+<p>Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.</p>
+<dl class="function">
+<dt id="BSON.serializeWithBufferAndIndex">
+<tt class="descclassname">BSON.</tt><tt class="descname">serializeWithBufferAndIndex</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>buffer</em>, <em>index</em>, <em>serializeFunctions</em><big>)</big><a class="headerlink" href="#BSON.serializeWithBufferAndIndex" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to serialize.</li>
+<li><strong>checkKeys</strong> (<em>boolean</em>) &#8211; the serializer will check if keys are valid.</li>
+<li><strong>buffer</strong> (<em>buffer</em>) &#8211; the Buffer you pre-allocated to store the serialized BSON object.</li>
+<li><strong>index</strong> (<em>number</em>) &#8211; the index in the buffer where we wish to start serializing into.</li>
+<li><strong>serializeFunctions</strong> (<em>boolean</em>) &#8211; serialize the javascript functions <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the new write index in the Buffer.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="bson-serialize">
+<h2>BSON.serialize<a class="headerlink" href="#bson-serialize" title="Permalink to this headline">¶</a></h2>
+<p>Serialize a Javascript object.</p>
+<dl class="function">
+<dt id="BSON.serialize">
+<tt class="descclassname">BSON.</tt><tt class="descname">serialize</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>asBuffer</em>, <em>serializeFunctions</em><big>)</big><a class="headerlink" href="#BSON.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to serialize.</li>
+<li><strong>checkKeys</strong> (<em>boolean</em>) &#8211; the serializer will check if keys are valid.</li>
+<li><strong>asBuffer</strong> (<em>boolean</em>) &#8211; return the serialized object as a Buffer object <strong>(ignore)</strong>.</li>
+<li><strong>serializeFunctions</strong> (<em>boolean</em>) &#8211; serialize the javascript functions <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">buffer returns the Buffer object containing the serialized object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="bson-deserializestream">
+<h2>BSON.deserializeStream<a class="headerlink" href="#bson-deserializestream" title="Permalink to this headline">¶</a></h2>
+<p>Deserialize stream data as BSON documents.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>evalFunctions</strong> {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.</li>
+<li><strong>cacheFunctions</strong> {Boolean, default:false}, cache evaluated functions for reuse.</li>
+<li><strong>cacheFunctionsCrc32</strong> {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.</li>
+<li><strong>promoteLongs</strong> {Boolean, default:true}, when deserializing a Long will fit it into a Number if it&#8217;s smaller than 53 bits</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="BSON.deserializeStream">
+<tt class="descclassname">BSON.</tt><tt class="descname">deserializeStream</tt><big>(</big><em>data</em>, <em>startIndex</em>, <em>numberOfDocuments</em>, <em>documents</em>, <em>docStartIndex</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#BSON.deserializeStream" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>buffer</em>) &#8211; the buffer containing the serialized set of BSON documents.</li>
+<li><strong>startIndex</strong> (<em>number</em>) &#8211; the start index in the data Buffer where the deserialization is to start.</li>
+<li><strong>numberOfDocuments</strong> (<em>number</em>) &#8211; number of documents to deserialize.</li>
+<li><strong>documents</strong> (<em>array</em>) &#8211; an array where to store the deserialized documents.</li>
+<li><strong>docStartIndex</strong> (<em>number</em>) &#8211; the index in the documents array from where to start inserting documents.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options used for the deserialization.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the next index in the buffer after deserialization <strong>x</strong> numbers of documents.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="bson-deserialize">
+<h2>BSON.deserialize<a class="headerlink" href="#bson-deserialize" title="Permalink to this headline">¶</a></h2>
+<p>Deserialize data as BSON.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>evalFunctions</strong> {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.</li>
+<li><strong>cacheFunctions</strong> {Boolean, default:false}, cache evaluated functions for reuse.</li>
+<li><strong>cacheFunctionsCrc32</strong> {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.</li>
+<li><strong>promoteLongs</strong> {Boolean, default:true}, when deserializing a Long will fit it into a Number if it&#8217;s smaller than 53 bits</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="BSON.deserialize">
+<tt class="descclassname">BSON.</tt><tt class="descname">deserialize</tt><big>(</big><em>buffer</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>isArray</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#BSON.deserialize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>buffer</strong> (<em>buffer</em>) &#8211; the buffer containing the serialized set of BSON documents.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options used for the deserialization.</li>
+<li><strong>[isArray]</strong> (<em>boolean</em>) &#8211; ignore used for recursive parsing.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object returns the deserialized Javascript Object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="deserialize">
+<h2>deserialize<a class="headerlink" href="#deserialize" title="Permalink to this headline">¶</a></h2>
+<p>Deserialize data as BSON.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>evalFunctions</strong> {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.</li>
+<li><strong>cacheFunctions</strong> {Boolean, default:false}, cache evaluated functions for reuse.</li>
+<li><strong>cacheFunctionsCrc32</strong> {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt>
+<tt class="descname">deserialize</tt><big>(</big><em>buffer</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>isArray</em><span class="optional">]</span><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>buffer</strong> (<em>buffer</em>) &#8211; the buffer containing the serialized set of BSON documents.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options used for the deserialization.</li>
+<li><strong>[isArray]</strong> (<em>boolean</em>) &#8211; ignore used for recursive parsing.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object returns the deserialized Javascript Object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="deserializestream">
+<h2>deserializeStream<a class="headerlink" href="#deserializestream" title="Permalink to this headline">¶</a></h2>
+<p>Deserialize stream data as BSON documents.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>evalFunctions</strong> {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.</li>
+<li><strong>cacheFunctions</strong> {Boolean, default:false}, cache evaluated functions for reuse.</li>
+<li><strong>cacheFunctionsCrc32</strong> {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="deserializeStream">
+<tt class="descname">deserializeStream</tt><big>(</big><em>data</em>, <em>startIndex</em>, <em>numberOfDocuments</em>, <em>documents</em>, <em>docStartIndex</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#deserializeStream" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>buffer</em>) &#8211; the buffer containing the serialized set of BSON documents.</li>
+<li><strong>startIndex</strong> (<em>number</em>) &#8211; the start index in the data Buffer where the deserialization is to start.</li>
+<li><strong>numberOfDocuments</strong> (<em>number</em>) &#8211; number of documents to deserialize.</li>
+<li><strong>documents</strong> (<em>array</em>) &#8211; an array where to store the deserialized documents.</li>
+<li><strong>docStartIndex</strong> (<em>number</em>) &#8211; the index in the documents array from where to start inserting documents.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options used for the deserialization.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the next index in the buffer after deserialization <strong>x</strong> numbers of documents.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="serialize">
+<h2>serialize<a class="headerlink" href="#serialize" title="Permalink to this headline">¶</a></h2>
+<p>Serialize a Javascript object.</p>
+<dl class="function">
+<dt>
+<tt class="descname">serialize</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>asBuffer</em>, <em>serializeFunctions</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to serialize.</li>
+<li><strong>checkKeys</strong> (<em>boolean</em>) &#8211; the serializer will check if keys are valid.</li>
+<li><strong>asBuffer</strong> (<em>boolean</em>) &#8211; return the serialized object as a Buffer object <strong>(ignore)</strong>.</li>
+<li><strong>serializeFunctions</strong> (<em>boolean</em>) &#8211; serialize the javascript functions <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">buffer returns the Buffer object containing the serialized object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="calculateobjectsize">
+<h2>calculateObjectSize<a class="headerlink" href="#calculateobjectsize" title="Permalink to this headline">¶</a></h2>
+<p>Calculate the bson size for a passed in Javascript object.</p>
+<dl class="function">
+<dt id="calculateObjectSize">
+<tt class="descname">calculateObjectSize</tt><big>(</big><em>object</em><span class="optional">[</span>, <em>serializeFunctions</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#calculateObjectSize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to calculate the BSON byte size for.</li>
+<li><strong>[serializeFunctions]</strong> (<em>boolean</em>) &#8211; serialize all functions in the object <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the number of bytes the BSON object will take up.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="serializewithbufferandindex">
+<h2>serializeWithBufferAndIndex<a class="headerlink" href="#serializewithbufferandindex" title="Permalink to this headline">¶</a></h2>
+<p>Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.</p>
+<dl class="function">
+<dt id="serializeWithBufferAndIndex">
+<tt class="descname">serializeWithBufferAndIndex</tt><big>(</big><em>object</em>, <em>checkKeys</em>, <em>buffer</em>, <em>index</em>, <em>serializeFunctions</em><big>)</big><a class="headerlink" href="#serializeWithBufferAndIndex" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>object</em>) &#8211; the Javascript object to serialize.</li>
+<li><strong>checkKeys</strong> (<em>boolean</em>) &#8211; the serializer will check if keys are valid.</li>
+<li><strong>buffer</strong> (<em>buffer</em>) &#8211; the Buffer you pre-allocated to store the serialized BSON object.</li>
+<li><strong>index</strong> (<em>number</em>) &#8211; the index in the buffer where we wish to start serializing into.</li>
+<li><strong>serializeFunctions</strong> (<em>boolean</em>) &#8211; serialize the javascript functions <strong>(default:false)</strong>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number returns the new write index in the Buffer.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">BSON()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#constants">Constants</a></li>
+<li><a class="reference internal" href="#bson-calculateobjectsize">BSON.calculateObjectSize</a></li>
+<li><a class="reference internal" href="#bson-serializewithbufferandindex">BSON.serializeWithBufferAndIndex</a></li>
+<li><a class="reference internal" href="#bson-serialize">BSON.serialize</a></li>
+<li><a class="reference internal" href="#bson-deserializestream">BSON.deserializeStream</a></li>
+<li><a class="reference internal" href="#bson-deserialize">BSON.deserialize</a></li>
+<li><a class="reference internal" href="#deserialize">deserialize</a></li>
+<li><a class="reference internal" href="#deserializestream">deserializeStream</a></li>
+<li><a class="reference internal" href="#serialize">serialize</a></li>
+<li><a class="reference internal" href="#calculateobjectsize">calculateObjectSize</a></li>
+<li><a class="reference internal" href="#serializewithbufferandindex">serializeWithBufferAndIndex</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu"><li><strong>Previous:</strong> <a href="../api-generated/readstream.html" title="previous chapter">ReadStream()</a></li><li><strong>Next:</strong> <a href="objectid.html" title="next chapter">ObjectID()</a></li>
+</ul>
+<h3>Manual</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

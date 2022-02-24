@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/img/favicon.png">
+
+    <title>Shopping Cart</title>
+
+    <link href="/node-mongodb-native/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+
+  <section id="container" class="">
+
+
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+
+            <a href="/node-mongodb-native/" class="logo"><img src="/node-mongodb-native/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> Shopping Cart </h1>
+            </div>
+      </header>
+
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+
+        <ul class="sidebar-menu">
+
+
+
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+
+                <span>schema design</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+
+                    <li><a href="/node-mongodb-native/schema/chapter1/"> Introduction </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter2/"> Schema Basics </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter3/"> MongoDB Storage </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter4/"> Indexes </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter5/"> Metadata </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter6/"> Time Series </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter7/"> Queues </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter8/"> Nested Categories </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter9/"> Account Transactions </a> </li>
+
+                    <li class="active"><a href="/node-mongodb-native/schema/chapter10/"> Shopping Cart </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter11/"> Sharding </a> </li>
+
+                </ul>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>2.0 driver docs</span>
+                </a>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>1.4 driver docs</span>
+                </a>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>Core driver docs</span>
+                </a>
+
+              </li>
+
+            <li> <a href="https://groups.google.com/forum/#!forum/learn-mongo-db-the-hardway" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+
+
+        </ul>
+
+    </div>
+</aside>
+
+
+
+
+      <section id="main-content">
+          <section class="wrapper">
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <div class="row">
+                  <div class="col-md-1">
+
+
+                      <a class="navigation prev" href="/schema/chapter9">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+
+
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+
+
+
+                    <div class="panel-body">
+
+
+
+<h1 id="shopping-cart:61a6257a1d794ac1b525cf782a2a26b3">Shopping Cart</h1>
+
+<p><img src="/images/originals/shopping_cart_racing.png" alt="Metadata, courtesy of http://www.wpclipart.com/working/work_supplies/shopping_cart_racing.png.html" />
+</p>
+
+<p>The traditional E-commerce shopping cart can be modeled in MongoDB by using double bookkeeping. Given that we have the following initial documents.</p>
+
+<p>First let&rsquo;s create a product</p>
+
+<pre><code class="language-js">var col = db.getSisterDB(&quot;shop&quot;).products;
+col.insert({
+  , _id: &quot;111445GB3&quot;
+  , name: &quot;Simsong Mobile&quot;
+  , description: &quot;Awesome new 70G Phone&quot;
+  , quantity: 99
+  , price: 1000
+});
+</code></pre>
+
+<h2 id="adding-the-product-to-the-shopping-cart:61a6257a1d794ac1b525cf782a2a26b3">Adding the product to the Shopping Cart</h2>
+
+<p>When the user indicates they want to add the product to their shopping cart we need to perform the following 3 steps.</p>
+
+<ol>
+<li>Add the item to the shopping cart, creating the cart if it does not exist</li>
+<li>Update the inventory only if we have enough quantity</li>
+</ol>
+
+<p>If we don&rsquo;t have enough inventory to fulfill the request we need to rollback the shopping cart.</p>
+
+<p>Let&rsquo;s add the selected product to the cart, creating the cart if it does not exist. We are assuming that the users unique session <strong>id</strong> in this case is <strong>1</strong>.</p>
+
+<pre><code class="language-js">var quantity = 1;
+var userId = 1;
+var productId = &quot;111445GB3&quot;;
+
+var col = db.getSisterDB(&quot;shop&quot;).carts;
+col.update(
+    { _id: userId, status: 'active' }
+  , {
+      $set: { modified_on: new Date() }
+    , $push: { products: {
+        _id: productId
+      , quantity: quantity
+      , name: &quot;Simsong Mobile&quot;
+      , price: 1000
+    }}
+  }, true);
+</code></pre>
+
+<p>The update above is an <strong>upsert</strong> meaning the cart is created if it does not exist. The next step is to reserve the quantity from the product ensuring there is inventory to cover the customers request.</p>
+
+<pre><code class="language-js">var quantity = 1;
+var col = db.getSisterDB(&quot;shop&quot;).products;
+col.update({
+    _id: productId
+  , quantity: { $gte: quantity }
+}, {
+    $inc: { quantity: -quantity }
+  , $push: {
+    reserved: {
+      quantity: quantity, _id: userId, created_on: new Date()
+    }
+  }
+});
+</code></pre>
+
+<p>This reserves the quantity of the customer request only if there is product inventory to cover it. If there is inventory we decrement the available inventory and push a reservation into the <strong>reserved</strong> array.</p>
+
+<h2 id="not-enough-inventory:61a6257a1d794ac1b525cf782a2a26b3">Not Enough Inventory</h2>
+
+<p>If we don&rsquo;t have enough inventory to cover the customer request we need to rollback the addition to the shopping cart.</p>
+
+<pre><code class="language-js">var quantity = 1;
+var col = db.getSisterDB(&quot;shop&quot;).carts;
+col.update({
+  _id: userId
+}, {
+    $set: { modified_on: new Date() }
+  , $pull: { products: { _id: productId }}
+})
+</code></pre>
+
+<p>This removes the shopping cart reservation.</p>
+
+<h2 id="adjusting-the-number-of-items-in-the-cart:61a6257a1d794ac1b525cf782a2a26b3">Adjusting The Number Of Items In The Cart</h2>
+
+<p>If the customer changes their mind about the number of items they want to shop we need to perform an update of the shopping cart. We need to perform a couple of steps to ensure proper recording of the right value.</p>
+
+<p>First let&rsquo;s update the quantity in the shopping cart. First we need to fetch the existing quantity, then we need to calculate the delta between the old and new quantity and finally update the cart.</p>
+
+<pre><code class="language-js">var col = db.getSisterDB(&quot;shop&quot;).carts;
+var cart = db.findOne({
+    _id: userId
+  , &quot;products._id&quot;: productId
+  , status: &quot;active&quot;});
+var oldQuantity = 0;
+
+for(var i = 0; i &lt; cart.products.length; i++) {
+  if(cart.products[i]._id == productId) {
+    oldQuantity = cart.products[i].quantity;
+  }
+}
+
+var newQuantity = 2;
+var delta = newQuantity - oldQuantity;
+
+col.update({
+    _id: userId
+  , &quot;products._id&quot;: productId
+  , status: &quot;active&quot;
+}, {
+  $set: {
+      modified_on: new Date()
+    , &quot;products.$.quantity&quot;: newQuantity
+  }
+});
+</code></pre>
+
+<p>Having updated the quantity in the cart we now need to ensure there is enough inventory to of the product to cover the change in quantity. The needed amount is the difference between (newQuantity and oldQuantity)</p>
+
+<pre><code class="language-js">var col = db.getSisterDB(&quot;shop&quot;).products;
+col.update({
+    _id: productId
+  , &quot;reserved._id&quot;: userId
+  , quantity: {
+    $gte: delta
+  }
+}, {
+  , $inc: { quantity: -delta }
+    $set: {
+      &quot;reserved.$.quantity&quot;: newQuantity, modified_on: new Date()
+    }
+})
+</code></pre>
+
+<p>This correctly reserves more or returns any non-needed product to the inventory.</p>
+
+<ol>
+<li>If delta is a <strong>negative</strong> number the $gte will always hold and the product <strong>quantity</strong> get increased by the delta, returning product to the inventory.</li>
+<li>If delta is a <strong>positive</strong> number the $gte will only hold if inventory is equal to the delta and is then decreased by delta, reserving more product.</li>
+</ol>
+
+<h2 id="rolling-back-attempted-increase-of-reservation-for-a-product:61a6257a1d794ac1b525cf782a2a26b3">Rolling back Attempted Increase of Reservation for A Product</h2>
+
+<p>If there is not enough inventory to fulfill the new reservation we need to rollback the change we made in the cart. We do that by re-applying the old quantity.</p>
+
+<pre><code class="language-js">var col = db.getSisterDB(&quot;shop&quot;).carts;
+col.update({
+    _id: userId
+  , &quot;products._id&quot;: productId
+  , status: &quot;active&quot;
+}, {
+  $set: {
+      modified_on: new Date()
+    , &quot;products.$.quantity&quot;: oldQuantity
+  }
+});
+</code></pre>
+
+<h2 id="expiring-carts:61a6257a1d794ac1b525cf782a2a26b3">Expiring Carts</h2>
+
+<p>It&rsquo;s common for customers to have put items in a cart and then abandon it. This means there is a need for a process to expire carts that have been abandoned. For each expired cart we need to.</p>
+
+<ol>
+<li>Return the reserved items to the product inventory</li>
+<li>Expire the cart</li>
+</ol>
+
+<p>Below is a script that will look for any cart that has been sitting inactive for more than 30 minutes and automatically expire them returning stock to the inventory for each product reserved in the carts.</p>
+
+<pre><code class="language-js">var cutOffDate = new Date();
+cutOffDate.setMinutes(cutOffDate.getMinutes() - 30);
+
+var cartsCol = db.getSisterDB(&quot;shop&quot;).carts;
+var productCol = db.getSisterDB(&quot;shop&quot;).products;
+
+var carts = cartsCol.find({ modified_on: { $lte: cutOffDate }});
+while(carts.hasNext()) {
+  var cart = carts.next();
+
+  for(var i = 0; i &lt; cart.products.length; i++) {
+    var product = cart.products[i];
+
+    productCol.update({
+        _id: product._id
+      , &quot;reserved._id&quot;: cart._id
+      , &quot;reserved.quantity&quot;: product.quantity
+    }, {
+        $inc: { quantity: product.quantity }
+      , $pull: { reserved: { _id: cart._id }}
+    });
+  }
+
+  cartsCol.update({
+    _id: cart._id
+  }, {
+    $set: { status: 'expired' }
+  });
+}
+</code></pre>
+
+<p>For each cart we iterate over all the products in it and for each product we return the quantity to the product inventory and at the same time remove that cart from the <strong>reserved</strong> array of the product. After returning the inventory we set the status of the cart to <strong>expired</strong>. Notice that we don&rsquo;t clean up the cart. We are keeping the expired cart as history. Any new customer will create a new cart.</p>
+
+<h2 id="checkout:61a6257a1d794ac1b525cf782a2a26b3">Checkout</h2>
+
+<p>The customer clicked the checkout button on the website and entered their payment details. It&rsquo;s time to issue an purchase order and clean up the cart and product reservations.</p>
+
+<pre><code class="language-js">var cartsCol = db.getSisterDB(&quot;shop&quot;).carts;
+var productCol = db.getSisterDB(&quot;shop&quot;).products;
+var orderCol = db.getSisterDB(&quot;shop&quot;).orders;
+
+var cart = cartsCol.findOne({ _id: userId })
+
+orderCol.insert({
+    created_on: new Date()
+  , shipping: {
+      name: &quot;Joe Dow&quot;
+    , address: &quot;Some street 1, NY 11223&quot;
+  }
+  , payment: { method: &quot;visa&quot;, transaction_id: &quot;2312213312XXXTD&quot; }
+  , products: cart.products
+});
+
+cartsCol.update({
+  { _id: userId }
+}, {
+  $set: { status: 'complete' }
+});
+
+productCol.update({
+  &quot;reserved._id&quot;: userId
+}, {
+  $pull: { reserved: {_id: userId }}
+}, false, true);
+</code></pre>
+
+<p>We perform the following actions during checkout.</p>
+
+<ol>
+<li>Add an a finished order document to the <strong>orders</strong> collection</li>
+<li>Set the cart to <strong>done</strong> status</li>
+<li>Removing the cart from the <strong>reserved</strong> arrays of all products where it&rsquo;s present using a multi update</li>
+</ol>
+
+<h2 id="indexes:61a6257a1d794ac1b525cf782a2a26b3">Indexes</h2>
+
+<h2 id="some-possible-changes:61a6257a1d794ac1b525cf782a2a26b3">Some Possible Changes</h2>
+
+<p>It&rsquo;s possible to split out product information from the inventory by creating an <strong>inventory</strong> collection that references the production metadata collection and contains the amount of the product.</p>
+
+
+
+                <div class="col-md-1">
+
+
+                    <a class="navigation next" href="/schema/chapter11">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+
+
+                </div>
+              </div>
+
+          </section>
+      </section>
+
+  </section>
+
+
+    <script src="/node-mongodb-native/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/js/bootstrap.min.js"></script>
+
+    <script src="/node-mongodb-native/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41953057-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

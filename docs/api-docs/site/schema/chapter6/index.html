@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/img/favicon.png">
+
+    <title>Time Series</title>
+
+    <link href="/node-mongodb-native/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+
+  <section id="container" class="">
+
+
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+
+            <a href="/node-mongodb-native/" class="logo"><img src="/node-mongodb-native/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> Time Series </h1>
+            </div>
+      </header>
+
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+
+        <ul class="sidebar-menu">
+
+
+
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+
+                <span>schema design</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+
+                    <li><a href="/node-mongodb-native/schema/chapter1/"> Introduction </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter2/"> Schema Basics </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter3/"> MongoDB Storage </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter4/"> Indexes </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter5/"> Metadata </a> </li>
+
+                    <li class="active"><a href="/node-mongodb-native/schema/chapter6/"> Time Series </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter7/"> Queues </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter8/"> Nested Categories </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter9/"> Account Transactions </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter10/"> Shopping Cart </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter11/"> Sharding </a> </li>
+
+                </ul>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>2.0 driver docs</span>
+                </a>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>1.4 driver docs</span>
+                </a>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>Core driver docs</span>
+                </a>
+
+              </li>
+
+            <li> <a href="https://groups.google.com/forum/#!forum/learn-mongo-db-the-hardway" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+
+
+        </ul>
+
+    </div>
+</aside>
+
+
+
+
+      <section id="main-content">
+          <section class="wrapper">
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <div class="row">
+                  <div class="col-md-1">
+
+
+                      <a class="navigation prev" href="/schema/chapter5">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+
+
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+
+
+
+                    <div class="panel-body">
+
+
+
+<h1 id="time-series:b7673b314677a8560e182fed1b34792e">Time Series</h1>
+
+<p><img src="/images/originals/time_series.png" alt="An Example Time Series" />
+</p>
+
+<p>The first pattern we are going to explore is the time series pattern. This pattern is a write optimization pattern to ensure maximum write performance for a typical analytics application. A time series is made up of discreet measurements at timed intervals. Examples can include counting the number of page views in a second or the temperature per minute. For this pattern we will discuss time series in the context of web page views.</p>
+
+<p>| Schema Attributes                                 |
+|&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;|&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;|
+| <strong>Optimized For</strong>  | Write Performance            |
+| <strong>Pre-Allocation</strong> | Benefits from Pre-Allocation |</p>
+
+<p>To maximize our write performance for a time series we have are going to assume that we are interested in discreet buckets of time. That&rsquo;s to say an individual page view is not interesting to the application, only the number of page views in a particular second, minute, hour, day or any time range in-between. This means the smallest unit of time we are interested in is a single minute.</p>
+
+<h2 id="schema:b7673b314677a8560e182fed1b34792e">Schema</h2>
+
+<p>Taking that into account let&rsquo;s model a <strong>bucket</strong> to keep all our page views for a particular minute.</p>
+
+<pre><code class="language-json">{
+  &quot;page&quot;: &quot;/index.htm&quot;,
+  &quot;timestamp_minute&quot;: ISODate(&quot;2014-01-01T10:01:00Z&quot;),
+  &quot;total_views&quot;: 0,
+  &quot;seconds&quot;: {
+    &quot;0&quot;: 0
+  }
+}
+</code></pre>
+
+<p>Let&rsquo;s have a quick view of what the fields mean.</p>
+
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><strong>page</strong></td>
+<td>The web page we are measuring</td>
+</tr>
+
+<tr>
+<td><strong>timestamp_minute</strong></td>
+<td>The actual minute the bucket is for</td>
+</tr>
+
+<tr>
+<td><strong>total_views</strong></td>
+<td>Total page views in this minute</td>
+</tr>
+
+<tr>
+<td><strong>seconds</strong></td>
+<td>Page views for a specific second in the minute</td>
+</tr>
+</tbody>
+</table>
+
+<p>As we can see the document represents not only a single minute of page views for a specific page but also allows for looking at individual seconds.</p>
+
+<h2 id="update-page-views:b7673b314677a8560e182fed1b34792e">Update Page Views</h2>
+
+<p>Let&rsquo;s simulate what happens in an application that is counting page views for a specific page. We are going to simulate updating a bucket for a specific page view in the 2nd second of the <strong>ISODate(&ldquo;2014-01-01T10:01:00Z&rdquo;)</strong> bucket.</p>
+
+<pre><code class="language-js">use analytics
+var secondInMinute = 2;
+var updateStatment = {$inc: {}};
+updateStatment[&quot;$inc&quot;][&quot;seconds.&quot; + secondInMinute] = 1;
+
+db.page_views.update({
+  page: &quot;/index.htm&quot;,
+  timestamp_minute: ISODate(&quot;2014-01-01T10:01:00Z&quot;)
+}, updateStatment, true)
+</code></pre>
+
+<p>The first part of the <strong>updateStatement</strong> sets up the <strong>$inc</strong> value to increment the field in the <strong>seconds</strong> field named <strong>2</strong> which corresponds with the second second in our time period. If the field does not exist MongoDB will set it to one otherwise it will increment the existing value with one. Notice the last parameter of the update statement. This is telling MongoDB to do an <strong>upsert</strong>, meaning MongoDB will create a new document if none exists. Let&rsquo;s query for the document.</p>
+
+<pre><code class="language-js">use analytics
+db.page_views.findOne({
+  page: &quot;/index.htm&quot;,
+  timestamp_minute: ISODate(&quot;2014-01-01T10:01:00Z&quot;)
+});
+</code></pre>
+
+<p>Returns the following document.</p>
+
+<pre><code class="language-json">{
+  &quot;_id&quot; : ObjectId(&quot;52de4ef8297f2f3b6f41d242&quot;),
+  &quot;page&quot; : &quot;/index.htm&quot;,
+  &quot;timestamp_minute&quot; : ISODate(&quot;2014-01-01T10:01:00Z&quot;),
+  &quot;seconds&quot; : {
+    &quot;2&quot; : 1
+  }
+}
+</code></pre>
+
+<p>Unfortunately there is a slight problem with this way of creating new buckets, namely that the document will grow over time causing MongoDB to have to move it around an incurring a write performance penalty. Luckily there is a work around to improve the write performance.</p>
+
+<h2 id="pre-allocation:b7673b314677a8560e182fed1b34792e">Pre-Allocation</h2>
+
+<p>We can preallocate documents for our minute buckets. Let&rsquo;s look at a simple little script that takes in a specific hour and pre-allocates minute buckets for that hour.</p>
+
+<pre><code class="language-js">var preAllocate = function(coll, pageName, timestamp) {
+  for(var i = 0; i &lt; 60; i++) {
+    coll.insert({
+      &quot;page&quot;: pageName,
+      &quot;timestamp_minute&quot; : timestamp,
+      &quot;seconds&quot; : {
+        &quot;0&quot;:0,&quot;1&quot;:0,&quot;2&quot;:0,&quot;3&quot;:0,&quot;4&quot;:0,&quot;5&quot;:0,&quot;6&quot;:0,&quot;7&quot;:0,&quot;8&quot;:0,&quot;9&quot;:0,
+        &quot;10&quot;:0,&quot;11&quot;:0,&quot;12&quot;:0,&quot;13&quot;:0,&quot;14&quot;:0,&quot;15&quot;:0,&quot;16&quot;:0,&quot;17&quot;:0,&quot;18&quot;:0,&quot;19&quot;:0,
+        &quot;20&quot;:0,&quot;21&quot;:0,&quot;22&quot;:0,&quot;23&quot;:0,&quot;24&quot;:0,&quot;25&quot;:0,&quot;26&quot;:0,&quot;27&quot;:0,&quot;28&quot;:0,&quot;29&quot;:0,
+        &quot;30&quot;:0,&quot;31&quot;:0,&quot;32&quot;:0,&quot;33&quot;:0,&quot;34&quot;:0,&quot;35&quot;:0,&quot;36&quot;:0,&quot;37&quot;:0,&quot;38&quot;:0,&quot;39&quot;:0,
+        &quot;40&quot;:0,&quot;41&quot;:0,&quot;42&quot;:0,&quot;43&quot;:0,&quot;44&quot;:0,&quot;45&quot;:0,&quot;46&quot;:0,&quot;47&quot;:0,&quot;48&quot;:0,&quot;49&quot;:0,
+        &quot;50&quot;:0,&quot;51&quot;:0,&quot;52&quot;:0,&quot;53&quot;:0,&quot;54&quot;:0,&quot;55&quot;:0,&quot;56&quot;:0,&quot;57&quot;:0,&quot;58&quot;:0,&quot;59&quot;:0
+      }
+    })
+
+    timestamp.setMinutes(timestamp.getMinutes() + 1);
+  }
+}
+</code></pre>
+
+<p>Let&rsquo;s take this pre-allocation method out for a test run.</p>
+
+<pre><code class="language-js">var col = db.getSisterDB(&quot;analytics&quot;).page_views;
+col.drop();
+preAllocate(col, &quot;index.htm&quot;, ISODate(&quot;2014-01-01T10:01:00Z&quot;));
+</code></pre>
+
+<p>For this example we are dropping any existing documents in the <strong>page_views</strong> collection for clarity reasons. Now run the following commands.</p>
+
+<pre><code class="language-js">var col = db.getSisterDB(&quot;analytics&quot;).page_views;
+col.count()
+col.find()
+</code></pre>
+
+<p>The <strong>col.count()</strong> returns <strong>60</strong> showing we have inserted <strong>60</strong> buckets. Looking over the results from the <strong>col.find()</strong> you&rsquo;ll notice that each one has an incrementing timestamp and that the interval is 1 minutes.</p>
+
+<p>With out pre-allocated documents, the <strong>update</strong> command will hit an existing empty bucket and since the bucket is at it&rsquo;s maximum size it will never grow and MongoDB will avoid having to copy the data to a new location. This will increase the write performance as MongoDb can spend more of it&rsquo;s time performing <strong>updates in place</strong>.</p>
+
+
+
+                <div class="col-md-1">
+
+
+                    <a class="navigation next" href="/schema/chapter7">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+
+
+                </div>
+              </div>
+
+          </section>
+      </section>
+
+  </section>
+
+
+    <script src="/node-mongodb-native/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/js/bootstrap.min.js"></script>
+
+    <script src="/node-mongodb-native/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41953057-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

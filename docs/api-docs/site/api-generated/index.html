@@ -1,0 +1,466 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Driver API &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="driver-api">
+<h1>Driver API<a class="headerlink" href="#driver-api" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#buildinfo">buildInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#serverstatus">serverStatus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#profilinglevel">profilingLevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#ping">ping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#authenticate">authenticate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#logout">logout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#adduser">addUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#removeuser">removeUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#setprofilinglevel">setProfilingLevel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#profilinginfo">profilingInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#command">command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#validatecollection">validateCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#listdatabases">listDatabases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin.html#replsetgetstatus">replSetGetStatus</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#insert">insert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#remove">remove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#rename">rename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#save">save</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#update">update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#distinct">distinct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#count">count</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#drop">drop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#findandmodify">findAndModify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#findandremove">findAndRemove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#find">find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#findone">findOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#createindex">createIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#ensureindex">ensureIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#indexinformation">indexInformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#dropindex">dropIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#dropallindexes">dropAllIndexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#reindex">reIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#mapreduce">mapReduce</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#group">group</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#options">options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#iscapped">isCapped</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#indexexists">indexExists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#geonear">geoNear</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#geohaystacksearch">geoHaystackSearch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#indexes">indexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#aggregate">aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#stats">stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#initializeunorderedbulkop">initializeUnorderedBulkOp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#initializeorderedbulkop">initializeOrderedBulkOp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collection.html#parallelcollectionscan">parallelCollectionScan</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mongoclient.html">MongoClient()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mongoclient.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mongoclient.html#connect">connect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mongoclient.html#open">open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mongoclient.html#close">close</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mongoclient.html#db">db</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mongoclient.html#mongoclient-connect">MongoClient.connect</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="db.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#open">open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#id1">db</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#close">close</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#admin">admin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#collectionsinfo">collectionsInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#collectionnames">collectionNames</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#collection">collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#collections">collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#eval">eval</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#dereference">dereference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#logout">logout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#authenticate">authenticate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#adduser">addUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#removeuser">removeUser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#createcollection">createCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#command">command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#dropcollection">dropCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#renamecollection">renameCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#createindex">createIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#ensureindex">ensureIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#cursorinfo">cursorInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#dropindex">dropIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#reindex">reIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#indexinformation">indexInformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#dropdatabase">dropDatabase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#stats">stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="db.html#db-connect">Db.connect</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#cursor-clonewithoptions">Cursor.cloneWithOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#rewind">rewind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#toarray">toArray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#each">each</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#count">count</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#sort">sort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#limit">limit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#maxtimems">maxTimeMS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#setreadpreference">setReadPreference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#skip">skip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#batchsize">batchSize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#nextobject">nextObject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#explain">explain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#stream">stream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#close">close</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cursor.html#isclosed">isClosed</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cursorstream.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#properties">Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#open">open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#writefile">writeFile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#close">close</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#chunkcollection">chunkCollection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#unlink">unlink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#collection">collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#readlines">readlines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#rewind">rewind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#read">read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#tell">tell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#seek">seek</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#eof">eof</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#getc">getc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#puts">puts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#stream">stream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#gridstore-exist">GridStore.exist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#gridstore-list">GridStore.list</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#gridstore-read">GridStore.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#gridstore-readlines">GridStore.readlines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#gridstore-unlink">GridStore.unlink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridstore.html#write">write</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="readstream.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grid.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid.html#put">put</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid.html#get">get</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid.html#delete">delete</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="server.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server.html#assignreplicaset">assignReplicaSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server.html#inheritreplsetoptionsfrom">inheritReplSetOptionsFrom</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mongos.html">Mongos()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mongos.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="replset.html">ReplSet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="replset.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="replset.html#createserver">createServer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="readpreference.html">ReadPreference()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="readpreference.html#constructor">Constructor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ordered.html">OrderedBulkOperation()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#update">update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#updateone">updateOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#replaceone">replaceOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#upsert">upsert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#removeone">removeOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#remove">remove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#insert">insert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#find">find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ordered.html#execute">execute</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="unordered.html">UnorderedBulkOperation()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#update">update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#updateone">updateOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#replaceone">replaceOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#upsert">upsert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#removeone">removeOne</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#remove">remove</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#insert">insert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#find">find</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unordered.html#execute">execute</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="batchwriteresult.html">BatchWriteResult()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#properties">Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#getupsertedids">getUpsertedIds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#getupsertedidat">getUpsertedIdAt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#getrawresponse">getRawResponse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#haswriteerrors">hasWriteErrors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#getwriteerrorcount">getWriteErrorCount</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#getwriteerrorat">getWriteErrorAt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#getwriteerrors">getWriteErrors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#getlastop">getLastOp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batchwriteresult.html#getwriteconcernerror">getWriteConcernError</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Driver API</a><ul>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

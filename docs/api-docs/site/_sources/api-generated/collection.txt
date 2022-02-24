@@ -1,0 +1,3376 @@
+============
+Collection()
+============
+
+------------------
+Constructor
+------------------
+
+
+Create a new Collection instance (INTERNAL TYPE, do not instantiate directly)
+
+
+  .. js:class:: Collection()
+
+   :param object db: db instance.
+   :param string collectionName: collection name.
+   :param object [pkFactory]: alternative primary key factory.
+   :param object [options]: additional options for the collection.
+   :returns: object a collection instance.
+
+
+Options
+ - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **slaveOk** {Boolean, default:false}, Allow reads from secondaries.
+ - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
+ - **raw** {Boolean, default:false}, perform all operations using raw bson objects.
+ - **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
+
+
+------
+insert
+------
+
+
+Inserts a single document or a an array of documents into MongoDB.
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+ - **continueOnError/keepGoing** {Boolean, default:false}, keep inserting documents even if one document has an error, *mongodb 1.9.1 >*.
+ - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
+ - **forceServerObjectId** {Boolean, default:false}, let server assign ObjectId instead of the driver
+ - **checkKeys** {Boolean, default:true}, allows for disabling of document key checking (WARNING OPENS YOU UP TO INJECTION ATTACKS)
+ - **fullResult** {Boolean, default:false}, returns the full result document (document returned will differ by server version)
+
+.. js:function:: insert(docs[, options], [callback])
+
+   :param array docs: 
+   :param object [options]: optional options for insert command
+   :param function [callback]: optional callback for the function, must be provided when using a writeconcern
+   :returns: collection 
+
+
+**Examples**
+
+  
+  
+  A simple document insert example, not using safe mode to ensure document persistance on MongoDB
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Fetch a collection to insert document into
+     db.open(function(err, db) {
+       var collection = db.collection("simple_document_insert_collection_no_safe");
+       // Insert a single document
+       collection.insert({hello:'world_no_safe'});
+     
+       // Wait for a second before finishing up, to ensure we have written the item to disk
+       setTimeout(function() {
+     
+         // Fetch the document
+         collection.findOne({hello:'world_no_safe'}, function(err, item) {
+           assert.equal(null, err);
+           assert.equal('world_no_safe', item.hello);
+           db.close();
+         })
+       }, 100);
+     });
+
+  
+  
+  A batch document insert example, using safe mode to ensure document persistance on MongoDB
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     db.open(function(err, db) {
+       // Fetch a collection to insert document into
+       var collection = db.collection("batch_document_insert_collection_safe");
+       // Insert a single document
+       collection.insert([{hello:'world_safe1'}
+         , {hello:'world_safe2'}], {w:1}, function(err, result) {
+         assert.equal(null, err);
+     
+         // Fetch the document
+         collection.findOne({hello:'world_safe2'}, function(err, item) {
+           assert.equal(null, err);
+           assert.equal('world_safe2', item.hello);
+           db.close();
+         })
+       });
+     });
+
+  
+  
+  Example of inserting a document containing functions
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     db.open(function(err, db) {
+       // Fetch a collection to insert document into
+       var collection = db.collection("simple_document_insert_with_function_safe");
+       // Insert a single document
+       collection.insert({hello:'world'
+         , func:function() {}}, {w:1, serializeFunctions:true}, function(err, result) {
+         assert.equal(null, err);
+     
+         // Fetch the document
+         collection.findOne({hello:'world'}, function(err, item) {
+           assert.equal(null, err);
+           assert.ok("function() {}", item.code);
+           db.close();
+         })
+       });
+     });
+
+  
+  
+  Example of using keepGoing to allow batch insert to complete even when there are illegal documents in the batch
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Only run the rest of the code if we have a mongodb server with version >= 1.9.1
+       db.open(function(err, db) {
+     
+         // Create a collection
+         var collection = db.collection('keepGoingExample');
+     
+         // Add an unique index to title to force errors in the batch insert
+         collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+     
+           // Insert some intial data into the collection
+           collection.insert([{name:"Jim"}
+             , {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
+     
+             // Force keep going flag, ignoring unique index issue
+             collection.insert([{name:"Jim"}
+               , {name:"Sarah", title:"Princess"}
+               , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
+     
+               // Count the number of documents left (should not include the duplicates)
+               collection.count(function(err, count) {
+                 assert.equal(3, count);
+               })
+             });
+           });
+         });
+       });
+
+
+------
+remove
+------
+
+
+Removes documents specified by <code>selector</code> from the db.
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+ - **single** {Boolean, default:false}, removes the first document found.
+ - **fullResult** {Boolean, default:false}, returns the full result document (document returned will differ by server version)
+
+.. js:function:: remove([selector][, options], [callback])
+
+   :param object [selector]: optional select, no selector is equivalent to removing all documents.
+   :param object [options]: additional options during remove.
+   :param function [callback]: must be provided if you performing a remove with a writeconcern
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example removing all documents in a collection not using safe mode
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Fetch a collection to insert document into
+       db.collection("remove_all_documents_no_safe", function(err, collection) {
+         
+         // Insert a bunch of documents
+         collection.insert([{a:1}, {b:2}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+           
+           // Remove all the document
+           collection.remove();
+           
+           // Fetch all results
+           collection.find().toArray(function(err, items) {
+             assert.equal(null, err);
+             assert.equal(0, items.length);
+             db.close();
+           });
+         });
+       })
+     });  
+
+  
+  
+  An example removing a subset of documents using safe mode to ensure removal of documents
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Fetch a collection to insert document into
+       db.collection("remove_subset_of_documents_safe", function(err, collection) {
+         
+         // Insert a bunch of documents
+         collection.insert([{a:1}, {b:2}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+           
+           // Remove all the document
+           collection.remove({a:1}, {w:1}, function(err, numberOfRemovedDocs) {
+             assert.equal(null, err);
+             assert.equal(1, numberOfRemovedDocs);
+             db.close();
+           });        
+         });
+       })
+     });  
+
+
+------
+rename
+------
+
+
+Renames the collection.
+
+
+
+Options
+ - **dropTarget** {Boolean, default:false}, drop the target name collection if it previously exists.
+
+.. js:function:: rename(newName[, options], callback)
+
+   :param string newName: the new name of the collection.
+   :param object [options]: returns option results.
+   :param function callback: the callback accepting the result
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example of illegal and legal renaming of a collection
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Open a couple of collections
+       db.createCollection('test_rename_collection', function(err, collection1) {
+         db.createCollection('test_rename_collection2', function(err, collection2) {
+     
+           // Attemp to rename a collection to a number
+           try {
+             collection1.rename(5, function(err, collection) {});
+           } catch(err) {
+             assert.ok(err instanceof Error);
+             assert.equal("collection name must be a String", err.message);
+           }
+     
+           // Attemp to rename a collection to an empty string
+           try {
+             collection1.rename("", function(err, collection) {});
+           } catch(err) {
+             assert.ok(err instanceof Error);
+             assert.equal("collection names cannot be empty", err.message);
+           }
+     
+           // Attemp to rename a collection to an illegal name including the character $
+           try {
+             collection1.rename("te$t", function(err, collection) {});
+           } catch(err) {
+             assert.ok(err instanceof Error);
+             assert.equal("collection names must not contain '$'", err.message);
+           }
+     
+           // Attemp to rename a collection to an illegal name starting with the character .
+           try {
+             collection1.rename(".test", function(err, collection) {});
+           } catch(err) {
+             assert.ok(err instanceof Error);
+             assert.equal("collection names must not start or end with '.'", err.message);
+           }
+     
+           // Attemp to rename a collection to an illegal name ending with the character .
+           try {
+             collection1.rename("test.", function(err, collection) {});
+           } catch(err) {
+             assert.ok(err instanceof Error);
+             assert.equal("collection names must not start or end with '.'", err.message);
+           }
+     
+           // Attemp to rename a collection to an illegal name with an empty middle name
+           try {
+             collection1.rename("tes..t", function(err, collection) {});
+           } catch(err) {
+             assert.equal("collection names cannot be empty", err.message);
+           }
+     
+           // Insert a couple of documents
+           collection1.insert([{'x':1}, {'x':2}], {w:1}, function(err, docs) {
+     
+             // Attemp to rename the first collection to the second one, this will fail
+             collection1.rename('test_rename_collection2', function(err, collection) {
+               assert.ok(err instanceof Error);
+               assert.ok(err.message.length > 0);
+     
+               // Attemp to rename the first collection to a name that does not exist
+               // this will be succesful
+               collection1.rename('test_rename_collection3', function(err, collection) {
+                 assert.equal("test_rename_collection3", collection.collectionName);
+     
+                 // Ensure that the collection is pointing to the new one
+                 collection1.count(function(err, count) {
+                   assert.equal(2, count);
+                   db.close();
+                 });
+               });
+             });
+           })
+         });
+       });
+     });
+
+
+----
+save
+----
+
+
+Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic
+operators and update instead for more efficient operations.
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+.. js:function:: save([doc][, options], [callback])
+
+   :param object [doc]: the document to save
+   :param object [options]: additional options during remove.
+   :param function [callback]: must be provided if you performing an update with a writeconcern
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of a simple document save with safe set to false
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Fetch the collection
+       var collection = db.collection("save_a_simple_document");
+       // Save a document with no safe option
+       collection.save({hello:'world'});
+     
+       // Wait for a second
+       setTimeout(function() {
+     
+         // Find the saved document
+         collection.findOne({hello:'world'}, function(err, item) {
+           assert.equal(null, err);
+           assert.equal('world', item.hello);
+           db.close();
+         });
+       }, 1000);
+     });
+
+  
+  
+  Example of a simple document save and then resave with safe set to true
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Fetch the collection
+       var collection = db.collection("save_a_simple_document_modify_it_and_resave_it");
+     
+       // Save a document with no safe option
+       collection.save({hello:'world'}, {w: 0}, function(err, result) {
+     
+         // Find the saved document
+         collection.findOne({hello:'world'}, function(err, item) {
+           assert.equal(null, err);
+           assert.equal('world', item.hello);
+     
+           // Update the document
+           item['hello2'] = 'world2';
+     
+           // Save the item with the additional field
+           collection.save(item, {w: 1}, function(err, result) {
+     
+             // Find the changed document
+             collection.findOne({hello:'world'}, function(err, item) {
+               assert.equal(null, err);
+               assert.equal('world', item.hello);
+               assert.equal('world2', item.hello2);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+------
+update
+------
+
+
+Updates documents.
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+ - **upsert** {Boolean, default:false}, perform an upsert operation.
+ - **multi** {Boolean, default:false}, update all documents matching the selector.
+ - **serializeFunctions** {Boolean, default:false}, serialize functions on the document.
+ - **checkKeys** {Boolean, default:true}, allows for disabling of document key checking (WARNING OPENS YOU UP TO INJECTION ATTACKS)
+ - **fullResult** {Boolean, default:false}, returns the full result document (document returned will differ by server version)
+
+.. js:function:: update(selector, document[, options], [callback])
+
+   :param object selector: the query to select the document/documents to be updated
+   :param object document: the fields/vals to be updated, or in the case of an upsert operation, inserted.
+   :param object [options]: additional options during update.
+   :param function [callback]: must be provided if you performing an update with a writeconcern
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of a simple document update with safe set to false on an existing document
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Get a collection
+       db.collection('update_a_simple_document', function(err, collection) {
+     
+         // Insert a document, then update it
+         collection.insert({a:1}, {w: 1}, function(err, doc) {
+     
+           // Update the document with an atomic operator
+           collection.update({a:1}, {$set:{b:2}});
+     
+           // Wait for a second then fetch the document
+           setTimeout(function() {
+     
+             // Fetch the document that we modified
+             collection.findOne({a:1}, function(err, item) {
+               assert.equal(null, err);
+               assert.equal(1, item.a);
+               assert.equal(2, item.b);
+               db.close();
+             });
+           }, 1000);
+         })
+       });
+     });
+
+  
+  
+  Example of a simple document update using upsert (the document will be inserted if it does not exist)
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Get a collection
+       db.collection('update_a_simple_document_upsert', function(err, collection) {
+     
+         // Update the document using an upsert operation, ensuring creation if it does not exist
+         collection.update({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
+           assert.equal(null, err);
+           assert.equal(1, result);
+     
+           // Fetch the document that we modified and check if it got inserted correctly
+           collection.findOne({a:1}, function(err, item) {
+             assert.equal(null, err);
+             assert.equal(1, item.a);
+             assert.equal(2, item.b);
+             db.close();
+           });
+         });
+       });
+     });
+
+  
+  
+  Example of an update across multiple documents using the multi option.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Get a collection
+       db.collection('update_a_simple_document_multi', function(err, collection) {
+     
+         // Insert a couple of documentations
+         collection.insert([{a:1, b:1}, {a:1, b:2}], {w: 1}, function(err, result) {
+     
+           // Update multiple documents using the multi option
+           collection.update({a:1}, {$set:{b:0}}, {w: 1, multi:true}, function(err, numberUpdated) {
+             assert.equal(null, err);
+             assert.equal(2, numberUpdated);
+     
+             // Fetch all the documents and verify that we have changed the b value
+             collection.find().toArray(function(err, items) {
+               assert.equal(null, err);
+               assert.equal(1, items[0].a);
+               assert.equal(0, items[0].b);
+               assert.equal(1, items[1].a);
+               assert.equal(0, items[1].b);
+     
+               db.close();
+             });
+           })
+         });
+       });
+     });
+
+
+--------
+distinct
+--------
+
+
+The distinct command returns returns a list of distinct values for the given key across a collection.
+
+
+
+Options
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+
+.. js:function:: distinct(key[, query], [options], callback)
+
+   :param string key: key to run distinct against.
+   :param object [query]: option query to narrow the returned objects.
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from distinct or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of running the distinct command against a collection
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Crete the collection for the distinct example
+       db.createCollection('simple_key_based_distinct', function(err, collection) {
+     
+         // Insert documents to perform distinct against
+         collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+           {a:2, b:{c:'a'}}, {a:3}, {a:3}], {w: 1}, function(err, ids) {
+     
+           // Peform a distinct query against the a field
+           collection.distinct('a', function(err, docs) {
+             assert.deepEqual([0, 1, 2, 3], docs.sort());
+     
+             // Perform a distinct query against the sub-field b.c
+             collection.distinct('b.c', function(err, docs) {
+               assert.deepEqual(['a', 'b', 'c'], docs.sort());
+     
+               db.close();
+             });
+           });
+         })
+       });
+     });
+
+  
+  
+  Example of running the distinct command against a collection with a filter query
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Crete the collection for the distinct example
+       db.createCollection('simple_key_based_distinct_sub_query_filter', function(err, collection) {
+     
+         // Insert documents to perform distinct against
+         collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+           {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], {w: 1}, function(err, ids) {
+     
+           // Peform a distinct query with a filter against the documents
+           collection.distinct('a', {c:1}, function(err, docs) {
+             assert.deepEqual([5], docs.sort());
+     
+             db.close();
+           });
+         })
+       });
+     });
+
+
+-----
+count
+-----
+
+
+Count number of matching documents in the db to a query.
+
+
+
+Options
+ - **skip** {Number}, The number of documents to skip for the count.
+ - **limit** {Number}, The limit of documents to count.
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+
+.. js:function:: count([query][, options], callback)
+
+   :param object [query]: query to filter by before performing count.
+   :param object [options]: additional options during count.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the count method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of running simple count commands against a collection.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Crete the collection for the distinct example
+       db.createCollection('simple_count_example', function(err, collection) {
+     
+         // Insert documents to perform distinct against
+         collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], {w: 1}, function(err, ids) {
+     
+           // Perform a total count command
+           collection.count(function(err, count) {
+             assert.equal(null, err);
+             assert.equal(4, count);
+     
+             // Peform a partial account where b=1
+             collection.count({b:1}, function(err, count) {
+               assert.equal(null, err);
+               assert.equal(1, count);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+----
+drop
+----
+
+
+Drop the collection
+
+.. js:function:: drop(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the drop method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of a simple document save and then resave with safe set to true
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('test_other_drop', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Drop the collection
+         collection.drop(function(err, reply) {
+     
+           // Ensure we don't have the collection in the set of names
+           db.collectionNames(function(err, replies) {
+     
+             var found = false;
+             // For each collection in the list of collection names in this db look for the
+             // dropped collection
+             replies.forEach(function(document) {
+               if(document.name == "test_other_drop") {
+                 found = true;
+                 return;
+               }
+             });
+     
+             // Ensure the collection is not found
+             assert.equal(false, found);
+     
+             // Let's close the db
+             db.close();
+           });
+         });
+       });
+     });
+
+
+-------------
+findAndModify
+-------------
+
+
+Find and update a document.
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+ - **remove** {Boolean, default:false}, set to true to remove the object before returning.
+ - **upsert** {Boolean, default:false}, perform an upsert operation.
+ - **new** {Boolean, default:false}, set to true if you want to return the modified object rather than the original. Ignored for remove.
+
+.. js:function:: findAndModify(query, sort, doc[, options], callback)
+
+   :param object query: query object to locate the object to modify
+   :param array sort: - if multiple docs match, choose the first one in the specified sort order as the object to manipulate
+   :param object doc: - the fields/vals to be updated
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the findAndModify method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A whole set of different ways to use the findAndModify command.
+  
+  
+  
+  The first findAndModify command modifies a document and returns the modified document back.
+  The second findAndModify command removes the document.
+  The second findAndModify command upserts a document and returns the new document.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('simple_find_and_modify_operations_', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some test documentations
+         collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Simple findAndModify command returning the new document
+           collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true}, function(err, doc) {
+             assert.equal(null, err);
+             assert.equal(1, doc.a);
+             assert.equal(1, doc.b1);
+     
+             // Simple findAndModify command returning the new document and
+             // removing it at the same time
+             collection.findAndModify({b:1}, [['b', 1]],
+               {$set:{b:2}}, {remove:true}, function(err, doc) {
+     
+               // Verify that the document is gone
+               collection.findOne({b:1}, function(err, item) {
+                 assert.equal(null, err);
+                 assert.equal(null, item);
+     
+                 // Simple findAndModify command performing an upsert and returning the new document
+                 // executing the command safely
+                 collection.findAndModify({d:1}, [['b', 1]],
+                   {d:1, f:1}, {new:true, upsert:true, w:1}, function(err, doc) {
+                     assert.equal(null, err);
+                     assert.equal(1, doc.d);
+                     assert.equal(1, doc.f);
+     
+                     db.close();
+                 })
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+-------------
+findAndRemove
+-------------
+
+
+Find and remove a document
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+.. js:function:: findAndRemove(query, sort[, options], callback)
+
+   :param object query: query object to locate the object to modify
+   :param array sort: - if multiple docs match, choose the first one in the specified sort order as the object to manipulate
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the findAndRemove method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example of using findAndRemove
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('simple_find_and_modify_operations_2', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert some test documentations
+         collection.insert([{a:1}, {b:1, d:1}, {c:1}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Simple findAndModify command returning the old document and
+           // removing it at the same time
+           collection.findAndRemove({b:1}, [['b', 1]], function(err, doc) {
+             assert.equal(null, err);
+             assert.equal(1, doc.b);
+             assert.equal(1, doc.d);
+     
+             // Verify that the document is gone
+             collection.findOne({b:1}, function(err, item) {
+               assert.equal(null, err);
+               assert.equal(null, item);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+----
+find
+----
+
+
+Creates a cursor for a query that can be used to iterate over results from MongoDB
+
+
+
+Various argument possibilities
+ - callback?
+ - selector, callback?,
+ - selector, fields, callback?
+ - selector, options, callback?
+ - selector, fields, options, callback?
+ - selector, fields, skip, limit, callback?
+ - selector, fields, skip, limit, timeout, callback?
+
+
+
+Options
+ - **limit** {Number, default:0}, sets the limit of documents returned in the query.
+ - **sort** {Array | Object}, set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc.
+ - **fields** {Object}, the fields to return in the query. Object of fields to include or exclude (not both), {'a':1}
+ - **skip** {Number, default:0}, set to skip N documents ahead in your query (useful for pagination).
+ - **hint** {Object}, tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1}
+ - **explain** {Boolean, default:false}, explain the query instead of returning the data.
+ - **snapshot** {Boolean, default:false}, snapshot query.
+ - **timeout** {Boolean, default:false}, specify if the cursor can timeout.
+ - **tailable** {Boolean, default:false}, specify if the cursor is tailable.
+ - **tailableRetryInterval** {Number, default:100}, specify the miliseconds between getMores on tailable cursor.
+ - **numberOfRetries** {Number, default:5}, specify the number of times to retry the tailable cursor.
+ - **awaitdata** {Boolean, default:false} allow the cursor to wait for data, only applicable for tailable cursor.
+ - **oplogReplay** {Boolean, default:false} sets an internal flag, only applicable for tailable cursor.
+ - **exhaust** {Boolean, default:false} have the server send all the documents at once as getMore packets, not recommended.
+ - **batchSize** {Number, default:0}, set the batchSize for the getMoreCommand when iterating over the query results.
+ - **returnKey** {Boolean, default:false}, only return the index key.
+ - **maxScan** {Number}, Limit the number of items to scan.
+ - **min** {Number}, Set index bounds.
+ - **max** {Number}, Set index bounds.
+ - **showDiskLoc** {Boolean, default:false}, Show disk location of results.
+ - **comment** {String}, You can put a $comment field on a query to make looking in the profiler logs simpler.
+ - **raw** {Boolean, default:false}, Return all BSON documents as Raw Buffer documents.
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **numberOfRetries** {Number, default:5}, if using awaidata specifies the number of times to retry on timeout.
+ - **partial** {Boolean, default:false}, specify if the cursor should return partial results when querying against a sharded system
+ - **maxTimeMS** {Number}, number of miliseconds to wait before aborting the query.
+
+.. js:function:: find(query[, options], callback)
+
+   :param object query: query object to locate the object to modify
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the find method or null if an error occured.
+   :returns: cursor returns a cursor to the query
+
+
+**Examples**
+
+  
+  
+  A simple query using the find method on the collection.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('simple_query', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the testing
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Peform a simple find and return all the documents
+           collection.find().toArray(function(err, docs) {
+             assert.equal(null, err);
+             assert.equal(3, docs.length);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+  
+  
+  A simple query showing the explain for a query
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('simple_explain_query', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the testing
+         collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Peform a simple find and return all the documents
+           collection.find({}, {explain:true}).toArray(function(err, docs) {
+             assert.equal(null, err);
+             assert.equal(1, docs.length);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+  
+  
+  A simple query showing skip and limit
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('simple_limit_skip_query', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the testing
+         collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Peform a simple find and return all the documents
+           collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray(function(err, docs) {
+             assert.equal(null, err);
+             assert.equal(1, docs.length);
+             assert.equal(null, docs[0].a);
+             assert.equal(2, docs[0].b);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+-------
+findOne
+-------
+
+
+Finds a single document based on the query
+
+
+
+Various argument possibilities
+ - callback?
+ - selector, callback?,
+ - selector, fields, callback?
+ - selector, options, callback?
+ - selector, fields, options, callback?
+ - selector, fields, skip, limit, callback?
+ - selector, fields, skip, limit, timeout, callback?
+
+
+
+Options
+ - **limit** {Number, default:0}, sets the limit of documents returned in the query.
+ - **sort** {Array | Object}, set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc.
+ - **fields** {Object}, the fields to return in the query. Object of fields to include or exclude (not both), {'a':1}
+ - **skip** {Number, default:0}, set to skip N documents ahead in your query (useful for pagination).
+ - **hint** {Object}, tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1}
+ - **explain** {Boolean, default:false}, explain the query instead of returning the data.
+ - **snapshot** {Boolean, default:false}, snapshot query.
+ - **timeout** {Boolean, default:false}, specify if the cursor can timeout.
+ - **tailable** {Boolean, default:false}, specify if the cursor is tailable.
+ - **batchSize** {Number, default:0}, set the batchSize for the getMoreCommand when iterating over the query results.
+ - **returnKey** {Boolean, default:false}, only return the index key.
+ - **maxScan** {Number}, Limit the number of items to scan.
+ - **min** {Number}, Set index bounds.
+ - **max** {Number}, Set index bounds.
+ - **showDiskLoc** {Boolean, default:false}, Show disk location of results.
+ - **comment** {String}, You can put a $comment field on a query to make looking in the profiler logs simpler.
+ - **raw** {Boolean, default:false}, Return all BSON documents as Raw Buffer documents.
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **partial** {Boolean, default:false}, specify if the cursor should return partial results when querying against a sharded system
+ - **maxTimeMS** {Number}, number of miliseconds to wait before aborting the query.
+
+.. js:function:: findOne(query[, options], callback)
+
+   :param object query: query object to locate the object to modify
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the findOne method or null if an error occured.
+   :returns: cursor returns a cursor to the query
+
+
+**Examples**
+
+  
+  
+  A simple query using findOne
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('simple_limit_skip_find_one_query', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the testing
+         collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Peform a simple find and return all the documents
+           collection.findOne({a:2}, {fields:{b:1}}, function(err, doc) {
+             assert.equal(null, err);
+             assert.equal(null, doc.a);
+             assert.equal(2, doc.b);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+-----------
+createIndex
+-----------
+
+
+Creates an index on the collection.
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+ - **unique** {Boolean, default:false}, creates an unique index.
+ - **sparse** {Boolean, default:false}, creates a sparse index.
+ - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
+ - **dropDups** {Boolean, default:false}, a unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
+ - **min** {Number}, for geospatial indexes set the lower bound for the co-ordinates.
+ - **max** {Number}, for geospatial indexes set the high bound for the co-ordinates.
+ - **v** {Number}, specify the format version of the indexes.
+ - **expireAfterSeconds** {Number}, allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
+ - **name** {String}, override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
+
+.. js:function:: createIndex(fieldOrSpec[, options], callback)
+
+   :param object fieldOrSpec: fieldOrSpec that defines the index.
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the createIndex method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple createIndex using a simple single field index
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('simple_index_test', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the index
+         collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Create an index on the a field
+           collection.createIndex('a', {w:1}, function(err, indexName) {
+             assert.equal("a_1", indexName);
+     
+             // Peform a query, with explain to show we hit the query
+             collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+               assert.deepEqual([[2, 2]], explanation[0].indexBounds.a);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+  
+  
+  A more complex createIndex using a compound unique index in the background and dropping duplicated documents
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('more_complex_index_test', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the index
+         collection.insert([{a:1, b:1}, {a:1, b:1}
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           var options = {unique:true, background:true, dropDups:true, w:1};
+           // Create an index on the a field
+           collection.createIndex({a:1, b:1}
+             , options, function(err, indexName) {
+     
+             assert.ok(!options.readPreference);
+             // Show that duplicate records got dropped
+             collection.find({}).toArray(function(err, items) {
+               assert.equal(null, err);
+               assert.equal(4, items.length);
+     
+               // Peform a query, with explain to show we hit the query
+               collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+                 assert.equal(null, err);
+                 assert.ok(explanation[0].indexBounds.a != null);
+                 assert.ok(explanation[0].indexBounds.b != null);
+     
+                 db.close();
+               });
+             })
+           });
+         });
+       });
+     });
+
+
+-----------
+ensureIndex
+-----------
+
+
+Ensures that an index exists, if it does not it creates it
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+ - **unique** {Boolean, default:false}, creates an unique index.
+ - **sparse** {Boolean, default:false}, creates a sparse index.
+ - **background** {Boolean, default:false}, creates the index in the background, yielding whenever possible.
+ - **dropDups** {Boolean, default:false}, a unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
+ - **min** {Number}, for geospatial indexes set the lower bound for the co-ordinates.
+ - **max** {Number}, for geospatial indexes set the high bound for the co-ordinates.
+ - **v** {Number}, specify the format version of the indexes.
+ - **expireAfterSeconds** {Number}, allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
+ - **name** {String}, override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
+
+.. js:function:: ensureIndex(fieldOrSpec[, options], callback)
+
+   :param object fieldOrSpec: fieldOrSpec that defines the index.
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the ensureIndex method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('more_complex_ensure_index_test', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the index
+         collection.insert([{a:1, b:1}, {a:1, b:1}
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Create an index on the a field
+           collection.ensureIndex({a:1, b:1}
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+             // Show that duplicate records got dropped
+             collection.find({}).toArray(function(err, items) {
+               assert.equal(null, err);
+               assert.equal(4, items.length);
+     
+               // Peform a query, with explain to show we hit the query
+               collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+                 assert.equal(null, err);
+                 assert.ok(explanation[0].indexBounds.a != null);
+                 assert.ok(explanation[0].indexBounds.b != null);
+     
+                 db.close();
+               });
+             })
+           });
+         });
+       });
+     });
+
+
+----------------
+indexInformation
+----------------
+
+
+Retrieves this collections index info.
+
+
+
+Options
+ - **full** {Boolean, default:false}, returns the full raw index information.
+
+.. js:function:: indexInformation([options], callback)
+
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the indexInformation method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An examples showing the information returned by indexInformation
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('more_index_information_test', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the index
+         collection.insert([{a:1, b:1}, {a:1, b:1}
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Create an index on the a field
+           collection.ensureIndex({a:1, b:1}
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+     
+             // Fetch basic indexInformation for collection
+             collection.indexInformation(function(err, indexInformation) {
+               assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+               assert.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+     
+               // Fetch full index information
+               collection.indexInformation({full:true}, function(err, indexInformation) {
+                 assert.deepEqual({ _id: 1 }, indexInformation[0].key);
+                 assert.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+---------
+dropIndex
+---------
+
+
+Drops an index from this collection.
+
+.. js:function:: dropIndex(name, callback)
+
+   :param string name: 
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the dropIndex method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An examples showing the creation and dropping of an index
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('create_and_drop_an_index', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the index
+         collection.insert([{a:1, b:1}, {a:1, b:1}
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Create an index on the a field
+           collection.ensureIndex({a:1, b:1}
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+     
+             // Drop the index
+             collection.dropIndex("a_1_b_1", function(err, result) {
+               assert.equal(null, err);
+     
+               // Verify that the index is gone
+               collection.indexInformation(function(err, indexInformation) {
+                 assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+                 assert.equal(null, indexInformation.a_1_b_1);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+--------------
+dropAllIndexes
+--------------
+
+
+Drops all indexes from this collection.
+
+.. js:function:: dropAllIndexes(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the dropAllIndexes method or null if an error occured.
+   :returns: null 
+
+
+-------
+reIndex
+-------
+
+
+Reindex all indexes on the collection
+Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.
+
+.. js:function:: reIndex(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the reIndex method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example showing how to force a reindex of a collection.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a collection we want to drop later
+       db.createCollection('shouldCorrectlyForceReindexOnCollection', function(err, collection) {
+         assert.equal(null, err);
+     
+         // Insert a bunch of documents for the index
+         collection.insert([{a:1, b:1}, {a:1, b:1}
+           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Create an index on the a field
+           collection.ensureIndex({a:1, b:1}
+             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+     
+             // Force a reindex of the collection
+             collection.reIndex(function(err, result) {
+               assert.equal(null, err);
+               assert.equal(true, result);
+     
+               // Verify that the index is gone
+               collection.indexInformation(function(err, indexInformation) {
+                 assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+                 assert.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+---------
+mapReduce
+---------
+
+
+Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
+
+
+
+Options
+ - **out** {Object}, sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}*
+ - **query** {Object}, query filter object.
+ - **sort** {Object}, sorts the input objects using this key. Useful for optimization, like sorting by the emit key for fewer reduces.
+ - **limit** {Number}, number of objects to return from collection.
+ - **keeptemp** {Boolean, default:false}, keep temporary data.
+ - **finalize** {Function | String}, finalize function.
+ - **scope** {Object}, can pass in variables that can be access from map/reduce/finalize.
+ - **jsMode** {Boolean, default:false}, it is possible to make the execution stay in JS. Provided in MongoDB > 2.0.X.
+ - **verbose** {Boolean, default:false}, provide statistics on job execution time.
+ - **readPreference** {String, only for inline results}, the preferred read preference, require('mongodb').ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+
+.. js:function:: mapReduce(map, reduce[, options], callback)
+
+   :param function map: the mapping function.
+   :param function reduce: the reduce function.
+   :param objects [options]: options for the map reduce job.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the mapReduce method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple map reduce example
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a test collection
+       db.createCollection('test_map_reduce_functions', function(err, collection) {
+     
+         // Insert some documents to perform map reduce over
+         collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+     
+           // Map function
+           var map = function() { emit(this.user_id, 1); };
+           // Reduce function
+           var reduce = function(k,vals) { return 1; };
+     
+           // Peform the map reduce
+           collection.mapReduce(map, reduce, {out: {replace : 'tempCollection', readPreference : 'secondary'}}, function(err, collection) {
+             // Mapreduce returns the temporary collection with the results
+             collection.findOne({'_id':1}, function(err, result) {
+               assert.equal(1, result.value);
+     
+               collection.findOne({'_id':2}, function(err, result) {
+                 assert.equal(1, result.value);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+  
+  
+  A simple map reduce example using the inline output type on MongoDB > 1.7.6 returning the statistics
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+     
+         // Create a test collection
+         db.createCollection('test_map_reduce_functions_inline', function(err, collection) {
+     
+           // Insert some test documents
+           collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+     
+             // Map function
+             var map = function() { emit(this.user_id, 1); };
+             // Reduce function
+             var reduce = function(k,vals) { return 1; };
+     
+             // Execute map reduce and return results inline
+             collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}, function(err, results, stats) {
+               assert.equal(2, results.length);
+               assert.ok(stats != null);
+     
+               collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}, function(err, results, stats) {
+                 assert.ok(stats != null);
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+
+  
+  
+  Mapreduce different test with a provided scope containing a javascript function.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a test collection
+       db.createCollection('test_map_reduce_functions_scope', function(err, collection) {
+     
+         // Insert some test documents
+         collection.insert([{'user_id':1, 'timestamp':new Date()}
+           , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
+     
+           // Map function
+           var map = function(){
+               emit(fn(this.timestamp.getYear()), 1);
+           }
+     
+           // Reduce function
+           var reduce = function(k, v){
+               count = 0;
+               for(i = 0; i < v.length; i++) {
+                   count += v[i];
+               }
+               return count;
+           }
+     
+           // Javascript function available in the map reduce scope
+           var t = function(val){ return val+1; }
+     
+           // Execute the map reduce with the custom scope
+           var o = {};
+           o.scope =  { fn: new Code(t.toString()) }
+           o.out = { replace: 'replacethiscollection' }
+     
+           collection.mapReduce(map, reduce, o, function(err, outCollection) {
+             assert.equal(null, err);
+     
+             // Find all entries in the map-reduce collection
+             outCollection.find().toArray(function(err, results) {
+               assert.equal(null, err);
+               assert.equal(2, results[0].value)
+     
+               // mapReduce with scope containing plain function
+               var o = {};
+               o.scope =  { fn: t }
+               o.out = { replace: 'replacethiscollection' }
+     
+               collection.mapReduce(map, reduce, o, function(err, outCollection) {
+                 assert.equal(null, err);
+     
+                 // Find all entries in the map-reduce collection
+                 outCollection.find().toArray(function(err, results) {
+                   assert.equal(2, results[0].value)
+                   db.close();
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+  
+  
+  Mapreduce different test with a provided scope containing javascript objects with functions.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a test collection
+       db.createCollection('test_map_reduce_functions_scope_objects', function(err, collection) {
+     
+         // Insert some test documents
+         collection.insert([{'user_id':1, 'timestamp':new Date()}
+           , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
+     
+           // Map function
+           var map = function(){
+             emit(obj.fn(this.timestamp.getYear()), 1);
+           }
+     
+           // Reduce function
+           var reduce = function(k, v){
+             count = 0;
+             for(i = 0; i < v.length; i++) {
+               count += v[i];
+             }
+             return count;
+           }
+     
+           // Javascript function available in the map reduce scope
+           var t = function(val){ return val+1; }
+     
+           // Execute the map reduce with the custom scope containing objects
+           var o = {};
+           o.scope =  { obj: {fn: new Code(t.toString())} }
+           o.out = { replace: 'replacethiscollection' }
+     
+           collection.mapReduce(map, reduce, o, function(err, outCollection) {
+             assert.equal(null, err);
+     
+             // Find all entries in the map-reduce collection
+             outCollection.find().toArray(function(err, results) {
+               assert.equal(null, err);
+               assert.equal(2, results[0].value)
+     
+               // mapReduce with scope containing plain function
+               var o = {};
+               o.scope =  { obj: {fn: t} }
+               o.out = { replace: 'replacethiscollection' }
+     
+               collection.mapReduce(map, reduce, o, function(err, outCollection) {
+                 assert.equal(null, err);
+     
+                 // Find all entries in the map-reduce collection
+                 outCollection.find().toArray(function(err, results) {
+                   assert.equal(2, results[0].value)
+                   db.close();
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+-----
+group
+-----
+
+
+Run a group command across a collection
+
+
+
+Options
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+
+.. js:function:: group(keys, condition, initial, reduce, finalize, command[, options], callback)
+
+   :param object keys: an object, array or function expressing the keys to group by.
+   :param object condition: an optional condition that must be true for a row to be considered.
+   :param object initial: initial value of the aggregation counter object.
+   :param function reduce: the reduce function aggregates (reduces) the objects iterated
+   :param function finalize: an optional function to be run on each item in the result set just before the item is returned.
+   :param boolean command: specify if you wish to run using the internal group command or using eval, default is true.
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the group method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A whole lot of different wayt to execute the group command
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a test collection
+       db.createCollection('test_group', function(err, collection) {
+     
+         // Peform a simple group by on an empty collection
+         collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
+           assert.deepEqual([], results);
+     
+           // Trigger some inserts on the collection
+           collection.insert([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
+     
+             // Perform a group count
+             collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
+               assert.equal(3, results[0].count);
+     
+               // Pefrom a group count using the eval method
+               collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false, function(err, results) {
+                 assert.equal(3, results[0].count);
+     
+                 // Group with a conditional
+                 collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
+                   // Results
+                   assert.equal(1, results[0].count);
+     
+                   // Group with a conditional using the EVAL method
+                   collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }" , false, function(err, results) {
+                     // Results
+                     assert.equal(1, results[0].count);
+     
+                     // Insert some more test data
+                     collection.insert([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
+     
+                       // Do a Group by field a
+                       collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
+                         // Results
+                         assert.equal(2, results[0].a);
+                         assert.equal(2, results[0].count);
+                         assert.equal(null, results[1].a);
+                         assert.equal(2, results[1].count);
+                         assert.equal(1, results[2].a);
+                         assert.equal(1, results[2].count);
+     
+                         // Do a Group by field a
+                         collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true, function(err, results) {
+                           // Results
+                           assert.equal(2, results[0].a);
+                           assert.equal(2, results[0].count);
+                           assert.equal(null, results[1].a);
+                           assert.equal(2, results[1].count);
+                           assert.equal(1, results[2].a);
+                           assert.equal(1, results[2].count);
+     
+                           // Correctly handle illegal function
+                           collection.group([], {}, {}, "5 ++ 5", function(err, results) {
+                             assert.ok(err.message != null);
+     
+                             // Use a function to select the keys used to group by
+                             var keyf = function(doc) { return {a: doc.a}; };
+                             collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                               // Results
+                               results.sort(function(a, b) { return b.count - a.count; });
+                               assert.equal(2, results[0].count);
+                               assert.equal(2, results[0].a);
+                               assert.equal(4, results[0].value);
+                               assert.equal(1, results[1].count);
+                               assert.equal(1, results[1].a);
+                               assert.equal(1, results[1].value);
+     
+                               // Use a Code object to select the keys used to group by
+                               var keyf = new Code(function(doc) { return {a: doc.a}; });
+                               collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                                 // Results
+                                 results.sort(function(a, b) { return b.count - a.count; });
+                                 assert.equal(2, results[0].count);
+                                 assert.equal(2, results[0].a);
+                                 assert.equal(4, results[0].value);
+                                 assert.equal(1, results[1].count);
+                                 assert.equal(1, results[1].a);
+                                 assert.equal(1, results[1].value);
+     
+                                 // Correctly handle illegal function when using the EVAL method
+                                 collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
+                                   assert.ok(err.message != null);
+     
+                                   db.close();
+                                 });
+                               });
+                             });
+                           });
+                         });
+                       });
+                     });
+                   });
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+-------
+options
+-------
+
+
+Returns the options of the collection.
+
+.. js:function:: options(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the options method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example returning the options for a collection.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a test collection that we are getting the options back from
+       db.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {
+         assert.ok(collection instanceof Collection);
+         assert.equal('test_collection_options', collection.collectionName);
+     
+         // Let's fetch the collection options
+         collection.options(function(err, options) {
+           assert.equal(true, options.capped);
+           assert.ok(options.size >= 1024);
+     
+           db.close();
+         });
+       });
+     });
+
+
+--------
+isCapped
+--------
+
+
+Returns if the collection is a capped collection
+
+.. js:function:: isCapped(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the isCapped method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example showing how to establish if it's a capped collection
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a test collection that we are getting the options back from
+       db.createCollection('test_collection_is_capped', {'capped':true, 'size':1024}, function(err, collection) {
+         assert.ok(collection instanceof Collection);
+         assert.equal('test_collection_is_capped', collection.collectionName);
+     
+         // Let's fetch the collection options
+         collection.isCapped(function(err, capped) {
+           assert.equal(true, capped);
+     
+           db.close();
+         });
+       });
+     });
+
+
+-----------
+indexExists
+-----------
+
+
+Checks if one or more indexes exist on the collection
+
+.. js:function:: indexExists(indexNames, callback)
+
+   :param string indexNames: check if one or more indexes exist on the collection.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the indexExists method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  An example showing the use of the indexExists function for a single index name and a list of index names.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Create a test collection that we are getting the options back from
+       db.createCollection('test_collection_index_exists', {w: 1}, function(err, collection) {
+         assert.equal(null, err);
+     
+         // Create an index on the collection
+         collection.createIndex('a', {w: 1}, function(err, indexName) {
+     
+           // Let's test to check if a single index exists
+           collection.indexExists("a_1", function(err, result) {
+             assert.equal(true, result);
+     
+             // Let's test to check if multiple indexes are available
+             collection.indexExists(["a_1", "_id_"], function(err, result) {
+               assert.equal(true, result);
+     
+               // Check if a non existing index exists
+               collection.indexExists("c_1", function(err, result) {
+                 assert.equal(false, result);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+-------
+geoNear
+-------
+
+
+Execute the geoNear command to search for items in the collection
+
+
+
+Options
+ - **num** {Number}, max number of results to return.
+ - **minDistance** {Number}, include results starting at minDistance from a point (2.6 or higher)
+ - **maxDistance** {Number}, include results up to maxDistance from the point.
+ - **distanceMultiplier** {Number}, include a value to multiply the distances with allowing for range conversions.
+ - **query** {Object}, filter the results by a query.
+ - **spherical** {Boolean, default:false}, perform query using a spherical model.
+ - **uniqueDocs** {Boolean, default:false}, the closest location in a document to the center of the search region will always be returned MongoDB > 2.X.
+ - **includeLocs** {Boolean, default:false}, include the location data fields in the top level of the results MongoDB > 2.X.
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+
+.. js:function:: geoNear(x, y[, options], callback)
+
+   :param number x: point to search on the x axis, ensure the indexes are ordered in the same order.
+   :param number y: point to search on the y axis, ensure the indexes are ordered in the same order.
+   :param objects [options]: options for the map reduce job.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the geoNear method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of a simple geoNear query across some documents
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = configuration.newDbInstance({w:0}, {poolSize:1});
+     
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Fetch the collection
+       var collection = db.collection("simple_geo_near_command");
+         
+       // Add a location based index
+       collection.ensureIndex({loc:"2d"}, function(err, result) {
+     
+         // Save a new location tagged document
+         collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
+          
+           // Use geoNear command to find document
+           collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
+             assert.equal(1, docs.results.length);
+             
+             db.close();
+           });          
+         });
+       });      
+     });
+
+
+-----------------
+geoHaystackSearch
+-----------------
+
+
+Execute a geo search using a geo haystack index on a collection.
+
+
+
+Options
+ - **maxDistance** {Number}, include results up to maxDistance from the point.
+ - **search** {Object}, filter the results by a query.
+ - **limit** {Number}, max number of results to return.
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+
+.. js:function:: geoHaystackSearch(x, y[, options], callback)
+
+   :param number x: point to search on the x axis, ensure the indexes are ordered in the same order.
+   :param number y: point to search on the y axis, ensure the indexes are ordered in the same order.
+   :param objects [options]: options for the map reduce job.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the geoHaystackSearch method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of a simple geoHaystackSearch query across some documents
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Fetch the collection
+       var collection = db.collection("simple_geo_haystack_command");
+         
+       // Add a location based index
+       collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}, function(err, result) {
+     
+         // Save a new location tagged document
+         collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
+          
+           // Use geoNear command to find document
+           collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
+             assert.equal(1, docs.results.length);
+             db.close();
+           });          
+         });
+       });      
+     });
+
+
+-------
+indexes
+-------
+
+
+Retrieve all the indexes on the collection.
+
+.. js:function:: indexes(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the indexes method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of retrieving a collections indexes
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Crete the collection for the distinct example
+       db.createCollection('simple_key_based_distinct', function(err, collection) {
+     
+         // Create a geo 2d index
+         collection.ensureIndex({loc:"2d"}, {w: 1}, function(err, result) {
+           assert.equal(null, err);
+     
+           // Create a simple single field index
+           collection.ensureIndex({a:1}, {w: 1}, function(err, result) {
+             assert.equal(null, err);
+     
+             // List all of the indexes on the collection
+             collection.indexes(function(err, indexes) {
+               assert.equal(3, indexes.length);
+     
+               db.close();
+             });
+           })
+         })
+       });
+     });
+
+
+---------
+aggregate
+---------
+
+
+Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.2
+
+
+
+Options
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **cursor** {Object}, return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor.
+ - **cursor.batchSize** {Number}, the batchSize for the cursor
+ - **out** {String}, the collection name to where to write the results from the aggregation (MongoDB 2.6 or higher). Warning any existing collection will be overwritten.
+ - **explain** {Boolean, default:false}, explain returns the aggregation execution plan (requires mongodb 2.6 >).
+ - **allowDiskUse** {Boolean, default:false}, allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >).
+
+.. js:function:: aggregate(array[, options], callback)
+
+   :param array array: containing all the aggregation framework commands for the execution.
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the aggregate method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Correctly call the aggregation framework using a pipeline in an Array.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Some docs for insertion
+         var docs = [{
+             title : "this is my title", author : "bob", posted : new Date() ,
+             pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+             comments : [
+               { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+             ]}];
+     
+         // Create a collection
+         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
+         // Insert the docs
+         collection.insert(docs, {w: 1}, function(err, result) {
+     
+           // Execute aggregate, notice the pipeline is expressed as an Array
+           collection.aggregate([
+               { $project : {
+                 author : 1,
+                 tags : 1
+               }},
+               { $unwind : "$tags" },
+               { $group : {
+                 _id : {tags : "$tags"},
+                 authors : { $addToSet : "$author" }
+               }}
+             ], function(err, result) {
+               assert.equal(null, err);
+               assert.equal('good', result[0]._id.tags);
+               assert.deepEqual(['bob'], result[0].authors);
+               assert.equal('fun', result[1]._id.tags);
+               assert.deepEqual(['bob'], result[1].authors);
+     
+               db.close();
+           });
+         });
+       });
+
+  
+  
+  Correctly call the aggregation framework using a pipeline expressed as an argument list.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Some docs for insertion
+         var docs = [{
+             title : "this is my title", author : "bob", posted : new Date() ,
+             pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+             comments : [
+               { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+             ]}];
+     
+         // Create a collection
+         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments');
+         // Insert the docs
+         collection.insert(docs, {w: 1}, function(err, result) {
+           // Execute aggregate, notice the pipeline is expressed as function call parameters
+           // instead of an Array.
+           collection.aggregate(
+               { $project : {
+                 author : 1,
+                 tags : 1
+               }},
+               { $unwind : "$tags" },
+               { $group : {
+                 _id : {tags : "$tags"},
+                 authors : { $addToSet : "$author" }
+               }}
+             , function(err, result) {
+               assert.equal(null, err);
+               assert.equal('good', result[0]._id.tags);
+               assert.deepEqual(['bob'], result[0].authors);
+               assert.equal('fun', result[1]._id.tags);
+               assert.deepEqual(['bob'], result[1].authors);
+     
+               db.close();
+           });
+         });
+       });
+
+  
+  
+  Correctly call the aggregation framework using a pipeline expressed as an argument list.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Some docs for insertion
+         var docs = [{
+             title : "this is my title", author : "bob", posted : new Date() ,
+             pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+             comments : [
+               { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+             ]}];
+     
+         // Create a collection
+         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments');
+         // Insert the docs
+         collection.insert(docs, {w: 1}, function(err, result) {
+           // Execute aggregate, notice the pipeline is expressed as function call parameters
+           // instead of an Array.
+           collection.aggregate(
+               { $project : {
+                 author : 1,
+                 tags : 1
+               }},
+               { $unwind : "$tags" },
+               { $group : {
+                 _id : {tags : "$tags"},
+                 authors : { $addToSet : "$author" }
+               }}
+             , function(err, result) {
+               assert.equal(null, err);
+               assert.equal('good', result[0]._id.tags);
+               assert.deepEqual(['bob'], result[0].authors);
+               assert.equal('fun', result[1]._id.tags);
+               assert.deepEqual(['bob'], result[1].authors);
+     
+               db.close();
+           });
+         });
+       });
+
+  
+  
+  Correctly call the aggregation framework to return a cursor
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Some docs for insertion
+         var docs = [{
+             title : "this is my title", author : "bob", posted : new Date() ,
+             pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+             comments : [
+               { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+             ]}];
+     
+         // Create a collection
+         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+         // Insert the docs
+         collection.insert(docs, {w: 1}, function(err, result) {
+     
+           // Execute aggregate, notice the pipeline is expressed as an Array
+           var cursor = collection.aggregate([
+               { $project : {
+                 author : 1,
+                 tags : 1
+               }},
+               { $unwind : "$tags" },
+               { $group : {
+                 _id : {tags : "$tags"},
+                 authors : { $addToSet : "$author" }
+               }}
+             ], {
+               cursor: {batchSize:100}
+             });
+     
+           // Iterate over all the items in the cursor
+           cursor.get(function(err, results) {
+             assert.equal(null, err);
+             assert.equal('good', results[0]._id.tags);
+             assert.deepEqual(['bob'], results[0].authors);
+             assert.equal('fun', results[1]._id.tags);
+             assert.deepEqual(['bob'], results[1].authors);
+     
+             db.close();        
+           });
+         });
+       });
+
+  
+  
+  Correctly call the aggregation framework to return a cursor and call explain
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Some docs for insertion
+         var docs = [{
+             title : "this is my title", author : "bob", posted : new Date() ,
+             pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+             comments : [
+               { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+             ]}];
+     
+         // Create a collection
+         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+         // Insert the docs
+         collection.insert(docs, {w: 1}, function(err, result) {
+     
+           // Execute aggregate, notice the pipeline is expressed as an Array
+           var cursor = collection.aggregate([
+               { $project : {
+                 author : 1,
+                 tags : 1
+               }},
+               { $unwind : "$tags" },
+               { $group : {
+                 _id : {tags : "$tags"},
+                 authors : { $addToSet : "$author" }
+               }}
+             ], {
+               cursor: {batchSize:100}
+             });
+     
+           // Iterate over all the items in the cursor
+           cursor.explain(function(err, results) {
+             assert.equal(null, err);
+             assert.equal(4, results.length);
+     
+             db.close();        
+           });
+         });
+       });
+
+  
+  
+  Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Some docs for insertion
+         var docs = [{
+             title : "this is my title", author : "bob", posted : new Date() ,
+             pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+             comments : [
+               { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+             ]}];
+     
+         // Create a collection
+         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+         // Insert the docs
+         collection.insert(docs, {w: 1}, function(err, result) {
+     
+           // Execute aggregate, notice the pipeline is expressed as an Array
+           var cursor = collection.aggregate([
+               { $project : {
+                 author : 1,
+                 tags : 1
+               }},
+               { $unwind : "$tags" },
+               { $group : {
+                 _id : {tags : "$tags"},
+                 authors : { $addToSet : "$author" }
+               }}
+             ], {
+               cursor: {batchSize:1}
+             });
+     
+           // Iterate over all the items in the cursor
+           cursor.next(function(err, result) {
+             assert.equal(null, err);
+             assert.equal('good', result._id.tags);
+             assert.deepEqual(['bob'], result.authors);
+     
+             db.close();        
+           });
+         });
+       });
+
+  
+  
+  Correctly call the aggregation framework and write the results to a new collection
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Some docs for insertion
+         var docs = [{
+             title : "this is my title", author : "bob", posted : new Date() ,
+             pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+             comments : [
+               { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+             ]}];
+     
+         // Create a collection
+         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+         // Insert the docs
+         collection.insert(docs, {w: 1}, function(err, result) {
+     
+           // Execute aggregate, notice the pipeline is expressed as an Array
+           collection.aggregate([
+               { $project : {
+                 author : 1,
+                 tags : 1
+               }},
+               { $unwind : "$tags" },
+               { $group : {
+                 _id : {tags : "$tags"},
+                 authors : { $addToSet : "$author" }
+               }}
+             ], {
+               out: "testingOutCollectionForAggregation"
+             }, function(err, results) {
+               assert.equal(null, err);
+               assert.equal(0, results.length);
+     
+               db.close();        
+             });
+         });
+       });
+
+  
+  
+  Correctly use allowDiskUse when performing an aggregation
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Some docs for insertion
+         var docs = [{
+             title : "this is my title", author : "bob", posted : new Date() ,
+             pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+             comments : [
+               { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+             ]}];
+     
+         // Create a collection
+         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+         // Insert the docs
+         collection.insert(docs, {w: 1}, function(err, result) {
+     
+           // Execute aggregate, notice the pipeline is expressed as an Array
+           collection.aggregate([
+               { $project : {
+                 author : 1,
+                 tags : 1
+               }},
+               { $unwind : "$tags" },
+               { $group : {
+                 _id : {tags : "$tags"},
+                 authors : { $addToSet : "$author" }
+               }}
+             ], {
+               allowDiskUse: true
+             }, function(err, results) {
+               assert.equal(null, err);
+               assert.equal('good', results[0]._id.tags);
+               assert.deepEqual(['bob'], results[0].authors);
+               assert.equal('fun', results[1]._id.tags);
+               assert.deepEqual(['bob'], results[1].authors);
+     
+               db.close();        
+             });
+         });
+       });
+
+
+-----
+stats
+-----
+
+
+Get all the collection statistics.
+
+
+
+Options
+ - **scale** {Number}, divide the returned sizes by scale value.
+ - **readPreference** {String}, the preferred read preference, require('mongodb').ReadPreference ((ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+
+.. js:function:: stats([options], callback)
+
+   :param objects [options]: options for the stats command.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the stats method or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Example of retrieving a collections stats
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Crete the collection for the distinct example
+       db.createCollection('collection_stats_test', function(err, collection) {
+     
+           // Insert some documents
+           collection.insert([{a:1}, {hello:'world'}], {w: 1}, function(err, result) {
+     
+             // Retrieve the statistics for the collection
+             collection.stats(function(err, stats) {
+               assert.equal(2, stats.count);
+     
+               db.close();
+             });
+           });
+       });
+     });
+
+
+-------------------------
+initializeUnorderedBulkOp
+-------------------------
+
+
+Initiate a Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order.
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+.. js:function:: initializeUnorderedBulkOp([options], callback)
+
+   :param objects [options]: options for the initializeUnorderedBatch 
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. The second argument will be a UnorderedBulkOperation object.
+   :returns: unorderedbulkoperation 
+
+
+-----------------------
+initializeOrderedBulkOp
+-----------------------
+
+
+Initiate an In order bulk write operation, operations will be serially executed in the order they are added, creating a new operation for each switch in types.
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+.. js:function:: initializeOrderedBulkOp([options], callback)
+
+   :param objects [options]: options for the initializeOrderedBulkOp 
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. The second argument will be a OrderedBulkOperation object.
+   :returns: orderedbulkoperation 
+
+
+----------------------
+parallelCollectionScan
+----------------------
+
+
+Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are
+no ordering guarantees for returned results.
+
+
+
+Options
+ - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **batchSize** {Number, default:0}, set the batchSize for the getMoreCommand when iterating over the query results.
+ - **numCursors**, {Number, 1} the maximum number of parallel command cursors to return (the number of returned cursors will be in the range 1:numCursors)
+
+.. js:function:: parallelCollectionScan([options], callback)
+
+   :param objects [options]: options for the initializeOrderedBulkOp 
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. The second argument will be an array of CommandCursor instances.
+   :returns: orderedbulkoperation 
+
+
+**Examples**
+
+  
+  
+  A parallelCollectionScan example
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         var docs = [];
+     
+         // Insert some documents
+         for(var i = 0; i < 2000; i++) {
+           docs.push({a:i});
+         }
+     
+         // Get the collection
+         var collection = db.collection('parallelCollectionScan');
+         // Insert 1000 documents in a batch
+         collection.insert(docs, function(err, result) {
+           var results = [];
+           var numCursors = 3;
+     
+           // Execute parallelCollectionScan command
+           collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
+             assert.equal(null, err);
+             assert.ok(cursors != null);
+             assert.ok(cursors.length > 0);
+     
+             for(var i = 0; i < cursors.length; i++) {
+               cursors[i].get(function(err, items) {
+                 assert.equal(err, null);
+     
+                 // Add docs to results array
+                 results = results.concat(items);
+                 numCursors = numCursors - 1;
+     
+                 // No more cursors let's ensure we got all results
+                 if(numCursors == 0) {
+                   assert.equal(docs.length, results.length);
+     
+                   db.close();
+                 }
+               });
+             }
+           });
+         });
+       });
+

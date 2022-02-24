@@ -1,0 +1,2540 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/3.5/img/favicon.png">
+
+    <title>Unified Topology Design</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/3.5/lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.5/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.5/css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.5/css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.5/lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.5/lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.5/css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="https://www.mongodb.com/">
+        <img src="http://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/3.5">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/3.5/../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/3.5">3.5</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+      
+    
+  
+  
+
+
+        
+      
+    
+      
+      
+        
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.5/installation-guide/installation-guide/">
+        <i class='fa fa-puzzle-piece'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.5/quick-start/quick-start/">
+        <i class='fa fa-road'></i>
+        Quick Start
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.5/tutorials/main/" class="">
+      <i class='fa fa-thumb-tack'></i>
+      <span>Tutorials</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.5/tutorials/connect/" class="">
+      <i class='fa'></i>
+      <span>Connect to MongoDB</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/tutorials/connect/authenticating/">
+        <i class='fa'></i>
+        Authentication
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/tutorials/connect/tls/">
+        <i class='fa'></i>
+        TLS Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/collations/">
+        <i class='fa'></i>
+        Collations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/collections/">
+        <i class='fa'></i>
+        Collections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/create-indexes/">
+        <i class='fa'></i>
+        Create Indexes
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/projections/">
+        <i class='fa'></i>
+        Projections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/aggregation/">
+        <i class='fa'></i>
+        Aggregation
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/text-search/">
+        <i class='fa'></i>
+        Text Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/geospatial-search/">
+        <i class='fa'></i>
+        Geospatial Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/tutorials/commands/">
+        <i class='fa'></i>
+        Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.5/tutorials/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/tutorials/gridfs/streaming/">
+        <i class='fa'></i>
+        GridFS API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/tutorials/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/3.5/reference/main/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.5/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connection Options</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.5/reference/ecmascriptnext/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript Next</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/reference/ecmascriptnext/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/reference/ecmascriptnext/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.5/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/reference/management/cmap-monitoring/">
+        <i class='fa'></i>
+        Connection Pool Monitoring
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.5/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/reference/client-side-encryption/">
+        <i class='fa'></i>
+        Client Side Encryption
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/reference/cursors/">
+        <i class='fa'></i>
+        Cursors
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/reference/pool/">
+        <i class='fa'></i>
+        Pool Design
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/reference/unified-topology/">
+        <i class='fa'></i>
+        Unified Topology Design
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.5/upgrade-migration/main/" class="">
+      <i class='fa fa-cog'></i>
+      <span>Upgrade Guide</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.5/upgrade-migration/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.x
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.5/api">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.5/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+
+                    <div class="alert alert-info" role="alert">
+  Note: You are currently viewing version 3.5 of the Node.js driver documentation.
+  <a href="https://docs.mongodb.com/drivers/node">Click here</a> for the latest version.
+</div>
+
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/master/docs/reference/content/reference/unified-topology/index.md" target="_blank" title="Edit reference/unified-topology/index.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/3.5/reference/main/">Reference</a> <i class="fa fa-angle-right"></i></li>
+  <li>Unified Topology Design</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="unified-topology-design">Unified Topology Design</h1>
+
+<p>At the time of writing the node driver has seven topology classes, including the newly introduced unified topology. Each legacy topology type from the core module targets a supported topology class: Replica Sets, Sharded Deployments (mongos) and Standalone servers. On top of each of these rests a thin topology wrapper from the &ldquo;native&rdquo; layer which introduces the concept of a &ldquo;disconnect handler&rdquo;, essentially a callback queue for handling naive retryability.</p>
+
+<p>The goal of the unified topology is threefold:</p>
+
+<ul>
+<li>fully support the drivers Server Discovery and Monitoring, Server Selection and Max Staleness specifications</li>
+<li>reduce the maintenance burden of supporting the topology layer in the driver by modeling all supported topology types with a single engine</li>
+<li>remove confusing functionality which could be potentially dangerous for our users</li>
+</ul>
+
+<h2 id="how-to-use-it">How to use it</h2>
+
+<p>The unified topology is available now behind the <code>useUnifiedTopology</code> feature flag. You can opt in to using it by passing the option to your <code>MongoClient</code> constructor:</p>
+
+<pre><code class="language-js">const client = MongoClient('mongodb://localhost:27017', { useUnifiedTopology: true });
+</code></pre>
+
+<p><strong>NOTE:</strong> In upcoming minor versions <code>useUnifiedTopology</code> will default to <code>true</code>, and in the next major version of the driver this topology will outright replace the legacy topologies.</p>
+
+<h2 id="behavioral-changes">Behavioral Changes</h2>
+
+<h2 id="deprecated-events-and-options">Deprecated events and options</h2>
+
+<p>The unified topology no longer supports the following events:</p>
+
+<ul>
+<li><code>reconnect</code></li>
+<li><code>reconnectFailed</code></li>
+<li><code>attemptReconnect</code></li>
+<li><code>joined</code></li>
+<li><code>left</code></li>
+<li><code>ping</code></li>
+<li><code>ha</code></li>
+<li><code>all</code></li>
+<li><code>fullsetup</code></li>
+<li><code>open</code></li>
+</ul>
+
+<p>It also deprecates the following options passed into the <code>MongoClient</code>:</p>
+
+<ul>
+<li><code>autoReconnect</code></li>
+<li><code>reconnectTries</code></li>
+<li><code>reconnectInterval</code></li>
+<li><code>bufferMaxEntries</code></li>
+</ul>
+
+<p>The following sections will go into detail about why these values are no longer used.</p>
+
+<h3 id="mongoclient-connect-isconnected"><code>MongoClient.connect</code>, <code>isConnected</code></h3>
+
+<p>The unified topology is the first step in a paradigm shift away from a concept of &ldquo;connecting&rdquo; to a MongoDB deployment using a <code>connect</code> method. Consider for a moment what it means to be connected to a replica set: do we trigger this state when connected to a primary? A primary and one secondary? When connected to all known nodes? It&rsquo;s unclear whether its possible to answer this without introducing something like a <code>ReadPreference</code> parameter to the <code>connect</code> method. At this point &ldquo;connecting&rdquo; is just one half of &ldquo;operation execution&rdquo; - you pass a <code>ReadPreference</code> in, and await a selectable server for the operation, now we&rsquo;re connected!</p>
+
+<p>But couldn&rsquo;t you do all of that as a part of your first operation? Our goal is to move towards code that looks more like the following:</p>
+
+<pre><code class="language-js">const client = new MongoClient('mongodb://llama:drama@localhost:27017/?replicaSet=rs');
+const coll = client.db('test').collection('foo');
+await coll.insert({ test: 'document' });
+const docs = coll.find({ test: 1 }, { readPreference: 'secondary' }).toArray();
+console.dir({ docs });
+await client.close();
+</code></pre>
+
+<p>A default <code>ReadPreference</code> of &ldquo;primary&rdquo; is used for the first write, and a part of awaiting that insert involves initiating connections to all servers in a cluster, selecting a server and executing the operation. Errors will surface at the callsite of any given operation, giving the user more fine-grained control over error handling.</p>
+
+<h4 id="why-does-mongoclient-isconnected-always-return-true">Why does <code>MongoClient.isConnected</code> always return <code>true</code>?</h4>
+
+<p>We think the ambiguity of what it means to be &ldquo;connected&rdquo; can lead to far more problems than it seeks to solve. The primary concern of an application developer is successful operation execution. The <code>isConnected</code> method is often used to &ldquo;health check&rdquo; the <code>MongoClient</code> in order to determine if operations can be successfully executed. The unified topology pushes this concern directly to operation execution through the introduction of a &ldquo;server selection loop&rdquo; (discussed in detail below). A <code>MongoClient</code> thus is <em>always</em> &ldquo;connected&rdquo; in that it will <em>always</em> accept operations and attempt to execute them.</p>
+
+<p><strong>NOTE:</strong> In the next major version of the driver, <code>isConnected</code> will be removed completely.</p>
+
+<h3 id="server-selection">Server Selection</h3>
+
+<p>The pseudocode for operation execution looks something like this:</p>
+
+<pre><code class="language-js">function executeOperation(topology, operation, callback) {
+  const readPreference = resolveReadPreference(operation);
+  topology.selectServer(readPreference, (err, server) =&gt; {
+    if (err) {
+      // This error is most likely a &quot;Server selection timed out after Xms&quot;
+      return callback(err);
+    }
+
+    // checks a connection out of the server to execute the operation, then checks it back in
+    server.withConnection(conn =&gt; operation.execute(conn, callback));
+  })
+}
+</code></pre>
+
+<p>The <code>serverSelection</code> method above will loop for up to <code>serverSelectionTimeoutMS</code> (default: 30s) waiting for the driver to successfully connect to a viable server in order to execute the requested operation. If server selection results in no viable server, control is passed back to the user to determine what the next best course of action is. This doesn&rsquo;t necessarily mean that the client is generally disconnected from a cluster, but that it is not currently connected to any server that satisfies the specified <code>ReadPreference</code>.</p>
+
+<h3 id="disconnecthandler">disconnectHandler</h3>
+
+<p>The three topology types from the &ldquo;native&rdquo; layer (in <code>lib/topologies</code>) primarily provide support for a callback store, called the &ldquo;disconnect handler&rdquo;. Rather than using a server selection loop, the legacy topologies instead place callbacks on this store in cases when no suitable server is available, intending to run the operation at some later time. This callback store also provides a form of naive retryability, however in practice this might lead to unexpected, or even unintended results:</p>
+
+<ul>
+<li>The callback store is only associated with a single server, so attempts to re-execute an operation are only ever made against the originally selected server. If that server never comes back (it was stepped down, and decommissioned for instance), the operation will sit in limbo.</li>
+<li>There is no collaboration with the server to ensure that queued write operations only happen one time. Imagine running an <code>updateOne</code> operation which is interrupted by a network error. The operation was successfully sent to the server, but the server response was lost during the interruption, which means the operation is placed in the callback store to be retried. At the same, another microservice allows a user to update the written data. Once the original client is reconnected to the server, it automatically rexecutes the operation and updates the <em>newer</em> data with an <em>older</em> value.</li>
+</ul>
+
+<p>The unified topology completely removes the disconnect handler, in favor of the more robust and consistent <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.rst">Retryable Reads</a> and <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst">Retryable Writes</a> features. Operations now will attempt execution in a server selection loop for up to <code>serverSelectionTimeoutMS</code> (default: 30s), and will retry the operation one time in the event of a <a href="https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms">retryable error</a>. All errors outside of this loop are returned to the user, since they know best what to do in these scenarios.</p>
+
+<h3 id="deprecated-monitoring-events">Deprecated monitoring events</h3>
+
+<p>The <code>joined</code>, <code>left</code>, <code>all</code>, and <code>fullsetup</code> events are no longer emitted by the unified topology, primarily
+because their behavior is duplicated by the pre-existing SDAM monitoring events: <code>topologyDescriptionChanged</code>
+and <code>serverDescriptionChanged</code>. Please refer to the documentation on <a href="/node-mongodb-native/3.5/reference/management/sdam-monitoring/">Topology Monitoring</a></p>
+
+
+
+
+
+
+<div id="btnv">
+  
+  <div class="pull-left">
+  <a class="navigation prev" href="/node-mongodb-native/3.5/reference/pool/">
+      <i class="fa fa-long-arrow-left"> </i> Pool Design
+  </a>
+  </div>
+  
+  
+  <div class="pull-right">
+  <a class="navigation next" href="/node-mongodb-native/3.5/reference/faq/">
+    Frequently Asked Questions <i class="fa fa-long-arrow-right"> </i>
+  </a>
+  
+</div>
+</div>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#unified-topology-design">Unified Topology Design</a>
+<ul>
+<li><a href="#how-to-use-it">How to use it</a></li>
+<li><a href="#behavioral-changes">Behavioral Changes</a></li>
+<li><a href="#deprecated-events-and-options">Deprecated events and options</a>
+<ul>
+<li><a href="#mongoclient-connect-isconnected"><code>MongoClient.connect</code>, <code>isConnected</code></a>
+<ul>
+<li><a href="#why-does-mongoclient-isconnected-always-return-true">Why does <code>MongoClient.isConnected</code> always return <code>true</code>?</a></li>
+</ul></li>
+<li><a href="#server-selection">Server Selection</a></li>
+<li><a href="#disconnecthandler">disconnectHandler</a></li>
+<li><a href="#deprecated-monitoring-events">Deprecated monitoring events</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/3.5",
+   VERSION:     "3.5",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/3.5/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.5/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.5/js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.5/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.5/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.5/lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.5/js/java.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.5/js/toggle-switch.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+

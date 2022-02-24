@@ -1,0 +1,1673 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Changelog &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>1.4.9 2014-08-26<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Check _bsonType for Binary (Issue #1202, <a class="reference external" href="https://github.com/mchapman">https://github.com/mchapman</a>)</li>
+<li>Remove duplicate Cursor constructor (Issue #1201, <a class="reference external" href="https://github.com/KenPowers">https://github.com/KenPowers</a>)</li>
+<li>Added missing parameter in the documentation (Issue #1199, <a class="reference external" href="https://github.com/wpjunior">https://github.com/wpjunior</a>)</li>
+<li>Documented third parameter on the update callback(Issue #1196, <a class="reference external" href="https://github.com/gabmontes">https://github.com/gabmontes</a>)</li>
+<li>NODE-240 Operations on SSL connection hang on node 0.11.x</li>
+<li>NODE-235 writeResult is not being passed on when error occurs in insert</li>
+<li>NODE-229 Allow count to work with query hints</li>
+<li>NODE-233 collection.save() does not support fullResult</li>
+<li>NODE-244 Should parseError also emit a <cite>disconnected</cite> event?</li>
+<li>NODE-246 Cursors are inefficiently constructed and consequently cannot be promisified.</li>
+<li>NODE-248 Crash with X509 auth</li>
+<li>NODE-252 Uncaught Exception in Base.__executeAllServerSpecificErrorCallbacks</li>
+<li>Bumped BSON parser to 0.2.12</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>1.4.8 2014-08-01<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>NODE-205 correctly emit authenticate event</li>
+<li>NODE-210 ensure no undefined connection error when checking server state</li>
+<li>NODE-212 correctly inherit socketTimeoutMS from replicaset when HA process adds new servers or reconnects to existing ones</li>
+<li>NODE-220 don&#8217;t throw error if ensureIndex errors out in Gridstore</li>
+<li>Updated bson to 0.2.11 to ensure correct toBSON behavior when returning non object in nested classes</li>
+<li>Fixed test running filters</li>
+<li>Wrap debug log in a call to format (Issue #1187, <a class="reference external" href="https://github.com/andyroyle">https://github.com/andyroyle</a>)</li>
+<li>False option values should not trigger w:1 (Issue #1186, https://github.com/jsdevel)</li>
+<li>Fix aggregatestream.close(Issue #1194, <a class="reference external" href="https://github.com/jonathanong">https://github.com/jonathanong</a>)</li>
+<li>Fixed parsing issue for w:0 in url parser when in connection string</li>
+<li>Modified collection.geoNear to support a geoJSON point or legacy coordinate pair (Issue #1198, <a class="reference external" href="https://github.com/mmacmillan">https://github.com/mmacmillan</a>)</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>1.4.7 2014-06-18<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Make callbacks to be executed in right domain when server comes back up (Issue #1184, <a class="reference external" href="https://github.com/anton-kotenko">https://github.com/anton-kotenko</a>)</li>
+<li>Fix issue where currentOp query against mongos would fail due to mongos passing through $readPreference field to mongod (CS-X)</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>1.4.6 2014-06-12<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added better support for MongoClient IP6 parsing (Issue #1181, <a class="reference external" href="https://github.com/micovery">https://github.com/micovery</a>)</li>
+<li>Remove options check on index creation (Issue #1179, Issue #1183, <a class="reference external" href="https://github.com/jdesboeufs">https://github.com/jdesboeufs</a>, <a class="reference external" href="https://github.com/rubenvereecken">https://github.com/rubenvereecken</a>)</li>
+<li>Added missing type check before calling optional callback function (Issue #1180)</li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h2>1.4.5 2014-05-21<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added fullResult flag to insert/update/remove which will pass raw result document back. Document contents will vary depending on the server version the driver is talking to. No attempt is made to coerce a joint response.</li>
+<li>Fix to avoid MongoClient.connect hanging during auth when secondaries building indexes pre 2.6.</li>
+<li>return the destination stream in GridStore.pipe (Issue #1176, <a class="reference external" href="https://github.com/iamdoron">https://github.com/iamdoron</a>)</li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h2>1.4.4 2014-05-13<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Bumped BSON version to use the NaN 1.0 package, fixed strict comparison issue for ObjectID</li>
+<li>Removed leaking global variable (Issue #1174, <a class="reference external" href="https://github.com/dainis">https://github.com/dainis</a>)</li>
+<li>MongoClient respects connectTimeoutMS for initial discovery process (NODE-185)</li>
+<li>Fix bug with return messages larger than 16MB but smaller than max BSON Message Size (NODE-184)</li>
+</ul>
+</div>
+<div class="section" id="id7">
+<h2>1.4.3 2014-05-01<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Clone options for commands to avoid polluting original options passed from Mongoose (Issue #1171, <a class="reference external" href="https://github.com/vkarpov15">https://github.com/vkarpov15</a>)</li>
+<li>Made geoNear and geoHaystackSearch only clean out allowed options from command generation (Issue #1167)</li>
+<li>Fixed typo for allowDiskUse (Issue #1168, <a class="reference external" href="https://github.com/joaofranca">https://github.com/joaofranca</a>)</li>
+<li>A &#8216;mapReduce&#8217; function changed &#8216;function&#8217; to instance &#8216;&amp;lt;Object&amp;gt;&#8217; of &#8216;Code&#8217; class (Issue #1165, <a class="reference external" href="https://github.com/exabugs">https://github.com/exabugs</a>)</li>
+<li>Made findAndModify set sort only when explicitly set (Issue #1163, <a class="reference external" href="https://github.com/sars">https://github.com/sars</a>)</li>
+<li>Rewriting a gridStore file by id should use a new filename if provided (Issue #1169, <a class="reference external" href="https://github.com/vsivsi">https://github.com/vsivsi</a>)</li>
+</ul>
+</div>
+<div class="section" id="id8">
+<h2>1.4.2 2014-04-15<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix for inheritance of readPreferences from MongoClient NODE-168/NODE-169</li>
+<li>Merged in fix for ping strategy to avoid hitting non-pinged servers (Issue #1161, <a class="reference external" href="https://github.com/vaseker">https://github.com/vaseker</a>)</li>
+<li>Merged in fix for correct debug output for connection messages (Issue #1158, <a class="reference external" href="https://github.com/vaseker">https://github.com/vaseker</a>)</li>
+<li>Fixed global variable leak (Issue #1160, <a class="reference external" href="https://github.com/vaseker">https://github.com/vaseker</a>)</li>
+</ul>
+</div>
+<div class="section" id="id9">
+<h2>1.4.1 2014-04-09<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Correctly emit joined event when primary change</li>
+<li>Add _id to documents correctly when using bulk operations</li>
+</ul>
+</div>
+<div class="section" id="id10">
+<h2>1.4.0 2014-04-03<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>All node exceptions will no longer be caught if on(&#8216;error&#8217;) is defined</li>
+<li>Added X509 auth support</li>
+<li>Fix for MongoClient connection timeout issue (NODE-97)</li>
+<li>Pass through error messages from parseError instead of just text (Issue #1125)</li>
+<li>Close db connection on error (Issue #1128, <a class="reference external" href="https://github.com/benighted">https://github.com/benighted</a>)</li>
+<li>Fixed documentation generation</li>
+<li>Added aggregation cursor for 2.6 and emulated cursor for pre 2.6 (uses stream2)</li>
+<li>New Bulk API implementation using write commands for 2.6 and down converts for pre 2.6</li>
+<li>Insert/Update/Remove using new write commands when available</li>
+<li>Added support for new roles based API&#8217;s in 2.6 for addUser/removeUser</li>
+<li>Added bufferMaxEntries to start failing if the buffer hits the specified number of entries</li>
+<li>Upgraded BSON parser to version 0.2.7 to work with &amp;lt; 0.11.10 C++ API changes</li>
+<li>Support for OP_LOG_REPLAY flag (NODE-94)</li>
+<li>Fixes for SSL HA ping and discovery.</li>
+<li>Uses createIndexes if available for ensureIndex/createIndex</li>
+<li>Added parallelCollectionScan method to collection returning CommandCursor instances for cursors</li>
+<li>Made CommandCursor behave as Readable stream.</li>
+<li>Only Db honors readPreference settings, removed Server.js legacy readPreference settings due to user confusion.</li>
+<li>Reconnect event emitted by ReplSet/Mongos/Server after reconnect and before replaying of buffered operations.</li>
+<li>GridFS buildMongoObject returns error on illegal md5 (NODE-157, <a class="reference external" href="https://github.com/iantocristian">https://github.com/iantocristian</a>)</li>
+<li>Default GridFS chunk size changed to (255 * 1024) bytes to optimize for collections defaulting to power of 2 sizes on 2.6.</li>
+<li>Refactored commands to all go through command function ensuring consistent command execution.</li>
+<li>Fixed issues where readPreferences where not correctly passed to mongos.</li>
+<li>Catch error == null and make err detection more prominent (NODE-130)</li>
+<li>Allow reads from arbiter for single server connection (NODE-117)</li>
+<li>Handle error coming back with no documents (NODE-130)</li>
+<li>Correctly use close parameter in Gridstore.write() (NODE-125)</li>
+<li>Throw an error on a bulk find with no selector (NODE-129, <a class="reference external" href="https://github.com/vkarpov15">https://github.com/vkarpov15</a>)</li>
+<li>Use a shallow copy of options in find() (NODE-124, <a class="reference external" href="https://github.com/vkarpov15">https://github.com/vkarpov15</a>)</li>
+<li>Fix statistical strategy (NODE-158, <a class="reference external" href="https://github.com/vkarpov15">https://github.com/vkarpov15</a>)</li>
+<li>GridFS off-by-one bug in lastChunkNumber() causes uncaught throw and data loss (Issue #1154, <a class="reference external" href="https://github.com/vsivsi">https://github.com/vsivsi</a>)</li>
+<li>GridStore drops passed <cite>aliases</cite> option, always results in <cite>null</cite> value in GridFS files (Issue #1152, <a class="reference external" href="https://github.com/vsivsi">https://github.com/vsivsi</a>)</li>
+<li>Remove superfluous connect object copying in index.js (Issue #1145, <a class="reference external" href="https://github.com/thomseddon">https://github.com/thomseddon</a>)</li>
+<li>Do not return false when the connection buffer is still empty (Issue #1143, <a class="reference external" href="https://github.com/eknkc">https://github.com/eknkc</a>)</li>
+<li>Check ReadPreference object on ReplSet.canRead (Issue #1142, <a class="reference external" href="https://github.com/eknkc">https://github.com/eknkc</a>)</li>
+<li>Fix unpack error on _executeQueryCommand (Issue #1141, <a class="reference external" href="https://github.com/eknkc">https://github.com/eknkc</a>)</li>
+<li>Close db on failed connect so node can exit (Issue #1128, <a class="reference external" href="https://github.com/benighted">https://github.com/benighted</a>)</li>
+<li>Fix global leak with _write_concern (Issue #1126, <a class="reference external" href="https://github.com/shanejonas">https://github.com/shanejonas</a>)</li>
+</ul>
+</div>
+<div class="section" id="id11">
+<h2>1.3.19 2013-08-21<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Correctly rethrowing errors after change from event emission to callbacks, compatibility with 0.10.X domains without breaking 0.8.X support.</li>
+<li>Small fix to return the entire findAndModify result as the third parameter (Issue #1068)</li>
+<li>No removal of &amp;quot;close&amp;quot; event handlers on server reconnect, emits &amp;quot;reconnect&amp;quot; event when reconnection happens. Reconnect Only applies for single server connections as of now as semantics for ReplSet and Mongos is not clear (Issue #1056)</li>
+</ul>
+</div>
+<div class="section" id="id12">
+<h2>1.3.18 2013-08-10<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed issue when throwing exceptions in MongoClient.connect/Db.open (Issue #1057)</li>
+<li>Fixed an issue where _events is not cleaned up correctly causing a slow steady memory leak.</li>
+</ul>
+</div>
+<div class="section" id="id13">
+<h2>1.3.17 2013-08-07<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Ignore return commands that have no registered callback</li>
+<li>Made collection.count not use the db.command function</li>
+<li>Fix throw exception on ping command (Issue #1055)</li>
+</ul>
+</div>
+<div class="section" id="id14">
+<h2>1.3.16 2013-08-02<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixes connection issue where lots of connections would happen if a server is in recovery mode during connection (Issue #1050, NODE-50, NODE-51)</li>
+<li>Bug in unlink mulit filename (Issue #1054)</li>
+</ul>
+</div>
+<div class="section" id="id15">
+<h2>1.3.15 2013-08-01<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Memory leak issue due to node Issue #4390 where _events[id] is set to undefined instead of deleted leading to leaks in the Event Emitter over time</li>
+</ul>
+</div>
+<div class="section" id="id16">
+<h2>1.3.14 2013-08-01<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed issue with checkKeys where it would error on X.X</li>
+</ul>
+</div>
+<div class="section" id="id17">
+<h2>1.3.13 2013-07-31<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added override for checkKeys on insert/update (Warning will expose you to injection attacks) (Issue #1046)</li>
+<li>BSON size checking now done pre serialization (Issue #1037)</li>
+<li>Added isConnected returns false when no connection Pool exists (Issue #1043)</li>
+<li>Unified command handling to ensure same handling (Issue #1041, #1042)</li>
+<li>Correctly emit &amp;quot;open&amp;quot; and &amp;quot;fullsetup&amp;quot; across all Db&#8217;s associated with Mongos, ReplSet or Server (Issue #1040)</li>
+<li>Correctly handles bug in authentication when attempting to connect to a recovering node in a replicaset.</li>
+<li>Correctly remove recovering servers from available servers in replicaset. Piggybacks on the ping command.</li>
+<li>Removed findAndModify chaining to be compliant with behavior in other official drivers and to fix a known mongos issue.</li>
+<li>Fixed issue with Kerberos authentication on Windows for re-authentication.</li>
+<li>Fixed Mongos failover behavior to correctly throw out old servers.</li>
+<li>Ensure stored queries/write ops are executed correctly after connection timeout</li>
+<li>Added promoteLongs option for to allow for overriding the promotion of Longs to Numbers and return the actual Long.</li>
+</ul>
+</div>
+<div class="section" id="id18">
+<h2>1.3.12 2013-07-19<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed issue where timeouts sometimes would behave wrongly (Issue #1032)</li>
+<li>Fixed bug with callback third parameter on some commands (Issue #1033)</li>
+<li>Fixed possible issue where killcursor command might leave hanging functions</li>
+<li>Fixed issue where Mongos was not correctly removing dead servers from the pool of eligable servers</li>
+<li>Throw error if dbName or collection name contains null character (at command level and at collection level)</li>
+<li>Updated bson parser to 0.2.1 with security fix and non-promotion of Long values to javascript Numbers (once a long always a long)</li>
+</ul>
+</div>
+<div class="section" id="id19">
+<h2>1.3.11 2013-07-04<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed errors on geoNear and geoSearch (Issue #1024, <a class="reference external" href="https://github.com/ebensing">https://github.com/ebensing</a>)</li>
+<li>Add driver version to export (Issue #1021, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Add text to readpreference obedient commands (Issue #1019)</li>
+<li>Drivers should check the query failure bit even on getmore response (Issue #1018)</li>
+<li>Map reduce has incorrect expectations of &#8216;inline&#8217; value for &#8216;out&#8217; option (Issue #1016, <a class="reference external" href="https://github.com/rcotter">https://github.com/rcotter</a>)</li>
+<li>Support SASL PLAIN authentication (Issue #1009)</li>
+<li>Ability to use different Service Name on the driver for Kerberos Authentication (Issue #1008)</li>
+<li>Remove unnecessary octal literal to allow the code to run in strict mode (Issue #1005, <a class="reference external" href="https://github.com/jamesallardice">https://github.com/jamesallardice</a>)</li>
+<li>Proper handling of recovering nodes (when they go into recovery and when they return from recovery, Issue #1027)</li>
+</ul>
+</div>
+<div class="section" id="id20">
+<h2>1.3.10 2013-06-17<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Guard against possible undefined in server::canCheckoutWriter (Issue #992, https://github.com/willyaranda)</li>
+<li>Fixed some duplicate test names (Issue #993, <a class="reference external" href="https://github.com/kawanet">https://github.com/kawanet</a>)</li>
+<li>Introduced write and read concerns for GridFS (Issue #996)</li>
+<li>Fixed commands not correctly respecting Collection level read preference (Issue #995, #999)</li>
+<li>Fixed issue with pool size on replicaset connections (Issue #1000)</li>
+<li>Execute all query commands on master switch (Issue #1002, <a class="reference external" href="https://github.com/fogaztuc">https://github.com/fogaztuc</a>)</li>
+</ul>
+</div>
+<div class="section" id="id21">
+<h2>1.3.9 2013-06-05<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed memory leak when findAndModify errors out on w&amp;gt;1 and chained callbacks not properly cleaned up.</li>
+</ul>
+</div>
+<div class="section" id="id22">
+<h2>1.3.8 2013-05-31<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed issue with socket death on windows where it emits error event instead of close event (Issue #987)</li>
+<li>Emit authenticate event on db after authenticate method has finished on db instance (Issue #984)</li>
+<li>Allows creation of MongoClient and do new MongoClient().connect(..). Emits open event when connection correct allowing for apps to react on event.</li>
+</ul>
+</div>
+<div class="section" id="id23">
+<h2>1.3.7 2013-05-29<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>After reconnect, tailable getMores go on inconsistent connections (Issue #981, #982, <a class="reference external" href="https://github.com/glasser">https://github.com/glasser</a>)</li>
+<li>Updated Bson to 0.1.9 to fix ARM support (Issue #985)</li>
+</ul>
+</div>
+<div class="section" id="id24">
+<h2>1.3.6 2013-05-21<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed issue where single server reconnect attempt would throw due to missing options variable (Issue #979)</li>
+<li>Fixed issue where difference in ismaster server name and seed list caused connections issues, (Issue #976)</li>
+</ul>
+</div>
+<div class="section" id="id25">
+<h2>1.3.5 2013-05-14<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed issue where HA for replicaset would pick the same broken connection when attempting to ping the replicaset causing the replicaset to never recover.</li>
+</ul>
+</div>
+<div class="section" id="id26">
+<h2>1.3.4 2013-05-14<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed bug where options not correctly passed in for uri parser (Issue #973, <a class="reference external" href="https://github.com/supershabam">https://github.com/supershabam</a>)</li>
+<li>Fixed bug when passing a named index hint (Issue #974)</li>
+</ul>
+</div>
+<div class="section" id="id27">
+<h2>1.3.3 2013-05-09<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed auto-reconnect issue with single server instance.</li>
+</ul>
+</div>
+<div class="section" id="id28">
+<h2>1.3.2 2013-05-08<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixes for an issue where replicaset would be pronounced dead when high priority primary caused double elections.</li>
+</ul>
+</div>
+<div class="section" id="id29">
+<h2>1.3.1 2013-05-06<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix for replicaset consisting of primary/secondary/arbiter with priority applied failing to reconnect properly</li>
+<li>Applied auth before server instance is set as connected when single server connection</li>
+<li>Throw error if array of documents passed to save method</li>
+</ul>
+</div>
+<div class="section" id="id30">
+<h2>1.3.0 2013-04-25<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Whole High availability handling for Replicaset, Server and Mongos connections refactored to ensure better handling of failover cases.</li>
+<li>Fixed issue where findAndModify would not correctly skip issuing of chained getLastError (Issue #941)</li>
+<li>Fixed throw error issue on errors with findAndModify during write out operation (Issue #939, <a class="reference external" href="https://github.com/autopulated">https://github.com/autopulated</a>)</li>
+<li>Gridstore.prototype.writeFile now returns gridstore object correctly (Issue #938)</li>
+<li>Kerberos support is now an optional module that allows for use of GSSAPI authentication using MongoDB Subscriber edition</li>
+<li>Fixed issue where cursor.toArray could blow the stack on node 0.10.X (#950)</li>
+</ul>
+</div>
+<div class="section" id="id31">
+<h2>1.2.14 2013-03-14<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Refactored test suite to speed up running of replicaset tests</li>
+<li>Fix of async error handling when error happens in callback (Issue #909, <a class="reference external" href="https://github.com/medikoo">https://github.com/medikoo</a>)</li>
+<li>Corrected a slaveOk setting issue (Issue #906, #905)</li>
+<li>Fixed HA issue where ping&#8217;s would not go to correct server on HA server connection failure.</li>
+<li>Uses setImmediate if on 0.10 otherwise nextTick for cursor stream</li>
+<li>Fixed race condition in Cursor stream (NODE-31)</li>
+<li>Fixed issues related to node 0.10 and process.nextTick now correctly using setImmediate where needed on node 0.10</li>
+<li>Added support for maxMessageSizeBytes if available (DRIVERS-1)</li>
+<li>Added support for authSource (2.4) to MongoClient URL and db.authenticate method (DRIVER-69/NODE-34)</li>
+<li>Fixed issue in GridStore seek and GridStore read to correctly work on multiple seeks (Issue #895)</li>
+</ul>
+</div>
+<div class="section" id="id32">
+<h2>1.2.13 2013-02-22<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Allow strategy &#8216;none&#8217; for repliaset if no strategy wanted (will default to round robin selection of servers on a set readPreference)</li>
+<li>Fixed missing MongoErrors on some cursor methods (Issue #882)</li>
+<li>Correctly returning a null for the db instance on MongoClient.connect when auth fails (Issue #890)</li>
+<li>Added dropTarget option support for renameCollection/rename (Issue #891, help from <a class="reference external" href="https://github.com/jbottigliero">https://github.com/jbottigliero</a>)</li>
+<li>Fixed issue where connection using MongoClient.connect would fail if first server did not exist (Issue #885)</li>
+</ul>
+</div>
+<div class="section" id="id33">
+<h2>1.2.12 2013-02-13<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added limit/skip options to Collection.count (Issue #870)</li>
+<li>Added applySkipLimit option to Cursor.count (Issue #870)</li>
+<li>Enabled ping strategy as default for Replicaset if none specified (Issue #876)</li>
+<li>Should correctly pick nearest server for SECONDARY/SECONDARY_PREFERRED/NEAREST (Issue #878)</li>
+</ul>
+</div>
+<div class="section" id="id34">
+<h2>1.2.11 2013-01-29<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added fixes for handling type 2 binary due to PHP driver (Issue #864)</li>
+<li>Moved callBackStore to Base class to have single unified store (Issue #866)</li>
+<li>Ping strategy now reuses sockets unless they are closed by the server to avoid overhead</li>
+</ul>
+</div>
+<div class="section" id="id35">
+<h2>1.2.10 2013-01-25<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Merged in SSL support for 2.4 supporting certificate validation and presenting certificates to the server.</li>
+<li>Only open a new HA socket when previous one dead (Issue #859, #857)</li>
+<li>Minor fixes</li>
+</ul>
+</div>
+<div class="section" id="id36">
+<h2>1.2.9 2013-01-15<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed bug in SSL support for MongoClient/Db.connect when discovering servers (Issue #849)</li>
+<li>Connection string with no db specified should default to admin db (Issue #848)</li>
+<li>Support port passed as string to Server class (Issue #844)</li>
+<li>Removed noOpen support for MongoClient/Db.connect as auto discovery of servers for Mongod/Mongos makes it not possible (Issue #842)</li>
+<li>Included toError wrapper code moved to utils.js file (Issue #839, #840)</li>
+<li>Rewrote cursor handling to avoid process.nextTick using trampoline instead to avoid stack overflow, speedup about 40%</li>
+</ul>
+</div>
+<div class="section" id="id37">
+<h2>1.2.8 2013-01-07<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Accept function in a Map Reduce scope object not only a function string (Issue #826, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Typo in db.authenticate caused a check (for provided connection) to return false, causing a connection AND onAll=true to be passed into __executeQueryCommand downstream (Issue #831, <a class="reference external" href="https://github.com/m4tty">https://github.com/m4tty</a>)</li>
+<li>Allow gridfs objects to use non ObjectID ids (Issue #825, <a class="reference external" href="https://github.com/nailgun">https://github.com/nailgun</a>)</li>
+<li>Removed the double wrap, by not passing an Error object to the wrap function (Issue #832, <a class="reference external" href="https://github.com/m4tty">https://github.com/m4tty</a>)</li>
+<li>Fix connection leak (gh-827) for HA replicaset health checks (Issue #833, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Modified findOne to use nextObject instead of toArray avoiding a nextTick operation (Issue #836)</li>
+<li>Fixes for cursor stream to avoid multiple getmore issues when one in progress (Issue #818)</li>
+<li>Fixes .open replaying all backed up commands correctly if called after operations performed, (Issue #829 and #823)</li>
+</ul>
+</div>
+<div class="section" id="id38">
+<h2>1.2.7 2012-12-23<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Rolled back batches as they hang in certain situations</li>
+<li>Fixes for NODE-25, keep reading from secondaries when primary goes down</li>
+</ul>
+</div>
+<div class="section" id="id39">
+<h2>1.2.6 2012-12-21<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>domain sockets shouldn&#8217;t require a port arg (Issue #815, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Cannot read property &#8216;info&#8217; of null (Issue #809, <a class="reference external" href="https://github.com/thesmart">https://github.com/thesmart</a>)</li>
+<li>Cursor.each should work in batches (Issue #804, <a class="reference external" href="https://github.com/Swatinem">https://github.com/Swatinem</a>)</li>
+<li>Cursor readPreference bug for non-supported read preferences (Issue #817)</li>
+</ul>
+</div>
+<div class="section" id="id40">
+<h2>1.2.5 2012-12-12<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed ssl regression, added more test coverage (Issue #800)</li>
+<li>Added better error reporting to the Db.connect if no valid serverConfig setup found (Issue #798)</li>
+</ul>
+</div>
+<div class="section" id="id41">
+<h2>1.2.4 2012-12-11<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix to ensure authentication is correctly applied across all secondaries when using MongoClient.</li>
+</ul>
+</div>
+<div class="section" id="id42">
+<h2>1.2.3 2012-12-10<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix for new replicaset members correctly authenticating when being added (Issue #791, <a class="reference external" href="https://github.com/m4tty">https://github.com/m4tty</a>)</li>
+<li>Fixed seek issue in gridstore when using stream (Issue #790)</li>
+</ul>
+</div>
+<div class="section" id="id43">
+<h2>1.2.2 2012-12-03<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix for journal write concern not correctly being passed under some circumstances.</li>
+<li>Fixed correct behavior and re-auth for servers that get stepped down (Issue #779).</li>
+</ul>
+</div>
+<div class="section" id="id44">
+<h2>1.2.1 2012-11-30<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix for double callback on insert with w:0 specified (Issue #783)</li>
+<li>Small cleanup of urlparser.</li>
+</ul>
+</div>
+<div class="section" id="id45">
+<h2>1.2.0 2012-11-27<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Honor connectTimeoutMS option for replicasets (Issue #750, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Fix ping strategy regression (Issue #738, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Small cleanup of code (Issue #753, <a class="reference external" href="https://github.com/sokra/node-mongodb-native">https://github.com/sokra/node-mongodb-native</a>)</li>
+<li>Fixed index declaration using objects/arrays from other contexts (Issue #755, <a class="reference external" href="https://github.com/sokra/node-mongodb-native">https://github.com/sokra/node-mongodb-native</a>)</li>
+<li>Intermittent (and rare) null callback exception when using ReplicaSets (Issue #752)</li>
+<li>Force correct setting of read_secondary based on the read preference (Issue #741)</li>
+<li>If using read preferences with secondaries queries will not fail if primary is down (Issue #744)</li>
+<li>noOpen connection for Db.connect removed as not compatible with autodetection of Mongo type</li>
+<li>Mongos connection with auth not working (Issue #737)</li>
+<li>Use the connect method directly from the require. require(&#8216;mongodb&#8217;)(&amp;quot;mongodb://localhost:27017/db&amp;quot;)</li>
+<li>new MongoClient introduced as the point of connecting to MongoDB&#8217;s instead of the Db
+- open/close/db/connect methods implemented</li>
+<li>Implemented common URL connection format using MongoClient.connect allowing for simialar interface across all drivers.</li>
+<li>Fixed a bug with aggregation helper not properly accepting readPreference</li>
+</ul>
+</div>
+<div class="section" id="id46">
+<h2>1.1.11 2012-10-10<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Removed strict mode and introduced normal handling of safe at DB level.</li>
+</ul>
+</div>
+<div class="section" id="id47">
+<h2>1.1.10 2012-10-08<a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>fix Admin.serverStatus (Issue #723, <a class="reference external" href="https://github.com/Contra">https://github.com/Contra</a>)</li>
+<li>logging on connection open/close(Issue #721, <a class="reference external" href="https://github.com/asiletto">https://github.com/asiletto</a>)</li>
+<li>more fixes for windows bson install (Issue #724)</li>
+</ul>
+</div>
+<div class="section" id="id48">
+<h2>1.1.9 2012-10-05<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Updated bson to 0.1.5 to fix build problem on sunos/windows.</li>
+</ul>
+</div>
+<div class="section" id="id49">
+<h2>1.1.8 2012-10-01<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed db.eval to correctly handle system.js global javascript functions (Issue #709)</li>
+<li>Cleanup of non-closing connections (Issue #706)</li>
+<li>More cleanup of connections under replicaset (Issue #707, <a class="reference external" href="https://github.com/elbert3">https://github.com/elbert3</a>)</li>
+<li>Set keepalive on as default, override if not needed</li>
+<li>Cleanup of jsbon install to correctly build without install.js script (<a class="reference external" href="https://github.com/shtylman">https://github.com/shtylman</a>)</li>
+<li>Added domain socket support new Server(&amp;quot;/tmp/mongodb.sock&amp;quot;) style</li>
+</ul>
+</div>
+<div class="section" id="id50">
+<h2>1.1.7 2012-09-10<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Protect against starting PingStrategy being called more than once (Issue #694, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Make PingStrategy interval configurable (was 1 second, relaxed to 5) (Issue #693, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Made PingStrategy api more consistant, callback to start/stop methods are optional (Issue #693, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Proper stopping of strategy on replicaset stop</li>
+<li>Throw error when gridstore file is not found in read mode (Issue #702, <a class="reference external" href="https://github.com/jbrumwell">https://github.com/jbrumwell</a>)</li>
+<li>Cursor stream resume now using nextTick to avoid duplicated records (Issue #696)</li>
+</ul>
+</div>
+<div class="section" id="id51">
+<h2>1.1.6 2012-09-01<a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix for readPreference NEAREST for replicasets (Issue #693, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Emit end correctly on stream cursor (Issue #692, <a class="reference external" href="https://github.com/Raynos">https://github.com/Raynos</a>)</li>
+</ul>
+</div>
+<div class="section" id="id52">
+<h2>1.1.5 2012-08-29<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix for eval on replicaset Issue #684</li>
+<li>Use helpful error msg when native parser not compiled (Issue #685, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Arbiter connect hotfix (Issue #681, <a class="reference external" href="https://github.com/fengmk2">https://github.com/fengmk2</a>)</li>
+<li>Upgraded bson parser to 0.1.2 using gyp, deprecated support for node 0.4.X</li>
+<li>Added name parameter to createIndex/ensureIndex to be able to override index names larger than 128 bytes</li>
+<li>Added exhaust option for find for feature completion (not recommended for normal use)</li>
+<li>Added tailableRetryInterval to find for tailable cursors to allow to control getMore retry time interval</li>
+<li>Fixes for read preferences when using MongoS to correctly handle no read preference set when iterating over a cursor (Issue #686)</li>
+</ul>
+</div>
+<div class="section" id="id53">
+<h2>1.1.4 2012-08-12<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Added Mongos connection type with a fallback list for mongos proxies, supports ha (on by default) and will attempt to reconnect to failed proxies.</p>
+</li>
+<li><p class="first">Documents can now have a toBSON method that lets the user control the serialization behavior for documents being saved.</p>
+</li>
+<li><p class="first">Gridstore instance object now works as a readstream or writestream (thanks to code from Aaron heckmann (<a class="reference external" href="https://github.com/aheckmann/gridfs-stream">https://github.com/aheckmann/gridfs-stream</a>)).</p>
+</li>
+<li><p class="first">Fix gridfs readstream (Issue #607, <a class="reference external" href="https://github.com/tedeh">https://github.com/tedeh</a>).</p>
+</li>
+<li><p class="first">Added disableDriverBSONSizeCheck property to Server.js for people who wish to push the inserts to the limit (Issue #609).</p>
+</li>
+<li><p class="first">Fixed bug where collection.group keyf given as Code is processed as a regular object (Issue #608, <a class="reference external" href="https://github.com/rrusso2007">https://github.com/rrusso2007</a>).</p>
+</li>
+<li><p class="first">Case mismatch between driver&#8217;s ObjectID and mongo&#8217;s ObjectId, allow both (Issue #618).</p>
+</li>
+<li><p class="first">Cleanup map reduce (Issue #614, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>).</p>
+</li>
+<li><p class="first">Add proper error handling to gridfs (Issue #615, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>).</p>
+</li>
+<li><p class="first">Ensure cursor is using same connection for all operations to avoid potential jump of servers when using replicasets.</p>
+</li>
+<li><p class="first">Date identification handled correctly in bson js parser when running in vm context.</p>
+</li>
+<li><p class="first">Documentation updates</p>
+</li>
+<li><p class="first">GridStore filename not set on read (Issue #621)</p>
+</li>
+<li><p class="first">Optimizations on the C++ bson parser to fix a potential memory leak and avoid non-needed calls</p>
+</li>
+<li><p class="first">Added support for awaitdata for tailable cursors (Issue #624)</p>
+</li>
+<li><dl class="first docutils">
+<dt>Implementing read preference setting at collection and cursor level</dt>
+<dd><ul class="first last simple">
+<li>collection.find().setReadPreference(Server.SECONDARY_PREFERRED)</li>
+<li>db.collection(&amp;quot;some&amp;quot;, {readPreference:Server.SECONDARY})</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Replicaset now returns when the master is discovered on db.open and lets the rest of the connections happen asynchronous.
+- ReplSet/ReplSetServers emits &amp;quot;fullsetup&amp;quot; when all servers have been connected to</p>
+</li>
+<li><p class="first">Prevent callback from executing more than once in getMore function (Issue #631, <a class="reference external" href="https://github.com/shankar0306">https://github.com/shankar0306</a>)</p>
+</li>
+<li><p class="first">Corrupt bson messages now errors out to all callbacks and closes up connections correctly, Issue #634</p>
+</li>
+<li><p class="first">Replica set member status update when primary changes bug (Issue #635, <a class="reference external" href="https://github.com/alinsilvian">https://github.com/alinsilvian</a>)</p>
+</li>
+<li><p class="first">Fixed auth to work better when multiple connections are involved.</p>
+</li>
+<li><p class="first">Default connection pool size increased to 5 connections.</p>
+</li>
+<li><p class="first">Fixes for the ReadStream class to work properly with 0.8 of Node.js</p>
+</li>
+<li><p class="first">Added explain function support to aggregation helper</p>
+</li>
+<li><p class="first">Added socketTimeoutMS and connectTimeoutMS to socket options for repl_set.js and server.js</p>
+</li>
+<li><p class="first">Fixed addUser to correctly handle changes in 2.2 for getLastError authentication required</p>
+</li>
+<li><p class="first">Added index to gridstore chunks on file_id (Issue #649, <a class="reference external" href="https://github.com/jacobbubu">https://github.com/jacobbubu</a>)</p>
+</li>
+<li><p class="first">Fixed Always emit db events (Issue #657)</p>
+</li>
+<li><p class="first">Close event not correctly resets DB openCalled variable to allow reconnect</p>
+</li>
+<li><p class="first">Added open event on connection established for replicaset, mongos and server</p>
+</li>
+<li><p class="first">Much faster BSON C++ parser thanks to Lucasfilm Singapore.</p>
+</li>
+<li><p class="first">Refactoring of replicaset connection logic to simplify the code.</p>
+</li>
+<li><p class="first">Add <cite>options.connectArbiter</cite> to decide connect arbiters or not (Issue #675)</p>
+</li>
+<li><p class="first">Minor optimization for findAndModify when not using j,w or fsync for safe</p>
+</li>
+</ul>
+</div>
+<div class="section" id="id54">
+<h2>1.0.2 2012-05-15<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Reconnect functionality for replicaset fix for mongodb 2.0.5</li>
+</ul>
+</div>
+<div class="section" id="id55">
+<h2>1.0.1 2012-05-12<a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Passing back getLastError object as 3rd parameter on findAndModify command.</li>
+<li>Fixed a bunch of performance regressions in objectId and cursor.</li>
+<li>Fixed issue #600 allowing for single document delete to be passed in remove command.</li>
+</ul>
+</div>
+<div class="section" id="id56">
+<h2>1.0.0 2012-04-25<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixes to handling of failover on server error</li>
+<li>Only emits error messages if there are error listeners to avoid uncaught events</li>
+<li>Server.isConnected using the server state variable not the connection pool state</li>
+</ul>
+</div>
+<div class="section" id="id57">
+<h2>0.9.9.8 2012-04-12<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>_id=0 is being turned into an ObjectID (Issue #551)</li>
+<li>fix for error in GridStore write method (Issue #559)</li>
+<li>Fix for reading a GridStore from arbitrary, non-chunk aligned offsets, added test (Issue #563, <a class="reference external" href="https://github.com/subroutine">https://github.com/subroutine</a>)</li>
+<li>Modified limitRequest to allow negative limits to pass through to Mongo, added test (Issue #561)</li>
+<li>Corrupt GridFS files when chunkSize &amp;lt; fileSize, fixed concurrency issue (Issue #555)</li>
+<li>Handle dead tailable cursors (Issue #568, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Connection pools handles closing themselves down and clearing the state</li>
+<li>Check bson size of documents against maxBsonSize and throw client error instead of server error, (Issue #553)</li>
+<li>Returning update status document at the end of the callback for updates, (Issue #569)</li>
+<li>Refactor use of Arguments object to gain performance (Issue #574, <a class="reference external" href="https://github.com/AaronAsAChimp">https://github.com/AaronAsAChimp</a>)</li>
+</ul>
+</div>
+<div class="section" id="id58">
+<h2>0.9.9.7 2012-03-16<a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Stats not returned from map reduce with inline results (Issue #542)</li>
+<li>Re-enable testing of whether or not the callback is called in the multi-chunk seek, fix small GridStore bug (Issue #543, <a class="reference external" href="https://github.com/pgebheim">https://github.com/pgebheim</a>)</li>
+<li>Streaming large files from GridFS causes truncation (Issue #540)</li>
+<li>Make callback type checks agnostic to V8 context boundaries (Issue #545)</li>
+<li>Correctly throw error if an attempt is made to execute an insert/update/remove/createIndex/ensureIndex with safe enabled and no callback</li>
+<li>Db.open throws if the application attemps to call open again without calling close first</li>
+</ul>
+</div>
+<div class="section" id="id59">
+<h2>0.9.9.6 2012-03-12<a class="headerlink" href="#id59" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>BSON parser is externalized in it&#8217;s own repository, currently using git master</li>
+<li>Fixes for Replicaset connectivity issue (Issue #537)</li>
+<li>Fixed issues with node 0.4.X vs 0.6.X (Issue #534)</li>
+<li>Removed SimpleEmitter and replaced with standard EventEmitter</li>
+<li>GridStore.seek fails to change chunks and call callback when in read mode (Issue #532)</li>
+</ul>
+</div>
+<div class="section" id="id60">
+<h2>0.9.9.5 2012-03-07<a class="headerlink" href="#id60" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Merged in replSetGetStatus helper to admin class (Issue #515, <a class="reference external" href="https://github.com/mojodna">https://github.com/mojodna</a>)</li>
+<li>Merged in serverStatus helper to admin class (Issue #516, <a class="reference external" href="https://github.com/mojodna">https://github.com/mojodna</a>)</li>
+<li>Fixed memory leak in C++ bson parser (Issue #526)</li>
+<li>Fix empty MongoError &amp;quot;message&amp;quot; property (Issue #530, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Cannot save files with the same file name to GridFS (Issue #531)</li>
+</ul>
+</div>
+<div class="section" id="id61">
+<h2>0.9.9.4 2012-02-26<a class="headerlink" href="#id61" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>bugfix for findAndModify: Error: corrupt bson message &amp;lt; 5 bytes long (Issue #519)</li>
+</ul>
+</div>
+<div class="section" id="id62">
+<h2>0.9.9.3 2012-02-23<a class="headerlink" href="#id62" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>document: save callback arguments are both undefined, (Issue #518)</li>
+<li>Native BSON parser install error with npm, (Issue #517)</li>
+</ul>
+</div>
+<div class="section" id="id63">
+<h2>0.9.9.2 2012-02-17<a class="headerlink" href="#id63" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Improved detection of Buffers using Buffer.isBuffer instead of instanceof.</li>
+<li>Added wrap error around db.dropDatabase to catch all errors (Issue #512)</li>
+<li>Added aggregate helper to collection, only for MongoDB &amp;gt;= 2.1</li>
+</ul>
+</div>
+<div class="section" id="id64">
+<h2>0.9.9.1 2012-02-15<a class="headerlink" href="#id64" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Better handling of safe when using some commands such as createIndex, ensureIndex, addUser, removeUser, createCollection.</li>
+<li>Mapreduce now throws error if out parameter is not specified.</li>
+</ul>
+</div>
+<div class="section" id="id65">
+<h2>0.9.9 2012-02-13<a class="headerlink" href="#id65" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added createFromTime method on ObjectID to allow for queries against _id more easily using the timestamp.</li>
+<li>Db.close(true) now makes connection unusable as it&#8217;s been force closed by app.</li>
+<li>Fixed mapReduce and group functions to correctly send slaveOk on queries.</li>
+<li>Fixes for find method to correctly work with find(query, fields, callback) (Issue #506).</li>
+<li>A fix for connection error handling when using the SSL on MongoDB.</li>
+</ul>
+</div>
+<div class="section" id="id66">
+<h2>0.9.8-7 2012-02-06<a class="headerlink" href="#id66" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Simplified findOne to use the find command instead of the custom code (Issue #498).</li>
+<li>BSON JS parser not also checks for _bsonType variable in case BSON object is in weird scope (Issue #495).</li>
+</ul>
+</div>
+<div class="section" id="id67">
+<h2>0.9.8-6 2012-02-04<a class="headerlink" href="#id67" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Removed the check for replicaset change code as it will never work with node.js.</li>
+</ul>
+</div>
+<div class="section" id="id68">
+<h2>0.9.8-5 2012-02-02<a class="headerlink" href="#id68" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added geoNear command to Collection.</li>
+<li>Added geoHaystackSearch command to Collection.</li>
+<li>Added indexes command to collection to retrieve the indexes on a Collection.</li>
+<li>Added stats command to collection to retrieve the statistics on a Collection.</li>
+<li>Added listDatabases command to admin object to allow retrieval of all available dbs.</li>
+<li>Changed createCreateIndexCommand to work better with options.</li>
+<li>Fixed dereference method on Db class to correctly dereference Db reference objects.</li>
+<li>Moved connect object onto Db class(Db.connect) as well as keeping backward compatibility.</li>
+<li>Removed writeBuffer method from gridstore, write handles switching automatically now.</li>
+<li>Changed readBuffer to read on Gridstore, Gridstore now only supports Binary Buffers no Strings anymore.</li>
+<li>Moved Long class to bson directory.</li>
+</ul>
+</div>
+<div class="section" id="id69">
+<h2>0.9.8-4 2012-01-28<a class="headerlink" href="#id69" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added reIndex command to collection and db level.</li>
+<li>Added support for $returnKey, $maxScan, $min, $max, $showDiskLoc, $comment to cursor and find/findOne methods.</li>
+<li>Added dropDups and v option to createIndex and ensureIndex.</li>
+<li>Added isCapped method to Collection.</li>
+<li>Added indexExists method to Collection.</li>
+<li>Added findAndRemove method to Collection.</li>
+<li>Fixed bug for replicaset connection when no active servers in the set.</li>
+<li>Fixed bug for replicaset connections when errors occur during connection.</li>
+<li>Merged in patch for BSON Number handling from Lee Salzman, did some small fixes and added test coverage.</li>
+</ul>
+</div>
+<div class="section" id="id70">
+<h2>0.9.8-3 2012-01-21<a class="headerlink" href="#id70" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Workaround for issue with Object.defineProperty (Issue #484)</li>
+<li>ObjectID generation with date does not set rest of fields to zero (Issue #482)</li>
+</ul>
+</div>
+<div class="section" id="id71">
+<h2>0.9.8-2 2012-01-20<a class="headerlink" href="#id71" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed a missing this in the ReplSetServers constructor.</li>
+</ul>
+</div>
+<div class="section" id="id72">
+<h2>0.9.8-1 2012-01-17<a class="headerlink" href="#id72" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>FindAndModify bug fix for duplicate errors (Issue #481)</li>
+</ul>
+</div>
+<div class="section" id="id73">
+<h2>0.9.8 2012-01-17<a class="headerlink" href="#id73" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Replicasets now correctly adjusts to live changes in the replicaset configuration on the servers, reconnecting correctly.
+- Set the interval for checking for changes setting the replicaSetCheckInterval property when creating the ReplSetServers instance or on db.serverConfig.replicaSetCheckInterval. (default 1000 miliseconds)</li>
+<li>Fixes formattedOrderClause in collection.js to accept a plain hash as a parameter (Issue #469) <a class="reference external" href="https://github.com/tedeh">https://github.com/tedeh</a></li>
+<li>Removed duplicate code for formattedOrderClause and moved to utils module</li>
+<li>Pass in poolSize for ReplSetServers to set default poolSize for new replicaset members</li>
+<li>Bug fix for BSON JS deserializer. Isolating the eval functions in separate functions to avoid V8 deoptimizations</li>
+<li>Correct handling of illegal BSON messages during deserialization</li>
+<li>Fixed Infinite loop when reading GridFs file with no chunks (Issue #471)</li>
+<li>Correctly update existing user password when using addUser (Issue #470)</li>
+</ul>
+</div>
+<div class="section" id="id74">
+<h2>0.9.7.3-5 2012-01-04<a class="headerlink" href="#id74" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix for RegExp serialization for 0.4.X where typeof /regexp/ == &#8216;function&#8217; vs in 0.6.X typeof /regexp/ == &#8216;object&#8217;</li>
+<li>Don&#8217;t allow keepAlive and setNoDelay for 0.4.X as it throws errors</li>
+</ul>
+</div>
+<div class="section" id="id75">
+<h2>0.9.7.3-4 2012-01-04<a class="headerlink" href="#id75" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Chased down potential memory leak on findAndModify, Issue #467 (node.js removeAllListeners leaves the key in the _events object, node.js bug on eventlistener?, leads to extremely slow memory leak on listener object)</li>
+<li>Sanity checks for GridFS performance with benchmark added</li>
+</ul>
+</div>
+<div class="section" id="id76">
+<h2>0.9.7.3-3 2012-01-04<a class="headerlink" href="#id76" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Bug fixes for performance issues going form 0.9.6.X to 0.9.7.X on linux</li>
+<li>BSON bug fixes for performance</li>
+</ul>
+</div>
+<div class="section" id="id77">
+<h2>0.9.7.3-2 2012-01-02<a class="headerlink" href="#id77" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed up documentation to reflect the preferred way of instantiating bson types</li>
+<li>GC bug fix for JS bson parser to avoid stop-and-go GC collection</li>
+</ul>
+</div>
+<div class="section" id="id78">
+<h2>0.9.7.3-1 2012-01-02<a class="headerlink" href="#id78" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix to make db.bson_serializer and db.bson_deserializer work as it did previously</li>
+</ul>
+</div>
+<div class="section" id="id79">
+<h2>0.9.7.3 2011-12-30<a class="headerlink" href="#id79" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Moved BSON_BINARY_SUBTYPE_DEFAULT from BSON object to Binary object and removed the <a href="#id119"><span class="problematic" id="id120">BSON_BINARY_</span></a> prefixes</li>
+<li>Removed Native BSON types, C++ parser uses JS types (faster due to cost of crossing the JS-C++ barrier for each call)</li>
+<li>Added build fix for 0.4.X branch of Node.js where GetOwnPropertyNames is not defined in v8</li>
+<li>Fix for wire protocol parser for corner situation where the message is larger than the maximum socket buffer in node.js (Issue #464, #461, #447)</li>
+<li>Connection pool status set to connected on poolReady, isConnected returns false on anything but connected status (Issue #455)</li>
+</ul>
+</div>
+<div class="section" id="id80">
+<h2>0.9.7.2-5 2011-12-22<a class="headerlink" href="#id80" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Brand spanking new Streaming Cursor support Issue #458 (<a class="reference external" href="https://github.com/christkv/node-mongodb-native/pull/458">https://github.com/christkv/node-mongodb-native/pull/458</a>) thanks to Mr Aaron Heckmann</li>
+</ul>
+</div>
+<div class="section" id="id81">
+<h2>0.9.7.2-4 2011-12-21<a class="headerlink" href="#id81" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Refactoring of callback code to work around performance regression on linux</li>
+<li>Fixed group function to correctly use the command mode as default</li>
+</ul>
+</div>
+<div class="section" id="id82">
+<h2>0.9.7.2-3 2011-12-18<a class="headerlink" href="#id82" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Fixed error handling for findAndModify while still working for mongodb 1.8.6 (Issue #450).</p>
+</li>
+<li><dl class="first docutils">
+<dt>Allow for force send query to primary, pass option (read:&#8217;primary&#8217;) on find command.</dt>
+<dd><ul class="first last simple">
+<li><tt class="docutils literal"><span class="pre">find({a:1},</span> <span class="pre">{read:'primary'}).toArray(function(err,</span> <span class="pre">items)</span> <span class="pre">{});</span></tt></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="id83">
+<h2>0.9.7.2-2 2011-12-16<a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixes infinite streamRecords QueryFailure fix when using Mongos (Issue #442)</li>
+</ul>
+</div>
+<div class="section" id="id84">
+<h2>0.9.7.2-1 2011-12-16<a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>~10% perf improvement for ObjectId#toHexString (Issue #448, <a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>)</li>
+<li>Only using process.nextTick on errors emitted on callbacks not on all parsing, reduces number of ticks in the driver</li>
+<li>Changed parsing off bson messages to use process.nextTick to do bson parsing in batches if the message is over 10K as to yield more time to the event look increasing concurrency on big mongoreply messages with multiple documents</li>
+</ul>
+</div>
+<div class="section" id="id85">
+<h2>0.9.7.2 2011-12-15<a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="first docutils">
+<dt>Added SSL support for future version of mongodb (VERY VERY EXPERIMENTAL)</dt>
+<dd><ul class="first last simple">
+<li>pass in the ssl:true option to the server or replicaset server config to enable</li>
+<li>a bug either in mongodb or node.js does not allow for more than 1 connection pr db instance (poolSize:1).</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Added getTimestamp() method to objectID that returns a date object</p>
+</li>
+<li><dl class="first docutils">
+<dt>Added finalize function to collection.group</dt>
+<dd><ul class="first last simple">
+<li>function group (keys, condition, initial, reduce, finalize, command, callback)</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Reaper no longer using setTimeout to handle reaping. Triggering is done in the general flow leading to predictable behavior.</dt>
+<dd><ul class="first last simple">
+<li>reaperInterval, set interval for reaper (default 10000 miliseconds)</li>
+<li>reaperTimeout, set timeout for calls (default 30000 miliseconds)</li>
+<li>reaper, enable/disable reaper (default false)</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Work around for issues with findAndModify during high concurrency load, insure that the behavior is the same across the 1.8.X branch and 2.X branch of MongoDb</p>
+</li>
+<li><p class="first">Reworked multiple db&#8217;s sharing same connection pool to behave correctly on error, timeout and close</p>
+</li>
+<li><p class="first">EnsureIndex command can be executed without a callback (Issue #438)</p>
+</li>
+<li><dl class="first docutils">
+<dt>Eval function no accepts options including nolock (Issue #432)</dt>
+<dd><ul class="first last simple">
+<li>eval(code, parameters, options, callback) (where options = {nolock:true})</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="id86">
+<h2>0.9.7.1-4 2011-11-27<a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Replaced install.sh with install.js to install correctly on all supported os&#8217;s</li>
+</ul>
+</div>
+<div class="section" id="id87">
+<h2>0.9.7.1-3 2011-11-27<a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixes incorrect scope for ensureIndex error wrapping (Issue #419) <a class="reference external" href="https://github.com/ritch">https://github.com/ritch</a></li>
+</ul>
+</div>
+<div class="section" id="id88">
+<h2>0.9.7.1-2 2011-11-27<a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Set statistical selection strategy as default for secondary choice.</li>
+</ul>
+</div>
+<div class="section" id="id89">
+<h2>0.9.7.1-1 2011-11-27<a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Better handling of single server reconnect (fixes some bugs)</li>
+<li>Better test coverage of single server failure</li>
+<li>Correct handling of callbacks on replicaset servers when firewall dropping packets, correct reconnect</li>
+</ul>
+</div>
+<div class="section" id="id90">
+<h2>0.9.7.1 2011-11-24<a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Better handling of dead server for single server instances</p>
+</li>
+<li><p class="first">FindOne and find treats selector == null as {}, Issue #403</p>
+</li>
+<li><dl class="first docutils">
+<dt>Possible to pass in a strategy for the replicaset to pick secondary reader node</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>parameter strategy</dt>
+<dd><ul class="first last simple">
+<li>ping (default), pings the servers and picks the one with the lowest ping time</li>
+<li>statistical, measures each request and pick the one with the lowest mean and std deviation</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Set replicaset read preference replicaset.setReadPreference()</dt>
+<dd><ul class="first last simple">
+<li>Server.READ_PRIMARY (use primary server for reads)</li>
+<li>Server.READ_SECONDARY (from a secondary server (uses the strategy set))</li>
+<li>tags, {object of tags}</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Added replay of commands issued to a closed connection when the connection is re-established</p>
+</li>
+<li><p class="first">Fix isConnected and close on unopened connections. Issue #409, fix by (<a class="reference external" href="https://github.com/sethml">https://github.com/sethml</a>)</p>
+</li>
+<li><p class="first">Moved reaper to db.open instead of constructor (Issue #406)</p>
+</li>
+<li><dl class="first docutils">
+<dt>Allows passing through of socket connection settings to Server or ReplSetServer under the option socketOptions</dt>
+<dd><ul class="first last simple">
+<li>timeout = set seconds before connection times out (default 0)</li>
+<li>noDelay = Disables the Nagle algorithm (default true)</li>
+<li>keepAlive = Set if keepAlive is used (default 0, which means no keepAlive, set higher than 0 for keepAlive)</li>
+<li>encoding = [&#8216;ascii&#8217;, &#8216;utf8&#8217;, or &#8216;base64&#8217;] (default null)</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Fixes for handling of errors during shutdown off a socket connection</p>
+</li>
+<li><p class="first">Correctly applies socket options including timeout</p>
+</li>
+<li><p class="first">Cleanup of test management code to close connections correctly</p>
+</li>
+<li><p class="first">Handle parser errors better, closing down the connection and emitting an error</p>
+</li>
+<li><p class="first">Correctly emit errors from server.js only wrapping errors that are strings</p>
+</li>
+</ul>
+</div>
+<div class="section" id="id91">
+<h2>0.9.7 2011-11-10<a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Added priority setting to replicaset manager</p>
+</li>
+<li><p class="first">Added correct handling of passive servers in replicaset</p>
+</li>
+<li><p class="first">Reworked socket code for simpler clearer handling</p>
+</li>
+<li><p class="first">Correct handling of connections in test helpers</p>
+</li>
+<li><dl class="first docutils">
+<dt>Added control of retries on failure</dt>
+<dd><ul class="first last simple">
+<li>control with parameters retryMiliSeconds and numberOfRetries when creating a db instance</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Added reaper that will timeout and cleanup queries that never return</dt>
+<dd><ul class="first last simple">
+<li>control with parameters reaperInterval and reaperTimeout when creating a db instance</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Refactored test helper classes for replicaset tests</p>
+</li>
+<li><dl class="first docutils">
+<dt>Allows raw (no bson parser mode for insert, update, remove, find and findOne)</dt>
+<dd><ul class="first last simple">
+<li>control raw mode passing in option raw:true on the commands</li>
+<li>will return buffers with the binary bson objects</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Fixed memory leak in cursor.toArray</p>
+</li>
+<li><p class="first">Fixed bug in command creation for mongodb server with wrong scope of call</p>
+</li>
+<li><p class="first">Added db(dbName) method to db.js to allow for reuse of connections against other databases</p>
+</li>
+<li><dl class="first docutils">
+<dt>Serialization of functions in an object is off by default, override with parameter</dt>
+<dd><ul class="first last simple">
+<li>serializeFunctions [true/false] on db level, collection level or individual insert/update/findAndModify</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Added Long.fromString to c++ class and fixed minor bug in the code (Test case for $gt operator on 64-bit integers, Issue #394)</p>
+</li>
+<li><p class="first">FindOne and find now share same code execution and will work in the same manner, Issue #399</p>
+</li>
+<li><p class="first">Fix for tailable cursors, Issue #384</p>
+</li>
+<li><p class="first">Fix for Cursor rewind broken, Issue #389</p>
+</li>
+<li><p class="first">Allow Gridstore.exist to query using regexp, Issue #387, fix by (<a class="reference external" href="https://github.com/kaij">https://github.com/kaij</a>)</p>
+</li>
+<li><p class="first">Updated documentation on <a class="reference external" href="https://github.com/christkv/node-mongodb-native">https://github.com/christkv/node-mongodb-native</a></p>
+</li>
+<li><p class="first">Fixed toJSON methods across all objects for BSON, Binary return Base64 Encoded data</p>
+</li>
+</ul>
+</div>
+<div class="section" id="id92">
+<h2>0.9.6-22 2011-10-15<a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed bug in js bson parser that could cause wrong object size on serialization, Issue #370</li>
+<li>Fixed bug in findAndModify that did not throw error on replicaset timeout, Issue #373</li>
+</ul>
+</div>
+<div class="section" id="id93">
+<h2>0.9.6-21 2011-10-05<a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Reworked reconnect code to work correctly</li>
+<li>Handling errors in different parts of the code to ensure that it does not lock the connection</li>
+<li>Consistent error handling for Object.createFromHexString for JS and C++</li>
+</ul>
+</div>
+<div class="section" id="id94">
+<h2>0.9.6-20 2011-10-04<a class="headerlink" href="#id94" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Reworked bson.js parser to get rid off Array.shift() due to it allocating new memory for each call. Speedup varies between 5-15% depending on doc</p>
+</li>
+<li><p class="first">Reworked bson.cc to throw error when trying to serialize js bson types</p>
+</li>
+<li><p class="first">Added MinKey, MaxKey and Double support for JS and C++ parser</p>
+</li>
+<li><p class="first">Reworked socket handling code to emit errors on unparsable messages</p>
+</li>
+<li><dl class="first docutils">
+<dt>Added logger option for Db class, lets you pass in a function in the shape</dt>
+<dd><dl class="first docutils">
+<dt>{</dt>
+<dd><p class="first last">log : function(message, object) {},
+error : function(errorMessage, errorObject) {},
+debug : function(debugMessage, object) {},</p>
+</dd>
+</dl>
+<p class="last">}</p>
+</dd>
+</dl>
+<p>Usage is new Db(new Server(..), {logger: loggerInstance})</p>
+</li>
+</ul>
+</div>
+<div class="section" id="id95">
+<h2>0.9.6-19 2011-09-29<a class="headerlink" href="#id95" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixing compatibility issues between C++ bson parser and js parser</li>
+<li>Added Symbol support to C++ parser</li>
+<li>Fixed socket handling bug for seldom misaligned message from mongodb</li>
+<li>Correctly handles serialization of functions using the C++ bson parser</li>
+</ul>
+</div>
+<div class="section" id="id96">
+<h2>0.9.6-18 2011-09-22<a class="headerlink" href="#id96" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed bug in waitForConnection that would lead to 100% cpu usage, Issue #352</li>
+</ul>
+</div>
+<div class="section" id="id97">
+<h2>0.9.6-17 2011-09-21<a class="headerlink" href="#id97" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed broken exception test causing bamboo to hang</li>
+<li>Handling correctly command+lastError when both return results as in findAndModify, Issue #351</li>
+</ul>
+</div>
+<div class="section" id="id98">
+<h2>0.9.6-16 2011-09-14<a class="headerlink" href="#id98" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixing a bunch of issues with compatibility with MongoDB 2.0.X branch. Some fairly big changes in behavior from 1.8.X to 2.0.X on the server.</li>
+<li>Error Connection MongoDB V2.0.0 with Auth=true, Issue #348</li>
+</ul>
+</div>
+<div class="section" id="id99">
+<h2>0.9.6-15 2011-09-09<a class="headerlink" href="#id99" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixed issue where pools would not be correctly cleaned up after an error, Issue #345</li>
+<li>Fixed authentication issue with secondary servers in Replicaset, Issue #334</li>
+<li>Duplicate replica-set servers when omitting port, Issue #341</li>
+<li>Fixing findAndModify to correctly work with Replicasets ensuring proper error handling, Issue #336</li>
+<li>Merged in code from (<a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>) that checks for global variable leaks</li>
+</ul>
+</div>
+<div class="section" id="id100">
+<h2>0.9.6-14 2011-09-05<a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Minor fixes for error handling in cursor streaming (<a class="reference external" href="https://github.com/sethml">https://github.com/sethml</a>), Issue #332</li>
+<li>Minor doc fixes</li>
+<li>Some more cursor sort tests added, Issue #333</li>
+<li>Fixes to work with 0.5.X branch</li>
+<li>Fix Db not removing reconnect listener from serverConfig, (<a class="reference external" href="https://github.com/sbrekken">https://github.com/sbrekken</a>), Issue #337</li>
+<li>Removed node_events.h includes (<a class="reference external" href="https://github.com/jannehietamaki">https://github.com/jannehietamaki</a>), Issue #339</li>
+<li>Implement correct safe/strict mode for findAndModify.</li>
+</ul>
+</div>
+<div class="section" id="id101">
+<h2>0.9.6-13 2011-08-24<a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Db names correctly error checked for illegal characters</li>
+</ul>
+</div>
+<div class="section" id="id102">
+<h2>0.9.6-12 2011-08-24<a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Nasty bug in GridFS if you changed the default chunk size</li>
+<li>Fixed error handling bug in findOne</li>
+</ul>
+</div>
+<div class="section" id="id103">
+<h2>0.9.6-11 2011-08-23<a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Timeout option not correctly making it to the cursor, Issue #320, Fix from (<a class="reference external" href="https://github.com/year2013">https://github.com/year2013</a>)</li>
+<li>Fixes for memory leaks when using buffers and C++ parser</li>
+<li>Fixes to make tests pass on 0.5.X</li>
+<li>Cleanup of bson.js to remove duplicated code paths</li>
+<li>Fix for errors occurring in ensureIndex, Issue #326</li>
+<li>Removing require.paths to make tests work with the 0.5.X branch</li>
+</ul>
+</div>
+<div class="section" id="id104">
+<h2>0.9.6-10 2011-08-11<a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Specific type Double for capped collections (<a class="reference external" href="https://github.com/mbostock">https://github.com/mbostock</a>), Issue #312</li>
+<li>Decorating Errors with all all object info from Mongo (<a class="reference external" href="https://github.com/laurie71">https://github.com/laurie71</a>), Issue #308</li>
+<li>Implementing fixes for mongodb 1.9.1 and higher to make tests pass</li>
+<li>Admin validateCollection now takes an options argument for you to pass in full option</li>
+<li>Implemented keepGoing parameter for mongodb 1.9.1 or higher, Issue #310</li>
+<li>Added test for read_secondary count issue, merged in fix from (<a class="reference external" href="https://github.com/year2013">https://github.com/year2013</a>), Issue #317</li>
+</ul>
+</div>
+<div class="section" id="id105">
+<h2>0.9.6-9<a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Bug fix for bson parsing the key &#8216;&#8217;:&#8217;&#8217; correctly without crashing</li>
+</ul>
+</div>
+<div class="section" id="id106">
+<h2>0.9.6-8<a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Changed to using node.js crypto library MD5 digest</li>
+<li>Connect method support documented mongodb: syntax by (<a class="reference external" href="https://github.com/sethml">https://github.com/sethml</a>)</li>
+<li>Support Symbol type for BSON, serializes to it&#8217;s own type Symbol, Issue #302, #288</li>
+<li>Code object without scope serializing to correct BSON type</li>
+<li>Lot&#8217;s of fixes to avoid double callbacks (<a class="reference external" href="https://github.com/aheckmann">https://github.com/aheckmann</a>) Issue #304</li>
+<li>Long deserializes as Number for values in the range -2^53 to 2^53, Issue #305 (<a class="reference external" href="https://github.com/sethml">https://github.com/sethml</a>)</li>
+<li>Fixed C++ parser to reflect JS parser handling of long deserialization</li>
+<li>Bson small optimizations</li>
+</ul>
+</div>
+<div class="section" id="id107">
+<h2>0.9.6-7 2011-07-13<a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>JS Bson deserialization bug #287</li>
+</ul>
+</div>
+<div class="section" id="id108">
+<h2>0.9.6-6 2011-07-12<a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>FindAndModify not returning error message as other methods Issue #277</li>
+<li>Added test coverage for $push, $pushAll and $inc atomic operations</li>
+<li>Correct Error handling for non 12/24 bit ids on Pure JS ObjectID class Issue #276</li>
+<li>Fixed terrible deserialization bug in js bson code #285</li>
+<li>Fix by andrewjstone to avoid throwing errors when this.primary not defined</li>
+</ul>
+</div>
+<div class="section" id="id109">
+<h2>0.9.6-5 2011-07-06<a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Rewritten BSON js parser now faster than the C parser on my core2duo laptop</li>
+<li>Added option full to indexInformation to get all index info Issue #265</li>
+<li>Passing in ObjectID for new Gridstore works correctly Issue #272</li>
+</ul>
+</div>
+<div class="section" id="id110">
+<h2>0.9.6-4 2011-07-01<a class="headerlink" href="#id110" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added test and bug fix for insert/update/remove without callback supplied</li>
+</ul>
+</div>
+<div class="section" id="id111">
+<h2>0.9.6-3 2011-07-01<a class="headerlink" href="#id111" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added simple grid class called Grid with put, get, delete methods</li>
+<li>Fixed writeBuffer/readBuffer methods on GridStore so they work correctly</li>
+<li>Automatic handling of buffers when using write method on GridStore</li>
+<li>GridStore now accepts a ObjectID instead of file name for write and read methods</li>
+<li>GridStore.list accepts id option to return of file ids instead of filenames</li>
+<li>GridStore close method returns document for the file allowing user to reference _id field</li>
+</ul>
+</div>
+<div class="section" id="id112">
+<h2>0.9.6-2 2011-06-30<a class="headerlink" href="#id112" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixes for reconnect logic for server object (replays auth correctly)</li>
+<li>More testcases for auth</li>
+<li>Fixes in error handling for replicaset</li>
+<li>Fixed bug with safe parameter that would fail to execute safe when passing w or wtimeout</li>
+<li>Fixed slaveOk bug for findOne method</li>
+<li>Implemented auth support for replicaset and test cases</li>
+<li>Fixed error when not passing in rs_name</li>
+</ul>
+</div>
+<div class="section" id="id113">
+<h2>0.9.6-1 2011-06-25<a class="headerlink" href="#id113" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixes for test to run properly using c++ bson parser</li>
+<li>Fixes for dbref in native parser (correctly handles ref without db component)</li>
+<li>Connection fixes for replicasets to avoid runtime conditions in cygwin (<a class="reference external" href="https://github.com/vincentcr">https://github.com/vincentcr</a>)</li>
+<li>Fixes for timestamp in js bson parser (distinct timestamp type now)</li>
+</ul>
+</div>
+<div class="section" id="id114">
+<h2>0.9.6 2011-06-21<a class="headerlink" href="#id114" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Worked around npm version handling bug</li>
+<li>Race condition fix for cygwin (<a class="reference external" href="https://github.com/vincentcr">https://github.com/vincentcr</a>)</li>
+</ul>
+</div>
+<div class="section" id="id115">
+<h2>0.9.5-1 2011-06-21<a class="headerlink" href="#id115" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Extracted Timestamp as separate class for bson js parser to avoid instanceof problems</li>
+<li>Fixed driver strict mode issue</li>
+</ul>
+</div>
+<div class="section" id="id116">
+<h2>0.9.5 2011-06-20<a class="headerlink" href="#id116" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Replicaset support (failover and reading from secondary servers)</li>
+<li>Removed ServerPair and ServerCluster</li>
+<li>Added connection pool functionality</li>
+<li>Fixed serious bug in C++ bson parser where bytes &amp;gt; 127 would generate 2 byte sequences</li>
+<li>Allows for forcing the server to assign ObjectID&#8217;s using the option {forceServerObjectId: true}</li>
+</ul>
+</div>
+<div class="section" id="id117">
+<h2>0.6.8<a class="headerlink" href="#id117" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Removed multiple message concept from bson</li>
+<li>Changed db.open(db) to be db.open(err, db)</li>
+</ul>
+</div>
+<div class="section" id="id118">
+<h2>0.1 2010-01-30<a class="headerlink" href="#id118" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Initial release support of driver using native node.js interface</li>
+<li>Supports gridfs specification</li>
+<li>Supports admin functionality</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#id1">1.4.9 2014-08-26</a></li>
+<li><a class="reference internal" href="#id2">1.4.8 2014-08-01</a></li>
+<li><a class="reference internal" href="#id3">1.4.7 2014-06-18</a></li>
+<li><a class="reference internal" href="#id4">1.4.6 2014-06-12</a></li>
+<li><a class="reference internal" href="#id5">1.4.5 2014-05-21</a></li>
+<li><a class="reference internal" href="#id6">1.4.4 2014-05-13</a></li>
+<li><a class="reference internal" href="#id7">1.4.3 2014-05-01</a></li>
+<li><a class="reference internal" href="#id8">1.4.2 2014-04-15</a></li>
+<li><a class="reference internal" href="#id9">1.4.1 2014-04-09</a></li>
+<li><a class="reference internal" href="#id10">1.4.0 2014-04-03</a></li>
+<li><a class="reference internal" href="#id11">1.3.19 2013-08-21</a></li>
+<li><a class="reference internal" href="#id12">1.3.18 2013-08-10</a></li>
+<li><a class="reference internal" href="#id13">1.3.17 2013-08-07</a></li>
+<li><a class="reference internal" href="#id14">1.3.16 2013-08-02</a></li>
+<li><a class="reference internal" href="#id15">1.3.15 2013-08-01</a></li>
+<li><a class="reference internal" href="#id16">1.3.14 2013-08-01</a></li>
+<li><a class="reference internal" href="#id17">1.3.13 2013-07-31</a></li>
+<li><a class="reference internal" href="#id18">1.3.12 2013-07-19</a></li>
+<li><a class="reference internal" href="#id19">1.3.11 2013-07-04</a></li>
+<li><a class="reference internal" href="#id20">1.3.10 2013-06-17</a></li>
+<li><a class="reference internal" href="#id21">1.3.9 2013-06-05</a></li>
+<li><a class="reference internal" href="#id22">1.3.8 2013-05-31</a></li>
+<li><a class="reference internal" href="#id23">1.3.7 2013-05-29</a></li>
+<li><a class="reference internal" href="#id24">1.3.6 2013-05-21</a></li>
+<li><a class="reference internal" href="#id25">1.3.5 2013-05-14</a></li>
+<li><a class="reference internal" href="#id26">1.3.4 2013-05-14</a></li>
+<li><a class="reference internal" href="#id27">1.3.3 2013-05-09</a></li>
+<li><a class="reference internal" href="#id28">1.3.2 2013-05-08</a></li>
+<li><a class="reference internal" href="#id29">1.3.1 2013-05-06</a></li>
+<li><a class="reference internal" href="#id30">1.3.0 2013-04-25</a></li>
+<li><a class="reference internal" href="#id31">1.2.14 2013-03-14</a></li>
+<li><a class="reference internal" href="#id32">1.2.13 2013-02-22</a></li>
+<li><a class="reference internal" href="#id33">1.2.12 2013-02-13</a></li>
+<li><a class="reference internal" href="#id34">1.2.11 2013-01-29</a></li>
+<li><a class="reference internal" href="#id35">1.2.10 2013-01-25</a></li>
+<li><a class="reference internal" href="#id36">1.2.9 2013-01-15</a></li>
+<li><a class="reference internal" href="#id37">1.2.8 2013-01-07</a></li>
+<li><a class="reference internal" href="#id38">1.2.7 2012-12-23</a></li>
+<li><a class="reference internal" href="#id39">1.2.6 2012-12-21</a></li>
+<li><a class="reference internal" href="#id40">1.2.5 2012-12-12</a></li>
+<li><a class="reference internal" href="#id41">1.2.4 2012-12-11</a></li>
+<li><a class="reference internal" href="#id42">1.2.3 2012-12-10</a></li>
+<li><a class="reference internal" href="#id43">1.2.2 2012-12-03</a></li>
+<li><a class="reference internal" href="#id44">1.2.1 2012-11-30</a></li>
+<li><a class="reference internal" href="#id45">1.2.0 2012-11-27</a></li>
+<li><a class="reference internal" href="#id46">1.1.11 2012-10-10</a></li>
+<li><a class="reference internal" href="#id47">1.1.10 2012-10-08</a></li>
+<li><a class="reference internal" href="#id48">1.1.9 2012-10-05</a></li>
+<li><a class="reference internal" href="#id49">1.1.8 2012-10-01</a></li>
+<li><a class="reference internal" href="#id50">1.1.7 2012-09-10</a></li>
+<li><a class="reference internal" href="#id51">1.1.6 2012-09-01</a></li>
+<li><a class="reference internal" href="#id52">1.1.5 2012-08-29</a></li>
+<li><a class="reference internal" href="#id53">1.1.4 2012-08-12</a></li>
+<li><a class="reference internal" href="#id54">1.0.2 2012-05-15</a></li>
+<li><a class="reference internal" href="#id55">1.0.1 2012-05-12</a></li>
+<li><a class="reference internal" href="#id56">1.0.0 2012-04-25</a></li>
+<li><a class="reference internal" href="#id57">0.9.9.8 2012-04-12</a></li>
+<li><a class="reference internal" href="#id58">0.9.9.7 2012-03-16</a></li>
+<li><a class="reference internal" href="#id59">0.9.9.6 2012-03-12</a></li>
+<li><a class="reference internal" href="#id60">0.9.9.5 2012-03-07</a></li>
+<li><a class="reference internal" href="#id61">0.9.9.4 2012-02-26</a></li>
+<li><a class="reference internal" href="#id62">0.9.9.3 2012-02-23</a></li>
+<li><a class="reference internal" href="#id63">0.9.9.2 2012-02-17</a></li>
+<li><a class="reference internal" href="#id64">0.9.9.1 2012-02-15</a></li>
+<li><a class="reference internal" href="#id65">0.9.9 2012-02-13</a></li>
+<li><a class="reference internal" href="#id66">0.9.8-7 2012-02-06</a></li>
+<li><a class="reference internal" href="#id67">0.9.8-6 2012-02-04</a></li>
+<li><a class="reference internal" href="#id68">0.9.8-5 2012-02-02</a></li>
+<li><a class="reference internal" href="#id69">0.9.8-4 2012-01-28</a></li>
+<li><a class="reference internal" href="#id70">0.9.8-3 2012-01-21</a></li>
+<li><a class="reference internal" href="#id71">0.9.8-2 2012-01-20</a></li>
+<li><a class="reference internal" href="#id72">0.9.8-1 2012-01-17</a></li>
+<li><a class="reference internal" href="#id73">0.9.8 2012-01-17</a></li>
+<li><a class="reference internal" href="#id74">0.9.7.3-5 2012-01-04</a></li>
+<li><a class="reference internal" href="#id75">0.9.7.3-4 2012-01-04</a></li>
+<li><a class="reference internal" href="#id76">0.9.7.3-3 2012-01-04</a></li>
+<li><a class="reference internal" href="#id77">0.9.7.3-2 2012-01-02</a></li>
+<li><a class="reference internal" href="#id78">0.9.7.3-1 2012-01-02</a></li>
+<li><a class="reference internal" href="#id79">0.9.7.3 2011-12-30</a></li>
+<li><a class="reference internal" href="#id80">0.9.7.2-5 2011-12-22</a></li>
+<li><a class="reference internal" href="#id81">0.9.7.2-4 2011-12-21</a></li>
+<li><a class="reference internal" href="#id82">0.9.7.2-3 2011-12-18</a></li>
+<li><a class="reference internal" href="#id83">0.9.7.2-2 2011-12-16</a></li>
+<li><a class="reference internal" href="#id84">0.9.7.2-1 2011-12-16</a></li>
+<li><a class="reference internal" href="#id85">0.9.7.2 2011-12-15</a></li>
+<li><a class="reference internal" href="#id86">0.9.7.1-4 2011-11-27</a></li>
+<li><a class="reference internal" href="#id87">0.9.7.1-3 2011-11-27</a></li>
+<li><a class="reference internal" href="#id88">0.9.7.1-2 2011-11-27</a></li>
+<li><a class="reference internal" href="#id89">0.9.7.1-1 2011-11-27</a></li>
+<li><a class="reference internal" href="#id90">0.9.7.1 2011-11-24</a></li>
+<li><a class="reference internal" href="#id91">0.9.7 2011-11-10</a></li>
+<li><a class="reference internal" href="#id92">0.9.6-22 2011-10-15</a></li>
+<li><a class="reference internal" href="#id93">0.9.6-21 2011-10-05</a></li>
+<li><a class="reference internal" href="#id94">0.9.6-20 2011-10-04</a></li>
+<li><a class="reference internal" href="#id95">0.9.6-19 2011-09-29</a></li>
+<li><a class="reference internal" href="#id96">0.9.6-18 2011-09-22</a></li>
+<li><a class="reference internal" href="#id97">0.9.6-17 2011-09-21</a></li>
+<li><a class="reference internal" href="#id98">0.9.6-16 2011-09-14</a></li>
+<li><a class="reference internal" href="#id99">0.9.6-15 2011-09-09</a></li>
+<li><a class="reference internal" href="#id100">0.9.6-14 2011-09-05</a></li>
+<li><a class="reference internal" href="#id101">0.9.6-13 2011-08-24</a></li>
+<li><a class="reference internal" href="#id102">0.9.6-12 2011-08-24</a></li>
+<li><a class="reference internal" href="#id103">0.9.6-11 2011-08-23</a></li>
+<li><a class="reference internal" href="#id104">0.9.6-10 2011-08-11</a></li>
+<li><a class="reference internal" href="#id105">0.9.6-9</a></li>
+<li><a class="reference internal" href="#id106">0.9.6-8</a></li>
+<li><a class="reference internal" href="#id107">0.9.6-7 2011-07-13</a></li>
+<li><a class="reference internal" href="#id108">0.9.6-6 2011-07-12</a></li>
+<li><a class="reference internal" href="#id109">0.9.6-5 2011-07-06</a></li>
+<li><a class="reference internal" href="#id110">0.9.6-4 2011-07-01</a></li>
+<li><a class="reference internal" href="#id111">0.9.6-3 2011-07-01</a></li>
+<li><a class="reference internal" href="#id112">0.9.6-2 2011-06-30</a></li>
+<li><a class="reference internal" href="#id113">0.9.6-1 2011-06-25</a></li>
+<li><a class="reference internal" href="#id114">0.9.6 2011-06-21</a></li>
+<li><a class="reference internal" href="#id115">0.9.5-1 2011-06-21</a></li>
+<li><a class="reference internal" href="#id116">0.9.5 2011-06-20</a></li>
+<li><a class="reference internal" href="#id117">0.6.8</a></li>
+<li><a class="reference internal" href="#id118">0.1 2010-01-30</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>
