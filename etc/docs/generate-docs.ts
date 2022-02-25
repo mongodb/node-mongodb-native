@@ -2,7 +2,7 @@
 
 import { parse, stringify } from '@iarna/toml';
 import * as child_process from 'child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { createInterface } from 'readline';
 import { chdir } from 'process';
@@ -11,7 +11,6 @@ const exec = promisify(child_process.exec);
 
 const RELEASES_TOML_FILE = './template/data/releases.toml';
 const RELEASES_JSON_FILE = './template/static/versions.json';
-const PATH_TO_BUILT_DOCS = './build';
 
 interface JsonVersionSchema {
   version: string;
@@ -111,14 +110,16 @@ ${JSON.stringify(newVersion, null, 2)}
     process.exit(1);
   }
 
-  const docsExist = existsSync(PATH_TO_BUILT_DOCS);
+  console.error('Installing typedoc...');
+  await exec('npm i --no-save typedoc');
 
-  if (!docsExist) {
-    console.error('This script requires that the current API docs already be built.');
-    console.error('Please build with npm run build:docs before running this script');
-    process.exit(1);
-  }
+  console.error('Successfully installed typedoc.  Building api docs for current branch...');
 
+  await exec('npm run build:typedoc');
+
+  console.error('Successfully built api docs for current branch');
+
+  console.error('Generating new doc site...')
   const tomlVersions = parse(readFileSync(RELEASES_TOML_FILE, { encoding: 'utf8' })) as unknown as TomlVersionSchema;
   const jsonVersions = JSON.parse(readFileSync(RELEASES_JSON_FILE, { encoding: 'utf8' })) as unknown as JsonVersionSchema[];
 
@@ -141,6 +142,8 @@ ${JSON.stringify(newVersion, null, 2)}
 
   // cleanup
   await exec('rm -rf temp');
+
+  console.error('Successfully generated api documentation and updated the doc site.')
 }
 
 main();
