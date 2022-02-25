@@ -7,7 +7,7 @@ import type { Logger } from '../logger';
 import { Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { Callback, executeLegacyOperation, getTopology } from '../utils';
+import { Callback, maybePromise } from '../utils';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -140,11 +140,30 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    *
    * @param id - The id of the file doc
    */
-  delete(id: ObjectId): Promise<undefined>;
+  delete(id: ObjectId): Promise<void>;
   delete(id: ObjectId, callback: Callback<void>): void;
-  delete(id: ObjectId, callback?: Callback<void>): Promise<undefined> | void {
-    return executeLegacyOperation(getTopology(this.s.db), _delete, [this, id, callback], {
-      skipSessions: true
+  delete(id: ObjectId, callback?: Callback<void>): Promise<void> | void {
+    return maybePromise(callback, callback => {
+      return this.s._filesCollection.deleteOne({ _id: id }, (error, res) => {
+        if (error) {
+          return callback(error);
+        }
+
+        return this.s._chunksCollection.deleteMany({ files_id: id }, error => {
+          if (error) {
+            return callback(error);
+          }
+
+          // Delete orphaned chunks before returning FileNotFound
+          if (!res?.deletedCount) {
+            // TODO(NODE-3483): Replace with more appropriate error
+            // Consider creating new error MongoGridFSFileNotFoundError
+            return callback(new MongoRuntimeError(`File not found for id ${id}`));
+          }
+
+          return callback();
+        });
+      });
     });
   }
 
@@ -194,8 +213,20 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   rename(id: ObjectId, filename: string): Promise<void>;
   rename(id: ObjectId, filename: string, callback: Callback<void>): void;
   rename(id: ObjectId, filename: string, callback?: Callback<void>): Promise<void> | void {
-    return executeLegacyOperation(getTopology(this.s.db), _rename, [this, id, filename, callback], {
-      skipSessions: true
+    return maybePromise(callback, callback => {
+      const filter = { _id: id };
+      const update = { $set: { filename } };
+      return this.s._filesCollection.updateOne(filter, update, (error?, res?) => {
+        if (error) {
+          return callback(error);
+        }
+
+        if (!res?.matchedCount) {
+          return callback(new MongoRuntimeError(`File with id ${id} not found`));
+        }
+
+        return callback();
+      });
     });
   }
 
@@ -203,8 +234,19 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   drop(): Promise<void>;
   drop(callback: Callback<void>): void;
   drop(callback?: Callback<void>): Promise<void> | void {
-    return executeLegacyOperation(getTopology(this.s.db), _drop, [this, callback], {
-      skipSessions: true
+    return maybePromise(callback, callback => {
+      return this.s._filesCollection.drop(error => {
+        if (error) {
+          return callback(error);
+        }
+        return this.s._chunksCollection.drop(error => {
+          if (error) {
+            return callback(error);
+          }
+
+          return callback();
+        });
+      });
     });
   }
 
@@ -212,63 +254,4 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   getLogger(): Logger {
     return this.s.db.s.logger;
   }
-}
-
-function _delete(bucket: GridFSBucket, id: ObjectId, callback: Callback<void>): void {
-  return bucket.s._filesCollection.deleteOne({ _id: id }, (error, res) => {
-    if (error) {
-      return callback(error);
-    }
-
-    return bucket.s._chunksCollection.deleteMany({ files_id: id }, error => {
-      if (error) {
-        return callback(error);
-      }
-
-      // Delete orphaned chunks before returning FileNotFound
-      if (!res?.deletedCount) {
-        // TODO(NODE-3483): Replace with more appropriate error
-        // Consider creating new error MongoGridFSFileNotFoundError
-        return callback(new MongoRuntimeError(`File not found for id ${id}`));
-      }
-
-      return callback();
-    });
-  });
-}
-
-function _rename(
-  bucket: GridFSBucket,
-  id: ObjectId,
-  filename: string,
-  callback: Callback<void>
-): void {
-  const filter = { _id: id };
-  const update = { $set: { filename } };
-  return bucket.s._filesCollection.updateOne(filter, update, (error?, res?) => {
-    if (error) {
-      return callback(error);
-    }
-
-    if (!res?.matchedCount) {
-      return callback(new MongoRuntimeError(`File with id ${id} not found`));
-    }
-
-    return callback();
-  });
-}
-
-function _drop(bucket: GridFSBucket, callback: Callback<void>): void {
-  return bucket.s._filesCollection.drop((error?: Error) => {
-    if (error) {
-      return callback(error);
-    }
-    return bucket.s._chunksCollection.drop((error?: Error) => {
-      if (error) {
-        return callback(error);
-      }
-
-      return callback();
-    });
-  });
 }

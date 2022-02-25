@@ -1,3 +1,4 @@
+import type { ClientSession, Server } from '..';
 import {
   BSONSerializeOptions,
   Document,
@@ -20,14 +21,13 @@ import type { CollationOptions, CommandOperationOptions } from '../operations/co
 import { DeleteOperation, DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import type { Hint } from '../operations/operation';
+import { AbstractOperation, Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, UpdateStatement } from '../operations/update';
 import { PromiseProvider } from '../promise_provider';
 import type { Topology } from '../sdam/topology';
 import {
   applyRetryableWrites,
   Callback,
-  executeLegacyOperation,
   getTopology,
   hasAtomicOperators,
   MongoDBNamespace,
@@ -1256,7 +1256,23 @@ export abstract class BulkOperationBase {
 
     this.s.executed = true;
     const finalOptions = { ...this.s.options, ...options };
-    return executeLegacyOperation(this.s.topology, executeCommands, [this, finalOptions, callback]);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const bulkOperation = this;
+
+    const operation = new (class BulkShimOperation extends AbstractOperation {
+      execute(server: Server, session: ClientSession, callback: Callback<any>): void {
+        if (finalOptions.session == null) {
+          // An implicit session could have been created by 'executeOperation'
+          // So if we stick it on finalOptions here, each bulk operation
+          // will use this same session, it'll be passed in the same way
+          // an explicit session would be
+          finalOptions.session = session;
+        }
+        return executeCommands(bulkOperation, finalOptions, callback);
+      }
+    })(finalOptions);
+
+    return executeOperation(this.s.topology, operation, callback);
   }
 
   /**
