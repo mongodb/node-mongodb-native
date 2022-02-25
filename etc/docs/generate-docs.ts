@@ -22,6 +22,7 @@ interface VersionSchema {
   docs?: string;
   semvarVersion: string;
 }
+
 interface TomlVersionSchema {
   current: string;
   mongodDBManual: string;
@@ -83,9 +84,9 @@ async function updateSiteTemplateForNewVersion(tomlData: TomlVersionSchema, json
   tomlData.current = NEW_VERSION.version;
   writeFileSync(RELEASES_TOML_FILE, stringify(tomlData as any));
 
-  jsonData.unshift({ version: NEW_VERSION.semvarVersion});
+  jsonData.unshift({ version: NEW_VERSION.semvarVersion });
   writeFileSync(RELEASES_JSON_FILE, JSON.stringify(jsonData, null, 4));
-  
+
   // generate the site from the template
   await exec(`hugo -s template -d ../temp -b "/node-mongodb-native"`);
 }
