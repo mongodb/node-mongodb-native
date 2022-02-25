@@ -1,0 +1,57 @@
+{{ with $.Site.Data.releases.versions }}
+<section id="releases">
+  <h2>Releases</h2>
+  <table class="table table-striped">
+    <thead><tr><th>Release</th><th>Documentation</th></tr></thead>
+    <tbody>
+    {{ range where . "status" "!=" "not-supported" }}
+      <tr>
+        <th class="{{.status}}">{{.version}}</th>
+        <td>
+
+          {{ if .usesMongoDBManual }}
+            <a href="{{$.Site.Data.releases.mongoDBManual}}" class="reference">Reference</a>
+          {{ else }}
+            <a href="{{.docs}}" class="reference">Reference</a>
+          {{ end }}
+
+          &#124; <!-- vertical bar -->
+
+          <a href="{{.api}}">API</a>
+
+        </td>
+      </tr>
+    {{ end }}
+  </tbody>
+  </table>
+
+  <details>
+    <summary><h2>Legacy Versions</h2></summary>
+    <table class="table table-striped">
+      <thead><tr><th>Release</th><th>Documentation</th></tr></thead>
+      <tbody>
+      {{ range where . "status" "==" "not-supported" }}
+        <tr>
+          <th class="{{.status}}">{{.version}}</th>
+          <td>
+
+            {{ if .usesMongoDBManual }}
+              <a href="{{$.Site.Data.releases.mongoDBManual}}" class="reference">Reference</a>
+            {{ else }}
+              <a href="{{.docs}}" class="reference">Reference</a>
+            {{ end }}
+
+            &#124; <!-- vertical bar -->
+
+            <a href="{{.api}}">API</a>
+
+          </td>
+        </tr>
+      {{ end }}
+    </tbody>
+    </table>
+  </details>
+
+
+</section>
+{{ end }}

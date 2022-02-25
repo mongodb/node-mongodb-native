@@ -1,0 +1,19 @@
+<div id="hero" class="jumbotron">
+  <div class="container">
+  <div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-6">
+      <h2>MongoDB Node.JS Driver</h2>
+      <p>
+        The next generation Node.JS driver for MongoDB
+      </p>
+      <p>
+        {{ range where $.Site.Data.releases.versions "version" $.Site.Data.releases.current  }}{{ $.Scratch.Set "qs.currentReleasedVersion" . }}{{end }}
+        {{$currentReleasedVersion := $.Scratch.Get "qs.currentReleasedVersion"}}
+        <a href="{{$.Site.Params.referenceDocsUrl}}" class="btn btn-success btn-dark btn-mongo">Latest documentation</a>
+      </p>
+
+    </div>
+  </div>
+  </div>
+</div>
