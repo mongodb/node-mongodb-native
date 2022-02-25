@@ -4,6 +4,7 @@ import { parse, stringify } from '@iarna/toml';
 import * as child_process from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { promisify } from 'util';
+import { createInterface } from 'readline';
 
 const exec = promisify(child_process.exec);
 
@@ -16,11 +17,11 @@ interface JsonVersionSchema {
 
 interface VersionSchema {
   version: string;
-  status: 'current' | 'supported' | 'not-supported';
+  status: string;
   api: string;
   usesMongoDBManual?: boolean;
   docs?: string;
-  semvarVersion: string;
+  semverVersion: string;
 }
 
 interface TomlVersionSchema {
@@ -29,69 +30,82 @@ interface TomlVersionSchema {
   versions: VersionSchema[]
 }
 
-/**
- * ATTENTION - EDIT THIS BEFORE RELEASING
- */
-const NEW_VERSION: VersionSchema = {
-  // version - the display name for the version of the driver on the docs website
-  //  ex: Driver 4.5
-  version: 'Driver 4.5',
+function prompt(prompt: string) : Promise<string> {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stderr
+  })
 
-  // status - a status for the version.  typically would probably just be 'latest'
-  status: 'current',
-
-  // api - the name of the folder for the generated documentation to live.  typically should be version_id prefixed with `./`
-  //  ex: ./4.5
-  api: './4.5',
-
-  // usesMongoDBManual - if true, includes a link to the mongodb documentation for the new version
-  usesMongoDBManual: true,
-
-  // the 
-  semvarVersion: '4.5'
-};
-
-function validateVersionInformation(jsonVersions: JsonVersionSchema[]) {
-  const isVersionInfoValid = ['version', 'version_id', 'status', 'api'].every(
-    key => NEW_VERSION[key] !== ''
-  );
-
-  if (!isVersionInfoValid) {
-    console.error(
-      'Error - version information invalid.  Please update the `NEW_VERSION` object before running the script.'
-    );
-    process.exit(1);
-  }
-
-  if (jsonVersions.some(({ version }) => version === NEW_VERSION.semvarVersion)) {
-    console.error(
-      'Error - attempting to publish docs for a release that already exists.'
-    );
-    process.exit(1);
-  }
-
+  return new Promise((resolve, _) => {
+    rl.question(prompt, (answer) => {
+      rl.close();
+      resolve(answer);
+    })
+  })
 }
 
-async function copyNewDocsToGeneratedSite() {
-  const outputDirectory = `./temp/${NEW_VERSION.semvarVersion}`;
+function getCommandLineArguments() : { semverVersion: string, status: string } {
+  const args = process.argv.slice(2);
+
+  if (args.length === 0) {
+    console.error('usage: generate-docs.ts <semver version> <status (optional)>')
+    process.exit(1);
+  }
+
+  const semverVersion = args.shift();
+  const status = args.shift() ?? 'current';
+  return {
+    semverVersion,
+    status
+  }
+}
+
+async function copyNewDocsToGeneratedSite({ semverVersion }: VersionSchema) {
+  const outputDirectory = `./temp/${semverVersion}`;
   const pathToBuiltDocs = './build';
   const command = `cp -R ${pathToBuiltDocs} ${outputDirectory}`;
   return await exec(command);
 }
 
-async function updateSiteTemplateForNewVersion(tomlData: TomlVersionSchema, jsonData: JsonVersionSchema[]) {
-  tomlData.versions.unshift(NEW_VERSION);
-  tomlData.current = NEW_VERSION.version;
-  writeFileSync(RELEASES_TOML_FILE, stringify(tomlData as any));
+async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlData: TomlVersionSchema, jsonVersions: JsonVersionSchema[]) {
+  const versionExists = jsonVersions.some(({ version }) => version === newVersion.semverVersion);
+  if (versionExists) {
+    const existingVersionIndex = tomlData.versions.findIndex(({ semverVersion }) => semverVersion === newVersion.semverVersion);
+    tomlData.versions[existingVersionIndex] = newVersion;
+  } else {
+    tomlData.versions.unshift(newVersion);
+    tomlData.current = newVersion.version;
 
-  jsonData.unshift({ version: NEW_VERSION.semvarVersion });
-  writeFileSync(RELEASES_JSON_FILE, JSON.stringify(jsonData, null, 4));
+    jsonVersions.unshift({ version: newVersion.semverVersion })
+  }
+
+  writeFileSync(RELEASES_TOML_FILE, stringify(tomlData as any));
+  writeFileSync(RELEASES_JSON_FILE, JSON.stringify(jsonVersions, null, 4));
 
   // generate the site from the template
   await exec(`hugo -s template -d ../temp -b "/node-mongodb-native"`);
 }
 
 async function main() {
+  const { semverVersion, status } = getCommandLineArguments();
+
+  const newVersion: VersionSchema = {
+    version: `${semverVersion} Driver`,
+    status,
+    api: `./${semverVersion}`,
+    usesMongoDBManual: true,
+    semverVersion
+  };
+
+  const response = await prompt(`
+    Generating docs for the following configuration.  
+${JSON.stringify(newVersion, null, 2)}
+    Does this look right? [y/n] `);
+
+  if (response.trim() !== 'y') {
+    console.error("something went wrong.  Exiting...");
+    process.exit(1);
+  }
 
   const pathToBuiltDocs = './build';
   const docsExist = existsSync(pathToBuiltDocs);
@@ -105,11 +119,19 @@ async function main() {
   const tomlVersions = parse(readFileSync(RELEASES_TOML_FILE, { encoding: 'utf8' })) as unknown as TomlVersionSchema;
   const jsonVersions = JSON.parse(readFileSync(RELEASES_JSON_FILE, { encoding: 'utf8' })) as unknown as JsonVersionSchema[];
 
-  validateVersionInformation(jsonVersions);
+  const versionAlreadyExists = jsonVersions.some(({version }) => version === semverVersion)
 
-  await updateSiteTemplateForNewVersion(tomlVersions, jsonVersions);
+  if (versionAlreadyExists) {
+    const response = await prompt(`Version ${semverVersion} already exists.  Do you want to override the existing docs? [y/n] `);
+    if (response !== 'y') {
+      console.error("something went wrong.  Exiting...");
+      process.exit(1);
+    }
+  }
 
-  await copyNewDocsToGeneratedSite();
+  await updateSiteTemplateForNewVersion(newVersion, tomlVersions, jsonVersions);
+
+  await copyNewDocsToGeneratedSite(newVersion);
 
   // copy the generated site to the docs folder
   await exec(`cp -R temp/. ../../docs/.`);
