@@ -3,7 +3,6 @@
 import { parse, stringify } from '@iarna/toml';
 import * as child_process from 'child_process';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { json } from 'stream/consumers';
 import { promisify } from 'util';
 
 const exec = promisify(child_process.exec);
@@ -72,8 +71,8 @@ function validateVersionInformation(jsonVersions: JsonVersionSchema[]) {
 
 }
 
-async function copyNewDocsToGeneratedSite({ semvarVersion }: VersionSchema ) {
-  const outputDirectory = `./temp/${semvarVersion}`;
+async function copyNewDocsToGeneratedSite() {
+  const outputDirectory = `./temp/${NEW_VERSION.semvarVersion}`;
   const pathToBuiltDocs = './build';
   const command = `cp -R ${pathToBuiltDocs} ${outputDirectory}`;
   return await exec(command);
@@ -109,7 +108,7 @@ async function main() {
 
   await updateSiteTemplateForNewVersion(tomlVersions, jsonVersions);
 
-  await copyNewDocsToGeneratedSite(NEW_VERSION);
+  await copyNewDocsToGeneratedSite();
 
   // copy the generated site to the docs folder
   await exec(`cp -R temp/. ../../docs/.`);
