@@ -67,3 +67,6 @@ serverless.env
 
 lb-expansion.yml
 lb.env
+
+# docs specific configuration
+etc/docs/build
