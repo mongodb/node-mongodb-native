@@ -1,0 +1,123 @@
+description: "driver-sessions-server-support"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "3.6"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name session-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+
+tests:
+  - description: "Server supports explicit sessions"
+    operations:
+      - name: assertSessionNotDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 2 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } } }
+      - name: assertSessionNotDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: endSession
+        object: *session0
+      - &find_with_implicit_session
+        name: find
+        object: *collection0
+        arguments:
+          filter: { _id: -1 }
+        expectResult: []
+      - name: assertSameLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents: [ { _id: 2 } ]
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: -1 }
+                lsid: { $$sessionLsid: *session0 }
+              commandName: find
+              databaseName: *database0Name
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+
+  - description: "Server supports implicit sessions"
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 2 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } } }
+      - *find_with_implicit_session
+      - name: assertSameLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                # There is no explicit session to use with $$sessionLsid, so
+                # just assert an arbitrary lsid document
+                lsid: { $$type: object }
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                find: *collection0Name
+                filter: { _id: -1 }
+                lsid: { $$type: object }
+              commandName: find
+              databaseName: *database0Name
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }

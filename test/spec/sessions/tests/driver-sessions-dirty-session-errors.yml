@@ -1,0 +1,353 @@
+description: "driver-sessions-dirty-session-errors"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "4.0"
+    topologies: [ replicaset ]
+  - minServerVersion: "4.1.8"
+    # Tests depend on retryable writes, which require a replica set
+    topologies: [ sharded-replicaset ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name session-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+
+tests:
+  - description: "Dirty explicit session is discarded (insert)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              closeConnection: true
+      - name: assertSessionNotDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 2 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } } }
+      - name: assertSessionDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 3 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 3 } } }
+      - name: assertSessionDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: endSession
+        object: *session0
+      - &find_with_implicit_session
+        name: find
+        object: *collection0
+        arguments:
+          filter: { _id: -1 }
+        expectResult: []
+      - name: assertDifferentLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &insert_attempt
+              command:
+                insert: *collection0Name
+                documents: 
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent: *insert_attempt
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents: 
+                  - { _id: 3 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 2
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent: &find_with_implicit_session_event
+              command:
+                find: *collection0Name
+                filter: { _id: -1 }
+                # There is no explicit session to use with $$sessionLsid, so
+                # just assert an arbitrary lsid document
+                lsid: { $$type: object }
+              commandName: find
+              databaseName: *database0Name
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+          - { _id: 3 }
+
+  - description: "Dirty explicit session is discarded (findAndModify)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ findAndModify ]
+              closeConnection: true
+      - name: assertSessionNotDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          session: *session0
+          filter: { _id: 1 }
+          update: { $inc: { x: 1 } }
+          returnDocument: Before
+        expectResult: { _id: 1 }
+      - name: assertSessionDirty
+        object: testRunner
+        arguments:
+          session: *session0
+      - name: endSession
+        object: *session0
+      - *find_with_implicit_session
+      - name: assertDifferentLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &findAndModify_attempt
+              command:
+                findAndModify: *collection0Name
+                query: { _id: 1 }
+                update: { $inc: { x: 1 } }
+                new: false
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: 1
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: findAndModify
+              databaseName: *database0Name
+          - commandStartedEvent: *findAndModify_attempt
+          - commandStartedEvent: *find_with_implicit_session_event
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 1 }
+
+  - description: "Dirty implicit session is discarded (insert)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              closeConnection: true
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 2 }
+        expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } } }
+      - *find_with_implicit_session
+      - name: assertDifferentLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &insert_attempt
+              command:
+                insert: *collection0Name
+                documents: 
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$type: object }
+                txnNumber: 1
+              commandName: insert
+              databaseName: *database0Name
+          - commandStartedEvent: *insert_attempt
+          - commandStartedEvent: *find_with_implicit_session_event
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+
+  - description: "Dirty implicit session is discarded (findAndModify)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ findAndModify ]
+              closeConnection: true
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+          update: { $inc: { x: 1 } }
+          returnDocument: Before
+        expectResult: { _id: 1 }
+      - *find_with_implicit_session
+      - name: assertDifferentLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &findAndModify_attempt
+              command:
+                findAndModify: *collection0Name
+                query: { _id: 1 }
+                update: { $inc: { x: 1 } }
+                new: false
+                lsid: { $$type: object }
+                txnNumber: 1
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: findAndModify
+              databaseName: *database0Name
+          - commandStartedEvent: *findAndModify_attempt
+          - commandStartedEvent: *find_with_implicit_session_event
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 1 }
+
+  - description: "Dirty implicit session is discarded (read returning cursor)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ aggregate ]
+              closeConnection: true
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: [ { $project: { _id: 1 } } ]
+        expectResult: [ { _id: 1 } ]
+      - *find_with_implicit_session
+      - name: assertDifferentLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &aggregate_attempt
+              command:
+                aggregate: *collection0Name
+                pipeline: [ { $project: { _id: 1 } } ]
+                lsid: { $$type: object }
+              commandName: aggregate
+              databaseName: *database0Name
+          - commandStartedEvent: *aggregate_attempt
+          - commandStartedEvent: *find_with_implicit_session_event
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }
+
+  - description: "Dirty implicit session is discarded (read not returning cursor)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ aggregate ]
+              closeConnection: true
+      - name: countDocuments
+        object: *collection0
+        arguments:
+          filter: {}
+        expectResult: 1
+      - *find_with_implicit_session
+      - name: assertDifferentLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &countDocuments_attempt
+              command:
+                aggregate: *collection0Name
+                pipeline: [ { $match: {} }, { $group: { _id: 1, n: { $sum: 1 } } } ]
+                lsid: { $$type: object }
+              commandName: aggregate
+              databaseName: *database0Name
+          - commandStartedEvent: *countDocuments_attempt
+          - commandStartedEvent: *find_with_implicit_session_event
+    outcome:
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1 }

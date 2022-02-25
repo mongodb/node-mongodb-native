@@ -1,0 +1,969 @@
+{
+  "description": "driver-sessions-dirty-session-errors",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.8",
+      "topologies": [
+        "sharded-replicaset"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "session-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "session-tests",
+      "documents": [
+        {
+          "_id": 1
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Dirty explicit session is discarded (insert)",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "assertSessionNotDirty",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 2
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "assertSessionDirty",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "assertSessionDirty",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "endSession",
+          "object": "session0"
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": -1
+            }
+          },
+          "expectResult": []
+        },
+        {
+          "name": "assertDifferentLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ],
+                  "ordered": true,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 1
+                },
+                "commandName": "insert",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ],
+                  "ordered": true,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 1
+                },
+                "commandName": "insert",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 3
+                    }
+                  ],
+                  "ordered": true,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 2
+                },
+                "commandName": "insert",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": -1
+                  },
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "session-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "session-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Dirty explicit session is discarded (findAndModify)",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "assertSessionNotDirty",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before"
+          },
+          "expectResult": {
+            "_id": 1
+          }
+        },
+        {
+          "name": "assertSessionDirty",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "endSession",
+          "object": "session0"
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": -1
+            }
+          },
+          "expectResult": []
+        },
+        {
+          "name": "assertDifferentLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "new": false,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 1,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "findAndModify",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "new": false,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": 1,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "findAndModify",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": -1
+                  },
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "session-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "session-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Dirty implicit session is discarded (insert)",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 2
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": -1
+            }
+          },
+          "expectResult": []
+        },
+        {
+          "name": "assertDifferentLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ],
+                  "ordered": true,
+                  "lsid": {
+                    "$$type": "object"
+                  },
+                  "txnNumber": 1
+                },
+                "commandName": "insert",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ],
+                  "ordered": true,
+                  "lsid": {
+                    "$$type": "object"
+                  },
+                  "txnNumber": 1
+                },
+                "commandName": "insert",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": -1
+                  },
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "session-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "session-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Dirty implicit session is discarded (findAndModify)",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before"
+          },
+          "expectResult": {
+            "_id": 1
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": -1
+            }
+          },
+          "expectResult": []
+        },
+        {
+          "name": "assertDifferentLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "new": false,
+                  "lsid": {
+                    "$$type": "object"
+                  },
+                  "txnNumber": 1,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "findAndModify",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "new": false,
+                  "lsid": {
+                    "$$type": "object"
+                  },
+                  "txnNumber": 1,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "findAndModify",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": -1
+                  },
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "session-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "session-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Dirty implicit session is discarded (read returning cursor)",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ]
+          },
+          "expectResult": [
+            {
+              "_id": 1
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": -1
+            }
+          },
+          "expectResult": []
+        },
+        {
+          "name": "assertDifferentLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$project": {
+                        "_id": 1
+                      }
+                    }
+                  ],
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "aggregate",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$project": {
+                        "_id": 1
+                      }
+                    }
+                  ],
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "aggregate",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": -1
+                  },
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "session-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "session-tests",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Dirty implicit session is discarded (read not returning cursor)",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection0",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": 1
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": -1
+            }
+          },
+          "expectResult": []
+        },
+        {
+          "name": "assertDifferentLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$match": {}
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "aggregate",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$match": {}
+                    },
+                    {
+                      "$group": {
+                        "_id": 1,
+                        "n": {
+                          "$sum": 1
+                        }
+                      }
+                    }
+                  ],
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "aggregate",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": -1
+                  },
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "session-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "session-tests",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
