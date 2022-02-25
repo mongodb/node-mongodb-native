@@ -2,15 +2,16 @@
 
 import { parse, stringify } from '@iarna/toml';
 import * as child_process from 'child_process';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { createInterface } from 'readline';
-import { resolve } from 'path/posix';
+import { chdir } from 'process';
 
 const exec = promisify(child_process.exec);
 
-const RELEASES_TOML_FILE = resolve(__dirname, './template/data/releases.toml');
-const RELEASES_JSON_FILE = resolve(__dirname, './template/static/versions.json');
+const RELEASES_TOML_FILE = './template/data/releases.toml';
+const RELEASES_JSON_FILE = './template/static/versions.json';
+const PATH_TO_BUILT_DOCS = './build';
 
 interface JsonVersionSchema {
   version: string;
@@ -88,6 +89,8 @@ async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlDa
 }
 
 async function main() {
+  chdir(__dirname);
+
   const { semverVersion, status } = getCommandLineArguments();
 
   const newVersion: VersionSchema = {
@@ -108,8 +111,7 @@ ${JSON.stringify(newVersion, null, 2)}
     process.exit(1);
   }
 
-  const pathToBuiltDocs = './build';
-  const docsExist = existsSync(pathToBuiltDocs);
+  const docsExist = existsSync(PATH_TO_BUILT_DOCS);
 
   if (!docsExist) {
     console.error('This script requires that the current API docs already be built.');
