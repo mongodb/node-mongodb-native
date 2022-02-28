@@ -121,7 +121,7 @@
     "check:csfle": "mocha --config test/mocha_mongodb.json test/integration/client-side-encryption",
     "check:snappy": "mocha test/unit/assorted/snappy.test.js",
     "prepare": "node etc/prepare.js",
-    "preview:docs": "python  -m http.server --directory etc/docs/build",
+    "preview:docs": "python -m http.server --directory etc/docs/build",
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run test:all",
     "test:all": "npm run check:unit && npm run check:test"

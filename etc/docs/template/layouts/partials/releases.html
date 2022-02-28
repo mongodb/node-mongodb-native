@@ -6,7 +6,7 @@
     <tbody>
     {{ range where . "status" "!=" "not-supported" }}
       <tr>
-        <th>{{.version}}</th>
+        <th class="{{.status}}">{{.version}}</th>
         <td>
 
           {{ if .usesMongoDBManual }}

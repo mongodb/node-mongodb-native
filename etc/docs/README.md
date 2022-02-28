@@ -34,5 +34,5 @@ To generate API documentation for a new major or minor version:
 
 The generated docs can be previewed using `npm run docs:preview`.
 
-Once everything looks correct, open a PR against `main`.  Once the PR is merged, the docs will automatically re-build via a Github action.  Once this
-process is complete, confirm that the docs look as expected on the Github pages site.
+Once everything looks correct, open a PR against `main`.  Our docs are hosted out of the `docs` folder on the 
+main branch, and once the PR is merged Github will automatically update the hosted documentation.

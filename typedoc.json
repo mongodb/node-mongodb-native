@@ -2,7 +2,6 @@
   "entryPoints": [
     "src/index.ts"
   ],
-  "excludeTags": ["internal"],
   "excludeInternal": true,
   "out": "etc/docs/build"
 }
