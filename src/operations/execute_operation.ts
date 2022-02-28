@@ -77,6 +77,14 @@ export function executeOperation<
   }
 
   return maybePromise(callback, cb => {
+    if (topology.shouldCheckForSessionSupport()) {
+      return topology.selectServer(ReadPreference.primaryPreferred, err => {
+        if (err) return cb(err);
+
+        executeOperation<T, TResult>(topology, operation, cb);
+      });
+    }
+
     // The driver sessions spec mandates that we implicitly create sessions for operations
     // that are not explicitly provided with a session.
     let session: ClientSession | undefined = operation.session;

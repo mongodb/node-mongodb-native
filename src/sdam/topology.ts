@@ -630,6 +630,17 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   // Sessions related methods
 
+  /**
+   * @returns Whether the topology should initiate selection to determine session support
+   */
+  shouldCheckForSessionSupport(): boolean {
+    if (this.description.type === TopologyType.Single) {
+      return !this.description.hasKnownServers;
+    }
+
+    return !this.description.hasDataBearingServers;
+  }
+
   /** Start a logical session */
   startSession(options: ClientSessionOptions, clientOptions?: MongoOptions): ClientSession {
     const session = new ClientSession(this, this.s.sessionPool, options, clientOptions);
