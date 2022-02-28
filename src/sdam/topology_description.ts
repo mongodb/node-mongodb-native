@@ -396,9 +396,9 @@ function updateRsFromPrimary(
     const maxElectionIdIsEqual = electionIdComparison === 0;
     const maxElectionIdIsLess = electionIdComparison === -1;
     const maxSetVersionIsGreater =
-      typeof maxSetVersion === 'number' ? maxSetVersion > serverDescription.setVersion : false;
+      maxSetVersion == null ? false : maxSetVersion > serverDescription.setVersion;
     const maxSetVersionIsLess =
-      typeof maxSetVersion === 'number' ? maxSetVersion < serverDescription.setVersion : false;
+      maxSetVersion == null ? true : maxSetVersion < serverDescription.setVersion;
 
     if (maxElectionIdIsGreater || (maxElectionIdIsEqual && maxSetVersionIsGreater)) {
       // this primary is stale, we must remove it
