@@ -402,7 +402,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       if (deprecationErrors != null) finalCmd.apiDeprecationErrors = deprecationErrors;
     }
 
-    if (session) {
+    if (hasSessionSupport(this) && session) {
       if (
         session.clusterTime &&
         clusterTime &&
@@ -681,6 +681,12 @@ export class CryptoConnection extends Connection {
       });
     });
   }
+}
+
+/** @internal */
+export function hasSessionSupport(conn: Connection): boolean {
+  const description = conn.description;
+  return description.logicalSessionTimeoutMinutes != null || !!description.loadBalanced;
 }
 
 function supportsOpMsg(conn: Connection) {

@@ -229,7 +229,7 @@ export function executeLegacyOperation(
   let session: ClientSession;
   let opOptions: any;
   let owner: any;
-  if (!options.skipSessions) {
+  if (!options.skipSessions && topology.hasSessionSupport()) {
     opOptions = args[args.length - 2];
     if (opOptions == null || opOptions.session == null) {
       owner = Symbol();

@@ -641,6 +641,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return !this.description.hasDataBearingServers;
   }
 
+  /**
+   * @returns Whether sessions are supported on the current topology
+   */
+  hasSessionSupport(): boolean {
+    return this.loadBalanced || this.description.logicalSessionTimeoutMinutes != null;
+  }
+
   /** Start a logical session */
   startSession(options: ClientSessionOptions, clientOptions?: MongoOptions): ClientSession {
     const session = new ClientSession(this, this.s.sessionPool, options, clientOptions);

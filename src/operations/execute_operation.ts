@@ -89,13 +89,19 @@ export function executeOperation<
     // that are not explicitly provided with a session.
     let session: ClientSession | undefined = operation.session;
     let owner: symbol | undefined;
-    if (session == null) {
-      owner = Symbol();
-      session = topology.startSession({ owner, explicit: false });
-    } else if (session.hasEnded) {
-      return cb(new MongoExpiredSessionError('Use of expired sessions is not permitted'));
-    } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
-      return cb(new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later'));
+    if (topology.hasSessionSupport()) {
+      if (session == null) {
+        owner = Symbol();
+        session = topology.startSession({ owner, explicit: false });
+      } else if (session.hasEnded) {
+        return cb(new MongoExpiredSessionError('Use of expired sessions is not permitted'));
+      } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
+        return cb(new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later'));
+      }
+    } else if (session) {
+      // If the user passed an explicit session and we are still, after server selection,
+      // trying to run against a topology that doesn't support sessions we error out.
+      return cb(new MongoCompatibilityError('Current topology does not support sessions'));
     }
 
     try {
