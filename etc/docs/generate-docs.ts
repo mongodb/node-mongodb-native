@@ -1,13 +1,14 @@
 #! /usr/bin/env ts-node
 
 import { parse, stringify } from '@iarna/toml';
-import * as child_process from 'child_process';
-import { readFileSync, writeFileSync } from 'fs';
+import { exec as execCb } from 'child_process';
+import { readFileSync, writeFile as writeFileCb } from 'fs';
 import { promisify } from 'util';
 import { createInterface } from 'readline';
 import { chdir } from 'process';
 
-const exec = promisify(child_process.exec);
+const exec = promisify(execCb);
+const writeFile = promisify(writeFileCb);
 
 const RELEASES_TOML_FILE = './template/data/releases.toml';
 const RELEASES_JSON_FILE = './template/static/versions.json';
@@ -80,8 +81,8 @@ async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlDa
     jsonVersions.unshift({ version: newVersion.semverVersion })
   }
 
-  writeFileSync(RELEASES_TOML_FILE, stringify(tomlData as any));
-  writeFileSync(RELEASES_JSON_FILE, JSON.stringify(jsonVersions, null, 4));
+  await writeFile(RELEASES_TOML_FILE, stringify(tomlData as any));
+  await writeFile(RELEASES_JSON_FILE, JSON.stringify(jsonVersions, null, 4));
 
   // generate the site from the template
   await exec(`hugo -s template -d ../temp -b "/node-mongodb-native"`);

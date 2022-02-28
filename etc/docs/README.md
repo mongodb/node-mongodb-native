@@ -16,8 +16,9 @@ necessary to backport a feature).
 
 * Hugo static web generator `v0.30.2`
   * You can download the right version [here](https://github.com/gohugoio/hugo/releases/tag/v0.30.2)
-* typedoc 
 * ts-node
+
+Note: `typedoc` is also a dependency but it is downloaded by the docs generation script automatically.
 
 `legacy-generate.sh` requires the following (in addition to Hugo):
 
@@ -29,26 +30,9 @@ necessary to backport a feature).
 
 To generate API documentation for a new major or minor version:
 
-#### Generate Documentation for the new Version
+`npm run docs:build -- <version> <optional status for the version>`
 
-First, generate the API docs for the new version.  To do this, run `npm run build:docs` on main.  This will output the documentation in the docs_utils/build folder.
+The generated docs can be previewed using `npm run docs:preview`.
 
-#### Update the Node Driver Docs
-
-After generating the API docs for a particular version, the next step is to update the static site to include the new docs.  Open the `generate-docs.ts` 
-script and update the `NEW_VERSION` object with information for the new version.
-
-Run the `generate-docs.ts` script from the `docs_utils` directory.
-
-#### Push the changes to Github
-
-Finally, push the new documentation to Github and confirm that the site builds as expected.
-
-### Doc Generation Overview
-
-API docs are stored in the top level `docs` folder in the `node-mongodb-driver` Github repository and are hosted on Github Pages.  Each major or minor release,
-a new set of API docs are generated and added to our Hugo static site.  This is a three step process:
-
-1. Generate the new API docs using type doc
-2. Run the generate docs script to create the new version of the Hugo site, copy in the new documentation and move the newly generated site into the `docs` folder.
-3. Push the changes to main
+Once everything looks correct, open a PR against `main`.  Once the PR is merged, the docs will automatically re-build via a Github action.  Once this
+process is complete, confirm that the docs look as expected on the Github pages site.

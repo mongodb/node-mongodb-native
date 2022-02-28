@@ -3,6 +3,6 @@
     "src/index.ts"
   ],
   "excludeTags": ["internal"],
-  "excludeInternal": false,
+  "excludeInternal": true,
   "out": "etc/docs/build"
 }
