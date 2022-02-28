@@ -653,8 +653,15 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    if (cursor[kSession] == null && cursor[kTopology].hasSessionSupport()) {
-      cursor[kSession] = cursor[kTopology].startSession({ owner: cursor, explicit: false });
+    if (cursor[kSession] == null) {
+      if (cursor[kTopology].shouldCheckForSessionSupport()) {
+        return cursor[kTopology].selectServer(ReadPreference.primaryPreferred, err => {
+          if (err) return callback(err);
+          return next(cursor, blocking, callback);
+        });
+      } else if (cursor[kTopology].hasSessionSupport()) {
+        cursor[kSession] = cursor[kTopology].startSession({ owner: cursor, explicit: false });
+      }
     }
 
     cursor._initialize(cursor[kSession], (err, state) => {
