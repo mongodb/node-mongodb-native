@@ -126,6 +126,10 @@ function generateMatchAndDiff(expected, actual, metadata) {
     return { match: expected === actual, expected, actual };
   }
 
+  if (expected && expected._bsontype === 'ObjectID' && actual && actual._bsontype === 'ObjectID') {
+    return { match: expected.equals(actual), expected, actual };
+  }
+
   if (expected instanceof Date) {
     return {
       match: actual instanceof Date ? expected.getTime() === actual.getTime() : false,

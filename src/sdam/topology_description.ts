@@ -1,4 +1,4 @@
-import type { Document, ObjectId } from '../bson';
+import type { ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { MongoError, MongoRuntimeError } from '../error';
 import { shuffle } from '../utils';
@@ -364,8 +364,7 @@ function topologyTypeForServerType(serverType: ServerType): TopologyType {
   }
 }
 
-// TODO: improve these docs when ObjectId is properly typed
-function compareObjectId(oid1: Document, oid2: Document): number {
+function compareObjectId(oid1?: ObjectId, oid2?: ObjectId): 0 | 1 | -1 {
   if (oid1 == null) {
     return -1;
   }
@@ -374,15 +373,8 @@ function compareObjectId(oid1: Document, oid2: Document): number {
     return 1;
   }
 
-  if (oid1.id instanceof Buffer && oid2.id instanceof Buffer) {
-    const oid1Buffer = oid1.id;
-    const oid2Buffer = oid2.id;
-    return oid1Buffer.compare(oid2Buffer);
-  }
-
-  const oid1String = oid1.toString();
-  const oid2String = oid2.toString();
-  return oid1String.localeCompare(oid2String);
+  const res = oid1.id.compare(oid2.id);
+  return res === 0 ? 0 : res > 0 ? 1 : -1;
 }
 
 function updateRsFromPrimary(
@@ -398,31 +390,32 @@ function updateRsFromPrimary(
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
-  const electionId = serverDescription.electionId ? serverDescription.electionId : null;
-  if (serverDescription.setVersion && electionId) {
-    if (maxSetVersion && maxElectionId) {
-      if (
-        maxSetVersion > serverDescription.setVersion ||
-        compareObjectId(maxElectionId, electionId) > 0
-      ) {
-        // this primary is stale, we must remove it
-        serverDescriptions.set(
-          serverDescription.address,
-          new ServerDescription(serverDescription.address)
-        );
+  if (serverDescription.electionId && serverDescription.setVersion) {
+    const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
+    const maxElectionIdIsGreater = electionIdComparison === 1;
+    const maxElectionIdIsEqual = electionIdComparison === 0;
+    const maxElectionIdIsLess = electionIdComparison === -1;
+    const maxSetVersionIsGreater =
+      typeof maxSetVersion === 'number' ? maxSetVersion > serverDescription.setVersion : false;
+    const maxSetVersionIsLess =
+      typeof maxSetVersion === 'number' ? maxSetVersion < serverDescription.setVersion : false;
 
-        return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
-      }
+    if (maxElectionIdIsGreater || (maxElectionIdIsEqual && maxSetVersionIsGreater)) {
+      // this primary is stale, we must remove it
+      serverDescriptions.set(
+        serverDescription.address,
+        new ServerDescription(serverDescription.address)
+      );
+
+      return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
     }
 
-    maxElectionId = serverDescription.electionId;
-  }
-
-  if (
-    serverDescription.setVersion != null &&
-    (maxSetVersion == null || serverDescription.setVersion > maxSetVersion)
-  ) {
-    maxSetVersion = serverDescription.setVersion;
+    if (maxElectionIdIsLess || (maxElectionIdIsEqual && maxSetVersionIsLess)) {
+      // We've seen a higher ElectionId! Update both!
+      // Or the electionId is the same but the setVersion increased
+      maxElectionId = serverDescription.electionId;
+      maxSetVersion = serverDescription.setVersion;
+    }
   }
 
   // We've heard from the primary. Is it the same primary as before?
