@@ -2,7 +2,7 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/CHANGES_4.0.0.md)!**
+**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_4.0.0.md)!**
 
 ## Quick Links
 
@@ -14,7 +14,7 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                |
 | mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                              |
 | changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                       |
-| upgrade to v4 | [docs/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/CHANGES_4.0.0.md) |
+| upgrade to v4 | [etc/notes/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_4.0.0.md) |
 | contributing  | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)             |
 
 ### Bugs / Feature Requests
@@ -79,7 +79,7 @@ The MongoDB driver depends on several other packages. These are:
 - [kerberos](https://github.com/mongodb-js/kerberos)
 - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
 
-Some of these packages include native C++ extensions. Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/native-extensions.md) if you run into issues.
+Some of these packages include native C++ extensions. Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/native-extensions.md) if you run into issues.
 
 ## Quick Start
 
@@ -240,7 +240,7 @@ For more detailed information, see the [indexing strategies page](https://docs.m
 
 ## Error Handling
 
-If you need to filter certain errors from our driver we have a helpful tree of errors described in [docs/errors.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/docs/errors.md).
+If you need to filter certain errors from our driver we have a helpful tree of errors described in [etc/notes/errors.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/errors.md).
 
 It is our recommendation to use `instanceof` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code.
 We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.

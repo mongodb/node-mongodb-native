@@ -38,6 +38,7 @@
     "socks": "^2.6.1"
   },
   "devDependencies": {
+    "@iarna/toml": "^2.2.5",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@microsoft/api-extractor": "^7.19.4",
     "@microsoft/tsdoc-config": "^0.15.2",
@@ -97,7 +98,8 @@
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "rimraf lib && node ./node_modules/typescript/bin/tsc",
     "build:dts": "npm run build:ts && api-extractor run && rimraf 'lib/**/*.d.ts*' && downlevel-dts mongodb.d.ts mongodb.ts34.d.ts",
-    "build:docs": "typedoc",
+    "build:docs": "./etc/docs/generate-docs.ts",
+    "build:typedoc": "typedoc",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc npm run test:all",
     "check:integration-coverage": "nyc npm run check:test",
@@ -119,6 +121,7 @@
     "check:csfle": "mocha --config test/mocha_mongodb.json test/integration/client-side-encryption",
     "check:snappy": "mocha test/unit/assorted/snappy.test.js",
     "prepare": "node etc/prepare.js",
+    "preview:docs": "python -m http.server --directory etc/docs/build",
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run test:all",
     "test:all": "npm run check:unit && npm run check:test"

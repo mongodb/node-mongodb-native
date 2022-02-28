@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{ partial "meta.html"}}
+    <link rel="shortcut icon" href="{{.Site.BaseURL}}/s/img/favicon.png">
+
+    <title>{{.Title}}</title>
+
+    {{ partial "assets/css.html" . }}
+  </head>
+
+  <body>
+  <!--header start-->
+  {{ partial "header/main.html" . }}
+  <!--header end-->
+
+  {{ partial "hero.html" . }}
+
+  {{ partial "banners/new_version.html" . }}
+
+  <!-- Main content -->
+  <div class="container" id="mainContent">
+    <div class="row">
+      <div class="col-md-8">
+        {{ partial "introduction.html" . }}
+
+        {{ partial "features.html" . }}
+
+        {{ partial "quickStart.html" . }}
+      </div>
+      <div class="col-md-4">
+        {{ partial "releases.html" . }}
+        {{ partial "mongodbUniversity.html" . }}
+     </div>
+    </div>
+  </div>
+  <!-- End main content -->
+
+  <!-- Footer -->
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        {{ partial "footer.html" .}}
+      </div>
+    </div>
+  </div>
+  <!-- End footer -->
+
+
+<!-- javascripts -->
+{{ partial "assets/javascripts.html" . }}
+{{ partial "assets/analytics.html" . }}
+</body>
+</html>

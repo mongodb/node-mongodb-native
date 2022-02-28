@@ -1,0 +1,107 @@
+current = "4.4 Driver"
+mongoDBManual = "https://docs.mongodb.com/drivers/node/"
+
+[[versions]]
+version = "4.4 Driver"
+status = "current"
+api = "./4.4"
+usesMongoDBManual = true
+semverVersion = "4.4"
+
+[[versions]]
+version = "4.3 Driver"
+status = "supported"
+api = "./4.3"
+usesMongoDBManual = true
+semverVersion = "4.3"
+
+[[versions]]
+version = "4.2 Driver"
+status = "supported"
+api = "./4.2"
+usesMongoDBManual = true
+semverVersion = "4.2"
+
+[[versions]]
+version = "4.1 Driver"
+status = "supported"
+api = "./4.1"
+usesMongoDBManual = true
+semverVersion = "4.1"
+
+[[versions]]
+version = "4.0 Driver"
+status = "supported"
+api = "./4.0"
+usesMongoDBManual = true
+semverVersion = "4.0"
+
+[[versions]]
+version = "3.7 Driver"
+status = "supported"
+docs = "./3.7"
+api = "./3.7/api"
+semverVersion = "3.7"
+
+[[versions]]
+version = "3.6 Driver"
+status = "supported"
+docs = "./3.6"
+api = "./3.6/api"
+semverVersion = "3.6"
+
+[[versions]]
+version = "3.5 Driver"
+status = "not-supported"
+docs = "./3.5"
+api = "./3.5/api"
+semverVersion = "3.5"
+
+[[versions]]
+version = "3.4 Driver"
+status = "not-supported"
+docs = "./3.4"
+api = "./3.4/api"
+semverVersion = "3.4"
+
+[[versions]]
+version = "3.3 Driver"
+status = "not-supported"
+docs = "./3.3"
+api = "./3.3/api"
+semverVersion = "3.3"
+
+[[versions]]
+version = "3.2 Driver"
+status = "not-supported"
+docs = "./3.2"
+api = "./3.2/api"
+semverVersion = "3.2"
+
+[[versions]]
+version = "3.1 Driver"
+status = "not-supported"
+docs = "./3.1"
+api = "./3.1/api"
+semverVersion = "3.1"
+
+[[versions]]
+version = "3.0 Driver"
+status = "not-supported"
+docs = "./3.0"
+api = "./3.0/api"
+semverVersion = "3.0"
+
+[[versions]]
+version = "2.2 Driver"
+status = "not-supported"
+docs = "./2.2"
+api = "./2.2/api"
+semverVersion = "2.2"
+
+[[versions]]
+version = "3.x Core Driver"
+status = "not-supported"
+docs = "./core"
+api = "./core/api"
+semverVersion = "3.x"

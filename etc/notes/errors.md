@@ -38,7 +38,7 @@ There are four main error classes which stem from `MongoError`: `MongoDriverErro
 
 The base class from which all errors in the Node driver subclass.
 `MongoError` should **never** be be directly instantiated.
-![(MongoError hierarchy tree)](charts/imgs/MongoError.svg)
+![(MongoError hierarchy tree)](../charts/imgs/MongoError.svg)
 
 Children of `MongoError` include:
 
