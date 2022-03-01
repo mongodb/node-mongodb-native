@@ -61,7 +61,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   }
 
   /** @internal */
-  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
+  _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
     const aggregateOperation = new AggregateOperation(this.namespace, this[kPipeline], {
       ...this[kOptions],
       ...this.cursorOptions,

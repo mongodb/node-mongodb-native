@@ -68,7 +68,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
+  _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
     const findOperation = new FindOperation(undefined, this.namespace, this[kFilter], {
       ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
