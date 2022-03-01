@@ -2,13 +2,12 @@
 
 import { parse, stringify } from '@iarna/toml';
 import { exec as execCb } from 'child_process';
-import { readFileSync, writeFile as writeFileCb } from 'fs';
+import { writeFile, readFile } from 'fs/promises';
 import { promisify } from 'util';
 import { createInterface } from 'readline';
 import { chdir } from 'process';
 
 const exec = promisify(execCb);
-const writeFile = promisify(writeFileCb);
 
 const RELEASES_TOML_FILE = './template/data/releases.toml';
 const RELEASES_JSON_FILE = './template/static/versions.json';
@@ -143,8 +142,8 @@ ${JSON.stringify(newVersion, null, 2)}
   console.error('Successfully built api docs for current branch');
 
   console.error('Generating new doc site...')
-  const tomlVersions = parse(readFileSync(RELEASES_TOML_FILE, { encoding: 'utf8' })) as unknown as TomlVersionSchema;
-  const jsonVersions = JSON.parse(readFileSync(RELEASES_JSON_FILE, { encoding: 'utf8' })) as unknown as JsonVersionSchema[];
+  const tomlVersions = parse(await readFile(RELEASES_TOML_FILE, { encoding: 'utf8' })) as unknown as TomlVersionSchema;
+  const jsonVersions = JSON.parse(await readFile(RELEASES_JSON_FILE, { encoding: 'utf8' })) as unknown as JsonVersionSchema[];
 
   const versionAlreadyExists = jsonVersions.some(({version }) => version === semverVersion)
 
