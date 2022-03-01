@@ -1,0 +1,559 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>OrderedBulkOperation() &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="orderedbulkoperation">
+<h1>OrderedBulkOperation()<a class="headerlink" href="#orderedbulkoperation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>Create a new OrderedBulkOperation instance (INTERNAL TYPE, do not instantiate directly)</p>
+<blockquote>
+<div><dl class="class">
+<dt id="OrderedBulkOperation">
+<em class="property">class </em><tt class="descname">OrderedBulkOperation</tt><big>(</big><big>)</big><a class="headerlink" href="#OrderedBulkOperation" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>collection</strong> (<em>object</em>) &#8211; collection instance.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options for the collection.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object a ordered bulk operation instance.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
+<li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal</li>
+<li><strong>j</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="update">
+<h2>update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h2>
+<p>Add a single update document to the bulk operation</p>
+<dl class="function">
+<dt>
+<tt class="descname">update</tt><big>(</big><em>doc</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; update operations</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>Example of a simple ordered insert/update/upsert/remove ordered collection</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+  <span class="c1">// Establish connection to db</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Get the collection</span>
+    <span class="kd">var</span> <span class="nx">col</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;batch_write_ordered_ops_0&#39;</span><span class="p">);</span>
+    <span class="c1">// Initialize the Ordered Batch</span>
+    <span class="kd">var</span> <span class="nx">batch</span> <span class="o">=</span> <span class="nx">col</span><span class="p">.</span><span class="nx">initializeOrderedBulkOp</span><span class="p">();</span>
+
+    <span class="c1">// Add some operations to be executed in order</span>
+    <span class="nx">batch</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">});</span>
+    <span class="nx">batch</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">}).</span><span class="nx">updateOne</span><span class="p">({</span><span class="nx">$set</span><span class="o">:</span> <span class="p">{</span><span class="nx">b</span><span class="o">:</span><span class="mi">1</span><span class="p">}});</span>
+    <span class="nx">batch</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">}).</span><span class="nx">upsert</span><span class="p">().</span><span class="nx">updateOne</span><span class="p">({</span><span class="nx">$set</span><span class="o">:</span> <span class="p">{</span><span class="nx">b</span><span class="o">:</span><span class="mi">2</span><span class="p">}});</span>
+    <span class="nx">batch</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">});</span>
+    <span class="nx">batch</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">}).</span><span class="nx">remove</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">});</span>
+
+    <span class="c1">// Execute the operations</span>
+    <span class="nx">batch</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Check state of result</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">nInserted</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">nUpserted</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">nMatched</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="mi">1</span> <span class="o">==</span> <span class="nx">result</span><span class="p">.</span><span class="nx">nModified</span> <span class="o">||</span> <span class="nx">result</span><span class="p">.</span><span class="nx">nModified</span> <span class="o">==</span> <span class="kc">null</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">nRemoved</span><span class="p">);</span>
+
+      <span class="kd">var</span> <span class="nx">upserts</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getUpsertedIds</span><span class="p">();</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">upserts</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">upserts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">index</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">upserts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">_id</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+
+      <span class="kd">var</span> <span class="nx">upsert</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">getUpsertedIdAt</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">upsert</span><span class="p">.</span><span class="nx">index</span><span class="p">);</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">upsert</span><span class="p">.</span><span class="nx">_id</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+
+      <span class="c1">// Finish up test</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="updateone">
+<h2>updateOne<a class="headerlink" href="#updateone" title="Permalink to this headline">¶</a></h2>
+<p>Add a single update one document to the bulk operation</p>
+<dl class="function">
+<dt id="updateOne">
+<tt class="descname">updateOne</tt><big>(</big><em>doc</em><big>)</big><a class="headerlink" href="#updateOne" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; update operations</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="replaceone">
+<h2>replaceOne<a class="headerlink" href="#replaceone" title="Permalink to this headline">¶</a></h2>
+<p>Add a replace one operation to the bulk operation</p>
+<dl class="function">
+<dt id="replaceOne">
+<tt class="descname">replaceOne</tt><big>(</big><em>doc</em><big>)</big><a class="headerlink" href="#replaceOne" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; the new document to replace the existing one with</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="upsert">
+<h2>upsert<a class="headerlink" href="#upsert" title="Permalink to this headline">¶</a></h2>
+<p>Upsert modifier for update bulk operation</p>
+<dl class="function">
+<dt>
+<tt class="descname">upsert</tt><big>(</big><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">orderedbulkoperation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="removeone">
+<h2>removeOne<a class="headerlink" href="#removeone" title="Permalink to this headline">¶</a></h2>
+<p>Add a remove one operation to the bulk operation</p>
+<dl class="function">
+<dt id="removeOne">
+<tt class="descname">removeOne</tt><big>(</big><em>doc</em><big>)</big><a class="headerlink" href="#removeOne" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; selector for the removal of documents</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="remove">
+<h2>remove<a class="headerlink" href="#remove" title="Permalink to this headline">¶</a></h2>
+<p>Add a remove operation to the bulk operation</p>
+<dl class="function">
+<dt>
+<tt class="descname">remove</tt><big>(</big><em>doc</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; selector for the single document to remove</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="insert">
+<h2>insert<a class="headerlink" href="#insert" title="Permalink to this headline">¶</a></h2>
+<p>Add a single insert document to the bulk operation</p>
+<dl class="function">
+<dt>
+<tt class="descname">insert</tt><big>(</big><em>doc</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; the document to insert</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="find">
+<h2>find<a class="headerlink" href="#find" title="Permalink to this headline">¶</a></h2>
+<p>Initiate a find operation for an update/updateOne/remove/removeOne/replaceOne</p>
+<dl class="function">
+<dt>
+<tt class="descname">find</tt><big>(</big><em>doc</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<em>object</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">orderedbulkoperation</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="execute">
+<h2>execute<a class="headerlink" href="#execute" title="Permalink to this headline">¶</a></h2>
+<p>Execute the ordered bulk operation</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>w</strong>, {Number/String, &gt; -1 || &#8216;majority&#8217; || tag name} the write concern for the operation where &amp;lt; 1 is no acknowlegement of write and w &gt;= 1, w = &#8216;majority&#8217; or tag acknowledges the write</li>
+<li><strong>wtimeout</strong>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
+<li><strong>fsync</strong>, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal</li>
+<li><strong>j</strong>, (Boolean, default:false) write waits for journal sync before returning</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt>
+<tt class="descname">execute</tt><big>(</big><span class="optional">[</span><em>options</em><span class="optional">]</span>, <em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from from the ordered bulk operation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">OrderedBulkOperation()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#update">update</a></li>
+<li><a class="reference internal" href="#updateone">updateOne</a></li>
+<li><a class="reference internal" href="#replaceone">replaceOne</a></li>
+<li><a class="reference internal" href="#upsert">upsert</a></li>
+<li><a class="reference internal" href="#removeone">removeOne</a></li>
+<li><a class="reference internal" href="#remove">remove</a></li>
+<li><a class="reference internal" href="#insert">insert</a></li>
+<li><a class="reference internal" href="#find">find</a></li>
+<li><a class="reference internal" href="#execute">execute</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

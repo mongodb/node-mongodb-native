@@ -1,0 +1,17 @@
+========
+MinKey()
+========
+
+------------------
+Constructor
+------------------
+
+
+A class representation of the BSON MinKey type.
+
+
+  .. js:class:: MinKey()
+
+   :returns: minkey 
+
+

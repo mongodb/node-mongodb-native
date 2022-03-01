@@ -1,0 +1,104 @@
+========
+Binary()
+========
+
+------------------
+Constructor
+------------------
+
+
+A class representation of the BSON Binary type.
+
+
+  .. js:class:: Binary()
+
+   :param buffer buffer: a buffer object containing the binary data.
+   :param number [subType]: the option binary type.
+   :returns: grid 
+
+
+Sub types
+ - **BSON.BSON_BINARY_SUBTYPE_DEFAULT**, default BSON type.
+ - **BSON.BSON_BINARY_SUBTYPE_FUNCTION**, BSON function type.
+ - **BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY**, BSON byte array type.
+ - **BSON.BSON_BINARY_SUBTYPE_UUID**, BSON uuid type.
+ - **BSON.BSON_BINARY_SUBTYPE_MD5**, BSON md5 type.
+ - **BSON.BSON_BINARY_SUBTYPE_USER_DEFINED**, BSON user defined type.
+
+
+------------------
+Constants
+------------------
+
+.. csv-table:: 
+   :header: "Constant Name", "Value", "Description"
+   :widths: 15, 10, 30
+
+   "Binary.SUBTYPE_DEFAULT", "0", "Default BSON type"
+   "Binary.SUBTYPE_FUNCTION", "1", "Function BSON type"
+   "Binary.SUBTYPE_BYTE_ARRAY", "2", "Byte Array BSON type"
+   "Binary.SUBTYPE_UUID_OLD", "3", "OLD UUID BSON type"
+   "Binary.SUBTYPE_UUID", "4", "UUID BSON type"
+   "Binary.SUBTYPE_MD5", "5", "MD5 BSON type"
+   "Binary.SUBTYPE_USER_DEFINED", "128", "User BSON type"
+
+---
+put
+---
+
+
+Updates this binary with byte_value.
+
+.. js:function:: put(byte_value)
+
+   :param character byte_value: a single byte we wish to write.
+
+-----
+write
+-----
+
+
+Writes a buffer or string to the binary.
+
+.. js:function:: write(string, offset)
+
+   :param buffer string: a string or buffer to be written to the Binary BSON object.
+   :param number offset: specify the binary of where to write the content.
+
+----
+read
+----
+
+
+Reads **length** bytes starting at **position**.
+
+.. js:function:: read(position, length)
+
+   :param number position: read from the given position in the Binary.
+   :param number length: the number of bytes to read.
+   :returns: buffer 
+
+
+-----
+value
+-----
+
+
+Returns the value of this binary as a string.
+
+.. js:function:: value()
+
+   :returns: string 
+
+
+------
+length
+------
+
+
+Length.
+
+.. js:function:: length()
+
+   :returns: number the length of the binary.
+

@@ -1,0 +1,532 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Mongo Driver and Mongo DB 2.6 Features &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mongo-driver-and-mongo-db-2-6-features">
+<h1>Mongo Driver and Mongo DB 2.6 Features<a class="headerlink" href="#mongo-driver-and-mongo-db-2-6-features" title="Permalink to this headline">¶</a></h1>
+<p>MongoDB 2.6 introduces some new powerful features that are reflected in
+the 1.4 driver release. These include.</p>
+<ul class="simple">
+<li>Aggregation cursors</li>
+<li>Per query timeouts <strong>maxTimeMS</strong></li>
+<li>Ordered and Unordered bulk operations</li>
+<li>A parallelCollectionScan command for fast reading of an entire
+collection</li>
+<li>Integrated text search in the query language</li>
+</ul>
+<p>Moreover the driver includes a whole slew of minor and major bug fixes
+and features. Some of the more noteworthy features include.</p>
+<ul class="simple">
+<li>Better support for domains in node.js</li>
+<li>Reconnect events for replicaset and mongos connections</li>
+<li>Replicaset emits &#8220;joined&#8221; and &#8220;left&#8221; events when new server join or
+leave the set</li>
+<li>Added <strong>bufferMaxEntries</strong> entry to allow tuning on how long driver
+keeps waiting for servers to come back up (default is until memory
+exhaustion)</li>
+<li>Upgraded BSON parser to rely on 0.2.6 returning to using <strong>nan</strong>
+package</li>
+</ul>
+<p>Let&#8217;s look at the main things in 2.6 features one by one.</p>
+<div class="section" id="aggregation-cursors">
+<h2>Aggregation cursors<a class="headerlink" href="#aggregation-cursors" title="Permalink to this headline">¶</a></h2>
+<p>The addition off aggregation cursors to MongoDB 2.6 now means that
+applications can disregard the previous max result limit of 16MB. Let&#8217;s
+look at a simple use of the aggregation cursor.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+    // Get an aggregation cursor
+    var cursor = db.collection('data').aggregate([
+            {$match: {}}
+        ], {
+        allowDiskUsage: true
+      , cursor: {batchSize: 1000}
+        });
+
+    // Use cursor as stream
+    cursor.on('data', function(data) {
+        console.dir(data);
+    });
+
+    cursor.on('end', function() {
+        db.close();
+    });
+});</pre>
+</div>
+<p>As one can see the cursor implements the <strong>Readable</strong> stream interface
+for 0.10.X or higher. For 2.4 the driver will emulate the cursor
+behavior by wrapping the result document.</p>
+</div>
+<div class="section" id="maxtimems">
+<h2>maxTimeMS<a class="headerlink" href="#maxtimems" title="Permalink to this headline">¶</a></h2>
+<p>One feature that has requested often is the ability to timeout
+individual queries. In MongoDB 2.6 it&#8217;s finally arrived and is known as
+the <strong>maxTimeMS</strong> option. Let&#8217;s take a look at a simple usage of the
+property with a query.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+    // Get an aggregation cursor
+    var cursor = db.collection('data')
+        .find("$where": "sleep(1000) || true")
+        .maxTimeMS(50);
+
+    // Get alll the items
+    cursor.toArray(function(err, items) {
+        console.dir(err);
+        console.dir(items);
+        db.close();
+    });
+});</pre>
+</div>
+<p>This is a bit of a contrived example using sleep to force the query to
+wait a second. With the <strong>maxTimeMS</strong> set to 50 milliseconds the query
+will be aborted before the full second is up.</p>
+</div>
+<div class="section" id="ordered-unordered-bulk-operations">
+<h2>Ordered/Unordered bulk operations<a class="headerlink" href="#ordered-unordered-bulk-operations" title="Permalink to this headline">¶</a></h2>
+<p>Under the covers MongoDB is moving away from the combination of a write
+operation + get last error (GLE) and towards a write commands api. These
+new commands allow for the execution of bulk insert/update/remove
+operations. The bulk api&#8217;s are abstractions on top of this that server
+to make it easy to build bulk operations. Bulk operations come in two
+main flavors.</p>
+<ol class="arabic simple">
+<li>Ordered bulk operations. These operations execute all the operation
+in order and error out on the first write error.</li>
+<li>Unordered bulk operations. These operations execute all the
+operations in parallel and aggregates up all the errors. Unordered
+bulk operations do not guarantee order of execution.</li>
+</ol>
+<p>Let&#8217;s look at two simple examples using ordered and unordered
+operations.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+  // Get the collection
+  var col = db.collection('batch_write_ordered_ops');
+  // Initialize the Ordered Batch
+  var batch = col.initializeOrderedBulkOp();
+
+  // Add some operations to be executed in order
+  batch.insert({a:1});
+  batch.find({a:1}).updateOne({$set: {b:1}});
+  batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+  batch.insert({a:3});
+  batch.find({a:3}).remove({a:3});
+
+  // Execute the operations
+  batch.execute(function(err, result) {
+    console.dir(err);
+    console.dir(result);
+    db.close();
+  });
+});
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+  // Get the collection
+  var col = db.collection('batch_write_ordered_ops');
+  // Initialize the Ordered Batch
+  var batch = col.initializeUnorderedBulkOp();
+
+  // Add some operations to be executed in order
+  batch.insert({a:1});
+  batch.find({a:1}).updateOne({$set: {b:1}});
+  batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+  batch.insert({a:3});
+  batch.find({a:3}).remove({a:3});
+
+  // Execute the operations
+  batch.execute(function(err, result) {
+    console.dir(err);
+    console.dir(result);
+    db.close();
+  });
+});</pre>
+</div>
+<p>For older servers than 2.6 the API will downconvert the operations.
+However it&#8217;s not possible to downconvert 100% so there might be slight
+edge cases where it cannot correctly report the right numbers.</p>
+</div>
+<div class="section" id="parallelcollectionscan">
+<h2>parallelCollectionScan<a class="headerlink" href="#parallelcollectionscan" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>parallelCollectionScan</strong> command is a special command targeted at
+reading out an entire collection using <strong>numCursors</strong> parallel cursors.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+    // Get an aggregation cursor
+    db.collection('data').parallelCollectionScan({numCursors:3}, function(err, cursors) {
+    var results = [];
+
+    for(var i = 0; i &lt; cursors.length; i++) {
+      cursors[i].get(function(err, items) {
+        test.equal(err, null);
+
+        // Add docs to results array
+        results = results.concat(items);
+        numCursors = numCursors - 1;
+
+        // No more cursors let's ensure we got all results
+        if(numCursors == 0) {
+          test.equal(docs.length, results.length);
+
+          db.close();
+          test.done();
+        }
+      });
+    }
+    });
+});</pre>
+</div>
+<p>This optimizes the IO throughput from a collection.</p>
+</div>
+<div class="section" id="integrated-text-search-in-the-query-language">
+<h2>Integrated text search in the query language<a class="headerlink" href="#integrated-text-search-in-the-query-language" title="Permalink to this headline">¶</a></h2>
+<p>Text indexes are now integrated into the main query language and enabled
+by default. A simple example.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
+  // Get the collection
+  var collection = db.collection('textSearchWithSort');
+  collection.ensureIndex({s: 'text'}, function(err, result) {
+    test.equal(null, err);
+
+    collection.insert([
+        {s: 'spam'}
+      , {s: 'spam eggs and spam'}
+      , {s: 'sausage and eggs'}], function(err, result) {
+        test.equal(null, err);
+
+        collection.find(
+            {$text: {$search: 'spam'}}
+          , {fields: {_id: false, s: true, score: {$meta: 'textScore'}}}
+        ).sort({score: {$meta: 'textScore'}}).toArray(function(err, items) {
+          test.equal(null, err);
+          test.equal("spam eggs and spam", items[0].s);
+          db.close();
+          test.done();
+        });
+      });
+  });
+});</pre>
+</div>
+</div>
+<div class="section" id="emitting-reconnect-and-joined-left-events">
+<h2>Emitting Reconnect and Joined/Left events<a class="headerlink" href="#emitting-reconnect-and-joined-left-events" title="Permalink to this headline">¶</a></h2>
+<p>The Replicaset and Mongos now emits events for servers joining and
+leaving the replicaset. This let&#8217;s applications more easily monitor the
+changes in the driver over time. <strong>Reconnect</strong> in the context of a
+Replicaset or Mongos means that the driver is starting to replay
+buffered operations.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017,localhost:27027/test", function(err, db) {
+    db.serverConfig.on('joined', function(err, server) {
+        console.log("server joined");
+        console.dir(server);
+    });
+
+    db.serverConfig.on('left', function(err, server) {
+        console.log("server left");
+        console.dir(server);
+    });
+
+    db.serverConfig.on('reconnect', function() {
+        console.log("server reconnected");
+    });
+});</pre>
+</div>
+</div>
+<div class="section" id="buffermaxentries">
+<h2>bufferMaxEntries<a class="headerlink" href="#buffermaxentries" title="Permalink to this headline">¶</a></h2>
+<p>Buffered Max Entries allow for more fine grained control on how many
+operations that will be buffered before the driver errors out and stops
+attempting to reconnect.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect("mongodb://localhost:27017/test", {
+        db: {bufferMaxEntries:0},
+    }, function(err, db) {
+        db.close();
+});</pre>
+</div>
+<p>This example disables the command buffering completely and errors out
+the moment there is no connection available. The default value (for
+backward compatibility) is to buffer until memory runs out. Be aware
+that by setting a very low value you can cause some problems in failover
+scenarios in Replicasets as it might take a little but of time before
+f.ex a new Primary is elected and steps up to accept writes. Setting
+<strong>bufferMaxEntries</strong> to 0 in this case will cause the driver to error
+out instead of falling over correctly.</p>
+</div>
+<div class="section" id="fsync-and-journal-write-concerns-note">
+<h2>Fsync and journal Write Concerns note<a class="headerlink" href="#fsync-and-journal-write-concerns-note" title="Permalink to this headline">¶</a></h2>
+<p>MongoDB from version 2.6 and higher disallows the combination of
+<strong>journal</strong> and <strong>fsync</strong>. Combining them will cause an error while on
+2.4 <strong>fsync</strong> was ignored when provided with <strong>journal</strong>. The following
+semantics apply.</p>
+<ul class="simple">
+<li>j: If true block until write operations have been committed to the
+journal. Cannot be used in combination with <tt class="docutils literal"><span class="pre">fsync</span></tt>. Prior to
+MongoDB 2.6 this option was ignored if the server was running without
+journaling. Starting with MongoDB 2.6 write operations will fail with
+an exception if this option is used when the server is running
+without journaling.</li>
+<li>fsync: If true and the server is running without journaling, blocks
+until the server has synced all data files to disk. If the server is
+running with journaling, this acts the same as the <tt class="docutils literal"><span class="pre">j</span></tt> option,
+blocking until write operations have been committed to the journal.
+Cannot be used in combination with <tt class="docutils literal"><span class="pre">j</span></tt>.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Mongo Driver and Mongo DB 2.6 Features</a><ul>
+<li><a class="reference internal" href="#aggregation-cursors">Aggregation cursors</a></li>
+<li><a class="reference internal" href="#maxtimems">maxTimeMS</a></li>
+<li><a class="reference internal" href="#ordered-unordered-bulk-operations">Ordered/Unordered bulk operations</a></li>
+<li><a class="reference internal" href="#parallelcollectionscan">parallelCollectionScan</a></li>
+<li><a class="reference internal" href="#integrated-text-search-in-the-query-language">Integrated text search in the query language</a></li>
+<li><a class="reference internal" href="#emitting-reconnect-and-joined-left-events">Emitting Reconnect and Joined/Left events</a></li>
+<li><a class="reference internal" href="#buffermaxentries">bufferMaxEntries</a></li>
+<li><a class="reference internal" href="#fsync-and-journal-write-concerns-note">Fsync and journal Write Concerns note</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

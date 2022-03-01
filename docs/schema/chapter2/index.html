@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/img/favicon.png">
+
+    <title>Schema Basics</title>
+
+    <link href="/node-mongodb-native/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+
+  <section id="container" class="">
+
+
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+
+            <a href="/node-mongodb-native/" class="logo"><img src="/node-mongodb-native/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> Schema Basics </h1>
+            </div>
+      </header>
+
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+
+        <ul class="sidebar-menu">
+
+
+
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+
+                <span>schema design</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+
+                    <li><a href="/node-mongodb-native/schema/chapter1/"> Introduction </a> </li>
+
+                    <li class="active"><a href="/node-mongodb-native/schema/chapter2/"> Schema Basics </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter3/"> MongoDB Storage </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter4/"> Indexes </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter5/"> Metadata </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter6/"> Time Series </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter7/"> Queues </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter8/"> Nested Categories </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter9/"> Account Transactions </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter10/"> Shopping Cart </a> </li>
+
+                    <li><a href="/node-mongodb-native/schema/chapter11/"> Sharding </a> </li>
+
+                </ul>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>2.0 driver docs</span>
+                </a>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>1.4 driver docs</span>
+                </a>
+
+              </li>
+
+
+                <li>
+                <a class="" href="http://mongodb.github.io/node-mongodb-native/2.2">
+                    <i class='fa fa-file-text'></i>
+
+                    <span>Core driver docs</span>
+                </a>
+
+              </li>
+
+            <li> <a href="https://groups.google.com/forum/#!forum/learn-mongo-db-the-hardway" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+
+
+        </ul>
+
+    </div>
+</aside>
+
+
+
+
+      <section id="main-content">
+          <section class="wrapper">
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <div class="row">
+                  <div class="col-md-1">
+
+
+                      <a class="navigation prev" href="/schema/chapter1">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+
+
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+
+
+
+                    <div class="panel-body">
+
+
+
+<h1 id="schema-basics:180b2e7d3d86507c8acb2f575cf95af4">Schema Basics</h1>
+
+<p>Before presenting Schema patterns for MongoDB we will go through the basics of MongoDB Schema design and ways on how to model traditional relational relationships such as one-to-one, one-to-many and many-to-many.</p>
+
+<h1 id="one-to-one-1-1:180b2e7d3d86507c8acb2f575cf95af4">One-To-One (1:1)</h1>
+
+<p><img src="/images/originals/one-to-one.png" alt="A One to One Relational Example" />
+</p>
+
+<p>The <strong>1:1</strong> relationship can be modeled in two ways using MongoDB. The first way is to embed the relationship as a document, the second one is as a link to a document in a separate collection. Let&rsquo;s look at both ways of modeling the one to one relationship using the following two documents.</p>
+
+<h2 id="model:180b2e7d3d86507c8acb2f575cf95af4">Model</h2>
+
+<pre><code class="language-js">{
+  name: &quot;Peter Wilkinson&quot;,
+  age: 27
+}
+</code></pre>
+
+<pre><code class="language-js">{
+  street: &quot;100 some road&quot;,
+  city: &quot;Nevermore&quot;
+}
+</code></pre>
+
+<h2 id="strategy:180b2e7d3d86507c8acb2f575cf95af4">Strategy</h2>
+
+<h3 id="embedding:180b2e7d3d86507c8acb2f575cf95af4">Embedding</h3>
+
+<p>The first approach is simply to embed the address as a document in the User document.</p>
+
+<pre><code class="language-js">{
+  name: &quot;Peter Wilkinson&quot;,
+  age: 27,
+  address: {
+    street: &quot;100 some road&quot;,
+    city: &quot;Nevermore&quot;
+  }
+}
+</code></pre>
+
+<p>The benefit is that we can retrieve the user details and the address using a single read operation.</p>
+
+<h3 id="linking:180b2e7d3d86507c8acb2f575cf95af4">Linking</h3>
+
+<p>The second approach is to link the address and user document using a <strong>foreign key</strong>.</p>
+
+<pre><code class="language-js">{
+  _id: 1,
+  name: &quot;Peter Wilkinson&quot;,
+  age: 27
+}
+</code></pre>
+
+<pre><code class="language-js">{
+  user_id: 1,
+  street: &quot;100 some road&quot;,
+  city: &quot;Nevermore&quot;
+}
+</code></pre>
+
+<p>This is similar to how traditional relational databases would store the data. It is however important to note that MongoDB does not enforce any foreign key constraints so the relation only exists as part of the application level schema.</p>
+
+<blockquote>
+<p><strong>Embedding Preferred</strong></p>
+
+<p>In the one to one relationship Embedding is the preferred way to model the relationship as it&rsquo;s a more efficient way to retrieve the document.</p>
+</blockquote>
+
+<h1 id="one-to-many-1-n:180b2e7d3d86507c8acb2f575cf95af4">One-To-Many (1:N)</h1>
+
+<p><img src="/images/originals/one-to-many.png" alt="A One to Many Relational Example" />
+</p>
+
+<p>The <strong>1:N</strong> relationship can be modeled in couple of different ways using MongoDB . The first one is embedding, the second one is linking and the third one is a bucketing strategy that is useful for some particular cases. Let&rsquo;s use the model of a <strong>Blog Post</strong> and its <strong>Comments</strong>.</p>
+
+<h2 id="model-1:180b2e7d3d86507c8acb2f575cf95af4">Model</h2>
+
+<pre><code class="language-js">{
+  title: &quot;An awesome blog&quot;,
+  url: &quot;http://awesomeblog.com&quot;,
+  text: &quot;This is an awesome blog we have just started&quot;
+}
+</code></pre>
+
+<p>A Blog Post is a single document that describes one specific blog post.</p>
+
+<pre><code class="language-js">{
+  name: &quot;Peter Critic&quot;,
+  created_on: ISODate(&quot;2014-01-01T10:01:22Z&quot;),
+  comment: &quot;Awesome blog post&quot;
+}
+
+{
+  name: &quot;John Page&quot;,
+  created_on: ISODate(&quot;2014-01-01T11:01:22Z&quot;),
+  comment: &quot;Not so awesome blog&quot;
+}
+</code></pre>
+
+<p>For each Blog Post we can have one or more Comments.</p>
+
+<h2 id="strategy-1:180b2e7d3d86507c8acb2f575cf95af4">Strategy</h2>
+
+<h3 id="embedding-1:180b2e7d3d86507c8acb2f575cf95af4">Embedding</h3>
+
+<p>The first approach is to embed the comments in the <strong>Blog Post</strong>.</p>
+
+<pre><code class="language-js">{
+  title: &quot;An awesome blog&quot;,
+  url: &quot;http://awesomeblog.com&quot;,
+  text: &quot;This is an awesome blog we have just started&quot;,
+  comments: [{
+    name: &quot;Peter Critic&quot;,
+    created_on: ISODate(&quot;2014-01-01T10:01:22Z&quot;),
+    comment: &quot;Awesome blog post&quot;
+  }, {
+    name: &quot;John Page&quot;,
+    created_on: ISODate(&quot;2014-01-01T11:01:22Z&quot;),
+    comment: &quot;Not so awesome blog&quot;
+  }]
+}
+</code></pre>
+
+<p>The benefits are that we can easily retrieve all the comments with the Blog Post in a single read. Adding new comments is as simple as appending the new comment document to the end of the <strong>comments</strong> array. However there are three possible problems with this approach.</p>
+
+<p>The first one is that the <strong>comments</strong> array might grow larger than the maximum document size of <strong>16 MB</strong>.</p>
+
+<p>The second has to do with write performance. As each Blog Post will get comments added to it over time it makes it hard for MongoDB to predict the correct document padding to apply when a new document is created. This means that the document has to be moved around in memory as it grows causing additional IO and impacting write performance.</p>
+
+<blockquote>
+<p>It&rsquo;s however important to note that this only matters for high write traffic and might not be a problem for smaller applications.</p>
+</blockquote>
+
+<p>The third one is performing pagination off the comments. As cannot easily filter out comments returned from the single <strong>Blog Post</strong> we will have to retrieve all the comments and filter in the application.</p>
+
+<h3 id="linking-1:180b2e7d3d86507c8acb2f575cf95af4">Linking</h3>
+
+<p>The second approach is to link comments to the <strong>Blog Post</strong> using a more traditional <strong>foreign</strong> key.</p>
+
+<pre><code class="language-js">{
+  _id: 1,
+  title: &quot;An awesome blog&quot;,
+  url: &quot;http://awesomeblog.com&quot;,
+  text: &quot;This is an awesome blog we have just started&quot;
+}
+</code></pre>
+
+<pre><code class="language-js">{
+  blog_entry_id: 1,
+  name: &quot;Peter Critic&quot;,
+  created_on: ISODate(&quot;2014-01-01T10:01:22Z&quot;),
+  comment: &quot;Awesome blog post&quot;
+}
+
+{
+  blog_entry_id: 1,
+  name: &quot;John Page&quot;,
+  created_on: ISODate(&quot;2014-01-01T11:01:22Z&quot;),
+  comment: &quot;Not so awesome blog&quot;
+}
+</code></pre>
+
+<p>The benefits from this model is that additional comments will not grow the original <strong>Blog Post</strong> document, making it less likely that the applications will run in the the maximum document size of <strong>16 MB</strong>. It&rsquo;s also much easier to return paginated comments as the application can slice and dice the comments more easily. On the downside if we have 1000 comments on a blog post we need to retrieve all 1000 documents causing a lot of reads from the database.</p>
+
+<h3 id="bucketing:180b2e7d3d86507c8acb2f575cf95af4">Bucketing</h3>
+
+<p>The third approach is a hybrid of the two above. Basically it tries to balance the rigidity of the embedding strategy with the flexibility of the linking strategy. For this example we might decide that we will split the comments into buckets with a maximum of 50 comments in each bucket.</p>
+
+<pre><code class="language-js">{
+  _id: 1,
+  title: &quot;An awesome blog&quot;,
+  url: &quot;http://awesomeblog.com&quot;,
+  text: &quot;This is an awesome blog we have just started&quot;
+}
+</code></pre>
+
+<pre><code class="language-js">{
+  blog_entry_id: 1,
+  page: 1,
+  count: 50,
+  comments: [{
+    name: &quot;Peter Critic&quot;,
+    created_on: ISODate(&quot;2014-01-01T10:01:22Z&quot;),
+    comment: &quot;Awesome blog post&quot;
+  }, ...]
+}
+
+{
+  blog_entry_id: 1,
+  page: 2,
+  count: 1,
+  comments: [{
+    name: &quot;John Page&quot;,
+    created_on: ISODate(&quot;2014-01-01T11:01:22Z&quot;),
+    comment: &quot;Not so awesome blog&quot;
+  }]
+}
+</code></pre>
+
+<p>The main benefit of using buckets in this case is that we can perform a single read to fetch 50 comments at the time, allowing for efficient pagination.</p>
+
+<blockquote>
+<p><strong>When to use bucketing</strong></p>
+
+<p>When you have the possibility of splitting up your documents in discreet batches it makes sense to consider bucketing to speed up retrieval of documents.</p>
+
+<p>Typical cases are things like bucketing data by hours, days or number of entries on a page (such as comments pagination).</p>
+</blockquote>
+
+<h1 id="many-to-many-n-m:180b2e7d3d86507c8acb2f575cf95af4">Many-To-Many (N:M)</h1>
+
+<p><img src="/images/originals/many-to-many.png" alt="A Many to Many Relational Example" />
+</p>
+
+<p><strong>N:M</strong> relationships are modeled in the relational database by using a join table. A typical example is the relationship between books and authors where an author has authored multiple authors and a book can be written by multiple authors. Let&rsquo;s look at two ways of modeling many to many relationships.</p>
+
+<h2 id="two-way-embedding:180b2e7d3d86507c8acb2f575cf95af4">Two Way Embedding</h2>
+
+<p>Embedding the books in an authors document</p>
+
+<h3 id="model-2:180b2e7d3d86507c8acb2f575cf95af4">Model</h3>
+
+<p>In <strong>Two Way Embedding</strong> we will include the <strong>Book</strong> <strong>foreign keys</strong> under the <strong>books</strong> field.</p>
+
+<pre><code class="language-js">{
+  _id: 1,
+  name: &quot;Peter Standford&quot;,
+  books: [1, 2]
+}
+
+{
+  _id: 2,
+  name: &quot;Georg Peterson&quot;,
+  books: [2]
+}
+</code></pre>
+
+<p>In the same way for each <strong>Book</strong> we include the <strong>Author</strong> <strong>foreign keys</strong> under the <strong>author</strong> field.</p>
+
+<pre><code class="language-js">{
+  _id: 1,
+  title: &quot;A tale of two people&quot;,
+  categories: [&quot;drama&quot;],
+  authors: [1, 2]
+}
+
+{
+  _id: 2,
+  title: &quot;A tale of two space ships&quot;,
+  categories: [&quot;scifi&quot;],
+  authors: [1]
+}
+</code></pre>
+
+<h3 id="queries:180b2e7d3d86507c8acb2f575cf95af4">Queries</h3>
+
+<pre><code class="language-js">var db = db.getSisterDB(&quot;library&quot;);
+var booksCollection = db.books;
+var authorsCollection = db.authors;
+
+var author = authorsCollection.findOne({name: &quot;Peter Standford&quot;});
+var books = booksCollection.find({_id: {$in: author.books}}).toArray();
+</code></pre>
+
+<pre><code class="language-js">var db = db.getSisterDB(&quot;library&quot;);
+var booksCollection = db.books;
+var authorsCollection = db.authors;
+
+var book = booksCollection.findOne({title: &quot;A tale of two space ships&quot;});
+var authors = authorsCollection.find({_id: {$in: book.authors}}).toArray();
+</code></pre>
+
+<p>As we can see we have to perform two queries in both directions. First finding either the author or the book and then performing an $in query to find the books or authors.</p>
+
+<blockquote>
+<p><strong>Consider</strong></p>
+
+<p>If one way is massively unbalanced in size this modeling might not be feasible. Such a possible scenario is <strong>Products</strong> and <strong>Categories</strong> where f.ex a <strong>TV</strong> might have a single <strong>Category</strong> associated with it but a Category might have <strong>n</strong> number of items associated with it, meaning embedding all the product id&rsquo;s in a Category is not feasible.</p>
+</blockquote>
+
+<h2 id="one-way-embedding:180b2e7d3d86507c8acb2f575cf95af4">One Way Embedding</h2>
+
+<p>The One Way Embedding strategy take optimizes the many to many relationship by embedding only in one direction which is very useful if one side is massively unbalanced in size. Consider the case above of the categories. Let&rsquo;s pull the categories out in a separate document.</p>
+
+<h3 id="model-3:180b2e7d3d86507c8acb2f575cf95af4">Model</h3>
+
+<pre><code class="language-js">{
+  _id: 1,
+  name: &quot;drama&quot;
+}
+</code></pre>
+
+<pre><code class="language-js">{
+  _id: 1,
+  title: &quot;A tale of two people&quot;,
+  categories: [1],
+  authors: [1, 2]
+}
+</code></pre>
+
+<p>The reason we are doing a single direction for categories is due to there being a lot more books in the drama category than categories in a book. If one embeds the books in the category document it&rsquo;s easy to foresee that one could break the 16MB max document size for certain broad categories.</p>
+
+<h3 id="queries-1:180b2e7d3d86507c8acb2f575cf95af4">Queries</h3>
+
+<pre><code class="language-js">var db = db.getSisterDB(&quot;library&quot;);
+var booksCol = db.books;
+var categoriesCol = db.categories;
+
+var book = booksCol.findOne({title: &quot;A tale of two space ships&quot;});
+var categories = categoriesCol.find({_id: {$in: book.categories}}).toArray();
+</code></pre>
+
+<pre><code class="language-js">var db = db.getSisterDB(&quot;library&quot;);
+var booksCollection = db.books;
+var categoriesCollection = db.categories;
+
+var category = categoriesCollection.findOne({name: &quot;drama&quot;});
+var books = booksCollection.find({categories: category.id}).toArray();
+</code></pre>
+
+<blockquote>
+<p><strong>Establish Relationship Balance</strong></p>
+
+<p>Establish the max size of <strong>N</strong> and the size of <strong>M</strong>. F.ex if <strong>N</strong> is a max of 3 categories for a book and <strong>M</strong> is a max of 500000 books in a category you should pick One Way Embedding. If <strong>N</strong> is a max of 3 and <strong>M</strong> is a max of 5 then Two Way Embedding might work well.</p>
+</blockquote>
+
+
+
+                <div class="col-md-1">
+
+
+                    <a class="navigation next" href="/schema/chapter3">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+
+
+                </div>
+              </div>
+
+          </section>
+      </section>
+
+  </section>
+
+
+    <script src="/node-mongodb-native/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/js/bootstrap.min.js"></script>
+
+    <script src="/node-mongodb-native/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41953057-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

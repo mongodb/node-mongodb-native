@@ -1,0 +1,1059 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Timestamp() &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" />
+    <link rel="next" title="MaxKey()" href="maxkey.html" />
+    <link rel="prev" title="Long()" href="long.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="timestamp">
+<h1>Timestamp()<a class="headerlink" href="#timestamp" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>Defines a Timestamp class for representing a 64-bit two&#8217;s-complement
+integer value, which faithfully simulates the behavior of a Java &#8220;Timestamp&#8221;. This
+implementation is derived from TimestampLib in GWT.</p>
+<blockquote>
+<div><dl class="class">
+<dt id="Timestamp">
+<em class="property">class </em><tt class="descname">Timestamp</tt><big>(</big><big>)</big><a class="headerlink" href="#Timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>low</strong> (<em>number</em>) &#8211; the low (signed) 32 bits of the Timestamp.</li>
+<li><strong>high</strong> (<em>number</em>) &#8211; the high (signed) 32 bits of the Timestamp.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+<p>Constructs a 64-bit two&#8217;s-complement integer, given its low and high 32-bit
+values as <em>signed</em> integers.  See the from* functions below for more
+convenient ways of constructing Timestamps.</p>
+<p>The internal representation of a Timestamp is the two given signed, 32-bit values.
+We use 32-bit pieces because these are the size of integers on which
+Javascript performs bit-operations.  For operations like addition and
+multiplication, we split each number into 16-bit pieces, which can easily be
+multiplied within Javascript&#8217;s floating-point representation without overflow
+or change in sign.</p>
+<p>In the algorithms below, we frequently reduce the negative case to the
+positive case by negating the input(s) and then post-processing the result.
+Note that we must ALWAYS check specially whether those values are MIN_VALUE
+(-2^63) because -MIN_VALUE == MIN_VALUE (since 2^63 cannot be represented as
+a positive number, it overflows back into a negative).  Not handling this
+case would often result in infinite recursion.</p>
+</div>
+<div class="section" id="toint">
+<h2>toInt<a class="headerlink" href="#toint" title="Permalink to this headline">¶</a></h2>
+<p>Return the int value.</p>
+<dl class="function">
+<dt id="toInt">
+<tt class="descname">toInt</tt><big>(</big><big>)</big><a class="headerlink" href="#toInt" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the value, assuming it is a 32-bit integer.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="tonumber">
+<h2>toNumber<a class="headerlink" href="#tonumber" title="Permalink to this headline">¶</a></h2>
+<p>Return the Number value.</p>
+<dl class="function">
+<dt id="toNumber">
+<tt class="descname">toNumber</tt><big>(</big><big>)</big><a class="headerlink" href="#toNumber" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the closest floating-point representation to this value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="tojson">
+<h2>toJSON<a class="headerlink" href="#tojson" title="Permalink to this headline">¶</a></h2>
+<p>Return the JSON value.</p>
+<dl class="function">
+<dt id="toJSON">
+<tt class="descname">toJSON</tt><big>(</big><big>)</big><a class="headerlink" href="#toJSON" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string the JSON representation.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="tostring">
+<h2>toString<a class="headerlink" href="#tostring" title="Permalink to this headline">¶</a></h2>
+<p>Return the String value.</p>
+<dl class="function">
+<dt id="toString">
+<tt class="descname">toString</tt><big>(</big><span class="optional">[</span><em>opt_radix</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#toString" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>[opt_radix]</strong> (<em>number</em>) &#8211; the radix in which the text should be written.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">string the textual representation of this value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="gethighbits">
+<h2>getHighBits<a class="headerlink" href="#gethighbits" title="Permalink to this headline">¶</a></h2>
+<p>Return the high 32-bits value.</p>
+<dl class="function">
+<dt id="getHighBits">
+<tt class="descname">getHighBits</tt><big>(</big><big>)</big><a class="headerlink" href="#getHighBits" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the high 32-bits as a signed value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getlowbits">
+<h2>getLowBits<a class="headerlink" href="#getlowbits" title="Permalink to this headline">¶</a></h2>
+<p>Return the low 32-bits value.</p>
+<dl class="function">
+<dt id="getLowBits">
+<tt class="descname">getLowBits</tt><big>(</big><big>)</big><a class="headerlink" href="#getLowBits" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the low 32-bits as a signed value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getlowbitsunsigned">
+<h2>getLowBitsUnsigned<a class="headerlink" href="#getlowbitsunsigned" title="Permalink to this headline">¶</a></h2>
+<p>Return the low unsigned 32-bits value.</p>
+<dl class="function">
+<dt id="getLowBitsUnsigned">
+<tt class="descname">getLowBitsUnsigned</tt><big>(</big><big>)</big><a class="headerlink" href="#getLowBitsUnsigned" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number the low 32-bits as an unsigned value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getnumbitsabs">
+<h2>getNumBitsAbs<a class="headerlink" href="#getnumbitsabs" title="Permalink to this headline">¶</a></h2>
+<p>Returns the number of bits needed to represent the absolute value of this Timestamp.</p>
+<dl class="function">
+<dt id="getNumBitsAbs">
+<tt class="descname">getNumBitsAbs</tt><big>(</big><big>)</big><a class="headerlink" href="#getNumBitsAbs" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number Returns the number of bits needed to represent the absolute value of this Timestamp.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="iszero">
+<h2>isZero<a class="headerlink" href="#iszero" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this value is zero.</p>
+<dl class="function">
+<dt id="isZero">
+<tt class="descname">isZero</tt><big>(</big><big>)</big><a class="headerlink" href="#isZero" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is zero.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isnegative">
+<h2>isNegative<a class="headerlink" href="#isnegative" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this value is negative.</p>
+<dl class="function">
+<dt id="isNegative">
+<tt class="descname">isNegative</tt><big>(</big><big>)</big><a class="headerlink" href="#isNegative" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is negative.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isodd">
+<h2>isOdd<a class="headerlink" href="#isodd" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this value is odd.</p>
+<dl class="function">
+<dt id="isOdd">
+<tt class="descname">isOdd</tt><big>(</big><big>)</big><a class="headerlink" href="#isOdd" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean whether this value is odd.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="equals">
+<h2>equals<a class="headerlink" href="#equals" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this Timestamp equals the other</p>
+<dl class="function">
+<dt>
+<tt class="descname">equals</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to compare against.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">boolean whether this Timestamp equals the other</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="notequals">
+<h2>notEquals<a class="headerlink" href="#notequals" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this Timestamp does not equal the other.</p>
+<dl class="function">
+<dt id="notEquals">
+<tt class="descname">notEquals</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#notEquals" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to compare against.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">boolean whether this Timestamp does not equal the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="lessthan">
+<h2>lessThan<a class="headerlink" href="#lessthan" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this Timestamp is less than the other.</p>
+<dl class="function">
+<dt id="lessThan">
+<tt class="descname">lessThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#lessThan" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to compare against.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">boolean whether this Timestamp is less than the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="lessthanorequal">
+<h2>lessThanOrEqual<a class="headerlink" href="#lessthanorequal" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this Timestamp is less than or equal to the other.</p>
+<dl class="function">
+<dt id="lessThanOrEqual">
+<tt class="descname">lessThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#lessThanOrEqual" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to compare against.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">boolean whether this Timestamp is less than or equal to the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="greaterthan">
+<h2>greaterThan<a class="headerlink" href="#greaterthan" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this Timestamp is greater than the other.</p>
+<dl class="function">
+<dt id="greaterThan">
+<tt class="descname">greaterThan</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#greaterThan" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to compare against.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">boolean whether this Timestamp is greater than the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="greaterthanorequal">
+<h2>greaterThanOrEqual<a class="headerlink" href="#greaterthanorequal" title="Permalink to this headline">¶</a></h2>
+<p>Return whether this Timestamp is greater than or equal to the other.</p>
+<dl class="function">
+<dt id="greaterThanOrEqual">
+<tt class="descname">greaterThanOrEqual</tt><big>(</big><em>other</em><big>)</big><a class="headerlink" href="#greaterThanOrEqual" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to compare against.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">boolean whether this Timestamp is greater than or equal to the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="compare">
+<h2>compare<a class="headerlink" href="#compare" title="Permalink to this headline">¶</a></h2>
+<p>Compares this Timestamp with the given one.</p>
+<dl class="function">
+<dt>
+<tt class="descname">compare</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to compare against.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">boolean 0 if they are the same, 1 if the this is greater, and -1 if the given one is greater.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="negate">
+<h2>negate<a class="headerlink" href="#negate" title="Permalink to this headline">¶</a></h2>
+<p>The negation of this value.</p>
+<dl class="function">
+<dt>
+<tt class="descname">negate</tt><big>(</big><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">timestamp the negation of this value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="add">
+<h2>add<a class="headerlink" href="#add" title="Permalink to this headline">¶</a></h2>
+<p>Returns the sum of this and the given Timestamp.</p>
+<dl class="function">
+<dt>
+<tt class="descname">add</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to add to this one.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the sum of this and the given Timestamp.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="subtract">
+<h2>subtract<a class="headerlink" href="#subtract" title="Permalink to this headline">¶</a></h2>
+<p>Returns the difference of this and the given Timestamp.</p>
+<dl class="function">
+<dt>
+<tt class="descname">subtract</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to subtract from this.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the difference of this and the given Timestamp.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="multiply">
+<h2>multiply<a class="headerlink" href="#multiply" title="Permalink to this headline">¶</a></h2>
+<p>Returns the product of this and the given Timestamp.</p>
+<dl class="function">
+<dt>
+<tt class="descname">multiply</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp to multiply with this.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the product of this and the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="div">
+<h2>div<a class="headerlink" href="#div" title="Permalink to this headline">¶</a></h2>
+<p>Returns this Timestamp divided by the given one.</p>
+<dl class="function">
+<dt>
+<tt class="descname">div</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp by which to divide.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp this Timestamp divided by the given one.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modulo">
+<h2>modulo<a class="headerlink" href="#modulo" title="Permalink to this headline">¶</a></h2>
+<p>Returns this Timestamp modulo the given one.</p>
+<dl class="function">
+<dt>
+<tt class="descname">modulo</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; Timestamp by which to mod.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp this Timestamp modulo the given one.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="not">
+<h2>not<a class="headerlink" href="#not" title="Permalink to this headline">¶</a></h2>
+<p>The bitwise-NOT of this value.</p>
+<dl class="function">
+<dt>
+<tt class="descname">not</tt><big>(</big><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">timestamp the bitwise-NOT of this value.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="and">
+<h2>and<a class="headerlink" href="#and" title="Permalink to this headline">¶</a></h2>
+<p>Returns the bitwise-AND of this Timestamp and the given one.</p>
+<dl class="function">
+<dt>
+<tt class="descname">and</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; the Timestamp with which to AND.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the bitwise-AND of this and the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="or">
+<h2>or<a class="headerlink" href="#or" title="Permalink to this headline">¶</a></h2>
+<p>Returns the bitwise-OR of this Timestamp and the given one.</p>
+<dl class="function">
+<dt>
+<tt class="descname">or</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; the Timestamp with which to OR.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the bitwise-OR of this and the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="xor">
+<h2>xor<a class="headerlink" href="#xor" title="Permalink to this headline">¶</a></h2>
+<p>Returns the bitwise-XOR of this Timestamp and the given one.</p>
+<dl class="function">
+<dt>
+<tt class="descname">xor</tt><big>(</big><em>other</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<em>timestamp</em>) &#8211; the Timestamp with which to XOR.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the bitwise-XOR of this and the other.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="shiftleft">
+<h2>shiftLeft<a class="headerlink" href="#shiftleft" title="Permalink to this headline">¶</a></h2>
+<p>Returns this Timestamp with bits shifted to the left by the given amount.</p>
+<dl class="function">
+<dt id="shiftLeft">
+<tt class="descname">shiftLeft</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftLeft" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>numBits</strong> (<em>number</em>) &#8211; the number of bits by which to shift.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp this shifted to the left by the given amount.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="shiftright">
+<h2>shiftRight<a class="headerlink" href="#shiftright" title="Permalink to this headline">¶</a></h2>
+<p>Returns this Timestamp with bits shifted to the right by the given amount.</p>
+<dl class="function">
+<dt id="shiftRight">
+<tt class="descname">shiftRight</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftRight" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>numBits</strong> (<em>number</em>) &#8211; the number of bits by which to shift.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp this shifted to the right by the given amount.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="shiftrightunsigned">
+<h2>shiftRightUnsigned<a class="headerlink" href="#shiftrightunsigned" title="Permalink to this headline">¶</a></h2>
+<p>Returns this Timestamp with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.</p>
+<dl class="function">
+<dt id="shiftRightUnsigned">
+<tt class="descname">shiftRightUnsigned</tt><big>(</big><em>numBits</em><big>)</big><a class="headerlink" href="#shiftRightUnsigned" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>numBits</strong> (<em>number</em>) &#8211; the number of bits by which to shift.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp this shifted to the right by the given amount, with zeros placed into the new leading bits.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="timestamp-fromint">
+<h2>Timestamp.fromInt<a class="headerlink" href="#timestamp-fromint" title="Permalink to this headline">¶</a></h2>
+<p>Returns a Timestamp representing the given (32-bit) integer value.</p>
+<dl class="function">
+<dt id="Timestamp.fromInt">
+<tt class="descclassname">Timestamp.</tt><tt class="descname">fromInt</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#Timestamp.fromInt" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> (<em>number</em>) &#8211; the 32-bit integer in question.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the corresponding Timestamp value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="timestamp-fromnumber">
+<h2>Timestamp.fromNumber<a class="headerlink" href="#timestamp-fromnumber" title="Permalink to this headline">¶</a></h2>
+<p>Returns a Timestamp representing the given value, provided that it is a finite number. Otherwise, zero is returned.</p>
+<dl class="function">
+<dt id="Timestamp.fromNumber">
+<tt class="descclassname">Timestamp.</tt><tt class="descname">fromNumber</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#Timestamp.fromNumber" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> (<em>number</em>) &#8211; the number in question.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the corresponding Timestamp value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="timestamp-frombits">
+<h2>Timestamp.fromBits<a class="headerlink" href="#timestamp-frombits" title="Permalink to this headline">¶</a></h2>
+<p>Returns a Timestamp representing the 64-bit integer that comes by concatenating the given high and low bits. Each is assumed to use 32 bits.</p>
+<dl class="function">
+<dt id="Timestamp.fromBits">
+<tt class="descclassname">Timestamp.</tt><tt class="descname">fromBits</tt><big>(</big><em>lowBits</em>, <em>highBits</em><big>)</big><a class="headerlink" href="#Timestamp.fromBits" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>lowBits</strong> (<em>number</em>) &#8211; the low 32-bits.</li>
+<li><strong>highBits</strong> (<em>number</em>) &#8211; the high 32-bits.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the corresponding Timestamp value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="timestamp-fromstring">
+<h2>Timestamp.fromString<a class="headerlink" href="#timestamp-fromstring" title="Permalink to this headline">¶</a></h2>
+<p>Returns a Timestamp representation of the given string, written using the given radix.</p>
+<dl class="function">
+<dt id="Timestamp.fromString">
+<tt class="descclassname">Timestamp.</tt><tt class="descname">fromString</tt><big>(</big><em>str</em>, <em>opt_radix</em><big>)</big><a class="headerlink" href="#Timestamp.fromString" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>str</strong> (<em>string</em>) &#8211; the textual representation of the Timestamp.</li>
+<li><strong>opt_radix</strong> (<em>number</em>) &#8211; the radix in which the text is written.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">timestamp the corresponding Timestamp value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Timestamp()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#toint">toInt</a></li>
+<li><a class="reference internal" href="#tonumber">toNumber</a></li>
+<li><a class="reference internal" href="#tojson">toJSON</a></li>
+<li><a class="reference internal" href="#tostring">toString</a></li>
+<li><a class="reference internal" href="#gethighbits">getHighBits</a></li>
+<li><a class="reference internal" href="#getlowbits">getLowBits</a></li>
+<li><a class="reference internal" href="#getlowbitsunsigned">getLowBitsUnsigned</a></li>
+<li><a class="reference internal" href="#getnumbitsabs">getNumBitsAbs</a></li>
+<li><a class="reference internal" href="#iszero">isZero</a></li>
+<li><a class="reference internal" href="#isnegative">isNegative</a></li>
+<li><a class="reference internal" href="#isodd">isOdd</a></li>
+<li><a class="reference internal" href="#equals">equals</a></li>
+<li><a class="reference internal" href="#notequals">notEquals</a></li>
+<li><a class="reference internal" href="#lessthan">lessThan</a></li>
+<li><a class="reference internal" href="#lessthanorequal">lessThanOrEqual</a></li>
+<li><a class="reference internal" href="#greaterthan">greaterThan</a></li>
+<li><a class="reference internal" href="#greaterthanorequal">greaterThanOrEqual</a></li>
+<li><a class="reference internal" href="#compare">compare</a></li>
+<li><a class="reference internal" href="#negate">negate</a></li>
+<li><a class="reference internal" href="#add">add</a></li>
+<li><a class="reference internal" href="#subtract">subtract</a></li>
+<li><a class="reference internal" href="#multiply">multiply</a></li>
+<li><a class="reference internal" href="#div">div</a></li>
+<li><a class="reference internal" href="#modulo">modulo</a></li>
+<li><a class="reference internal" href="#not">not</a></li>
+<li><a class="reference internal" href="#and">and</a></li>
+<li><a class="reference internal" href="#or">or</a></li>
+<li><a class="reference internal" href="#xor">xor</a></li>
+<li><a class="reference internal" href="#shiftleft">shiftLeft</a></li>
+<li><a class="reference internal" href="#shiftright">shiftRight</a></li>
+<li><a class="reference internal" href="#shiftrightunsigned">shiftRightUnsigned</a></li>
+<li><a class="reference internal" href="#timestamp-fromint">Timestamp.fromInt</a></li>
+<li><a class="reference internal" href="#timestamp-fromnumber">Timestamp.fromNumber</a></li>
+<li><a class="reference internal" href="#timestamp-frombits">Timestamp.fromBits</a></li>
+<li><a class="reference internal" href="#timestamp-fromstring">Timestamp.fromString</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu"><li><strong>Previous:</strong> <a href="long.html" title="previous chapter">Long()</a></li><li><strong>Next:</strong> <a href="maxkey.html" title="next chapter">MaxKey()</a></li>
+</ul>
+<h3>Manual</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="long.html">Long()</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

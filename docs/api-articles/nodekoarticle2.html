@@ -1,0 +1,510 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>A primer for GridFS using the Mongo DB driver &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="a-primer-for-gridfs-using-the-mongo-db-driver">
+<h1>A primer for GridFS using the Mongo DB driver<a class="headerlink" href="#a-primer-for-gridfs-using-the-mongo-db-driver" title="Permalink to this headline">¶</a></h1>
+<p>In the first tutorial we targeted general usage of the database. But
+Mongo DB is much more than this. One of the additional very useful
+features is to act as a file storage system. This is accomplish in Mongo
+by having a file collection and a chunks collection where each document
+in the chunks collection makes up a <strong>Block</strong> of the file. In this
+tutorial we will look at how to use the GridFS functionality and what
+functions are available.</p>
+<div class="section" id="a-simple-example">
+<h2>A simple example<a class="headerlink" href="#a-simple-example" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s dive straight into a simple example on how to write a file to the
+grid using the simplified Grid class.</p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient,
+  Grid = mongo.Grid;
+
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(err) return console.dir(err);
+
+  var grid = new Grid(db, 'fs');
+  var buffer = new Buffer("Hello world");
+  grid.put(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
+    if(!err) {
+      console.log("Finished writing file to Mongo");
+    }
+  });
+});</pre>
+</div>
+<p>All right let&#8217;s dissect the example. The first thing you&#8217;ll notice is
+the statement</p>
+<div class="highlight-python"><pre>var grid = new Grid(db, 'fs');</pre>
+</div>
+<p>Since GridFS is actually a special structure stored as collections
+you&#8217;ll notice that we are using the db connection that we used in the
+previous tutorial to operate on collections and documents. The second
+parameter <strong>&#8216;fs&#8217;</strong> allows you to change the collections you want to
+store the data in. In this example the collections would be
+<strong>fs_files</strong> and <strong>fs_chunks</strong>.</p>
+<p>Having a live grid instance we now go ahead and create some test data
+stored in a Buffer instance, although you can pass in a string instead.
+We then write our data to disk.</p>
+<div class="highlight-python"><pre>var buffer = new Buffer("Hello world");
+grid.put(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
+  if(!err) {
+    console.log("Finished writing file to Mongo");
+  }
+});</pre>
+</div>
+<p>Let&#8217;s deconstruct the call we just made. The <strong>put</strong> call will write the
+data you passed in as one or more chunks. The second parameter is a hash
+of options for the Grid class. In this case we wish to annotate the file
+we are writing to Mongo DB with some metadata and also specify a content
+type. Each file entry in GridFS has support for metadata documents which
+might be very useful if you are for example storing images in you Mongo
+DB and need to store all the data associated with the image.</p>
+<p>One important thing is to take not that the put method return a document
+containing a <strong>_id</strong>, this is an <strong>ObjectID</strong> identifier that you&#8217;ll
+need to use if you wish to retrieve the file contents later.</p>
+<p>Right so we have written out first file, let&#8217;s look at the other two
+simple functions supported by the Grid class.</p>
+<p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
+<div class="highlight-python"><pre>var MongoClient = require('mongodb').MongoClient,
+  Grid = mongo.Grid;
+
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, db) {
+  if(err) return console.dir(err);
+
+  var grid = new Grid(db, 'fs');
+  var buffer = new Buffer("Hello world");
+  grid.put.(buffer, {metadata:{category:'text'}, content_type: 'text'}, function(err, fileInfo) {
+    grid.get(fileInfo._id, function(err, data) {
+      console.log("Retrieved data: " + data.toString());
+      grid.delete(fileInfo._id, function(err, result) {
+      });
+    });
+  });
+});</pre>
+</div>
+<p>Let&#8217;s have a look at the two operations <strong>get</strong> and <strong>delete</strong></p>
+<div class="highlight-python"><pre>grid.get(fileInfo._id, function(err, data) {});</pre>
+</div>
+<p>The <strong>get</strong> method takes an ObjectID as the first argument and as we can
+se in the code we are using the one provided in <strong>fileInfo._id</strong>. This
+will read all the chunks for the file and return it as a Buffer object.</p>
+<p>The <strong>delete</strong> method also takes an ObjectID as the first argument but
+will delete the file entry and the chunks associated with the file in
+Mongo.</p>
+<p>This <strong>api</strong> is the simplest one you can use to interact with GridFS but
+it&#8217;s not suitable for all kinds of files. One of it&#8217;s main drawbacks is
+you are trying to write large files to Mongo. This api will require you
+to read the entire file into memory when writing and reading from Mongo
+which most likely is not feasible if you have to store large files like
+Video or RAW Pictures. Luckily this is not the only way to work with
+GridFS. That&#8217;s not to say this api is not useful. If you are storing
+tons of small files the memory usage vs the simplicity might be a
+worthwhile tradeoff. Let&#8217;s dive into some of the more advanced ways of
+using GridFS.</p>
+</div>
+<div class="section" id="advanced-gridfs-or-how-not-to-run-out-of-memory">
+<h2>Advanced GridFS or how not to run out of memory<a class="headerlink" href="#advanced-gridfs-or-how-not-to-run-out-of-memory" title="Permalink to this headline">¶</a></h2>
+<p>As we just said controlling memory consumption for you file writing and
+reading is key if you want to scale up the application. That means not
+reading in entire files before either writing or reading from Mongo DB.
+The good news is, it&#8217;s supported. Let&#8217;s throw some code out there
+straight away and look at how to do chunk sized streaming writes and
+reads.</p>
+<p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
+<div class="highlight-python"><pre>var fileId = new ObjectID();
+var gridStore = new GridStore(db, fileId, "w", {root:'fs'});
+gridStore.chunkSize = 1024 * 256;
+
+gridStore.open(function(err, gridStore) {
+ Step(
+   function writeData() {
+     var group = this.group();
+
+     for(var i = 0; i &lt; 1000000; i += 5000) {
+       gridStore.write(new Buffer(5000), group());
+     }
+   },
+
+   function doneWithWrite() {
+     gridStore.close(function(err, result) {
+       console.log("File has been written to GridFS");
+     });
+   }
+ )
+});</pre>
+</div>
+<p>Before we jump into picking apart the code let&#8217;s look at</p>
+<div class="highlight-python"><pre>var gridStore = new GridStore(db, fileId, "w", {root:'fs'});</pre>
+</div>
+<p>Notice the parameter <strong>&#8220;w&#8221;</strong> this is important. It tells the driver that
+you are planning to write a new file. The parameters you can use here
+are.</p>
+<ul class="simple">
+<li><strong>&#8220;r&#8221;</strong> - read only. This is the default mode</li>
+<li><strong>&#8220;w&#8221;</strong> - write in truncate mode. Existing data will be overwritten</li>
+<li><strong>&#8220;w+&#8221;</strong> - write in edit mode</li>
+</ul>
+<p>Right so there is a fair bit to digest here. We are simulating writing a
+file that&#8217;s about 1MB big to Mongo DB using GridFS. To do this we are
+writing it in chunks of 5000 bytes. So to not live with a difficult
+callback setup we are using the Step library with its&#8217; group
+functionality to ensure that we are notified when all of the writes are
+done. After all the writes are done Step will invoke the next function
+(or step) called <strong>doneWithWrite</strong> where we finish up by closing the
+file that flushes out any remaining data to Mongo DB and updates the
+file document.</p>
+<p>As we are doing it in chunks of 5000 bytes we will notice that memory
+consumption is low. This is the trick to write large files to GridFS. In
+pieces. Also notice this line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gridStore</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">256</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This allows you to adjust how big the chunks are in bytes that Mongo DB
+will write. You can tune the Chunk Size to your needs. If you need to
+write large files to GridFS it might be worthwhile to trade of memory
+for CPU by setting a larger Chunk Size.</p>
+<p>Now let&#8217;s see how the actual streaming read works.</p>
+<div class="highlight-python"><pre>new GridStore(db, fileId, "r").open(function(err, gridStore) {
+  var stream = gridStore.stream(true);
+
+  stream.on("data", function(chunk) {
+    console.log("Chunk of file data");
+  });
+
+  stream.on("end", function() {
+    console.log("EOF of file");
+  });
+
+  stream.on("close", function() {
+    console.log("Finished reading the file");
+  });
+});</pre>
+</div>
+<p>Right let&#8217;s have a quick lock at the streaming functionality supplied
+with the driver <strong>(make sure you are using 0.9.6-12 or higher as there
+is a bug fix for custom chunksizes that you need)</strong></p>
+<div class="highlight-python"><pre>var stream = gridStore.stream(true);</pre>
+</div>
+<p>This opens a stream to our file, you can pass in a boolean parameter to
+tell the driver to close the file automatically when it reaches the end.
+This will fire the <strong>close</strong> event automatically. Otherwise you&#8217;ll have
+to handle cleanup when you receive the <strong>end</strong> event. Let&#8217;s have a look
+at the events supported.</p>
+<div class="highlight-python"><pre>stream.on("data", function(chunk) {
+  console.log("Chunk of file data");
+});</pre>
+</div>
+<p>The <strong>data</strong> event is called for each chunk read. This means that it&#8217;s
+by the chunk size of the written file. So if you file is 1MB big and the
+file has chunkSize 256K then you&#8217;ll get 4 calls to the event handler for
+<strong>data</strong>. The chunk returned is a <strong>Buffer</strong> object.</p>
+<div class="highlight-python"><pre>stream.on("end", function() {
+  console.log("EOF of file");
+});</pre>
+</div>
+<p>The <strong>end</strong> event is called when the driver reaches the end of data for
+the file.</p>
+<div class="highlight-python"><pre>stream.on("close", function() {
+  console.log("Finished reading the file");
+});</pre>
+</div>
+<p>The <strong>close</strong> event is only called if you the <strong>autoclose</strong> parameter on
+the <strong>gridStore.stream</strong> method as shown above. If it&#8217;s false or not set
+handle cleanup of the streaming in the <strong>end</strong> event handler.</p>
+<p>Right that&#8217;s it for writing to GridFS in an efficient Manner. I&#8217;ll
+outline some other useful function on the Gridstore object.</p>
+</div>
+<div class="section" id="other-useful-methods-on-the-gridstore-object">
+<h2>Other useful methods on the Gridstore object<a class="headerlink" href="#other-useful-methods-on-the-gridstore-object" title="Permalink to this headline">¶</a></h2>
+<p>There are some other methods that are useful</p>
+<div class="highlight-python"><pre>gridStore.writeFile(filename/filedescriptor, function(err fileInfo) {});</pre>
+</div>
+<p><strong>writeFile</strong> takes either a file name or a file descriptor and writes
+it to GridFS. It does this in chunks to ensure the Eventloop is not tied
+up.</p>
+<div class="highlight-python"><pre>gridStore.read(length, function(err, data) {});</pre>
+</div>
+<p><strong>read/readBuffer</strong> lets you read a #length number of bytes from the
+current position in the file.</p>
+<div class="highlight-python"><pre>gridStore.seek(position, seekLocation, function(err, gridStore) {});</pre>
+</div>
+<p><strong>seek</strong> lets you navigate the file to read from different positions
+inside the chunks. The seekLocation allows you to specify how to seek.
+It can be one of three values.</p>
+<ul>
+<li><p class="first">GridStore.IO_SEEK_SET Seek mode where the given length is absolute</p>
+</li>
+<li><p class="first">GridStore.IO_SEEK_CUR Seek mode where the given length is an offset
+to the current read/write head</p>
+</li>
+<li><p class="first">GridStore.IO_SEEK_END Seek mode where the given length is an offset
+to the end of the file</p>
+<p>GridStore.list(dbInstance, collectionName, {id:true}, function(err,
+files) {})</p>
+</li>
+</ul>
+<p><strong>list</strong> lists all the files in the collection in GridFS. If you have a
+lot of files the current version will not work very well as it&#8217;s getting
+all files into memory first. You can have it return either the filenames
+or the ids for the files using option.</p>
+<div class="highlight-python"><pre>gridStore.unlink(function(err, result) {});</pre>
+</div>
+<p><strong>unlink</strong> deletes the file from Mongo DB, that&#8217;s to say all the file
+info and all the chunks.</p>
+<p>This should be plenty to get you on your way building your first GridFS
+based application. As in the previous article the following links might
+be useful for you. Good luck and have fun.</p>
+</div>
+<div class="section" id="links-and-stuff">
+<h2>Links and stuff<a class="headerlink" href="#links-and-stuff" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/mongodb/node-mongodb-native/tree/master/examples">The driver examples, good starting point for basic
+usage</a></li>
+<li><a class="reference external" href="https://github.com/mongodb/node-mongodb-native/tree/master/test">All the integration tests, they have tons of different usage
+cases</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">A primer for GridFS using the Mongo DB driver</a><ul>
+<li><a class="reference internal" href="#a-simple-example">A simple example</a></li>
+<li><a class="reference internal" href="#advanced-gridfs-or-how-not-to-run-out-of-memory">Advanced GridFS or how not to run out of memory</a></li>
+<li><a class="reference internal" href="#other-useful-methods-on-the-gridstore-object">Other useful methods on the Gridstore object</a></li>
+<li><a class="reference internal" href="#links-and-stuff">Links and stuff</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>
