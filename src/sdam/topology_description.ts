@@ -390,7 +390,7 @@ function updateRsFromPrimary(
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
-  if (serverDescription.electionId && serverDescription.setVersion) {
+  if (serverDescription.electionId != null && serverDescription.setVersion != null) {
     const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
     const maxElectionIdIsGreater = electionIdComparison === 1;
     const maxElectionIdIsEqual = electionIdComparison === 0;
