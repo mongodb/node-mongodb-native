@@ -69,6 +69,24 @@ async function copyNewDocsToGeneratedSite({ semverVersion }: VersionSchema) {
   return await exec(command);
 }
 
+function customSemverCompare(a: string, b: string) {
+  if (a === 'current') {
+    return -1
+  }
+  if (b === 'current') {
+    return 1
+  }
+  // put legacy 3x driver version at the bottom of the list
+  if (a === 'core') {
+    return 1;
+  }
+  if (b === 'core') {
+    return -1;
+  }
+
+  return b.localeCompare(a);
+}
+
 async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlData: TomlVersionSchema, jsonVersions: JsonVersionSchema[]) {
   const versionExists = jsonVersions.some(({ version }) => version === newVersion.semverVersion);
   if (versionExists) {
@@ -76,10 +94,14 @@ async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlDa
     tomlData.versions[existingVersionIndex] = newVersion;
   } else {
     tomlData.versions.unshift(newVersion);
-    tomlData.current = newVersion.version;
 
     jsonVersions.unshift({ version: newVersion.semverVersion })
   }
+
+  tomlData.versions.sort((a, b) => customSemverCompare(a.semverVersion, b.semverVersion))
+  tomlData.current = tomlData.versions[0].version;
+
+  jsonVersions.sort((a, b) => customSemverCompare(a.version, b.version))
 
   await writeFile(RELEASES_TOML_FILE, stringify(tomlData as any));
   await writeFile(RELEASES_JSON_FILE, JSON.stringify(jsonVersions, null, 4));
@@ -102,7 +124,7 @@ async function main() {
   };
 
   const response = await prompt(`
-    Generating docs for the following configuration.  
+    Generating docs for the following configuration.
 ${JSON.stringify(newVersion, null, 2)}
     Does this look right? [y/n] `);
 
