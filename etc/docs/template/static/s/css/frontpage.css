@@ -231,8 +231,8 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
   background-repeat: no-repeat;
 }
 
-#mongodbJVMlogo {
-  background-image: url("../img/mongoJVMlogo.png");
+#mongodbNodelogo {
+  background-image: url("../img/node.png");
   background-position: left top;
   background-repeat: no-repeat;
   width: 83px;
