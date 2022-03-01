@@ -1,0 +1,240 @@
+======
+BSON()
+======
+
+------------------
+Constructor
+------------------
+
+
+Create a new BSON instance
+
+
+  .. js:class:: BSON()
+
+   :returns: bson instance of BSON Parser.
+
+
+
+------------------
+Constants
+------------------
+
+.. csv-table:: 
+   :header: "Constant Name", "Value", "Description"
+   :widths: 15, 10, 30
+
+   "BSON.BSON_DATA_NUMBER", "1", "Number BSON Type"
+   "BSON.BSON_DATA_STRING", "2", "String BSON Type"
+   "BSON.BSON_DATA_OBJECT", "3", "Object BSON Type"
+   "BSON.BSON_DATA_ARRAY", "4", "Array BSON Type"
+   "BSON.BSON_DATA_BINARY", "5", "Binary BSON Type"
+   "BSON.BSON_DATA_OID", "7", "ObjectID BSON Type"
+   "BSON.BSON_DATA_BOOLEAN", "8", "Boolean BSON Type"
+   "BSON.BSON_DATA_DATE", "9", "Date BSON Type"
+   "BSON.BSON_DATA_NULL", "10", "null BSON Type"
+   "BSON.BSON_DATA_REGEXP", "11", "RegExp BSON Type"
+   "BSON.BSON_DATA_CODE", "13", "Code BSON Type"
+   "BSON.BSON_DATA_SYMBOL", "14", "Symbol BSON Type"
+   "BSON.BSON_DATA_CODE_W_SCOPE", "15", "Code with Scope BSON Type"
+   "BSON.BSON_DATA_INT", "16", "32 bit Integer BSON Type"
+   "BSON.BSON_DATA_TIMESTAMP", "17", "Timestamp BSON Type"
+   "BSON.BSON_DATA_LONG", "18", "Long BSON Type"
+   "BSON.BSON_DATA_MIN_KEY", "0xff", "MinKey BSON Type"
+   "BSON.BSON_DATA_MAX_KEY", "0x7f", "MaxKey BSON Type"
+   "BSON.BSON_BINARY_SUBTYPE_DEFAULT", "0", "Binary Default Type"
+   "BSON.BSON_BINARY_SUBTYPE_FUNCTION", "1", "Binary Function Type"
+   "BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY", "2", "Binary Byte Array Type"
+   "BSON.BSON_BINARY_SUBTYPE_UUID", "3", "Binary UUID Type"
+   "BSON.BSON_BINARY_SUBTYPE_MD5", "4", "Binary MD5 Type"
+   "BSON.BSON_BINARY_SUBTYPE_USER_DEFINED", "128", "Binary User Defined Type"
+
+------------------------
+BSON.calculateObjectSize
+------------------------
+
+
+Calculate the bson size for a passed in Javascript object.
+
+.. js:function:: BSON.calculateObjectSize(object[, serializeFunctions])
+
+   :param object object: the Javascript object to calculate the BSON byte size for.
+   :param boolean [serializeFunctions]: serialize all functions in the object **(default:false)**.
+   :returns: number returns the number of bytes the BSON object will take up.
+
+
+--------------------------------
+BSON.serializeWithBufferAndIndex
+--------------------------------
+
+
+Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.
+
+.. js:function:: BSON.serializeWithBufferAndIndex(object, checkKeys, buffer, index, serializeFunctions)
+
+   :param object object: the Javascript object to serialize.
+   :param boolean checkKeys: the serializer will check if keys are valid.
+   :param buffer buffer: the Buffer you pre-allocated to store the serialized BSON object.
+   :param number index: the index in the buffer where we wish to start serializing into.
+   :param boolean serializeFunctions: serialize the javascript functions **(default:false)**.
+   :returns: number returns the new write index in the Buffer.
+
+
+--------------
+BSON.serialize
+--------------
+
+
+Serialize a Javascript object.
+
+.. js:function:: BSON.serialize(object, checkKeys, asBuffer, serializeFunctions)
+
+   :param object object: the Javascript object to serialize.
+   :param boolean checkKeys: the serializer will check if keys are valid.
+   :param boolean asBuffer: return the serialized object as a Buffer object **(ignore)**.
+   :param boolean serializeFunctions: serialize the javascript functions **(default:false)**.
+   :returns: buffer returns the Buffer object containing the serialized object.
+
+
+----------------------
+BSON.deserializeStream
+----------------------
+
+
+Deserialize stream data as BSON documents.
+
+
+
+Options
+ - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
+ - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
+ - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+ - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
+
+.. js:function:: BSON.deserializeStream(data, startIndex, numberOfDocuments, documents, docStartIndex[, options])
+
+   :param buffer data: the buffer containing the serialized set of BSON documents.
+   :param number startIndex: the start index in the data Buffer where the deserialization is to start.
+   :param number numberOfDocuments: number of documents to deserialize.
+   :param array documents: an array where to store the deserialized documents.
+   :param number docStartIndex: the index in the documents array from where to start inserting documents.
+   :param object [options]: additional options used for the deserialization.
+   :returns: number returns the next index in the buffer after deserialization **x** numbers of documents.
+
+
+----------------
+BSON.deserialize
+----------------
+
+
+Deserialize data as BSON.
+
+
+
+Options
+ - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
+ - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
+ - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+ - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
+
+.. js:function:: BSON.deserialize(buffer[, options], [isArray])
+
+   :param buffer buffer: the buffer containing the serialized set of BSON documents.
+   :param object [options]: additional options used for the deserialization.
+   :param boolean [isArray]: ignore used for recursive parsing.
+   :returns: object returns the deserialized Javascript Object.
+
+
+-----------
+deserialize
+-----------
+
+
+Deserialize data as BSON.
+
+
+
+Options
+ - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
+ - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
+ - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+
+.. js:function:: deserialize(buffer[, options], [isArray])
+
+   :param buffer buffer: the buffer containing the serialized set of BSON documents.
+   :param object [options]: additional options used for the deserialization.
+   :param boolean [isArray]: ignore used for recursive parsing.
+   :returns: object returns the deserialized Javascript Object.
+
+
+-----------------
+deserializeStream
+-----------------
+
+
+Deserialize stream data as BSON documents.
+
+
+
+Options
+ - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
+ - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
+ - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+
+.. js:function:: deserializeStream(data, startIndex, numberOfDocuments, documents, docStartIndex[, options])
+
+   :param buffer data: the buffer containing the serialized set of BSON documents.
+   :param number startIndex: the start index in the data Buffer where the deserialization is to start.
+   :param number numberOfDocuments: number of documents to deserialize.
+   :param array documents: an array where to store the deserialized documents.
+   :param number docStartIndex: the index in the documents array from where to start inserting documents.
+   :param object [options]: additional options used for the deserialization.
+   :returns: number returns the next index in the buffer after deserialization **x** numbers of documents.
+
+
+---------
+serialize
+---------
+
+
+Serialize a Javascript object.
+
+.. js:function:: serialize(object, checkKeys, asBuffer, serializeFunctions)
+
+   :param object object: the Javascript object to serialize.
+   :param boolean checkKeys: the serializer will check if keys are valid.
+   :param boolean asBuffer: return the serialized object as a Buffer object **(ignore)**.
+   :param boolean serializeFunctions: serialize the javascript functions **(default:false)**.
+   :returns: buffer returns the Buffer object containing the serialized object.
+
+
+-------------------
+calculateObjectSize
+-------------------
+
+
+Calculate the bson size for a passed in Javascript object.
+
+.. js:function:: calculateObjectSize(object[, serializeFunctions])
+
+   :param object object: the Javascript object to calculate the BSON byte size for.
+   :param boolean [serializeFunctions]: serialize all functions in the object **(default:false)**.
+   :returns: number returns the number of bytes the BSON object will take up.
+
+
+---------------------------
+serializeWithBufferAndIndex
+---------------------------
+
+
+Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.
+
+.. js:function:: serializeWithBufferAndIndex(object, checkKeys, buffer, index, serializeFunctions)
+
+   :param object object: the Javascript object to serialize.
+   :param boolean checkKeys: the serializer will check if keys are valid.
+   :param buffer buffer: the Buffer you pre-allocated to store the serialized BSON object.
+   :param number index: the index in the buffer where we wish to start serializing into.
+   :param boolean serializeFunctions: serialize the javascript functions **(default:false)**.
+   :returns: number returns the new write index in the Buffer.
+

@@ -70,3 +70,6 @@ lb.env
 
 # docs specific configuration
 etc/docs/build
+!docs
+!docs/s/lib
+!docs/s/js

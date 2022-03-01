@@ -1,0 +1,19 @@
+======
+Code()
+======
+
+------------------
+Constructor
+------------------
+
+
+A class representation of the BSON Code type.
+
+
+  .. js:class:: Code()
+
+   :param string code: a string or function.
+   :param object [scope]: an optional scope for the function.
+   :returns: code 
+
+

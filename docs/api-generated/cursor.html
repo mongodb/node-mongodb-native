@@ -1,0 +1,1313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Cursor() &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" />
+    <link rel="next" title="CursorStream()" href="cursorstream.html" />
+    <link rel="prev" title="Admin()" href="admin.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="cursor">
+<h1>Cursor()<a class="headerlink" href="#cursor" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<p>Constructor for a cursor object that handles all the operations on query result
+using find. This cursor object is unidirectional and cannot traverse backwards. Clients should not be creating a cursor directly,
+but use find to acquire a cursor. (INTERNAL TYPE)</p>
+<blockquote>
+<div><dl class="class">
+<dt id="Cursor">
+<em class="property">class </em><tt class="descname">Cursor</tt><big>(</big><big>)</big><a class="headerlink" href="#Cursor" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>db</strong> (<em>db</em>) &#8211; the database object to work with.</li>
+<li><strong>collection</strong> (<em>collection</em>) &#8211; the collection to query.</li>
+<li><strong>selector</strong> (<em>object</em>) &#8211; the query selector.</li>
+<li><strong>fields</strong> (<em>object</em>) &#8211; an object containing what fields to include or exclude from objects returned.</li>
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options for the collection.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div></blockquote>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>skip</strong> {Number} skip number of documents to skip.</li>
+<li><strong>limit</strong> {Number}, limit the number of results to return. -1 has a special meaning and is used by Db.eval. A value of 1 will also be treated as if it were -1.</li>
+<li><strong>sort</strong> {Array | Object}, set to sort the documents coming back from the query. Array of indexes, [[&#8216;a&#8217;, 1]] etc.</li>
+<li><strong>hint</strong>  {Object}, hint force the query to use a specific index.</li>
+<li><strong>explain</strong> {Boolean}, explain return the explaination of the query.</li>
+<li><strong>snapshot</strong> {Boolean}, snapshot Snapshot mode assures no duplicates are returned.</li>
+<li><strong>timeout</strong> {Boolean}, timeout allow the query to timeout.</li>
+<li><strong>tailable</strong> {Boolean}, tailable allow the cursor to be tailable.</li>
+<li><strong>awaitdata</strong> {Boolean}, awaitdata allow the cursor to wait for data, only applicable for tailable cursor.</li>
+<li><strong>oplogReplay</strong> {Boolean}, sets an internal flag, only applicable for tailable cursor.</li>
+<li><strong>batchSize</strong> {Number}, batchSize the number of the subset of results to request the database to return for every request. This should initially be greater than 1 otherwise the database will automatically close the cursor. The batch size can be set to 1 with cursorInstance.batchSize after performing the initial query to the database.</li>
+<li><strong>raw</strong> {Boolean}, raw return all query documents as raw buffers (default false).</li>
+<li><strong>read</strong> {Boolean}, read specify override of read from source (primary/secondary).</li>
+<li><strong>returnKey</strong> {Boolean}, returnKey only return the index key.</li>
+<li><strong>maxScan</strong> {Number}, maxScan limit the number of items to scan.</li>
+<li><strong>min</strong> {Number}, min set index bounds.</li>
+<li><strong>max</strong> {Number}, max set index bounds.</li>
+<li><strong>maxTimeMS</strong> {Number}, number of miliseconds to wait before aborting the query.</li>
+<li><strong>showDiskLoc</strong> {Boolean}, showDiskLoc show disk location of results.</li>
+<li><strong>comment</strong> {String}, comment you can put a $comment field on a query to make looking in the profiler logs simpler.</li>
+<li><strong>numberOfRetries</strong> {Number}, numberOfRetries if using awaidata specifies the number of times to retry on timeout.</li>
+<li><strong>dbName</strong> {String}, dbName override the default dbName.</li>
+<li><strong>tailableRetryInterval</strong> {Number}, tailableRetryInterval specify the miliseconds between getMores on tailable cursor.</li>
+<li><strong>exhaust</strong> {Boolean}, exhaust have the server send all the documents at once as getMore packets.</li>
+<li><strong>partial</strong> {Boolean}, partial have the sharded system return a partial result from mongos.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="18%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Constant Name</th>
+<th class="head">Value</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Cursor.INIT</td>
+<td>0</td>
+<td>Init state</td>
+</tr>
+<tr class="row-odd"><td>Cursor.OPEN</td>
+<td>1</td>
+<td>Cursor open</td>
+</tr>
+<tr class="row-even"><td>Cursor.CLOSED</td>
+<td>2</td>
+<td>Cursor closed</td>
+</tr>
+<tr class="row-odd"><td>Cursor.GET_MORE</td>
+<td>3</td>
+<td>Cursor performing a get more</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="cursor-clonewithoptions">
+<h2>Cursor.cloneWithOptions<a class="headerlink" href="#cursor-clonewithoptions" title="Permalink to this headline">¶</a></h2>
+<p>Clones a given cursor but uses new options</p>
+<dl class="function">
+<dt id="Cursor.cloneWithOptions">
+<tt class="descclassname">Cursor.</tt><tt class="descname">cloneWithOptions</tt><big>(</big><em>cursor</em><big>)</big><a class="headerlink" href="#Cursor.cloneWithOptions" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>cursor</strong> (<em>cursor</em>) &#8211; the cursor to clone.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object [options] additional options for the collection when cloning.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="rewind">
+<h2>rewind<a class="headerlink" href="#rewind" title="Permalink to this headline">¶</a></h2>
+<p>Resets this cursor to its initial state. All settings like the query string,
+tailable, batchSizeValue, skipValue and limits are preserved.</p>
+<dl class="function">
+<dt>
+<tt class="descname">rewind</tt><big>(</big><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">cursor returns itself with rewind applied.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example showing the information returned by indexInformation</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[];</span>
+
+  <span class="c1">// Insert 100 documents with some data</span>
+  <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">d</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">getTime</span><span class="p">()</span> <span class="o">+</span> <span class="nx">i</span><span class="o">*</span><span class="mi">1000</span><span class="p">;</span>
+    <span class="nx">docs</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="nx">i</span><span class="p">,</span> <span class="nx">createdAt</span><span class="o">:</span><span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="nx">d</span><span class="p">)};</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Create collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;Should_correctly_rewind_and_restart_cursor&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// insert all docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Grab a cursor using the find</span>
+      <span class="kd">var</span> <span class="nx">cursor</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">({});</span>
+      <span class="c1">// Fetch the first object off the cursor</span>
+      <span class="nx">cursor</span><span class="p">.</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">a</span><span class="p">)</span>
+        <span class="c1">// Rewind the cursor, resetting it to point to the start of the query</span>
+        <span class="nx">cursor</span><span class="p">.</span><span class="nx">rewind</span><span class="p">();</span>
+
+        <span class="c1">// Grab the first object again</span>
+        <span class="nx">cursor</span><span class="p">.</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">a</span><span class="p">)</span>
+
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">})</span>
+      <span class="p">})</span>
+    <span class="p">})</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="toarray">
+<h2>toArray<a class="headerlink" href="#toarray" title="Permalink to this headline">¶</a></h2>
+<p>Returns an array of documents. The caller is responsible for making sure that there
+is enough memory to store the results. Note that the array only contain partial
+results when this cursor had been previouly accessed. In that case,
+cursor.rewind() can be used to reset the cursor.</p>
+<dl class="function">
+<dt id="toArray">
+<tt class="descname">toArray</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#toArray" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; This will be called after executing this method successfully. The first parameter will contain the Error object if an error occured, or null otherwise. The second parameter will contain an array of BSON deserialized objects as a result of the query.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>An example showing the information returned by indexInformation</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a collection to hold our documents</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_array&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// Insert a test document</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;b&#39;</span><span class="o">:</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Retrieve all the documents in the collection</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">documents</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">documents</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">deepEqual</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="nx">documents</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">b</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="each">
+<h2>each<a class="headerlink" href="#each" title="Permalink to this headline">¶</a></h2>
+<p>Iterates over all the documents for this cursor. As with <strong>{cursor.toArray}</strong>,
+not all of the elements will be iterated if this cursor had been previouly accessed.
+In that case, <strong>{cursor.rewind}</strong> can be used to reset the cursor. However, unlike
+<strong>{cursor.toArray}</strong>, the cursor will only hold a maximum of batch size elements
+at any given time if batch size is specified. Otherwise, the caller is responsible
+for making sure that the entire result can fit the memory.</p>
+<dl class="function">
+<dt>
+<tt class="descname">each</tt><big>(</big><em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called for while iterating every document of the query result. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the document.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example iterating over a query using the each function of the cursor.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_to_a_after_each&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert a document in the collection</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="c1">// Grab a cursor</span>
+      <span class="kd">var</span> <span class="nx">cursor</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">();</span>
+
+      <span class="c1">// Execute the each command, triggers for each document</span>
+      <span class="nx">cursor</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// If the item is null then the cursor is exhausted/empty and closed</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">item</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+
+          <span class="c1">// Show that the cursor is closed</span>
+          <span class="nx">cursor</span><span class="p">.</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">err</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+
+            <span class="c1">// Let&#39;s close the db</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+          <span class="p">});</span>
+        <span class="p">};</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="count">
+<h2>count<a class="headerlink" href="#count" title="Permalink to this headline">¶</a></h2>
+<p>Determines how many result the query for this cursor will return</p>
+<dl class="function">
+<dt>
+<tt class="descname">count</tt><big>(</big><em>applySkipLimit</em>, <em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>applySkipLimit</strong> (<em>boolean</em>) &#8211; if set to true will apply the skip and limits set on the cursor. Defaults to false.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the number of results or null if an error occured.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the count function of the cursor.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Creat collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;cursor_count_collection&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert some docs</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">docs</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Do a find and get the cursor count</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">count</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">count</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">count</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">})</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="sort">
+<h2>sort<a class="headerlink" href="#sort" title="Permalink to this headline">¶</a></h2>
+<p>Sets the sort parameter of this cursor to the given value.</p>
+<p>This method has the following method signatures:
+(keyOrList, callback)
+(keyOrList, direction, callback)</p>
+<dl class="function">
+<dt>
+<tt class="descname">sort</tt><big>(</big><em>keyOrList</em>, <em>direction</em>, <em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>keyOrList</strong> (<em>string</em>) &#8211; This can be a string or an array. If passed as a string, the string will be the field to sort. If passed an array, each element will represent a field to be sorted and should be an array that contains the format [string, direction].</li>
+<li><strong>direction</strong> (<em>string</em>) &#8211; this determines how the results are sorted. &amp;quot;asc&amp;quot;, &amp;quot;ascending&amp;quot; or 1 for asceding order while &amp;quot;desc&amp;quot;, &amp;quot;desceding or -1 for descending order. Note that the strings are case insensitive.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain an error object when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">cursor an instance of this object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of sort on the cursor.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;simple_sort_collection&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert some documents we can sort on</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">docs</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Do normal ascending sort</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">sort</span><span class="p">([[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]).</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+
+        <span class="c1">// Do normal descending sort</span>
+        <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">sort</span><span class="p">([[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]).</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="limit">
+<h2>limit<a class="headerlink" href="#limit" title="Permalink to this headline">¶</a></h2>
+<p>Sets the limit parameter of this cursor to the given value.</p>
+<dl class="function">
+<dt>
+<tt class="descname">limit</tt><big>(</big><em>limit</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>limit</strong> (<em>number</em>) &#8211; the new limit.</li>
+<li><strong>[callback]</strong> (<em>function</em>) &#8211; this optional callback will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">cursor an instance of this object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of limit on the cursor</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;simple_limit_collection&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert some documents we can sort on</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">docs</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Limit to only one document returned</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">limit</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">items</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="maxtimems">
+<h2>maxTimeMS<a class="headerlink" href="#maxtimems" title="Permalink to this headline">¶</a></h2>
+<p>Specifies a time limit for a query operation. After the specified
+time is exceeded, the operation will be aborted and an error will be
+returned to the client. If maxTimeMS is null, no limit is applied.</p>
+<dl class="function">
+<dt id="maxTimeMS">
+<tt class="descname">maxTimeMS</tt><big>(</big><em>maxTimeMS</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#maxTimeMS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>maxTimeMS</strong> (<em>number</em>) &#8211; the maxTimeMS for the query.</li>
+<li><strong>[callback]</strong> (<em>function</em>) &#8211; this optional callback will be called after executing this method. The first parameter will contain an error object when the limit given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">cursor an instance of this object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setreadpreference">
+<h2>setReadPreference<a class="headerlink" href="#setreadpreference" title="Permalink to this headline">¶</a></h2>
+<p>Sets the read preference for the cursor</p>
+<dl class="function">
+<dt id="setReadPreference">
+<tt class="descname">setReadPreference</tt><big>(</big><em>the</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#setReadPreference" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>the</strong> (<em>string</em>) &#8211; read preference for the cursor, one of Server.READ_PRIMARY, Server.READ_SECONDARY, Server.READ_SECONDARY_ONLY</li>
+<li><strong>[callback]</strong> (<em>function</em>) &#8211; this optional callback will be called after executing this method. The first parameter will contain an error object when the read preference given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">cursor an instance of this object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="skip">
+<h2>skip<a class="headerlink" href="#skip" title="Permalink to this headline">¶</a></h2>
+<p>Sets the skip parameter of this cursor to the given value.</p>
+<dl class="function">
+<dt>
+<tt class="descname">skip</tt><big>(</big><em>skip</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>skip</strong> (<em>number</em>) &#8211; the new skip value.</li>
+<li><strong>[callback]</strong> (<em>function</em>) &#8211; this optional callback will be called after executing this method. The first parameter will contain an error object when the skip value given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">cursor an instance of this object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of skip on the cursor</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;simple_skip_collection&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert some documents we can sort on</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">docs</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Skip one document</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">skip</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="batchsize">
+<h2>batchSize<a class="headerlink" href="#batchsize" title="Permalink to this headline">¶</a></h2>
+<p>Sets the batch size parameter of this cursor to the given value.</p>
+<dl class="function">
+<dt id="batchSize">
+<tt class="descname">batchSize</tt><big>(</big><em>batchSize</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#batchSize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>batchSize</strong> (<em>number</em>) &#8211; the new batch size.</li>
+<li><strong>[callback]</strong> (<em>function</em>) &#8211; this optional callback will be called after executing this method. The first parameter will contain an error object when the batchSize given is not a valid number or when the cursor is already closed while the second parameter will contain a reference to this object upon successful execution.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">cursor an instance of this object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
+documents are returned for each batch using the getMoreCommand against the MongoDB server</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;simple_batch_size_collection&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert some documents we can sort on</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">docs</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Do normal ascending sort</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">batchSize</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="nextobject">
+<h2>nextObject<a class="headerlink" href="#nextobject" title="Permalink to this headline">¶</a></h2>
+<p>Gets the next document from the cursor.</p>
+<dl class="function">
+<dt id="nextObject">
+<tt class="descname">nextObject</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#nextObject" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain an error object on error while the second parameter will contain a document from the returned result or null if there are no more results.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of nextObject.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;simple_next_object_collection&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert some documents we can sort on</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">docs</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Do normal ascending sort</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">a</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="explain">
+<h2>explain<a class="headerlink" href="#explain" title="Permalink to this headline">¶</a></h2>
+<p>Gets a detailed information about how the query is performed on this cursor and how
+long it took the database to process it.</p>
+<dl class="function">
+<dt>
+<tt class="descname">explain</tt><big>(</big><em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will always be null while the second parameter will be an object containing the details.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of the cursor explain function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;simple_explain_collection&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert some documents we can sort on</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">([{</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="nx">a</span><span class="o">:</span><span class="mi">3</span><span class="p">}],</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">docs</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+      <span class="c1">// Do normal ascending sort</span>
+      <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">explain</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">explaination</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="stream">
+<h2>stream<a class="headerlink" href="#stream" title="Permalink to this headline">¶</a></h2>
+<p>Returns a Node Transform Stream interface for this cursor.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>transform</strong> {Function} function of type function(object) { return transformed }, allows for transformation of data before emitting.</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt>
+<tt class="descname">stream</tt><big>(</big><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">cursorstream returns a stream object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of the cursor stream function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a lot of documents to insert</span>
+  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">docs</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="nx">i</span><span class="p">})</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_stream_function&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert documents into collection</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Peform a find to get a cursor</span>
+      <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">().</span><span class="nx">stream</span><span class="p">();</span>
+
+      <span class="c1">// Execute find on all the documents</span>
+      <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;close&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+      <span class="p">});</span>
+
+      <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">data</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">);</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="close">
+<h2>close<a class="headerlink" href="#close" title="Permalink to this headline">¶</a></h2>
+<p>Close the cursor.</p>
+<dl class="function">
+<dt>
+<tt class="descname">close</tt><big>(</big><em>callback</em><big>)</big></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will always contain null while the second parameter will contain a reference to this cursor.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of the cursor close function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a lot of documents to insert</span>
+  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">docs</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="nx">i</span><span class="p">})</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_close_function_on_cursor&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert documents into collection</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Peform a find to get a cursor</span>
+      <span class="kd">var</span> <span class="nx">cursor</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">();</span>
+
+      <span class="c1">// Fetch the first object</span>
+      <span class="nx">cursor</span><span class="p">.</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+        <span class="c1">// Close the cursor, this is the same as reseting the query</span>
+        <span class="nx">cursor</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="isclosed">
+<h2>isClosed<a class="headerlink" href="#isclosed" title="Permalink to this headline">¶</a></h2>
+<p>Check if the cursor is closed or open.</p>
+<dl class="function">
+<dt id="isClosed">
+<tt class="descname">isClosed</tt><big>(</big><big>)</big><a class="headerlink" href="#isClosed" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean returns the state of the cursor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p><strong>Examples</strong></p>
+<blockquote>
+<div><p>A simple example showing the use of the cursor close function.</p>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">Db</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Db</span><span class="p">,</span>
+    <span class="nx">MongoClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">MongoClient</span><span class="p">,</span>
+    <span class="nx">Server</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Server</span><span class="p">,</span>
+    <span class="nx">ReplSetServers</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ReplSetServers</span><span class="p">,</span>
+    <span class="nx">ObjectID</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">ObjectID</span><span class="p">,</span>
+    <span class="nx">Binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Binary</span><span class="p">,</span>
+    <span class="nx">GridStore</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">GridStore</span><span class="p">,</span>
+    <span class="nx">Grid</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Grid</span><span class="p">,</span>
+    <span class="nx">Code</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">Code</span><span class="p">,</span>
+    <span class="nx">BSON</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;mongodb&#39;</span><span class="p">).</span><span class="nx">pure</span><span class="p">().</span><span class="nx">BSON</span><span class="p">,</span>
+    <span class="nx">assert</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Db</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Server</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="mi">27017</span><span class="p">));</span>
+<span class="c1">// Establish connection to db</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="c1">// Create a lot of documents to insert</span>
+  <span class="kd">var</span> <span class="nx">docs</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">docs</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="o">:</span><span class="nx">i</span><span class="p">})</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Create a collection</span>
+  <span class="nx">db</span><span class="p">.</span><span class="nx">createCollection</span><span class="p">(</span><span class="s1">&#39;test_is_close_function_on_cursor&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">collection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+    <span class="c1">// Insert documents into collection</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">(</span><span class="nx">docs</span><span class="p">,</span> <span class="p">{</span><span class="nx">w</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Peform a find to get a cursor</span>
+      <span class="kd">var</span> <span class="nx">cursor</span> <span class="o">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">find</span><span class="p">();</span>
+
+      <span class="c1">// Fetch the first object</span>
+      <span class="nx">cursor</span><span class="p">.</span><span class="nx">nextObject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+
+        <span class="c1">// Close the cursor, this is the same as reseting the query</span>
+        <span class="nx">cursor</span><span class="p">.</span><span class="nx">close</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">cursor</span><span class="p">.</span><span class="nx">isClosed</span><span class="p">());</span>
+
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Cursor()</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#constants">Constants</a></li>
+<li><a class="reference internal" href="#cursor-clonewithoptions">Cursor.cloneWithOptions</a></li>
+<li><a class="reference internal" href="#rewind">rewind</a></li>
+<li><a class="reference internal" href="#toarray">toArray</a></li>
+<li><a class="reference internal" href="#each">each</a></li>
+<li><a class="reference internal" href="#count">count</a></li>
+<li><a class="reference internal" href="#sort">sort</a></li>
+<li><a class="reference internal" href="#limit">limit</a></li>
+<li><a class="reference internal" href="#maxtimems">maxTimeMS</a></li>
+<li><a class="reference internal" href="#setreadpreference">setReadPreference</a></li>
+<li><a class="reference internal" href="#skip">skip</a></li>
+<li><a class="reference internal" href="#batchsize">batchSize</a></li>
+<li><a class="reference internal" href="#nextobject">nextObject</a></li>
+<li><a class="reference internal" href="#explain">explain</a></li>
+<li><a class="reference internal" href="#stream">stream</a></li>
+<li><a class="reference internal" href="#close">close</a></li>
+<li><a class="reference internal" href="#isclosed">isClosed</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu"><li><strong>Previous:</strong> <a href="admin.html" title="previous chapter">Admin()</a></li><li><strong>Next:</strong> <a href="cursorstream.html" title="next chapter">CursorStream()</a></li>
+</ul>
+<h3>Manual</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="admin.html">Admin()</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

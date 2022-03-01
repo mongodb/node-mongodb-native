@@ -1,0 +1,26 @@
+================
+ReadPreference()
+================
+
+------------------
+Constructor
+------------------
+
+
+A class representation of the Read Preference.
+
+
+  .. js:class:: ReadPreference()
+
+   :param string the: read preference type
+   :param object tags: 
+   :returns: readpreference 
+
+
+Read Preferences
+ - **ReadPreference.PRIMARY**, Read from primary only. All operations produce an error (throw an exception where applicable) if primary is unavailable. Cannot be combined with tags (This is the default.).
+ - **ReadPreference.PRIMARY_PREFERRED**, Read from primary if available, otherwise a secondary.
+ - **ReadPreference.SECONDARY**, Read from secondary if available, otherwise error.
+ - **ReadPreference.SECONDARY_PREFERRED**, Read from a secondary if available, otherwise read from the primary.
+ - **ReadPreference.NEAREST**, All modes read from among the nearest candidates, but unlike other modes, NEAREST will include both the primary and all secondaries in the random selection.
+

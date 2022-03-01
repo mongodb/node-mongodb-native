@@ -1,0 +1,209 @@
+========================
+UnorderedBulkOperation()
+========================
+
+------------------
+Constructor
+------------------
+
+
+Create a new UnorderedBulkOperation instance (INTERNAL TYPE, do not instantiate directly)
+
+
+  .. js:class:: UnorderedBulkOperation()
+
+   :param object collection: collection instance.
+   :param object [options]: additional options for the collection.
+   :returns: object a ordered bulk operation instance.
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where < 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+
+------
+update
+------
+
+
+Add a single update document to the bulk operation
+
+.. js:function:: update(doc)
+
+   :param object doc: update operations
+   :returns: unorderedbulkoperation 
+
+
+**Examples**
+
+  
+  
+  Example of a simple ordered insert/update/upsert/remove ordered collection
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db
+       db.open(function(err, db) {
+         // Get the collection
+         var col = db.collection('batch_write_unordered_ops_legacy_0');
+         // Initialize the unordered Batch
+         var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
+     
+         // Add some operations to be executed in order
+         batch.insert({a:1});
+         batch.find({a:1}).updateOne({$set: {b:1}});
+         batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+         batch.insert({a:3});
+         batch.find({a:3}).remove({a:3});
+     
+         // Execute the operations
+         batch.execute(function(err, result) {
+           // Check state of result
+           assert.equal(2, result.nInserted);
+           assert.equal(1, result.nUpserted);
+           assert.equal(1, result.nMatched);
+           assert.ok(1 == result.nModified || result.nModified == null);
+           assert.equal(1, result.nRemoved);
+     
+           var upserts = result.getUpsertedIds();
+           assert.equal(1, upserts.length);
+           assert.equal(2, upserts[0].index);
+           assert.ok(upserts[0]._id != null);
+           
+           var upsert = result.getUpsertedIdAt(0);
+           assert.equal(2, upsert.index);
+           assert.ok(upsert._id != null);
+     
+           // Finish up test
+           db.close();
+         });
+       });
+
+
+---------
+updateOne
+---------
+
+
+Add a single update one document to the bulk operation
+
+.. js:function:: updateOne(doc)
+
+   :param object doc: update operations
+   :returns: unorderedbulkoperation 
+
+
+----------
+replaceOne
+----------
+
+
+Add a replace one operation to the bulk operation
+
+.. js:function:: replaceOne(doc)
+
+   :param object doc: the new document to replace the existing one with
+   :returns: unorderedbulkoperation 
+
+
+------
+upsert
+------
+
+
+Upsert modifier for update bulk operation
+
+.. js:function:: upsert()
+
+   :returns: unorderedbulkoperation 
+
+
+---------
+removeOne
+---------
+
+
+Add a remove one operation to the bulk operation
+
+.. js:function:: removeOne(doc)
+
+   :param object doc: selector for the removal of documents
+   :returns: unorderedbulkoperation 
+
+
+------
+remove
+------
+
+
+Add a remove operation to the bulk operation
+
+.. js:function:: remove(doc)
+
+   :param object doc: selector for the single document to remove
+   :returns: unorderedbulkoperation 
+
+
+------
+insert
+------
+
+
+Add a single insert document to the bulk operation
+
+.. js:function:: insert(doc)
+
+   :param object doc: the document to insert
+   :returns: unorderedbulkoperation 
+
+
+----
+find
+----
+
+
+Initiate a find operation for an update/updateOne/remove/removeOne/replaceOne
+
+.. js:function:: find(selector)
+
+   :param object selector: the selector used to locate documents for the operation
+   :returns: unorderedbulkoperation 
+
+
+-------
+execute
+-------
+
+
+Execute the unordered bulk operation
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+.. js:function:: execute([options], callback)
+
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from from the unordered bulk operation.
+   :returns: null 
+

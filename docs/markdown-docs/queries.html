@@ -1,0 +1,581 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Queries &mdash; MongoDB Node.JS Driver 1.4.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.4.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.9 documentation" href="../index.html" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="queries">
+<h1>Queries<a class="headerlink" href="#queries" title="Permalink to this headline">¶</a></h1>
+<p>See also:</p>
+<ul class="simple">
+<li><a class="reference external" href="database.md">Database</a></li>
+<li><a class="reference external" href="collections.md">Collections</a></li>
+</ul>
+<div class="section" id="making-queries-with-find">
+<h2>Making queries with find()<a class="headerlink" href="#making-queries-with-find" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="collections.md">Collections</a> can be queried with <tt class="docutils literal"><span class="pre">find</span></tt>.</p>
+<div class="highlight-python"><pre>collection.find(query[[[, fields], options], callback]);</pre>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">query</span></tt> - is a query object, defining the conditions the documents
+need to apply</li>
+<li><tt class="docutils literal"><span class="pre">fields</span></tt> - indicates which fields should be included in the
+response (default is all)</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> - defines extra logic (sorting options, paging etc.)</li>
+<li><tt class="docutils literal"><span class="pre">raw</span></tt> - driver returns documents as bson binary Buffer objects,
+<tt class="docutils literal"><span class="pre">default:false</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> has two parameters - an error object (if an error
+occured) and a cursor object.</li>
+</ul>
+<p>The result for the query is actually a cursor object. This can be used
+directly or converted to an array.</p>
+<div class="highlight-python"><pre>var cursor = collection.find({});
+cursor.each(...);</pre>
+</div>
+<p>To indicate which fields must or must no be returned <tt class="docutils literal"><span class="pre">fields</span></tt> value
+can be used. For example the following <tt class="docutils literal"><span class="pre">fields</span></tt> value</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+  <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="n">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>retrieves fields <tt class="docutils literal"><span class="pre">name</span></tt> and <tt class="docutils literal"><span class="pre">title</span></tt> (and as a default also <tt class="docutils literal"><span class="pre">_id</span></tt>)
+but not any others.</p>
+</div>
+<div class="section" id="find-first-occurence-with-findone">
+<h2>Find first occurence with findOne()<a class="headerlink" href="#find-first-occurence-with-findone" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">findOne</span></tt> is a convinence method finding and returning the first match
+of a query while regular <tt class="docutils literal"><span class="pre">find</span></tt> returns a cursor object instead. Use
+it when you expect only one record, for example when querying with
+<tt class="docutils literal"><span class="pre">_id</span></tt> or another unique property.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">findOne</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">[</span><span class="n">fields</span><span class="p">,</span> <span class="p">[</span><span class="n">options</span><span class="p">]],</span> <span class="n">callback</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">query</span></tt> is a query object or an <tt class="docutils literal"><span class="pre">_id</span></tt> value</li>
+<li><tt class="docutils literal"><span class="pre">fields</span></tt> - indicates which fields should be included in the
+response (default is all)</li>
+<li><tt class="docutils literal"><span class="pre">options</span></tt> - defines extra logic (sorting options, paging etc.)</li>
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> has two parameters - an error object (if an error
+occured) and the document object.</li>
+</ul>
+<p>Example:</p>
+<div class="highlight-python"><pre>collection.findOne({_id: doc_id}, function(err, document) {
+  console.log(document.name);
+});</pre>
+</div>
+</div>
+<div class="section" id="id-values">
+<h2>_id values<a class="headerlink" href="#id-values" title="Permalink to this headline">¶</a></h2>
+<p>Default <tt class="docutils literal"><span class="pre">_id</span></tt> values are 12 byte binary hashes. You can alter the
+format with custom Primary Key factories (see <em>Custom Primarky Keys</em> in
+<a class="reference external" href="database.md">Database</a>).</p>
+<p>In order to treat these binary _id values as strings it would be wise
+to convert binary values to hex strings. This can be done with
+<tt class="docutils literal"><span class="pre">toHexString</span></tt> property.</p>
+<div class="highlight-python"><pre>var idHex = document._id.toHexString();</pre>
+</div>
+<p>Hex strings can be reverted back to binary (for example to perform
+queries) with <tt class="docutils literal"><span class="pre">ObjectID.createFromHexString</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="n">_id</span><span class="p">:</span> <span class="n">ObjectID</span><span class="o">.</span><span class="n">createFromHexString</span><span class="p">(</span><span class="n">idHex</span><span class="p">)}</span>
+</pre></div>
+</div>
+<p>When inserting new records it is possible to use custom <tt class="docutils literal"><span class="pre">_id</span></tt> values
+as well which do not need to be binary hashes, for example strings.</p>
+<div class="highlight-python"><pre>collection.insert({_id: "abc", ...});
+collection.findOne({_id: "abc"},...);</pre>
+</div>
+<p>This way it is not necessary to convert <tt class="docutils literal"><span class="pre">_id</span></tt> values to hex strings
+and back.</p>
+</div>
+<div class="section" id="query-object">
+<h2>Query object<a class="headerlink" href="#query-object" title="Permalink to this headline">¶</a></h2>
+<p>The simplest query object is an empty one <tt class="docutils literal"><span class="pre">{}</span></tt> which matches every
+record in the database.</p>
+<p>To make a simple query where one field must match to a defined value,
+one can do it as simply as</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="n">fieldname</span><span class="p">:</span> <span class="s">&quot;fieldvalue&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This query matches all the records that a) have fields called
+<em>fieldname</em> and b) its value is <em>&#8220;fieldvalue&#8221;</em>.</p>
+<p>For example if we have a collection of blog posts where the structure of
+the records is <tt class="docutils literal"><span class="pre">{title,</span> <span class="pre">author,</span> <span class="pre">contents}</span></tt> and we want to retrieve all
+the posts for a specific author then we can do it like this:</p>
+<div class="highlight-python"><pre>posts = pointer_to_collection;
+posts.find({author:"Daniel"}).toArray(function(err, results){
+    console.log(results); // output all records
+});</pre>
+</div>
+<p>If the queried field is inside an object then that can be queried also.
+For example if we have a record with the following structure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="n">user</span><span class="p">:</span> <span class="p">{</span>
+    <span class="n">name</span><span class="p">:</span> <span class="s">&quot;Daniel&quot;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Then we can query the &#8220;name&#8221; field like this: <tt class="docutils literal"><span class="pre">{&quot;user.name&quot;:&quot;Daniel&quot;}</span></tt></p>
+<div class="section" id="and">
+<h3>AND<a class="headerlink" href="#and" title="Permalink to this headline">¶</a></h3>
+<p>If more than one fieldname is specified, then it&#8217;s an AND query</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="n">key1</span><span class="p">:</span> <span class="s">&quot;value1&quot;</span><span class="p">,</span>
+  <span class="n">name2</span><span class="p">:</span> <span class="s">&quot;value2&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Whis query matches all records where <em>key1</em> is <em>&#8220;value1&#8221;</em> and <em>key2</em> is
+<em>&#8220;value2&#8221;</em></p>
+</div>
+<div class="section" id="or">
+<h3>OR<a class="headerlink" href="#or" title="Permalink to this headline">¶</a></h3>
+<p>OR queries are a bit trickier but doable with the <tt class="docutils literal"><span class="pre">$or</span></tt> operator.
+Query operator takes an array which includes a set of query objects and
+at least one of these must match a document before it is retrieved</p>
+<div class="highlight-python"><pre>{
+  $or:[
+    {author:"Daniel"},
+    {author:"Jessica"}
+  ]
+}</pre>
+</div>
+<p>This query match all the documents where author is Daniel or Jessica.</p>
+<p>To mix AND and OR queries, you just need to use $or as one of regular
+query fields.</p>
+<div class="highlight-python"><pre>{
+  title:"MongoDB",
+  $or:[
+    {author:"Daniel"},
+    {author:"Jessica"}
+  ]
+}</pre>
+</div>
+</div>
+<div class="section" id="conditionals">
+<h3>Conditionals<a class="headerlink" href="#conditionals" title="Permalink to this headline">¶</a></h3>
+<p>Conditional operators <tt class="docutils literal"><span class="pre">&lt;</span></tt>, <tt class="docutils literal"><span class="pre">&lt;=</span></tt>, <tt class="docutils literal"><span class="pre">&gt;</span></tt>, <tt class="docutils literal"><span class="pre">&gt;=</span></tt> and <tt class="docutils literal"><span class="pre">!=</span></tt> can&#8217;t be
+used directly, as the query object format doesn&#8217;t support it but the
+same can be achieved with their aliases <tt class="docutils literal"><span class="pre">$lt</span></tt>, <tt class="docutils literal"><span class="pre">$lte</span></tt>, <tt class="docutils literal"><span class="pre">$gt</span></tt>,
+<tt class="docutils literal"><span class="pre">$gte</span></tt> and <tt class="docutils literal"><span class="pre">$ne</span></tt>. When a field value needs to match a conditional,
+the value must be wrapped into a separate object.</p>
+<div class="highlight-python"><pre>{"fieldname":{$gte:100}}</pre>
+</div>
+<p>This query defines that <em>fieldname</em> must be greater than or equal to
+<tt class="docutils literal"><span class="pre">100</span></tt>.</p>
+<p>Conditionals can also be mixed to create ranges.</p>
+<div class="highlight-python"><pre>{"fieldname": {$lte:10, $gte:100}}</pre>
+</div>
+</div>
+<div class="section" id="regular-expressions-in-queries">
+<h3>Regular expressions in queries<a class="headerlink" href="#regular-expressions-in-queries" title="Permalink to this headline">¶</a></h3>
+<p>Queried field values can also be matched with regular expressions</p>
+<div class="highlight-python"><pre>{author:/^Daniel/}</pre>
+</div>
+</div>
+<div class="section" id="special-query-operators">
+<h3>Special query operators<a class="headerlink" href="#special-query-operators" title="Permalink to this headline">¶</a></h3>
+<p>In addition to OR and conditional there&#8217;s some more operators:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">$in</span></tt> - specifies an array of possible matches,
+<tt class="docutils literal"><span class="pre">{&quot;name&quot;:{$in:[1,2,3]}}</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">$nin</span></tt> - specifies an array of unwanted matches</li>
+<li><tt class="docutils literal"><span class="pre">$all</span></tt> - array value must match to the condition
+<tt class="docutils literal"><span class="pre">{&quot;name&quot;:{$all:[1,2,3]}}</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">$exists</span></tt> - checks for existence of a field
+<tt class="docutils literal"><span class="pre">{&quot;name&quot;:{$exists:true}}</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">$mod</span></tt> - check for a modulo <tt class="docutils literal"><span class="pre">{&quot;name&quot;:{$mod:{3,2}}</span></tt> is the same as
+<tt class="docutils literal"><span class="pre">&quot;name&quot;</span> <span class="pre">%</span> <span class="pre">3</span> <span class="pre">==</span> <span class="pre">2</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">$size</span></tt> - checks the size of an array value <tt class="docutils literal"><span class="pre">{&quot;name&quot;:</span> <span class="pre">{$size:2}}</span></tt>
+matches arrays <em>name</em> with 2 elements</li>
+</ul>
+</div>
+</div>
+<div class="section" id="queries-inside-objects-and-arrays">
+<h2>Queries inside objects and arrays<a class="headerlink" href="#queries-inside-objects-and-arrays" title="Permalink to this headline">¶</a></h2>
+<p>If you have a document with nested objects/arrays then the keys inside
+these nested objects can still be used for queries.</p>
+<p>For example with the following document</p>
+<div class="highlight-python"><pre>{
+  "_id": idvalue,
+  "author":{
+    "firstname":"Daniel",
+    "lastname": "Defoe"
+  },
+  "books":[
+    {
+      "title":"Robinson Crusoe"
+      "year": 1714
+    }
+  ]
+}</pre>
+</div>
+<p>not only the <tt class="docutils literal"><span class="pre">_id</span></tt> field can be used as a query field - also the
+<tt class="docutils literal"><span class="pre">firstname</span></tt> and even <tt class="docutils literal"><span class="pre">title</span></tt> can be used. This can be done when
+using nested field names as strings, concated with periods.</p>
+<div class="highlight-python"><pre>collection.find({"author.firstname":"Daniel})</pre>
+</div>
+<p>Works even inside arrays</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;books.year&quot;</span><span class="p">:</span><span class="mi">1714</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="query-options">
+<h2>Query options<a class="headerlink" href="#query-options" title="Permalink to this headline">¶</a></h2>
+<p>Query options define the behavior of the query.</p>
+<div class="highlight-python"><pre>var options = {
+    "limit": 20,
+    "skip": 10,
+    "sort": "title"
+}
+
+collection.find({}, options).toArray(...);</pre>
+</div>
+<div class="section" id="paging">
+<h3>Paging<a class="headerlink" href="#paging" title="Permalink to this headline">¶</a></h3>
+<p>Paging can be achieved with option parameters <tt class="docutils literal"><span class="pre">limit</span></tt> and <tt class="docutils literal"><span class="pre">skip</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+  <span class="s">&quot;skip&quot;</span><span class="p">:</span> <span class="mi">10</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>retrieves 10 elements starting from 20</p>
+</div>
+<div class="section" id="sorting">
+<h3>Sorting<a class="headerlink" href="#sorting" title="Permalink to this headline">¶</a></h3>
+<p>Sorting can be acieved with option parameter <tt class="docutils literal"><span class="pre">sort</span></tt> which takes an
+array of sort preferences</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;sort&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span><span class="s">&#39;asc&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">,</span><span class="s">&#39;desc&#39;</span><span class="p">]]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>With single ascending field the array can be replaced with the name of
+the field.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;sort&quot;</span><span class="p">:</span> <span class="s">&quot;name&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="explain">
+<h3>Explain<a class="headerlink" href="#explain" title="Permalink to this headline">¶</a></h3>
+<p>Option parameter <tt class="docutils literal"><span class="pre">explain</span></tt> turns the query into an explain query.</p>
+</div>
+</div>
+<div class="section" id="cursors">
+<h2>Cursors<a class="headerlink" href="#cursors" title="Permalink to this headline">¶</a></h2>
+<p>Cursor objects are the results for queries and can be used to fetch
+individual fields from the database.</p>
+<div class="section" id="nextobject">
+<h3>nextObject<a class="headerlink" href="#nextobject" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">cursor.nextObject(function(err,</span> <span class="pre">doc){})</span></tt> retrieves the next record
+from database. If doc is null, then there weren&#8217;t any more records.</p>
+</div>
+<div class="section" id="each">
+<h3>each<a class="headerlink" href="#each" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">cursor.each(function(err,</span> <span class="pre">doc){})</span></tt> retrieves all matching records one
+by one.</p>
+</div>
+<div class="section" id="toarray">
+<h3>toArray<a class="headerlink" href="#toarray" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">cursor.toArray(function(err,</span> <span class="pre">docs){})</span></tt> converts the cursor object
+into an array of all the matching records. Probably the most convenient
+way to retrieve results but be careful with large datasets as every
+record is loaded into memory.</p>
+<div class="highlight-python"><pre>collection.find().toArray(function(err, docs){
+    console.log("retrieved records:");
+    console.log(docs);
+});</pre>
+</div>
+</div>
+<div class="section" id="rewind">
+<h3>rewind<a class="headerlink" href="#rewind" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">cursor.rewind()</span></tt> resets the internal pointer in the cursor to the
+beginning
+## Counting matches</p>
+<p>Counting total number of found matches can be done against cursors with
+method <tt class="docutils literal"><span class="pre">count</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cursor</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">callback</span></tt> is the callback function with two parameters - an error
+object (if an error occured) and the number on matches as an integer.</li>
+</ul>
+<p>Example</p>
+<div class="highlight-python"><pre>cursor.count(function(err, count){
+  console.log("Total matches: "+count);
+});</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Queries</a><ul>
+<li><a class="reference internal" href="#making-queries-with-find">Making queries with find()</a></li>
+<li><a class="reference internal" href="#find-first-occurence-with-findone">Find first occurence with findOne()</a></li>
+<li><a class="reference internal" href="#id-values">_id values</a></li>
+<li><a class="reference internal" href="#query-object">Query object</a><ul>
+<li><a class="reference internal" href="#and">AND</a></li>
+<li><a class="reference internal" href="#or">OR</a></li>
+<li><a class="reference internal" href="#conditionals">Conditionals</a></li>
+<li><a class="reference internal" href="#regular-expressions-in-queries">Regular expressions in queries</a></li>
+<li><a class="reference internal" href="#special-query-operators">Special query operators</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#queries-inside-objects-and-arrays">Queries inside objects and arrays</a></li>
+<li><a class="reference internal" href="#query-options">Query options</a><ul>
+<li><a class="reference internal" href="#paging">Paging</a></li>
+<li><a class="reference internal" href="#sorting">Sorting</a></li>
+<li><a class="reference internal" href="#explain">Explain</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cursors">Cursors</a><ul>
+<li><a class="reference internal" href="#nextobject">nextObject</a></li>
+<li><a class="reference internal" href="#each">each</a></li>
+<li><a class="reference internal" href="#toarray">toArray</a></li>
+<li><a class="reference internal" href="#rewind">rewind</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="../index.html">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="../contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="../genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.9 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2b3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

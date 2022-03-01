@@ -1,0 +1,2279 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Schemas on </title>
+    <link>/node-mongodb-native/schema/</link>
+    <description>Recent content in Schemas on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    
+    
+    
+    
+    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 UT</lastBuildDate>
+    <atom:link href="/node-mongodb-native/schema/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Introduction</title>
+      <link>/node-mongodb-native/schema/chapter1/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter1/</guid>
+      <description>
+
+&lt;h1 id=&#34;introduction:1f0c5186ba9c3d3a3f0bb58c806f2c79&#34;&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;One of the questions that come up very often from new users of MongoDB and document databases is how to do schema design. The concepts of embedding and linking documents combined with many years of working with relational models means there is a learning process involved in moving to a document database.&lt;/p&gt;
+
+&lt;p&gt;As the product has matured over time some patterns of schema design have emerged. This book is an attempt to distill that knowledge into actionable information you can use for your own applications.&lt;/p&gt;
+
+&lt;p&gt;We will cover basics of MongoDB schema design, how MongoDB works under the covers and look at a series of schema design patterns that aim to solve specific issues that you might run into while working on your application.&lt;/p&gt;
+
+&lt;p&gt;That said this is not the end all of schema design for MongoDB. If you come up with other brilliant schema design patterns feel free to drop me an email at &lt;strong&gt;christkv@gmail.com&lt;/strong&gt; or send me a tweet to &lt;strong&gt;@christkv&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I hope you enjoy the book and find the information useful.&lt;/p&gt;
+
+&lt;p&gt;Christian Amor Kvalheim&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Schema Basics</title>
+      <link>/node-mongodb-native/schema/chapter2/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter2/</guid>
+      <description>
+
+&lt;h1 id=&#34;schema-basics:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Schema Basics&lt;/h1&gt;
+
+&lt;p&gt;Before presenting Schema patterns for MongoDB we will go through the basics of MongoDB Schema design and ways on how to model traditional relational relationships such as one-to-one, one-to-many and many-to-many.&lt;/p&gt;
+
+&lt;h1 id=&#34;one-to-one-1-1:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;One-To-One (1:1)&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/one-to-one.png&#34; alt=&#34;A One to One Relational Example&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;1:1&lt;/strong&gt; relationship can be modeled in two ways using MongoDB. The first way is to embed the relationship as a document, the second one is as a link to a document in a separate collection. Let&amp;rsquo;s look at both ways of modeling the one to one relationship using the following two documents.&lt;/p&gt;
+
+&lt;h2 id=&#34;model:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Model&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  name: &amp;quot;Peter Wilkinson&amp;quot;,
+  age: 27
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  street: &amp;quot;100 some road&amp;quot;,
+  city: &amp;quot;Nevermore&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;strategy:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Strategy&lt;/h2&gt;
+
+&lt;h3 id=&#34;embedding:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Embedding&lt;/h3&gt;
+
+&lt;p&gt;The first approach is simply to embed the address as a document in the User document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  name: &amp;quot;Peter Wilkinson&amp;quot;,
+  age: 27,
+  address: {
+    street: &amp;quot;100 some road&amp;quot;,
+    city: &amp;quot;Nevermore&amp;quot;   
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The benefit is that we can retrieve the user details and the address using a single read operation.&lt;/p&gt;
+
+&lt;h3 id=&#34;linking:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Linking&lt;/h3&gt;
+
+&lt;p&gt;The second approach is to link the address and user document using a &lt;strong&gt;foreign key&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  _id: 1,
+  name: &amp;quot;Peter Wilkinson&amp;quot;,
+  age: 27
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  user_id: 1,
+  street: &amp;quot;100 some road&amp;quot;,
+  city: &amp;quot;Nevermore&amp;quot;   
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is similar to how traditional relational databases would store the data. It is however important to note that MongoDB does not enforce any foreign key constraints so the relation only exists as part of the application level schema.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Embedding Preferred&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;In the one to one relationship Embedding is the preferred way to model the relationship as it&amp;rsquo;s a more efficient way to retrieve the document.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&#34;one-to-many-1-n:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;One-To-Many (1:N)&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/one-to-many.png&#34; alt=&#34;A One to Many Relational Example&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;1:N&lt;/strong&gt; relationship can be modeled in couple of different ways using MongoDB . The first one is embedding, the second one is linking and the third one is a bucketing strategy that is useful for some particular cases. Let&amp;rsquo;s use the model of a &lt;strong&gt;Blog Post&lt;/strong&gt; and its &lt;strong&gt;Comments&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;model-1:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Model&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  title: &amp;quot;An awesome blog&amp;quot;,
+  url: &amp;quot;http://awesomeblog.com&amp;quot;,
+  text: &amp;quot;This is an awesome blog we have just started&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A Blog Post is a single document that describes one specific blog post.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  name: &amp;quot;Peter Critic&amp;quot;,
+  created_on: ISODate(&amp;quot;2014-01-01T10:01:22Z&amp;quot;),
+  comment: &amp;quot;Awesome blog post&amp;quot;
+}
+
+{
+  name: &amp;quot;John Page&amp;quot;,
+  created_on: ISODate(&amp;quot;2014-01-01T11:01:22Z&amp;quot;),
+  comment: &amp;quot;Not so awesome blog&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For each Blog Post we can have one or more Comments.&lt;/p&gt;
+
+&lt;h2 id=&#34;strategy-1:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Strategy&lt;/h2&gt;
+
+&lt;h3 id=&#34;embedding-1:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Embedding&lt;/h3&gt;
+
+&lt;p&gt;The first approach is to embed the comments in the &lt;strong&gt;Blog Post&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  title: &amp;quot;An awesome blog&amp;quot;,
+  url: &amp;quot;http://awesomeblog.com&amp;quot;,
+  text: &amp;quot;This is an awesome blog we have just started&amp;quot;,
+  comments: [{
+    name: &amp;quot;Peter Critic&amp;quot;,
+    created_on: ISODate(&amp;quot;2014-01-01T10:01:22Z&amp;quot;),
+    comment: &amp;quot;Awesome blog post&amp;quot;
+  }, {
+    name: &amp;quot;John Page&amp;quot;,
+    created_on: ISODate(&amp;quot;2014-01-01T11:01:22Z&amp;quot;),
+    comment: &amp;quot;Not so awesome blog&amp;quot;
+  }]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The benefits are that we can easily retrieve all the comments with the Blog Post in a single read. Adding new comments is as simple as appending the new comment document to the end of the &lt;strong&gt;comments&lt;/strong&gt; array. However there are three possible problems with this approach.&lt;/p&gt;
+
+&lt;p&gt;The first one is that the &lt;strong&gt;comments&lt;/strong&gt; array might grow larger than the maximum document size of &lt;strong&gt;16 MB&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;The second has to do with write performance. As each Blog Post will get comments added to it over time it makes it hard for MongoDB to predict the correct document padding to apply when a new document is created. This means that the document has to be moved around in memory as it grows causing additional IO and impacting write performance.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;It&amp;rsquo;s however important to note that this only matters for high write traffic and might not be a problem for smaller applications.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The third one is performing pagination off the comments. As cannot easily filter out comments returned from the single &lt;strong&gt;Blog Post&lt;/strong&gt; we will have to retrieve all the comments and filter in the application.&lt;/p&gt;
+
+&lt;h3 id=&#34;linking-1:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Linking&lt;/h3&gt;
+
+&lt;p&gt;The second approach is to link comments to the &lt;strong&gt;Blog Post&lt;/strong&gt; using a more traditional &lt;strong&gt;foreign&lt;/strong&gt; key.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  _id: 1,
+  title: &amp;quot;An awesome blog&amp;quot;,
+  url: &amp;quot;http://awesomeblog.com&amp;quot;,
+  text: &amp;quot;This is an awesome blog we have just started&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  blog_entry_id: 1,
+  name: &amp;quot;Peter Critic&amp;quot;,
+  created_on: ISODate(&amp;quot;2014-01-01T10:01:22Z&amp;quot;),
+  comment: &amp;quot;Awesome blog post&amp;quot;
+}
+
+{
+  blog_entry_id: 1,
+  name: &amp;quot;John Page&amp;quot;,
+  created_on: ISODate(&amp;quot;2014-01-01T11:01:22Z&amp;quot;),
+  comment: &amp;quot;Not so awesome blog&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The benefits from this model is that additional comments will not grow the original &lt;strong&gt;Blog Post&lt;/strong&gt; document, making it less likely that the applications will run in the the maximum document size of &lt;strong&gt;16 MB&lt;/strong&gt;. It&amp;rsquo;s also much easier to return paginated comments as the application can slice and dice the comments more easily. On the downside if we have 1000 comments on a blog post we need to retrieve all 1000 documents causing a lot of reads from the database.&lt;/p&gt;
+
+&lt;h3 id=&#34;bucketing:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Bucketing&lt;/h3&gt;
+
+&lt;p&gt;The third approach is a hybrid of the two above. Basically it tries to balance the rigidity of the embedding strategy with the flexibility of the linking strategy. For this example we might decide that we will split the comments into buckets with a maximum of 50 comments in each bucket.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  _id: 1,
+  title: &amp;quot;An awesome blog&amp;quot;,
+  url: &amp;quot;http://awesomeblog.com&amp;quot;,
+  text: &amp;quot;This is an awesome blog we have just started&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  blog_entry_id: 1,
+  page: 1,
+  count: 50,
+  comments: [{
+    name: &amp;quot;Peter Critic&amp;quot;,
+    created_on: ISODate(&amp;quot;2014-01-01T10:01:22Z&amp;quot;),
+    comment: &amp;quot;Awesome blog post&amp;quot;
+  }, ...]
+}
+
+{
+  blog_entry_id: 1,
+  page: 2,
+  count: 1,
+  comments: [{
+    name: &amp;quot;John Page&amp;quot;,
+    created_on: ISODate(&amp;quot;2014-01-01T11:01:22Z&amp;quot;),
+    comment: &amp;quot;Not so awesome blog&amp;quot;
+  }]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The main benefit of using buckets in this case is that we can perform a single read to fetch 50 comments at the time, allowing for efficient pagination.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;When to use bucketing&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;When you have the possibility of splitting up your documents in discreet batches it makes sense to consider bucketing to speed up retrieval of documents.&lt;/p&gt;
+
+&lt;p&gt;Typical cases are things like bucketing data by hours, days or number of entries on a page (such as comments pagination).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&#34;many-to-many-n-m:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Many-To-Many (N:M)&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/many-to-many.png&#34; alt=&#34;A Many to Many Relational Example&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;N:M&lt;/strong&gt; relationships are modeled in the relational database by using a join table. A typical example is the relationship between books and authors where an author has authored multiple authors and a book can be written by multiple authors. Let&amp;rsquo;s look at two ways of modeling many to many relationships.&lt;/p&gt;
+
+&lt;h2 id=&#34;two-way-embedding:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Two Way Embedding&lt;/h2&gt;
+
+&lt;p&gt;Embedding the books in an authors document&lt;/p&gt;
+
+&lt;h3 id=&#34;model-2:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Model&lt;/h3&gt;
+
+&lt;p&gt;In &lt;strong&gt;Two Way Embedding&lt;/strong&gt; we will include the &lt;strong&gt;Book&lt;/strong&gt; &lt;strong&gt;foreign keys&lt;/strong&gt; under the &lt;strong&gt;books&lt;/strong&gt; field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  _id: 1,
+  name: &amp;quot;Peter Standford&amp;quot;,
+  books: [1, 2]
+}
+
+{
+  _id: 2,
+  name: &amp;quot;Georg Peterson&amp;quot;,
+  books: [2]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the same way for each &lt;strong&gt;Book&lt;/strong&gt; we include the &lt;strong&gt;Author&lt;/strong&gt; &lt;strong&gt;foreign keys&lt;/strong&gt; under the &lt;strong&gt;author&lt;/strong&gt; field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  _id: 1,
+  title: &amp;quot;A tale of two people&amp;quot;,
+  categories: [&amp;quot;drama&amp;quot;],
+  authors: [1, 2]
+}
+
+{
+  _id: 2,
+  title: &amp;quot;A tale of two space ships&amp;quot;,
+  categories: [&amp;quot;scifi&amp;quot;],
+  authors: [1]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;queries:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Queries&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&amp;quot;library&amp;quot;);
+var booksCollection = db.books;
+var authorsCollection = db.authors;
+
+var author = authorsCollection.findOne({name: &amp;quot;Peter Standford&amp;quot;});
+var books = booksCollection.find({_id: {$in: author.books}}).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&amp;quot;library&amp;quot;);
+var booksCollection = db.books;
+var authorsCollection = db.authors;
+
+var book = booksCollection.findOne({title: &amp;quot;A tale of two space ships&amp;quot;});
+var authors = authorsCollection.find({_id: {$in: book.authors}}).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As we can see we have to perform two queries in both directions. First finding either the author or the book and then performing an $in query to find the books or authors.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Consider&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;If one way is massively unbalanced in size this modeling might not be feasible. Such a possible scenario is &lt;strong&gt;Products&lt;/strong&gt; and &lt;strong&gt;Categories&lt;/strong&gt; where f.ex a &lt;strong&gt;TV&lt;/strong&gt; might have a single &lt;strong&gt;Category&lt;/strong&gt; associated with it but a Category might have &lt;strong&gt;n&lt;/strong&gt; number of items associated with it, meaning embedding all the product id&amp;rsquo;s in a Category is not feasible.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;one-way-embedding:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;One Way Embedding&lt;/h2&gt;
+
+&lt;p&gt;The One Way Embedding strategy take optimizes the many to many relationship by embedding only in one direction which is very useful if one side is massively unbalanced in size. Consider the case above of the categories. Let&amp;rsquo;s pull the categories out in a separate document.&lt;/p&gt;
+
+&lt;h3 id=&#34;model-3:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Model&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  _id: 1,
+  name: &amp;quot;drama&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  _id: 1,
+  title: &amp;quot;A tale of two people&amp;quot;,
+  categories: [1],
+  authors: [1, 2]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The reason we are doing a single direction for categories is due to there being a lot more books in the drama category than categories in a book. If one embeds the books in the category document it&amp;rsquo;s easy to foresee that one could break the 16MB max document size for certain broad categories.&lt;/p&gt;
+
+&lt;h3 id=&#34;queries-1:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Queries&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&amp;quot;library&amp;quot;);
+var booksCol = db.books;
+var categoriesCol = db.categories;
+
+var book = booksCol.findOne({title: &amp;quot;A tale of two space ships&amp;quot;});
+var categories = categoriesCol.find({_id: {$in: book.categories}}).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&amp;quot;library&amp;quot;);
+var booksCollection = db.books;
+var categoriesCollection = db.categories;
+
+var category = categoriesCollection.findOne({name: &amp;quot;drama&amp;quot;});
+var books = booksCollection.find({categories: category.id}).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Establish Relationship Balance&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Establish the max size of &lt;strong&gt;N&lt;/strong&gt; and the size of &lt;strong&gt;M&lt;/strong&gt;. F.ex if &lt;strong&gt;N&lt;/strong&gt; is a max of 3 categories for a book and &lt;strong&gt;M&lt;/strong&gt; is a max of 500000 books in a category you should pick One Way Embedding. If &lt;strong&gt;N&lt;/strong&gt; is a max of 3 and &lt;strong&gt;M&lt;/strong&gt; is a max of 5 then Two Way Embedding might work well.&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>MongoDB Storage</title>
+      <link>/node-mongodb-native/schema/chapter3/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter3/</guid>
+      <description>
+
+&lt;h1 id=&#34;mongodb-storage:b3a7a6b1d300a0da8d3b13d4a559ed84&#34;&gt;MongoDB Storage&lt;/h1&gt;
+
+&lt;p&gt;To properly understand how a schema design impacts performance it&amp;rsquo;s important to understand how MongoDB works under the covers.&lt;/p&gt;
+
+&lt;h2 id=&#34;memory-mapped-files:b3a7a6b1d300a0da8d3b13d4a559ed84&#34;&gt;Memory Mapped Files&lt;/h2&gt;
+
+&lt;p&gt;MongoDB uses memory-mapped files to store it&amp;rsquo;s data (A memory-mapped file is a segment of virtual memory which has been assigned a direct byte-for-byte correlation with some portion of a file or file).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/memory_mapping.png&#34; alt=&#34;Memory Mapped Files&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Memory mapped files lets MongoDB delegate the handling of Virtual Memory to the operating system instead of explicitly managing memory itself. Since the Virtual Address Space is much larger than any physical RAM (Random Access Memory) installed in a computer there is contention about what parts of the Virtual Memory is kept in RAM at any given point in time. When the operating system runs out of RAM and an application requests something that&amp;rsquo;s not currently in RAM it will swap out memory to disk to make space for the newly requested data. Most operating systems will do this using a Least Recently Used (LRU) strategy where the oldest data is swapped to disk first.&lt;/p&gt;
+
+&lt;p&gt;When reading up on MongoDB you&amp;rsquo;ll most likely run into the word &amp;ldquo;Working Set&amp;rdquo;. This is the data that your application is constantly requesting. If your &amp;ldquo;Working Set&amp;rdquo; all fits in RAM then all access will be fast as the operating system will not have to swap to and from disk as much. However if your &amp;ldquo;Working Set&amp;rdquo; does not fit in RAM you suffer performance penalties as the operating system needs to swap one part of your &amp;ldquo;Working Set&amp;rdquo; to disk to access another part of it.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Determine if the Working Set is to big&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;You can get an indication of if your working set fits in memory by looking at the number of page faults over time. If it&amp;rsquo;s rapidly increasing it might mean your Working Set does not fit in memory.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;   use mydb
+&amp;gt;   db.serverStatus().extra_info.page_faults
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is usually a sign that it&amp;rsquo;s time to consider either increasing the amount of RAM in your machine or to shard your MongoDB system so more of your &amp;ldquo;Working Set&amp;rdquo; can be kept in memory (sharding splits your &amp;ldquo;Working Set&amp;rdquo; across multiple machines RAM resources).&lt;/p&gt;
+
+&lt;h2 id=&#34;padding:b3a7a6b1d300a0da8d3b13d4a559ed84&#34;&gt;Padding&lt;/h2&gt;
+
+&lt;p&gt;Another important aspect to understand with MongoDB is how documents physically grow in the database. Let&amp;rsquo;s take the simple document example below.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If we add a new field named &lt;em&gt;name&lt;/em&gt; to the document&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;,
+  &amp;quot;name&amp;quot;: &amp;quot;Christian&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The document will grow in size. If MongoDB was naively implemented it would now need to move the document to a new bigger space as it would have outgrown it&amp;rsquo;s originally allocated space.&lt;/p&gt;
+
+&lt;p&gt;However MongoDB stored the original document it added a bit of empty space at the end of the document hence referred to as &lt;strong&gt;padding&lt;/strong&gt;. The reason for this padding is that MongoDB expects the document to grow in size over time. As long as this document growth stays inside the additional &lt;strong&gt;padding&lt;/strong&gt; space MongoDB does not need to move the document to a new bigger space thus avoiding the cost of copying bytes around in memory, and on disk.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/document_with_padding.png&#34; alt=&#34;Document With Padding&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Over time the &lt;strong&gt;padding factor&lt;/strong&gt; that governs how much extra space is appended to a document inserted into MongoDB changes as the database attempts to find the balance between the eventual size of documents and the unused space take up by the &lt;em&gt;padding&lt;/em&gt;. However if the growth of individual documents is random MongoDB will not be able to correctly &lt;strong&gt;Pre-Allocate&lt;/strong&gt; the right level of &lt;em&gt;padding&lt;/em&gt; and the database might end up spending a lot of time copying documents around in memory and on disk instead of performing application specific work causing an impact on write performance.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;h2 id=&#34;how-to-determine-the-padding-factor:b3a7a6b1d300a0da8d3b13d4a559ed84&#34;&gt;How to determine the padding factor&lt;/h2&gt;
+
+&lt;p&gt;You can determine the &lt;em&gt;padding&lt;/em&gt; factor for a specific collection in the following way&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;   use mydb
+&amp;gt;   db.my_collection.stats()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The returned result contains a field &lt;strong&gt;paddingFactor&lt;/strong&gt;. The value tells you how much padding is added. A value of 1 means no padding added a value of 2 means the padding is the same size as the document size.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;A &lt;strong&gt;padding factor&lt;/strong&gt; of 1 is usually a sign that the database is spending most of it&amp;rsquo;s time writing new data to memory and disk instead of moving existing data. Having said that one has to take into account the scale of the writing operations. If you have only a 1000 documents in a collection it might not matter if you&amp;rsquo;re &lt;strong&gt;padding factor&lt;/strong&gt; is closer to 2. On the other hand if you are writing massive amounts of time series data the impact of moving documents around in memory and on disk might have a severe impact on your performance.&lt;/p&gt;
+
+&lt;h2 id=&#34;fragmentation:b3a7a6b1d300a0da8d3b13d4a559ed84&#34;&gt;Fragmentation&lt;/h2&gt;
+
+&lt;p&gt;When documents move around or are removed they leave holes. MongoDB tries to reuse these holes for new documents when ever possible, but over time it will slowly and steadily find itself having a lot of holes that cannot be reused because documents cannot fit in them. This effect is called fragmentation and is common in all systems that allocate memory including your operating system.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/fragmentation.png&#34; alt=&#34;Document With Padding&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The effect of fragmentation is to waste space. Due to the fact that MongoDB uses memory mapped files any fragmentation on disk will be reflected in fragmentation in RAM as well. This has the effect of making less of the &amp;ldquo;Working Set&amp;rdquo; fit in RAM and causing more swapping to disk.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;h2 id=&#34;how-to-determine-the-fragmentation:b3a7a6b1d300a0da8d3b13d4a559ed84&#34;&gt;How to determine the fragmentation&lt;/h2&gt;
+
+&lt;p&gt;You can get a good indication of fragmentation by&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;&amp;gt;   use mydb
+&amp;gt;   var s = db.my_collection.stats()
+&amp;gt;   var frag = s.storageSize / (s.size + s.totalIndexSize)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;A &lt;strong&gt;frag&lt;/strong&gt; value larger than 1 indicates some level of fragmentation&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;There are three main ways of avoiding or limiting fragmentation for your MongoDB data.&lt;/p&gt;
+
+&lt;p&gt;The first one is to use the &lt;strong&gt;compact&lt;/strong&gt; command on MongoDB to rewrite the data and thus remove the fragmentation. Unfortunately as of 2.6 &lt;strong&gt;compact&lt;/strong&gt; is an off-line operation meaning that the database has to be taking out of production for the duration of the &lt;strong&gt;compact&lt;/strong&gt; operation&lt;/p&gt;
+
+&lt;p&gt;The second option is to use the &lt;strong&gt;usePowerOf2Sizes&lt;/strong&gt; option to make MongoDB allocate memory in powers of 2. So instead of allocating memory to fit a specific document MongoDB allocates only in powers of 2 (128 bytes, 256 bytes, 512 bytes, 1024 bytes and so forth). This means there is less chance of a hole not being reused as it will always be a standard size. However it does increase the likeliness of wasted space as a document that is 257 bytes long will occupy a 512 bytes big allocation.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;As of &lt;strong&gt;2.6&lt;/strong&gt; &lt;strong&gt;usePowerOf2Sizes&lt;/strong&gt; is the default allocation strategy for collections.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The third and somewhat harder option is to consider fragmentation in your schema design. The application can model it&amp;rsquo;s documents to minimize fragmentation doing such things as pre-allocating the max size of a document and ensuring document size growth is managed correctly. Some of the patterns in this book will discuss aspects of this.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Indexes</title>
+      <link>/node-mongodb-native/schema/chapter4/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter4/</guid>
+      <description>
+
+&lt;h1 id=&#34;indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Indexes&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/btree.png&#34; alt=&#34;A Btree Example, http://commons.wikimedia.org/wiki/File:Btree.png&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Indexes are the root to high performance in MongoDB, as it allows the database to search through less documents to satisfy a query. Without an index MongoDB has to scan through all of the documents to ensure it has answered the query correctly.&lt;/p&gt;
+
+&lt;p&gt;An index increases the amount of storage needed to represent a document and the time it takes to insert a document, trading it against faster search time for the terms in the document indexed.&lt;/p&gt;
+
+&lt;p&gt;One of the core issues to remember about indexes is that they are &lt;strong&gt;inclusive&lt;/strong&gt;. That means they can only answer questions about documents that have been included in the index.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Index Gotchas&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;$nin&lt;/strong&gt; and &lt;strong&gt;$ne&lt;/strong&gt; queries that cannot be answered by indexes and force collection scans. If you need to use these ensure you are filtering down using indexes as much as possible leaving the &lt;strong&gt;$nin&lt;/strong&gt; and &lt;strong&gt;$ne&lt;/strong&gt; terms to the very last part of the query selector.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;MongoDB have several types of indexes&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Single field indexes&lt;/li&gt;
+&lt;li&gt;Compound indexes&lt;/li&gt;
+&lt;li&gt;Multikey indexes&lt;/li&gt;
+&lt;li&gt;Geo-spatial indexes&lt;/li&gt;
+&lt;li&gt;Text indexes&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It also supports a couple of variations of the above indexes&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Sparse indexes&lt;/li&gt;
+&lt;li&gt;Unique indexes&lt;/li&gt;
+&lt;li&gt;Time To Live indexes&lt;/li&gt;
+&lt;li&gt;Covered Indexes&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;single-field-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Single field indexes&lt;/h2&gt;
+
+&lt;p&gt;Take the following document&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  _id: ObjectId(&amp;quot;523cba3c73a8049bcdbf6007&amp;quot;),
+  name: &#39;Peter Jackson&#39;,
+  age: 50,
+  nationality: &amp;quot;New Zealand&amp;quot;,
+  address: {
+    street: &amp;quot;Some Street 22&amp;quot;
+  },
+  department: {
+    floor: 1,
+    building: 1
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the different ways we can apply a single field index&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var values = db.getSisterDB(&amp;quot;indexes&amp;quot;).values;
+values.ensureIndex({name: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This indexes the name field in ascending order.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var values = db.getSisterDB(&amp;quot;indexes&amp;quot;).values;
+values.ensureIndex({&amp;quot;address.street&amp;quot;: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This indexes the &lt;strong&gt;street&lt;/strong&gt; field in the embedded document under the &lt;strong&gt;address&lt;/strong&gt; field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var values = db.getSisterDB(&amp;quot;indexes&amp;quot;).values;
+values.ensureIndex({department: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This indexes the &lt;strong&gt;department&lt;/strong&gt; subdocument allowing for strict equality matches on the subdocument. That is to say it will only match on the query for a subdocument that contains all the fields in the indexed subdocument.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var values = db.getSisterDB(&amp;quot;indexes&amp;quot;).values;
+values.findOne({department: {floor: 1, building: 1}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;compound-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Compound indexes&lt;/h2&gt;
+
+&lt;p&gt;A compound index is an index that contains references to multiple fields within a document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var values = db.getSisterDB(&amp;quot;indexes&amp;quot;).values;
+values.ensureIndex({nationality: 1, age: -1, name: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The compound indexes have some interesting properties. Obviously the index is usable if you have a query that includes nationality, age and name. But it&amp;rsquo;s also able to answer other queries using the index.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Any query starting with nationality&lt;/li&gt;
+&lt;li&gt;Any query starting with nationality and age&lt;/li&gt;
+&lt;li&gt;Any query starting with nationality, age and name&lt;/li&gt;
+&lt;li&gt;Any query starting with nationality and name&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The reason is that for compound indexes order matters as we match from left to right. F.ex if you reverse a query to start with name and age it will not match the order of fields in the compound index and MongoDB is not able to use the index.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Compound Index Field Order&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Always make sure the order of fields in a compound index match the order of fields in the queries you want to execute against the collection.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;One additional note about using a compound index is about sorting. The ordering and direction of fields in a compound index decide if it&amp;rsquo;s possible to use the index in the query as well as for the sort.&lt;/p&gt;
+
+&lt;p&gt;Given the index above of &lt;strong&gt;{nationality: 1, age: -1, name: 1}&lt;/strong&gt; we can support the following sorts using the index.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var values = db.getSisterDB(&amp;quot;indexes&amp;quot;).values;
+values.find().sort({nationality: 1, age: -1}).toArray();
+values.find().sort({nationality: -1, age: 1}).toArray();
+values.find().sort({nationality: -1, age: 1, name: -1}).toArray();
+values.find().sort({nationality: 1, age: -1, name: 1}).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Sort can use the index if they match the order specified or the exact reverse order specified but not otherwise.&lt;/p&gt;
+
+&lt;h2 id=&#34;multikey-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Multikey indexes&lt;/h2&gt;
+
+&lt;p&gt;Multikey indexes lets MongoDB index arrays of values. Take the following document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;title&amp;quot;: &amp;quot;Superman&amp;quot;,
+  &amp;quot;tags&amp;quot;: [&amp;quot;comic&amp;quot;, &amp;quot;action&amp;quot;, &amp;quot;xray&amp;quot;],
+  &amp;quot;issues&amp;quot;: [
+    {
+      &amp;quot;number&amp;quot;: 1,
+      &amp;quot;published_on&amp;quot;: &amp;quot;June 1938&amp;quot;
+    }
+  ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Multikey indexes lets us search on the values in the &lt;strong&gt;tags&lt;/strong&gt; array as well as in the &lt;strong&gt;issues&lt;/strong&gt; array. Let&amp;rsquo;s create two indexes to cover both.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var comics = db.getSisterDB(&amp;quot;store&amp;quot;).comics;
+comics.ensureIndex({tags: 1});
+comics.ensureIndex({issues: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The two indexes lets you do exact matches on values in the &lt;strong&gt;tags&lt;/strong&gt; and &lt;strong&gt;issues&lt;/strong&gt; arrays of values.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var comics = db.getSisterDB(&amp;quot;store&amp;quot;).comics;
+comics.find({tags: &amp;quot;action&amp;quot;});
+comics.find({issues: {number: 1, published_on: &amp;quot;June 1938&amp;quot;}}).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first query will use the index on &lt;strong&gt;tags&lt;/strong&gt; to return the document. The second query will use the index on &lt;strong&gt;issues&lt;/strong&gt; to return the document. One thing to notice about the second query is that it&amp;rsquo;s dependent on the order of the fields in the documents indexed. Meaning that if the &lt;strong&gt;number&lt;/strong&gt; and &lt;strong&gt;published_on&lt;/strong&gt; field change order the second query would fail. If the document changes structure it would be better to create a specific compound index on the fields needed in sub element documents. A better index would be.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var comics = db.getSisterDB(&amp;quot;store&amp;quot;).comics;
+comics.ensureIndex({&amp;quot;issues.number&amp;quot;:1, &amp;quot;issues.published_on&amp;quot;:1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To use the index correctly the second query can be issues as.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var comics = db.getSisterDB(&amp;quot;store&amp;quot;).comics;
+comics.find({
+  &amp;quot;issues.number&amp;quot;:1, 
+  &amp;quot;issues.published_on&amp;quot;: &amp;quot;June 1938&amp;quot;}).toArray()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;geospatial-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Geospatial indexes&lt;/h2&gt;
+
+&lt;p&gt;MongoDB offers several a couple of Geospatial indexes. The indexes makes it possible to perform efficient Geospatial queries.&lt;/p&gt;
+
+&lt;h3 id=&#34;specialized-2d-sphere-index:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Specialized 2d Sphere index&lt;/h3&gt;
+
+&lt;p&gt;The 2d Geospatial Sphere index allows to perform queries on a earth-like sphere making for better accuracy in matching locations.&lt;/p&gt;
+
+&lt;p&gt;Take the following example document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  loc: {
+    type: &amp;quot;Point&amp;quot;,
+    coordinates: [60, 79]
+  },
+  type: &amp;quot;house&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create a 2dsphere index.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var locations = db.getSisterDB(&amp;quot;geo&amp;quot;).locations;
+locations.ensureIndex({loc: &amp;quot;2dsphere&amp;quot;, house: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Query the index using a square box and the type.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var locations = db.getSisterDB(&amp;quot;geo&amp;quot;).locations;
+locations.find({loc: {
+    $geoWithin: {
+      $geometry: {
+        type: &amp;quot;Polygon&amp;quot;,
+        coordinates: [[
+          [ 0 , 0 ] , [ 0 , 80 ] , [ 80 , 80 ] , [ 80 , 0 ] , [ 0 , 0 ]
+        ]]
+      }
+    }
+  }}).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Gotchas 2dsphere&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The 2d sphere index is a pure GeoSpatial index and is limited to the ranges for latitude (-90 - 90) and longitude (-180 to 180). It also only accepts &lt;strong&gt;$geometry&lt;/strong&gt; like queries and supports a subset of the 2d index. In return it&amp;rsquo;s faster and more accurate than the general 2d index.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&#34;general-2d-index:0336f6e2875b14063cc3d24d40aee459&#34;&gt;General 2d index&lt;/h3&gt;
+
+&lt;p&gt;The 2d index is a flat index that does not take into consideration any projection. One of the benefits of the 2d index is that it allows to set lower and upper bounds for the coordinate system as well as the search resolution. This makes the index a general 2d index.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s add a sample document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;var houses = db.getSisterDB(&amp;quot;2d&amp;quot;).houses;
+houses.insert({
+  price_room: [10000, 3],
+  type: &amp;quot;house&amp;quot;
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice that the price_room is just an array. This is because the 2d index is not inherently tied to the GeoJSON format in the same way as the 2dsphere index.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a 2d index.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var houses = db.getSisterDB(&amp;quot;2d&amp;quot;).houses;
+houses.ensureIndex({price_room: &amp;quot;2d&amp;quot;}, { min: 0, max: 200000, bits: 32 });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s look for all houses that fall inside the range of 2000 to 20000 in price and has 0 to 5 rooms.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;db.houses.find( { price_room :
+  { $geoWithin : { 
+      $box : [ [ 2000 , 0 ] , [ 20000 , 5 ] ] 
+    } 
+  } 
+}).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;2d indexes&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;min&lt;/strong&gt; and &lt;strong&gt;max&lt;/strong&gt; values lets you project any 2d data with numeric values into a 2d index where you can use geo queries like $near, $box etc to cut and slice the data. Once one realizes it&amp;rsquo;s a generalized 2d index it becomes very useful for a range of shape queries not easily done using the normal query operators.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;text-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Text indexes&lt;/h2&gt;
+
+&lt;p&gt;From 2.6 on text search is integrated into the MongoDB query language (In 2.4 it was available as beta command). It relies on an underlying text index.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s insert some sample documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var entries = db.getSisterDB(&amp;quot;blogs&amp;quot;).entries;
+entries.insert( { 
+  title : &amp;quot;my blog post&amp;quot;, 
+  text : &amp;quot;i am writing a blog. yay&amp;quot;,
+  site: &amp;quot;home&amp;quot;,
+  language: &amp;quot;english&amp;quot; });
+entries.insert( {
+  title : &amp;quot;my 2nd post&amp;quot;, 
+  text : &amp;quot;this is a new blog i am typing. yay&amp;quot;,
+  site: &amp;quot;work&amp;quot;,
+  language: &amp;quot;english&amp;quot; });
+entries.insert( {
+  title : &amp;quot;knives are Fun&amp;quot;, 
+  text : &amp;quot;this is a new blog i am writing. yay&amp;quot;,
+  site: &amp;quot;home&amp;quot;,
+  language: &amp;quot;english&amp;quot; });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s define create the text index.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var entries = db.getSisterDB(&amp;quot;blogs&amp;quot;).entries;
+entries.ensureIndex({title: &amp;quot;text&amp;quot;, text: &amp;quot;text&amp;quot;}, { weights: {
+    title: 10,
+    text: 5
+  }, 
+  name: &amp;quot;TextIndex&amp;quot;, 
+  default_language: &amp;quot;english&amp;quot;, 
+  language_override: &amp;quot;language&amp;quot; });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This &lt;strong&gt;ensureIndex&lt;/strong&gt; command shows how weights can be used to control the weighting of fields. In this case any search that matches &lt;strong&gt;title&lt;/strong&gt; should be ranked higher than a match in the &lt;strong&gt;text&lt;/strong&gt; field. We also pass in a &lt;strong&gt;name&lt;/strong&gt; parameter that allows to give the index a custom name. The &lt;strong&gt;default_language&lt;/strong&gt; specifies that any document missing a specific language field should default to &lt;strong&gt;english&lt;/strong&gt;. The option &lt;strong&gt;language_override&lt;/strong&gt; tells the text index to look for individual documents language definition under the &lt;strong&gt;language&lt;/strong&gt; field. If the &lt;strong&gt;language&lt;/strong&gt; field for a specific document is set to f.ex spanish, MongoDB will index it using the spanish stop list and stemming.&lt;/p&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s query for all the blog entries that contain the **blog(()) word and filter by the site field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var entries = db.getSisterDB(&amp;quot;blogs&amp;quot;).entries;
+entries.find({$text: {$search: &amp;quot;blog&amp;quot;}, site: &amp;quot;home&amp;quot;})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The query matches all the documents that contain the word &lt;strong&gt;blog&lt;/strong&gt; in either the &lt;strong&gt;title&lt;/strong&gt; or &lt;strong&gt;text&lt;/strong&gt; field and then filters them by the &lt;strong&gt;site&lt;/strong&gt; field. To include the individual search scores modify the query slightly.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var entries = db.getSisterDB(&amp;quot;blogs&amp;quot;).entries;
+entries.find({$text: {$search: &amp;quot;blog&amp;quot;}, site: &amp;quot;home&amp;quot;}, 
+  {score: {$meta: &amp;quot;textScore&amp;quot;}}).sort({score: {$meta: &amp;quot;textScore&amp;quot;}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The query includes the score given to the individual documents and sorts them in descending order by the &lt;strong&gt;score&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Text Indexes Can Get Big&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Text indexes can grow to be bigger than the actual stored documents and can take a while to build if the collection is big. They also add additional overhead to writes such as inserts and updates compared to simpler indexes.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;sparse-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Sparse indexes&lt;/h2&gt;
+
+&lt;p&gt;Sparse indexes are indexes where no values are included for fields that do not exist. Take the following two documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var sparse = db.getSisterDB(&amp;quot;indexes&amp;quot;).sparse;
+sparse.insert({ hello: &amp;quot;world&amp;quot;, number: 1 });
+sparse.insert({ hello: &amp;quot;world&amp;quot; });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A non-sparse index for the field &lt;strong&gt;number&lt;/strong&gt; will contain an entry for both documents in the index. A sparse index will contain only the documents that contains the &lt;strong&gt;number&lt;/strong&gt; field. This saves memory and disk space for the index in comparison to a normal field level index.&lt;/p&gt;
+
+&lt;p&gt;To create a sparse index.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var sparse = db.getSisterDB(&amp;quot;indexes&amp;quot;).sparse;
+sparse.ensureIndex({number: 1}, {sparse: true});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;unique-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Unique indexes&lt;/h2&gt;
+
+&lt;p&gt;An unique index is different from a normal index in that it only allows a single document to exist for a field value. Let&amp;rsquo;s define the index for a field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var unique = db.getSisterDB(&amp;quot;indexes&amp;quot;).unique;
+unique.ensureIndex({number: 1}, {unique: true});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s try to insert some documents&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var unique = db.getSisterDB(&amp;quot;indexes&amp;quot;).unique;
+unique.insert({ hello: &amp;quot;world&amp;quot;, number: 1 });
+unique.insert({ hello: &amp;quot;world&amp;quot;, number: 1 });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The second insert will fail as there is already a document with the field &lt;strong&gt;number&lt;/strong&gt; equal to &lt;strong&gt;1&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;time-to-live-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Time To Live indexes&lt;/h2&gt;
+
+&lt;p&gt;Time to live indexes (TTL) are a special type of index that will remove documents that fail to meet the index condition. One use for TTL indexes is for a cache of documents, allowing old documents to be gradually removed by MongoDB instead of bulk removing documents with an external process.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s insert some documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var ttl = db.getSisterDB(&amp;quot;indexes&amp;quot;).ttl;
+ttl.insert({ created_on: new Date() });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s define an a TTL index on &lt;strong&gt;created_on&lt;/strong&gt; with a expire time of &lt;strong&gt;1000&lt;/strong&gt; seconds in the future.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var ttl = db.getSisterDB(&amp;quot;indexes&amp;quot;).ttl;
+ttl.ensureIndex({created_on: 1}, {expireAfterSeconds: 1000});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When the documents cross the &lt;strong&gt;created_on + 1000 seconds&lt;/strong&gt; they will get removed.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Notes about TTL&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;expireAfterSeconds&lt;/strong&gt; is not a hard limit. MongoDB will remove and expired documents once it has time to do it. So the actual time of removal might vary.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;covered-indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Covered Indexes&lt;/h2&gt;
+
+&lt;p&gt;Covered indexes are queries that can be answered using only the information stored in the index. Basically MongoDB answers the index using the fields stored in a covered index. Let&amp;rsquo;s insert some documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var covered = db.getSisterDB(&amp;quot;indexes&amp;quot;).covered;
+covered.insert({ text: &amp;quot;hello&amp;quot;, site: &amp;quot;home&amp;quot;});
+covered.insert({ text: &amp;quot;hello&amp;quot;, site: &amp;quot;work&amp;quot; });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s define the covered index.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var covered = db.getSisterDB(&amp;quot;indexes&amp;quot;).covered;
+covered.ensureIndex({text: 1, site: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s perform a covered index query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var covered = db.getSisterDB(&amp;quot;indexes&amp;quot;).covered;
+covered.find({text: &amp;quot;hello&amp;quot;}, {_id: 0, text:1, site:1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the query plan.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var covered = db.getSisterDB(&amp;quot;indexes&amp;quot;).covered;
+covered.find({text: &amp;quot;hello&amp;quot;}, {_id: 0, text:1, site:1}).explain();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The results look like.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;cursor&amp;quot; : &amp;quot;BtreeCursor text_1_site_1&amp;quot;,
+  &amp;quot;isMultiKey&amp;quot; : false,
+  &amp;quot;n&amp;quot; : 2,
+  &amp;quot;nscannedObjects&amp;quot; : 0,
+  &amp;quot;nscanned&amp;quot; : 2,
+  &amp;quot;nscannedObjectsAllPlans&amp;quot; : 0,
+  &amp;quot;nscannedAllPlans&amp;quot; : 2,
+  &amp;quot;scanAndOrder&amp;quot; : false,
+  &amp;quot;indexOnly&amp;quot; : true,
+  &amp;quot;nYields&amp;quot; : 0,
+  &amp;quot;nChunkSkips&amp;quot; : 0,
+  &amp;quot;millis&amp;quot; : 0,
+  ...
+  &amp;quot;server&amp;quot; : &amp;quot;christkv.local:27017&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice how the query plan result includes &lt;strong&gt;indexOnly&lt;/strong&gt; set to &lt;strong&gt;true&lt;/strong&gt; meaning that the query was completely covered by the index and MongoDB never touched the documents.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Covered Index Gotchas&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Noticed how &lt;strong&gt;{_id: 0, text:1, site:1}&lt;/strong&gt; excludes &lt;strong&gt;_id&lt;/strong&gt;. A covered index query cannot include the &lt;strong&gt;_id&lt;/strong&gt; field.&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Metadata</title>
+      <link>/node-mongodb-native/schema/chapter5/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter5/</guid>
+      <description>
+
+&lt;h1 id=&#34;metadata:88f6cb0c2dababd96ac958a2c7592492&#34;&gt;Metadata&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/metadata.png&#34; alt=&#34;Metadata, courtesy of http://www.flickr.com/photos/sjcockell/6126442977&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Metadata is data that describes and gives information about other data. A classic example is the information about a digital image file such as the ISO settings, resolution, pixel depth, exposure, camera settings, camera type and so forth.&lt;/p&gt;
+
+&lt;p&gt;The Metadata Schema is to handle the situation where the information we wish to store in a document has a varying number of fields but we still want to retain the ability to search efficiently on any field in the metadata. Let&amp;rsquo;s use the example of a digital image file.&lt;/p&gt;
+
+&lt;h2 id=&#34;model:88f6cb0c2dababd96ac958a2c7592492&#34;&gt;Model&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at sample metadata for an image.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Field&lt;/th&gt;
+&lt;th&gt;Value&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;File name&lt;/td&gt;
+&lt;td&gt;img_1771.jpg&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;File size&lt;/td&gt;
+&lt;td&gt;32764 Bytes&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;MIME type&lt;/td&gt;
+&lt;td&gt;image/jpeg&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Image size&lt;/td&gt;
+&lt;td&gt;480 x 360&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Camera make&lt;/td&gt;
+&lt;td&gt;Canon&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Camera model&lt;/td&gt;
+&lt;td&gt;Canon PowerShot S40&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Image timestamp&lt;/td&gt;
+&lt;td&gt;2003-12-14 12-01-44&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Image number&lt;/td&gt;
+&lt;td&gt;117-1771&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Exposure time&lt;/td&gt;
+&lt;td&gt;&lt;sup&gt;1&lt;/sup&gt;&amp;frasl;&lt;sub&gt;500&lt;/sub&gt; s&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Aperture&lt;/td&gt;
+&lt;td&gt;F4.9&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Exposure bias&lt;/td&gt;
+&lt;td&gt;0 EV&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Flash&lt;/td&gt;
+&lt;td&gt;No, auto&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;The first naive approach to modeling this might be to just translate the table directly into a corresponding document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;File name&amp;quot;       : &amp;quot;img_1771.jpg&amp;quot;,
+  &amp;quot;File size&amp;quot;       : &amp;quot;32764&amp;quot;,
+  &amp;quot;MIME type&amp;quot;       : &amp;quot;image/jpeg&amp;quot;,
+  &amp;quot;Image size&amp;quot;      : {&amp;quot;width&amp;quot;: 480, &amp;quot;height&amp;quot;: 360},
+  &amp;quot;Camera make&amp;quot;     : &amp;quot;Canon&amp;quot;,
+  &amp;quot;Camera model&amp;quot;    : &amp;quot;Canon PowerShot S40&amp;quot;,
+  &amp;quot;Image timestamp&amp;quot; : ISODate(&amp;quot;2014-01-01T10:01:00Z&amp;quot;),
+  &amp;quot;Image number&amp;quot;    : &amp;quot;117-1771&amp;quot;,
+  &amp;quot;Exposure time&amp;quot;   : &amp;quot;1/500 s&amp;quot;,
+  &amp;quot;Aperture&amp;quot;        : &amp;quot;F4.9&amp;quot;,
+  &amp;quot;Exposure bias&amp;quot;   : &amp;quot;0 EV&amp;quot;,
+  &amp;quot;Flash&amp;quot;           : &amp;quot;No, auto&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One of the shortcomings of this model is the need for multiple indexes for multiple fields, increasing the time it takes to write documents and possibly hitting the max number of indexes available on a single collection. For each index you add to a collection it takes longer to insert new documents as all indexes have to potentially be updated.&lt;/p&gt;
+
+&lt;p&gt;Another possibility is to leverage the fact that one can index arrays of objects easily. Let&amp;rsquo;s modify the schema above to leverage this.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;metadata&amp;quot;: [
+    {&amp;quot;key&amp;quot;: &amp;quot;File Name&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;img_1771.jpg&amp;quot;},
+    {&amp;quot;key&amp;quot;: &amp;quot;File size&amp;quot;, &amp;quot;value&amp;quot;: 32764},
+    {&amp;quot;key&amp;quot;: &amp;quot;MIME type&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;image/jpeg&amp;quot;},
+    {&amp;quot;key&amp;quot;: &amp;quot;Image size&amp;quot;, &amp;quot;value&amp;quot;: {&amp;quot;width&amp;quot;: 480, &amp;quot;height&amp;quot;: 360}},
+    {&amp;quot;key&amp;quot;: &amp;quot;Camera make&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;Canon&amp;quot;},
+    {&amp;quot;key&amp;quot;: &amp;quot;Camera model&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;Canon PowerShot S40&amp;quot;},
+    {&amp;quot;key&amp;quot;: &amp;quot;Image timestamp&amp;quot;, &amp;quot;value&amp;quot;: ISODate(&amp;quot;2014-01-01T10:01:00Z&amp;quot;)},
+    {&amp;quot;key&amp;quot;: &amp;quot;Image number&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;117-1771&amp;quot;},
+    {&amp;quot;key&amp;quot;: &amp;quot;Exposure time&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;1/500 s&amp;quot;},
+    {&amp;quot;key&amp;quot;: &amp;quot;Aperture&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;F4.9&amp;quot;},
+    {&amp;quot;key&amp;quot;: &amp;quot;Exposure bias&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;0 EV&amp;quot;},
+    {&amp;quot;key&amp;quot;: &amp;quot;Flash&amp;quot;, &amp;quot;value&amp;quot;: &amp;quot;No, auto&amp;quot;}
+  ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next lets add a compound index on the metadata array.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;var col = db.getSisterDB(&amp;quot;supershot&amp;quot;).images;
+db.images.ensureIndex({&amp;quot;metadata.key&amp;quot;: 1, &amp;quot;metadata.value&amp;quot;: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So how do we actually query the data to efficiently use the index. Let&amp;rsquo;s take a look at two query operators called &lt;strong&gt;$all&lt;/strong&gt; and &lt;strong&gt;$elemMatch&lt;/strong&gt; and how we can leverage them.&lt;/p&gt;
+
+&lt;h3 id=&#34;all:88f6cb0c2dababd96ac958a2c7592492&#34;&gt;$all&lt;/h3&gt;
+
+&lt;p&gt;The &lt;strong&gt;$all&lt;/strong&gt; operator is defined as selecting all the documents where the value of a field is an array that contains all the specified elements.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;supershot&amp;quot;).images;
+col.findOne({tags: {$all: [ &amp;quot;appliance&amp;quot;, &amp;quot;school&amp;quot;, &amp;quot;book&amp;quot; ]}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;elemmatch:88f6cb0c2dababd96ac958a2c7592492&#34;&gt;$elemMatch&lt;/h3&gt;
+
+&lt;p&gt;The &lt;strong&gt;$elemMatch&lt;/strong&gt; operator is defined as matching more than one component within an array element.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;supershot&amp;quot;).images;
+col.findOne({metadata: {$elemMatch: {key: &amp;quot;File Name&amp;quot;, value: &amp;quot;img_1771.jpg&amp;quot;}}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;$elemMatch&lt;/strong&gt; operator looks like the obvious first choice. However the problem is that our &lt;strong&gt;metadata&lt;/strong&gt; array is defined as objects that all have &lt;strong&gt;key&lt;/strong&gt; and &lt;strong&gt;value&lt;/strong&gt;. If you attempt to enter multiple matches using &lt;strong&gt;key&lt;/strong&gt; and &lt;strong&gt;value&lt;/strong&gt; in the &lt;strong&gt;$elemMatch&lt;/strong&gt; only the last pair will be used.&lt;/p&gt;
+
+&lt;p&gt;If you wish to locate a photo that has &lt;strong&gt;MIME type&lt;/strong&gt; equal to &lt;strong&gt;image/jpeg&lt;/strong&gt; and also &lt;strong&gt;Flash&lt;/strong&gt; equal to &lt;strong&gt;No, auto&lt;/strong&gt; we need to combine &lt;strong&gt;$all&lt;/strong&gt; and &lt;strong&gt;$elemMatch&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a look at how to correctly pick the document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;supershot&amp;quot;).images;
+col.find({ metadata: { $all: [
+            { &amp;quot;$elemMatch&amp;quot; : { key : &amp;quot;MIME type&amp;quot;, value: &amp;quot;image/jpeg&amp;quot; } },
+            { &amp;quot;$elemMatch&amp;quot; : { key: &amp;quot;Flash&amp;quot;, value: &amp;quot;No, auto&amp;quot; } }
+          ]}
+       }).toArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first &lt;strong&gt;$elemMatch&lt;/strong&gt; will use the index to locate all the documents with the &lt;strong&gt;MIME type&lt;/strong&gt; equal to &lt;strong&gt;image/jpeg&lt;/strong&gt; and then filter on the &lt;strong&gt;Flash&lt;/strong&gt; key.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Indexes&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;One of the thing to remember when it comes to indexes is that the more indexes are on a collection the more &lt;strong&gt;BTree&amp;rsquo;s&lt;/strong&gt; need to be updated each time a document is inserted or updated causing additional overhead and IO. In this case we replace 12+ indexes with a single compound index saving both space as well as increasing insert and update performance.&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Time Series</title>
+      <link>/node-mongodb-native/schema/chapter6/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter6/</guid>
+      <description>
+
+&lt;h1 id=&#34;time-series:b7673b314677a8560e182fed1b34792e&#34;&gt;Time Series&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/time_series.png&#34; alt=&#34;An Example Time Series&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The first pattern we are going to explore is the time series pattern. This pattern is a write optimization pattern to ensure maximum write performance for a typical analytics application. A time series is made up of discreet measurements at timed intervals. Examples can include counting the number of page views in a second or the temperature per minute. For this pattern we will discuss time series in the context of web page views.&lt;/p&gt;
+
+&lt;p&gt;| Schema Attributes                                 |
+|&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;ndash;|&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;&amp;mdash;|
+| &lt;strong&gt;Optimized For&lt;/strong&gt;  | Write Performance            |
+| &lt;strong&gt;Pre-Allocation&lt;/strong&gt; | Benefits from Pre-Allocation |&lt;/p&gt;
+
+&lt;p&gt;To maximize our write performance for a time series we have are going to assume that we are interested in discreet buckets of time. That&amp;rsquo;s to say an individual page view is not interesting to the application, only the number of page views in a particular second, minute, hour, day or any time range in-between. This means the smallest unit of time we are interested in is a single minute.&lt;/p&gt;
+
+&lt;h2 id=&#34;schema:b7673b314677a8560e182fed1b34792e&#34;&gt;Schema&lt;/h2&gt;
+
+&lt;p&gt;Taking that into account let&amp;rsquo;s model a &lt;strong&gt;bucket&lt;/strong&gt; to keep all our page views for a particular minute.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;page&amp;quot;: &amp;quot;/index.htm&amp;quot;,
+  &amp;quot;timestamp_minute&amp;quot;: ISODate(&amp;quot;2014-01-01T10:01:00Z&amp;quot;),
+  &amp;quot;total_views&amp;quot;: 0,
+  &amp;quot;seconds&amp;quot;: {
+    &amp;quot;0&amp;quot;: 0
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s have a quick view of what the fields mean.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Field&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;page&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;The web page we are measuring&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;timestamp_minute&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;The actual minute the bucket is for&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;total_views&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Total page views in this minute&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;seconds&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Page views for a specific second in the minute&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;As we can see the document represents not only a single minute of page views for a specific page but also allows for looking at individual seconds.&lt;/p&gt;
+
+&lt;h2 id=&#34;update-page-views:b7673b314677a8560e182fed1b34792e&#34;&gt;Update Page Views&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s simulate what happens in an application that is counting page views for a specific page. We are going to simulate updating a bucket for a specific page view in the 2nd second of the &lt;strong&gt;ISODate(&amp;ldquo;2014-01-01T10:01:00Z&amp;rdquo;)&lt;/strong&gt; bucket.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;use analytics
+var secondInMinute = 2;
+var updateStatment = {$inc: {}};
+updateStatment[&amp;quot;$inc&amp;quot;][&amp;quot;seconds.&amp;quot; + secondInMinute] = 1;
+
+db.page_views.update({
+  page: &amp;quot;/index.htm&amp;quot;, 
+  timestamp_minute: ISODate(&amp;quot;2014-01-01T10:01:00Z&amp;quot;)
+}, updateStatment, true)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first part of the &lt;strong&gt;updateStatement&lt;/strong&gt; sets up the &lt;strong&gt;$inc&lt;/strong&gt; value to increment the field in the &lt;strong&gt;seconds&lt;/strong&gt; field named &lt;strong&gt;2&lt;/strong&gt; which corresponds with the second second in our time period. If the field does not exist MongoDB will set it to one otherwise it will increment the existing value with one. Notice the last parameter of the update statement. This is telling MongoDB to do an &lt;strong&gt;upsert&lt;/strong&gt;, meaning MongoDB will create a new document if none exists. Let&amp;rsquo;s query for the document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;use analytics
+db.page_views.findOne({
+  page: &amp;quot;/index.htm&amp;quot;, 
+  timestamp_minute: ISODate(&amp;quot;2014-01-01T10:01:00Z&amp;quot;)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Returns the following document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;52de4ef8297f2f3b6f41d242&amp;quot;),
+  &amp;quot;page&amp;quot; : &amp;quot;/index.htm&amp;quot;,
+  &amp;quot;timestamp_minute&amp;quot; : ISODate(&amp;quot;2014-01-01T10:01:00Z&amp;quot;),
+  &amp;quot;seconds&amp;quot; : {
+    &amp;quot;2&amp;quot; : 1
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Unfortunately there is a slight problem with this way of creating new buckets, namely that the document will grow over time causing MongoDB to have to move it around an incurring a write performance penalty. Luckily there is a work around to improve the write performance.&lt;/p&gt;
+
+&lt;h2 id=&#34;pre-allocation:b7673b314677a8560e182fed1b34792e&#34;&gt;Pre-Allocation&lt;/h2&gt;
+
+&lt;p&gt;We can preallocate documents for our minute buckets. Let&amp;rsquo;s look at a simple little script that takes in a specific hour and pre-allocates minute buckets for that hour.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var preAllocate = function(coll, pageName, timestamp) {
+  for(var i = 0; i &amp;lt; 60; i++) {
+    coll.insert({
+      &amp;quot;page&amp;quot;: pageName,
+      &amp;quot;timestamp_minute&amp;quot; : timestamp,
+      &amp;quot;seconds&amp;quot; : {
+        &amp;quot;0&amp;quot;:0,&amp;quot;1&amp;quot;:0,&amp;quot;2&amp;quot;:0,&amp;quot;3&amp;quot;:0,&amp;quot;4&amp;quot;:0,&amp;quot;5&amp;quot;:0,&amp;quot;6&amp;quot;:0,&amp;quot;7&amp;quot;:0,&amp;quot;8&amp;quot;:0,&amp;quot;9&amp;quot;:0,
+        &amp;quot;10&amp;quot;:0,&amp;quot;11&amp;quot;:0,&amp;quot;12&amp;quot;:0,&amp;quot;13&amp;quot;:0,&amp;quot;14&amp;quot;:0,&amp;quot;15&amp;quot;:0,&amp;quot;16&amp;quot;:0,&amp;quot;17&amp;quot;:0,&amp;quot;18&amp;quot;:0,&amp;quot;19&amp;quot;:0,
+        &amp;quot;20&amp;quot;:0,&amp;quot;21&amp;quot;:0,&amp;quot;22&amp;quot;:0,&amp;quot;23&amp;quot;:0,&amp;quot;24&amp;quot;:0,&amp;quot;25&amp;quot;:0,&amp;quot;26&amp;quot;:0,&amp;quot;27&amp;quot;:0,&amp;quot;28&amp;quot;:0,&amp;quot;29&amp;quot;:0,
+        &amp;quot;30&amp;quot;:0,&amp;quot;31&amp;quot;:0,&amp;quot;32&amp;quot;:0,&amp;quot;33&amp;quot;:0,&amp;quot;34&amp;quot;:0,&amp;quot;35&amp;quot;:0,&amp;quot;36&amp;quot;:0,&amp;quot;37&amp;quot;:0,&amp;quot;38&amp;quot;:0,&amp;quot;39&amp;quot;:0,
+        &amp;quot;40&amp;quot;:0,&amp;quot;41&amp;quot;:0,&amp;quot;42&amp;quot;:0,&amp;quot;43&amp;quot;:0,&amp;quot;44&amp;quot;:0,&amp;quot;45&amp;quot;:0,&amp;quot;46&amp;quot;:0,&amp;quot;47&amp;quot;:0,&amp;quot;48&amp;quot;:0,&amp;quot;49&amp;quot;:0,
+        &amp;quot;50&amp;quot;:0,&amp;quot;51&amp;quot;:0,&amp;quot;52&amp;quot;:0,&amp;quot;53&amp;quot;:0,&amp;quot;54&amp;quot;:0,&amp;quot;55&amp;quot;:0,&amp;quot;56&amp;quot;:0,&amp;quot;57&amp;quot;:0,&amp;quot;58&amp;quot;:0,&amp;quot;59&amp;quot;:0
+      }
+    })
+
+    timestamp.setMinutes(timestamp.getMinutes() + 1);
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take this pre-allocation method out for a test run.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;analytics&amp;quot;).page_views;
+col.drop();
+preAllocate(col, &amp;quot;index.htm&amp;quot;, ISODate(&amp;quot;2014-01-01T10:01:00Z&amp;quot;));
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For this example we are dropping any existing documents in the &lt;strong&gt;page_views&lt;/strong&gt; collection for clarity reasons. Now run the following commands.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;analytics&amp;quot;).page_views;
+col.count()
+col.find()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;col.count()&lt;/strong&gt; returns &lt;strong&gt;60&lt;/strong&gt; showing we have inserted &lt;strong&gt;60&lt;/strong&gt; buckets. Looking over the results from the &lt;strong&gt;col.find()&lt;/strong&gt; you&amp;rsquo;ll notice that each one has an incrementing timestamp and that the interval is 1 minutes.&lt;/p&gt;
+
+&lt;p&gt;With out pre-allocated documents, the &lt;strong&gt;update&lt;/strong&gt; command will hit an existing empty bucket and since the bucket is at it&amp;rsquo;s maximum size it will never grow and MongoDB will avoid having to copy the data to a new location. This will increase the write performance as MongoDb can spend more of it&amp;rsquo;s time performing &lt;strong&gt;updates in place&lt;/strong&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Queues</title>
+      <link>/node-mongodb-native/schema/chapter7/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter7/</guid>
+      <description>
+
+&lt;h1 id=&#34;queues:350c6b49ae8b36a26012060b0876f863&#34;&gt;Queues&lt;/h1&gt;
+
+&lt;p&gt;A queue lets multiple publishers push messages to it and multiple subscribers can pull messages off it. The message is only delivered to a single subscriber.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/queue.png&#34; alt=&#34;A Queue With Publishers and Subscribers&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;A variant of a queue is called a topic and the difference with a queue is that all subscribers receive all messages. In MongoDB the classic example is the &lt;strong&gt;oplog&lt;/strong&gt; that contains all operations performed on the &lt;strong&gt;master&lt;/strong&gt; database and that all &lt;strong&gt;secondaries&lt;/strong&gt; listen to for changes.&lt;/p&gt;
+
+&lt;p&gt;We are going to look at both examples and how to implement them using MongoDB.&lt;/p&gt;
+
+&lt;h2 id=&#34;work-queue:350c6b49ae8b36a26012060b0876f863&#34;&gt;Work Queue&lt;/h2&gt;
+
+&lt;p&gt;The work queue will contain messages describing work to be performed asynchronously. In our example this will be to process images that have been uploaded.&lt;/p&gt;
+
+&lt;p&gt;The document describing a job looks like and we are inserting it into our queue collections.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;work&amp;quot;).queue;
+col.insert({
+  &amp;quot;input&amp;quot;: &amp;quot;/img/images.png&amp;quot;,
+  &amp;quot;output&amp;quot;: &amp;quot;/converted/images.jpg&amp;quot;
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;ObjectId&lt;/strong&gt; that is added to all documents as the &lt;strong&gt;_id&lt;/strong&gt; field if not overridden contains a timestamp allowing us to use it to sort by time. To fetch the next document in a &lt;em&gt;FIFO&lt;/em&gt; (First In First Out) manner do.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;work&amp;quot;).queue;
+var job = col.findAndModify({
+    query: {}
+  , sort: {_id: 1}
+  , remove: true
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will sort the jobs in &lt;em&gt;ascending order&lt;/em&gt; by &lt;strong&gt;_id&lt;/strong&gt; and remove and return the first one. Since &lt;strong&gt;findAndModify&lt;/strong&gt; is an &lt;em&gt;atomic&lt;/em&gt; operation it guarantees that only a single subscriber receives the message.&lt;/p&gt;
+
+&lt;h3 id=&#34;work-queue-with-priorities-and-timestamps:350c6b49ae8b36a26012060b0876f863&#34;&gt;Work Queue With Priorities and Timestamps&lt;/h3&gt;
+
+&lt;p&gt;We can extend the work queue very easily to allow for priorities and statistics by extending the work document to include a couple of more fields.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;work&amp;quot;).queue;
+col.insert({
+  &amp;quot;priority&amp;quot;: 1,
+  &amp;quot;input&amp;quot;: &amp;quot;/img/images.png&amp;quot;,
+  &amp;quot;output&amp;quot;: &amp;quot;/converted/images.jpg&amp;quot;,
+  &amp;quot;start_time&amp;quot;: null,
+  &amp;quot;end_time&amp;quot;: null,   
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the previous example we are consuming the actual work item by removing it from the collection but here we want to keep it around for reporting purposes. Let&amp;rsquo;s grab the highest priority work item.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;work&amp;quot;).queue;
+var job = col.findAndModify({
+    query: {start_time: null}
+  , sort: {priority: -1}
+  , update: {$set: {start_time: new Date()}}
+  , new: true
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When we are done we can set the end time for the job using a simple update.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;work&amp;quot;).queue;
+col.update({_id: job._id}, {$set: {end_time: new Date()}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;stock-ticker-topic:350c6b49ae8b36a26012060b0876f863&#34;&gt;Stock Ticker Topic&lt;/h2&gt;
+
+&lt;p&gt;The stock ticker topic allows multiple applications to listen to a live stream of data about stock price. For the topic we want to ensure maximum throughput. We can achieve this by using a special type of collection in MongoDB called a &lt;strong&gt;capped collection&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;A &lt;strong&gt;capped collection&lt;/strong&gt; is basically what we call a ring buffer meaning they have a fixed size. Once the application goes over the size it starts overwriting documents.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/ring_buffer.png&#34; alt=&#34;A Ring Buffer&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The benefit of the &lt;strong&gt;capped collection&lt;/strong&gt; is that it allows for &lt;strong&gt;tailing&lt;/strong&gt; meaning applications can listen to new documents being inserted. Let&amp;rsquo;s set up our stock ticker schema.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;time&amp;quot;: ISODate(&amp;quot;2014-01-01T10:01:22Z&amp;quot;)
+  &amp;quot;ticker&amp;quot;: &amp;quot;PIP&amp;quot;,
+  &amp;quot;price&amp;quot;: &amp;quot;4.45&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create a new &lt;strong&gt;capped collection&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&amp;quot;finance&amp;quot;);
+db.createCollection(&amp;quot;ticker&amp;quot;, {capped:true, size:100000})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s boot up a new shell and set up a producer of tickers that emits a random price between 0 and 100 for PIP once a second.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&amp;quot;finance&amp;quot;);
+while(true) {
+  db.ticker.insert({
+    time: new Date(),
+    ticker: &amp;quot;PIP&amp;quot;,
+    price: 100 * Math.random(1000)
+  })
+
+  sleep(1000);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s boot up a consumer for the tickers using a &lt;strong&gt;tailable&lt;/strong&gt; cursor.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&amp;quot;finance&amp;quot;);
+var cursor = db.ticker.find({time: {$gte: new Date()}}).addOption(DBQuery.Option.tailable).addOption(DBQuery.Option.awaitData)
+
+while(cursor.hasNext) {
+  print(JSON.stringify(cursor.next(), null, 2))
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This consumer will get any ticker prices that are equal to or newer than the current time when it starts up.&lt;/p&gt;
+
+&lt;h2 id=&#34;time-to-live-indexes-ttl:350c6b49ae8b36a26012060b0876f863&#34;&gt;Time To Live Indexes (TTL)&lt;/h2&gt;
+
+&lt;p&gt;MongoDB 2.4 or higher has a new type of index called TTL that lets the server expire documents gradually over time. Take the following document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;hello&amp;quot;: &amp;quot;world&amp;quot;,
+  &amp;quot;created_on&amp;quot;: ISODate(&amp;quot;2014-01-01T10:01:22Z&amp;quot;)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Say we only want to keep the last 24 hours worth of data. This could be accomplished by performing a bulk remove of document using a batch job, or it can be more elegantly be solved using a TTL index.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&amp;quot;data&amp;quot;);
+var numberOfSeconds = 60 * 60 * 24; // 60 sec * 60 min * 24 hours
+db.expire.ensureIndex({ &amp;quot;created_on&amp;quot;: 1}, {expireAfterSeconds: numberOfSeconds })
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As documents expire against the TTL index they will be removed gradually over time.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Time To Live Indexes (TTL)&lt;/p&gt;
+
+&lt;p&gt;The TTL index is not a hard real-time limit of expiry. It only guarantees that document will be expired some time after it hits the expire threshold but this period will vary depending on the load on MongoDB and other currently running operations.&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Nested Categories</title>
+      <link>/node-mongodb-native/schema/chapter8/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter8/</guid>
+      <description>
+
+&lt;h1 id=&#34;nested-categories:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Nested Categories&lt;/h1&gt;
+
+&lt;p&gt;The nested categories schema design pattern targets the hierarchical structures traditionally found in a product catalog on an line e-commerce website.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/hierarchy.png&#34; alt=&#34;A Category Hierarchy Example&#34; /&gt;
+&lt;/p&gt;
+
+&lt;h2 id=&#34;trees-using-paths:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Trees using Paths&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s insert the category &lt;strong&gt;/electronics/embedded&lt;/strong&gt; and a product that belongs in this category.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var categories = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+categories.insert([{
+    &amp;quot;name&amp;quot;: &amp;quot;electronics&amp;quot;
+  , &amp;quot;parent&amp;quot;: &amp;quot;/&amp;quot;
+  , &amp;quot;category&amp;quot;: &amp;quot;/electronics&amp;quot;
+}, {
+    &amp;quot;name&amp;quot;: &amp;quot;embedded&amp;quot;
+  , &amp;quot;parent&amp;quot;: &amp;quot;/electronics&amp;quot;
+  , &amp;quot;category&amp;quot;: &amp;quot;/electronics/embedded&amp;quot;
+}, {
+    &amp;quot;name&amp;quot;: &amp;quot;cases&amp;quot;
+  , &amp;quot;parent&amp;quot;: &amp;quot;/&amp;quot;
+  , &amp;quot;category&amp;quot;: &amp;quot;/cases&amp;quot;
+}, {
+    &amp;quot;name&amp;quot;: &amp;quot;big&amp;quot;
+  , &amp;quot;parent&amp;quot;: &amp;quot;/cases&amp;quot;
+  , &amp;quot;category&amp;quot;: &amp;quot;/cases/big&amp;quot;
+}, {
+    &amp;quot;name&amp;quot;: &amp;quot;small&amp;quot;
+  , &amp;quot;parent&amp;quot;: &amp;quot;/cases&amp;quot;
+  , &amp;quot;category&amp;quot;: &amp;quot;/cases/small&amp;quot;
+}]);
+
+var products = db.getSisterDB(&amp;quot;catalog&amp;quot;).products;
+products.insert({
+    &amp;quot;name&amp;quot;: &amp;quot;Arduino&amp;quot;
+  , &amp;quot;cost&amp;quot;: 125
+  , &amp;quot;currency&amp;quot;: &amp;quot;USD&amp;quot;
+  , &amp;quot;categories&amp;quot;: [&amp;quot;/electronics/embedded&amp;quot;] 
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the Trees as Paths we are using what looks like file directory paths from UNIX. Together with regular expressions we can slice the paths as we need to efficiently retrieve any level of the tree structure.&lt;/p&gt;
+
+&lt;p&gt;A couple of notes about the schema above. Notice that the product has an array of &lt;strong&gt;categories&lt;/strong&gt;. This lets you easily list the same product in multiple categories (maybe by attributes such as embedded but also Arduino).&lt;/p&gt;
+
+&lt;p&gt;Lets fetch all the categories just below the top level &lt;strong&gt;/&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+var categories = col.find({parent: /^\/$/}).toArray();
+
+for(var i = 0; i &amp;lt; categories.length; i++) {
+  print(categories[i].category);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice the regular expression &lt;strong&gt;/^\/$/&lt;/strong&gt;. This translates to all documents where the field &lt;strong&gt;parent&lt;/strong&gt; starts and ends with &lt;strong&gt;/&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Locate the entire tree structure below the cases level &lt;strong&gt;/cases&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+var categories = col.find({category: /^\/cases\//}).toArray();
+
+for(var i = 0; i &amp;lt; categories.length; i++) {
+  printjson(categories[i]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice the regular expression &lt;strong&gt;/^\/cases\/$/&lt;/strong&gt;. This matches all documents where the field &lt;strong&gt;category&lt;/strong&gt; starts with &lt;strong&gt;/cases/&lt;/strong&gt;, thus returning all the categories in the subtree below &lt;strong&gt;/cases&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;To locate all the products for the &lt;strong&gt;/electronics/embedded&lt;/strong&gt; category&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).products;
+var products = col.find({categories: /^\/electronics\/embedded$/}).toArray();
+
+for(var i = 0; i &amp;lt; products.length; i++) {
+  printjson(products[i]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will match any documents where the categories array contains the string &lt;strong&gt;/electronics/embedded&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;indexes:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Indexes&lt;/h3&gt;
+
+&lt;p&gt;Adding indexes ensure the lookup is as fast as possible as the database needs to spend less effort in locating the data. Below are some recommended indexes for the schema.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+col.ensureIndex({parent:1})
+col.ensureIndex({category:1})
+
+var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).products;
+col.ensureIndex({categories:1})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;covered-indexes:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Covered Indexes&lt;/h3&gt;
+
+&lt;p&gt;Covered indexes are indexes that contain enough information to be able to answer the query with the data stored in the index and are in general, many times faster than queries that need to search the documents. We could create a covered index for categories to allow for quick retrieval of a specific level.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+col.ensureIndex({parent:1, name: 1})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The Index &lt;strong&gt;{parent:1, name:1}&lt;/strong&gt; is a compound index and will contain both the &lt;strong&gt;parent&lt;/strong&gt; and &lt;strong&gt;name&lt;/strong&gt; field and can cover queries containing those fields.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s rewrite the query of all the categories just below the top level &lt;strong&gt;/&lt;/strong&gt; and look at the explain plan.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+col.find({parent: /^\/$/}, {_id:0, parent:1, name:1}).explain();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This should return a document result that contains a field &lt;strong&gt;indexOnly&lt;/strong&gt; that is set to true indicating that the query can be answered by only using the index. However you do have to give up the &lt;strong&gt;_id&lt;/strong&gt; field for this query but in many cases covered index queries can give a radical performance boost for a query where &lt;strong&gt;_id&lt;/strong&gt; is not needed and a small set of fields need to be returned.&lt;/p&gt;
+
+&lt;p&gt;Knowing this we can rewrite the query for the direct sub categories of the path &lt;strong&gt;/&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+var categories = col.find({parent: /^\/$/}, {_id:0, parent:1, name:1});
+
+for(var i = 0; i &amp;lt; categories.length; i++) {
+  print(categories[i].category);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;pros-and-cons:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Pros and Cons&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;Pros&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Quick retrieval of a subtree, backed by index&lt;/li&gt;
+&lt;li&gt;Flexible&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Cons&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Expensive to retrieve the parent path for a specific node (ex:all parent categories of small)&lt;/li&gt;
+&lt;li&gt;Relies on regular expressions make it more complicated (wrong regexp&amp;rsquo;s can cause collection scans)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;trees-using-ancestors-array:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Trees using Ancestors Array&lt;/h2&gt;
+
+&lt;p&gt;In Trees using Ancestor&amp;rsquo;s Array each tree node contains it&amp;rsquo;s node path allowing you to retrieve a single node and being able to retrieve all it&amp;rsquo;s parents nodes in a single query. Below is the categories tree from the above example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var categories = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+categories.insert([{
+  &amp;quot;_id&amp;quot;: &amp;quot;root&amp;quot;
+} , {
+    &amp;quot;_id&amp;quot;: &amp;quot;electronics&amp;quot;
+  , &amp;quot;tree&amp;quot;: [&amp;quot;root&amp;quot;]
+  , &amp;quot;parent&amp;quot;: &amp;quot;root&amp;quot;
+}, {
+    &amp;quot;_id&amp;quot;: &amp;quot;embedded&amp;quot;
+  , &amp;quot;tree&amp;quot;: [&amp;quot;root&amp;quot;, &amp;quot;electronics&amp;quot;]
+  , &amp;quot;parent&amp;quot;: &amp;quot;electronics&amp;quot;
+}, {
+    &amp;quot;_id&amp;quot;: &amp;quot;cases&amp;quot;
+  , &amp;quot;tree&amp;quot;: [&amp;quot;root&amp;quot;]
+  , &amp;quot;parent&amp;quot;: &amp;quot;root&amp;quot;
+}, {
+    &amp;quot;_id&amp;quot;: &amp;quot;big&amp;quot;
+  , &amp;quot;tree&amp;quot;: [&amp;quot;root&amp;quot;, &amp;quot;cases&amp;quot;]
+  , &amp;quot;parent&amp;quot;: &amp;quot;cases&amp;quot;
+}, {
+    &amp;quot;_id&amp;quot;: &amp;quot;small&amp;quot;
+  , &amp;quot;tree&amp;quot;: [&amp;quot;root&amp;quot;, &amp;quot;cases&amp;quot;]
+  , &amp;quot;parent&amp;quot;: &amp;quot;cases&amp;quot;
+}, {
+    &amp;quot;_id&amp;quot;: &amp;quot;yellow&amp;quot;
+  , &amp;quot;tree&amp;quot;: [&amp;quot;root&amp;quot;, &amp;quot;cases&amp;quot;, &amp;quot;small&amp;quot;]
+  , &amp;quot;parent&amp;quot;: &amp;quot;small&amp;quot;
+}]);
+
+var products = db.getSisterDB(&amp;quot;catalog&amp;quot;).products;
+products.insert({
+    &amp;quot;name&amp;quot;: &amp;quot;Arduino&amp;quot;
+  , &amp;quot;cost&amp;quot;: 125
+  , &amp;quot;currency&amp;quot;: &amp;quot;USD&amp;quot;
+  , &amp;quot;categories&amp;quot;: [&amp;quot;embedded&amp;quot;] 
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Locating all the direct descendants of the &lt;strong&gt;cases&lt;/strong&gt; tree node.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+var categories = col.find({parent: &amp;quot;cases&amp;quot;}).toArray();
+
+for(var i = 0; i &amp;lt; categories.length; i++) {
+  printjson(categories[i]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Locate all the nodes that share the common parent node &lt;strong&gt;cases&lt;/strong&gt; (allowing you to extract a subtree of categories)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+var categories = col.find({tree: &amp;quot;cases&amp;quot;}).toArray();
+
+for(var i = 0; i &amp;lt; categories.length; i++) {
+  printjson(categories[i]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Locate all the parent nodes for the &lt;strong&gt;yellow&lt;/strong&gt; node.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+var nodes = col.findOne({_id: &amp;quot;small&amp;quot;}).tree;
+var categories = col.find({_id: {$in: nodes}}).toArray();
+
+for(var i = 0; i &amp;lt; categories.length; i++) {
+  printjson(categories[i]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;One thing to notice is that one can retrieve the entire path from the root for a specific node in two queries. This is in contrast to the Path based tree where there is no cheap way to retrieve it.&lt;/p&gt;
+
+&lt;h3 id=&#34;indexes-1:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Indexes&lt;/h3&gt;
+
+&lt;p&gt;Just as the Path based tree we can benefit from a couple of indexes to improve retrieval performance.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).categories;
+col.ensureIndex({parent:1})
+col.ensureIndex({tree:1})
+
+var col = db.getSisterDB(&amp;quot;catalog&amp;quot;).products;
+col.ensureIndex({categories:1})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice that in this case we are not explicitly creating a &lt;strong&gt;_id&lt;/strong&gt; as it&amp;rsquo;s by default a unique index.&lt;/p&gt;
+
+&lt;h3 id=&#34;pros-and-cons-1:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Pros and Cons&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;Pros&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Quick retrieval of all ascendants and descendants of a particular node&lt;/li&gt;
+&lt;li&gt;More straightforward to understand than the Path Based tree&lt;/li&gt;
+&lt;li&gt;Not reliant on regular expressions for matching&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Cons&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;More expensive than the Path Based tree&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Account Transactions</title>
+      <link>/node-mongodb-native/schema/chapter9/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter9/</guid>
+      <description>
+
+&lt;h1 id=&#34;account-transactions:38a9a76b33f1cbc2606833c72cbf6c68&#34;&gt;Account Transactions&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/bank.png&#34; alt=&#34;Metadata, courtesy of http://www.flickr.com/photos/68751915@N05/6629034769&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;MongoDB does not as of 2.6 support any notion of a transaction across a document or multiple documents. It does however guarantee atomic operations on single documents. This allows us to implement a Two-Phase commit strategy using double bookkeeping. However it&amp;rsquo;s important to note that due to only single document operations being atomic, MongoDB can only offer transaction-like semantics. It&amp;rsquo;s still possible for applications to return intermediate during the two-phase commit or rollback.&lt;/p&gt;
+
+&lt;p&gt;In this chapter we will use two collections to simulate a bank account system. The first collection &lt;strong&gt;accounts&lt;/strong&gt; contains all the customer accounts and the second one &lt;strong&gt;transactions&lt;/strong&gt; is our transaction book-keeping collection. The goal is to transfer &lt;em&gt;100&lt;/em&gt; from Joe to Peter using a two-phase commit.&lt;/p&gt;
+
+&lt;h2 id=&#34;two-phase-commit:38a9a76b33f1cbc2606833c72cbf6c68&#34;&gt;Two-phase Commit&lt;/h2&gt;
+
+&lt;p&gt;First create two accounts&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).accounts;
+col.insert({name: &amp;quot;Joe&amp;quot;, balance: 1000, pendingTransactions:[]});
+col.insert({name: &amp;quot;Peter&amp;quot;, balance: 1000, pendingTransactions:[]});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s set up the initial transaction&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).transactions;
+col.insert({source: &amp;quot;Joe&amp;quot;, destination: &amp;quot;Peter&amp;quot;, amount: 100, state: &amp;quot;intital&amp;quot;});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s first update the transaction to pending&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).transactions;
+var transaction = col.findOne({state: &amp;quot;initial&amp;quot;});
+col.update({_id: transaction._id}, {$set: {state: &amp;quot;pending&amp;quot;}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next apply the transaction to both accounts&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).accounts;
+col.update({
+    name: transaction.source, pendingTransactions: {$ne: transaction._id}
+  }, {
+    $inc: {balance: -transaction.value}, $push: {pendingTransactions: transaction._id}
+  });
+col.update({
+    name: transaction.source, pendingTransactions: {$ne: transaction._id}
+  }, { 
+    $inc: {balance: transaction.value} , $push: {pendingTransactions: transaction._id}
+  }); 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Set the transaction to committed state&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).transactions;
+col.update({_id: transaction._id}, {$set: {state: &amp;quot;commited&amp;quot;}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Remove the pending transactions from the accounts&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).accounts;
+col.update({name: transaction.source}, {$pull: {pendingTransactions: transaction._id}});
+col.update({name: transaction.destination}, {$pull: {pendingTransactions: transaction._id}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally set the transaction state to done&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).transactions;
+col.update({_id: transaction._id}, {$set: {state: &amp;quot;done&amp;quot;}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;rollback:38a9a76b33f1cbc2606833c72cbf6c68&#34;&gt;Rollback&lt;/h2&gt;
+
+&lt;p&gt;There are two types of errors during a two-phase commit that might force us to rollback the transaction.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;There is an error before applying the transaction to the accounts. To recover from this all transactions marked &lt;strong&gt;pending&lt;/strong&gt; need to be retrieved and the application must retry applying the transaction to the accounts.&lt;/li&gt;
+&lt;li&gt;There is an error after applying the transaction to the accounts but before marking the transaction as &lt;strong&gt;done&lt;/strong&gt;. To recover from this all transactions marked &lt;strong&gt;committed&lt;/strong&gt; need to be retrieved and start from removing the pending transactions.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Correcting for the two error cases will allow an application to resume a transaction a get the accounts to a consistent state.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Recovery Process&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s helpful to have a process that will look for for any transactions left in &lt;strong&gt;pending&lt;/strong&gt; or &lt;strong&gt;commited&lt;/strong&gt; state. To determine the time a transaction has been sitting in an interrupted state it might be worth adding a &lt;strong&gt;create_at&lt;/strong&gt; timestamp.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;But for some cases you might need to undo (rollback) a transaction due to the application canceling the transaction or because it cannot be recovered (for example if the one of the accounts does not exist during the transaction).&lt;/p&gt;
+
+&lt;p&gt;There are two points in the two-phase commit we can rollback.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;If you have applied the transaction to the accounts you should not rollback. Instead create a new transaction and switch original source and destination fields.&lt;/li&gt;
+&lt;li&gt;If you have created the transaction but have not yet applied it you can use the following steps.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;First set the transaction state to canceling&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).transactions;
+col.update({_id: transaction._id}, {$set: {state: &amp;quot;canceling&amp;quot;}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next let&amp;rsquo;s undo the transaction. Notice that a non-applied transaction means the transaction &lt;strong&gt;_id&lt;/strong&gt; has not yet been removed from the &lt;strong&gt;pendingTransactions&lt;/strong&gt; array.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).accounts;
+col.update({
+    name: transaction.source, pendingTransactions: transaction._id
+  }, {
+    $inc: {balance: transaction.value}, $pull: {pendingTransactions: transaction._id}
+  });
+col.update({
+    name: transaction.destination, pendingTransactions: transaction._id
+  }, { 
+    $inc: {balance: -transaction.value} , $pull: {pendingTransactions: transaction._id}
+  }); 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally set the transaction state to canceled&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).transactions;
+col.update({_id: transaction._id}, {$set: {state: &amp;quot;canceled&amp;quot;}});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;concurrent-transaction-application:38a9a76b33f1cbc2606833c72cbf6c68&#34;&gt;Concurrent Transaction Application&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s imagine to applications &lt;strong&gt;A1&lt;/strong&gt; and &lt;strong&gt;A2&lt;/strong&gt; that both start processing the single transaction &lt;strong&gt;T1&lt;/strong&gt;. Given that the transaction is still in initial then.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;A1&lt;/strong&gt; can apply &lt;strong&gt;T1&lt;/strong&gt; before &lt;strong&gt;A2&lt;/strong&gt; starts&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A2&lt;/strong&gt; will then apply &lt;strong&gt;T1&lt;/strong&gt; again because it does not appear as pending in the &lt;strong&gt;accounts&lt;/strong&gt; documents.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;You can avoid this by making is explicit in the transaction which application is handling it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).transactions;
+col.findAndModify({
+    query: {state: &amp;quot;initial&amp;quot;, application: {$exists: 0}}
+  , update: {$set: {state: &amp;quot;pending&amp;quot;, application: &amp;quot;A1&amp;quot;}}
+  , new: true});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;findAndModify&lt;/strong&gt; will retrieve and update the document atomically. This guarantees that only a single application can tag a transaction as being processed by it. In this case a transaction in the &lt;strong&gt;initial&lt;/strong&gt; state is marked as being processed by &lt;strong&gt;A1&lt;/strong&gt; if the &lt;strong&gt;application&lt;/strong&gt; field does not exist.&lt;/p&gt;
+
+&lt;p&gt;If the transaction fails or needs to be rolled back, you can retrieve the &lt;strong&gt;pending&lt;/strong&gt; transactions for a specific application &lt;strong&gt;A1&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;bank&amp;quot;).transactions;
+col.transactions.find({application: &amp;quot;A1&amp;quot;, state: &amp;quot;pending&amp;quot;});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Notes&lt;/p&gt;
+
+&lt;p&gt;Real world applications will likely be more complex requiring updating more than just the balance of the accounts. The application might need to update pending credits, pending debits as well as to assure that the account has sufficient balance to cover the transaction.&lt;/p&gt;
+
+&lt;p&gt;If these fields are part of the account document they can still occur within a single &lt;strong&gt;update&lt;/strong&gt; ensuing an &lt;strong&gt;atomic&lt;/strong&gt; update of all the fields.&lt;/p&gt;
+&lt;/blockquote&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Shopping Cart</title>
+      <link>/node-mongodb-native/schema/chapter10/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter10/</guid>
+      <description>
+
+&lt;h1 id=&#34;shopping-cart:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Shopping Cart&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/shopping_cart_racing.png&#34; alt=&#34;Metadata, courtesy of http://www.wpclipart.com/working/work_supplies/shopping_cart_racing.png.html&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The traditional E-commerce shopping cart can be modeled in MongoDB by using double bookkeeping. Given that we have the following initial documents.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s create a product&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;shop&amp;quot;).products;
+col.insert({
+  , _id: &amp;quot;111445GB3&amp;quot;
+  , name: &amp;quot;Simsong Mobile&amp;quot;
+  , description: &amp;quot;Awesome new 70G Phone&amp;quot;
+  , quantity: 99
+  , price: 1000
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;adding-the-product-to-the-shopping-cart:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Adding the product to the Shopping Cart&lt;/h2&gt;
+
+&lt;p&gt;When the user indicates they want to add the product to their shopping cart we need to perform the following 3 steps.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Add the item to the shopping cart, creating the cart if it does not exist&lt;/li&gt;
+&lt;li&gt;Update the inventory only if we have enough quantity&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;If we don&amp;rsquo;t have enough inventory to fulfill the request we need to rollback the shopping cart.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s add the selected product to the cart, creating the cart if it does not exist. We are assuming that the users unique session &lt;strong&gt;id&lt;/strong&gt; in this case is &lt;strong&gt;1&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var quantity = 1;
+var userId = 1;
+var productId = &amp;quot;111445GB3&amp;quot;;
+
+var col = db.getSisterDB(&amp;quot;shop&amp;quot;).carts;
+col.update(
+    { _id: userId, status: &#39;active&#39; }
+  , {
+      $set: { modified_on: new Date() }
+    , $push: { products: {
+        _id: productId
+      , quantity: quantity
+      , name: &amp;quot;Simsong Mobile&amp;quot;
+      , price: 1000
+    }}
+  }, true);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The update above is an &lt;strong&gt;upsert&lt;/strong&gt; meaning the cart is created if it does not exist. The next step is to reserve the quantity from the product ensuring there is inventory to cover the customers request.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var quantity = 1;
+var col = db.getSisterDB(&amp;quot;shop&amp;quot;).products;
+col.update({
+    _id: productId
+  , quantity: { $gte: quantity }
+}, {
+    $inc: { quantity: -quantity }
+  , $push: {
+    reserved: {
+      quantity: quantity, _id: userId, created_on: new Date()
+    }
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This reserves the quantity of the customer request only if there is product inventory to cover it. If there is inventory we decrement the available inventory and push a reservation into the &lt;strong&gt;reserved&lt;/strong&gt; array.&lt;/p&gt;
+
+&lt;h2 id=&#34;not-enough-inventory:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Not Enough Inventory&lt;/h2&gt;
+
+&lt;p&gt;If we don&amp;rsquo;t have enough inventory to cover the customer request we need to rollback the addition to the shopping cart.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var quantity = 1;
+var col = db.getSisterDB(&amp;quot;shop&amp;quot;).carts;
+col.update({
+  _id: userId
+}, {
+    $set: { modified_on: new Date() }
+  , $pull: { products: { _id: productId }}
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This removes the shopping cart reservation.&lt;/p&gt;
+
+&lt;h2 id=&#34;adjusting-the-number-of-items-in-the-cart:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Adjusting The Number Of Items In The Cart&lt;/h2&gt;
+
+&lt;p&gt;If the customer changes their mind about the number of items they want to shop we need to perform an update of the shopping cart. We need to perform a couple of steps to ensure proper recording of the right value.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s update the quantity in the shopping cart. First we need to fetch the existing quantity, then we need to calculate the delta between the old and new quantity and finally update the cart.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;shop&amp;quot;).carts;
+var cart = db.findOne({
+    _id: userId
+  , &amp;quot;products._id&amp;quot;: productId
+  , status: &amp;quot;active&amp;quot;});
+var oldQuantity = 0;
+
+for(var i = 0; i &amp;lt; cart.products.length; i++) {
+  if(cart.products[i]._id == productId) {
+    oldQuantity = cart.products[i].quantity;
+  }
+}
+
+var newQuantity = 2;
+var delta = newQuantity - oldQuantity;
+
+col.update({
+    _id: userId
+  , &amp;quot;products._id&amp;quot;: productId
+  , status: &amp;quot;active&amp;quot;
+}, {
+  $set: {
+      modified_on: new Date()
+    , &amp;quot;products.$.quantity&amp;quot;: newQuantity
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Having updated the quantity in the cart we now need to ensure there is enough inventory to of the product to cover the change in quantity. The needed amount is the difference between (newQuantity and oldQuantity)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;shop&amp;quot;).products;
+col.update({
+    _id: productId
+  , &amp;quot;reserved._id&amp;quot;: userId
+  , quantity: {
+    $gte: delta
+  }
+}, {
+  , $inc: { quantity: -delta }
+    $set: {
+      &amp;quot;reserved.$.quantity&amp;quot;: newQuantity, modified_on: new Date()
+    }
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This correctly reserves more or returns any non-needed product to the inventory.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;If delta is a &lt;strong&gt;negative&lt;/strong&gt; number the $gte will always hold and the product &lt;strong&gt;quantity&lt;/strong&gt; get increased by the delta, returning product to the inventory.&lt;/li&gt;
+&lt;li&gt;If delta is a &lt;strong&gt;positive&lt;/strong&gt; number the $gte will only hold if inventory is equal to the delta and is then decreased by delta, reserving more product.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;rolling-back-attempted-increase-of-reservation-for-a-product:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Rolling back Attempted Increase of Reservation for A Product&lt;/h2&gt;
+
+&lt;p&gt;If there is not enough inventory to fulfill the new reservation we need to rollback the change we made in the cart. We do that by re-applying the old quantity.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var col = db.getSisterDB(&amp;quot;shop&amp;quot;).carts;
+col.update({
+    _id: userId
+  , &amp;quot;products._id&amp;quot;: productId
+  , status: &amp;quot;active&amp;quot;
+}, {
+  $set: {
+      modified_on: new Date()
+    , &amp;quot;products.$.quantity&amp;quot;: oldQuantity
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;expiring-carts:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Expiring Carts&lt;/h2&gt;
+
+&lt;p&gt;It&amp;rsquo;s common for customers to have put items in a cart and then abandon it. This means there is a need for a process to expire carts that have been abandoned. For each expired cart we need to.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Return the reserved items to the product inventory&lt;/li&gt;
+&lt;li&gt;Expire the cart&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Below is a script that will look for any cart that has been sitting inactive for more than 30 minutes and automatically expire them returning stock to the inventory for each product reserved in the carts.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var cutOffDate = new Date();
+cutOffDate.setMinutes(cutOffDate.getMinutes() - 30);
+
+var cartsCol = db.getSisterDB(&amp;quot;shop&amp;quot;).carts;
+var productCol = db.getSisterDB(&amp;quot;shop&amp;quot;).products;
+
+var carts = cartsCol.find({ modified_on: { $lte: cutOffDate }});
+while(carts.hasNext()) {
+  var cart = carts.next();
+
+  for(var i = 0; i &amp;lt; cart.products.length; i++) {
+    var product = cart.products[i];
+
+    productCol.update({
+        _id: product._id
+      , &amp;quot;reserved._id&amp;quot;: cart._id
+      , &amp;quot;reserved.quantity&amp;quot;: product.quantity 
+    }, {
+        $inc: { quantity: product.quantity }
+      , $pull: { reserved: { _id: cart._id }}
+    });
+  }
+
+  cartsCol.update({
+    _id: cart._id
+  }, {
+    $set: { status: &#39;expired&#39; }
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For each cart we iterate over all the products in it and for each product we return the quantity to the product inventory and at the same time remove that cart from the &lt;strong&gt;reserved&lt;/strong&gt; array of the product. After returning the inventory we set the status of the cart to &lt;strong&gt;expired&lt;/strong&gt;. Notice that we don&amp;rsquo;t clean up the cart. We are keeping the expired cart as history. Any new customer will create a new cart.&lt;/p&gt;
+
+&lt;h2 id=&#34;checkout:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Checkout&lt;/h2&gt;
+
+&lt;p&gt;The customer clicked the checkout button on the website and entered their payment details. It&amp;rsquo;s time to issue an purchase order and clean up the cart and product reservations.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var cartsCol = db.getSisterDB(&amp;quot;shop&amp;quot;).carts;
+var productCol = db.getSisterDB(&amp;quot;shop&amp;quot;).products;
+var orderCol = db.getSisterDB(&amp;quot;shop&amp;quot;).orders;
+
+var cart = cartsCol.findOne({ _id: userId })
+
+orderCol.insert({
+    created_on: new Date()
+  , shipping: {
+      name: &amp;quot;Joe Dow&amp;quot;
+    , address: &amp;quot;Some street 1, NY 11223&amp;quot;
+  }
+  , payment: { method: &amp;quot;visa&amp;quot;, transaction_id: &amp;quot;2312213312XXXTD&amp;quot; }
+  , products: cart.products
+});
+
+cartsCol.update({
+  { _id: userId }
+}, {
+  $set: { status: &#39;complete&#39; }
+});
+
+productCol.update({
+  &amp;quot;reserved._id&amp;quot;: userId
+}, {
+  $pull: { reserved: {_id: userId }}
+}, false, true);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We perform the following actions during checkout.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Add an a finished order document to the &lt;strong&gt;orders&lt;/strong&gt; collection&lt;/li&gt;
+&lt;li&gt;Set the cart to &lt;strong&gt;done&lt;/strong&gt; status&lt;/li&gt;
+&lt;li&gt;Removing the cart from the &lt;strong&gt;reserved&lt;/strong&gt; arrays of all products where it&amp;rsquo;s present using a multi update&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;indexes:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Indexes&lt;/h2&gt;
+
+&lt;h2 id=&#34;some-possible-changes:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Some Possible Changes&lt;/h2&gt;
+
+&lt;p&gt;It&amp;rsquo;s possible to split out product information from the inventory by creating an &lt;strong&gt;inventory&lt;/strong&gt; collection that references the production metadata collection and contains the amount of the product.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Sharding</title>
+      <link>/node-mongodb-native/schema/chapter11/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/schema/chapter11/</guid>
+      <description>
+
+&lt;h1 id=&#34;sharding:783a13680e5de96acfee68995945d897&#34;&gt;Sharding&lt;/h1&gt;
+
+&lt;p&gt;Sharding is one of those mystical aspects of MongoDB that it take awhile to wrap ones head around. Basically sharding is a mechanism by which one can scale writes by distributing the writing to multiple primaries (shards). Each document has a shard key associated with it which decides on what primary the document lives.&lt;/p&gt;
+
+&lt;h2 id=&#34;sharding-topology:783a13680e5de96acfee68995945d897&#34;&gt;Sharding Topology&lt;/h2&gt;
+
+&lt;p&gt;In MongoDB sharding happens at the &lt;strong&gt;collection&lt;/strong&gt; level. That is to say that you can have a combination of sharded and unsharded collections. Let&amp;rsquo;s look at a simple topology.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/sharded.png&#34; alt=&#34;Simple Two Shard Topology&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;The application talks to the &lt;strong&gt;Mongos&lt;/strong&gt; proxies to write to the sharded system.&lt;/p&gt;
+
+&lt;h2 id=&#34;when-to-shard:783a13680e5de96acfee68995945d897&#34;&gt;When to Shard&lt;/h2&gt;
+
+&lt;p&gt;One of the typical errors is to shard to early. The reason this can be a problem is that sharding requires the developer to pick a shard key for distribution of the writes and one can easily pick the wrong key early due to not knowing how the data needs to be accessed. This can cause reads to be inefficiently spread out causing unnecessary &lt;strong&gt;IO&lt;/strong&gt; and &lt;strong&gt;CPU&lt;/strong&gt; usage to retrieve the data. Once the collection is sharded with a key it can be very time consuming to undo it as all the data will have to migrated from one sharded collection to another rewriting the all the documents.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at some reason you might want to Shard.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Your Working Set no longer fits in the memory of you computer. Sharding can help more of your Working Set to be in memory by pooling the RAM of all the shards. Thus if you have a 20GB Working Set on a 16GB machine, sharding can split this across 2 machines or 32GB instead, keeping all of the data in RAM.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Scaling the write IO. You need to perform more write operations than what a single server can handle. By Sharding you can balance out the writes across multiple computers, scaling the total write throughput.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&#34;choosing-a-shard-key:783a13680e5de96acfee68995945d897&#34;&gt;Choosing a Shard Key&lt;/h2&gt;
+
+&lt;p&gt;It&amp;rsquo;s important to pick a Shard key based on the actual read/write profile of your application to avoid inefficiencies in the application. That said there are a couple of tips that can help finding the right shard key.&lt;/p&gt;
+
+&lt;h3 id=&#34;easily-divisible-shard-key:783a13680e5de96acfee68995945d897&#34;&gt;Easily Divisible Shard Key&lt;/h3&gt;
+
+&lt;p&gt;If the picked shard key is easily divisible it makes it easier for MongoDB to distribute the content among the shards. If a key has a very limited number of possible values it can lead to inefficient distribution of the documents causing an uneven amount of reads and writes to go to a small set of the shards.&lt;/p&gt;
+
+&lt;h3 id=&#34;high-randomness-shard-key:783a13680e5de96acfee68995945d897&#34;&gt;High Randomness Shard Key&lt;/h3&gt;
+
+&lt;p&gt;A key with high randomness will evenly distribute the writes and reads across all the shards. This works great if documents are self contained entities such as Users. However queries for ranges of document such as all users with age less than 35 years will require a scatter gather.&lt;/p&gt;
+
+&lt;h3 id=&#34;single-shard-targeted-key:783a13680e5de96acfee68995945d897&#34;&gt;Single Shard Targeted Key&lt;/h3&gt;
+
+&lt;p&gt;Picking a shard key that groups the documents together will make most of the queries go to a specific Shard, meaning one can avoid scatter gather queries. One possible example might be a geo application for the UK where the first part of the key includes the postcode and the second is the address. Due to the first part of the shard key being the postcode all documents for that particular sort key will end up on the same Shard, meaning all queries for a specific postcode will be routed to a single Shard.&lt;/p&gt;
+
+&lt;p&gt;The UK postcode works as it has a lot of possible values due to the resolution of postcodes in the UK. This means there will only be limited amount of documents in each chunk for a specific postcode. However if we where to do this for a US postcode we might find that each postcode includes a lot of addresses causing the chunks to be hard to split into new ranges. The effect is that MongoDB is less able to spread out the documents and it thus impacts performance.&lt;/p&gt;
+
+&lt;h2 id=&#34;routing-shard-keys:783a13680e5de96acfee68995945d897&#34;&gt;Routing Shard Keys&lt;/h2&gt;
+
+&lt;p&gt;Depending on your Shard key the routing will work differently. This is important to keep in mind as it will impact performance.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Type Of Operation&lt;/th&gt;
+&lt;th&gt;Query Topology&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Insert&lt;/td&gt;
+&lt;td&gt;Must have the Shard key&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Update&lt;/td&gt;
+&lt;td&gt;Can have the Shard key&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Query with Shard Key&lt;/td&gt;
+&lt;td&gt;Routed to nodes&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Query without Shard Key&lt;/td&gt;
+&lt;td&gt;Scatter gather&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Indexed/Sorted Query with Shard Key&lt;/td&gt;
+&lt;td&gt;Routed in order&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;Indexed/Sorted Query without Shard Key&lt;/td&gt;
+&lt;td&gt;Distributed sort merge&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&#34;inbox-example:783a13680e5de96acfee68995945d897&#34;&gt;Inbox Example&lt;/h2&gt;
+
+&lt;p&gt;Imagine a social Inbox. In this case we have two main goals&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Send new messages to it&amp;rsquo;s recipients efficiently&lt;/li&gt;
+&lt;li&gt;Read the Inbox efficiently&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;We want to ensure we meet two specific goals. The first one is to write to multiple recipients on separate shards thus leveraging the write scalability. However for a user to read their email box, one wants to read from a single shard avoid scatter/gather queries.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/sharded_inbox_write.png&#34; alt=&#34;Fan out write, Single shard Read&#34; /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;How does one go about getting the correct shard key. Let&amp;rsquo;s assume we have two collections &lt;strong&gt;inbox&lt;/strong&gt; and &lt;strong&gt;users&lt;/strong&gt; in our &lt;strong&gt;social&lt;/strong&gt; database. Let&amp;rsquo;s do the collection sharding.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&#39;social&#39;);
+db.shardCollection(&#39;social.inbox&#39;, {owner: 1, sequence: 1});
+db.shardCollection(&#39;social.users&#39;, {user_name: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s write and read to the collections with some test data to show how we can leverage the sharding.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&#39;social&#39;);
+var msg = {
+  from: &#39;Christian&#39;,
+  to: [&#39;Peter&#39;, &#39;Paul&#39;],
+  sent_on: new Date(),
+  message: &#39;Hello world&#39;
+}
+
+for(var i = 0; i &amp;lt; msg.to.length; i++) {
+  var result = db.users.findAndModify({
+    query: { user_name: msg.to[i] },
+    update: { &#39;$inc&#39;: {msg_count: 1} },
+    upsert: true,
+    new: true
+  })
+
+  var count = result.msg_count;
+  var sequence_number = Math.floor(count/50);
+  db.inbox.update({ owner: msg.to[i], sequence: sequence} ),
+    { $push: {messages: msg} },
+    { upsert:true });
+}
+
+db.inbox.find({owner: &#39;Peter&#39;})
+  .sort({sequence: -1})
+  .limit(2);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first part delivers the message to all it&amp;rsquo;s recipients. First it updates the message count for the recipient and then pushes the message to the recipients mailbox (which is a embedded document). The combination of the Shard key being &lt;strong&gt;{owner: 1, sequence: 1}&lt;/strong&gt; means that all new messages get written to the same chunk for an owner. The &lt;strong&gt;Math.floor(count/50)&lt;/strong&gt; generation will split up the inbox into buckets of 50 messages in each.&lt;/p&gt;
+
+&lt;p&gt;This last aspect means that the read will route by owner directly to a single chunk on a single Shard avoiding scatter/gather and speeding up retrieval.&lt;/p&gt;
+
+&lt;h2 id=&#34;multiple-identities-example:783a13680e5de96acfee68995945d897&#34;&gt;Multiple Identities Example&lt;/h2&gt;
+
+&lt;p&gt;What if we need to lookup documents by multiple different identities like a username or an email address.&lt;/p&gt;
+
+&lt;p&gt;Take the following document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;var db = db.getSisterDB(&#39;users&#39;);
+db.users.insert({
+  _id: &#39;peter&#39;,
+  email: &#39;peter@example.com&#39;
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If we shard by &lt;strong&gt;_id&lt;/strong&gt; it means that only &lt;strong&gt;_id&lt;/strong&gt; queries will be routed directly to the right shard. If we wish to query by email we have to perform a scatter/gather query.&lt;/p&gt;
+
+&lt;p&gt;There is a possible solution called document per identity. Let&amp;rsquo;s look at a different way of representing the information.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&#39;users&#39;);
+
+db.identities.ensureIndex({ identifier: 1 }, { unique: true });
+
+db.identities.insert({
+  identifier: {user: &#39;peter&#39;}, id: &#39;peter&#39;});
+
+db.identities.insert({
+  identifier: {email: &#39;peter@example.com&#39;, user: &#39;peter&#39;},
+  id: &#39;peter&#39;});
+
+db.shardCollection(&#39;users.identities&#39;, {identifier: 1});
+db.users.ensureIndex({ _id: 1}, { unique: true });
+db.shardCollection(&#39;users.users&#39;. { _id: 1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We create a unique index for the &lt;strong&gt;identities&lt;/strong&gt; table to ensure we cannot map two entries into the same identity space. Since identifier is a compound index we can not actually query directly to a shard using this key. So it&amp;rsquo;s still a single read to retrieve a user by &lt;strong&gt;_id&lt;/strong&gt; and now we can retrieve a user by it&amp;rsquo;s email by performing two direct queries using the correct identifier. Let&amp;rsquo;s see how to do this for an &lt;strong&gt;email&lt;/strong&gt; user lookup.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var db = db.getSisterDB(&#39;users&#39;);
+
+var identity = db.identities.findOne({
+  identifier: {
+    email: &#39;peter@example.com&#39;}});
+
+var user = db.users.find({ _id: identity.id });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first query locates the identity using the email, which is a routed query to a single shard, and the second query uses the returned &lt;strong&gt;identitiy.id&lt;/strong&gt; field to retrieve the user by the shard key.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

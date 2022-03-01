@@ -1,0 +1,302 @@
+/*
+ * nature.css_t
+ * ~~~~~~~~~~~~
+ *
+ * Sphinx stylesheet -- nature theme.
+ *
+ * :copyright: Copyright 2007-2011 by the Sphinx team, see AUTHORS.
+ * :license: BSD, see LICENSE for details.
+ *
+ */
+
+@import url("basic.css");
+
+/* -- page layout ----------------------------------------------------------- */
+
+body {
+    font-family: helvetica,arial,sans-serif;
+    font-size: 100%;
+    background-color: #402817;
+    color: black;
+    margin: 0;
+    padding: 0;
+}
+
+div.documentwrapper {
+    float: left;
+    width: 100%;
+    background-color: #F3F4EB;
+}
+
+div.bodywrapper {
+    margin: 0 0 0 230px;
+}
+
+hr {
+    border: 1px solid #B1B4B6;
+}
+
+div.document {
+    background-color: white;
+    text-shadow: none;
+}
+
+div.body {
+    background-color: white; 
+    color: black;
+    padding: 0 30px 30px 30px;
+    font-size: 0.9em;
+}
+
+div.footer {
+    color: white;
+    width: 100%;
+    padding: 13px 0;
+    text-align: center;
+    font-size: 75%;
+    border-top: 1px solid black;
+}
+
+div.footer a {
+    color: #989898;
+    text-decoration: underline;
+}
+
+div.related {
+    background-color: #402817;
+    margin-bottom: 10px;
+    color: #fff;
+    font-size: 0.9em;
+    
+}
+
+div.related a {
+    color: #E2F3CC;
+}
+
+div.related ul {
+    padding: 0 10px 0;    
+}
+
+div.footer-nav div.related ul {
+    padding: 5px 10px 0;    
+}
+
+div.sphinxsidebar {
+    font-size: 0.72em;
+    line-height: 1.4em;
+    width: 230px; 
+}
+
+div.sphinxsidebarwrapper{
+    background-color: #F3F4EB;
+    padding: 12px 5px;
+}
+
+div.sphinxsidebar h3 {
+    font-family: helvetica,arial,sans-serif;
+    color: black;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+    padding: 10px 0 0 10px;
+}
+
+div.sphinxsidebar h3 a {
+    color: #444;
+}
+
+div.sphinxsidebar p {
+    color: #333333;
+    margin: 12px 0 5px 12px;
+    padding: 0 12p;
+}
+
+div.sphinxsidebar form {
+    margin-top: 5px;
+}
+
+div.sphinxsidebar p.logo {
+    color: #888;
+    padding: 0px;
+    margin: -18px 5px 5px;
+}
+
+div.sphinxsidebar p.topless {
+}
+
+div.sphinxsidebar ul ul, div.sphinxsidebar ul.want-points {
+    list-style: square outside none;
+    margin-left: 15px;
+}
+
+div.sphinxsidebar ul {
+    margin: 10px;
+    padding: 0;
+    color: #000;
+}
+
+div.sphinxsidebar a {
+    color: #444;
+}
+
+div.sphinxsidebar input {
+    border: 1px solid #ccc;
+    font-family: sans-serif;
+    font-size: 1em;
+}
+div.sphinxsidebar input[type=text]{
+    margin-left: 20px;
+    width: 11em !important;
+}
+div.sphinxsidebar input[type="submit"] {
+    text-align: center;
+    width: 4.5em !important;
+}
+
+p.searchtip {
+    font-size: 93%;
+}
+
+/* -- body styles ----------------------------------------------------------- */
+
+a {
+    color: #005B81;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #E32E00;
+    text-decoration: underline;
+}
+
+div.body h1,
+div.body h2,
+div.body h3,
+div.body h4,
+div.body h5,
+div.body h6 {
+    font-family: helvetica,arial,sans-serif;
+    font-weight: bold;
+    margin: 30px 0px 0px 0px;
+    padding: 0;
+}
+
+div.body h1 { border-top: 15px solid white; margin-top: 0; font-size: 200%; }
+div.body h2 { font-size: 150%; }
+div.body h3 { font-size: 120%; }
+div.body h4 { font-size: 110%; }
+div.body h5 { font-size: 100%; }
+div.body h6 { font-size: 100%; }
+
+a.headerlink {
+    color: #c60f0f;
+    font-size: 0.8em;
+    padding: 0 4px 0 4px;
+    text-decoration: none;
+}
+
+a.headerlink:hover {
+    background-color: #c60f0f;
+    color: white;
+}
+
+div.body p, div.body dd, div.body li {
+    line-height: 1.5em;
+}
+
+div.admonition p.admonition-title + p {
+    display: inline;
+}
+
+div.highlight{
+    background-color: white;
+}
+
+dl.binary {
+    display: none;
+}
+
+div.topic {
+    background-color: #eee;
+}
+
+div.warning {
+    background-color: #ffe4e4;
+    border: 1px solid #f66;
+}
+div.admonition {
+    margin: 15px;
+    padding: 7px;
+}
+
+div.note {
+    background-color: #F3F4EB;
+    border: 1px solid #ccc;
+}
+
+div.seealso {
+    background-color: #ffc;
+    border: 1px solid #ff6;
+    padding-bottom: 7px;
+}
+
+div.admonition-optional {
+    background-color: #ffffee;
+    border: 1px solid #dfdfdf;
+    color: #666666;
+    margin: 10px 25px;
+}
+
+div.admonition-example {
+    background-color: #F3F4EB;
+    border: 1px solid #ccc;
+    color: #3E4349;
+}
+
+p.admonition-title {
+    display: inline;
+}
+
+p.admonition-title:after {
+    content: ":";
+}
+
+div.admonition pre {
+    margin: 10px 0;
+}
+
+pre {
+    padding: 10px;
+    background-color: White;
+    color: #222;
+    line-height: 1.2em;
+    border: 1px solid #C6C9CB;
+    font-size: 1.1em;
+    margin: 20px;
+    -webkit-box-shadow: 1px 1px 1px #d8d8d8;
+    -moz-box-shadow: 1px 1px 1px #d8d8d8;
+}
+
+tt {
+    background-color: #ecf0f3;
+    color: #222;
+    /* padding: 1px 2px; */
+    font-size: 1.1em;
+    font-family: monospace;
+}
+
+.viewcode-back {
+    font-family: helvetica,arial,sans-serif;
+}
+
+div.viewcode-block:target {
+    background-color: #f4debf;
+    border-top: 1px solid #ac9;
+    border-bottom: 1px solid #ac9;
+}
+
+p.first {
+    margin-bottom: 0px !important;
+    margin-top: 10px !important;
+}
