@@ -44,8 +44,8 @@ export async function confirm(message: string) {
     }
 }
 
-export function getCommandLineArguments(): { semverVersion: string, status: string, skipPrompts } {
-    const { status, semverVersion, yes: skipPrompts } = yargs(hideBin(process.argv)).option(
+export function getCommandLineArguments(): { semverVersion: string, status: string, skipPrompts, versionName: string } {
+    const { status, semverVersion, yes: skipPrompts, versionName } = yargs(hideBin(process.argv)).option(
         'semverVersion', {
         type: 'string',
         description: 'The version of the docs to update',
@@ -61,12 +61,19 @@ export function getCommandLineArguments(): { semverVersion: string, status: stri
         default: false,
         requiresArg: false,
         description: 'If set, will skip any prompts.'
-    }).demandOption('semverVersion', 'You must specify a version').argv;
+    })
+    .option('versionName', {
+        type: 'string',
+        requiresArg: true,
+        description: 'The version identifier used on the docs site.  Will be displayed to in the form <versionName> Driver.  Defaults to the semverVersion.'
+    })
+    .demandOption('semverVersion', 'You must specify a version').argv;
 
     return {
         semverVersion,
         status,
-        skipPrompts
+        skipPrompts,
+        versionName: versionName ?? semverVersion
     }
 }
 
