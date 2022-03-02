@@ -95,11 +95,16 @@ describe('Aggregation Cursor', function () {
 
     context('when a data bearing server becomes available', function () {
       beforeEach(function () {
+        // Set the count of times hello has been called.
         let helloCalls = 0;
         test.server.setMessageHandler(request => {
           const doc = request.document;
           if (isHello(doc)) {
-            request.reply(helloCalls > 0 ? { errmsg: 'network error' } : mock.HELLO);
+            // After the first hello call errors indicating no data bearing server is
+            // available, any subsequent hello call should succeed after server selection.
+            // This gives us a data bearing server available for the next call.
+            request.reply(helloCalls > 0 ? mock.HELLO : { errmsg: 'network error' });
+            helloCalls++;
           } else if (doc.aggregate) {
             request.reply({
               cursor: {
