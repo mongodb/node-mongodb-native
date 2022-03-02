@@ -14,7 +14,9 @@ describe('Aggregation Cursor', function () {
     afterEach(function () {
       mock.cleanup();
     });
-    beforeEach(function () {
+beforeEach(async function() {
+    test.server = await mock.createServer();
+})
       return mock.createServer().then(mockServer => {
         test.server = mockServer;
       });
