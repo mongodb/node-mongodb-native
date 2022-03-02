@@ -1,11 +1,11 @@
-'use strict';
+import { join } from 'path';
 
-const { join } = require('path');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
-const { loadSpecTests } = require('../../spec');
+import { loadSpecTests } from '../../spec';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 describe('Sessions spec tests', function () {
   runUnifiedSuite(loadSpecTests(join('sessions', 'tests')), [
+    // TODO(NODE-3951): fix broken dirty sessions spec tests
     'Dirty explicit session is discarded (insert)',
     'Dirty explicit session is discarded (findAndModify)'
   ]);
