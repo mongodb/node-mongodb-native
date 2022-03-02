@@ -1,4 +1,7 @@
+import { argv } from "process";
 import { createInterface } from "readline";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
 export interface JsonVersionSchema {
     version: string;
@@ -41,19 +44,29 @@ export async function confirm(message: string) {
     }
 }
 
-export function getCommandLineArguments(): { semverVersion: string, status: string } {
-    const args = process.argv.slice(2);
-
-    if (args.length === 0) {
-        console.error('usage: generate-docs.ts <semver version> <status (optional)>')
-        process.exit(1);
+export function getCommandLineArguments(): { semverVersion: string, status: string, skipPrompts } {
+    const { status, semverVersion, yes: skipPrompts } = yargs(hideBin(process.argv)).option(
+        'semverVersion', {
+        type: 'string',
+        description: 'The version of the docs to update',
+        requiresArg: true
     }
+    ).option('status', {
+        type: 'string',
+        choices: ['supported', 'not-supported', 'current'],
+        default: 'current',
+        requiresArg: true
+    }).option('yes', {
+        type: 'boolean',
+        default: false,
+        requiresArg: false,
+        description: 'If set, will skip any prompts.'
+    }).demandOption('semverVersion', 'You must specify a version').argv;
 
-    const semverVersion = args.shift();
-    const status = args.shift() ?? 'current';
     return {
         semverVersion,
-        status
+        status,
+        skipPrompts
     }
 }
 

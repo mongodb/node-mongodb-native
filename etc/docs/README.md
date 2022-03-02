@@ -30,7 +30,14 @@ Note: `typedoc` is also a dependency but it is downloaded by the docs generation
 
 To generate API documentation for a new major or minor version:
 
-`npm run docs:build -- <version> <optional status for the version>`
+`npm run build:docs -- --semverVersion <version>`
+
+You can optionally specify the following options:
+
+- `--yes` if set, this will silence any prompts in the script. useful for running in CI
+- `--status <status>` set the status of the version.
+
+Run `npm run build:docs -- --help` for more information.
 
 The generated docs can be previewed using `npm run docs:preview`.
 

@@ -50,7 +50,7 @@ async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlDa
 async function main() {
   chdir(__dirname);
 
-  const { semverVersion, status } = getCommandLineArguments();
+  const { semverVersion, status, skipPrompts } = getCommandLineArguments();
 
   const newVersion: VersionSchema = {
     version: `${semverVersion} Driver`,
@@ -60,11 +60,13 @@ async function main() {
     semverVersion
   };
 
-  await confirm(`
-    Generating docs for the following configuration.
-${JSON.stringify(newVersion, null, 2)}
-    Does this look right? [y/n] `
-  );
+  if (!skipPrompts) {
+    await confirm(`
+      Generating docs for the following configuration.
+  ${JSON.stringify(newVersion, null, 2)}
+      Does this look right? [y/n] `
+    );
+  }
 
   console.error('Installing dependencies...');
   await installDependencies();
@@ -79,7 +81,7 @@ ${JSON.stringify(newVersion, null, 2)}
 
   const versionAlreadyExists = jsonVersions.some(({ version }) => version === semverVersion)
 
-  if (versionAlreadyExists) {
+  if (versionAlreadyExists && !skipPrompts) {
     await confirm(`Version ${semverVersion} already exists.  Do you want to override the existing docs? [y/n] `);
   }
 
