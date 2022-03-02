@@ -4,86 +4,24 @@ import { parse, stringify } from '@iarna/toml';
 import { exec as execCb } from 'child_process';
 import { writeFile, readFile } from 'fs/promises';
 import { promisify } from 'util';
-import { createInterface } from 'readline';
 import { chdir } from 'process';
+import { confirm, customSemverCompare, getCommandLineArguments, JsonVersionSchema, TomlVersionSchema, VersionSchema } from './utils';
 
 const exec = promisify(execCb);
 
 const RELEASES_TOML_FILE = './template/data/releases.toml';
 const RELEASES_JSON_FILE = './template/static/versions.json';
 
-interface JsonVersionSchema {
-  version: string;
-}
-
-interface VersionSchema {
-  version: string;
-  status: string;
-  api: string;
-  usesMongoDBManual?: boolean;
-  docs?: string;
-  semverVersion: string;
-}
-
-interface TomlVersionSchema {
-  current: string;
-  mongodDBManual: string;
-  versions: VersionSchema[]
-}
-
-function prompt(prompt: string) : Promise<string> {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stderr
-  })
-
-  return new Promise((resolve, _) => {
-    rl.question(prompt, (answer) => {
-      rl.close();
-      resolve(answer);
-    })
-  })
-}
-
-function getCommandLineArguments() : { semverVersion: string, status: string } {
-  const args = process.argv.slice(2);
-
-  if (args.length === 0) {
-    console.error('usage: generate-docs.ts <semver version> <status (optional)>')
-    process.exit(1);
-  }
-
-  const semverVersion = args.shift();
-  const status = args.shift() ?? 'current';
-  return {
-    semverVersion,
-    status
-  }
-}
+const copyGeneratedDocsToDocsFolder = () => exec(`cp -R temp/. ../../docs/.`);
+const removeTempDirectory = () => exec('rm -rf temp');
+const installDependencies = () => exec('npm i --no-save typedoc');
+const buildDocs = () => exec('npm run build:typedoc');
 
 async function copyNewDocsToGeneratedSite({ semverVersion }: VersionSchema) {
   const outputDirectory = `./temp/${semverVersion}`;
   const pathToBuiltDocs = './build';
   const command = `cp -R ${pathToBuiltDocs} ${outputDirectory}`;
   return await exec(command);
-}
-
-function customSemverCompare(a: string, b: string) {
-  if (a === 'current') {
-    return -1
-  }
-  if (b === 'current') {
-    return 1
-  }
-  // put legacy 3x driver version at the bottom of the list
-  if (a === 'core') {
-    return 1;
-  }
-  if (b === 'core') {
-    return -1;
-  }
-
-  return b.localeCompare(a);
 }
 
 async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlData: TomlVersionSchema, jsonVersions: JsonVersionSchema[]) {
@@ -122,48 +60,33 @@ async function main() {
     semverVersion
   };
 
-  const response = await prompt(`
+  await confirm(`
     Generating docs for the following configuration.
 ${JSON.stringify(newVersion, null, 2)}
-    Does this look right? [y/n] `);
+    Does this look right? [y/n] `
+  );
 
-  if (response.trim() !== 'y') {
-    console.error("something went wrong.  Exiting...");
-    process.exit(1);
-  }
+  console.error('Installing dependencies...');
+  await installDependencies();
 
-  console.error('Installing typedoc...');
-  await exec('npm i --no-save typedoc');
+  console.error('Building docs for current branch');
+  await buildDocs();
 
-  console.error('Successfully installed typedoc.  Building api docs for current branch...');
+  console.error('Generating new static site...')
 
-  await exec('npm run build:typedoc');
-
-  console.error('Successfully built api docs for current branch');
-
-  console.error('Generating new doc site...')
   const tomlVersions = parse(await readFile(RELEASES_TOML_FILE, { encoding: 'utf8' })) as unknown as TomlVersionSchema;
   const jsonVersions = JSON.parse(await readFile(RELEASES_JSON_FILE, { encoding: 'utf8' })) as unknown as JsonVersionSchema[];
 
-  const versionAlreadyExists = jsonVersions.some(({version }) => version === semverVersion)
+  const versionAlreadyExists = jsonVersions.some(({ version }) => version === semverVersion)
 
   if (versionAlreadyExists) {
-    const response = await prompt(`Version ${semverVersion} already exists.  Do you want to override the existing docs? [y/n] `);
-    if (response !== 'y') {
-      console.error("something went wrong.  Exiting...");
-      process.exit(1);
-    }
+    await confirm(`Version ${semverVersion} already exists.  Do you want to override the existing docs? [y/n] `);
   }
 
   await updateSiteTemplateForNewVersion(newVersion, tomlVersions, jsonVersions);
-
   await copyNewDocsToGeneratedSite(newVersion);
-
-  // copy the generated site to the docs folder
-  await exec(`cp -R temp/. ../../docs/.`);
-
-  // cleanup
-  await exec('rm -rf temp');
+  await copyGeneratedDocsToDocsFolder();
+  await removeTempDirectory();
 
   console.error('Successfully generated api documentation and updated the doc site.')
 }
