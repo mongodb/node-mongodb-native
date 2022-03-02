@@ -45,8 +45,8 @@ export async function confirm(message: string) {
 }
 
 export function getCommandLineArguments(): { semverVersion: string, status: string, skipPrompts, versionName: string } {
-    const { status, semverVersion, yes: skipPrompts, versionName } = yargs(hideBin(process.argv)).option(
-        'semverVersion', {
+    const { status, version: semverVersion, yes: skipPrompts, versionName } = yargs(hideBin(process.argv)).option(
+        'version', {
         type: 'string',
         description: 'The version of the docs to update',
         requiresArg: true

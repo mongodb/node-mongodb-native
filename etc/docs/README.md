@@ -30,7 +30,7 @@ Note: `typedoc` is also a dependency but it is downloaded by the docs generation
 
 To generate API documentation for a new major or minor version:
 
-`npm run build:docs -- --semverVersion <version>`
+`npm run build:docs -- --version <version>`
 
 You can optionally specify the following options:
 
