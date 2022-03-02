@@ -69,7 +69,7 @@ describe('MongoClient integration', function () {
     },
     test() {
       expect(() => this.configuration.newClient('user:password@localhost:27017/test')).to.throw(
-        'Invalid connection string "user:password@localhost:27017/test"'
+        'Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"'
       );
     }
   });
