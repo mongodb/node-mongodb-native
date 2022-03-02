@@ -1,6 +1,7 @@
 'use strict';
 
-const expect = require('chai').expect;
+const { expect } = require('chai');
+const { createServer, cleanup, isHello } = require('../../tools/mongodb-mock/index')
 const mock = require('../../tools/mongodb-mock/index');
 const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
