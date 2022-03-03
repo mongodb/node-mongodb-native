@@ -5,11 +5,7 @@ import type { UnifiedMongoClient } from '../../../tools/unified-spec-runner/enti
 describe('Bulk executeOperation', () => {
   let client: UnifiedMongoClient;
   beforeEach(async function () {
-    client = await this.configuration.client({
-      entityDescription: {
-        observeEvents: ['commandStartedEvent']
-      }
-    });
+    client = await this.configuration.newClient({ monitorCommands: true }).connect();
   });
   afterEach(async () => {
     await client?.close();
@@ -19,13 +15,14 @@ describe('Bulk executeOperation', () => {
     const collection = client.db().collection('bulk_execute_operation');
     const batch = collection.initializeOrderedBulkOp();
 
+    const events = [];
+    client.on('commandStarted', ev => events.push(ev));
+
     batch.insert({ a: 1 });
     batch.find({ a: 1 }).update({ $set: { b: 1 } });
     batch.find({ b: 1 }).deleteOne();
 
     await batch.execute();
-
-    const events = client.commandStartedEvents();
 
     expect(events).to.have.lengthOf(3);
     const sessions = events.map(ev => ev.command.lsid.id.toString('hex'));

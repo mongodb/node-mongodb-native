@@ -26,7 +26,6 @@ import {
   GridFSBucket,
   HostAddress,
   MongoClient,
-  MongoClientOptions,
   MongoCredentials
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
@@ -60,7 +59,7 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
-type PushFunction = (e: any) => void;
+type PushFunction = (e: CommandEvent | CmapEvent) => void;
 
 export class UnifiedMongoClient extends MongoClient {
   commandEvents: CommandEvent[];
@@ -103,12 +102,11 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
-  constructor(uri: string, description: ClientEntity, options?: MongoClientOptions) {
+  constructor(uri: string, description: ClientEntity) {
     super(uri, {
       monitorCommands: true,
       ...getEnvironmentalOptions(),
-      ...(description.serverApi ? { serverApi: description.serverApi } : {}),
-      ...options
+      ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
 
     this.commandEvents = [];
@@ -137,8 +135,7 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   isIgnored(e: CommandEvent | CmapEvent): boolean {
-    if ('commandName' in e) return this.ignoredEvents.includes(e.commandName);
-    return false;
+    return this.ignoredEvents.includes(e.commandName);
   }
 
   // NOTE: pushCommandEvent must be an arrow function
@@ -173,16 +170,10 @@ export class UnifiedMongoClient extends MongoClient {
   };
 
   stopCapturingEvents(pushFn: PushFunction): void {
-    for (const eventName of [...this.observedCommandEvents, ...this.observedCmapEvents]) {
+    const observedEvents = this.observedCommandEvents.concat(this.observedCmapEvents);
+    for (const eventName of observedEvents) {
       this.off(eventName, pushFn);
     }
-  }
-
-  commandStartedEvents() {
-    function isCommandStartedEvent(ev: CommandEvent): ev is CommandStartedEvent {
-      return ev instanceof CommandStartedEvent;
-    }
-    return this.commandEvents.filter(isCommandStartedEvent);
   }
 
   /** Disables command monitoring for the client and returns a list of the captured events. */
@@ -320,12 +311,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     if (!ctor) {
       throw new Error(`Unknown type ${type}`);
     }
-    return new EntitiesMap(
-      Array.from(this.entries()).filter(([, e]) => {
-        // @ts-expect-error: ctor is an instance of function
-        return e instanceof ctor;
-      })
-    );
+    return new EntitiesMap(Array.from(this.entries()).filter(([, e]) => e instanceof ctor));
   }
 
   getEntity(type: 'client', key: string, assertExists?: boolean): UnifiedMongoClient;
@@ -345,7 +331,6 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     if (!ctor) {
       throw new Error(`Unknown type ${type}`);
     }
-    // @ts-expect-error: ctor is an instance of function
     if (!(entity instanceof ctor)) {
       throw new Error(`${key} is not an instance of ${type}`);
     }

@@ -4,12 +4,10 @@ import * as qs from 'querystring';
 import * as url from 'url';
 
 import { AuthMechanism } from '../../../src';
-import { MongoClient, MongoClientOptions } from '../../../src/mongo_client';
+import { MongoClient } from '../../../src/mongo_client';
 import { TopologyType } from '../../../src/sdam/common';
 import { Topology } from '../../../src/sdam/topology';
 import { HostAddress } from '../../../src/utils';
-import { UnifiedMongoClient } from '../unified-spec-runner/entities';
-import { ClientEntity } from '../unified-spec-runner/schema';
 import { getEnvironmentalOptions } from '../utils';
 
 interface ProxyParams {
@@ -234,25 +232,6 @@ export class TestConfiguration {
     }
 
     return new MongoClient(connectionString, serverOptions);
-  }
-
-  async client({
-    clientOptions = {},
-    entityDescription = {}
-  }: {
-    clientOptions?: MongoClientOptions;
-    entityDescription?: Omit<ClientEntity, 'id'>;
-  } = {}) {
-    const connectionString = this.url();
-
-    const client = new UnifiedMongoClient(
-      connectionString,
-      { id: 'not real', ...entityDescription },
-      clientOptions
-    );
-    await client.connect();
-
-    return client;
   }
 
   newTopology(host, port, options) {
