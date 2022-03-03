@@ -2,10 +2,19 @@
 
 import { parse, stringify } from '@iarna/toml';
 import { exec as execCb } from 'child_process';
-import { writeFile, readFile } from 'fs/promises';
-import { promisify } from 'util';
+import { readFile, writeFile } from 'fs/promises';
 import { chdir } from 'process';
-import { confirm, customSemverCompare, getCommandLineArguments, JsonVersionSchema, TomlVersionSchema, VersionSchema } from './utils';
+import { promisify } from 'util';
+
+import {
+  confirm,
+  customSemverCompare,
+  getCommandLineArguments,
+  JsonVersionSchema,
+  log,
+  TomlVersionSchema,
+  VersionSchema
+} from './utils';
 
 const exec = promisify(execCb);
 
@@ -24,7 +33,11 @@ async function copyNewDocsToGeneratedSite({ tag }: VersionSchema) {
   return await exec(command);
 }
 
-async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlData: TomlVersionSchema, jsonVersions: JsonVersionSchema[]) {
+async function updateSiteTemplateForNewVersion(
+  newVersion: VersionSchema,
+  tomlData: TomlVersionSchema,
+  jsonVersions: JsonVersionSchema[]
+) {
   const versionExists = jsonVersions.some(({ version }) => version === newVersion.tag);
   if (versionExists) {
     const existingVersionIndex = tomlData.versions.findIndex(({ tag }) => tag === newVersion.tag);
@@ -32,13 +45,13 @@ async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlDa
   } else {
     tomlData.versions.unshift(newVersion);
 
-    jsonVersions.unshift({ version: newVersion.tag })
+    jsonVersions.unshift({ version: newVersion.tag });
   }
 
-  tomlData.versions.sort((a, b) => customSemverCompare(a.tag, b.tag))
+  tomlData.versions.sort((a, b) => customSemverCompare(a.tag, b.tag));
   tomlData.current = tomlData.versions.find(({ tag }) => tag.toLowerCase() !== 'next').version;
 
-  jsonVersions.sort((a, b) => customSemverCompare(a.version, b.version))
+  jsonVersions.sort((a, b) => customSemverCompare(a.version, b.version));
 
   await writeFile(RELEASES_TOML_FILE, stringify(tomlData as any));
   await writeFile(RELEASES_JSON_FILE, JSON.stringify(jsonVersions, null, 4));
@@ -64,25 +77,30 @@ async function main() {
     await confirm(`
       Generating docs for the following configuration.
   ${JSON.stringify(newVersion, null, 2)}
-      Does this look right? [y/n] `
-    );
+      Does this look right? [y/n] `);
   }
 
-  console.error('Installing dependencies...');
+  log('Installing dependencies...');
   await installDependencies();
 
-  console.error('Building docs for current branch');
+  log('Building docs for current branch');
   await buildDocs();
 
-  console.error('Generating new static site...')
+  log('Generating new static site...');
 
-  const tomlVersions = parse(await readFile(RELEASES_TOML_FILE, { encoding: 'utf8' })) as unknown as TomlVersionSchema;
-  const jsonVersions = JSON.parse(await readFile(RELEASES_JSON_FILE, { encoding: 'utf8' })) as unknown as JsonVersionSchema[];
+  const tomlVersions = parse(
+    await readFile(RELEASES_TOML_FILE, { encoding: 'utf8' })
+  ) as unknown as TomlVersionSchema;
+  const jsonVersions = JSON.parse(
+    await readFile(RELEASES_JSON_FILE, { encoding: 'utf8' })
+  ) as unknown as JsonVersionSchema[];
 
-  const versionAlreadyExists = jsonVersions.some(({ version }) => version === tag)
+  const versionAlreadyExists = jsonVersions.some(({ version }) => version === tag);
 
   if (versionAlreadyExists && !skipPrompts) {
-    await confirm(`Version ${tag} already exists.  Do you want to override the existing docs? [y/n] `);
+    await confirm(
+      `Version ${tag} already exists.  Do you want to override the existing docs? [y/n] `
+    );
   }
 
   await updateSiteTemplateForNewVersion(newVersion, tomlVersions, jsonVersions);
@@ -90,7 +108,7 @@ async function main() {
   await copyGeneratedDocsToDocsFolder();
   await removeTempDirectory();
 
-  console.error('Successfully generated api documentation and updated the doc site.')
+  log('Successfully generated api documentation and updated the doc site.');
 }
 
 main();
