@@ -126,7 +126,8 @@
     "preview:docs": "ts-node etc/docs/preview.ts",
     "release": "standard-version -i HISTORY.md",
     "test": "npm run check:lint && npm run test:all",
-    "test:all": "npm run check:unit && npm run check:test"
+    "test:all": "npm run check:unit && npm run check:test",
+    "update:docs": "npm run build:docs -- --yes"
   },
   "tsd": {
     "directory": "test/types",
