@@ -36,7 +36,7 @@ async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlDa
   }
 
   tomlData.versions.sort((a, b) => customSemverCompare(a.tag, b.tag))
-  tomlData.current = tomlData.versions[0].version;
+  tomlData.current = tomlData.versions.find(({ tag }) => tag !== 'next').version;
 
   jsonVersions.sort((a, b) => customSemverCompare(a.version, b.version))
 
