@@ -19,7 +19,7 @@ by each driver.
 
 Snapshot session tests
 ======================
-Snapshot sessions tests require server of version 5.0 or higher and
+Snapshot sessions tests require server of version 5.0 or higher and 
 replica set or a sharded cluster deployment.
 Default snapshot history window on the server is 5 minutes. Running the test in debug mode, or in any other slow configuration
 may lead to `SnapshotTooOld` errors. Drivers can work around this issue by increasing the server's `minSnapshotHistoryWindowInSeconds` parameter, for example:
