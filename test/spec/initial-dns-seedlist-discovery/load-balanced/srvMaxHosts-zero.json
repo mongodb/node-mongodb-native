@@ -1,10 +1,10 @@
 {
-  "uri": "mongodb+srv://test3.test.build.10gen.cc/?loadBalanced=true&srvMaxHosts=0",
+  "uri": "mongodb+srv://test23.test.build.10gen.cc/?loadBalanced=true&srvMaxHosts=0",
   "seeds": [
-    "localhost.test.build.10gen.cc:27017"
+    "localhost.test.build.10gen.cc:8000"
   ],
   "hosts": [
-    "localhost.test.build.10gen.cc:27017"
+    "localhost.test.build.10gen.cc:8000"
   ],
   "options": {
     "loadBalanced": true,

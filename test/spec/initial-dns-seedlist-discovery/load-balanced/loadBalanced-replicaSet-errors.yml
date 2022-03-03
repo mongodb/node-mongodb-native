@@ -1,5 +1,5 @@
-# The TXT record for test20.test.build.10gen.cc contains loadBalanced=true.
-uri: "mongodb+srv://test20.test.build.10gen.cc/?replicaSet=replset"
+# The TXT record for test24.test.build.10gen.cc contains loadBalanced=true.
+uri: "mongodb+srv://test24.test.build.10gen.cc/?replicaSet=replset"
 seeds: []
 hosts: []
 error: true
