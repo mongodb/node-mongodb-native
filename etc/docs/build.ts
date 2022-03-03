@@ -50,10 +50,10 @@ async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlDa
 async function main() {
   chdir(__dirname);
 
-  const { semverVersion, status, skipPrompts, versionName } = getCommandLineArguments();
+  const { semverVersion, status, skipPrompts } = getCommandLineArguments();
 
   const newVersion: VersionSchema = {
-    version: `${versionName} Driver`,
+    version: `${semverVersion} Driver`,
     status,
     api: `./${semverVersion}`,
     usesMongoDBManual: true,
