@@ -923,6 +923,32 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   forceServerObjectId?: boolean;
 }
 
+/**
+ * TODO(NODE-XXX)
+ * BulkWrites merge complexity is implemented in executeCommands
+ * This provides a vehicle to treat bulkOperations like any other operation (hence "shim")
+ * We would like this logic to simply live inside the BulkWriteOperation class
+ * @internal
+ */
+class BulkWriteShimOperation extends AbstractOperation {
+  bulkOperation: BulkOperationBase;
+  constructor(options: BulkWriteOptions, bulkOperation: BulkOperationBase) {
+    super(options);
+    this.bulkOperation = bulkOperation;
+  }
+
+  execute(server: Server, session: ClientSession, callback: Callback<any>): void {
+    if (this.options.session == null) {
+      // An implicit session could have been created by 'executeOperation'
+      // So if we stick it on finalOptions here, each bulk operation
+      // will use this same session, it'll be passed in the same way
+      // an explicit session would be
+      this.options.session = session;
+    }
+    return executeCommands(this.bulkOperation, this.options, callback);
+  }
+}
+
 /** @public */
 export abstract class BulkOperationBase {
   isOrdered: boolean;
@@ -1256,21 +1282,7 @@ export abstract class BulkOperationBase {
 
     this.s.executed = true;
     const finalOptions = { ...this.s.options, ...options };
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const bulkOperation = this;
-
-    const operation = new (class BulkShimOperation extends AbstractOperation {
-      execute(server: Server, session: ClientSession, callback: Callback<any>): void {
-        if (finalOptions.session == null) {
-          // An implicit session could have been created by 'executeOperation'
-          // So if we stick it on finalOptions here, each bulk operation
-          // will use this same session, it'll be passed in the same way
-          // an explicit session would be
-          finalOptions.session = session;
-        }
-        return executeCommands(bulkOperation, finalOptions, callback);
-      }
-    })(finalOptions);
+    const operation = new BulkWriteShimOperation(finalOptions, this);
 
     return executeOperation(this.s.topology, operation, callback);
   }
