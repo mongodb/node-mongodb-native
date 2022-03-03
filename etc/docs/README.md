@@ -8,11 +8,11 @@ There are two scripts contained in this folder.
 were moved into the main repository.  This script has the ability to generate api docs for older versions of the driver (in case it becomes
 necessary to backport a feature).
 
-- `generate-docs.ts` is used to generate API docs for a major or minor release.
+- `build.ts` is used to generate API docs for a major or minor release.
 
 ### Dependencies
 
-`generate-docs.ts` requires the following in addition to dependencies installed with `npm i`:
+`build.ts` requires the following in addition to dependencies installed with `npm i`:
 
 * Hugo static web generator `v0.30.2`
   * You can download the right version [here](https://github.com/gohugoio/hugo/releases/tag/v0.30.2)
@@ -30,9 +30,16 @@ Note: `typedoc` is also a dependency but it is downloaded by the docs generation
 
 To generate API documentation for a new major or minor version:
 
-`npm run docs:build -- <version> <optional status for the version>`
+`npm run build:docs -- --tag <version>`
+
+You can optionally specify the following options:
+
+- `--yes` if set, this will silence any prompts in the script. useful for running in CI
+- `--status <status>` set the status of the version.
+
+Run `npm run build:docs -- --help` for more information.
 
 The generated docs can be previewed using `npm run docs:preview`.
 
-Once everything looks correct, open a PR against `main`.  Our docs are hosted out of the `docs` folder on the 
+Once everything looks correct, open a PR against `main`.  Our docs are hosted out of the `docs` folder on the
 main branch, and once the PR is merged Github will automatically update the hosted documentation.

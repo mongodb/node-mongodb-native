@@ -73,3 +73,4 @@ etc/docs/build
 !docs
 !docs/s/lib
 !docs/s/js
+!docs/s/img/*png
