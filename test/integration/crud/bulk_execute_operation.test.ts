@@ -1,9 +1,7 @@
 import { expect } from 'chai';
 
-import type { UnifiedMongoClient } from '../../../tools/unified-spec-runner/entities';
-
 describe('Bulk executeOperation', () => {
-  let client: UnifiedMongoClient;
+  let client;
   beforeEach(async function () {
     client = await this.configuration.newClient({ monitorCommands: true }).connect();
   });

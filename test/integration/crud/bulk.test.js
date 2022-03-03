@@ -6,8 +6,8 @@ const {
   setupDatabase,
   ignoreNsNotFound,
   assert: test
-} = require('../../shared');
-const { Long, MongoBatchReExecutionError, MongoDriverError } = require('../../../../src');
+} = require('../shared');
+const { Long, MongoBatchReExecutionError, MongoDriverError } = require('../../../src');
 const crypto = require('crypto');
 const chai = require('chai');
 
