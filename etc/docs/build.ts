@@ -17,25 +17,25 @@ const removeTempDirectory = () => exec('rm -rf temp');
 const installDependencies = () => exec('npm i --no-save typedoc');
 const buildDocs = () => exec('npm run build:typedoc');
 
-async function copyNewDocsToGeneratedSite({ semverVersion }: VersionSchema) {
-  const outputDirectory = `./temp/${semverVersion}`;
+async function copyNewDocsToGeneratedSite({ tag }: VersionSchema) {
+  const outputDirectory = `./temp/${tag}`;
   const pathToBuiltDocs = './build';
   const command = `cp -R ${pathToBuiltDocs} ${outputDirectory}`;
   return await exec(command);
 }
 
 async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlData: TomlVersionSchema, jsonVersions: JsonVersionSchema[]) {
-  const versionExists = jsonVersions.some(({ version }) => version === newVersion.semverVersion);
+  const versionExists = jsonVersions.some(({ version }) => version === newVersion.tag);
   if (versionExists) {
-    const existingVersionIndex = tomlData.versions.findIndex(({ semverVersion }) => semverVersion === newVersion.semverVersion);
+    const existingVersionIndex = tomlData.versions.findIndex(({ tag }) => tag === newVersion.tag);
     tomlData.versions[existingVersionIndex] = newVersion;
   } else {
     tomlData.versions.unshift(newVersion);
 
-    jsonVersions.unshift({ version: newVersion.semverVersion })
+    jsonVersions.unshift({ version: newVersion.tag })
   }
 
-  tomlData.versions.sort((a, b) => customSemverCompare(a.semverVersion, b.semverVersion))
+  tomlData.versions.sort((a, b) => customSemverCompare(a.tag, b.tag))
   tomlData.current = tomlData.versions[0].version;
 
   jsonVersions.sort((a, b) => customSemverCompare(a.version, b.version))
@@ -50,14 +50,14 @@ async function updateSiteTemplateForNewVersion(newVersion: VersionSchema, tomlDa
 async function main() {
   chdir(__dirname);
 
-  const { semverVersion, status, skipPrompts } = getCommandLineArguments();
+  const { tag, status, skipPrompts } = getCommandLineArguments();
 
   const newVersion: VersionSchema = {
-    version: `${semverVersion} Driver`,
+    version: `${tag} Driver`,
     status,
-    api: `./${semverVersion}`,
+    api: `./${tag}`,
     usesMongoDBManual: true,
-    semverVersion
+    tag
   };
 
   if (!skipPrompts) {
@@ -79,10 +79,10 @@ async function main() {
   const tomlVersions = parse(await readFile(RELEASES_TOML_FILE, { encoding: 'utf8' })) as unknown as TomlVersionSchema;
   const jsonVersions = JSON.parse(await readFile(RELEASES_JSON_FILE, { encoding: 'utf8' })) as unknown as JsonVersionSchema[];
 
-  const versionAlreadyExists = jsonVersions.some(({ version }) => version === semverVersion)
+  const versionAlreadyExists = jsonVersions.some(({ version }) => version === tag)
 
   if (versionAlreadyExists && !skipPrompts) {
-    await confirm(`Version ${semverVersion} already exists.  Do you want to override the existing docs? [y/n] `);
+    await confirm(`Version ${tag} already exists.  Do you want to override the existing docs? [y/n] `);
   }
 
   await updateSiteTemplateForNewVersion(newVersion, tomlVersions, jsonVersions);

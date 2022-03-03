@@ -12,7 +12,7 @@ export interface VersionSchema {
     api: string;
     usesMongoDBManual?: boolean;
     docs?: string;
-    semverVersion: string;
+    tag: string;
 }
 
 export interface TomlVersionSchema {
@@ -45,11 +45,11 @@ export async function confirm(message: string) {
     }
 }
 
-export function getCommandLineArguments(): { semverVersion: string, status: string, skipPrompts } {
-    const { status, semverVersion, yes: skipPrompts } = yargs(hideBin(process.argv)).option(
-        'semverVersion', {
+export function getCommandLineArguments(): { tag: string, status: string, skipPrompts } {
+    const { status, tag, yes: skipPrompts } = yargs(hideBin(process.argv)).option(
+        'tag', {
         type: 'string',
-        description: 'The version of the docs to update',
+        description: 'The identifier for the version of the docs to update.',
         requiresArg: true,
         default: 'next'
     }
@@ -66,7 +66,7 @@ export function getCommandLineArguments(): { semverVersion: string, status: stri
     }).argv
 
     return {
-        semverVersion: capitalize(semverVersion),
+        tag: capitalize(tag),
         status,
         skipPrompts
     }
