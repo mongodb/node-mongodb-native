@@ -41,7 +41,9 @@ tests:
     expectError:
       isClientError: true
       errorContains: Snapshot reads require MongoDB 5.0 or later
-  expectEvents: []
+  expectEvents:
+    - client: *client0
+      events: []
 
 - description: Client error on aggregate with snapshot
   operations:
@@ -53,7 +55,9 @@ tests:
     expectError:
       isClientError: true
       errorContains: Snapshot reads require MongoDB 5.0 or later
-  expectEvents: []
+  expectEvents:
+    - client: *client0
+      events: []
 
 - description: Client error on distinct with snapshot
   operations:
@@ -66,4 +70,6 @@ tests:
     expectError:
       isClientError: true
       errorContains: Snapshot reads require MongoDB 5.0 or later
-  expectEvents: []
+  expectEvents:
+    - client: *client0
+      events: []

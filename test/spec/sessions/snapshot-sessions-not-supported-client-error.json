@@ -70,7 +70,12 @@
           }
         }
       ],
-      "expectEvents": []
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
     },
     {
       "description": "Client error on aggregate with snapshot",
@@ -88,7 +93,12 @@
           }
         }
       ],
-      "expectEvents": []
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
     },
     {
       "description": "Client error on distinct with snapshot",
@@ -107,7 +117,12 @@
           }
         }
       ],
-      "expectEvents": []
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
     }
   ]
 }

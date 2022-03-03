@@ -1,0 +1,256 @@
+{
+  "description": "driver-sessions-server-support",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.6"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "session-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "session-tests",
+      "documents": [
+        {
+          "_id": 1
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Server supports explicit sessions",
+      "operations": [
+        {
+          "name": "assertSessionNotDirty",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 2
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "assertSessionNotDirty",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "endSession",
+          "object": "session0"
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": -1
+            }
+          },
+          "expectResult": []
+        },
+        {
+          "name": "assertSameLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ],
+                  "ordered": true,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": -1
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "session-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "session-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Server supports implicit sessions",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 2
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": -1
+            }
+          },
+          "expectResult": []
+        },
+        {
+          "name": "assertSameLsidOnLastTwoCommands",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ],
+                  "ordered": true,
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "session-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "filter": {
+                    "_id": -1
+                  },
+                  "lsid": {
+                    "$$type": "object"
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "session-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "session-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
