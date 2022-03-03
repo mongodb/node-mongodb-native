@@ -14,7 +14,8 @@ const {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerError,
-  MongoError
+  MongoError,
+  MongoCompatibilityError
 } = require('../../../src/error');
 const { ns } = require('../../../src/utils');
 const { promisify } = require('util');
@@ -192,20 +193,12 @@ async function executeSDAMTest(testData) {
     topology.on(eventName, event => events.push(event));
   }
 
-  const incompatibilityHandler = err => {
-    if (err.message.match(/but this version of the driver/)) return;
-    throw err;
-  };
-
   // connect the topology
   await promisify(topology.connect.bind(topology))(options);
 
   for (const phase of testData.phases) {
-    const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
-
-    if (incompatibilityExpected) {
-      topology.on('error', incompatibilityHandler);
-    }
+    const errorEvents = [];
+    topology.on('error', error => errorEvents.push(error));
 
     if (phase.responses) {
       for (const [address, hello] of phase.responses) {
@@ -213,8 +206,15 @@ async function executeSDAMTest(testData) {
       }
       if (phase.outcome) {
         assertOutcomeExpectations(topology, events, phase.outcome);
+        if (phase.outcome.compatible === false) {
+          for (const errorEvent of errorEvents) {
+            expect(errorEvent).to.be.instanceOf(MongoCompatibilityError);
+            expect(errorEvent.message).to.match(/but this version of the driver/);
+          }
+        }
       }
-      topology.removeListener('error', incompatibilityHandler);
+
+      topology.removeAllListeners('error');
       events = [];
     } else if (phase.applicationErrors) {
       for (const appError of phase.applicationErrors) {
@@ -226,13 +226,9 @@ async function executeSDAMTest(testData) {
         const res = promisify(server.command.bind(server))(ns('admin.$cmd'), { ping: 1 });
         withConnectionStub.restore();
 
-        let thrownError;
-        try {
-          await res;
-        } catch (error) {
-          thrownError = error;
-        }
-        expect(thrownError).to.be.instanceOf(MongoError); // TODO: Can we narrow this check more?
+        const thrownError = await res.catch(error => error);
+        // TODO: Can we narrow this check more?
+        expect(thrownError).to.be.instanceOf(MongoError);
       }
     }
   }
