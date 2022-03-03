@@ -1,15 +1,14 @@
 'use strict';
 
-const expect = require('chai').expect;
-const { MongoError } = require('../../../src/error');
+const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
 const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
 const { MongoDBNamespace, isHello } = require('../../../src/utils');
-const { FindCursor } = require('../../../src/cursor/find_cursor');
+const { AggregationCursor } = require('../../../src/cursor/aggregation_cursor');
 
 const test = {};
-describe('Find Cursor', function () {
+describe('Aggregation Cursor', function () {
   describe('#next', function () {
     afterEach(function () {
       mock.cleanup();
@@ -24,7 +23,7 @@ describe('Find Cursor', function () {
           const doc = request.document;
           if (isHello(doc)) {
             request.reply(mock.HELLO);
-          } else if (doc.find) {
+          } else if (doc.aggregate) {
             request.reply({
               cursor: {
                 id: Long.fromNumber(1),
@@ -39,7 +38,12 @@ describe('Find Cursor', function () {
 
       it('sets the session on the cursor', function (done) {
         const topology = new Topology(test.server.hostAddress());
-        const cursor = new FindCursor(topology, MongoDBNamespace.fromString('test.test'), {}, {});
+        const cursor = new AggregationCursor(
+          topology,
+          MongoDBNamespace.fromString('test.test'),
+          [],
+          {}
+        );
         topology.connect(function () {
           cursor.next(function () {
             expect(cursor.session).to.exist;
@@ -55,7 +59,7 @@ describe('Find Cursor', function () {
           const doc = request.document;
           if (isHello(doc)) {
             request.reply({ errmsg: 'network error' });
-          } else if (doc.find) {
+          } else if (doc.aggregate) {
             request.reply({
               cursor: {
                 id: Long.fromNumber(1),
@@ -72,7 +76,12 @@ describe('Find Cursor', function () {
         const topology = new Topology(test.server.hostAddress(), {
           serverSelectionTimeoutMS: 1000
         });
-        const cursor = new FindCursor(topology, MongoDBNamespace.fromString('test.test'), {}, {});
+        const cursor = new AggregationCursor(
+          topology,
+          MongoDBNamespace.fromString('test.test'),
+          [],
+          {}
+        );
         topology.connect(function () {
           cursor.next(function () {
             expect(cursor.session).to.not.exist;
@@ -94,7 +103,7 @@ describe('Find Cursor', function () {
             // This gives us a data bearing server available for the next call.
             request.reply(helloCalls > 0 ? mock.HELLO : { errmsg: 'network error' });
             helloCalls++;
-          } else if (doc.find) {
+          } else if (doc.aggregate) {
             request.reply({
               cursor: {
                 id: Long.fromNumber(1),
@@ -111,7 +120,12 @@ describe('Find Cursor', function () {
         const topology = new Topology(test.server.hostAddress(), {
           serverSelectionTimeoutMS: 1000
         });
-        const cursor = new FindCursor(topology, MongoDBNamespace.fromString('test.test'), {}, {});
+        const cursor = new AggregationCursor(
+          topology,
+          MongoDBNamespace.fromString('test.test'),
+          [],
+          {}
+        );
         topology.connect(function () {
           cursor.next(function () {
             expect(cursor.session).to.exist;
@@ -119,62 +133,6 @@ describe('Find Cursor', function () {
           });
         });
       });
-    });
-  });
-
-  describe('Response', function () {
-    afterEach(() => mock.cleanup());
-    beforeEach(() => {
-      return mock.createServer().then(mockServer => {
-        test.server = mockServer;
-      });
-    });
-
-    it('should throw when document is error', function (done) {
-      const errdoc = {
-        errmsg: 'Cursor not found (namespace: "liveearth.entityEvents", id: 2018648316188432590).'
-      };
-
-      const client = new Topology(test.server.hostAddress());
-
-      test.server.setMessageHandler(request => {
-        const doc = request.document;
-        if (isHello(doc)) {
-          request.reply(
-            Object.assign({}, mock.HELLO, {
-              maxWireVersion: 6
-            })
-          );
-        } else if (doc.find) {
-          request.reply({
-            cursor: {
-              id: Long.fromNumber(1),
-              ns: 'test.test',
-              firstBatch: []
-            },
-            ok: 1
-          });
-        } else if (doc.getMore) {
-          request.reply(errdoc);
-        } else if (doc.killCursors) {
-          request.reply({ ok: 1 });
-        }
-      });
-
-      client.on('error', done);
-      client.once('connect', () => {
-        const cursor = new FindCursor(client, MongoDBNamespace.fromString('test.test'), {}, {});
-
-        // Execute next
-        cursor.next(function (err) {
-          expect(err).to.exist;
-          expect(err).to.be.instanceof(MongoError);
-          expect(err.message).to.equal(errdoc.errmsg);
-
-          client.close(done);
-        });
-      });
-      client.connect();
     });
   });
 });
