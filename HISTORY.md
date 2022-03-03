@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.4.1](https://github.com/mongodb/node-mongodb-native/compare/v4.4.0...v4.4.1) (2022-03-03)
+
+
+### Features
+
+* **NODE-3866:** Add let option to ReplaceOptions for replaceOne operation ([#3148](https://github.com/mongodb/node-mongodb-native/issues/3148)) ([f76635a](https://github.com/mongodb/node-mongodb-native/commit/f76635a0b5f268cb52a37afe050a8574630622c0))
+
+
+### Bug Fixes
+
+* **NODE-3521:** update session support checks ([#3151](https://github.com/mongodb/node-mongodb-native/issues/3151)) ([aaa453d](https://github.com/mongodb/node-mongodb-native/commit/aaa453d6e35be887d12cba8260780dd2c7fb39e0))
+* **NODE-3948:** Add error code to MongoSystemError ([#3149](https://github.com/mongodb/node-mongodb-native/issues/3149)) ([446da95](https://github.com/mongodb/node-mongodb-native/commit/446da952db3e20d859a42b08481ac88b0e8e0f08))
+
 ## [4.4.0](https://github.com/mongodb/node-mongodb-native/compare/v4.3.1...v4.4.0) (2022-02-17)
 
 
