@@ -2,6 +2,13 @@ current = "4.4 Driver"
 mongoDBManual = "https://docs.mongodb.com/drivers/node/"
 
 [[versions]]
+version = "Next Driver"
+status = "current"
+api = "./Next"
+usesMongoDBManual = true
+tag = "Next"
+
+[[versions]]
 version = "4.4 Driver"
 status = "current"
 api = "./4.4"
@@ -35,6 +42,13 @@ status = "supported"
 api = "./4.0"
 usesMongoDBManual = true
 tag = "4.0"
+
+[[versions]]
+version = "3.x Core Driver"
+status = "not-supported"
+docs = "./core"
+api = "./core/api"
+tag = "3.x"
 
 [[versions]]
 version = "3.7 Driver"
@@ -91,13 +105,6 @@ status = "not-supported"
 docs = "./3.0"
 api = "./3.0/api"
 tag = "3.0"
-
-[[versions]]
-version = "3.x Core Driver"
-status = "not-supported"
-docs = "./core"
-api = "./core/api"
-tag = "3.x"
 
 [[versions]]
 version = "2.2 Driver"
