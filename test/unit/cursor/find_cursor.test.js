@@ -14,12 +14,8 @@ describe('Find Cursor', function () {
     afterEach(function () {
       mock.cleanup();
     });
-beforeEach(async function() {
-    test.server = await mock.createServer();
-})
-      return mock.createServer().then(mockServer => {
-        test.server = mockServer;
-      });
+    beforeEach(async function () {
+      test.server = await mock.createServer();
     });
 
     context('when there is a data bearing server', function () {

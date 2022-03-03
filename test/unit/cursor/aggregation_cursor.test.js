@@ -1,7 +1,6 @@
 'use strict';
 
 const { expect } = require('chai');
-const { createServer, cleanup, isHello } = require('../../tools/mongodb-mock/index')
 const mock = require('../../tools/mongodb-mock/index');
 const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
@@ -14,12 +13,8 @@ describe('Aggregation Cursor', function () {
     afterEach(function () {
       mock.cleanup();
     });
-beforeEach(async function() {
-    test.server = await mock.createServer();
-})
-      return mock.createServer().then(mockServer => {
-        test.server = mockServer;
-      });
+    beforeEach(async function () {
+      test.server = await mock.createServer();
     });
 
     context('when there is a data bearing server', function () {
