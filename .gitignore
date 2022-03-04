@@ -71,7 +71,6 @@ lb.env
 # docs specific configuration
 etc/docs/build
 !docs
-!docs/img/*
 !docs/s/lib
 !docs/s/js
 !docs/s/img/*png
