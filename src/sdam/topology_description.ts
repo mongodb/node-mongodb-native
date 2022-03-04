@@ -353,7 +353,7 @@ function topologyTypeForServerType(serverType: ServerType): TopologyType {
 
 function compareObjectId(oid1?: ObjectId, oid2?: ObjectId): 0 | 1 | -1 {
   if (oid1 == null) {
-    return -1;
+    return oid2 == null ? 0 : -1;
   }
 
   if (oid2 == null) {
@@ -362,6 +362,18 @@ function compareObjectId(oid1?: ObjectId, oid2?: ObjectId): 0 | 1 | -1 {
 
   const res = oid1.id.compare(oid2.id);
   return res === 0 ? 0 : res > 0 ? 1 : -1;
+}
+
+function compareNumbers(num1?: number, num2?: number): 0 | 1 | -1 {
+  if (num1 == null) {
+    return num2 == null ? 0 : -1;
+  }
+
+  if (num2 == null) {
+    return 1;
+  }
+
+  return num1 === num2 ? 0 : num1 > num2 ? 1 : -1;
 }
 
 function updateRsFromPrimary(
@@ -378,14 +390,15 @@ function updateRsFromPrimary(
   }
 
   const electionIdIsNull = serverDescription.electionId == null;
+
   const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
   const maxElectionIdIsGreater = electionIdComparison === 1;
   const maxElectionIdIsEqual = electionIdComparison === 0;
   const maxElectionIdIsLess = electionIdComparison === -1;
-  const maxSetVersionIsGreater =
-    maxSetVersion == null ? false : maxSetVersion > (serverDescription.setVersion ?? -1);
-  const maxSetVersionIsLess =
-    maxSetVersion == null ? true : maxSetVersion < (serverDescription.setVersion ?? -1);
+
+  const setVersionComparison = compareNumbers(maxSetVersion, serverDescription.setVersion);
+  const maxSetVersionIsGreater = setVersionComparison === 1;
+  const maxSetVersionIsLess = setVersionComparison === -1;
 
   if (
     maxElectionIdIsGreater ||

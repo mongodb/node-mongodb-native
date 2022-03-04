@@ -21,6 +21,8 @@ const { promisify } = require('util');
 const { expect } = require('chai');
 
 const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
+// const specDir =
+//   '/Users/neal/code/drivers/mongodb-specifications/source/server-discovery-and-monitoring/tests';
 function collectTests() {
   const testTypes = fs
     .readdirSync(specDir)
