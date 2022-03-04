@@ -32,57 +32,42 @@ export interface TopologyDescriptionOptions {
  */
 export class TopologyDescription {
   type: TopologyType;
-  setName?: string;
-  maxSetVersion?: number;
-  maxElectionId?: ObjectId;
+  setName: string | undefined;
+  maxSetVersion: number | undefined;
+  maxElectionId: ObjectId | undefined;
   servers: Map<string, ServerDescription>;
   stale: boolean;
   compatible: boolean;
-  compatibilityError?: string;
-  logicalSessionTimeoutMinutes?: number;
+  compatibilityError: string | undefined;
+  logicalSessionTimeoutMinutes: number | undefined;
   heartbeatFrequencyMS: number;
   localThresholdMS: number;
-  commonWireVersion?: number;
+  commonWireVersion: number | undefined;
 
   /**
    * Create a TopologyDescription
    */
   constructor(
-    topologyType: TopologyType,
-    serverDescriptions?: Map<string, ServerDescription>,
-    setName?: string,
-    maxSetVersion?: number,
-    maxElectionId?: ObjectId,
-    commonWireVersion?: number,
-    options?: TopologyDescriptionOptions
+    topologyType: TopologyType = TopologyType.Unknown,
+    serverDescriptions: Map<string, ServerDescription> | undefined = undefined,
+    setName: string | undefined = undefined,
+    maxSetVersion: number | undefined = undefined,
+    maxElectionId: ObjectId | undefined = undefined,
+    commonWireVersion: number | undefined = undefined,
+    options: TopologyDescriptionOptions = {}
   ) {
-    options = options ?? {};
-
-    // TODO: consider assigning all these values to a temporary value `s` which
-    //       we use `Object.freeze` on, ensuring the internal state of this type
-    //       is immutable.
-    this.type = topologyType ?? TopologyType.Unknown;
+    this.type = topologyType;
     this.servers = serverDescriptions ?? new Map();
     this.stale = false;
     this.compatible = true;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 0;
     this.localThresholdMS = options.localThresholdMS ?? 0;
-
-    if (setName) {
-      this.setName = setName;
-    }
-
-    if (maxSetVersion) {
-      this.maxSetVersion = maxSetVersion;
-    }
-
-    if (maxElectionId) {
-      this.maxElectionId = maxElectionId;
-    }
-
-    if (commonWireVersion) {
-      this.commonWireVersion = commonWireVersion;
-    }
+    this.setName = setName;
+    this.maxSetVersion = maxSetVersion;
+    this.maxElectionId = maxElectionId;
+    this.commonWireVersion = commonWireVersion;
+    this.compatible = true;
+    this.compatibilityError = undefined;
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
@@ -134,6 +119,8 @@ export class TopologyDescription {
         );
       }
     }
+
+    Object.freeze(this);
   }
 
   /**
@@ -390,32 +377,34 @@ function updateRsFromPrimary(
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
-  if (serverDescription.electionId != null && serverDescription.setVersion != null) {
-    const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
-    const maxElectionIdIsGreater = electionIdComparison === 1;
-    const maxElectionIdIsEqual = electionIdComparison === 0;
-    const maxElectionIdIsLess = electionIdComparison === -1;
-    const maxSetVersionIsGreater =
-      maxSetVersion == null ? false : maxSetVersion > serverDescription.setVersion;
-    const maxSetVersionIsLess =
-      maxSetVersion == null ? true : maxSetVersion < serverDescription.setVersion;
+  const electionIdIsNull = serverDescription.electionId == null;
+  const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
+  const maxElectionIdIsGreater = electionIdComparison === 1;
+  const maxElectionIdIsEqual = electionIdComparison === 0;
+  const maxElectionIdIsLess = electionIdComparison === -1;
+  const maxSetVersionIsGreater =
+    maxSetVersion == null ? false : maxSetVersion > (serverDescription.setVersion ?? -1);
+  const maxSetVersionIsLess =
+    maxSetVersion == null ? true : maxSetVersion < (serverDescription.setVersion ?? -1);
 
-    if (maxElectionIdIsGreater || (maxElectionIdIsEqual && maxSetVersionIsGreater)) {
-      // this primary is stale, we must remove it
-      serverDescriptions.set(
-        serverDescription.address,
-        new ServerDescription(serverDescription.address)
-      );
+  if (
+    maxElectionIdIsGreater ||
+    ((maxElectionIdIsEqual || electionIdIsNull) && maxSetVersionIsGreater)
+  ) {
+    // this primary is stale, we must remove it
+    serverDescriptions.set(
+      serverDescription.address,
+      new ServerDescription(serverDescription.address)
+    );
 
-      return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
-    }
+    return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
+  }
 
-    if (maxElectionIdIsLess || (maxElectionIdIsEqual && maxSetVersionIsLess)) {
-      // We've seen a higher ElectionId! Update both!
-      // Or the electionId is the same but the setVersion increased
-      maxElectionId = serverDescription.electionId;
-      maxSetVersion = serverDescription.setVersion;
-    }
+  if (maxElectionIdIsLess || ((maxElectionIdIsEqual || electionIdIsNull) && maxSetVersionIsLess)) {
+    // We've seen a higher ElectionId! Update both!
+    // Or the electionId is the same but the setVersion increased
+    maxElectionId = serverDescription.electionId;
+    maxSetVersion = serverDescription.setVersion;
   }
 
   // We've heard from the primary. Is it the same primary as before?

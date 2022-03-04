@@ -14,7 +14,6 @@ const {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerError,
-  MongoError,
   MongoCompatibilityError
 } = require('../../../src/error');
 const { ns } = require('../../../src/utils');
@@ -29,7 +28,7 @@ function collectTests() {
     .filter(d => d !== 'integration');
 
   const tests = {};
-  testTypes.forEach(testType => {
+  for (const testType of testTypes) {
     tests[testType] = fs
       .readdirSync(path.join(specDir, testType))
       .filter(f => path.extname(f) === '.json')
@@ -39,9 +38,10 @@ function collectTests() {
         });
 
         result.type = testType;
+        result.fileName = path.join(testType, f);
         return result;
       });
-  });
+  }
 
   return tests;
 }
@@ -71,62 +71,43 @@ describe('Server Discovery and Monitoring (spec)', function () {
   }
 });
 
-const OUTCOME_TRANSLATIONS = new Map();
-OUTCOME_TRANSLATIONS.set('topologyType', 'type');
-
-function translateOutcomeKey(key) {
-  if (OUTCOME_TRANSLATIONS.has(key)) {
-    return OUTCOME_TRANSLATIONS.get(key);
-  }
-
-  return key;
-}
-
 function convertOutcomeEvents(events) {
   return events.map(event => {
     const eventType = Object.keys(event)[0];
     const args = [];
-    Object.keys(event[eventType]).forEach(key => {
+    for (const key of Object.keys(event[eventType])) {
       let argument = event[eventType][key];
       if (argument.servers) {
-        argument.servers = argument.servers.reduce((result, server) => {
-          result[server.address] = normalizeServerDescription(server);
-          return result;
-        }, {});
+        const serverEntries = argument.servers.map(server => [
+          server.address,
+          normalizeServerDescription(server)
+        ]);
+        argument.servers = Object.fromEntries(serverEntries);
       }
 
-      Object.keys(argument).forEach(key => {
-        if (OUTCOME_TRANSLATIONS.has(key)) {
-          argument[OUTCOME_TRANSLATIONS.get(key)] = argument[key];
-          delete argument[key];
-        }
-      });
+      if (typeof argument.topologyType === 'string') {
+        // Translation for our driver's TopologyDescription class
+        argument.type = argument.topologyType;
+        delete argument.topologyType;
+      }
 
       args.push(argument);
-    });
+    }
 
     // convert snake case to camelCase with capital first letter
     let eventClass = eventType.replace(/_\w/g, c => c[1].toUpperCase());
     eventClass = eventClass.charAt(0).toUpperCase() + eventClass.slice(1);
-    args.unshift(null);
     const eventConstructor = sdamEvents[eventClass];
-    const eventInstance = new (Function.prototype.bind.apply(eventConstructor, args))();
+    expect(eventConstructor).to.be.a('function');
+    const eventInstance = new eventConstructor(...args);
     return eventInstance;
   });
 }
 
 // iterates through expectation building a path of keys that should not exist (null), and
-// removes them from the expectation (NOTE: this mutates the expectation)
+// removes them from the expectation
 function findOmittedFields(expected) {
-  const result = [];
-  Object.keys(expected).forEach(key => {
-    if (expected[key] == null) {
-      result.push(key);
-      delete expected[key];
-    }
-  });
-
-  return result;
+  return Object.fromEntries(Object.entries(expected).filter(([, value]) => value == null));
 }
 
 function normalizeServerDescription(serverDescription) {
@@ -227,8 +208,13 @@ async function executeSDAMTest(testData) {
         withConnectionStub.restore();
 
         const thrownError = await res.catch(error => error);
-        // TODO: Can we narrow this check more?
-        expect(thrownError).to.be.instanceOf(MongoError);
+        expect(thrownError).to.satisfy(
+          error =>
+            // These errors all come from the withConnection stub
+            error instanceof MongoNetworkError ||
+            error instanceof MongoNetworkTimeoutError ||
+            error instanceof MongoServerError
+        );
       }
     }
   }
@@ -241,7 +227,7 @@ function withConnectionStubImpl(appError) {
       generation:
         typeof appError.generation === 'number' ? appError.generation : connectionPool.generation,
 
-      command: (ns, cmd, options, callback) => {
+      command(ns, cmd, options, callback) {
         if (appError.type === 'network') {
           callback(new MongoNetworkError('test generated'));
         } else if (appError.type === 'timeout') {
@@ -271,19 +257,24 @@ function withConnectionStubImpl(appError) {
 function assertOutcomeExpectations(topology, events, outcome) {
   // then verify the resulting outcome
   const description = topology.description;
+
+  if (typeof outcome.topologyType === 'string') {
+    // Translation for our driver's TopologyDescription class
+    outcome.type = outcome.topologyType;
+    delete outcome.topologyType;
+  }
+
   for (const key of Object.keys(outcome)) {
     const outcomeValue = outcome[key];
-    const translatedKey = translateOutcomeKey(key);
 
     if (key === 'servers') {
-      expect(description).to.include.keys(translatedKey);
+      expect(description).to.include.keys(key);
       const expectedServers = outcomeValue;
-      const actualServers = description[translatedKey];
+      const actualServers = description[key];
 
       for (const serverName of Object.keys(expectedServers)) {
         expect(actualServers).to.include.keys(serverName);
 
-        // TODO: clean all this up, always operate directly on `Server` not `ServerDescription`
         if (expectedServers[serverName].pool) {
           const expectedPool = expectedServers[serverName].pool;
           delete expectedServers[serverName].pool;
@@ -295,6 +286,7 @@ function assertOutcomeExpectations(topology, events, outcome) {
         const omittedFields = findOmittedFields(expectedServer);
 
         const actualServer = actualServers.get(serverName);
+        // resultCheck(actualServer, expectedServer, null);
         expect(actualServer).to.matchMongoSpec(expectedServer);
 
         if (omittedFields.length) {
@@ -302,7 +294,7 @@ function assertOutcomeExpectations(topology, events, outcome) {
         }
       }
 
-      return;
+      continue;
     }
 
     // Load balancer mode has no monitor hello response and
@@ -310,7 +302,7 @@ function assertOutcomeExpectations(topology, events, outcome) {
     // server description.
     if (description.type === TopologyType.LoadBalanced) {
       if (key !== 'address' || key !== 'compatible') {
-        return;
+        continue;
       }
     }
 
@@ -323,25 +315,27 @@ function assertOutcomeExpectations(topology, events, outcome) {
         expect(actualEvent).to.matchMongoSpec(expectedEvent);
       }
 
-      return;
+      continue;
     }
 
     if (key === 'compatible' || key === 'setName') {
       if (outcomeValue == null) {
-        expect(topology.description[key]).to.not.exist;
+        expect(topology.description).to.have.property(key, undefined);
       } else {
         expect(topology.description).property(key).to.equal(outcomeValue);
       }
 
-      return;
+      continue;
     }
 
-    expect(description).to.include.keys(translatedKey);
+    expect(description).to.include.keys(key);
 
     if (outcomeValue == null) {
-      expect(description[translatedKey]).to.not.exist;
+      expect(description).to.have.property(key, undefined);
     } else {
-      expect(description).to.have.property(translatedKey).that.deep.equals(outcomeValue);
+      if (typeof outcomeValue === 'object')
+        expect(description).to.have.property(key).that.deep.equals(outcomeValue);
+      else expect(description).to.have.property(key, outcomeValue);
     }
   }
 }

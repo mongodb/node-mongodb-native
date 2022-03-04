@@ -57,6 +57,6 @@ phases:
       topologyType: ReplicaSetWithPrimary
       logicalSessionTimeoutMinutes: null
       setName: rs
-      maxSetVersion: 2
+      maxSetVersion: 1
       maxElectionId:
         $oid: "000000000000000000000002"
