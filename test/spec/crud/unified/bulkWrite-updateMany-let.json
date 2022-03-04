@@ -142,7 +142,7 @@
       "description": "BulkWrite updateMany with let option unsupported (server-side error)",
       "runOnRequirements": [
         {
-          "minServerVersion": "3.6.0",
+          "minServerVersion": "4.2.0",
           "maxServerVersion": "4.9"
         }
       ],
