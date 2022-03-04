@@ -23,7 +23,7 @@ const RELEASES_JSON_FILE = './template/static/versions.json';
 
 const copyGeneratedDocsToDocsFolder = () => exec(`cp -R temp/. ../../docs/.`);
 const removeTempDirectory = () => exec('rm -rf temp');
-const installDependencies = () => exec('npm i --no-save typedoc');
+const installDependencies = () => exec('npm i --no-save --legacy-peer-deps typedoc');
 const buildDocs = () => exec('npm run build:typedoc');
 
 async function copyNewDocsToGeneratedSite({ tag }: VersionSchema) {
