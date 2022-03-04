@@ -932,7 +932,7 @@ export interface BulkWriteOptions extends CommandOperationOptions {
  */
 class BulkWriteShimOperation extends AbstractOperation {
   bulkOperation: BulkOperationBase;
-  constructor(options: BulkWriteOptions, bulkOperation: BulkOperationBase) {
+  constructor(bulkOperation: BulkOperationBase, options: BulkWriteOptions) {
     super(options);
     this.bulkOperation = bulkOperation;
   }
@@ -1282,7 +1282,7 @@ export abstract class BulkOperationBase {
 
     this.s.executed = true;
     const finalOptions = { ...this.s.options, ...options };
-    const operation = new BulkWriteShimOperation(finalOptions, this);
+    const operation = new BulkWriteShimOperation(this, finalOptions);
 
     return executeOperation(this.s.topology, operation, callback);
   }
