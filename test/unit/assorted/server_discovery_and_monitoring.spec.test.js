@@ -286,7 +286,6 @@ function assertOutcomeExpectations(topology, events, outcome) {
         const omittedFields = findOmittedFields(expectedServer);
 
         const actualServer = actualServers.get(serverName);
-        // resultCheck(actualServer, expectedServer, null);
         expect(actualServer).to.matchMongoSpec(expectedServer);
 
         if (omittedFields.length) {

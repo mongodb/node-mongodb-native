@@ -24,9 +24,10 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
   const expected = expectedObj[key];
   const actual = actualObj[key];
 
-  if (expected === null) {
+  if (expected == null) {
     if (key === 'readConcern') {
-      // HACK: get around NODE-1889
+      // TODO(NODE-1889): In our command construction, we are automatically adding a readConcern.afterClusterTime to every command that has a session.
+      // The Causal Consistency spec only says to add afterClusterTime to read commands, and explicitly says to not add it to runCommand-like behavior.
       return {
         match: true,
         expected: SYMBOL_DOES_NOT_EXIST,
@@ -34,11 +35,12 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
       };
     }
 
-    const match = !Object.prototype.hasOwnProperty.call(actualObj, key);
+    const actualHasKey = Object.prototype.hasOwnProperty.call(actualObj, key);
+    const actualIsNullish = actualObj[key] == null;
     return {
-      match,
-      expected: SYMBOL_DOES_NOT_EXIST,
-      actual: match ? SYMBOL_DOES_NOT_EXIST : actual
+      match: (actualHasKey && actualIsNullish) || !actualHasKey,
+      expected,
+      actual
     };
   }
 
@@ -200,4 +202,7 @@ function matchMongoSpec(chai, utils) {
   };
 }
 
-module.exports.default = matchMongoSpec;
+module.exports = {
+  default: matchMongoSpec,
+  generateMatchAndDiffMongoSpec: generateMatchAndDiff
+};

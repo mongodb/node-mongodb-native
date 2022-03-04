@@ -31,18 +31,18 @@ export interface TopologyDescriptionOptions {
  * @public
  */
 export class TopologyDescription {
-  type: TopologyType;
-  setName: string | undefined;
-  maxSetVersion: number | undefined;
-  maxElectionId: ObjectId | undefined;
-  servers: Map<string, ServerDescription>;
-  stale: boolean;
-  compatible: boolean;
-  compatibilityError: string | undefined;
-  logicalSessionTimeoutMinutes: number | undefined;
-  heartbeatFrequencyMS: number;
-  localThresholdMS: number;
-  commonWireVersion: number | undefined;
+  readonly type: TopologyType;
+  readonly setName: string | undefined;
+  readonly maxSetVersion: number | undefined;
+  readonly maxElectionId: ObjectId | undefined;
+  readonly servers: Map<string, ServerDescription>;
+  readonly stale: boolean;
+  readonly compatible: boolean;
+  readonly compatibilityError: string | undefined;
+  readonly logicalSessionTimeoutMinutes: number | undefined;
+  readonly heartbeatFrequencyMS: number;
+  readonly localThresholdMS: number;
+  readonly commonWireVersion: number | undefined;
 
   /**
    * Create a TopologyDescription

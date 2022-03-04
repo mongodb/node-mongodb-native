@@ -1,8 +1,7 @@
 import { Document, Long, ObjectId } from '../bson';
 import type { MongoError } from '../error';
 import { arrayStrictEqual, errorStrictEqual, HostAddress, now } from '../utils';
-import type { ClusterTime } from './common';
-import { ServerType } from './common';
+import { ClusterTime, ServerType } from './common';
 
 const WRITABLE_SERVER_TYPES = new Set<ServerType>([
   ServerType.RSPrimary,
@@ -50,31 +49,27 @@ export interface ServerDescriptionOptions {
  * @public
  */
 export class ServerDescription {
-  private _hostAddress: HostAddress;
-  address: string;
-  type: ServerType;
-  hosts: string[];
-  passives: string[];
-  arbiters: string[];
-  tags: TagSet;
-
-  error?: MongoError;
-  topologyVersion?: TopologyVersion;
-  minWireVersion: number;
-  maxWireVersion: number;
-  roundTripTime: number;
-  lastUpdateTime: number;
-  lastWriteDate: number;
-
-  me?: string;
-  primary?: string;
-  setName?: string;
-  setVersion?: number;
-  electionId?: ObjectId;
-  logicalSessionTimeoutMinutes?: number;
-
-  // NOTE: does this belong here? It seems we should gossip the cluster time at the CMAP level
-  $clusterTime?: ClusterTime;
+  private readonly _hostAddress: HostAddress;
+  readonly address: string;
+  readonly type: ServerType;
+  readonly hosts: string[];
+  readonly passives: string[];
+  readonly arbiters: string[];
+  readonly tags: TagSet;
+  readonly error: MongoError | undefined;
+  readonly topologyVersion: TopologyVersion | undefined;
+  readonly minWireVersion: number;
+  readonly maxWireVersion: number;
+  readonly roundTripTime: number;
+  readonly lastUpdateTime: number;
+  readonly lastWriteDate: number;
+  readonly me: string | undefined;
+  readonly primary: string | undefined;
+  readonly setName: string | undefined;
+  readonly setVersion: number | undefined;
+  readonly electionId: ObjectId | undefined;
+  readonly logicalSessionTimeoutMinutes: number | undefined;
+  readonly $clusterTime: ClusterTime | undefined;
 
   /**
    * Create a ServerDescription
@@ -83,7 +78,14 @@ export class ServerDescription {
    * @param address - The address of the server
    * @param hello - An optional hello response for this server
    */
-  constructor(address: HostAddress | string, hello?: Document, options?: ServerDescriptionOptions) {
+  constructor(
+    address: HostAddress | string,
+    hello: Document = {},
+    options: ServerDescriptionOptions = {}
+  ) {
+    hello ??= {};
+    options ??= {};
+
     if (typeof address === 'string') {
       this._hostAddress = new HostAddress(address);
       this.address = this._hostAddress.toString();
@@ -102,43 +104,23 @@ export class ServerDescription {
     this.lastUpdateTime = now();
     this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? 0;
 
+    this.topologyVersion = undefined;
     if (options?.topologyVersion) {
       this.topologyVersion = options.topologyVersion;
     } else if (hello?.topologyVersion) {
       this.topologyVersion = hello.topologyVersion;
     }
 
-    if (options?.error) {
-      this.error = options.error;
-    }
+    this.error = options.error;
+    this.primary = hello.primary;
+    this.me = hello.me?.toLowerCase();
+    this.setName = hello.setName;
+    this.setVersion = hello.setVersion;
+    this.electionId = hello.electionId;
+    this.logicalSessionTimeoutMinutes = hello.logicalSessionTimeoutMinutes;
+    this.$clusterTime = hello.$clusterTime;
 
-    if (hello?.primary) {
-      this.primary = hello.primary;
-    }
-
-    if (hello?.me) {
-      this.me = hello.me.toLowerCase();
-    }
-
-    if (hello?.setName) {
-      this.setName = hello.setName;
-    }
-
-    if (hello?.setVersion) {
-      this.setVersion = hello.setVersion;
-    }
-
-    if (hello?.electionId) {
-      this.electionId = hello.electionId;
-    }
-
-    if (hello?.logicalSessionTimeoutMinutes) {
-      this.logicalSessionTimeoutMinutes = hello.logicalSessionTimeoutMinutes;
-    }
-
-    if (hello?.$clusterTime) {
-      this.$clusterTime = hello.$clusterTime;
-    }
+    // Object.freeze(this); - Mock server and tests edit serverDescriptions...
   }
 
   get hostAddress(): HostAddress {
