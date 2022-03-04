@@ -75,3 +75,6 @@ etc/docs/build
 !docs/s/js
 !docs/s/img/*png
 !docs/*/lib
+!docs/**/*.png
+!docs/**/*.css
+!docs/**/*.js
