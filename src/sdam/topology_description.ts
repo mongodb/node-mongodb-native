@@ -353,7 +353,8 @@ function topologyTypeForServerType(serverType: ServerType): TopologyType {
 
 function compareObjectId(oid1?: ObjectId, oid2?: ObjectId): 0 | 1 | -1 {
   if (oid1 == null) {
-    return oid2 == null ? 0 : -1;
+    return -1;
+    // return oid2 == null ? 0 : -1;
   }
 
   if (oid2 == null) {
