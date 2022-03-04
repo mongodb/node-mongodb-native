@@ -1,4 +1,4 @@
-description: "findOneAndDelete-let"
+description: "BulkWrite replaceOne-let"
 
 schemaVersion: "1.0"
 
@@ -15,7 +15,7 @@ createEntities:
       database: *database0
       collectionName: &collection0Name coll0
 
-initialData: &initialData
+initialData:
   - collectionName: *collection0Name
     databaseName: *database0Name
     documents:
@@ -23,64 +23,67 @@ initialData: &initialData
       - { _id: 2 }
 
 tests:
-  - description: "findOneAndDelete with let option"
+  - description: "BulkWrite replaceOne with let option"
     runOnRequirements:
       - minServerVersion: "5.0"
     operations:
-      - name: findOneAndDelete
-        object: *collection0
+      - object: *collection0
+        name: bulkWrite
         arguments:
-          filter: &filter
-            $expr:
-              $eq: [ "$_id", "$$id" ]
-          let: &let0
+          requests:
+            - replaceOne:
+                filter: &filter
+                  $expr:
+                    $eq: [ "$_id", "$$id" ]
+                replacement: &replacement {"x": 3}
+          let: &let
             id: 1
     expectEvents:
       - client: *client0
         events:
           - commandStartedEvent:
               command:
-                findAndModify: *collection0Name
-                query: *filter
-                remove: true
-                let: *let0
+                update: *collection0Name
+                updates:
+                  - q: *filter
+                    u: *replacement
+                let: *let
     outcome:
       - collectionName: *collection0Name
         databaseName: *database0Name
         documents:
+          - { _id: 1, x: 3 }
           - { _id: 2 }
 
-  - description: "findOneAndDelete with let option unsupported (server-side error)"
+  - description: "BulkWrite replaceOne with let option unsupported (server-side error)"
     runOnRequirements:
-      - minServerVersion: "4.2.0"
-        maxServerVersion: "4.4.99"
+      - minServerVersion: "4.2"
+        maxServerVersion: "4.9"
     operations:
-      - name: findOneAndDelete
-        object: *collection0
+      - object: *collection0
+        name: bulkWrite
         arguments:
-          filter: &filter1
-            $expr:
-              $eq: [ "$_id", "$$id" ]
-          let: &let1
-            id: 1
+          requests:
+            - replaceOne:
+                filter: *filter
+                replacement: *replacement
+          let: *let
         expectError:
-          # This error message is consistent between 4.2.x and 4.4.x servers.
-          # Older servers return a different error message.
-          errorContains: "field 'let' is an unknown field"
+          errorContains: "'update.let' is an unknown field"
           isClientError: false
     expectEvents:
       - client: *client0
         events:
           - commandStartedEvent:
               command:
-                findAndModify: *collection0Name
-                query: *filter1
-                remove: true
-                let: *let1
+                update: *collection0Name
+                updates:
+                  - q: *filter
+                    u: *replacement
+                let: *let
     outcome:
       - collectionName: *collection0Name
         databaseName: *database0Name
         documents:
           - { _id: 1 }
           - { _id: 2 }
-
