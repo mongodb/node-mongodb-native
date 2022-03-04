@@ -919,6 +919,8 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   keepGoing?: boolean;
   /** Force server to assign _id values instead of driver. */
   forceServerObjectId?: boolean;
+  /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
+  let?: Document;
 }
 
 /**
