@@ -12,7 +12,6 @@ import type { Db } from './db';
 import {
   AnyError,
   MongoCompatibilityError,
-  MongoExpiredSessionError,
   MongoInvalidArgumentError,
   MongoNotConnectedError,
   MongoParseError,
@@ -29,7 +28,6 @@ import { ReadPreference } from './read_preference';
 import { ServerType } from './sdam/common';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
-import type { ClientSession } from './sessions';
 import { W, WriteConcern, WriteConcernOptions } from './write_concern';
 
 /**
@@ -188,110 +186,6 @@ export function filterOptions(options: AnyOptions, names: string[]): AnyOptions 
 
   // Filtered options
   return filterOptions;
-}
-
-/**
- * Executes the given operation with provided arguments.
- *
- * @remarks
- * This method reduces large amounts of duplication in the entire codebase by providing
- * a single point for determining whether callbacks or promises should be used. Additionally
- * it allows for a single point of entry to provide features such as implicit sessions, which
- * are required by the Driver Sessions specification in the event that a ClientSession is
- * not provided
- *
- * @internal
- *
- * @param topology - The topology to execute this operation on
- * @param operation - The operation to execute
- * @param args - Arguments to apply the provided operation
- * @param options - Options that modify the behavior of the method
- */
-export function executeLegacyOperation(
-  topology: Topology,
-  operation: (...args: any[]) => void | Promise<Document>,
-  args: any[],
-  options?: AnyOptions
-): void | Promise<any> {
-  const Promise = PromiseProvider.get();
-
-  if (!Array.isArray(args)) {
-    // TODO(NODE-3483)
-    throw new MongoRuntimeError('This method requires an array of arguments to apply');
-  }
-
-  options = options ?? {};
-
-  let callback = args[args.length - 1];
-
-  // The driver sessions spec mandates that we implicitly create sessions for operations
-  // that are not explicitly provided with a session.
-  let session: ClientSession;
-  let opOptions: any;
-  let owner: any;
-  if (!options.skipSessions && topology.hasSessionSupport()) {
-    opOptions = args[args.length - 2];
-    if (opOptions == null || opOptions.session == null) {
-      owner = Symbol();
-      session = topology.startSession({ owner });
-      const optionsIndex = args.length - 2;
-      args[optionsIndex] = Object.assign({}, args[optionsIndex], { session: session });
-    } else if (opOptions.session && opOptions.session.hasEnded) {
-      throw new MongoExpiredSessionError();
-    }
-  }
-
-  function makeExecuteCallback(
-    resolve: (value?: Document) => void,
-    reject: (reason?: AnyError) => void
-  ) {
-    return function (err?: AnyError, result?: any) {
-      if (session && session.owner === owner && !options?.returnsCursor) {
-        session.endSession(() => {
-          delete opOptions.session;
-          if (err) return reject(err);
-          resolve(result);
-        });
-      } else {
-        if (err) return reject(err);
-        resolve(result);
-      }
-    };
-  }
-
-  // Execute using callback
-  if (typeof callback === 'function') {
-    callback = args.pop();
-    const handler = makeExecuteCallback(
-      result => callback(undefined, result),
-      err => callback(err, null)
-    );
-    args.push(handler);
-
-    try {
-      return operation(...args);
-    } catch (e) {
-      handler(e);
-      throw e;
-    }
-  }
-
-  // Return a Promise
-  if (args[args.length - 1] != null) {
-    // TODO(NODE-3483)
-    throw new MongoRuntimeError('Final argument to `executeLegacyOperation` must be a callback');
-  }
-
-  return new Promise<any>((resolve, reject) => {
-    const handler = makeExecuteCallback(resolve, reject);
-    args[args.length - 1] = handler;
-
-    try {
-      return operation(...args);
-    } catch (e) {
-      handler(e);
-    }
-  });
 }
 
 interface HasRetryableWrites {

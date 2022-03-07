@@ -1,3 +1,4 @@
+import type { ClientSession, Server } from '..';
 import {
   BSONSerializeOptions,
   Document,
@@ -20,14 +21,13 @@ import type { CollationOptions, CommandOperationOptions } from '../operations/co
 import { DeleteOperation, DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import type { Hint } from '../operations/operation';
+import { AbstractOperation, Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, UpdateStatement } from '../operations/update';
 import { PromiseProvider } from '../promise_provider';
 import type { Topology } from '../sdam/topology';
 import {
   applyRetryableWrites,
   Callback,
-  executeLegacyOperation,
   getTopology,
   hasAtomicOperators,
   MongoDBNamespace,
@@ -923,6 +923,32 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   forceServerObjectId?: boolean;
 }
 
+/**
+ * TODO(NODE-4063)
+ * BulkWrites merge complexity is implemented in executeCommands
+ * This provides a vehicle to treat bulkOperations like any other operation (hence "shim")
+ * We would like this logic to simply live inside the BulkWriteOperation class
+ * @internal
+ */
+class BulkWriteShimOperation extends AbstractOperation {
+  bulkOperation: BulkOperationBase;
+  constructor(bulkOperation: BulkOperationBase, options: BulkWriteOptions) {
+    super(options);
+    this.bulkOperation = bulkOperation;
+  }
+
+  execute(server: Server, session: ClientSession, callback: Callback<any>): void {
+    if (this.options.session == null) {
+      // An implicit session could have been created by 'executeOperation'
+      // So if we stick it on finalOptions here, each bulk operation
+      // will use this same session, it'll be passed in the same way
+      // an explicit session would be
+      this.options.session = session;
+    }
+    return executeCommands(this.bulkOperation, this.options, callback);
+  }
+}
+
 /** @public */
 export abstract class BulkOperationBase {
   isOrdered: boolean;
@@ -1256,7 +1282,9 @@ export abstract class BulkOperationBase {
 
     this.s.executed = true;
     const finalOptions = { ...this.s.options, ...options };
-    return executeLegacyOperation(this.s.topology, executeCommands, [this, finalOptions, callback]);
+    const operation = new BulkWriteShimOperation(this, finalOptions);
+
+    return executeOperation(this.s.topology, operation, callback);
   }
 
   /**
