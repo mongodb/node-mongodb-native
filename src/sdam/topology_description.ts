@@ -353,8 +353,7 @@ function topologyTypeForServerType(serverType: ServerType): TopologyType {
 
 function compareObjectId(oid1?: ObjectId, oid2?: ObjectId): 0 | 1 | -1 {
   if (oid1 == null) {
-    return -1;
-    // return oid2 == null ? 0 : -1;
+    return oid2 == null ? 0 : -1;
   }
 
   if (oid2 == null) {
@@ -390,21 +389,23 @@ function updateRsFromPrimary(
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
-  const electionIdIsNull = serverDescription.electionId == null;
-
   const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
-  const maxElectionIdIsGreater = electionIdComparison === 1;
   const maxElectionIdIsEqual = electionIdComparison === 0;
   const maxElectionIdIsLess = electionIdComparison === -1;
 
   const setVersionComparison = compareNumbers(maxSetVersion, serverDescription.setVersion);
-  const maxSetVersionIsGreater = setVersionComparison === 1;
   const maxSetVersionIsLess = setVersionComparison === -1;
+  const maxSetVersionIsEqual = setVersionComparison === 0;
 
   if (
-    maxElectionIdIsGreater ||
-    ((maxElectionIdIsEqual || electionIdIsNull) && maxSetVersionIsGreater)
+    maxElectionIdIsLess ||
+    (maxElectionIdIsEqual && (maxSetVersionIsLess || maxSetVersionIsEqual))
   ) {
+    // We've seen a higher ElectionId! Update both!
+    // Or the electionId is the same but the setVersion increased
+    maxElectionId = serverDescription.electionId;
+    maxSetVersion = serverDescription.setVersion;
+  } else {
     // this primary is stale, we must remove it
     serverDescriptions.set(
       serverDescription.address,
@@ -412,13 +413,6 @@ function updateRsFromPrimary(
     );
 
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
-  }
-
-  if (maxElectionIdIsLess || ((maxElectionIdIsEqual || electionIdIsNull) && maxSetVersionIsLess)) {
-    // We've seen a higher ElectionId! Update both!
-    // Or the electionId is the same but the setVersion increased
-    maxElectionId = serverDescription.electionId;
-    maxSetVersion = serverDescription.setVersion;
   }
 
   // We've heard from the primary. Is it the same primary as before?
