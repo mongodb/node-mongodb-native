@@ -957,14 +957,16 @@ export const OPTIONS = {
           readPreference: { ...options.readPreference, ...value },
           ...value
         } as any);
-      } else if (isRecord(value, ['mode'] as const)) {
+      }
+      if (isRecord(value, ['mode'] as const)) {
         const rp = ReadPreference.fromOptions({
           readPreference: { ...options.readPreference, ...value },
           ...value
         } as any);
         if (rp) return rp;
         else throw new MongoParseError(`Cannot make read preference from ${JSON.stringify(value)}`);
-      } else if (typeof value === 'string') {
+      }
+      if (typeof value === 'string') {
         const rpOpts = {
           hedge: options.readPreference?.hedge,
           maxStalenessSeconds: options.readPreference?.maxStalenessSeconds

@@ -575,7 +575,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const Promise = PromiseProvider.get();
 
     return Promise.resolve()
-      .then(() => withSessionCallback(session))
+      .then(() => {
+        // Do not return the result of callback
+        withSessionCallback(session);
+      })
       .finally(() => session.endSession());
   }
 

@@ -330,6 +330,21 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   }
 
   /**
+   * Set a maxTimeMS on the cursor query, allowing for hard timeout limits on queries (Only supported on MongoDB 2.6 or higher)
+   *
+   * @param value - Number of milliseconds to wait before aborting the query.
+   */
+  override maxTimeMS(value: number): this {
+    assertUninitialized(this);
+    if (typeof value !== 'number') {
+      throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
+    }
+
+    this[kBuiltOptions].maxTimeMS = value;
+    return this;
+  }
+
+  /**
    * Add a project stage to the aggregation pipeline
    *
    * @remarks
