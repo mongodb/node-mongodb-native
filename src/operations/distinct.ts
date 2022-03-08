@@ -15,7 +15,7 @@ export type DistinctOptions = CommandOperationOptions;
  * @internal
  */
 export class DistinctOperation extends CommandOperation<any[]> {
-  options: DistinctOptions;
+  override options: DistinctOptions;
   collection: Collection;
   /** Field of the document to find distinct values for. */
   key: string;
@@ -39,7 +39,11 @@ export class DistinctOperation extends CommandOperation<any[]> {
     this.query = query;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<any[]>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<any[]>
+  ): void {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;

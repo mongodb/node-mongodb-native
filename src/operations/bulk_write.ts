@@ -12,7 +12,7 @@ import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
 export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
-  options: BulkWriteOptions;
+  override options: BulkWriteOptions;
   collection: Collection;
   operations: AnyBulkWriteOperation[];
 
@@ -27,7 +27,11 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
     this.operations = operations;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<BulkWriteResult>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<BulkWriteResult>
+  ): void {
     const coll = this.collection;
     const operations = this.operations;
     const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };

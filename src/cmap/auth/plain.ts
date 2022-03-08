@@ -4,7 +4,7 @@ import { Callback, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 export class Plain extends AuthProvider {
-  auth(authContext: AuthContext, callback: Callback): void {
+  override auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (!credentials) {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));

@@ -72,7 +72,7 @@ const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 /** @internal */
 export class FindOperation extends CommandOperation<Document> {
-  options: FindOptions;
+  override options: FindOptions;
   filter: Document;
 
   constructor(
@@ -104,7 +104,11 @@ export class FindOperation extends CommandOperation<Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectID' ? { _id: filter } : filter;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     this.server = server;
 
     const serverWireVersion = maxWireVersion(server);

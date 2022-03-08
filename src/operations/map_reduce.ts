@@ -83,7 +83,7 @@ interface MapReduceStats {
  * @internal
  */
 export class MapReduceOperation extends CommandOperation<Document | Document[]> {
-  options: MapReduceOptions;
+  override options: MapReduceOptions;
   collection: Collection;
   /** The mapping function. */
   map: MapFunction | string;
@@ -112,7 +112,11 @@ export class MapReduceOperation extends CommandOperation<Document | Document[]> 
     this.reduce = reduce;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document | Document[]>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document | Document[]>
+  ): void {
     const coll = this.collection;
     const map = this.map;
     const reduce = this.reduce;

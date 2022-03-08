@@ -1015,6 +1015,8 @@ export function applySession(
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
     }
   }
+
+  return;
 }
 
 export function updateSessionFromResponse(session: ClientSession, document: Document): void {

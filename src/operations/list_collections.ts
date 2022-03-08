@@ -23,7 +23,7 @@ export interface ListCollectionsOptions extends CommandOperationOptions {
 
 /** @internal */
 export class ListCollectionsOperation extends CommandOperation<string[]> {
-  options: ListCollectionsOptions;
+  override options: ListCollectionsOptions;
   db: Db;
   filter: Document;
   nameOnly: boolean;
@@ -44,7 +44,11 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     }
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<string[]>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<string[]>
+  ): void {
     if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
       let filter = this.filter;
       const databaseName = this.db.s.namespace.db;

@@ -11,7 +11,7 @@ export interface CollectionsOptions extends OperationOptions {
 
 /** @internal */
 export class CollectionsOperation extends AbstractOperation<Collection[]> {
-  options: CollectionsOptions;
+  override options: CollectionsOptions;
   db: Db;
 
   constructor(db: Db, options: CollectionsOptions) {
@@ -20,7 +20,11 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
     this.db = db;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Collection[]>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Collection[]>
+  ): void {
     const db = this.db;
 
     // Let's get the collection names

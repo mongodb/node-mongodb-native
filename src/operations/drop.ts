@@ -10,7 +10,7 @@ export type DropCollectionOptions = CommandOperationOptions;
 
 /** @internal */
 export class DropCollectionOperation extends CommandOperation<boolean> {
-  options: DropCollectionOptions;
+  override options: DropCollectionOptions;
   name: string;
 
   constructor(db: Db, name: string, options: DropCollectionOptions) {
@@ -19,7 +19,11 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     this.name = name;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<boolean>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<boolean>
+  ): void {
     super.executeCommand(server, session, { drop: this.name }, (err, result) => {
       if (err) return callback(err);
       if (result.ok) return callback(undefined, true);
@@ -33,13 +37,17 @@ export type DropDatabaseOptions = CommandOperationOptions;
 
 /** @internal */
 export class DropDatabaseOperation extends CommandOperation<boolean> {
-  options: DropDatabaseOptions;
+  override options: DropDatabaseOptions;
 
   constructor(db: Db, options: DropDatabaseOptions) {
     super(db, options);
     this.options = options;
   }
-  execute(server: Server, session: ClientSession, callback: Callback<boolean>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<boolean>
+  ): void {
     super.executeCommand(server, session, { dropDatabase: 1 }, (err, result) => {
       if (err) return callback(err);
       if (result.ok) return callback(undefined, true);

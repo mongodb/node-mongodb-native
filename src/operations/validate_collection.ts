@@ -14,7 +14,7 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
 
 /** @internal */
 export class ValidateCollectionOperation extends CommandOperation<Document> {
-  options: ValidateCollectionOptions;
+  override options: ValidateCollectionOptions;
   collectionName: string;
   command: Document;
 
@@ -34,7 +34,11 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
     this.collectionName = collectionName;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const collectionName = this.collectionName;
 
     super.executeCommand(server, session, this.command, (err, doc) => {

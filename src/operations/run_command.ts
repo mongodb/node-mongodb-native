@@ -9,7 +9,7 @@ export type RunCommandOptions = CommandOperationOptions;
 
 /** @internal */
 export class RunCommandOperation<T = Document> extends CommandOperation<T> {
-  options: RunCommandOptions;
+  override options: RunCommandOptions;
   command: Document;
 
   constructor(parent: OperationParent | undefined, command: Document, options?: RunCommandOptions) {
@@ -18,7 +18,11 @@ export class RunCommandOperation<T = Document> extends CommandOperation<T> {
     this.command = command;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<T>
+  ): void {
     const command = this.command;
     this.executeCommand(server, session, command, callback);
   }

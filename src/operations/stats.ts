@@ -18,7 +18,7 @@ export interface CollStatsOptions extends CommandOperationOptions {
  * @internal
  */
 export class CollStatsOperation extends CommandOperation<Document> {
-  options: CollStatsOptions;
+  override options: CollStatsOptions;
   collectionName: string;
 
   /**
@@ -33,7 +33,11 @@ export class CollStatsOperation extends CommandOperation<Document> {
     this.collectionName = collection.collectionName;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<CollStats>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<CollStats>
+  ): void {
     const command: Document = { collStats: this.collectionName };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
@@ -51,14 +55,18 @@ export interface DbStatsOptions extends CommandOperationOptions {
 
 /** @internal */
 export class DbStatsOperation extends CommandOperation<Document> {
-  options: DbStatsOptions;
+  override options: DbStatsOptions;
 
   constructor(db: Db, options: DbStatsOptions) {
     super(db, options);
     this.options = options;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const command: Document = { dbStats: true };
     if (this.options.scale != null) {
       command.scale = this.options.scale;

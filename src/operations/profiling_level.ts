@@ -10,14 +10,18 @@ export type ProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
 export class ProfilingLevelOperation extends CommandOperation<string> {
-  options: ProfilingLevelOptions;
+  override options: ProfilingLevelOptions;
 
   constructor(db: Db, options: ProfilingLevelOptions) {
     super(db, options);
     this.options = options;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<string>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<string>
+  ): void {
     super.executeCommand(server, session, { profile: -1 }, (err, doc) => {
       if (err == null && doc.ok === 1) {
         const was = doc.was;

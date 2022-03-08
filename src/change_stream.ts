@@ -528,7 +528,7 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
     });
   }
 
-  _getMore(batchSize: number, callback: Callback): void {
+  override _getMore(batchSize: number, callback: Callback): void {
     super._getMore(batchSize, (err, response) => {
       if (err) {
         return callback(err);

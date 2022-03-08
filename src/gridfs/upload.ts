@@ -119,15 +119,15 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
    * @param callback - Function to call when the chunk was added to the buffer, or if the entire chunk was persisted to MongoDB if this chunk caused a flush.
    * @returns False if this write required flushing a chunk to MongoDB. True otherwise.
    */
-  write(chunk: Buffer | string): boolean;
-  write(chunk: Buffer | string, callback: Callback<void>): boolean;
-  write(chunk: Buffer | string, encoding: BufferEncoding | undefined): boolean;
-  write(
+  override write(chunk: Buffer | string): boolean;
+  override write(chunk: Buffer | string, callback: Callback<void>): boolean;
+  override write(chunk: Buffer | string, encoding: BufferEncoding | undefined): boolean;
+  override write(
     chunk: Buffer | string,
     encoding: BufferEncoding | undefined,
     callback: Callback<void>
   ): boolean;
-  write(
+  override write(
     chunk: Buffer | string,
     encodingOrCallback?: Callback<void> | BufferEncoding,
     callback?: Callback<void>
@@ -172,17 +172,17 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
    * @param encoding - Optional encoding for the buffer
    * @param callback - Function to call when all files and chunks have been persisted to MongoDB
    */
-  end(): this;
-  end(chunk: Buffer): this;
-  end(callback: Callback<GridFSFile | void>): this;
-  end(chunk: Buffer, callback: Callback<GridFSFile | void>): this;
-  end(chunk: Buffer, encoding: BufferEncoding): this;
-  end(
+  override end(): this;
+  override end(chunk: Buffer): this;
+  override end(callback: Callback<GridFSFile | void>): this;
+  override end(chunk: Buffer, callback: Callback<GridFSFile | void>): this;
+  override end(chunk: Buffer, encoding: BufferEncoding): this;
+  override end(
     chunk: Buffer,
     encoding: BufferEncoding | undefined,
     callback: Callback<GridFSFile | void>
   ): this;
-  end(
+  override end(
     chunkOrCallback?: Buffer | Callback<GridFSFile | void>,
     encodingOrCallback?: BufferEncoding | Callback<GridFSFile | void>,
     callback?: Callback<GridFSFile | void>

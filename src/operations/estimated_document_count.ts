@@ -19,7 +19,7 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 
 /** @internal */
 export class EstimatedDocumentCountOperation extends CommandOperation<number> {
-  options: EstimatedDocumentCountOptions;
+  override options: EstimatedDocumentCountOptions;
   collectionName: string;
 
   constructor(collection: Collection, options: EstimatedDocumentCountOptions = {}) {
@@ -28,7 +28,11 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     this.collectionName = collection.collectionName;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<number>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<number>
+  ): void {
     if (maxWireVersion(server) < 12) {
       return this.executeLegacy(server, session, callback);
     }
@@ -50,7 +54,11 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     });
   }
 
-  executeLegacy(server: Server, session: ClientSession, callback: Callback<number>): void {
+  executeLegacy(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<number>
+  ): void {
     const cmd: Document = { count: this.collectionName };
 
     if (typeof this.options.maxTimeMS === 'number') {

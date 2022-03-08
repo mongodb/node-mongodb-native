@@ -6,7 +6,11 @@ import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 
 export class X509 extends AuthProvider {
-  prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback): void {
+  override prepare(
+    handshakeDoc: HandshakeDocument,
+    authContext: AuthContext,
+    callback: Callback
+  ): void {
     const { credentials } = authContext;
     if (!credentials) {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
@@ -18,7 +22,7 @@ export class X509 extends AuthProvider {
     callback(undefined, handshakeDoc);
   }
 
-  auth(authContext: AuthContext, callback: Callback): void {
+  override auth(authContext: AuthContext, callback: Callback): void {
     const connection = authContext.connection;
     const credentials = authContext.credentials;
     if (!credentials) {

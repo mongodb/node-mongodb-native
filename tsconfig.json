@@ -27,7 +27,8 @@
     // Prevents web types from being suggested by vscode.
     "types": ["node"],
     "forceConsistentCasingInFileNames": true,
-
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
     // TODO(NODE-3659): Enable useUnknownInCatchVariables and add type assertions or remove unnecessary catch blocks
     "useUnknownInCatchVariables": false
   },

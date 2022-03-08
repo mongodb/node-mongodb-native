@@ -49,7 +49,7 @@ export interface DeleteStatement {
 
 /** @internal */
 export class DeleteOperation extends CommandOperation<Document> {
-  options: DeleteOptions;
+  override options: DeleteOptions;
   statements: DeleteStatement[];
 
   constructor(ns: MongoDBNamespace, statements: DeleteStatement[], options: DeleteOptions) {
@@ -59,7 +59,7 @@ export class DeleteOperation extends CommandOperation<Document> {
     this.statements = statements;
   }
 
-  get canRetryWrite(): boolean {
+  override get canRetryWrite(): boolean {
     if (super.canRetryWrite === false) {
       return false;
     }
@@ -67,7 +67,7 @@ export class DeleteOperation extends CommandOperation<Document> {
     return this.statements.every(op => (op.limit != null ? op.limit > 0 : true));
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback): void {
+  override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -111,7 +111,11 @@ export class DeleteOneOperation extends DeleteOperation {
     super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<DeleteResult>
+  ): void {
     super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       if (res.code) return callback(new MongoServerError(res));
@@ -131,7 +135,11 @@ export class DeleteManyOperation extends DeleteOperation {
     super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<DeleteResult>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<DeleteResult>
+  ): void {
     super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       if (res.code) return callback(new MongoServerError(res));

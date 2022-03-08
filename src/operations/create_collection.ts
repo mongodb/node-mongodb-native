@@ -79,7 +79,7 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
 
 /** @internal */
 export class CreateCollectionOperation extends CommandOperation<Collection> {
-  options: CreateCollectionOptions;
+  override options: CreateCollectionOptions;
   db: Db;
   name: string;
 
@@ -91,7 +91,11 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     this.name = name;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Collection>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Collection>
+  ): void {
     const db = this.db;
     const name = this.name;
     const options = this.options;

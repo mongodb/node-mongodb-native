@@ -14,7 +14,7 @@ import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
 export class InsertOperation extends CommandOperation<Document> {
-  options: BulkWriteOptions;
+  override options: BulkWriteOptions;
   documents: Document[];
 
   constructor(ns: MongoDBNamespace, documents: Document[], options: BulkWriteOptions) {
@@ -24,7 +24,11 @@ export class InsertOperation extends CommandOperation<Document> {
     this.documents = documents;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -66,7 +70,11 @@ export class InsertOneOperation extends InsertOperation {
     super(collection.s.namespace, prepareDocs(collection, [doc], options), options);
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<InsertOneResult>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<InsertOneResult>
+  ): void {
     super.execute(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       if (res.code) return callback(new MongoServerError(res));
@@ -95,7 +103,7 @@ export interface InsertManyResult<TSchema = Document> {
 
 /** @internal */
 export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
-  options: BulkWriteOptions;
+  override options: BulkWriteOptions;
   collection: Collection;
   docs: Document[];
 
@@ -111,7 +119,11 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     this.docs = docs;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<InsertManyResult>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<InsertManyResult>
+  ): void {
     const coll = this.collection;
     const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
     const writeConcern = WriteConcern.fromOptions(options);

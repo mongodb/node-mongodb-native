@@ -15,7 +15,7 @@ export interface EvalOptions extends CommandOperationOptions {
 
 /** @internal */
 export class EvalOperation extends CommandOperation<Document> {
-  options: EvalOptions;
+  override options: EvalOptions;
   code: Code;
   parameters?: Document | Document[];
 
@@ -38,7 +38,11 @@ export class EvalOperation extends CommandOperation<Document> {
     });
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     let finalCode = this.code;
     let finalParameters: Document[] = [];
 

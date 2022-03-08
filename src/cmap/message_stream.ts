@@ -60,12 +60,12 @@ export class MessageStream extends Duplex {
     this[kBuffer] = new BufferPool();
   }
 
-  _write(chunk: Buffer, _: unknown, callback: Callback<Buffer>): void {
+  override _write(chunk: Buffer, _: unknown, callback: Callback<Buffer>): void {
     this[kBuffer].append(chunk);
     processIncomingData(this, callback);
   }
 
-  _read(/* size */): void {
+  override _read(/* size */): void {
     // NOTE: This implementation is empty because we explicitly push data to be read
     //       when `writeMessage` is called.
     return;

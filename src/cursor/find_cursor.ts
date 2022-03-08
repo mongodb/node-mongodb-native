@@ -63,7 +63,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     });
   }
 
-  map<T>(transform: (doc: TSchema) => T): FindCursor<T> {
+  override map<T>(transform: (doc: TSchema) => T): FindCursor<T> {
     return super.map(transform) as FindCursor<T>;
   }
 
@@ -92,7 +92,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  _getMore(batchSize: number, callback: Callback<Document>): void {
+  override _getMore(batchSize: number, callback: Callback<Document>): void {
     // NOTE: this is to support client provided limits in pre-command servers
     const numReturned = this[kNumReturned];
     if (numReturned) {
@@ -326,21 +326,6 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     }
 
     this[kBuiltOptions].maxAwaitTimeMS = value;
-    return this;
-  }
-
-  /**
-   * Set a maxTimeMS on the cursor query, allowing for hard timeout limits on queries (Only supported on MongoDB 2.6 or higher)
-   *
-   * @param value - Number of milliseconds to wait before aborting the query.
-   */
-  maxTimeMS(value: number): this {
-    assertUninitialized(this);
-    if (typeof value !== 'number') {
-      throw new MongoInvalidArgumentError('Argument for maxTimeMS must be a number');
-    }
-
-    this[kBuiltOptions].maxTimeMS = value;
     return this;
   }
 

@@ -8,7 +8,7 @@ import { AbstractOperation, OperationOptions } from './operation';
 
 /** @internal */
 export class OptionsOperation extends AbstractOperation<Document> {
-  options: OperationOptions;
+  override options: OperationOptions;
   collection: Collection;
 
   constructor(collection: Collection, options: OperationOptions) {
@@ -17,7 +17,11 @@ export class OptionsOperation extends AbstractOperation<Document> {
     this.collection = collection;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const coll = this.collection;
 
     coll.s.db

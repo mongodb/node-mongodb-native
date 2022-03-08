@@ -213,6 +213,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     if (this.s.options && this.s.options.autoEncrypter) {
       return this.s.options.autoEncrypter;
     }
+    return;
   }
 
   get loadBalanced(): boolean {

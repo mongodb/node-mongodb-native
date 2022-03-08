@@ -32,7 +32,7 @@ export interface AddUserOptions extends CommandOperationOptions {
 
 /** @internal */
 export class AddUserOperation extends CommandOperation<Document> {
-  options: AddUserOptions;
+  override options: AddUserOptions;
   db: Db;
   username: string;
   password?: string;
@@ -46,7 +46,11 @@ export class AddUserOperation extends CommandOperation<Document> {
     this.options = options ?? {};
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const db = this.db;
     const username = this.username;
     const password = this.password;

@@ -99,7 +99,7 @@ function configureFindAndModifyCmdBaseUpdateOpts(
 
 /** @internal */
 class FindAndModifyOperation extends CommandOperation<Document> {
-  options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
+  override options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
   cmdBase: FindAndModifyCmdBase;
   collection: Collection;
   query: Document;
@@ -147,7 +147,11 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     this.query = query;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const coll = this.collection;
     const query = this.query;
     const options = { ...this.options, ...this.bsonOptions };
