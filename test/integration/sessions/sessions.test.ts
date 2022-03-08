@@ -126,8 +126,10 @@ describe('Sessions Spec', function () {
 
       for (const testCase of tests) {
         it(testCase.description, async function () {
-          const shouldResolve = testCase.description.includes('should resolve');
-          const shouldReject = testCase.description.includes('should reject');
+          const shouldResolve = testCase.description.startsWith('should resolve');
+          const shouldReject = testCase.description.startsWith('should reject');
+
+          expect(shouldResolve || shouldReject, 'Check your test description').to.be.true;
 
           let sessionWasEnded = false;
 
@@ -140,13 +142,15 @@ describe('Sessions Spec', function () {
             })
             .then(
               () => {
-                expect(shouldResolve).to.be.true;
-                expect(shouldReject).to.be.false;
+                if (shouldReject) {
+                  expect.fail('this should have rejected');
+                }
                 expect(client.topology.s.sessionPool.sessions).to.have.length(1);
               },
               () => {
-                expect(shouldResolve).to.be.false;
-                expect(shouldReject).to.be.true;
+                if (shouldResolve) {
+                  expect.fail('this should have resolved');
+                }
                 expect(client.topology.s.sessionPool.sessions).to.have.length(1);
               }
             )
