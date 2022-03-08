@@ -90,6 +90,12 @@ describe('Sessions Spec', function () {
             await client.db('test').collection('foo').find({}, { session }).toArray()
         },
         {
+          description: 'should support errors thrown from async operations',
+          operation: () => () => async () => {
+            throw new Error('thrown from async function');
+          }
+        },
+        {
           description: 'should support operations that return rejected promises',
           operation: (/* client */) => (/* session */) => {
             return Promise.reject(new Error('something awful'));
