@@ -104,7 +104,7 @@ version = "3.x Core Driver"
 status = "not-supported"
 docs = "./core"
 api = "./core/api"
-tag = "3.x"
+tag = "3.-1"
 
 [[versions]]
 version = "2.2 Driver"

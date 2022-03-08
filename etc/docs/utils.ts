@@ -2,6 +2,8 @@ import { createInterface } from 'readline';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
+export const LATEST_TAG = 'Next';
+
 export interface JsonVersionSchema {
   version: string;
 }
@@ -58,7 +60,7 @@ export function getCommandLineArguments(): { tag: string; status: string; skipPr
       type: 'string',
       description: 'The identifier for the version of the docs to update.',
       requiresArg: true,
-      default: 'next'
+      default: LATEST_TAG
     })
     .option('status', {
       type: 'string',
@@ -96,6 +98,9 @@ export function customSemverCompare(a: string, b: string) {
   const [majorB, minorB] = b.split('.').map(Number);
 
   if (majorA === majorB) {
+    if (minorA === minorB) {
+      return 0;
+    }
     return minorB > minorA ? 1 : -1;
   }
 
