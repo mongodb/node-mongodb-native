@@ -549,7 +549,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * NOTE: presently the operation MUST return a Promise (either explicit or implicitly as an async function)
    *
    * @param options - Optional settings for the command
-   * @param withSessionCallback - An callback to execute with an implicitly created session
+   * @param callback - An callback to execute with an implicitly created session
    */
   withSession(callback: WithSessionCallback): Promise<void>;
   withSession(options: ClientSessionOptions, callback: WithSessionCallback): Promise<void>;

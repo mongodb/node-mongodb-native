@@ -77,7 +77,7 @@ describe('Sessions Spec', function () {
         return test.setup(this.configuration);
       });
 
-      [
+      const tests = [
         {
           description: 'should support operations that return promises',
           operation: client => session => {
@@ -107,7 +107,9 @@ describe('Sessions Spec', function () {
             throw new Error('something went wrong!');
           }
         }
-      ].forEach(testCase => {
+      ];
+
+      for (const testCase of tests) {
         it(testCase.description, function () {
           const client = test.client;
 
@@ -125,7 +127,7 @@ describe('Sessions Spec', function () {
               expect(client.topology).to.not.exist;
             });
         });
-      });
+      }
 
       it('supports passing options to ClientSession', function () {
         const client = test.client;
