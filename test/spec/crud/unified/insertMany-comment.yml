@@ -1,0 +1,92 @@
+description: "insertMany-comment"
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  - description: "insertMany with string comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - &document { _id: 2, x: 22 }
+          comment: "comment"
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *document
+                comment: "comment"
+    outcome: &outcome
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 }
+
+  - description: "insertMany with document comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - *document
+          comment: &comment { key: "value" }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *document
+                comment: *comment
+    outcome: *outcome
+
+  - description: "insertMany with comment - pre 4.4"
+    runOnRequirements:
+      - maxServerVersion: "4.2.99"
+    operations:
+      - name: insertMany
+        object: *collection0
+        arguments:
+          documents:
+            - *document
+          comment: "comment"
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *document
+                comment: "comment"
+    outcome: *initialData

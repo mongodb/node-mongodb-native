@@ -1,0 +1,176 @@
+description: bulkWrite-comment
+schemaVersion: '1.0'
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: client0
+      databaseName: &database_name crud-v2
+  - collection:
+      id: &collection0 collection0
+      database: database0
+      collectionName: &collection_name BulkWrite_comment
+
+initialData: &initial_data
+  - collectionName: *collection_name
+    databaseName: *database_name
+    documents:
+      - _id: 1
+        x: 11
+      - _id: 2
+        x: 22
+      - _id: 3
+        x: 33
+      - _id: 4
+        x: 44
+
+tests:
+  - description: 'BulkWrite with string comment'
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - object: *collection0
+        name: bulkWrite
+        arguments:
+          requests: &requests
+            - insertOne:
+                document: &inserted_document
+                  _id: 5
+                  x: "inserted"
+            - replaceOne:
+                filter: &replaceOne_filter
+                  _id: 1
+                replacement: &replacement { _id: 1, x: "replaced" }
+            - updateOne:
+                filter: &updateOne_filter
+                  _id: 2
+                update: &update { x: "updated" }
+            - deleteOne:
+                filter: &deleteOne_filter
+                  _id: 3
+          comment: &string_comment "comment"
+        expectResult: &expect_results
+          deletedCount: 1
+          insertedCount: 1
+          insertedIds: { 0: 5 }
+          matchedCount: 2
+          modifiedCount: 2
+          upsertedCount: 0
+          upsertedIds: {  }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - *inserted_document
+                ordered: true
+                comment: *string_comment
+          - commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  - q: *replaceOne_filter
+                    u: *replacement
+                ordered: true
+                comment: *string_comment
+          - commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  - q: *updateOne_filter
+                    u: *update
+                ordered: true
+                comment: *string_comment
+          - commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  - q: *deleteOne_filter
+                ordered: true
+                comment: *string_comment
+    outcome: &outcome
+      - collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - _id: 1
+            x: "replaced"
+          - _id: 2
+            x: "updated"
+          - _id: 4
+            x: 44
+          - _id: 5
+            x: "inserted"
+
+  - description: 'BulkWrite with document comment'
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - object: *collection0
+        name: bulkWrite
+        arguments:
+          requests: *requests
+          comment: &document_comment { key: "value" }
+        expectResult: *expect_results
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - *inserted_document
+                ordered: true
+                comment: *document_comment
+          - commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  - q: *replaceOne_filter
+                    u: *replacement
+                ordered: true
+                comment: *document_comment
+          - commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  - q: *updateOne_filter
+                    u: *update
+                ordered: true
+                comment: *document_comment
+          - commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  - q: *deleteOne_filter
+                ordered: true
+                comment: *document_comment
+    outcome: *outcome
+
+  - description: 'BulkWrite with comment - pre 4.4'
+    runOnRequirements:
+      - maxServerVersion: "4.2.99"
+    operations:
+      - object: *collection0
+        name: bulkWrite
+        arguments:
+          requests: *requests
+          comment: "comment"
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - *inserted_document
+                ordered: true
+                comment: "comment"
+    outcome: *initial_data

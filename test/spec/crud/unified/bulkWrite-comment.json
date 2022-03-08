@@ -1,0 +1,502 @@
+{
+  "description": "bulkWrite-comment",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-v2"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "BulkWrite_comment"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "BulkWrite_comment",
+      "databaseName": "crud-v2",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        },
+        {
+          "_id": 4,
+          "x": 44
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "BulkWrite with string comment",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 5,
+                    "x": "inserted"
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "x": "replaced"
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "x": "updated"
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 3
+                  }
+                }
+              }
+            ],
+            "comment": "comment"
+          },
+          "expectResult": {
+            "deletedCount": 1,
+            "insertedCount": 1,
+            "insertedIds": {
+              "0": 5
+            },
+            "matchedCount": 2,
+            "modifiedCount": 2,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "BulkWrite_comment",
+                  "documents": [
+                    {
+                      "_id": 5,
+                      "x": "inserted"
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": "comment"
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "BulkWrite_comment",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "_id": 1,
+                        "x": "replaced"
+                      }
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": "comment"
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "BulkWrite_comment",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 2
+                      },
+                      "u": {
+                        "x": "updated"
+                      }
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": "comment"
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "BulkWrite_comment",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": 3
+                      }
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": "comment"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "BulkWrite_comment",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": "replaced"
+            },
+            {
+              "_id": 2,
+              "x": "updated"
+            },
+            {
+              "_id": 4,
+              "x": 44
+            },
+            {
+              "_id": 5,
+              "x": "inserted"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with document comment",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 5,
+                    "x": "inserted"
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "x": "replaced"
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "x": "updated"
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 3
+                  }
+                }
+              }
+            ],
+            "comment": {
+              "key": "value"
+            }
+          },
+          "expectResult": {
+            "deletedCount": 1,
+            "insertedCount": 1,
+            "insertedIds": {
+              "0": 5
+            },
+            "matchedCount": 2,
+            "modifiedCount": 2,
+            "upsertedCount": 0,
+            "upsertedIds": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "BulkWrite_comment",
+                  "documents": [
+                    {
+                      "_id": 5,
+                      "x": "inserted"
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": {
+                    "key": "value"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "BulkWrite_comment",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 1
+                      },
+                      "u": {
+                        "_id": 1,
+                        "x": "replaced"
+                      }
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": {
+                    "key": "value"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "BulkWrite_comment",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 2
+                      },
+                      "u": {
+                        "x": "updated"
+                      }
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": {
+                    "key": "value"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "BulkWrite_comment",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": 3
+                      }
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": {
+                    "key": "value"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "BulkWrite_comment",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": "replaced"
+            },
+            {
+              "_id": 2,
+              "x": "updated"
+            },
+            {
+              "_id": 4,
+              "x": 44
+            },
+            {
+              "_id": 5,
+              "x": "inserted"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite with comment - pre 4.4",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 5,
+                    "x": "inserted"
+                  }
+                }
+              },
+              {
+                "replaceOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "replacement": {
+                    "_id": 1,
+                    "x": "replaced"
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 2
+                  },
+                  "update": {
+                    "x": "updated"
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 3
+                  }
+                }
+              }
+            ],
+            "comment": "comment"
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "BulkWrite_comment",
+                  "documents": [
+                    {
+                      "_id": 5,
+                      "x": "inserted"
+                    }
+                  ],
+                  "ordered": true,
+                  "comment": "comment"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "BulkWrite_comment",
+          "databaseName": "crud-v2",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

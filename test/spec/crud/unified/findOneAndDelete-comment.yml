@@ -1,0 +1,96 @@
+description: "findOneAndDelete-comment"
+schemaVersion: "1.0"
+
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+      - { _id: 2 }
+
+tests:
+  - description: "findOneAndDelete with string comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: findOneAndDelete
+        object: *collection0
+        arguments:
+          filter: &filter
+            _id: 1
+          comment: "comment"
+        expectResult:
+          _id: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *filter
+                remove: true
+                comment: "comment"
+    outcome: &outcome
+      - collectionName: *collection0Name
+        databaseName: *database0Name
+        documents:
+          - { _id: 2 }
+
+  - description: "findOneAndDelete with document comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: findOneAndDelete
+        object: *collection0
+        arguments:
+          filter: *filter
+          comment: &comment { key: "value"}
+        expectResult:
+          _id: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *filter
+                remove: true
+                comment: *comment
+    outcome: *outcome
+
+  - description: "findOneAndDelete with comment - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "4.2.0" # findAndModify option validation was introduced in 4.2
+        maxServerVersion: "4.2.99"
+    operations:
+      - name: findOneAndDelete
+        object: *collection0
+        arguments:
+          filter: *filter
+          comment: "comment"
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *filter
+                remove: true
+                comment: "comment"
+    outcome: *initialData
