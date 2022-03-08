@@ -1,8 +1,12 @@
 description: "change-streams"
 schemaVersion: "1.0"
+runOnRequirements:
+  - topologies: [ replicaset, sharded-replicaset ]
 createEntities:
   - client:
       id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
   - database:
       id: &database0 database0
       client: *client0
@@ -19,7 +23,6 @@ tests:
   - description: "Test array truncation"
     runOnRequirements:
       - minServerVersion: "4.7"
-        topologies: [replicaset]
     operations:
       - name: insertOne
         object: *collection0
@@ -70,3 +73,64 @@ tests:
             ]
           }
         }
+- description: "Test with document comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: &comment0 { name: "test1" }
+        saveResultAsEntity: &changeStream0 changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: *comment0
+
+  - description: "Test with document comment - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.2.99"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: &comment0 { name: "test1" }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: *comment0
+
+  - description: "Test with string comment"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: "comment"
+        saveResultAsEntity: &changeStream0 changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: "comment"

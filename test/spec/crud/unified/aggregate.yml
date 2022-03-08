@@ -66,3 +66,105 @@ tests:
               commandName: getMore
               databaseName: *database0Name
 
+  - description: "aggregate with a string comment"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+    operations:
+      - name: aggregate
+        arguments:
+          pipeline: [ { $match: { _id: { $gt: 1 } }} ]
+          comment: "comment"
+        object: *collection0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: [ { $match: { _id: { $gt: 1 } } } ]
+                comment: "comment"
+
+  - description: "aggregate with a document comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: aggregate
+        arguments:
+          pipeline: [ { $match: { _id: { $gt: 1 } }} ]
+          comment: &comment0 { content: "test" }
+        object: *collection0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: [ { $match: { _id: { $gt: 1 } } } ]
+                comment: *comment0
+
+  - description: "aggregate with a document comment - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.2.99"
+    operations:
+      - name: aggregate
+        object: *collection0
+        arguments:
+          pipeline: [ { $match: { _id: { $gt: 1 } }} ]
+          comment: *comment0
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: [ { $match: { _id: { $gt: 1 } }} ]
+                comment: *comment0
+              commandName: aggregate
+              databaseName: *database0Name
+
+  - description: "aggregate with comment does not set comment on getMore"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+    operations:
+      - name: aggregate
+        arguments:
+          pipeline: [ { $match: { _id: { $gt: 1 } }} ]
+          batchSize: 2
+          comment: "comment"
+        object: *collection0
+        expectResult:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+          - { _id: 4, x: 44 }
+          - { _id: 5, x: 55 }
+          - { _id: 6, x: 66 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: [ { $match: { _id: { $gt: 1 } }} ]
+                cursor: { batchSize: 2 }
+                comment: "comment"
+              commandName: aggregate
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0Name
+                batchSize: 2
+                comment: { $$exists: false }
+              commandName: getMore
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0Name
+                batchSize: 2
+                comment: { $$exists: false }
+              commandName: getMore
+              databaseName: *database0Name
