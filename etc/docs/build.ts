@@ -11,6 +11,7 @@ import {
   customSemverCompare,
   getCommandLineArguments,
   JsonVersionSchema,
+  LATEST_TAG,
   log,
   TomlVersionSchema,
   VersionSchema
@@ -24,7 +25,10 @@ const RELEASES_JSON_FILE = './template/static/versions.json';
 const copyGeneratedDocsToDocsFolder = () => exec(`cp -R temp/. ../../docs/.`);
 const removeTempDirectory = () => exec('rm -rf temp');
 const installDependencies = () => exec('npm i --no-save --legacy-peer-deps typedoc');
-const buildDocs = () => exec('npm run build:typedoc');
+const buildDocs = ({ tag }: VersionSchema) => {
+  const revision = tag === LATEST_TAG ? 'main' : `v${tag}.0`;
+  return exec(`npm run build:typedoc -- --gitRevision ${revision}`);
+};
 
 async function copyNewDocsToGeneratedSite({ tag }: VersionSchema) {
   const outputDirectory = `./temp/${tag}`;
@@ -49,7 +53,9 @@ async function updateSiteTemplateForNewVersion(
   }
 
   tomlData.versions.sort((a, b) => customSemverCompare(a.tag, b.tag));
-  tomlData.current = tomlData.versions.find(({ tag }) => tag.toLowerCase() !== 'next').version;
+  tomlData.current = tomlData.versions.find(
+    ({ tag }) => tag.toLowerCase() !== LATEST_TAG.toLowerCase()
+  ).version;
 
   jsonVersions.sort((a, b) => customSemverCompare(a.version, b.version));
 
@@ -84,7 +90,7 @@ async function main() {
   await installDependencies();
 
   log('Building docs for current branch');
-  await buildDocs();
+  await buildDocs(newVersion);
 
   log('Generating new static site...');
 
