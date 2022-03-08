@@ -1,13 +1,14 @@
-'use strict';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
-const { MongoServerError } = require('../../../src');
-const { setupDatabase, withMonitoredClient } = require('../shared');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+import type { MongoClient } from '../../../src';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { MongoServerError } from '../../../src/error';
+import { setupDatabase, withMonitoredClient } from '../shared';
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND];
 let hasInitialPingOccurred = false;
 const test = {
+  client: null,
   commands: { started: [], succeeded: [] },
   setup: function (config) {
     this.commands = { started: [], succeeded: [] };
@@ -57,7 +58,7 @@ describe('Sessions Spec', function () {
         },
         test: function (done) {
           const client = test.client;
-          let sessions = [client.startSession(), client.startSession()].map(s => s.id);
+          const sessions = [client.startSession(), client.startSession()].map(s => s.id);
 
           client.close(err => {
             expect(err).to.not.exist;
@@ -73,42 +74,50 @@ describe('Sessions Spec', function () {
     });
 
     describe('withSession', function () {
-      beforeEach(function () {
-        return test.setup(this.configuration);
+      let client: MongoClient;
+      beforeEach(async function () {
+        client = await this.configuration.newClient().connect();
+      });
+
+      afterEach(async function () {
+        await client?.close();
       });
 
       const tests = [
         {
-          description: 'should support operations that return promises',
+          description: 'should resolve non-async callbacks that return promises',
           operation: client => session => {
             return client.db('test').collection('foo').find({}, { session }).toArray();
           }
         },
         {
-          description: 'should support async operations',
-          operation: client => session => async () =>
+          description: 'should resolve async callbacks',
+          operation: client => async session =>
             await client.db('test').collection('foo').find({}, { session }).toArray()
         },
         {
-          description: 'should support errors thrown from async operations',
-          operation: () => () => async () => {
+          description: 'should reject with error thrown from async callback',
+          operation: (/* client */) => async (/* session */) => {
             throw new Error('thrown from async function');
           }
         },
         {
-          description: 'should support operations that return rejected promises',
+          description: 'should reject callbacks that return a rejected promise',
           operation: (/* client */) => (/* session */) => {
             return Promise.reject(new Error('something awful'));
           }
         },
         {
-          description: "should support operations that don't return promises",
+          description: 'should resolve callbacks that do not return a promise',
           operation: (/* client */) => (/* session */) => {
-            setTimeout(() => {});
+            // This is incorrect usage of the API, but we're making sure that we don't use
+            // .then on the result of the callback, we should always start with a Promise.resolve()
+            //
+            // void return;
           }
         },
         {
-          description: 'should support operations that throw exceptions',
+          description: 'should reject callbacks that throw synchronous exceptions',
           operation: (/* client */) => (/* session */) => {
             throw new Error('something went wrong!');
           }
@@ -116,42 +125,51 @@ describe('Sessions Spec', function () {
       ];
 
       for (const testCase of tests) {
-        it(testCase.description, function () {
-          const client = test.client;
+        it(testCase.description, async function () {
+          const shouldResolve = testCase.description.includes('should resolve');
+          const shouldReject = testCase.description.includes('should reject');
+
+          let sessionWasEnded = false;
 
           return client
-            .withSession(testCase.operation(client))
+            .withSession(session => {
+              session.on('ended', () => {
+                sessionWasEnded = true;
+              });
+              return testCase.operation(client)(session);
+            })
             .then(
-              () => expect(client.topology.s.sessionPool.sessions).to.have.length(1),
-              () => expect(client.topology.s.sessionPool.sessions).to.have.length(1)
+              () => {
+                expect(shouldResolve).to.be.true;
+                expect(shouldReject).to.be.false;
+                expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+              },
+              () => {
+                expect(shouldResolve).to.be.false;
+                expect(shouldReject).to.be.true;
+                expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+              }
             )
-            .then(() => client.close())
             .then(() => {
               // verify that the `endSessions` command was sent
-              const lastCommand = test.commands.started[test.commands.started.length - 1];
-              expect(lastCommand.commandName).to.equal('endSessions');
-              expect(client.topology).to.not.exist;
+              expect(sessionWasEnded).to.be.true;
             });
         });
       }
 
-      it('supports passing options to ClientSession', function () {
-        const client = test.client;
+      it('supports passing options to ClientSession', async function () {
+        let sessionWasEnded = false;
 
-        const promise = client.withSession({ causalConsistency: false }, session => {
+        await client.withSession({ causalConsistency: false }, async session => {
+          session.on('ended', () => {
+            sessionWasEnded = true;
+          });
           expect(session.supports.causalConsistency).to.be.false;
-          return client.db('test').collection('foo').find({}, { session }).toArray();
+          await client.db('test').collection('foo').find({}, { session }).toArray();
         });
 
-        return promise
-          .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
-          .then(() => client.close())
-          .then(() => {
-            // verify that the `endSessions` command was sent
-            const lastCommand = test.commands.started[test.commands.started.length - 1];
-            expect(lastCommand.commandName).to.equal('endSessions');
-            expect(client.topology).to.not.exist;
-          });
+        expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+        expect(sessionWasEnded).to.be.true;
       });
     });
 
