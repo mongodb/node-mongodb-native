@@ -286,10 +286,7 @@ export class BulkWriteResult {
 
   /** Returns a specific write error object */
   getWriteErrorAt(index: number): WriteError | undefined {
-    if (index < this.result.writeErrors.length) {
-      return this.result.writeErrors[index];
-    }
-    return;
+    return this.result.writeErrors[index];
   }
 
   /** Retrieve all write errors */

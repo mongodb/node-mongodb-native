@@ -63,7 +63,6 @@ export class ReadConcern {
     if (options.level) {
       return new ReadConcern(options.level);
     }
-
     return;
   }
 

@@ -1015,7 +1015,6 @@ export function applySession(
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
     }
   }
-
   return;
 }
 

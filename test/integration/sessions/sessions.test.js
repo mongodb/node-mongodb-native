@@ -72,84 +72,51 @@ describe('Sessions Spec', function () {
       });
     });
 
-    describe('withSession', {
-      metadata: {
-        requires: {
-          mongodb: '>=3.6.0'
-        }
-      },
-      test: function () {
-        beforeEach(function () {
-          return test.setup(this.configuration);
-        });
+    describe('withSession', function () {
+      beforeEach(function () {
+        return test.setup(this.configuration);
+      });
 
-        [
-          {
-            description: 'should support operations that return promises',
-            operation: client => session => {
-              return client.db('test').collection('foo').find({}, { session }).toArray();
-            }
-          },
-          // {
-          //   nodeVersion: '>=8.x',
-          //   description: 'should support async operations',
-          //   operation: client => session =>
-          //     async function() {
-          //       await client
-          //         .db('test')
-          //         .collection('foo')
-          //         .find({}, { session })
-          //         .toArray();
-          //     }
-          // },
-          {
-            description: 'should support operations that return rejected promises',
-            operation: (/* client */) => (/* session */) => {
-              return Promise.reject(new Error('something awful'));
-            }
-          },
-          {
-            description: "should support operations that don't return promises",
-            operation: (/* client */) => (/* session */) => {
-              setTimeout(() => {});
-            }
-          },
-          {
-            description: 'should support operations that throw exceptions',
-            operation: (/* client */) => (/* session */) => {
-              throw new Error('something went wrong!');
-            }
+      [
+        {
+          description: 'should support operations that return promises',
+          operation: client => session => {
+            return client.db('test').collection('foo').find({}, { session }).toArray();
           }
-        ].forEach(testCase => {
-          it(testCase.description, function () {
-            const client = test.client;
-
-            return client
-              .withSession(testCase.operation(client))
-              .then(
-                () => expect(client.topology.s.sessionPool.sessions).to.have.length(1),
-                () => expect(client.topology.s.sessionPool.sessions).to.have.length(1)
-              )
-              .then(() => client.close())
-              .then(() => {
-                // verify that the `endSessions` command was sent
-                const lastCommand = test.commands.started[test.commands.started.length - 1];
-                expect(lastCommand.commandName).to.equal('endSessions');
-                expect(client.topology).to.not.exist;
-              });
-          });
-        });
-
-        it('supports passing options to ClientSession', function () {
+        },
+        {
+          description: 'should support async operations',
+          operation: client => session => async () =>
+            await client.db('test').collection('foo').find({}, { session }).toArray()
+        },
+        {
+          description: 'should support operations that return rejected promises',
+          operation: (/* client */) => (/* session */) => {
+            return Promise.reject(new Error('something awful'));
+          }
+        },
+        {
+          description: "should support operations that don't return promises",
+          operation: (/* client */) => (/* session */) => {
+            setTimeout(() => {});
+          }
+        },
+        {
+          description: 'should support operations that throw exceptions',
+          operation: (/* client */) => (/* session */) => {
+            throw new Error('something went wrong!');
+          }
+        }
+      ].forEach(testCase => {
+        it(testCase.description, function () {
           const client = test.client;
 
-          const promise = client.withSession({ causalConsistency: false }, session => {
-            expect(session.supports.causalConsistency).to.be.false;
-            return client.db('test').collection('foo').find({}, { session }).toArray();
-          });
-
-          return promise
-            .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
+          return client
+            .withSession(testCase.operation(client))
+            .then(
+              () => expect(client.topology.s.sessionPool.sessions).to.have.length(1),
+              () => expect(client.topology.s.sessionPool.sessions).to.have.length(1)
+            )
             .then(() => client.close())
             .then(() => {
               // verify that the `endSessions` command was sent
@@ -158,7 +125,26 @@ describe('Sessions Spec', function () {
               expect(client.topology).to.not.exist;
             });
         });
-      }
+      });
+
+      it('supports passing options to ClientSession', function () {
+        const client = test.client;
+
+        const promise = client.withSession({ causalConsistency: false }, session => {
+          expect(session.supports.causalConsistency).to.be.false;
+          return client.db('test').collection('foo').find({}, { session }).toArray();
+        });
+
+        return promise
+          .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
+          .then(() => client.close())
+          .then(() => {
+            // verify that the `endSessions` command was sent
+            const lastCommand = test.commands.started[test.commands.started.length - 1];
+            expect(lastCommand.commandName).to.equal('endSessions');
+            expect(client.topology).to.not.exist;
+          });
+      });
     });
 
     context('unacknowledged writes', () => {
