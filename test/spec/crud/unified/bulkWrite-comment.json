@@ -88,7 +88,9 @@
                     "_id": 2
                   },
                   "update": {
-                    "x": "updated"
+                    "$set": {
+                      "x": "updated"
+                    }
                   }
                 }
               },
@@ -106,7 +108,9 @@
             "deletedCount": 1,
             "insertedCount": 1,
             "insertedIds": {
-              "0": 5
+              "$$unsetOrMatches": {
+                "0": 5
+              }
             },
             "matchedCount": 2,
             "modifiedCount": 2,
@@ -147,24 +151,15 @@
                         "_id": 1,
                         "x": "replaced"
                       }
-                    }
-                  ],
-                  "ordered": true,
-                  "comment": "comment"
-                }
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "update": "BulkWrite_comment",
-                  "updates": [
+                    },
                     {
                       "q": {
                         "_id": 2
                       },
                       "u": {
-                        "x": "updated"
+                        "$set": {
+                          "x": "updated"
+                        }
                       }
                     }
                   ],
@@ -181,7 +176,8 @@
                     {
                       "q": {
                         "_id": 3
-                      }
+                      },
+                      "limit": 1
                     }
                   ],
                   "ordered": true,
@@ -255,7 +251,9 @@
                     "_id": 2
                   },
                   "update": {
-                    "x": "updated"
+                    "$set": {
+                      "x": "updated"
+                    }
                   }
                 }
               },
@@ -275,7 +273,9 @@
             "deletedCount": 1,
             "insertedCount": 1,
             "insertedIds": {
-              "0": 5
+              "$$unsetOrMatches": {
+                "0": 5
+              }
             },
             "matchedCount": 2,
             "modifiedCount": 2,
@@ -318,26 +318,15 @@
                         "_id": 1,
                         "x": "replaced"
                       }
-                    }
-                  ],
-                  "ordered": true,
-                  "comment": {
-                    "key": "value"
-                  }
-                }
-              }
-            },
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "update": "BulkWrite_comment",
-                  "updates": [
+                    },
                     {
                       "q": {
                         "_id": 2
                       },
                       "u": {
-                        "x": "updated"
+                        "$set": {
+                          "x": "updated"
+                        }
                       }
                     }
                   ],
@@ -356,7 +345,8 @@
                     {
                       "q": {
                         "_id": 3
-                      }
+                      },
+                      "limit": 1
                     }
                   ],
                   "ordered": true,
@@ -432,7 +422,9 @@
                     "_id": 2
                   },
                   "update": {
-                    "x": "updated"
+                    "$set": {
+                      "x": "updated"
+                    }
                   }
                 }
               },

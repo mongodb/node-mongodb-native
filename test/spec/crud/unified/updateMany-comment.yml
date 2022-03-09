@@ -29,8 +29,7 @@ tests:
         object: *collection0
         arguments:
           filter: &filter { _id: 1 }
-          update: &update
-            - $set: { x: 22 }
+          update: &update { $set: {x: 22} }
           comment: "comment"
     expectEvents:
       - client: *client0
@@ -42,6 +41,7 @@ tests:
                   -
                     q: *filter
                     u: *update
+                    multi: true
                 comment: "comment"
     outcome: &outcome
       - collectionName: *collection0Name
@@ -69,6 +69,7 @@ tests:
                   -
                     q: *filter
                     u: *update
+                    multi: true
                 comment: *comment
     outcome: *outcome
 
@@ -94,5 +95,6 @@ tests:
                   -
                     q: *filter
                     u: *update
+                    multi: true
                 comment: "comment"
     outcome: *initialData

@@ -195,10 +195,14 @@
       ]
     },
     {
-      "description": "find with comment does not set comment on getMore",
+      "description": "find with comment sets comment on getMore",
       "runOnRequirements": [
         {
-          "minServerVersion": "3.6"
+          "minServerVersion": "4.4.0",
+          "topologies": [
+            "single",
+            "replicaset"
+          ]
         }
       ],
       "operations": [
@@ -267,9 +271,7 @@
                   },
                   "collection": "coll0",
                   "batchSize": 2,
-                  "comment": {
-                    "$$exists": false
-                  }
+                  "comment": "comment"
                 }
               }
             },
@@ -284,9 +286,7 @@
                   },
                   "collection": "coll0",
                   "batchSize": 2,
-                  "comment": {
-                    "$$exists": false
-                  }
+                  "comment": "comment"
                 }
               }
             }

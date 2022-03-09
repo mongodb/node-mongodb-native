@@ -125,9 +125,10 @@ tests:
               commandName: aggregate
               databaseName: *database0Name
 
-  - description: "aggregate with comment does not set comment on getMore"
+  - description: "aggregate with comment sets comment on getMore"
     runOnRequirements:
-      - minServerVersion: "3.6.0"
+      - minServerVersion: "4.4.0"
+        topologies: [ single, replicaset ]
     operations:
       - name: aggregate
         arguments:
@@ -157,7 +158,7 @@ tests:
                 getMore: { $$type: [ int, long ] }
                 collection: *collection0Name
                 batchSize: 2
-                comment: { $$exists: false }
+                comment: "comment"
               commandName: getMore
               databaseName: *database0Name
           - commandStartedEvent:
@@ -165,6 +166,6 @@ tests:
                 getMore: { $$type: [ int, long ] }
                 collection: *collection0Name
                 batchSize: 2
-                comment: { $$exists: false }
+                comment: "comment"
               commandName: getMore
               databaseName: *database0Name

@@ -29,7 +29,7 @@ tests:
         object: *collection0
         arguments:
           filter: &filter { _id: 1 }
-          update: &update { x: 22 }
+          update: &update { $set: {x: 22} }
           comment: "comment"
     expectEvents:
       - client: *client0
