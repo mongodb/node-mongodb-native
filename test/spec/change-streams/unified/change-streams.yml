@@ -19,6 +19,7 @@ initialData:
   - collectionName: *collection0
     databaseName: *database0
     documents: []
+
 tests:
   - description: "Test array truncation"
     runOnRequirements:
@@ -73,7 +74,8 @@ tests:
             ]
           }
         }
-- description: "Test with document comment"
+
+  - description: "Test with document comment"
     runOnRequirements:
       - minServerVersion: "4.4"
     operations:
@@ -134,3 +136,44 @@ tests:
                 pipeline:
                   - $changeStream: {}
                 comment: "comment"
+
+  - description: "Test that comment is set on getMore"
+    runOnRequirements:
+      - minServerVersion: "4.4.0"
+        topologies: [ single, replicaset ]
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: "comment"
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &new_document
+            _id: 1
+            a: 1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: "comment"
+          - commandStartedEvent:
+              command:
+                insert: *collection0
+                documents:
+                  - *new_document
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0
+                comment: "comment"
+              commandName: getMore
+              databaseName: *database0

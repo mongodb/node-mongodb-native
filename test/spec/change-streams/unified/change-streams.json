@@ -247,6 +247,92 @@
           ]
         }
       ]
+    },
+    {
+      "description": "Test that comment is set on getMore",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.0",
+          "topologies": [
+            "single",
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "comment": "comment"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ],
+                  "comment": "comment"
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "collection0",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "a": 1
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "collection0",
+                  "comment": "comment"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
