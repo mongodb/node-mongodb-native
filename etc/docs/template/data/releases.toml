@@ -100,13 +100,6 @@ api = "./3.0/api"
 tag = "3.0"
 
 [[versions]]
-version = "3.x Core Driver"
-status = "not-supported"
-docs = "./core"
-api = "./core/api"
-tag = "3.-1"
-
-[[versions]]
 version = "2.2 Driver"
 status = "not-supported"
 docs = "./2.2"
