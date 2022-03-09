@@ -86,30 +86,30 @@ describe('Sessions Spec', function () {
       const tests = [
         {
           description: 'should resolve non-async callbacks that return promises',
-          operation: client => session => {
+          operation: session => {
             return client.db('test').collection('foo').find({}, { session }).toArray();
           }
         },
         {
           description: 'should resolve async callbacks',
-          operation: client => async session =>
+          operation: async session =>
             await client.db('test').collection('foo').find({}, { session }).toArray()
         },
         {
           description: 'should reject with error thrown from async callback',
-          operation: (/* client */) => async (/* session */) => {
+          operation: async (/* session */) => {
             throw new Error('thrown from async function');
           }
         },
         {
           description: 'should reject callbacks that return a rejected promise',
-          operation: (/* client */) => (/* session */) => {
+          operation: (/* session */) => {
             return Promise.reject(new Error('something awful'));
           }
         },
         {
           description: 'should resolve callbacks that do not return a promise',
-          operation: (/* client */) => (/* session */) => {
+          operation: (/* session */) => {
             // This is incorrect usage of the API, but we're making sure that we don't use
             // .then on the result of the callback, we should always start with a Promise.resolve()
             //
@@ -118,7 +118,7 @@ describe('Sessions Spec', function () {
         },
         {
           description: 'should reject callbacks that throw synchronous exceptions',
-          operation: (/* client */) => (/* session */) => {
+          operation: (/* session */) => {
             throw new Error('something went wrong!');
           }
         }
@@ -133,31 +133,34 @@ describe('Sessions Spec', function () {
 
           let sessionWasEnded = false;
 
-          return client
-            .withSession(session => {
-              session.on('ended', () => {
-                sessionWasEnded = true;
-              });
-              return testCase.operation(client)(session);
-            })
-            .then(
-              () => {
-                if (shouldReject) {
-                  expect.fail('this should have rejected');
+          return (
+            client
+              // @ts-expect-error: some operations return void to test it is handled
+              .withSession(session => {
+                session.on('ended', () => {
+                  sessionWasEnded = true;
+                });
+                return testCase.operation(session);
+              })
+              .then(
+                () => {
+                  if (shouldReject) {
+                    expect.fail('this should have rejected');
+                  }
+                  expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+                },
+                () => {
+                  if (shouldResolve) {
+                    expect.fail('this should have resolved');
+                  }
+                  expect(client.topology.s.sessionPool.sessions).to.have.length(1);
                 }
-                expect(client.topology.s.sessionPool.sessions).to.have.length(1);
-              },
-              () => {
-                if (shouldResolve) {
-                  expect.fail('this should have resolved');
-                }
-                expect(client.topology.s.sessionPool.sessions).to.have.length(1);
-              }
-            )
-            .then(() => {
-              // verify that the `endSessions` command was sent
-              expect(sessionWasEnded).to.be.true;
-            });
+              )
+              .then(() => {
+                // verify that the `endSessions` command was sent
+                expect(sessionWasEnded).to.be.true;
+              })
+          );
         });
       }
 
