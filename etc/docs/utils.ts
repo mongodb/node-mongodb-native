@@ -89,10 +89,6 @@ export function customSemverCompare(a: string, b: string) {
   if ([a, b].includes('next')) {
     return a === 'next' ? -1 : 1;
   }
-  // put legacy 3x driver version at the end of the list
-  if ([a, b].includes('core')) {
-    return a === 'core' ? 1 : -1;
-  }
 
   const [majorA, minorA] = a.split('.').map(Number);
   const [majorB, minorB] = b.split('.').map(Number);
