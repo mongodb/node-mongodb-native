@@ -107,6 +107,10 @@ export class UpdateOperation extends CommandOperation<Document> {
       command.let = options.let;
     }
 
+    if (options.comment) {
+      command.comment = options.comment;
+    }
+
     const statementWithCollation = this.statements.find(statement => !!statement.collation);
     if (
       collationNotSupported(server, options) ||
@@ -151,9 +155,9 @@ export class UpdateOneOperation extends UpdateOperation {
       options
     );
 
-    if (!hasAtomicOperators(update)) {
-      throw new MongoInvalidArgumentError('Update document requires atomic operators');
-    }
+    // if (!hasAtomicOperators(update)) {
+    //   throw new MongoInvalidArgumentError('Update document requires atomic operators');
+    // }
   }
 
   override execute(
