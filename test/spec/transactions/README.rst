@@ -81,6 +81,11 @@ control the fail point's behavior. ``failCommand`` supports the following
   blocked for. Required when blockConnection is true.
   `New in mongod 4.3.4 <https://jira.mongodb.org/browse/SERVER-41070>`_.
 
+Speeding Up Tests
+=================
+
+See `Speeding Up Tests <../../retryable-reads/tests/README.rst#speeding-up-tests>`_ in the retryable reads spec tests.
+
 Test Format
 ===========
 
@@ -106,6 +111,18 @@ Each YAML file has the following keys:
     tests can be run successfully. Valid topologies are "single", "replicaset",
     and "sharded". If this field is omitted, the default is all topologies (i.e.
     ``["single", "replicaset", "sharded"]``).
+
+  - ``serverless``: Optional string. Whether or not the test should be run on
+    serverless instances imitating sharded clusters. Valid values are "require",
+    "forbid", and "allow". If "require", the test MUST only be run on serverless
+    instances. If "forbid", the test MUST NOT be run on serverless instances. If
+    omitted or "allow", this option has no effect.
+
+    The test runner MUST be informed whether or not serverless is being used in
+    order to determine if this requirement is met (e.g. through an environment
+    variable or configuration option). Since the serverless proxy imitates a
+    mongos, the runner is not capable of determining this by issuing a server
+    command such as ``buildInfo`` or ``hello``.
 
 - ``database_name`` and ``collection_name``: The database and collection to use
   for testing.

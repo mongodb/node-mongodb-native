@@ -205,6 +205,21 @@ export class MongoDriverError extends MongoError {
 }
 
 /**
+ * An error during the handshake.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoHandshakeError extends MongoError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  get name(): string {
+    return 'MongoHandshakeError';
+  }
+}
+/**
  * An error generated when the driver API is used incorrectly
  *
  * @privateRemarks

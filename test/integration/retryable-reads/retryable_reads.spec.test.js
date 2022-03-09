@@ -1,11 +1,13 @@
 'use strict';
 
+const path = require('path');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
 const { loadSpecTests } = require('../../spec');
+const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 
-describe('Retryable Reads', function () {
+describe('Retryable Reads (legacy)', function () {
   const testContext = new TestRunnerContext();
-  const testSuites = loadSpecTests('retryable-reads');
+  const testSuites = loadSpecTests(path.join('retryable-reads', 'legacy'));
 
   after(() => testContext.teardown());
   before(function () {
@@ -27,4 +29,8 @@ describe('Retryable Reads', function () {
       spec.description.match(/find/i)
     );
   });
+});
+
+describe('Retryable Reads (unified)', function () {
+  runUnifiedSuite(loadSpecTests(path.join('retryable-reads', 'unified')));
 });

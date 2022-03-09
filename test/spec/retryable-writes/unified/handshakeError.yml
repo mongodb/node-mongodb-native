@@ -1,0 +1,137 @@
+description: "retryable writes handshake failures"
+
+schemaVersion: "1.3"
+
+runOnRequirements:
+  - minServerVersion: "4.2"
+    topologies: [replicaset, sharded, load-balanced]
+    auth: true
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [commandStartedEvent, connectionCheckOutStartedEvent]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName retryable-handshake-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName coll
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  - description: "InsertOne succeeds after retryable handshake error"
+    operations:
+      - name: failPoint # fail the next connection establishment
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [saslContinue, ping]
+              closeConnection: true
+
+      - name: runCommand
+        object: *database0
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+        expectError:
+          isError: true
+
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 2, x: 22 }
+
+    expectEvents:
+      - client: *client0
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                ping: 1
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents: [{ _id: 2, x: 22 }]
+              commandName: insert
+              databaseName: *databaseName
+
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 } # The write was still applied
+
+  - description: "InsertOne succeeds after retryable handshake error ShutdownInProgress"
+    operations:
+      - name: failPoint # fail the next connection establishment
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [saslContinue, ping]
+              errorCode: 91 # ShutdownInProgress
+
+      - name: runCommand
+        object: *database0
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+        expectError:
+          isError: true
+
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 2, x: 22 }
+
+    expectEvents:
+      - client: *client0
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                ping: 1
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents: [{ _id: 2, x: 22 }]
+              commandName: insert
+              databaseName: *databaseName
+
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 } # The write was still applied

@@ -33,7 +33,7 @@ _yamlAnchors:
     &lockTimeoutErrorCode 24
 
 tests:
-  - description: unpin after TransientTransctionError error on commit
+  - description: unpin after TransientTransactionError error on commit
     runOnRequirements:
         # serverless proxy doesn't append error labels to errors in transactions
         # caused by failpoints (CLOUDP-88216)
@@ -70,17 +70,22 @@ tests:
         object: testRunner
         arguments:
           session: *session0
-
-  - description: unpin on successful abort
-    operations:
+      # Cleanup the potentionally open server transaction by starting and
+      # aborting a new transaction on the same session.
       - *startTransaction
       - *insertOne
       - &abortTransaction
         name: abortTransaction
         object: *session0
+
+  - description: unpin on successful abort
+    operations:
+      - *startTransaction
+      - *insertOne
+      - *abortTransaction
       - *assertNoPinnedServer
 
-  - description: unpin after TransientTransctionError error on abort
+  - description: unpin after non-transient error on abort
     runOnRequirements:
         # serverless proxy doesn't append error labels to errors in transactions
         # caused by failpoints (CLOUDP-88216)
@@ -100,6 +105,33 @@ tests:
               errorCode: *lockTimeoutErrorCode
       - *abortTransaction
       - *assertNoPinnedServer
+      # Cleanup the potentionally open server transaction by starting and
+      # aborting a new transaction on the same session.
+      - *startTransaction
+      - *insertOne
+      - *abortTransaction
+
+  - description: unpin after TransientTransactionError error on abort
+    operations:
+      - *startTransaction
+      - *insertOne
+      - name: targetedFailPoint
+        object: testRunner
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ abortTransaction ]
+              errorCode: 91 # ShutdownInProgress
+      - *abortTransaction
+      - *assertNoPinnedServer
+      # Cleanup the potentionally open server transaction by starting and
+      # aborting a new transaction on the same session.
+      - *startTransaction
+      - *insertOne
+      - *abortTransaction
 
   - description: unpin when a new transaction is started
     operations:

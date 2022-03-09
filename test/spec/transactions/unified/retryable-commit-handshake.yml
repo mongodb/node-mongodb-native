@@ -1,0 +1,118 @@
+description: "retryable commitTransaction on handshake errors"
+
+schemaVersion: "1.4"
+
+runOnRequirements:
+  - minServerVersion: "4.2"
+    topologies: [replicaset, sharded, load-balanced]
+    serverless: "forbid"
+    auth: true
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [commandStartedEvent, connectionCheckOutStartedEvent]
+      uriOptions: { retryWrites: false } # commitTransaction is retryable regardless of this option being set
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName retryable-handshake-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName coll
+  - session:
+      id: &session0 session0
+      client: *client0
+  - session:
+      id: &session1 session1
+      client: *client0
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  - description: "CommitTransaction succeeds after handshake network error"
+    skipReason: "DRIVERS-2032: Pinned servers need to be checked if they are still selectable"
+    operations:
+
+      - name: startTransaction
+        object: *session0
+
+      - name: insertOne
+        object: *collection0
+        arguments:
+          session: *session0
+          document: { _id: 2, x: 22 }
+
+      # The following failPoint and ping utilize session1 so that
+      # the transaction won't be failed by the intentional erroring of ping
+      # and it will have an empty pool when it goes to run commitTransaction
+      - name: failPoint # fail the next connection establishment
+        object: testRunner
+        arguments:
+          client: *client0
+          session: *session1
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              # use saslContinue here to avoid SDAM errors
+              # this failPoint itself will create a usable connection in the connection pool
+              # so we run a ping (that also fails) in order to discard the connection
+              # before testing that commitTransaction gets retried
+              failCommands: [saslContinue, ping]
+              closeConnection: true
+
+      - name: runCommand
+        object: *database0
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+          session: *session1
+        expectError:
+          isError: true
+
+      - name: commitTransaction
+        object: *session0
+
+    expectEvents:
+      - client: *client0
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} } # startTransaction
+          - { connectionCheckOutStartedEvent: {} } # insertOne
+          - { connectionCheckOutStartedEvent: {} } # failPoint
+          - { connectionCheckOutStartedEvent: {} } # commitTransaction
+          - { connectionCheckOutStartedEvent: {} } # commitTransaction retry
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents: [{ _id: 2, x: 22 }]
+                startTransaction: true
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                ping: 1
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid:
+                  $$sessionLsid: *session0
+              commandName: commitTransaction
+              databaseName: admin
+
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 2, x: 22 } # The write was still applied

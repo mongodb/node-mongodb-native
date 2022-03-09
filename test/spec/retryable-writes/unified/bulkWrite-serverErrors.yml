@@ -1,0 +1,96 @@
+description: "retryable-writes bulkWrite serverErrors"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "3.6"
+    topologies: [ replicaset ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName retryable-writes-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName coll
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+
+tests:
+  - description: "BulkWrite succeeds after retryable writeConcernError in first batch"
+    runOnRequirements:
+      - minServerVersion: "4.0"
+        topologies: [ replicaset ]
+      - minServerVersion: "4.1.7"
+        topologies: [ sharded-replicaset ]
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              errorLabels: [RetryableWriteError] # top-level error labels
+              writeConcernError:
+                code: 91 # ShutdownInProgress
+                errmsg: "Replication is being shut down"
+      - name: bulkWrite
+        object: *collection0
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 3, x: 33 }
+            - deleteOne:
+                filter: { _id: 2 }
+        expectResult:
+          deletedCount: 1
+          insertedCount: 1
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 0
+          insertedIds: { $$unsetOrMatches: { 0: 3 } }
+          upsertedIds: { }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents: [{ _id: 3, x: 33 }]
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents: [{ _id: 3, x: 33 }]
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                delete: *collectionName
+                deletes:
+                  -
+                    q: { _id: 2 }
+                    limit: 1
+              commandName: delete
+              databaseName: *databaseName
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, x: 11 }
+          - { _id: 3, x: 33 }  # The write was still applied

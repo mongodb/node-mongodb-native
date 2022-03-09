@@ -10,6 +10,7 @@ import { LEGACY_HELLO_COMMAND } from '../constants';
 import {
   AnyError,
   MongoCompatibilityError,
+  MongoHandshakeError,
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
@@ -127,7 +128,7 @@ function performInitialHandshake(
     const start = new Date().getTime();
     conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
       if (err) {
-        callback(err);
+        callback(new MongoHandshakeError(err.message));
         return;
       }
 
