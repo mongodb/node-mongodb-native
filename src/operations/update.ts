@@ -155,9 +155,9 @@ export class UpdateOneOperation extends UpdateOperation {
       options
     );
 
-    // if (!hasAtomicOperators(update)) {
-    //   throw new MongoInvalidArgumentError('Update document requires atomic operators');
-    // }
+    if (!hasAtomicOperators(update)) {
+      throw new MongoInvalidArgumentError('Update document requires atomic operators');
+    }
   }
 
   override execute(
