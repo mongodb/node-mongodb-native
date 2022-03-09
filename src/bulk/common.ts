@@ -1,4 +1,3 @@
-import type { ClientSession, Server } from '..';
 import {
   BSONSerializeOptions,
   Document,
@@ -24,7 +23,9 @@ import { InsertOperation } from '../operations/insert';
 import { AbstractOperation, Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, UpdateStatement } from '../operations/update';
 import { PromiseProvider } from '../promise_provider';
+import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
+import type { ClientSession } from '../sessions';
 import {
   applyRetryableWrites,
   Callback,
@@ -935,7 +936,7 @@ class BulkWriteShimOperation extends AbstractOperation {
     this.bulkOperation = bulkOperation;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<any>): void {
+  execute(server: Server, session: ClientSession | undefined, callback: Callback<any>): void {
     if (this.options.session == null) {
       // An implicit session could have been created by 'executeOperation'
       // So if we stick it on finalOptions here, each bulk operation

@@ -438,7 +438,7 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoUnexpectedServerResponseError';
   }
 }
