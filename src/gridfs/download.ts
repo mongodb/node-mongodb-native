@@ -141,7 +141,7 @@ export class GridFSBucketReadStream extends Readable implements NodeJS.ReadableS
    * Private Impl, do not call directly
    * @internal
    */
-  _read(): void {
+  override _read(): void {
     if (this.destroyed) return;
     waitForFile(this, () => doRead(this));
   }
@@ -303,6 +303,7 @@ function doRead(stream: GridFSBucketReadStream): void {
     }
 
     stream.push(buf);
+    return;
   });
 }
 
@@ -382,6 +383,7 @@ function init(stream: GridFSBucketReadStream): void {
     }
 
     stream.emit(GridFSBucketReadStream.FILE, doc);
+    return;
   });
 }
 

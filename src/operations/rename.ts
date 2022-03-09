@@ -18,7 +18,7 @@ export interface RenameOptions extends CommandOperationOptions {
 
 /** @internal */
 export class RenameOperation extends RunAdminCommandOperation {
-  options: RenameOptions;
+  override options: RenameOptions;
   collection: Collection;
   newName: string;
 
@@ -38,13 +38,17 @@ export class RenameOperation extends RunAdminCommandOperation {
     this.newName = newName;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Collection>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Collection>
+  ): void {
     const coll = this.collection;
 
     super.execute(server, session, (err, doc) => {
       if (err) return callback(err);
       // We have an error
-      if (doc.errmsg) {
+      if (doc?.errmsg) {
         return callback(new MongoServerError(doc));
       }
 

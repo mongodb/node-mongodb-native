@@ -26,7 +26,7 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 
 /** @internal */
 export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult> {
-  options: ListDatabasesOptions;
+  override options: ListDatabasesOptions;
 
   constructor(db: Db, options?: ListDatabasesOptions) {
     super(db, options);
@@ -34,7 +34,11 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<ListDatabasesResult>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<ListDatabasesResult>
+  ): void {
     const cmd: Document = { listDatabases: 1 };
     if (this.options.nameOnly) {
       cmd.nameOnly = Number(cmd.nameOnly);

@@ -21,8 +21,7 @@ export interface GetMoreOptions extends OperationOptions {
 /** @internal */
 export class GetMoreOperation extends AbstractOperation {
   cursorId: Long;
-  options: GetMoreOptions;
-  server: Server;
+  override options: GetMoreOptions;
 
   constructor(ns: MongoDBNamespace, cursorId: Long, server: Server, options: GetMoreOptions = {}) {
     super(options);
@@ -36,7 +35,11 @@ export class GetMoreOperation extends AbstractOperation {
    * Although there is a server already associated with the get more operation, the signature
    * for execute passes a server so we will just use that one.
    */
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     if (server !== this.server) {
       return callback(
         new MongoRuntimeError('Getmore must run on the same server operation began on')

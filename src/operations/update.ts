@@ -63,7 +63,7 @@ export interface UpdateStatement {
 
 /** @internal */
 export class UpdateOperation extends CommandOperation<Document> {
-  options: UpdateOptions & { ordered?: boolean };
+  override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];
 
   constructor(
@@ -78,7 +78,7 @@ export class UpdateOperation extends CommandOperation<Document> {
     this.statements = statements;
   }
 
-  get canRetryWrite(): boolean {
+  override get canRetryWrite(): boolean {
     if (super.canRetryWrite === false) {
       return false;
     }
@@ -86,7 +86,11 @@ export class UpdateOperation extends CommandOperation<Document> {
     return this.statements.every(op => op.multi == null || op.multi === false);
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -152,9 +156,9 @@ export class UpdateOneOperation extends UpdateOperation {
     }
   }
 
-  execute(
+  override execute(
     server: Server,
-    session: ClientSession,
+    session: ClientSession | undefined,
     callback: Callback<UpdateResult | Document>
   ): void {
     super.execute(server, session, (err, res) => {
@@ -189,9 +193,9 @@ export class UpdateManyOperation extends UpdateOperation {
     }
   }
 
-  execute(
+  override execute(
     server: Server,
-    session: ClientSession,
+    session: ClientSession | undefined,
     callback: Callback<UpdateResult | Document>
   ): void {
     super.execute(server, session, (err, res) => {
@@ -245,9 +249,9 @@ export class ReplaceOneOperation extends UpdateOperation {
     }
   }
 
-  execute(
+  override execute(
     server: Server,
-    session: ClientSession,
+    session: ClientSession | undefined,
     callback: Callback<UpdateResult | Document>
   ): void {
     super.execute(server, session, (err, res) => {

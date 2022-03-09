@@ -128,7 +128,7 @@ function supportsRetryableReads(server: Server) {
 
 function executeWithServerSelection(
   topology: Topology,
-  session: ClientSession,
+  session: ClientSession | undefined,
   operation: AbstractOperation,
   callback: Callback
 ) {

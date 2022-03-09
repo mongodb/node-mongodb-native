@@ -646,7 +646,12 @@ export class CryptoConnection extends Connection {
   }
 
   /** @internal @override */
-  command(ns: MongoDBNamespace, cmd: Document, options: CommandOptions, callback: Callback): void {
+  override command(
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: CommandOptions,
+    callback: Callback
+  ): void {
     const autoEncrypter = this[kAutoEncrypter];
     if (!autoEncrypter) {
       return callback(new MongoMissingDependencyError('No AutoEncrypter available for encryption'));

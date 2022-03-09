@@ -241,16 +241,16 @@ class CaseInsensitiveMap<Value = any> extends Map<string, Value> {
   constructor(entries: Array<[string, any]> = []) {
     super(entries.map(([k, v]) => [k.toLowerCase(), v]));
   }
-  has(k: string) {
+  override has(k: string) {
     return super.has(k.toLowerCase());
   }
-  get(k: string) {
+  override get(k: string) {
     return super.get(k.toLowerCase());
   }
-  set(k: string, v: any) {
+  override set(k: string, v: any) {
     return super.set(k.toLowerCase(), v);
   }
-  delete(k: string): boolean {
+  override delete(k: string): boolean {
     return super.delete(k.toLowerCase());
   }
 }
@@ -519,6 +519,7 @@ function validateLoadBalancedOptions(
       return new MongoParseError('Cannot limit srv hosts with loadBalanced enabled');
     }
   }
+  return;
 }
 
 function setOption(
@@ -836,6 +837,7 @@ export const OPTIONS = {
       emitWarning('Alternative loggers might not be supported');
       // TODO: make Logger an interface that others can implement, make usage consistent in driver
       // DRIVERS-1204
+      return;
     }
   },
   loggerLevel: {
@@ -975,6 +977,7 @@ export const OPTIONS = {
           rpOpts
         );
       }
+      throw new MongoParseError(`Unknown ReadPreference value: ${value}`);
     }
   },
   readPreferenceTags: {

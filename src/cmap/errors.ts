@@ -14,7 +14,7 @@ export class PoolClosedError extends MongoDriverError {
     this.address = pool.address;
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoPoolClosedError';
   }
 }
@@ -32,7 +32,7 @@ export class WaitQueueTimeoutError extends MongoDriverError {
     this.address = address;
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoWaitQueueTimeoutError';
   }
 }

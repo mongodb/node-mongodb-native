@@ -13,12 +13,7 @@ import type { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
-import {
-  AnyError,
-  MongoInvalidArgumentError,
-  MongoNotConnectedError,
-  MongoRuntimeError
-} from './error';
+import { MongoInvalidArgumentError, MongoNotConnectedError } from './error';
 import type { Logger, LoggerLevel } from './logger';
 import { TypedEventEmitter } from './mongo_types';
 import { connect } from './operations/connect';
@@ -74,8 +69,6 @@ export interface Auth {
 export interface PkFactory {
   createPk(): any; // TODO: when js-bson is typed, function should return some BSON type
 }
-
-type CleanUpHandlerFunction = (err?: AnyError, result?: any, opts?: any) => Promise<void>;
 
 /** @public */
 export type SupportedTLSConnectionOptions = Pick<
@@ -264,7 +257,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
 }
 
 /** @public */
-export type WithSessionCallback = (session: ClientSession) => Promise<any> | void;
+export type WithSessionCallback = (session: ClientSession) => Promise<any>;
 
 /** @internal */
 export interface MongoClientPrivate {
@@ -564,44 +557,29 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     optionsOrOperation?: ClientSessionOptions | WithSessionCallback,
     callback?: WithSessionCallback
   ): Promise<void> {
-    let options: ClientSessionOptions = optionsOrOperation as ClientSessionOptions;
-    if (typeof optionsOrOperation === 'function') {
-      callback = optionsOrOperation as WithSessionCallback;
-      options = { owner: Symbol() };
-    }
+    const options = {
+      // Always define an owner
+      owner: Symbol(),
+      // If it's an object inherit the options
+      ...(typeof optionsOrOperation === 'object' ? optionsOrOperation : {})
+    };
 
-    if (callback == null) {
+    const withSessionCallback =
+      typeof optionsOrOperation === 'function' ? optionsOrOperation : callback;
+
+    if (withSessionCallback == null) {
       throw new MongoInvalidArgumentError('Missing required callback parameter');
     }
 
     const session = this.startSession(options);
     const Promise = PromiseProvider.get();
 
-    let cleanupHandler: CleanUpHandlerFunction = ((err, result, opts) => {
-      // prevent multiple calls to cleanupHandler
-      cleanupHandler = () => {
-        // TODO(NODE-3483)
-        throw new MongoRuntimeError('cleanupHandler was called too many times');
-      };
-
-      opts = Object.assign({ throw: true }, opts);
-      session.endSession();
-
-      if (err) {
-        if (opts.throw) throw err;
-        return Promise.reject(err);
-      }
-    }) as CleanUpHandlerFunction;
-
-    try {
-      const result = callback(session);
-      return Promise.resolve(result).then(
-        result => cleanupHandler(undefined, result, undefined),
-        err => cleanupHandler(err, null, { throw: true })
-      );
-    } catch (err) {
-      return cleanupHandler(err, null, { throw: false }) as Promise<void>;
-    }
+    return Promise.resolve()
+      .then(() => withSessionCallback(session))
+      .then(() => {
+        // Do not return the result of callback
+      })
+      .finally(() => session.endSession());
   }
 
   /**

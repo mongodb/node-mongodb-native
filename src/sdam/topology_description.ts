@@ -321,6 +321,7 @@ export class TopologyDescription {
     if (descriptionsWithError.length > 0) {
       return descriptionsWithError[0].error;
     }
+    return;
   }
 
   /**

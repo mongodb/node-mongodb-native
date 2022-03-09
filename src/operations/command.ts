@@ -68,8 +68,7 @@ export interface OperationParent {
 
 /** @internal */
 export abstract class CommandOperation<T> extends AbstractOperation<T> {
-  options: CommandOperationOptions;
-  ns: MongoDBNamespace;
+  override options: CommandOperationOptions;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   explain?: Explain;
@@ -106,16 +105,25 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     }
   }
 
-  get canRetryWrite(): boolean {
+  override get canRetryWrite(): boolean {
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       return this.explain == null;
     }
     return true;
   }
 
-  abstract execute(server: Server, session: ClientSession, callback: Callback<T>): void;
+  abstract override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<T>
+  ): void;
 
-  executeCommand(server: Server, session: ClientSession, cmd: Document, callback: Callback): void {
+  executeCommand(
+    server: Server,
+    session: ClientSession | undefined,
+    cmd: Document,
+    callback: Callback
+  ): void {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 

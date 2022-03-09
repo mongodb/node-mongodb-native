@@ -24,7 +24,7 @@ class ScramSHA extends AuthProvider {
     this.cryptoMethod = cryptoMethod || 'sha1';
   }
 
-  prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback) {
+  override prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback) {
     const cryptoMethod = this.cryptoMethod;
     const credentials = authContext.credentials;
     if (!credentials) {
@@ -52,7 +52,7 @@ class ScramSHA extends AuthProvider {
     });
   }
 
-  auth(authContext: AuthContext, callback: Callback) {
+  override auth(authContext: AuthContext, callback: Callback) {
     const response = authContext.response;
     if (response && response.speculativeAuthenticate) {
       continueScramConversation(
@@ -358,6 +358,7 @@ function resolveError(err?: AnyError, result?: Document) {
   if (result) {
     if (result.$err || result.errmsg) return new MongoServerError(result);
   }
+  return;
 }
 
 export class ScramSHA1 extends ScramSHA {

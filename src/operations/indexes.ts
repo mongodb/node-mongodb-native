@@ -160,7 +160,7 @@ function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescri
 
 /** @internal */
 export class IndexesOperation extends AbstractOperation<Document[]> {
-  options: IndexInformationOptions;
+  override options: IndexInformationOptions;
   collection: Collection;
 
   constructor(collection: Collection, options: IndexInformationOptions) {
@@ -169,7 +169,11 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
     this.collection = collection;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document[]>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document[]>
+  ): void {
     const coll = this.collection;
     const options = this.options;
 
@@ -186,7 +190,7 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
 export class CreateIndexesOperation<
   T extends string | string[] = string[]
 > extends CommandOperation<T> {
-  options: CreateIndexesOptions;
+  override options: CreateIndexesOptions;
   collectionName: string;
   indexes: IndexDescription[];
 
@@ -204,7 +208,11 @@ export class CreateIndexesOperation<
     this.indexes = indexes;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<T>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<T>
+  ): void {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -280,7 +288,11 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
 
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
-  execute(server: Server, session: ClientSession, callback: Callback<string>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<string>
+  ): void {
     super.execute(server, session, (err, indexNames) => {
       if (err || !indexNames) return callback(err);
       return callback(undefined, indexNames[0]);
@@ -291,7 +303,6 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
 /** @internal */
 export class EnsureIndexOperation extends CreateIndexOperation {
   db: Db;
-  collectionName: string;
 
   constructor(
     db: Db,
@@ -306,7 +317,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
     this.collectionName = collectionName;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback): void {
+  override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
     const indexName = this.indexes[0].name;
     const cursor = this.db.collection(this.collectionName).listIndexes({ session });
     cursor.toArray((err, indexes) => {
@@ -333,7 +344,7 @@ export type DropIndexesOptions = CommandOperationOptions;
 
 /** @internal */
 export class DropIndexOperation extends CommandOperation<Document> {
-  options: DropIndexesOptions;
+  override options: DropIndexesOptions;
   collection: Collection;
   indexName: string;
 
@@ -345,7 +356,11 @@ export class DropIndexOperation extends CommandOperation<Document> {
     this.indexName = indexName;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
     super.executeCommand(server, session, cmd, callback);
   }
@@ -357,7 +372,7 @@ export class DropIndexesOperation extends DropIndexOperation {
     super(collection, '*', options);
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback): void {
+  override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
     super.execute(server, session, err => {
       if (err) return callback(err, false);
       callback(undefined, true);
@@ -373,7 +388,7 @@ export interface ListIndexesOptions extends CommandOperationOptions {
 
 /** @internal */
 export class ListIndexesOperation extends CommandOperation<Document> {
-  options: ListIndexesOptions;
+  override options: ListIndexesOptions;
   collectionNamespace: MongoDBNamespace;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
@@ -383,7 +398,11 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const serverWireVersion = maxWireVersion(server);
     if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {
       const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes');
@@ -445,7 +464,7 @@ export class ListIndexesCursor extends AbstractCursor {
 
 /** @internal */
 export class IndexExistsOperation extends AbstractOperation<boolean> {
-  options: IndexInformationOptions;
+  override options: IndexInformationOptions;
   collection: Collection;
   indexes: string | string[];
 
@@ -460,7 +479,11 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
     this.indexes = indexes;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<boolean>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<boolean>
+  ): void {
     const coll = this.collection;
     const indexes = this.indexes;
 
@@ -489,7 +512,7 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
 
 /** @internal */
 export class IndexInformationOperation extends AbstractOperation<Document> {
-  options: IndexInformationOptions;
+  override options: IndexInformationOptions;
   db: Db;
   name: string;
 
@@ -500,7 +523,11 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
     this.name = name;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<Document>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Document>
+  ): void {
     const db = this.db;
     const name = this.name;
 

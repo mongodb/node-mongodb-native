@@ -286,6 +286,14 @@ describe('MongoOptions', function () {
     expect(options.readPreference.minWireVersion).to.be.at.least(5);
   });
 
+  it('should throw when given a readpreference options with an unsupported type', () => {
+    expect(() => new MongoClient('mongodb://blah', { readPreference: 34 })).to.throw(
+      MongoParseError,
+      /Unknown ReadPreference value/
+    );
+    // Passing readPreference in URI will always be string
+  });
+
   it('supports WriteConcern option in url', function () {
     const options = parseOptions('mongodb://localhost/?w=3');
     expect(options.writeConcern).to.be.an.instanceof(WriteConcern);

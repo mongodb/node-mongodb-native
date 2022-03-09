@@ -78,7 +78,11 @@ export abstract class AbstractOperation<TResult = any> {
     this.trySecondaryWrite = false;
   }
 
-  abstract execute(server: Server, session: ClientSession, callback: Callback<TResult>): void;
+  abstract execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<TResult>
+  ): void;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;

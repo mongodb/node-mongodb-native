@@ -36,7 +36,7 @@ export interface AggregateOptions extends CommandOperationOptions {
 
 /** @internal */
 export class AggregateOperation<T = Document> extends CommandOperation<T> {
-  options: AggregateOptions;
+  override options: AggregateOptions;
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
   hasWriteStage: boolean;
@@ -78,7 +78,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
   }
 
-  get canRetryRead(): boolean {
+  override get canRetryRead(): boolean {
     return !this.hasWriteStage;
   }
 
@@ -86,7 +86,11 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     this.pipeline.push(stage);
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<T>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<T>
+  ): void {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };

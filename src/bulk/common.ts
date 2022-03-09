@@ -286,9 +286,7 @@ export class BulkWriteResult {
 
   /** Returns a specific write error object */
   getWriteErrorAt(index: number): WriteError | undefined {
-    if (index < this.result.writeErrors.length) {
-      return this.result.writeErrors[index];
-    }
+    return index < this.result.writeErrors.length ? this.result.writeErrors[index] : undefined;
   }
 
   /** Retrieve all write errors */
@@ -732,7 +730,7 @@ export class MongoBulkWriteError extends MongoServerError {
     Object.assign(this, error);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoBulkWriteError';
   }
 
@@ -1319,6 +1317,7 @@ export abstract class BulkOperationBase {
       callback(new MongoBulkWriteError(writeConcernError, writeResult));
       return true;
     }
+    return;
   }
 
   abstract addToOperationsList(

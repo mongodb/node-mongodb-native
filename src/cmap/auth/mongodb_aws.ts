@@ -33,7 +33,7 @@ interface AWSSaslContinuePayload {
 }
 
 export class MongoDBAWS extends AuthProvider {
-  auth(authContext: AuthContext, callback: Callback): void {
+  override auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (!credentials) {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));

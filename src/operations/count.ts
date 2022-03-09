@@ -20,7 +20,7 @@ export interface CountOptions extends CommandOperationOptions {
 
 /** @internal */
 export class CountOperation extends CommandOperation<number> {
-  options: CountOptions;
+  override options: CountOptions;
   collectionName?: string;
   query: Document;
 
@@ -32,7 +32,11 @@ export class CountOperation extends CommandOperation<number> {
     this.query = filter;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<number>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<number>
+  ): void {
     const options = this.options;
     const cmd: Document = {
       count: this.collectionName,

@@ -10,7 +10,7 @@ export type RemoveUserOptions = CommandOperationOptions;
 
 /** @internal */
 export class RemoveUserOperation extends CommandOperation<boolean> {
-  options: RemoveUserOptions;
+  override options: RemoveUserOptions;
   username: string;
 
   constructor(db: Db, username: string, options: RemoveUserOptions) {
@@ -19,7 +19,11 @@ export class RemoveUserOperation extends CommandOperation<boolean> {
     this.username = username;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<boolean>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<boolean>
+  ): void {
     super.executeCommand(server, session, { dropUser: this.username }, err => {
       callback(err, err ? false : true);
     });

@@ -7,7 +7,7 @@ import { AbstractOperation, OperationOptions } from './operation';
 
 /** @internal */
 export class IsCappedOperation extends AbstractOperation<boolean> {
-  options: OperationOptions;
+  override options: OperationOptions;
   collection: Collection;
 
   constructor(collection: Collection, options: OperationOptions) {
@@ -16,7 +16,11 @@ export class IsCappedOperation extends AbstractOperation<boolean> {
     this.collection = collection;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<boolean>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<boolean>
+  ): void {
     const coll = this.collection;
 
     coll.s.db

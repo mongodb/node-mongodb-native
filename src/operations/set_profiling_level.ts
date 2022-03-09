@@ -23,7 +23,7 @@ export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
 export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
-  options: SetProfilingLevelOptions;
+  override options: SetProfilingLevelOptions;
   level: ProfilingLevel;
   profile: 0 | 1 | 2;
 
@@ -48,7 +48,11 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     this.level = level;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<ProfilingLevel>): void {
+  override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<ProfilingLevel>
+  ): void {
     const level = this.level;
 
     if (!levelValues.has(level)) {

@@ -56,7 +56,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     });
   }
 
-  map<T>(transform: (doc: TSchema) => T): AggregationCursor<T> {
+  override map<T>(transform: (doc: TSchema) => T): AggregationCursor<T> {
     return super.map(transform) as AggregationCursor<T>;
   }
 

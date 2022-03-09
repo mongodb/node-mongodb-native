@@ -115,7 +115,7 @@ export class MongoError extends Error {
     }
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoError';
   }
 
@@ -176,7 +176,7 @@ export class MongoServerError extends MongoError {
     }
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoServerError';
   }
 }
@@ -192,7 +192,7 @@ export class MongoDriverError extends MongoError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoDriverError';
   }
 }
@@ -212,7 +212,7 @@ export class MongoAPIError extends MongoDriverError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoAPIError';
   }
 }
@@ -232,7 +232,7 @@ export class MongoRuntimeError extends MongoDriverError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoRuntimeError';
   }
 }
@@ -249,7 +249,7 @@ export class MongoBatchReExecutionError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoBatchReExecutionError';
   }
 }
@@ -266,7 +266,7 @@ export class MongoDecompressionError extends MongoRuntimeError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoDecompressionError';
   }
 }
@@ -283,7 +283,7 @@ export class MongoNotConnectedError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoNotConnectedError';
   }
 }
@@ -300,7 +300,7 @@ export class MongoTransactionError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoTransactionError';
   }
 }
@@ -317,7 +317,7 @@ export class MongoExpiredSessionError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoExpiredSessionError';
   }
 }
@@ -334,7 +334,7 @@ export class MongoKerberosError extends MongoRuntimeError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoKerberosError';
   }
 }
@@ -350,7 +350,7 @@ export class MongoChangeStreamError extends MongoRuntimeError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoChangeStreamError';
   }
 }
@@ -366,7 +366,7 @@ export class MongoTailableCursorError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoTailableCursorError';
   }
 }
@@ -381,7 +381,7 @@ export class MongoGridFSStreamError extends MongoRuntimeError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoGridFSStreamError';
   }
 }
@@ -398,7 +398,7 @@ export class MongoGridFSChunkError extends MongoRuntimeError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoGridFSChunkError';
   }
 }
@@ -415,7 +415,7 @@ export class MongoCursorInUseError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoCursorInUseError';
   }
 }
@@ -432,7 +432,7 @@ export class MongoServerClosedError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoServerClosedError';
   }
 }
@@ -448,7 +448,7 @@ export class MongoCursorExhaustedError extends MongoAPIError {
     super(message || 'Cursor is exhausted');
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoCursorExhaustedError';
   }
 }
@@ -465,7 +465,7 @@ export class MongoTopologyClosedError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoTopologyClosedError';
   }
 }
@@ -499,7 +499,7 @@ export class MongoNetworkError extends MongoError {
     }
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoNetworkError';
   }
 }
@@ -517,7 +517,7 @@ export class MongoNetworkTimeoutError extends MongoNetworkError {
     super(message, options);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoNetworkTimeoutError';
   }
 }
@@ -532,7 +532,7 @@ export class MongoParseError extends MongoDriverError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoParseError';
   }
 }
@@ -550,7 +550,7 @@ export class MongoInvalidArgumentError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoInvalidArgumentError';
   }
 }
@@ -568,7 +568,7 @@ export class MongoCompatibilityError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoCompatibilityError';
   }
 }
@@ -586,7 +586,7 @@ export class MongoMissingCredentialsError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoMissingCredentialsError';
   }
 }
@@ -602,7 +602,7 @@ export class MongoMissingDependencyError extends MongoAPIError {
     super(message);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoMissingDependencyError';
   }
 }
@@ -629,7 +629,7 @@ export class MongoSystemError extends MongoError {
     this.code = reason.error?.code;
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoSystemError';
   }
 }
@@ -644,7 +644,7 @@ export class MongoServerSelectionError extends MongoSystemError {
     super(message, reason);
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoServerSelectionError';
   }
 }
@@ -670,7 +670,6 @@ function makeWriteConcernResultObject(input: any) {
 export class MongoWriteConcernError extends MongoServerError {
   /** The result document (provided if ok: 1) */
   result?: Document;
-  errInfo?: Document;
 
   constructor(message: ErrorDescription, result?: Document) {
     if (result && Array.isArray(result.errorLabels)) {
@@ -685,7 +684,7 @@ export class MongoWriteConcernError extends MongoServerError {
     }
   }
 
-  get name(): string {
+  override get name(): string {
     return 'MongoWriteConcernError';
   }
 }
