@@ -17,6 +17,11 @@ describe('Retryable Writes Spec Prose', () => {
   let client;
 
   beforeEach(async function () {
+    if (this.configuration.buildInfo.versionArray[0] < 4) {
+      this.currentTest.skipReason =
+        'configureFailPoint only works on server versions greater than 4';
+      this.skip();
+    }
     client = this.configuration.newClient();
     await client.connect();
   });
@@ -25,7 +30,7 @@ describe('Retryable Writes Spec Prose', () => {
     await client?.close();
   });
 
-  it.skip('retryable writes raise an exception when using the MMAPv1 storage engine', async () => {
+  it('retryable writes raise an exception when using the MMAPv1 storage engine', async () => {
     const failPoint = await client.db('admin').command({
       configureFailPoint: 'failCommand',
       mode: { times: 1 },
@@ -52,5 +57,5 @@ describe('Retryable Writes Spec Prose', () => {
       'message',
       'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.'
     );
-  }).skipReason = 'TODO, might need to limit server versions? 3.6 fails, 4.x has different shape';
+  });
 });
