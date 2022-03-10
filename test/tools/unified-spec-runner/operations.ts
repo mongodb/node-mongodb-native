@@ -173,9 +173,7 @@ operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation
 
 operations.set('bulkWrite', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const operations = operation.arguments.requests;
-  const options = Object.assign({}, operation.arguments);
-  delete options.requests;
+  const { requests: operations, ...options } = operation.arguments;
   return collection.bulkWrite(operations, options);
 });
 
