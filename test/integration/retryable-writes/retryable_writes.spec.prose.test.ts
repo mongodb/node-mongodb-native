@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoError, MongoServerError } from '../../../src';
+import { MongoError, MongoServerError, TopologyType } from '../../../src';
 
 describe('Retryable Writes Spec Prose', () => {
   /**
@@ -17,7 +17,10 @@ describe('Retryable Writes Spec Prose', () => {
   let client;
 
   beforeEach(async function () {
-    if (this.configuration.buildInfo.versionArray[0] < 4) {
+    if (
+      this.configuration.buildInfo.versionArray[0] < 4 ||
+      this.configuration.topologyType !== TopologyType.ReplicaSetWithPrimary
+    ) {
       this.currentTest.skipReason =
         'configureFailPoint only works on server versions greater than 4';
       this.skip();
