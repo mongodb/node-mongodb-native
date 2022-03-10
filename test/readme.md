@@ -13,43 +13,6 @@ about the types of tests and how to run them.
 - [Writing Tests](#writing-tests)
 - [Testing with Special Environments](#testing-with-special-environments)
 
-## Complex deployments
-
-Some of the topologies mentioned in this testing guide require a bit of "orchestration".
-For that, we have [mongo-orchestration](https://github.com/10gen/mongo-orchestration).
-We advise cloning this repository (instead of installing from pip). Inside the repo run:
-
-```sh
-# Create a virtual environment so you can make sure m-orch has all of its dependencies versioned separate from your global environment
-python -m .venv.com
-# There are activates for a few different shells, use the one that matches your shell
-source ./.venv.com/bin/activate
-```
-
-Your working directory must still be at the root of the mongo-orchestration repository.
-With the virtual environment activated install mongo-orchestration with the following command.
-
-```sh
-# "-e ." installs the package as an editable python module
-# the benefit is that the source code in the repo is the same code that is run when you launch orchestration
-# instead of a new copy being installed elsewhere
-pip install -e .
-```
-
-I prefer launching mongo-orchestration in the foreground so it's easily stopped with ctrl-C but the pid file can be found in the current directory.
-
-```sh
-mongo-orchestration start --no-fork
-```
-
-Posting a configuration can look something like this:
-
-```sh
-curl --silent --show-error --max-time 60 --fail http://localhost:8889/v1/sharded_clusters --data @"$DRIVERS_TOOLS/.evergreen/orchestration/configs/sharded_clusters/load-balancer.json"
-```
-
-Where `$DRIVERS_TOOLS` is the path to drivers evergreen tools.
-
 ## About the Tests
 
 All of our test automation is powered by the [Mocha test framework][mocha].
@@ -300,8 +263,7 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
 The following steps will walk you through how to start and test a load balancer.
 
-1. Start a sharded cluster with `--setParameter featureFlagLoadBalancer=true` and `--setParameter loadBalancerPort=27051` flags passed to the mongos processes.
-   1. Follow the instructions here to setup [mongo-orchestration]()
+1. Start a sharded cluster. You can use the [cluster_setup.sh](tools/cluster_setup.sh) script to do so: `./test/tools/cluster_setup.sh sharded_cluster`. The tool should create a cluster with two mongos, so you have a URI similar to `MONGODB_URI=mongodb://host1,host2/`.
 1. Create an environment variable named `MONGODB_URI` that stores the URI of the sharded cluster you just created. For example: `export MONGODB_URI="mongodb://host1,host2/"`
 1. Install the HAProxy load balancer. For those on macOS, you can install HAProxy with `brew install haproxy`.
 1. Start the load balancer by using the [run-load-balancer script](https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/run-load-balancer.sh) provided in drivers-evergreen-tools.
@@ -392,9 +354,9 @@ The following steps will walk you through how to run the tests for CSFLE.
     1. This will install all the dependencies needed to run a python kms_kmip simulated server
 3. In 4 separate terminals launch the following:
     - `./kmstlsvenv/bin/python3 -u kms_kmip_server.py` # by default it always runs on port 5698
-    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 9000`
-    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 9001`
-    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 9002 --require_client_cert`
+    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000`
+    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001`
+    - `./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert`
 4. Set the following environment variables:
     - `export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"`
     - `export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"`

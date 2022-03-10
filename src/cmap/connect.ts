@@ -126,7 +126,7 @@ function performInitialHandshake(
 
     const start = new Date().getTime();
     conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
-      if (err || !response) {
+      if (err) {
         callback(err);
         return;
       }

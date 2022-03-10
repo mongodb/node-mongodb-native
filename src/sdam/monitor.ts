@@ -2,7 +2,7 @@ import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
-import { MongoNetworkError, MongoUnexpectedServerResponseError } from '../error';
+import { MongoNetworkError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, InterruptibleAsyncInterval } from '../utils';
 import {
@@ -260,11 +260,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
     connection.command(ns('admin.$cmd'), cmd, options, (err, hello) => {
       if (err) {
         return failureHandler(err);
-      }
-      if (!hello) {
-        return failureHandler(
-          new MongoUnexpectedServerResponseError('Empty response without error')
-        );
       }
 
       if (!('isWritablePrimary' in hello)) {

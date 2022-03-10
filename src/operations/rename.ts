@@ -1,6 +1,6 @@
 import type { Document } from '../bson';
 import { Collection } from '../collection';
-import { MongoRuntimeError, MongoServerError } from '../error';
+import { MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { Callback, checkCollectionName } from '../utils';
@@ -46,7 +46,7 @@ export class RenameOperation extends RunAdminCommandOperation {
     const coll = this.collection;
 
     super.execute(server, session, (err, doc) => {
-      if (err || !doc) return callback(err ? err : new MongoRuntimeError('No result'));
+      if (err) return callback(err);
       // We have an error
       if (doc?.errmsg) {
         return callback(new MongoServerError(doc));
