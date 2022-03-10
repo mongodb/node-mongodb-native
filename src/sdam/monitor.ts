@@ -243,8 +243,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
     const options = isAwaitable
       ? {
-          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
-          exhaustAllowed: true
+          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0
         }
       : { socketTimeoutMS: connectTimeoutMS };
 
