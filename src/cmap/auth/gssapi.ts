@@ -42,8 +42,11 @@ export class GSSAPI extends AuthProvider {
         new MongoMissingCredentialsError('Credentials required for GSSAPI authentication')
       );
     const { username } = credentials;
-    function externalCommand(command: Document, callback: Callback) {
-      return connection.command(ns('$external.$cmd'), command, undefined, callback);
+    function externalCommand(
+      command: Document,
+      cb: Callback<{ payload: string; conversationId: any }>
+    ) {
+      return connection.command(ns('$external.$cmd'), command, undefined, cb);
     }
     makeKerberosClient(authContext, (err, client) => {
       if (err) return callback(err);

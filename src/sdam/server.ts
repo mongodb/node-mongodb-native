@@ -520,18 +520,13 @@ function isRetryableWritesEnabled(topology: Topology) {
   return topology.s.options.retryWrites !== false;
 }
 
-/** @internal */
-export interface HandleOperationResultCallback {
-  (error: MongoError | Error | undefined, result?: Document): void;
-}
-
 function makeOperationHandler(
   server: Server,
   connection: Connection,
   cmd: Document,
   options: CommandOptions | GetMoreOptions | undefined,
   callback: Callback
-): HandleOperationResultCallback {
+): Callback {
   const session = options?.session;
   return function handleOperationResult(error, result) {
     if (result != null) {

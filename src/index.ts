@@ -398,13 +398,7 @@ export type {
   RTTPinger,
   RTTPingerOptions
 } from './sdam/monitor';
-export type {
-  HandleOperationResultCallback,
-  Server,
-  ServerEvents,
-  ServerOptions,
-  ServerPrivate
-} from './sdam/server';
+export type { Server, ServerEvents, ServerOptions, ServerPrivate } from './sdam/server';
 export type {
   ServerDescription,
   ServerDescriptionOptions,

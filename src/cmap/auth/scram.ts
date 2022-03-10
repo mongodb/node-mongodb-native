@@ -122,7 +122,7 @@ function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, call
   const saslStartCmd = makeFirstMessage(cryptoMethod, credentials, nonce);
   connection.command(ns(`${db}.$cmd`), saslStartCmd, undefined, (_err, result) => {
     const err = resolveError(_err, result);
-    if (err || !result) {
+    if (err) {
       return callback(err);
     }
 
@@ -213,7 +213,7 @@ function continueScramConversation(
 
   connection.command(ns(`${db}.$cmd`), saslContinueCmd, undefined, (_err, r) => {
     const err = resolveError(_err, r);
-    if (err || !r) {
+    if (err) {
       return callback(err);
     }
 

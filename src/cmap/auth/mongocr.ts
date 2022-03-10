@@ -18,7 +18,7 @@ export class MongoCR extends AuthProvider {
       let key = null;
 
       // Get nonce
-      if (err == null && r != null) {
+      if (err == null) {
         nonce = r.nonce;
 
         // Use node md5 generator
