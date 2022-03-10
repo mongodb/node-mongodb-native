@@ -248,6 +248,13 @@ describe('Change Streams', function () {
         expect(pipelineOptions).not.to.haveOwnProperty('allChangesForCluster');
       });
     });
+
+    it('ignores any invalid option values', function () {
+      const changeStream = new ChangeStream(collection, [], { invalidOption: true });
+      expect(changeStream.cursor).to.haveOwnProperty('pipeline');
+      const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
+      expect(pipelineOptions).not.to.haveOwnProperty('invalidOption');
+    });
   });
 
   it('should close the listeners after the cursor is closed', {
