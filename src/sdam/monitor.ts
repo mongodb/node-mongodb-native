@@ -212,6 +212,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
   monitor.emit(Server.SERVER_HEARTBEAT_STARTED, new ServerHeartbeatStartedEvent(monitor.address));
 
   function failureHandler(err: AnyError) {
+    console.debug('Monitor#failureHandler', err);
     monitor[kConnection]?.destroy({ force: true });
     monitor[kConnection] = undefined;
 
