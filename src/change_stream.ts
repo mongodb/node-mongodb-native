@@ -46,9 +46,14 @@ const kClosed = Symbol('closed');
 const kMode = Symbol('mode');
 
 const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
-const CURSOR_OPTIONS = ['batchSize', 'maxAwaitTimeMS', 'collation', 'readPreference'].concat(
-  CHANGE_STREAM_OPTIONS
-);
+
+const CURSOR_OPTIONS = [
+  'batchSize',
+  'maxAwaitTimeMS',
+  'collation',
+  'readPreference',
+  ...CHANGE_STREAM_OPTIONS
+];
 
 const CHANGE_DOMAIN_TYPES = {
   COLLECTION: Symbol('Collection'),
@@ -94,8 +99,8 @@ export interface PipeOptions {
  * @public
  */
 export interface ChangeStreamOptions extends AggregateOptions {
-  /** Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
-  fullDocument?: string;
+  /** Allowed values: ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
+  fullDocument?: 'updateLookup';
   /** The maximum amount of time for the server to wait on new documents to satisfy a change stream query. */
   maxAwaitTimeMS?: number;
   /** Allows you to start a changeStream after a specified event. See {@link https://docs.mongodb.com/manual/changeStreams/#resumeafter-for-change-streams|ChangeStream documentation}. */
@@ -576,8 +581,14 @@ function createChangeStreamCursor<TSchema>(
   changeStream: ChangeStream<TSchema>,
   options: ChangeStreamOptions
 ): ChangeStreamCursor<TSchema> {
-  const changeStreamStageOptions: Document = { fullDocument: options.fullDocument || 'default' };
-  applyKnownOptions(changeStreamStageOptions, options, CHANGE_STREAM_OPTIONS);
+  const changeStreamStageOptions: Document = applyKnownOptions(
+    {
+      fullDocument: options.fullDocument
+    },
+    options,
+    CHANGE_STREAM_OPTIONS
+  );
+
   if (changeStream.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
     changeStreamStageOptions.allChangesForCluster = true;
   }
@@ -606,11 +617,11 @@ function createChangeStreamCursor<TSchema>(
 }
 
 function applyKnownOptions(target: Document, source: Document, optionNames: string[]) {
-  optionNames.forEach(name => {
-    if (source[name]) {
-      target[name] = source[name];
+  for (const option of optionNames) {
+    if (source[option]) {
+      target[option] = source[option];
     }
-  });
+  }
 
   return target;
 }

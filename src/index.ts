@@ -166,7 +166,6 @@ export type {
 export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
 export type {
-  ChangeStream,
   ChangeStreamCursor,
   ChangeStreamCursorOptions,
   ChangeStreamDocument,
@@ -178,6 +177,7 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
+export { ChangeStream } from './change_stream';
 export type {
   AuthMechanismProperties,
   MongoCredentials,

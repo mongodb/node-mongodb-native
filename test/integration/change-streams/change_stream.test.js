@@ -7,7 +7,7 @@ const { EventCollector, getSymbolFrom } = require('../../tools/utils');
 const { expect } = require('chai');
 
 const sinon = require('sinon');
-const { Long, ReadPreference, MongoNetworkError } = require('../../../src');
+const { Long, ReadPreference, MongoNetworkError, ChangeStream } = require('../../../src');
 
 const crypto = require('crypto');
 const { isHello } = require('../../../src/utils');
@@ -186,6 +186,69 @@ describe('Change Streams', function () {
     }
   });
   afterEach(async () => await mock.cleanup());
+
+  context('ChangeStreamCursor options', function () {
+    let client, db, collection;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      await client.connect();
+      db = client.db('db');
+      collection = db.collection('collection');
+    });
+
+    afterEach(async function () {
+      await client.close();
+      client = undefined;
+      db = undefined;
+      collection = undefined;
+    });
+
+    context('fullDocument', () => {
+      it('sets fullDocument to `undefined` if no value is passed', function () {
+        const changeStream = new ChangeStream(client);
+
+        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
+        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
+        expect(pipelineOptions).to.haveOwnProperty('fullDocument').to.be.undefined;
+      });
+
+      it('assigns `fullDocument` to the correct value if it is passed as an option', function () {
+        const changeStream = new ChangeStream(client, [], { fullDocument: 'updateLookup' });
+
+        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
+        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
+        expect(pipelineOptions).to.haveOwnProperty('fullDocument').to.equal('updateLookup');
+      });
+    });
+
+    context('allChangesForCluster', () => {
+      it('assigns `allChangesForCluster` to `true` if the ChangeStream.type is Cluster', function () {
+        const changeStream = new ChangeStream(client);
+
+        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
+        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
+        expect(pipelineOptions).to.haveOwnProperty('allChangesForCluster').to.be.true;
+      });
+
+      it('does not assigns `allChangesForCluster` if the ChangeStream.type is Db', function () {
+        const changeStream = new ChangeStream(db);
+
+        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
+
+        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
+        expect(pipelineOptions).not.to.haveOwnProperty('allChangesForCluster');
+      });
+
+      it('does not assigns `allChangesForCluster` if the ChangeStream.type is Db', function () {
+        const changeStream = new ChangeStream(collection);
+
+        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
+        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
+        expect(pipelineOptions).not.to.haveOwnProperty('allChangesForCluster');
+      });
+    });
+  });
 
   it('should close the listeners after the cursor is closed', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
