@@ -166,7 +166,7 @@ const pipeline = [
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
 
-describe.only('Change Streams', function () {
+describe('Change Streams', function () {
   before(async function () {
     return await setupDatabase(this.configuration, ['integration_tests']);
   });
@@ -191,8 +191,7 @@ describe.only('Change Streams', function () {
     let client, db, collection;
 
     beforeEach(async function () {
-      client = this.configuration.newClient();
-      await client.connect();
+      client = await this.configuration.newClient().connect();
       db = client.db('db');
       collection = db.collection('collection');
     });
