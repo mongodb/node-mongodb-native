@@ -1,0 +1,243 @@
+{
+  "description": "BulkWrite updateMany-let",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "crud-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 20
+        },
+        {
+          "_id": 2,
+          "x": 21
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "BulkWrite updateMany with let option",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateMany": {
+                  "filter": {
+                    "$expr": {
+                      "$eq": [
+                        "$_id",
+                        "$$id"
+                      ]
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "x": 21
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "let": {
+              "id": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "$expr": {
+                          "$eq": [
+                            "$_id",
+                            "$$id"
+                          ]
+                        }
+                      },
+                      "u": [
+                        {
+                          "$set": {
+                            "x": 21
+                          }
+                        }
+                      ],
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "let": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 21
+            },
+            {
+              "_id": 2,
+              "x": 21
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "BulkWrite updateMany with let option unsupported (server-side error)",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2.0",
+          "maxServerVersion": "4.9"
+        }
+      ],
+      "operations": [
+        {
+          "object": "collection0",
+          "name": "bulkWrite",
+          "arguments": {
+            "requests": [
+              {
+                "updateMany": {
+                  "filter": {
+                    "$expr": {
+                      "$eq": [
+                        "$_id",
+                        "$$id"
+                      ]
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "x": 21
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "let": {
+              "id": 1
+            }
+          },
+          "expectError": {
+            "errorContains": "'update.let' is an unknown field",
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "coll0",
+                  "updates": [
+                    {
+                      "q": {
+                        "$expr": {
+                          "$eq": [
+                            "$_id",
+                            "$$id"
+                          ]
+                        }
+                      },
+                      "u": [
+                        {
+                          "$set": {
+                            "x": 21
+                          }
+                        }
+                      ],
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "let": {
+                    "id": 1
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll0",
+          "databaseName": "crud-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 20
+            },
+            {
+              "_id": 2,
+              "x": 21
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
