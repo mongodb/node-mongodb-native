@@ -53,7 +53,7 @@ describe('Retryable Writes Spec Prose', () => {
       .catch(error => error);
 
     expect(error).to.exist;
-    expect(error).to.be.instanceOf(MongoServerError);
+    expect(error).that.is.instanceOf(MongoServerError);
     expect(error).to.have.property('originalError').that.instanceOf(MongoError);
     expect(error.originalError).to.have.property('code', 20);
     expect(error).to.have.property(

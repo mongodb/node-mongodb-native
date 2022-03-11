@@ -51,7 +51,6 @@ declare global {
     interface Test {
       metadata: MongoDBMetadataUI;
 
-      /** @deprecated Attach spec to a test if you need access to it in a beforeEach hook, not recommended?? */
       spec: Record<string, any>;
     }
 

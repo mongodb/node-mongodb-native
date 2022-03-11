@@ -406,6 +406,9 @@ describe('MongoErrors', () => {
       // 8 - below server version 4.4
       // 9 - above server version 4.4
 
+      const ABOVE_4_4 = 9;
+      const BELOW_4_4 = 8;
+
       const tests: {
         description: string;
         result: boolean;
@@ -416,25 +419,25 @@ describe('MongoErrors', () => {
           description: 'a plain error',
           result: false,
           error: new Error('do not retry me!'),
-          maxWireVersion: 8
+          maxWireVersion: BELOW_4_4
         },
         {
           description: 'a MongoError with no code nor label',
           result: false,
           error: new MongoError('do not retry me!'),
-          maxWireVersion: 8
+          maxWireVersion: BELOW_4_4
         },
         {
           description: 'network error',
           result: true,
           error: new MongoNetworkError('socket bad, try again'),
-          maxWireVersion: 8
+          maxWireVersion: BELOW_4_4
         },
         {
           description: 'a MongoWriteConcernError with no code nor label',
           result: false,
           error: new MongoWriteConcernError({ message: 'empty wc error' }),
-          maxWireVersion: 8
+          maxWireVersion: BELOW_4_4
         },
         {
           description: 'a MongoWriteConcernError with a random label',
@@ -443,31 +446,31 @@ describe('MongoErrors', () => {
             { message: 'random label' },
             { errorLabels: ['myLabel'] }
           ),
-          maxWireVersion: 8
+          maxWireVersion: BELOW_4_4
         },
         {
           description: 'a MongoWriteConcernError with a retryable code above server 4.4',
           result: false,
           error: new MongoWriteConcernError({}, { code: 262 }),
-          maxWireVersion: 9
+          maxWireVersion: ABOVE_4_4
         },
         {
           description: 'a MongoWriteConcernError with a retryable code below server 4.4',
           result: true,
           error: new MongoWriteConcernError({}, { code: 262 }),
-          maxWireVersion: 8
+          maxWireVersion: BELOW_4_4
         },
         {
           description: 'a MongoWriteConcernError with a RetryableWriteError label below server 4.4',
           result: true,
           error: new MongoWriteConcernError({}, { errorLabels: ['RetryableWriteError'] }),
-          maxWireVersion: 8
+          maxWireVersion: BELOW_4_4
         },
         {
           description: 'a MongoWriteConcernError with a RetryableWriteError label above server 4.4',
           result: false,
           error: new MongoWriteConcernError({}, { errorLabels: ['RetryableWriteError'] }),
-          maxWireVersion: 9
+          maxWireVersion: ABOVE_4_4
         },
         {
           description: 'any MongoError with a RetryableWriteError label',
@@ -479,7 +482,7 @@ describe('MongoErrors', () => {
             error.addErrorLabel('RetryableWriteError');
             return error;
           })(),
-          maxWireVersion: 9
+          maxWireVersion: ABOVE_4_4
         }
       ];
       for (const { description, result, error, maxWireVersion } of tests) {
