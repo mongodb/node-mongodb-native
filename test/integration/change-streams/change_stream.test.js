@@ -7,7 +7,7 @@ const { EventCollector, getSymbolFrom } = require('../../tools/utils');
 const { expect } = require('chai');
 
 const sinon = require('sinon');
-const { Long, ReadPreference, MongoNetworkError, ChangeStream } = require('../../../src');
+const { Long, ReadPreference, MongoNetworkError } = require('../../../src');
 
 const crypto = require('crypto');
 const { isHello } = require('../../../src/utils');
@@ -166,7 +166,7 @@ const pipeline = [
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
 
-describe('Change Streams', function () {
+describe.only('Change Streams', function () {
   before(async function () {
     return await setupDatabase(this.configuration, ['integration_tests']);
   });
@@ -206,54 +206,57 @@ describe('Change Streams', function () {
 
     context('fullDocument', () => {
       it('sets fullDocument to `undefined` if no value is passed', function () {
-        const changeStream = new ChangeStream(client);
+        const changeStream = client.watch();
 
-        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
-        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
-        expect(pipelineOptions).to.haveOwnProperty('fullDocument').to.be.undefined;
+        expect(changeStream).to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.fullDocument',
+          undefined
+        );
       });
 
       it('assigns `fullDocument` to the correct value if it is passed as an option', function () {
-        const changeStream = new ChangeStream(client, [], { fullDocument: 'updateLookup' });
+        const changeStream = client.watch([], { fullDocument: 'updateLookup' });
 
-        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
-        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
-        expect(pipelineOptions).to.haveOwnProperty('fullDocument').to.equal('updateLookup');
+        expect(changeStream).to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.fullDocument',
+          'updateLookup'
+        );
       });
     });
 
     context('allChangesForCluster', () => {
       it('assigns `allChangesForCluster` to `true` if the ChangeStream.type is Cluster', function () {
-        const changeStream = new ChangeStream(client);
+        const changeStream = client.watch();
 
-        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
-        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
-        expect(pipelineOptions).to.haveOwnProperty('allChangesForCluster').to.be.true;
+        expect(changeStream).to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.allChangesForCluster',
+          true
+        );
       });
 
       it('does not assigns `allChangesForCluster` if the ChangeStream.type is Db', function () {
-        const changeStream = new ChangeStream(db);
+        const changeStream = db.watch();
 
-        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
-
-        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
-        expect(pipelineOptions).not.to.haveOwnProperty('allChangesForCluster');
+        expect(changeStream).not.to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.allChangesForCluster'
+        );
       });
 
-      it('does not assigns `allChangesForCluster` if the ChangeStream.type is Db', function () {
-        const changeStream = new ChangeStream(collection);
+      it('does not assign `allChangesForCluster` if the ChangeStream.type is Db', function () {
+        const changeStream = collection.watch();
 
-        expect(changeStream.cursor).to.haveOwnProperty('pipeline');
-        const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
-        expect(pipelineOptions).not.to.haveOwnProperty('allChangesForCluster');
+        expect(changeStream).not.to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.allChangesForCluster'
+        );
       });
     });
 
     it('ignores any invalid option values', function () {
-      const changeStream = new ChangeStream(collection, [], { invalidOption: true });
-      expect(changeStream.cursor).to.haveOwnProperty('pipeline');
-      const pipelineOptions = changeStream.cursor.pipeline[0].$changeStream;
-      expect(pipelineOptions).not.to.haveOwnProperty('invalidOption');
+      const changeStream = collection.watch([], { invalidOption: true });
+
+      expect(changeStream).not.to.have.nested.property(
+        'cursor.pipeline[0].$changeStream.invalidOption'
+      );
     });
   });
 

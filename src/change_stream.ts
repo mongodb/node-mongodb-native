@@ -45,7 +45,12 @@ const kClosed = Symbol('closed');
 /** @internal */
 const kMode = Symbol('mode');
 
-const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
+const CHANGE_STREAM_OPTIONS = [
+  'resumeAfter',
+  'startAfter',
+  'startAtOperationTime',
+  'fullDocument'
+] as const;
 
 const CURSOR_OPTIONS = [
   'batchSize',
@@ -53,7 +58,7 @@ const CURSOR_OPTIONS = [
   'collation',
   'readPreference',
   ...CHANGE_STREAM_OPTIONS
-];
+] as const;
 
 const CHANGE_DOMAIN_TYPES = {
   COLLECTION: Symbol('Collection'),
@@ -100,7 +105,7 @@ export interface PipeOptions {
  */
 export interface ChangeStreamOptions extends AggregateOptions {
   /** Allowed values: ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
-  fullDocument?: 'updateLookup';
+  fullDocument?: string;
   /** The maximum amount of time for the server to wait on new documents to satisfy a change stream query. */
   maxAwaitTimeMS?: number;
   /** Allows you to start a changeStream after a specified event. See {@link https://docs.mongodb.com/manual/changeStreams/#resumeafter-for-change-streams|ChangeStream documentation}. */
@@ -573,31 +578,50 @@ function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
   }
   changeStream[kMode] = 'iterator';
 }
+
+function createChangeStreamStageOptions<TSchema>(
+  changeStream: ChangeStream<TSchema>,
+  changeStreamOptions: ChangeStreamOptions
+) {
+  const changeStreamStageOptions: Document = {
+    fullDocument: changeStreamOptions.fullDocument
+  };
+
+  for (const optionName of CHANGE_STREAM_OPTIONS) {
+    if (changeStreamOptions[optionName]) {
+      changeStreamStageOptions[optionName] = changeStreamOptions[optionName];
+    }
+  }
+
+  if (changeStream.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
+    changeStreamStageOptions.allChangesForCluster = true;
+  }
+
+  return changeStreamStageOptions;
+}
 /**
  * Create a new change stream cursor based on self's configuration
  * @internal
  */
 function createChangeStreamCursor<TSchema>(
   changeStream: ChangeStream<TSchema>,
-  options: ChangeStreamOptions
+  changeStreamOptions: ChangeStreamOptions
 ): ChangeStreamCursor<TSchema> {
-  const changeStreamStageOptions: Document = applyKnownOptions(
-    {
-      fullDocument: options.fullDocument
-    },
-    options,
-    CHANGE_STREAM_OPTIONS
+  const changeStreamStageOptions = createChangeStreamStageOptions(
+    changeStream,
+    changeStreamOptions
   );
-
-  if (changeStream.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
-    changeStreamStageOptions.allChangesForCluster = true;
-  }
-
   const pipeline = [{ $changeStream: changeStreamStageOptions } as Document].concat(
     changeStream.pipeline
   );
 
-  const cursorOptions = applyKnownOptions({}, options, CURSOR_OPTIONS);
+  const cursorOptions: Document = {};
+  for (const optionName of CURSOR_OPTIONS) {
+    if (changeStreamOptions[optionName]) {
+      cursorOptions[optionName] = changeStreamOptions[optionName];
+    }
+  }
+
   const changeStreamCursor = new ChangeStreamCursor<TSchema>(
     getTopology(changeStream.parent),
     changeStream.namespace,
@@ -614,16 +638,6 @@ function createChangeStreamCursor<TSchema>(
   }
 
   return changeStreamCursor;
-}
-
-function applyKnownOptions(target: Document, source: Document, optionNames: string[]) {
-  for (const option of optionNames) {
-    if (source[option]) {
-      target[option] = source[option];
-    }
-  }
-
-  return target;
 }
 
 interface TopologyWaitOptions {
