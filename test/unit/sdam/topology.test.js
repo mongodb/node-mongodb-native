@@ -472,22 +472,17 @@ describe('Topology (unit)', function () {
       });
 
       topology.connect(() => {
-        topology.selectServer(
-          ReadPreference.secondary,
-          {},
-          { serverSelectionTimeoutMS: 1000 },
-          err => {
-            expect(err).to.exist;
-            expect(err).to.match(/Server selection timed out/);
-            expect(err).to.have.property('reason');
+        topology.selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 }, err => {
+          expect(err).to.exist;
+          expect(err).to.match(/Server selection timed out/);
+          expect(err).to.have.property('reason');
 
-            // When server is created `connect` is called on the monitor. When server selection
-            // occurs `requestCheck` will be called for an immediate check.
-            expect(requestCheck).property('callCount').to.equal(1);
+          // When server is created `connect` is called on the monitor. When server selection
+          // occurs `requestCheck` will be called for an immediate check.
+          expect(requestCheck).property('callCount').to.equal(1);
 
-            topology.close(done);
-          }
-        );
+          topology.close(done);
+        });
       });
     });
 
@@ -499,16 +494,11 @@ describe('Topology (unit)', function () {
       });
 
       topology.close(() => {
-        topology.selectServer(
-          ReadPreference.primary,
-          {},
-          { serverSelectionTimeoutMS: 2000 },
-          err => {
-            expect(err).to.exist;
-            expect(err).to.match(/Topology is closed/);
-            done();
-          }
-        );
+        topology.selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 }, err => {
+          expect(err).to.exist;
+          expect(err).to.match(/Topology is closed/);
+          done();
+        });
       });
     });
 
