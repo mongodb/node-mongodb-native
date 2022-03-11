@@ -80,7 +80,7 @@ export function executeOperation<
 
   return maybePromise(callback, callback => {
     if (topology.shouldCheckForSessionSupport()) {
-      return topology.selectServer(ReadPreference.primaryPreferred, err => {
+      return topology.selectServer(ReadPreference.primaryPreferred, {}, err => {
         if (err) return callback(err);
 
         executeOperation<T, TResult>(topology, operation, callback);
@@ -89,7 +89,7 @@ export function executeOperation<
 
     // The driver sessions spec mandates that we implicitly create sessions for operations
     // that are not explicitly provided with a session.
-    let session: ClientSession | undefined = operation.session;
+    let session = operation.session;
     let owner: symbol | undefined;
     if (topology.hasSessionSupport()) {
       if (session == null) {
@@ -125,7 +125,7 @@ export function executeOperation<
 
 function executeWithServerSelection<TResult>(
   topology: Topology,
-  session: ClientSession,
+  session: ClientSession | undefined,
   operation: AbstractOperation,
   callback: Callback<TResult>
 ) {

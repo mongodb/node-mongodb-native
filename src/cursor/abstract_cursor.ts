@@ -655,7 +655,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
     if (cursor[kSession] == null) {
       if (cursor[kTopology].shouldCheckForSessionSupport()) {
-        return cursor[kTopology].selectServer(ReadPreference.primaryPreferred, err => {
+        return cursor[kTopology].selectServer(ReadPreference.primaryPreferred, {}, err => {
           if (err) return callback(err);
           return next(cursor, blocking, callback);
         });

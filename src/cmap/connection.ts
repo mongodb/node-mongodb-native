@@ -109,9 +109,11 @@ export interface CommandOptions extends BSONSerializeOptions {
   noResponse?: boolean;
   omitReadPreference?: boolean;
 
-  // TODO(NODE-2802): Currently the CommandOptions take a property willRetryWrite which is a hint from executeOperation that the txnNum should be applied to this command.
-  // Applying a session to a command should happen as part of command construction, most likely in the CommandOperation#executeCommand method,
-  // where we have access to the details we need to determine if a txnNum should also be applied.
+  // TODO(NODE-2802): Currently the CommandOptions take a property willRetryWrite which is a hint
+  // from executeOperation that the txnNum should be applied to this command.
+  // Applying a session to a command should happen as part of command construction,
+  // most likely in the CommandOperation#executeCommand method, where we have access to
+  // the details we need to determine if a txnNum should also be applied.
   willRetryWrite?: true;
 
   writeConcern?: WriteConcern;

@@ -553,27 +553,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    * @param callback - The callback used to indicate success or failure
    * @returns An instance of a `Server` meeting the criteria of the predicate provided
    */
-  selectServer(options: SelectServerOptions, callback: Callback<Server>): void;
-  selectServer(
-    selector: string | ReadPreference | ServerSelector,
-    callback: Callback<Server>
-  ): void;
   selectServer(
     selector: string | ReadPreference | ServerSelector,
     options: SelectServerOptions,
     callback: Callback<Server>
-  ): void;
-  selectServer(
-    selector: string | ReadPreference | ServerSelector | SelectServerOptions,
-    _options?: SelectServerOptions | Callback<Server>,
-    _callback?: Callback<Server>
   ): void {
-    let options = _options as SelectServerOptions;
-    const callback = (_callback ?? _options) as Callback<Server>;
-    if (typeof options === 'function') {
-      options = {};
-    }
-
     let serverSelector;
     if (typeof selector !== 'function') {
       if (typeof selector === 'string') {
@@ -671,6 +655,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     this.selectServer(
       readPreferenceServerSelector(ReadPreference.primaryPreferred),
+      {},
       (err, server) => {
         if (err || !server) {
           if (typeof callback === 'function') callback(err);

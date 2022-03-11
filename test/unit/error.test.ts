@@ -337,7 +337,7 @@ describe('MongoErrors', () => {
           return cleanup(err);
         }
 
-        topology.selectServer('primary', (err, server) => {
+        topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
           server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {}, err => {
@@ -378,7 +378,7 @@ describe('MongoErrors', () => {
           return cleanup(err);
         }
 
-        topology.selectServer('primary', (err, server) => {
+        topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
           server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {}, err => {
