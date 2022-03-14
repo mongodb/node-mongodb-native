@@ -173,7 +173,7 @@ describe('Topology (unit)', function () {
       topology.connect(err => {
         expect(err).to.not.exist;
 
-        topology.selectServer('primary', (err, server) => {
+        topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
           server.command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250 }, (err, result) => {
@@ -209,7 +209,7 @@ describe('Topology (unit)', function () {
       topology.connect(err => {
         expect(err).to.not.exist;
 
-        topology.selectServer('primary', (err, server) => {
+        topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
           let serverDescription;
@@ -218,7 +218,7 @@ describe('Topology (unit)', function () {
           let poolCleared = false;
           topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, (err, result) => {
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
@@ -235,7 +235,7 @@ describe('Topology (unit)', function () {
         if (isHello(doc)) {
           request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
         } else if (doc.insert) {
-          request.reply({ ok: 0, message: LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE });
+          request.reply({ ok: 0, message: LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE.source });
         } else {
           request.reply({ ok: 1 });
         }
@@ -245,7 +245,7 @@ describe('Topology (unit)', function () {
       topology.connect(err => {
         expect(err).to.not.exist;
 
-        topology.selectServer('primary', (err, server) => {
+        topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
           let serverDescription;
@@ -254,7 +254,7 @@ describe('Topology (unit)', function () {
           let poolCleared = false;
           topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, (err, result) => {
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
@@ -281,13 +281,13 @@ describe('Topology (unit)', function () {
       topology.connect(err => {
         expect(err).to.not.exist;
 
-        topology.selectServer('primary', (err, server) => {
+        topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, (err, result) => {
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
             expect(result).to.not.exist;
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
@@ -550,11 +550,11 @@ describe('Topology (unit)', function () {
 
           preventSelection = true;
           for (let i = 0; i < toSelect - 1; ++i) {
-            topology.selectServer(i % 5 === 0 ? failingSelector : anySelector, finish);
+            topology.selectServer(i % 5 === 0 ? failingSelector : anySelector, {}, finish);
           }
 
           preventSelection = false;
-          topology.selectServer(anySelector, finish);
+          topology.selectServer(anySelector, {}, finish);
         });
       });
     });

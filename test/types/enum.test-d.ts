@@ -12,6 +12,7 @@ import {
   ExplainVerbosity,
   GSSAPICanonicalizationValue,
   LoggerLevel,
+  MongoErrorLabel,
   ProfilingLevel,
   ReadConcernLevel,
   ReadPreferenceMode,
@@ -45,3 +46,4 @@ expectType<ReturnDocument>(Object.values(ReturnDocument)[num]);
 expectType<ServerApiVersion>(Object.values(ServerApiVersion)[num]);
 expectType<ServerType>(Object.values(ServerType)[num]);
 expectType<TopologyType>(Object.values(TopologyType)[num]);
+expectType<MongoErrorLabel>(Object.values(MongoErrorLabel)[num]);

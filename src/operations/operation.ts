@@ -59,7 +59,7 @@ export abstract class AbstractOperation<TResult = any> {
   // TODO: Each operation defines its own options, there should be better typing here
   options: Document;
 
-  [kSession]: ClientSession;
+  [kSession]: ClientSession | undefined;
 
   constructor(options: OperationOptions = {}) {
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
@@ -69,9 +69,7 @@ export abstract class AbstractOperation<TResult = any> {
     // Pull the BSON serialize options from the already-resolved options
     this.bsonOptions = resolveBSONOptions(options);
 
-    if (options.session) {
-      this[kSession] = options.session;
-    }
+    this[kSession] = options.session != null ? options.session : undefined;
 
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
@@ -93,7 +91,7 @@ export abstract class AbstractOperation<TResult = any> {
     return ctor.aspects.has(aspect);
   }
 
-  get session(): ClientSession {
+  get session(): ClientSession | undefined {
     return this[kSession];
   }
 

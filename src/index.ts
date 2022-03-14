@@ -65,6 +65,7 @@ export {
   MongoTailableCursorError,
   MongoTopologyClosedError,
   MongoTransactionError,
+  MongoUnexpectedServerResponseError,
   MongoWriteConcernError
 } from './error';
 export {
@@ -92,6 +93,7 @@ export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
 export { CURSOR_FLAGS } from './cursor/abstract_cursor';
 export { AutoEncryptionLoggerLevel } from './deps';
+export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { LoggerLevel } from './logger';
 export { ServerApiVersion } from './mongo_client';

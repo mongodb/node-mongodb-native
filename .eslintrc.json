@@ -66,6 +66,10 @@
           {
             "name": ".",
             "message": "Please import directly from the relevant file instead."
+          },
+          {
+            "name": "..",
+            "message": "Please import directly from the relevant file instead."
           }
         ]
       }
@@ -158,7 +162,8 @@
       "parser": "@typescript-eslint/parser",
       "rules": {
         "no-console": "off",
-        "no-restricted-syntax": "off"
+        "no-restricted-syntax": "off",
+        "typescript-eslint/ban-ts-comment": "off"
       }
     },
     {

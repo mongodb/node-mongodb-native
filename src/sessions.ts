@@ -6,16 +6,14 @@ import { PINNED, UNPINNED } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import {
   AnyError,
-  isRetryableEndTransactionError,
-  isRetryableError,
   MongoAPIError,
   MongoCompatibilityError,
   MONGODB_ERROR_CODES,
   MongoDriverError,
   MongoError,
+  MongoErrorLabel,
   MongoExpiredSessionError,
   MongoInvalidArgumentError,
-  MongoNetworkError,
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
@@ -41,7 +39,6 @@ import {
   now,
   uuidV4
 } from './utils';
-import type { WriteConcern } from './write_concern';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -507,7 +504,7 @@ export function maybeClearPinnedConnection(
     session.inTransaction() &&
     error &&
     error instanceof MongoError &&
-    error.hasErrorLabel('TransientTransactionError')
+    error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
   ) {
     return;
   }
@@ -559,11 +556,11 @@ function attemptTransactionCommit<T>(
       hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
       !isMaxTimeMSExpiredError(err)
     ) {
-      if (err.hasErrorLabel('UnknownTransactionCommitResult')) {
+      if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
         return attemptTransactionCommit(session, startTime, fn, options);
       }
 
-      if (err.hasErrorLabel('TransientTransactionError')) {
+      if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
         return attemptTransaction(session, startTime, fn, options);
       }
     }
@@ -617,14 +614,14 @@ function attemptTransaction<TSchema>(
       function maybeRetryOrThrow(err: MongoError): Promise<any> {
         if (
           err instanceof MongoError &&
-          err.hasErrorLabel('TransientTransactionError') &&
+          err.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
           hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
         ) {
           return attemptTransaction(session, startTime, fn, options);
         }
 
         if (isMaxTimeMSExpiredError(err)) {
-          err.addErrorLabel('UnknownTransactionCommitResult');
+          err.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
         }
 
         throw err;
@@ -639,7 +636,11 @@ function attemptTransaction<TSchema>(
   );
 }
 
-function endTransaction(session: ClientSession, commandName: string, callback: Callback<Document>) {
+function endTransaction(
+  session: ClientSession,
+  commandName: 'abortTransaction' | 'commitTransaction',
+  callback: Callback<Document>
+) {
   if (!assertAlive(session, callback)) {
     // checking result in case callback was called
     return;
@@ -717,7 +718,7 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     Object.assign(command, { maxTimeMS: session.transaction.options.maxTimeMS });
   }
 
-  function commandHandler(e?: MongoError, r?: Document) {
+  function commandHandler(error?: Error, result?: Document) {
     if (commandName !== 'commitTransaction') {
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
       if (session.loadBalanced) {
@@ -729,25 +730,24 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
     }
 
     session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
-    if (e) {
+    if (error instanceof MongoError) {
       if (
-        e instanceof MongoNetworkError ||
-        e instanceof MongoWriteConcernError ||
-        isRetryableError(e) ||
-        isMaxTimeMSExpiredError(e)
+        error.hasErrorLabel(MongoErrorLabel.RetryableWriteError) ||
+        error instanceof MongoWriteConcernError ||
+        isMaxTimeMSExpiredError(error)
       ) {
-        if (isUnknownTransactionCommitResult(e)) {
-          e.addErrorLabel('UnknownTransactionCommitResult');
+        if (isUnknownTransactionCommitResult(error)) {
+          error.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
 
           // per txns spec, must unpin session in this case
-          session.unpin({ error: e });
+          session.unpin({ error });
         }
-      } else if (e.hasErrorLabel('TransientTransactionError')) {
-        session.unpin({ error: e });
+      } else if (error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+        session.unpin({ error });
       }
     }
 
-    callback(e, r);
+    callback(error, result);
   }
 
   // Assumption here that commandName is "commitTransaction" or "abortTransaction"
@@ -763,13 +763,13 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     }),
-    (err, reply) => {
+    (error, result) => {
       if (command.abortTransaction) {
         // always unpin on abort regardless of command outcome
         session.unpin();
       }
 
-      if (err && isRetryableEndTransactionError(err as MongoError)) {
+      if (error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         if (command.commitTransaction) {
           // per txns spec, must unpin session in this case
@@ -787,11 +787,11 @@ function endTransaction(session: ClientSession, commandName: string, callback: C
             readPreference: ReadPreference.primary,
             bypassPinningCheck: true
           }),
-          (_err, _reply) => commandHandler(_err as MongoError, _reply)
+          commandHandler
         );
       }
 
-      commandHandler(err as MongoError, reply);
+      commandHandler(error, result);
     }
   );
 }
@@ -936,11 +936,13 @@ export class ServerSessionPool {
  * @param session - the session tracking transaction state
  * @param command - the command to decorate
  * @param options - Optional settings passed to calling operation
+ *
+ * @internal
  */
 export function applySession(
   session: ClientSession,
   command: Document,
-  options?: CommandOptions
+  options: CommandOptions
 ): MongoDriverError | undefined {
   // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
   if (session.hasEnded) {
@@ -952,10 +954,9 @@ export function applySession(
     return new MongoRuntimeError('Unable to acquire server session');
   }
 
-  // SPEC-1019: silently ignore explicit session with unacknowledged write for backwards compatibility
-  // FIXME: NODE-2781, this check for write concern shouldn't be happening here, but instead during command construction
-  if (options && options.writeConcern && (options.writeConcern as WriteConcern).w === 0) {
+  if (options.writeConcern?.w === 0) {
     if (session && session.explicit) {
+      // Error if user provided an explicit session to an unacknowledged write (SPEC-1019)
       return new MongoAPIError('Cannot have explicit session with unacknowledged writes');
     }
     return;

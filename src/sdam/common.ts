@@ -53,12 +53,6 @@ export function drainTimerQueue(queue: TimerQueue): void {
   queue.clear();
 }
 
-/** @internal */
-export function clearAndRemoveTimerFrom(timer: NodeJS.Timeout, timers: TimerQueue): boolean {
-  clearTimeout(timer);
-  return timers.delete(timer);
-}
-
 /** @public */
 export interface ClusterTime {
   clusterTime: Timestamp;

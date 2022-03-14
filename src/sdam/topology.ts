@@ -50,7 +50,6 @@ import {
 } from '../utils';
 import {
   _advanceClusterTime,
-  clearAndRemoveTimerFrom,
   ClusterTime,
   drainTimerQueue,
   ServerType,
@@ -435,7 +434,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     // connect all known servers, then attempt server selection to connect
     const serverDescriptions = Array.from(this.s.description.servers.values());
-    connectServers(this, serverDescriptions);
+    this.s.servers = new Map(
+      serverDescriptions.map(serverDescription => [
+        serverDescription.address,
+        createAndConnectServer(this, serverDescription)
+      ])
+    );
 
     // In load balancer mode we need to fake a server description getting
     // emitted from the monitor, since the monitor doesn't exist.
@@ -459,7 +463,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       // TODO: NODE-2471
       if (server && this.s.credentials) {
-        server.command(ns('admin.$cmd'), { ping: 1 }, err => {
+        server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
           if (err) {
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
             return;
@@ -549,27 +553,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    * @param callback - The callback used to indicate success or failure
    * @returns An instance of a `Server` meeting the criteria of the predicate provided
    */
-  selectServer(options: SelectServerOptions, callback: Callback<Server>): void;
-  selectServer(
-    selector: string | ReadPreference | ServerSelector,
-    callback: Callback<Server>
-  ): void;
   selectServer(
     selector: string | ReadPreference | ServerSelector,
     options: SelectServerOptions,
     callback: Callback<Server>
-  ): void;
-  selectServer(
-    selector: string | ReadPreference | ServerSelector | SelectServerOptions,
-    _options?: SelectServerOptions | Callback<Server>,
-    _callback?: Callback<Server>
   ): void {
-    let options = _options as SelectServerOptions;
-    const callback = (_callback ?? _options) as Callback<Server>;
-    if (typeof options === 'function') {
-      options = {};
-    }
-
     let serverSelector;
     if (typeof selector !== 'function') {
       if (typeof selector === 'string') {
@@ -667,6 +655,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     this.selectServer(
       readPreferenceServerSelector(ReadPreference.primaryPreferred),
+      {},
       (err, server) => {
         if (err || !server) {
           if (typeof callback === 'function') callback(err);
@@ -875,13 +864,8 @@ function randomSelection(array: ServerDescription[]): ServerDescription {
  *
  * @param topology - The topology that this server belongs to
  * @param serverDescription - The description for the server to initialize and connect to
- * @param connectDelay - Time to wait before attempting initial connection
  */
-function createAndConnectServer(
-  topology: Topology,
-  serverDescription: ServerDescription,
-  connectDelay?: number
-) {
+function createAndConnectServer(topology: Topology, serverDescription: ServerDescription) {
   topology.emit(
     Topology.SERVER_OPENING,
     new ServerOpeningEvent(topology.s.id, serverDescription.address)
@@ -894,36 +878,8 @@ function createAndConnectServer(
 
   server.on(Server.DESCRIPTION_RECEIVED, description => topology.serverUpdateHandler(description));
 
-  if (connectDelay) {
-    const connectTimer = setTimeout(() => {
-      clearAndRemoveTimerFrom(connectTimer, topology.s.connectionTimers);
-      server.connect();
-    }, connectDelay);
-
-    topology.s.connectionTimers.add(connectTimer);
-    return server;
-  }
-
   server.connect();
   return server;
-}
-
-/**
- * Create `Server` instances for all initially known servers, connect them, and assign
- * them to the passed in `Topology`.
- *
- * @param topology - The topology responsible for the servers
- * @param serverDescriptions - A list of server descriptions to connect
- */
-function connectServers(topology: Topology, serverDescriptions: ServerDescription[]) {
-  topology.s.servers = serverDescriptions.reduce(
-    (servers: Map<string, Server>, serverDescription: ServerDescription) => {
-      const server = createAndConnectServer(topology, serverDescription);
-      servers.set(serverDescription.address, server);
-      return servers;
-    },
-    new Map<string, Server>()
-  );
 }
 
 /**

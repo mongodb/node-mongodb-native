@@ -5,11 +5,12 @@ import {
   WaitQueueTimeoutError as MongoWaitQueueTimeoutError
 } from '../../src/cmap/errors';
 import {
-  isRetryableEndTransactionError,
+  isRetryableReadError,
   isSDAMUnrecoverableError,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   MongoSystemError,
+  needsRetryableWriteLabel,
   NODE_IS_RECOVERING_ERROR_MESSAGE
 } from '../../src/error';
 import * as importsFromErrorSrc from '../../src/error';
@@ -146,34 +147,6 @@ describe('MongoErrors', () => {
     });
   });
 
-  describe('#isRetryableEndTransactionError', function () {
-    context('when the error has a RetryableWriteError label', function () {
-      const error = new MongoNetworkError('');
-      error.addErrorLabel('RetryableWriteError');
-
-      it('returns true', function () {
-        expect(isRetryableEndTransactionError(error)).to.be.true;
-      });
-    });
-
-    context('when the error does not have a RetryableWriteError label', function () {
-      const error = new MongoNetworkError('');
-      error.addErrorLabel('InvalidLabel');
-
-      it('returns false', function () {
-        expect(isRetryableEndTransactionError(error)).to.be.false;
-      });
-    });
-
-    context('when the error does not have any label', function () {
-      const error = new MongoNetworkError('');
-
-      it('returns false', function () {
-        expect(isRetryableEndTransactionError(error)).to.be.false;
-      });
-    });
-  });
-
   describe('#isSDAMUnrecoverableError', function () {
     context('when the error is a MongoParseError', function () {
       it('returns true', function () {
@@ -211,7 +184,7 @@ describe('MongoErrors', () => {
       function () {
         it('returns false', function () {
           // If the response includes an error code, it MUST be solely used to determine if error is a "node is recovering" or "not writable primary" error.
-          const error = new MongoError(NODE_IS_RECOVERING_ERROR_MESSAGE);
+          const error = new MongoError(NODE_IS_RECOVERING_ERROR_MESSAGE.source);
           error.code = 555;
           expect(isSDAMUnrecoverableError(error)).to.be.false;
         });
@@ -222,7 +195,9 @@ describe('MongoErrors', () => {
       'when the error message contains the legacy "not primary" message and no error code is used',
       function () {
         it('returns true', function () {
-          const error = new MongoError(`this is ${LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE}.`);
+          const error = new MongoError(
+            `this is ${LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE.source}.`
+          );
           expect(isSDAMUnrecoverableError(error)).to.be.true;
         });
       }
@@ -362,10 +337,10 @@ describe('MongoErrors', () => {
           return cleanup(err);
         }
 
-        topology.selectServer('primary', (err, server) => {
+        topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
-          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
+          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {}, err => {
             let _err;
             try {
               expect(err).to.be.an.instanceOf(MongoWriteConcernError);
@@ -403,10 +378,10 @@ describe('MongoErrors', () => {
           return cleanup(err);
         }
 
-        topology.selectServer('primary', (err, server) => {
+        topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
-          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), err => {
+          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {}, err => {
             let _err;
             try {
               expect(err).to.be.an.instanceOf(MongoWriteConcernError);
@@ -422,6 +397,141 @@ describe('MongoErrors', () => {
           });
         });
       });
+    });
+  });
+
+  describe('retryable errors', () => {
+    describe('#needsRetryableWriteLabel', () => {
+      // Note the wireVersions used below are used to represent
+      // 8 - below server version 4.4
+      // 9 - above server version 4.4
+
+      const ABOVE_4_4 = 9;
+      const BELOW_4_4 = 8;
+
+      const tests: {
+        description: string;
+        result: boolean;
+        error: Error;
+        maxWireVersion: number;
+      }[] = [
+        {
+          description: 'a plain error',
+          result: false,
+          error: new Error('do not retry me!'),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoError with no code nor label',
+          result: false,
+          error: new MongoError('do not retry me!'),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'network error',
+          result: true,
+          error: new MongoNetworkError('socket bad, try again'),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with no code nor label',
+          result: false,
+          error: new MongoWriteConcernError({ message: 'empty wc error' }),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a random label',
+          result: false,
+          error: new MongoWriteConcernError(
+            { message: 'random label' },
+            { errorLabels: ['myLabel'] }
+          ),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a retryable code above server 4.4',
+          result: false,
+          error: new MongoWriteConcernError({}, { code: 262 }),
+          maxWireVersion: ABOVE_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a retryable code below server 4.4',
+          result: true,
+          error: new MongoWriteConcernError({}, { code: 262 }),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a RetryableWriteError label below server 4.4',
+          result: true,
+          error: new MongoWriteConcernError({}, { errorLabels: ['RetryableWriteError'] }),
+          maxWireVersion: BELOW_4_4
+        },
+        {
+          description: 'a MongoWriteConcernError with a RetryableWriteError label above server 4.4',
+          result: false,
+          error: new MongoWriteConcernError({}, { errorLabels: ['RetryableWriteError'] }),
+          maxWireVersion: ABOVE_4_4
+        },
+        {
+          description: 'any MongoError with a RetryableWriteError label',
+          result: false,
+          error: (() => {
+            // These tests all use MongoWriteConcernError because
+            // its constructor is easier to call but any MongoError should work
+            const error = new MongoError('');
+            error.addErrorLabel('RetryableWriteError');
+            return error;
+          })(),
+          maxWireVersion: ABOVE_4_4
+        }
+      ];
+      for (const { description, result, error, maxWireVersion } of tests) {
+        it(`${description} ${result ? 'needs' : 'does not need'} a retryable write label`, () => {
+          expect(needsRetryableWriteLabel(error, maxWireVersion)).to.be.equal(result);
+        });
+      }
+    });
+
+    describe('#isRetryableReadError', () => {
+      const tests: { description: string; result: boolean; error: MongoError }[] = [
+        {
+          description: 'plain error',
+          result: false,
+          // @ts-expect-error: passing in a plain error to test false case
+          error: new Error('do not retry me!')
+        },
+        {
+          description: 'An error code that is not retryable',
+          result: false,
+          error: new MongoServerError({ message: '', code: 1 })
+        },
+        {
+          description: 'An error code that is retryable',
+          result: true,
+          error: new MongoServerError({ message: '', code: 91 })
+        },
+        {
+          description: 'network error',
+          result: true,
+          error: new MongoNetworkError('socket bad, try again')
+        },
+        {
+          description: 'error with legacy not writable primary error message',
+          result: true,
+          error: new MongoError(LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE.source)
+        },
+        {
+          description: 'error with node is recovering error message',
+          result: true,
+          error: new MongoError('node is recovering')
+        }
+      ];
+
+      for (const { description, result, error } of tests) {
+        it(`${description} is${result ? '' : ' not'} a retryable read`, () => {
+          expect(isRetryableReadError(error)).to.be.equal(result);
+        });
+      }
     });
   });
 });

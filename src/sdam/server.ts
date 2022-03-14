@@ -27,14 +27,16 @@ import type { AutoEncrypter } from '../deps';
 import {
   isNetworkErrorBeforeHandshake,
   isNodeShuttingDownError,
-  isRetryableWriteError,
   isSDAMUnrecoverableError,
   MongoCompatibilityError,
   MongoError,
+  MongoErrorLabel,
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoServerClosedError
+  MongoServerClosedError,
+  MongoUnexpectedServerResponseError,
+  needsRetryableWriteLabel
 } from '../error';
 import { Logger } from '../logger';
 import type { ServerApi } from '../mongo_client';
@@ -43,7 +45,6 @@ import type { ClientSession } from '../sessions';
 import { isTransactionCommand } from '../transactions';
 import {
   Callback,
-  CallbackWithType,
   collationNotSupported,
   EventEmitterWithState,
   makeStateMachine,
@@ -283,24 +284,12 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    * Execute a command
    * @internal
    */
-  command(ns: MongoDBNamespace, cmd: Document, callback: Callback): void;
-  /** @internal */
   command(
     ns: MongoDBNamespace,
     cmd: Document,
     options: CommandOptions,
     callback: Callback<Document>
-  ): void;
-  command(
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options?: CommandOptions | Callback<Document>,
-    callback?: Callback<Document>
   ): void {
-    if (typeof options === 'function') {
-      (callback = options), (options = {}), (options = options ?? {});
-    }
-
     if (callback == null) {
       throw new MongoInvalidArgumentError('Callback must be provided');
     }
@@ -345,7 +334,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         }
 
         session.pin(checkedOut);
-        this.command(ns, cmd, finalOptions, callback as Callback<Document>);
+        this.command(ns, cmd, finalOptions, callback);
       });
 
       return;
@@ -363,7 +352,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           ns,
           cmd,
           finalOptions,
-          makeOperationHandler(this, conn, cmd, finalOptions, cb) as Callback<Document>
+          makeOperationHandler(this, conn, cmd, finalOptions, cb)
         );
       },
       callback
@@ -388,12 +377,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           return cb(err);
         }
 
-        conn.query(
-          ns,
-          cmd,
-          options,
-          makeOperationHandler(this, conn, cmd, options, cb) as Callback
-        );
+        conn.query(ns, cmd, options, makeOperationHandler(this, conn, cmd, options, cb));
       },
       callback
     );
@@ -422,12 +406,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           return cb(err);
         }
 
-        conn.getMore(
-          ns,
-          cursorId,
-          options,
-          makeOperationHandler(this, conn, {}, options, cb) as Callback
-        );
+        conn.getMore(ns, cursorId, options, makeOperationHandler(this, conn, {}, options, cb));
       },
       callback
     );
@@ -463,7 +442,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           ns,
           cursorIds,
           options,
-          makeOperationHandler(this, conn, {}, undefined, cb) as Callback
+          makeOperationHandler(this, conn, {}, undefined, cb)
         );
       },
       callback
@@ -547,67 +526,87 @@ function makeOperationHandler(
   cmd: Document,
   options: CommandOptions | GetMoreOptions | undefined,
   callback: Callback
-): CallbackWithType<MongoError, Document> {
+): Callback {
   const session = options?.session;
-  return function handleOperationResult(err, result) {
-    if (err && !connectionIsStale(server.s.pool, connection)) {
-      if (err instanceof MongoNetworkError) {
-        if (session && !session.hasEnded && session.serverSession) {
-          session.serverSession.isDirty = true;
-        }
+  return function handleOperationResult(error, result) {
+    if (result != null) {
+      return callback(undefined, result);
+    }
 
-        // inActiveTransaction check handles commit and abort.
-        if (inActiveTransaction(session, cmd) && !err.hasErrorLabel('TransientTransactionError')) {
-          err.addErrorLabel('TransientTransactionError');
-        }
+    if (!error) {
+      return callback(new MongoUnexpectedServerResponseError('Empty response with no error'));
+    }
 
-        if (
-          (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
-          supportsRetryableWrites(server) &&
-          !inActiveTransaction(session, cmd)
-        ) {
-          err.addErrorLabel('RetryableWriteError');
-        }
+    if (!(error instanceof MongoError)) {
+      // Node.js or some other error we have not special handling for
+      return callback(error);
+    }
 
-        if (!(err instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(err)) {
-          // In load balanced mode we never mark the server as unknown and always
-          // clear for the specific service id.
+    if (connectionIsStale(server.s.pool, connection)) {
+      return callback(error);
+    }
 
-          server.s.pool.clear(connection.serviceId);
-          if (!server.loadBalanced) {
-            markServerUnknown(server, err);
-          }
-        }
-      } else {
-        // if pre-4.4 server, then add error label if its a retryable write error
-        if (
-          (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
-          maxWireVersion(server) < 9 &&
-          isRetryableWriteError(err) &&
-          !inActiveTransaction(session, cmd)
-        ) {
-          err.addErrorLabel('RetryableWriteError');
-        }
-
-        if (isSDAMUnrecoverableError(err)) {
-          if (shouldHandleStateChangeError(server, err)) {
-            if (maxWireVersion(server) <= 7 || isNodeShuttingDownError(err)) {
-              server.s.pool.clear(connection.serviceId);
-            }
-
-            if (!server.loadBalanced) {
-              markServerUnknown(server, err);
-              process.nextTick(() => server.requestCheck());
-            }
-          }
-        }
+    if (error instanceof MongoNetworkError) {
+      if (session && !session.hasEnded && session.serverSession) {
+        session.serverSession.isDirty = true;
       }
 
-      if (session && session.isPinned && err.hasErrorLabel('TransientTransactionError')) {
-        session.unpin({ force: true });
+      // inActiveTransaction check handles commit and abort.
+      if (
+        inActiveTransaction(session, cmd) &&
+        !error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.TransientTransactionError);
+      }
+
+      if (
+        (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
+        supportsRetryableWrites(server) &&
+        !inActiveTransaction(session, cmd)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+      }
+
+      if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
+        // In load balanced mode we never mark the server as unknown and always
+        // clear for the specific service id.
+
+        server.s.pool.clear(connection.serviceId);
+        if (!server.loadBalanced) {
+          markServerUnknown(server, error);
+        }
+      }
+    } else {
+      if (
+        (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
+        needsRetryableWriteLabel(error, maxWireVersion(server)) &&
+        !inActiveTransaction(session, cmd)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+      }
+
+      if (isSDAMUnrecoverableError(error)) {
+        if (shouldHandleStateChangeError(server, error)) {
+          if (maxWireVersion(server) <= 7 || isNodeShuttingDownError(error)) {
+            server.s.pool.clear(connection.serviceId);
+          }
+
+          if (!server.loadBalanced) {
+            markServerUnknown(server, error);
+            process.nextTick(() => server.requestCheck());
+          }
+        }
       }
     }
 
-    callback(err, result);
+    if (
+      session &&
+      session.isPinned &&
+      error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
+    ) {
+      session.unpin({ force: true });
+    }
+
+    return callback(error);
   };
 }

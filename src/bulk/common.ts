@@ -1,4 +1,3 @@
-import type { ClientSession, Server } from '..';
 import {
   BSONSerializeOptions,
   Document,
@@ -24,7 +23,9 @@ import { InsertOperation } from '../operations/insert';
 import { AbstractOperation, Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, UpdateStatement } from '../operations/update';
 import { PromiseProvider } from '../promise_provider';
+import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
+import type { ClientSession } from '../sessions';
 import {
   applyRetryableWrites,
   Callback,
@@ -937,7 +938,7 @@ class BulkWriteShimOperation extends AbstractOperation {
     this.bulkOperation = bulkOperation;
   }
 
-  execute(server: Server, session: ClientSession, callback: Callback<any>): void {
+  execute(server: Server, session: ClientSession | undefined, callback: Callback<any>): void {
     if (this.options.session == null) {
       // An implicit session could have been created by 'executeOperation'
       // So if we stick it on finalOptions here, each bulk operation
@@ -1291,10 +1292,7 @@ export abstract class BulkOperationBase {
    * Handles the write error before executing commands
    * @internal
    */
-  handleWriteError(
-    callback: Callback<BulkWriteResult>,
-    writeResult: BulkWriteResult
-  ): boolean | undefined {
+  handleWriteError(callback: Callback<BulkWriteResult>, writeResult: BulkWriteResult): boolean {
     if (this.s.bulkResult.writeErrors.length > 0) {
       const msg = this.s.bulkResult.writeErrors[0].errmsg
         ? this.s.bulkResult.writeErrors[0].errmsg
@@ -1319,7 +1317,8 @@ export abstract class BulkOperationBase {
       callback(new MongoBulkWriteError(writeConcernError, writeResult));
       return true;
     }
-    return;
+
+    return false;
   }
 
   abstract addToOperationsList(

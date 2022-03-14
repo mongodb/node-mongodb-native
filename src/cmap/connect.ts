@@ -16,14 +16,7 @@ import {
   MongoRuntimeError,
   MongoServerError
 } from '../error';
-import {
-  Callback,
-  CallbackWithType,
-  ClientMetadata,
-  HostAddress,
-  makeClientMetadata,
-  ns
-} from '../utils';
+import { Callback, ClientMetadata, HostAddress, makeClientMetadata, ns } from '../utils';
 import { AuthContext, AuthProvider } from './auth/auth_provider';
 import { GSSAPI } from './auth/gssapi';
 import { MongoCR } from './auth/mongocr';
@@ -336,10 +329,7 @@ const SOCKET_ERROR_EVENT_LIST = ['error', 'close', 'timeout', 'parseError'] as c
 type ErrorHandlerEventName = typeof SOCKET_ERROR_EVENT_LIST[number] | 'cancel';
 const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
 
-function makeConnection(
-  options: MakeConnectionOptions,
-  _callback: CallbackWithType<AnyError, Stream>
-) {
+function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stream>) {
   const useTLS = options.tls ?? false;
   const keepAlive = options.keepAlive ?? true;
   const socketTimeoutMS = options.socketTimeoutMS ?? Reflect.get(options, 'socketTimeout') ?? 0;

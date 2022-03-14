@@ -2,7 +2,7 @@ import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
-import { AnyError, MongoNetworkError } from '../error';
+import { MongoNetworkError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, InterruptibleAsyncInterval } from '../utils';
 import {
@@ -211,7 +211,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
   let start = now();
   monitor.emit(Server.SERVER_HEARTBEAT_STARTED, new ServerHeartbeatStartedEvent(monitor.address));
 
-  function failureHandler(err: AnyError) {
+  function failureHandler(err: Error) {
     monitor[kConnection]?.destroy({ force: true });
     monitor[kConnection] = undefined;
 
@@ -259,8 +259,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
     connection.command(ns('admin.$cmd'), cmd, options, (err, hello) => {
       if (err) {
-        failureHandler(err);
-        return;
+        return failureHandler(err);
       }
 
       if (!('isWritablePrimary' in hello)) {

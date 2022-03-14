@@ -13,7 +13,7 @@ export class UnorderedBulkOperation extends BulkOperationBase {
     super(collection, options, false);
   }
 
-  override handleWriteError(callback: Callback, writeResult: BulkWriteResult): boolean | undefined {
+  override handleWriteError(callback: Callback, writeResult: BulkWriteResult): boolean {
     if (this.s.batches.length) {
       return false;
     }

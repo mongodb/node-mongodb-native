@@ -33,7 +33,7 @@ import {
   now,
   uuidV4
 } from '../utils';
-import type { W, WriteConcern, WriteConcernOptions } from '../write_concern';
+import type { WriteConcern } from '../write_concern';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import {
   CommandFailedEvent,
@@ -109,11 +109,14 @@ export interface CommandOptions extends BSONSerializeOptions {
   noResponse?: boolean;
   omitReadPreference?: boolean;
 
-  // FIXME: NODE-2802
-  willRetryWrite?: boolean;
+  // TODO(NODE-2802): Currently the CommandOptions take a property willRetryWrite which is a hint
+  // from executeOperation that the txnNum should be applied to this command.
+  // Applying a session to a command should happen as part of command construction,
+  // most likely in the CommandOperation#executeCommand method, where we have access to
+  // the details we need to determine if a txnNum should also be applied.
+  willRetryWrite?: true;
 
-  // FIXME: NODE-2781
-  writeConcern?: WriteConcernOptions | WriteConcern | W;
+  writeConcern?: WriteConcern;
 }
 
 /** @internal */
