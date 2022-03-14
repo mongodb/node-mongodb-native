@@ -243,8 +243,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
     const options = isAwaitable
       ? {
-          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
-          exhaustAllowed: true
+          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0
         }
       : { socketTimeoutMS: connectTimeoutMS };
 
@@ -280,7 +279,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
-      if (isAwaitable && hello.moreToCome && hello.topologyVersion) {
+      if (isAwaitable && hello.topologyVersion) {
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address)
