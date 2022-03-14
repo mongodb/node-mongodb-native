@@ -9,7 +9,11 @@ const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { delay, setupDatabase } = require('../shared');
 
 describe('Change Streams Spec - Unified', function () {
-  runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')));
+  runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')), [
+    'Test with document comment',
+    'Test with string comment',
+    'Test that comment is set on getMore'
+  ]);
 });
 
 // TODO: NODE-3819: Unskip flaky MacOS tests.
