@@ -307,7 +307,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   handleIssue(issue: { isTimeout?: boolean; isClose?: boolean; destroy?: boolean | Error }): void {
-    console.debug('Connection#handleIssue', issue);
+    console.debug('Connection#handleIssue', issue, new Error());
     if (this.closed) {
       return;
     }
@@ -341,7 +341,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   destroy(options: DestroyOptions): void;
   destroy(options: DestroyOptions, callback: Callback): void;
   destroy(options?: DestroyOptions | Callback, callback?: Callback): void {
-    console.debug('Connection#destroy', options);
+    console.debug('Connection#destroy', options, new Error());
     if (typeof options === 'function') {
       callback = options;
       options = { force: false };

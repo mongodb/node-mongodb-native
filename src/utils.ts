@@ -862,8 +862,10 @@ export function makeInterruptibleAsyncInterval(
 
   function wake() {
     const currentTime = clock();
-    const nextScheduledCallTime = lastCallTime + interval;
-    const timeUntilNextCall = nextScheduledCallTime - currentTime;
+    const timeSinceLastWake = currentTime - lastWakeTime;
+    const timeSinceLastCall = currentTime - lastCallTime;
+    const timeUntilNextCall = interval - timeSinceLastCall;
+    lastWakeTime = currentTime;
 
     // For the streaming protocol: there is nothing obviously stopping this
     // interval from being woken up again while we are waiting "infinitely"
@@ -871,17 +873,8 @@ export function makeInterruptibleAsyncInterval(
     // never completes, the `timeUntilNextCall` will continue to grow
     // negatively unbounded, so it will never trigger a reschedule here.
 
-    // This is possible in virtualized environments like AWS Lambda where our
-    // clock is unreliable. In these cases the timer is "running" but never
-    // actually completes, so we want to execute immediately and then attempt
-    // to reschedule.
-    if (timeUntilNextCall < 0) {
-      executeAndReschedule();
-      return;
-    }
-
     // debounce multiple calls to wake within the `minInterval`
-    if (cannotBeExpedited) {
+    if (timeSinceLastWake < minInterval) {
       return;
     }
 
@@ -889,7 +882,14 @@ export function makeInterruptibleAsyncInterval(
     // faster than the `minInterval`
     if (timeUntilNextCall > minInterval) {
       reschedule(minInterval);
-      cannotBeExpedited = true;
+    }
+
+    // This is possible in virtualized environments like AWS Lambda where our
+    // clock is unreliable. In these cases the timer is "running" but never
+    // actually completes, so we want to execute immediately and then attempt
+    // to reschedule.
+    if (timeUntilNextCall < 0) {
+      executeAndReschedule();
     }
   }
 
