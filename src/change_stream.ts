@@ -414,10 +414,10 @@ export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
   /**
    * Comment to apply to the operation.
    *
-   * In server versions <4.4, 'comment' must be string.  A server
+   * In server versions pre-4.4, 'comment' must be string.  A server
    * error will be thrown if any other type is provided.
    *
-   * In server versions >=4.4, 'comment' can be any valid BSON type.
+   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
   comment?: any;
 }
