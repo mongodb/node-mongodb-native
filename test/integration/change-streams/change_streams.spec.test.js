@@ -12,7 +12,8 @@ describe('Change Streams Spec - Unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')), [
     'Test with document comment',
     'Test with string comment',
-    'Test that comment is set on getMore'
+    'Test that comment is set on getMore',
+    'Test with document comment - pre 4.4'
   ]);
 });
 
