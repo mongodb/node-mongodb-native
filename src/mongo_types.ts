@@ -20,14 +20,14 @@ export type TODO_NODE_3286 = any;
 /** Given an object shaped type, return the type of the _id field or default to ObjectId @public */
 export type InferIdType<TSchema> = TSchema extends { _id: infer IdType }
   ? // user has defined a type for _id
-  Record<any, never> extends IdType
-  ? never // explicitly forbid empty objects as the type of _id
-  : IdType
+    Record<any, never> extends IdType
+    ? never // explicitly forbid empty objects as the type of _id
+    : IdType
   : TSchema extends { _id?: infer IdType }
   ? // optional _id defined - return ObjectId | IdType
-  unknown extends IdType
-  ? ObjectId // infer the _id type as ObjectId if the type of _id is unknown
-  : IdType
+    unknown extends IdType
+    ? ObjectId // infer the _id type as ObjectId if the type of _id is unknown
+    : IdType
   : ObjectId; // user has not defined _id on schema
 
 /** Add an _id field to an object shaped type @public */
@@ -68,10 +68,10 @@ export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 export type Filter<TSchema> =
   | Partial<TSchema>
   | ({
-    [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
-      PropertyType<WithId<TSchema>, Property>
-    >;
-  } & RootFilterOperators<WithId<TSchema>>);
+      [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
+        PropertyType<WithId<TSchema>, Property>
+      >;
+    } & RootFilterOperators<WithId<TSchema>>);
 
 /** @public */
 export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
@@ -275,8 +275,8 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
   TSchema[keyof TSchema],
   Record<string, FieldType>,
   AcceptedFields<TSchema, FieldType, AssignableType> &
-  NotAcceptedFields<TSchema, FieldType> &
-  Record<string, AssignableType>
+    NotAcceptedFields<TSchema, FieldType> &
+    Record<string, AssignableType>
 >;
 
 /** @public */
@@ -298,8 +298,8 @@ export type ArrayOperator<Type> = {
 /** @public */
 export type SetFields<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any> | undefined>]?:
-  | OptionalId<Flatten<TSchema[key]>>
-  | AddToSetOperators<Array<OptionalId<Flatten<TSchema[key]>>>>;
+    | OptionalId<Flatten<TSchema[key]>>
+    | AddToSetOperators<Array<OptionalId<Flatten<TSchema[key]>>>>;
 } & NotAcceptedFields<TSchema, ReadonlyArray<any> | undefined>) & {
   readonly [key: string]: AddToSetOperators<any> | any;
 };
@@ -307,8 +307,8 @@ export type SetFields<TSchema> = ({
 /** @public */
 export type PushOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
-  | Flatten<TSchema[key]>
-  | ArrayOperator<Array<Flatten<TSchema[key]>>>;
+    | Flatten<TSchema[key]>
+    | ArrayOperator<Array<Flatten<TSchema[key]>>>;
 } & NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
   readonly [key: string]: ArrayOperator<any> | any;
 };
@@ -316,8 +316,8 @@ export type PushOperator<TSchema> = ({
 /** @public */
 export type PullOperator<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any>>]?:
-  | Partial<Flatten<TSchema[key]>>
-  | FilterOperations<Flatten<TSchema[key]>>;
+    | Partial<Flatten<TSchema[key]>>
+    | FilterOperations<Flatten<TSchema[key]>>;
 } & NotAcceptedFields<TSchema, ReadonlyArray<any>>) & {
   readonly [key: string]: FilterOperators<any> | any;
 };
@@ -462,10 +462,10 @@ export declare interface TypedEventEmitter<Events extends EventsDescription> ext
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class TypedEventEmitter<Events extends EventsDescription> extends EventEmitter { }
+export class TypedEventEmitter<Events extends EventsDescription> extends EventEmitter {}
 
 /** @public */
-export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> { }
+export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
 
 /**
  * Helper types for dot-notation filter attributes
@@ -487,18 +487,18 @@ export type PropertyType<Type, Property extends string> = string extends Propert
   ? Type[Property]
   : Property extends `${number}`
   ? Type extends ReadonlyArray<infer ArrayType>
-  ? ArrayType
-  : unknown
+    ? ArrayType
+    : unknown
   : Property extends `${infer Key}.${infer Rest}`
   ? Key extends `${number}`
-  ? Type extends ReadonlyArray<infer ArrayType>
-  ? PropertyType<ArrayType, Rest>
-  : unknown
-  : Key extends keyof Type
-  ? Type[Key] extends Map<string, infer MapType>
-  ? MapType
-  : PropertyType<Type[Key], Rest>
-  : unknown
+    ? Type extends ReadonlyArray<infer ArrayType>
+      ? PropertyType<ArrayType, Rest>
+      : unknown
+    : Key extends keyof Type
+    ? Type[Key] extends Map<string, infer MapType>
+      ? MapType
+      : PropertyType<Type[Key], Rest>
+    : unknown
   : unknown;
 
 /**
@@ -524,21 +524,21 @@ export type NestedPaths<Type> = Type extends
   : // eslint-disable-next-line @typescript-eslint/ban-types
   Type extends object
   ? {
-    [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
-    ? [Key]
-    : // for a recursive union type, the child will never extend the parent type.
-    // but the parent will still extend the child
-    Type extends Type[Key]
-    ? [Key]
-    : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
-    ? Type extends ArrayType // is the type of the parent the same as the type of the array?
-    ? [Key] // yes, it's a recursive array type
-    : // for unions, the child type extends the parent
-    ArrayType extends Type
-    ? [Key] // we have a recursive array union
-    : // child is an array, but it's not a recursive array
-    [Key, ...NestedPaths<Type[Key]>]
-    : // child is not structured the same as the parent
-    [Key, ...NestedPaths<Type[Key]>];
-  }[Extract<keyof Type, string>]
+      [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
+        ? [Key]
+        : // for a recursive union type, the child will never extend the parent type.
+        // but the parent will still extend the child
+        Type extends Type[Key]
+        ? [Key]
+        : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
+        ? Type extends ArrayType // is the type of the parent the same as the type of the array?
+          ? [Key] // yes, it's a recursive array type
+          : // for unions, the child type extends the parent
+          ArrayType extends Type
+          ? [Key] // we have a recursive array union
+          : // child is an array, but it's not a recursive array
+            [Key, ...NestedPaths<Type[Key]>]
+        : // child is not structured the same as the parent
+          [Key, ...NestedPaths<Type[Key]>];
+    }[Extract<keyof Type, string>]
   : [];

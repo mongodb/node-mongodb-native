@@ -80,6 +80,10 @@ export class DeleteOperation extends CommandOperation<Document> {
       command.let = options.let;
     }
 
+    if (options.comment) {
+      command.comment = options.comment;
+    }
+
     if (options.explain != null && maxWireVersion(server) < 3) {
       return callback
         ? callback(
@@ -173,10 +177,6 @@ export function makeDeleteStatement(
 
   if (options.hint) {
     op.hint = options.hint;
-  }
-
-  if (options.comment) {
-    op.comment = options.comment;
   }
 
   return op;

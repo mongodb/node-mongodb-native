@@ -1,6 +1,7 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
+import type { BSONLike } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -82,6 +83,7 @@ interface FindAndModifyCmdBase {
   maxTimeMS?: number;
   let?: Document;
   writeConcern?: WriteConcern | WriteConcernSettings;
+  comment?: BSONLike;
 }
 
 function configureFindAndModifyCmdBaseUpdateOpts(
@@ -138,6 +140,10 @@ class FindAndModifyOperation extends CommandOperation<Document> {
 
     if (options.let) {
       this.cmdBase.let = options.let;
+    }
+
+    if (options.comment) {
+      this.cmdBase.comment = options.comment;
     }
 
     // force primary read preference
