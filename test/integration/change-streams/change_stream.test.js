@@ -207,9 +207,8 @@ describe('Change Streams', function () {
       it('sets fullDocument to `undefined` if no value is passed', function () {
         const changeStream = client.watch();
 
-        expect(changeStream).to.have.nested.property(
-          'cursor.pipeline[0].$changeStream.fullDocument',
-          undefined
+        expect(changeStream).not.to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.fullDocument'
         );
       });
 

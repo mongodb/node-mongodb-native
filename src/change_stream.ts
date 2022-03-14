@@ -577,35 +577,23 @@ function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
   changeStream[kMode] = 'iterator';
 }
 
-function applyKnownOptions(source: Document, options: ReadonlyArray<string>) {
-  const result: Document = {};
-
-  for (const option of options) {
-    if (source[option]) {
-      result[option] = source[option];
-    }
-  }
-
-  return result;
-}
-
 /**
  * Create a new change stream cursor based on self's configuration
  * @internal
  */
 function createChangeStreamCursor<TSchema>(
   changeStream: ChangeStream<TSchema>,
-  changeStreamOptions: ChangeStreamOptions | ResumeOptions
+  options: ChangeStreamOptions | ResumeOptions
 ): ChangeStreamCursor<TSchema> {
-  const changeStreamStageOptions = applyKnownOptions(changeStreamOptions, CHANGE_STREAM_OPTIONS);
+  const changeStreamStageOptions = applyKnownOptions(options, CHANGE_STREAM_OPTIONS);
+  if (changeStream.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
+    changeStreamStageOptions.allChangesForCluster = true;
+  }
   const pipeline = [{ $changeStream: changeStreamStageOptions } as Document].concat(
     changeStream.pipeline
   );
 
-  const cursorOptions: ChangeStreamCursorOptions = applyKnownOptions(
-    changeStreamOptions,
-    CURSOR_OPTIONS
-  );
+  const cursorOptions: ChangeStreamCursorOptions = applyKnownOptions(options, CURSOR_OPTIONS);
 
   const changeStreamCursor = new ChangeStreamCursor<TSchema>(
     getTopology(changeStream.parent),
@@ -625,6 +613,17 @@ function createChangeStreamCursor<TSchema>(
   return changeStreamCursor;
 }
 
+function applyKnownOptions(source: Document, options: ReadonlyArray<string>) {
+  const result: Document = {};
+
+  for (const option of options) {
+    if (source[option]) {
+      result[option] = source[option];
+    }
+  }
+
+  return result;
+}
 interface TopologyWaitOptions {
   start?: number;
   timeout?: number;
