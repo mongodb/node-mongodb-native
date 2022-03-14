@@ -124,7 +124,15 @@ export interface GetMoreOptions extends CommandOptions {
   batchSize?: number;
   maxTimeMS?: number;
   maxAwaitTimeMS?: number;
-  comment?: Document | string;
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions <4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions >=4.4, 'comment' can be any valid BSON type.
+   */
+  comment?: any;
 }
 
 /** @public */

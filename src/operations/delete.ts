@@ -12,8 +12,15 @@ import { Aspect, defineAspects, Hint } from './operation';
 export interface DeleteOptions extends CommandOperationOptions, WriteConcernOptions {
   /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
   ordered?: boolean;
-  /** A user-provided comment to attach to this command */
-  comment?: string | Document;
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions <4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions >=4.4, 'comment' can be any valid BSON type.
+   */
+  comment?: any;
   /** Specifies the collation to use for the operation */
   collation?: CollationOptions;
   /** Specify that the update query should only consider plans using the hinted index */
@@ -43,8 +50,15 @@ export interface DeleteStatement {
   collation?: CollationOptions;
   /** A document or string that specifies the index to use to support the query predicate. */
   hint?: Hint;
-  /** A user-provided comment to attach to this command */
-  comment?: string | Document;
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions <4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions >=4.4, 'comment' can be any valid BSON type.
+   */
+  comment?: any;
 }
 
 /** @internal */

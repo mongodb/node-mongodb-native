@@ -411,8 +411,14 @@ export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
   startAtOperationTime?: OperationTime;
   resumeAfter?: ResumeToken;
   startAfter?: boolean;
-
-  /** todo: add comment */
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions <4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions >=4.4, 'comment' can be any valid BSON type.
+   */
   comment?: any;
 }
 

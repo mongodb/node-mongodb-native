@@ -82,8 +82,14 @@ interface FindAndModifyCmdBase {
   maxTimeMS?: number;
   let?: Document;
   writeConcern?: WriteConcern | WriteConcernSettings;
-
-  // TODO: add comment
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions <4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions >=4.4, 'comment' can be any valid BSON type.
+   */
   comment?: any;
 }
 

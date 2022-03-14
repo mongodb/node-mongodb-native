@@ -12,8 +12,15 @@ import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './op
 export interface GetMoreOptions extends OperationOptions {
   /** Set the batchSize for the getMoreCommand when iterating over the query results. */
   batchSize?: number;
-  /** You can put a $comment field on a query to make looking in the profiler logs simpler. */
-  comment?: string | Document;
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions <4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions >=4.4, 'comment' can be any valid BSON type.
+   */
+  comment?: any;
   /** Number of milliseconds to wait before aborting the query. */
   maxTimeMS?: number;
 }
