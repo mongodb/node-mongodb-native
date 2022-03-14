@@ -77,7 +77,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   readConcern?: ReadConcernLike;
   batchSize?: number;
   maxTimeMS?: number;
-  comment?: Document | string;
+  comment?: any;
   tailable?: boolean;
   awaitData?: boolean;
   noCursorTimeout?: boolean;

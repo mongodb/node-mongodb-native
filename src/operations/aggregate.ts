@@ -1,6 +1,5 @@
 import type { Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
-import type { BSONLike } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
@@ -33,7 +32,7 @@ export interface AggregateOptions extends CommandOperationOptions {
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
   /** Comment to apply to the operation. */
-  comment?: BSONLike;
+  comment?: any;
 
   out?: string;
 }

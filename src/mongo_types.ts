@@ -187,28 +187,6 @@ export const BSONType = Object.freeze({
   maxKey: 127
 } as const);
 
-// TODO: ensure all BSON types are represented
-/** @public */
-export type BSONLike = any;
-// | number
-// | string
-// | Document
-// | ReadonlyArray<any>
-// | Binary
-// | undefined
-// | ObjectId
-// | boolean
-// | Date
-// | null
-// | RegExp
-// // DbPointer
-// | Code
-// | CodeExtended
-// | Timestamp
-// | Decimal128
-// | MinKey
-// | MaxKey;
-
 /** @public */
 export type BSONType = typeof BSONType[keyof typeof BSONType];
 /** @public */
