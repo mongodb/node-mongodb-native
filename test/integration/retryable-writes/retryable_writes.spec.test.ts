@@ -1,8 +1,10 @@
 import { expect } from 'chai';
 
+import * as path from 'path';
 import type { Collection, Db, MongoClient } from '../../../src';
 import { loadSpecTests } from '../../spec';
 import { legacyRunOnToRunOnRequirement } from '../../tools/spec-runner';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 import { isAnyRequirementSatisfied } from '../../tools/unified-spec-runner/unified-utils';
 
 interface RetryableWriteTestContext {
@@ -196,3 +198,15 @@ async function turnOffFailPoint(client, name) {
     mode: 'off'
   });
 }
+
+// These tests are skipped because the driver 1) executes a ping when connecting to
+// an authenticated server and 2) command monitoring is at the connection level so
+// when the handshake fails no command started event is emitted.
+const SKIP = [
+  'InsertOne succeeds after retryable handshake error',
+  'InsertOne succeeds after retryable handshake error ShutdownInProgress'
+];
+
+describe('Retryable Writes (unified)', function () {
+  runUnifiedSuite(loadSpecTests(path.join('retryable-writes', 'unified')), SKIP);
+});
