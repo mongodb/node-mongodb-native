@@ -711,7 +711,7 @@ export class Db {
    * @deprecated This function is deprecated and will be removed in the next major version.
    */
   unref(): void {
-    this.unref();
+    getTopology(this).unref();
   }
 
   /**
