@@ -452,7 +452,7 @@ describe('Connection', function () {
       })
     );
 
-    it.only('throws when attempting an operation if the client is not connected', function (done) {
+    it('throws when attempting an operation if the client is not connected', function (done) {
       const client = this.configuration.newClient();
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
       collection.insertOne({ a: 2 }, err => {
@@ -461,7 +461,7 @@ describe('Connection', function () {
       });
     });
 
-    it.only('throws when attempting an operation if the client is not connected (promises)', async function () {
+    it('throws when attempting an operation if the client is not connected (promises)', async function () {
       const client = this.configuration.newClient();
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
 
@@ -472,7 +472,7 @@ describe('Connection', function () {
       }
     });
 
-    it.only(
+    it(
       'should correctly fail on retry when client has been closed',
       withClient(function (client, done) {
         const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
@@ -492,7 +492,7 @@ describe('Connection', function () {
       })
     );
 
-    it.only('should correctly fail on retry when client has been closed (promises)', async function () {
+    it('should correctly fail on retry when client has been closed (promises)', async function () {
       const client = await this.configuration.newClient().connect();
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
       await collection.insertOne({ a: 1 });
