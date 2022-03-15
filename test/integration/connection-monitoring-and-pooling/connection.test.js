@@ -243,7 +243,7 @@ describe('Connection', function () {
       }
     });
 
-    it('should only pass one argument (topology and not error) for topology "open" events', function (done) {
+    it('should pass one argument (topology and not error) for topology "open" events', function (done) {
       const configuration = this.configuration;
       client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
 
@@ -452,6 +452,26 @@ describe('Connection', function () {
       })
     );
 
+    it('should correctly fail on retry when client has been closed', function (done) {
+      const client = this.configuration.newClient();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+
+      collection.insertOne({ a: 2 }, err => {
+        expect(err).to.match(/must be connected/);
+        done();
+      });
+    });
+
+    it('should throw an error if an operation is attempted but the client is not connected (promises)', async function () {
+      const client = this.configuration.newClient();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+      try {
+        await collection.insertOne({ a: 2 });
+      } catch (err) {
+        expect(err).to.match(/must be connected/);
+      }
+    });
+
     it(
       'should correctly fail on retry when client has been closed',
       withClient(function (client, done) {
@@ -463,13 +483,25 @@ describe('Connection', function () {
           client.close(true, function (err) {
             expect(err).to.not.exist;
 
-            expect(() => {
-              collection.insertOne({ a: 2 });
-            }).to.throw(/must be connected/);
-            done();
+            collection.insertOne({ a: 2 }, err => {
+              expect(err).to.match(/must be connected/);
+              done();
+            });
           });
         });
       })
     );
+
+    it('should correctly fail on retry when client has been closed (promises)', async function () {
+      const client = await this.configuration.newClient().connect();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+      await collection.insertOne({ a: 1 });
+      await client.close(true);
+      try {
+        await collection.insertOne({ a: 2 });
+      } catch (err) {
+        expect(err).to.match(/must be connected/);
+      }
+    });
   });
 });
