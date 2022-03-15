@@ -296,7 +296,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      getTopology(this),
+      this,
       new InsertOneOperation(
         this as TODO_NODE_3286,
         doc,
@@ -338,7 +338,7 @@ export class Collection<TSchema extends Document = Document> {
     options = options ? Object.assign({}, options) : { ordered: true };
 
     return executeOperation(
-      getTopology(this),
+      this,
       new InsertManyOperation(
         this as TODO_NODE_3286,
         docs,
@@ -406,7 +406,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      getTopology(this),
+      this,
       new BulkWriteOperation(
         this as TODO_NODE_3286,
         operations as TODO_NODE_3286,
@@ -453,7 +453,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new UpdateOneOperation(
         this as TODO_NODE_3286,
         filter,
@@ -501,7 +501,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new ReplaceOneOperation(
         this as TODO_NODE_3286,
         filter,
@@ -549,7 +549,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new UpdateManyOperation(
         this as TODO_NODE_3286,
         filter,
@@ -583,7 +583,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new DeleteOneOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options)),
       callback
     );
@@ -623,7 +623,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      getTopology(this),
+      this,
       new DeleteManyOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options)),
       callback
     );
@@ -652,7 +652,7 @@ export class Collection<TSchema extends Document = Document> {
 
     // Intentionally, we do not inherit options from parent for this operation.
     return executeOperation(
-      getTopology(this),
+      this,
       new RenameOperation(this as TODO_NODE_3286, newName, {
         ...options,
         readPreference: ReadPreference.PRIMARY
@@ -679,7 +679,7 @@ export class Collection<TSchema extends Document = Document> {
     options = options ?? {};
 
     return executeOperation(
-      getTopology(this),
+      this,
       new DropCollectionOperation(this.s.db, this.collectionName, options),
       callback
     );
@@ -783,7 +783,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new OptionsOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -806,7 +806,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new IsCappedOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -857,7 +857,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new CreateIndexOperation(
         this as TODO_NODE_3286,
         this.collectionName,
@@ -918,7 +918,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
 
     return executeOperation(
-      getTopology(this),
+      this,
       new CreateIndexesOperation(
         this as TODO_NODE_3286,
         this.collectionName,
@@ -952,7 +952,7 @@ export class Collection<TSchema extends Document = Document> {
     options.readPreference = ReadPreference.primary;
 
     return executeOperation(
-      getTopology(this),
+      this,
       new DropIndexOperation(this as TODO_NODE_3286, indexName, options),
       callback
     );
@@ -975,7 +975,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new DropIndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -1013,7 +1013,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new IndexExistsOperation(this as TODO_NODE_3286, indexes, resolveOptions(this, options)),
       callback
     );
@@ -1036,7 +1036,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new IndexInformationOperation(this.s.db, this.collectionName, resolveOptions(this, options)),
       callback
     );
@@ -1058,7 +1058,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<number> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     return executeOperation(
-      getTopology(this),
+      this,
       new EstimatedDocumentCountOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -1118,7 +1118,7 @@ export class Collection<TSchema extends Document = Document> {
 
     filter ??= {};
     return executeOperation(
-      getTopology(this),
+      this,
       new CountDocumentsOperation(
         this as TODO_NODE_3286,
         filter as Document,
@@ -1193,7 +1193,7 @@ export class Collection<TSchema extends Document = Document> {
 
     filter ??= {};
     return executeOperation(
-      getTopology(this),
+      this,
       new DistinctOperation(
         this as TODO_NODE_3286,
         key as TODO_NODE_3286,
@@ -1221,7 +1221,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new IndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -1245,7 +1245,7 @@ export class Collection<TSchema extends Document = Document> {
     options = options ?? {};
 
     return executeOperation(
-      getTopology(this),
+      this,
       new CollStatsOperation(this as TODO_NODE_3286, options),
       callback
     );
@@ -1277,7 +1277,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new FindOneAndDeleteOperation(
         this as TODO_NODE_3286,
         filter,
@@ -1324,7 +1324,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new FindOneAndReplaceOperation(
         this as TODO_NODE_3286,
         filter,
@@ -1372,7 +1372,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new FindOneAndUpdateOperation(
         this as TODO_NODE_3286,
         filter,
@@ -1495,7 +1495,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      getTopology(this),
+      this,
       new MapReduceOperation(
         this as TODO_NODE_3286,
         map,
@@ -1636,7 +1636,7 @@ export class Collection<TSchema extends Document = Document> {
 
     filter ??= {};
     return executeOperation(
-      getTopology(this),
+      this,
       new CountOperation(
         MongoDBNamespace.fromString(this.namespace),
         filter,

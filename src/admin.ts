@@ -14,7 +14,7 @@ import {
   ValidateCollectionOperation,
   ValidateCollectionOptions
 } from './operations/validate_collection';
-import { Callback, getTopology } from './utils';
+import type { Callback } from './utils';
 
 /** @internal */
 export interface AdminPrivate {
@@ -83,7 +83,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      getTopology(this.s.db),
+      this.s.db,
       new RunCommandOperation(this.s.db, command, options),
       callback
     );
@@ -207,7 +207,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      getTopology(this.s.db),
+      this.s.db,
       new AddUserOperation(this.s.db, username, password, options),
       callback
     );
@@ -233,7 +233,7 @@ export class Admin {
     options = Object.assign({ dbName: 'admin' }, options);
 
     return executeOperation(
-      getTopology(this.s.db),
+      this.s.db,
       new RemoveUserOperation(this.s.db, username, options),
       callback
     );
@@ -263,7 +263,7 @@ export class Admin {
     options = options ?? {};
 
     return executeOperation(
-      getTopology(this.s.db),
+      this.s.db,
       new ValidateCollectionOperation(this, collectionName, options),
       callback
     );
@@ -286,11 +286,7 @@ export class Admin {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ?? {};
 
-    return executeOperation(
-      getTopology(this.s.db),
-      new ListDatabasesOperation(this.s.db, options),
-      callback
-    );
+    return executeOperation(this.s.db, new ListDatabasesOperation(this.s.db, options), callback);
   }
 
   /**

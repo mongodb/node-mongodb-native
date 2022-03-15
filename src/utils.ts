@@ -327,6 +327,11 @@ export function decorateWithExplain(command: Document, explain: Explain): Docume
 }
 
 /**
+ * @internal
+ */
+export type TopologyProvider<T> = MongoClient | Db | Collection<T>;
+
+/**
  * A helper function to get the topology from a given provider. Throws
  * if the topology cannot be found.
  * @internal
