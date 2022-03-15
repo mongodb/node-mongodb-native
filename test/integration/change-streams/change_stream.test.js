@@ -204,11 +204,20 @@ describe('Change Streams', function () {
     });
 
     context('fullDocument', () => {
-      it('sets fullDocument to `undefined` if no value is passed', function () {
+      it('does not set fullDocument if no value is provided', function () {
         const changeStream = client.watch();
 
         expect(changeStream).not.to.have.nested.property(
           'cursor.pipeline[0].$changeStream.fullDocument'
+        );
+      });
+
+      it('does not validate the value passed in for the `fullDocument` property', function () {
+        const changeStream = client.watch([], { fullDocument: 'invalid value' });
+
+        expect(changeStream).to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.fullDocument',
+          'invalid value'
         );
       });
 
@@ -232,7 +241,7 @@ describe('Change Streams', function () {
         );
       });
 
-      it('does not assigns `allChangesForCluster` if the ChangeStream.type is Db', function () {
+      it('does not assign `allChangesForCluster` if the ChangeStream.type is Db', function () {
         const changeStream = db.watch();
 
         expect(changeStream).not.to.have.nested.property(
@@ -240,7 +249,7 @@ describe('Change Streams', function () {
         );
       });
 
-      it('does not assign `allChangesForCluster` if the ChangeStream.type is Db', function () {
+      it('does not assign `allChangesForCluster` if the ChangeStream.type is Collection', function () {
         const changeStream = collection.watch();
 
         expect(changeStream).not.to.have.nested.property(
