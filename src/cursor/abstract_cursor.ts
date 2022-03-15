@@ -170,7 +170,8 @@ export abstract class AbstractCursor<
       this[kOptions].batchSize = options.batchSize;
     }
 
-    if (options.comment != null) {
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
       this[kOptions].comment = options.comment;
     }
 

@@ -149,7 +149,8 @@ class FindAndModifyOperation extends CommandOperation<Document> {
       this.cmdBase.let = options.let;
     }
 
-    if (options.comment) {
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
       this.cmdBase.comment = options.comment;
     }
 

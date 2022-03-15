@@ -107,7 +107,8 @@ export class UpdateOperation extends CommandOperation<Document> {
       command.let = options.let;
     }
 
-    if (options.comment) {
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
       command.comment = options.comment;
     }
 

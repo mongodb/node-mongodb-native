@@ -583,7 +583,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       getMoreCmd.maxTimeMS = options.maxAwaitTimeMS;
     }
 
-    if (options.comment) {
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
       getMoreCmd.comment = options.comment;
     }
 

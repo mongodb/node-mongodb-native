@@ -248,7 +248,8 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
     findCommand.singleBatch = options.singleBatch;
   }
 
-  if (options.comment) {
+  // eslint-disable-next-line no-restricted-syntax
+  if (options.comment !== undefined) {
     findCommand.comment = options.comment;
   }
 
