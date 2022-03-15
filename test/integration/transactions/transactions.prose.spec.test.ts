@@ -38,13 +38,13 @@ describe('Transactions (prose)', metadata, function () {
       session.startTransaction();
       await db.admin().command({
         configureFailPoint: 'failCommand',
-        mode: { times: 1 },
+        mode: { times: 2 },
         data: {
           failCommands: ['saslContinue', 'ping'],
           closeConnection: true
-        }
+        },
       });
-      await coll.insertOne({ _id: 2, x: 22 });
+      await coll.insertOne({ _id: 2, x: 22 }, { session });
       await session.abortTransaction();
       await session.endSession();
       const doc = await coll.findOne({ _id: 2 });
@@ -58,13 +58,13 @@ describe('Transactions (prose)', metadata, function () {
       session.startTransaction();
       await db.admin().command({
         configureFailPoint: 'failCommand',
-        mode: { times: 1 },
+        mode: { times: 2 },
         data: {
           failCommands: ['saslContinue', 'ping'],
           closeConnection: true
         }
       });
-      await coll.insertOne({ _id: 2, x: 22 });
+      await coll.insertOne({ _id: 2, x: 22 }, { session });
       await session.commitTransaction();
       await session.endSession();
       const doc = await coll.findOne({ _id: 2 });

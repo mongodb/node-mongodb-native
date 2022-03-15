@@ -7,7 +7,7 @@ const metadata = {
   }
 };
 
-describe('Retryable Reads (prose)', metadata, function () {
+describe.only('Retryable Reads (prose)', metadata, function () {
   const dbName = 'retryable-handshake-tests';
   const collName = 'coll';
   const docs = [
@@ -40,7 +40,7 @@ describe('Retryable Reads (prose)', metadata, function () {
       await coll.insertMany(docs);
       await db.admin().command({
         configureFailPoint: 'failCommand',
-        mode: { times: 1 },
+        mode: { times: 2 },
         data: {
           failCommands: ['saslContinue', 'ping'],
           closeConnection: true
@@ -57,7 +57,7 @@ describe('Retryable Reads (prose)', metadata, function () {
       await coll.insertMany(docs);
       await db.admin().command({
         configureFailPoint: 'failCommand',
-        mode: { times: 1 },
+        mode: { times: 2 },
         data: {
           failCommands: ['saslContinue', 'ping'],
           errorCode: 91 // ShutdownInProgress
