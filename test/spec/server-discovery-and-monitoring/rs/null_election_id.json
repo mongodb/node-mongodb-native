@@ -123,15 +123,18 @@
       "outcome": {
         "servers": {
           "a:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
+            "type": "Unknown",
+            "setName": null,
+            "setVersion": null,
             "electionId": null
           },
           "b:27017": {
-            "type": "Unknown",
-            "setName": null,
-            "electionId": null
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 1,
+            "electionId": {
+              "$oid": "000000000000000000000002"
+            }
           },
           "c:27017": {
             "type": "Unknown",
@@ -174,15 +177,18 @@
       "outcome": {
         "servers": {
           "a:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
+            "type": "Unknown",
+            "setName": null,
+            "setVersion": null,
             "electionId": null
           },
           "b:27017": {
-            "type": "Unknown",
-            "setName": null,
-            "electionId": null
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 1,
+            "electionId": {
+              "$oid": "000000000000000000000002"
+            }
           },
           "c:27017": {
             "type": "Unknown",

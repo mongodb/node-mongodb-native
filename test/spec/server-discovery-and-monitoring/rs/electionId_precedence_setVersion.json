@@ -1,5 +1,5 @@
 {
-  "description": "Record max setVersion, even from primary without electionId",
+  "description": "ElectionId is considered higher precedence than setVersion",
   "uri": "mongodb://a/?replicaSet=rs",
   "phases": [
     {
@@ -22,35 +22,7 @@
             "minWireVersion": 0,
             "maxWireVersion": 6
           }
-        ]
-      ],
-      "outcome": {
-        "servers": {
-          "a:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
-            "electionId": {
-              "$oid": "000000000000000000000001"
-            }
-          },
-          "b:27017": {
-            "type": "Unknown",
-            "setName": null,
-            "electionId": null
-          }
-        },
-        "topologyType": "ReplicaSetWithPrimary",
-        "logicalSessionTimeoutMinutes": null,
-        "setName": "rs",
-        "maxSetVersion": 1,
-        "maxElectionId": {
-          "$oid": "000000000000000000000001"
-        }
-      }
-    },
-    {
-      "responses": [
+        ],
         [
           "b:27017",
           {
@@ -63,38 +35,13 @@
             ],
             "setName": "rs",
             "setVersion": 2,
+            "electionId": {
+              "$oid": "000000000000000000000001"
+            },
             "minWireVersion": 0,
             "maxWireVersion": 6
           }
-        ]
-      ],
-      "outcome": {
-        "servers": {
-          "a:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
-            "electionId": {
-              "$oid": "000000000000000000000001"
-            }
-          },
-          "b:27017": {
-            "type": "Unknown",
-            "setName": null,
-            "electionId": null
-          }
-        },
-        "topologyType": "ReplicaSetWithPrimary",
-        "logicalSessionTimeoutMinutes": null,
-        "setName": "rs",
-        "maxSetVersion": 1,
-        "maxElectionId": {
-          "$oid": "000000000000000000000001"
-        }
-      }
-    },
-    {
-      "responses": [
+        ],
         [
           "a:27017",
           {
@@ -128,6 +75,7 @@
           "b:27017": {
             "type": "Unknown",
             "setName": null,
+            "setVersion": null,
             "electionId": null
           }
         },

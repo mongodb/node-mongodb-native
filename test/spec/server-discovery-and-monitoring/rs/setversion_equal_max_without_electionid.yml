@@ -1,4 +1,4 @@
-description: "setVersion that is less than maxSetVersion is ignored if there is no electionId"
+description: "setVersion version that is equal is treated the same as greater than if there is no electionId"
 
 uri: "mongodb://a/?replicaSet=rs"
 
@@ -13,7 +13,7 @@ phases: [
                 isWritablePrimary: true,
                 hosts: ["a:27017", "b:27017"],
                 setName: "rs",
-                setVersion: 2,
+                setVersion: 1,
                 minWireVersion: 0,
                 maxWireVersion: 6
             }]
@@ -24,7 +24,7 @@ phases: [
                 "a:27017": {
                     type: "RSPrimary",
                     setName: "rs",
-                    setVersion: 2 ,
+                    setVersion: 1,
                     electionId:
                 },
                 "b:27017": {
@@ -36,7 +36,7 @@ phases: [
             topologyType: "ReplicaSetWithPrimary",
             logicalSessionTimeoutMinutes: null,
             setName: "rs",
-            maxSetVersion: 2,
+            maxSetVersion: 1,
         }
     },
 
@@ -58,21 +58,21 @@ phases: [
         outcome: {
             servers: {
                 "a:27017": {
-                    type: "RSPrimary",
-                    setName: "rs",
-                    setVersion: 2 ,
+                    type: "Unknown",
+                    setName: ,
                     electionId:
                 },
                 "b:27017": {
-                    type: "Unknown",
-                    setName: ,
+                    type: "RSPrimary",
+                    setName: "rs",
+                    setVersion: 1,
                     electionId:
                 }
             },
             topologyType: "ReplicaSetWithPrimary",
             logicalSessionTimeoutMinutes: null,
             setName: "rs",
-            maxSetVersion: 2,
+            maxSetVersion: 1, # Max is still 1, there wasn't an actual larger setVersion seen
         }
     }
 ]
