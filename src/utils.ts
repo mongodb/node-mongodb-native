@@ -40,6 +40,8 @@ export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
 
 export type AnyOptions = Document;
 
+export type TopologyProvider<T> = MongoClient | Db | Collection<T>;
+
 /**
  * Throws if collectionName is not a valid mongodb collection namespace.
  * @internal
@@ -331,7 +333,7 @@ export function decorateWithExplain(command: Document, explain: Explain): Docume
  * if the topology cannot be found.
  * @internal
  */
-export function getTopology<T>(provider: MongoClient | Db | Collection<T>): Topology {
+export function getTopology<T>(provider: TopologyProvider<T>): Topology {
   if (`topology` in provider && provider.topology) {
     return provider.topology;
   } else if ('client' in provider.s && provider.s.client.topology) {
