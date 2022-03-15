@@ -1,13 +1,13 @@
 import { expect } from 'chai';
+import * as semver from 'semver';
 
 import { MongoError, MongoServerError, TopologyType } from '../../../src';
 
-const metadata = {
-  requires: {
-    mongodb: '>=4.2.0',
-    topology: ['replicaset', 'sharded', 'load-balanced']
-  }
-};
+const VALID_TOPOLOGIES = [
+  TopologyType.ReplicaSetWithPrimary,
+  TopologyType.Sharded,
+  TopologyType.LoadBalanced
+];
 
 describe('Retryable Writes Spec Prose', () => {
   context('when checking against mmapv1', () => {
@@ -71,7 +71,7 @@ describe('Retryable Writes Spec Prose', () => {
     });
   });
 
-  context('when errors occur in the handshake', metadata, function () {
+  context('when errors occur in the handshake', function () {
     const dbName = 'retryable-handshake-tests';
     const collName = 'coll';
     const docs = [{ _id: 1, x: 11 }];
@@ -80,18 +80,26 @@ describe('Retryable Writes Spec Prose', () => {
     let coll;
 
     beforeEach(function () {
+      if (
+        semver.lt(this.configuration.buildInfo.version, '4.2.0') ||
+        !VALID_TOPOLOGIES.includes(this.configuration.topologyType)
+      ) {
+        this.currentTest.skipReason =
+          'Retryable writes tests require MongoDB 4.2 and higher and no standalone';
+        this.skip();
+      }
       client = this.configuration.newClient({});
       db = client.db(dbName);
       coll = db.collection(collName);
     });
 
     afterEach(async function () {
-      await db.admin().command({
+      await db?.admin().command({
         configureFailPoint: 'failCommand',
         mode: 'off'
       });
-      await coll.drop();
-      await client.close();
+      await coll?.drop();
+      await client?.close();
     });
 
     context('when the handshake fails with a network error', function () {
