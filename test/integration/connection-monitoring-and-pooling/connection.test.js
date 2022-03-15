@@ -452,7 +452,27 @@ describe('Connection', function () {
       })
     );
 
-    it(
+    it.only('throws when attempting an operation if the client is not connected', function (done) {
+      const client = this.configuration.newClient();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+      collection.insertOne({ a: 2 }, err => {
+        expect(err).to.match(/must be connected/);
+        done();
+      });
+    });
+
+    it.only('throws when attempting an operation if the client is not connected (promises)', async function () {
+      const client = this.configuration.newClient();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+
+      try {
+        await collection.insertOne({ a: 2 });
+      } catch (err) {
+        expect(err).to.match(/must be connected/);
+      }
+    });
+
+    it.only(
       'should correctly fail on retry when client has been closed',
       withClient(function (client, done) {
         const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
@@ -463,13 +483,26 @@ describe('Connection', function () {
           client.close(true, function (err) {
             expect(err).to.not.exist;
 
-            expect(() => {
-              collection.insertOne({ a: 2 });
-            }).to.throw(/must be connected/);
-            done();
+            collection.insertOne({ a: 2 }, err => {
+              expect(err).to.match(/must be connected/);
+              done();
+            });
           });
         });
       })
     );
+
+    it.only('should correctly fail on retry when client has been closed (promises)', async function () {
+      const client = await this.configuration.newClient().connect();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+      await collection.insertOne({ a: 1 });
+      await client.close(true);
+
+      try {
+        await collection.insertOne({ a: 2 });
+      } catch (err) {
+        expect(err).to.match(/must be connected/);
+      }
+    });
   });
 });
