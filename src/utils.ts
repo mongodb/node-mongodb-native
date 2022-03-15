@@ -851,7 +851,7 @@ export function makeInterruptibleAsyncInterval(
 ): InterruptibleAsyncInterval {
   let timerId: NodeJS.Timeout | undefined;
   let lastCallTime: number;
-  let cannotBeExpedited = false;
+  let lastWakeTime: number;
   let stopped = false;
 
   options = options ?? {};
@@ -901,7 +901,7 @@ export function makeInterruptibleAsyncInterval(
     }
 
     lastCallTime = 0;
-    cannotBeExpedited = false;
+    lastWakeTime = 0;
   }
 
   function reschedule(ms?: number) {
@@ -914,7 +914,7 @@ export function makeInterruptibleAsyncInterval(
   }
 
   function executeAndReschedule() {
-    cannotBeExpedited = false;
+    lastWakeTime = 0;
     lastCallTime = clock();
 
     fn(err => {
