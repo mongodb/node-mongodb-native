@@ -94,14 +94,14 @@ maybeDescribe('examples(change-stream):', function () {
 
       // Start Changestream Example 2
       const collection = db.collection('inventory');
-      const changeStream = collection.watch({ fullDocument: 'updateLookup' });
+      const changeStream = collection.watch([], { fullDocument: 'updateLookup' });
       changeStream.on('change', next => {
         // process next document
       });
       // End Changestream Example 2
 
       // Start Changestream Example 2 Alternative
-      const changeStreamIterator = collection.watch({ fullDocument: 'updateLookup' });
+      const changeStreamIterator = collection.watch([], { fullDocument: 'updateLookup' });
       const next = await changeStreamIterator.next();
       // End Changestream Example 2 Alternative
 
@@ -137,7 +137,7 @@ maybeDescribe('examples(change-stream):', function () {
         const resumeToken = changeStream.resumeToken;
         changeStream.close();
 
-        newChangeStream = collection.watch({ resumeAfter: resumeToken });
+        newChangeStream = collection.watch([], { resumeAfter: resumeToken });
         newChangeStream.on('change', next => {
           processChange(next);
         });
@@ -151,7 +151,7 @@ maybeDescribe('examples(change-stream):', function () {
       const resumeToken = changeStreamIterator.resumeToken;
       changeStreamIterator.close();
 
-      const newChangeStreamIterator = collection.watch({ resumeAfter: resumeToken });
+      const newChangeStreamIterator = collection.watch([], { resumeAfter: resumeToken });
       const change2 = await newChangeStreamIterator.next();
       // End Changestream Example 3 Alternative
 
