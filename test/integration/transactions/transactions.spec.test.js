@@ -78,6 +78,14 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
+// These tests are skipped because the driver 1) executes a ping when connecting to
+// an authenticated server and 2) command monitoring is at the connection level so
+// when the handshake fails no command started event is emitted.
+const SKIP = [
+  'AbortTransaction succeeds after handshake network error',
+  'CommitTransaction succeeds after handshake network error'
+];
+
 describe('Transactions Spec Unified Tests', function () {
   runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')));
 });

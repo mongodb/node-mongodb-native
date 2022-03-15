@@ -2,7 +2,14 @@
 
 const { expect } = require('chai');
 
-describe('Retryable Writes (prose)', function () {
+const metadata = {
+  requires: {
+    mongodb: '>=4.2.0',
+    topology: ['replicaset', 'sharded', 'load-balanced']
+  }
+};
+
+describe('Retryable Writes (prose)', metadata, function () {
   const dbName = 'retryable-handshake-tests';
   const collName = 'coll';
   const docs = [{ _id: 1, x: 11 }];

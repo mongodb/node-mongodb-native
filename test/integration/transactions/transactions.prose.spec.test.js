@@ -9,14 +9,10 @@ const metadata = {
   }
 };
 
-describe('Retryable Reads (prose)', metadata, function () {
+describe('Transactions (prose)', metadata, function () {
   const dbName = 'retryable-handshake-tests';
   const collName = 'coll';
-  const docs = [
-    { _id: 1, x: 11 },
-    { _id: 2, x: 22 },
-    { _id: 3, x: 33 }
-  ];
+  const docs = [{ _id: 1, x: 11 }];
   let client;
   let db;
   let coll;
@@ -42,9 +38,11 @@ describe('Retryable Reads (prose)', metadata, function () {
   });
 
   context('when the handshake fails with a network error', function () {
-    it('retries the read', function (done) {
+    it('retries the abort', function (done) {
       client.connect(() => {
         coll.insertMany(docs, () => {
+          const session = client.startSession();
+          session.startTransaction();
           db.admin().command(
             {
               configureFailPoint: 'failCommand',
@@ -55,34 +53,38 @@ describe('Retryable Reads (prose)', metadata, function () {
               }
             },
             () => {
-              coll.find().toArray((error, documents) => {
-                expect(documents).to.deep.equal(docs);
-                done();
+              coll.insertOne({ _id: 2, x: 22 }, (error, result) => {
+                session.abortTransaction((error) => {
+                  if (error) return error;
+                  session.endSession(done);
+                });
               });
             }
           );
         });
       });
     });
-  });
 
-  context('when the handshake fails with shutdown in progress', function () {
-    it('retries the read', function (done) {
+    it('retries the commit', function (done) {
       client.connect(() => {
         coll.insertMany(docs, () => {
+          const session = client.startSession();
+          session.startTransaction();
           db.admin().command(
             {
               configureFailPoint: 'failCommand',
               mode: { times: 1 },
               data: {
                 failCommands: ['saslContinue', 'ping'],
-                errorCode: 91 // ShutdownInProgress
+                closeConnection: true
               }
             },
             () => {
-              coll.find().toArray((error, documents) => {
-                expect(documents).to.deep.equal(docs);
-                done();
+              coll.insertOne({ _id: 2, x: 22 }, (error, result) => {
+                session.commitTransaction((error) => {
+                  if (error) return error;
+                  session.endSession(done);
+                });
               });
             }
           );
