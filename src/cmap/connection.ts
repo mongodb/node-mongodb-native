@@ -114,7 +114,7 @@ export interface CommandOptions extends BSONSerializeOptions {
   // Applying a session to a command should happen as part of command construction,
   // most likely in the CommandOperation#executeCommand method, where we have access to
   // the details we need to determine if a txnNum should also be applied.
-  willRetryWrite?: true;
+  willRetryWrite?: boolean;
 
   writeConcern?: WriteConcern;
 }
