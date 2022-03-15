@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-
 import * as path from 'path';
+
 import type { Collection, Db, MongoClient } from '../../../src';
 import { loadSpecTests } from '../../spec';
 import { legacyRunOnToRunOnRequirement } from '../../tools/spec-runner';

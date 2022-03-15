@@ -87,7 +87,7 @@ const SKIP = [
 ];
 
 describe('Transactions Spec Unified Tests', function () {
-  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')));
+  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')), SKIP);
 });
 
 const SKIP_TESTS = [

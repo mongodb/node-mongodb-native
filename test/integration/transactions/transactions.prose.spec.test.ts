@@ -7,7 +7,7 @@ const metadata = {
   }
 };
 
-describe.only('Transactions (prose)', metadata, function () {
+describe('Transactions (prose)', metadata, function () {
   const dbName = 'retryable-handshake-tests';
   const collName = 'coll';
   const docs = [{ _id: 1, x: 11 }];
@@ -22,12 +22,10 @@ describe.only('Transactions (prose)', metadata, function () {
   });
 
   afterEach(async function () {
-    await db.admin().command(
-      {
-        configureFailPoint: 'failCommand',
-        mode: 'off'
-      }
-    );
+    await db.admin().command({
+      configureFailPoint: 'failCommand',
+      mode: 'off'
+    });
     await coll.drop();
     await client.close();
   });
@@ -38,19 +36,17 @@ describe.only('Transactions (prose)', metadata, function () {
       await coll.insertMany(docs);
       const session = client.startSession();
       session.startTransaction();
-      await db.admin().command(
-        {
-          configureFailPoint: 'failCommand',
-          mode: { times: 1 },
-          data: {
-            failCommands: ['saslContinue', 'ping'],
-            closeConnection: true
-          }
+      await db.admin().command({
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['saslContinue', 'ping'],
+          closeConnection: true
         }
-      );
-      const result = await coll.insertOne({ _id: 2, x: 22 });
+      });
+      await coll.insertOne({ _id: 2, x: 22 });
       await session.abortTransaction();
-      const res = await session.endSession();
+      await session.endSession();
       const doc = await coll.findOne({ _id: 2 });
       expect(doc).to.not.exist;
     });
@@ -60,17 +56,15 @@ describe.only('Transactions (prose)', metadata, function () {
       await coll.insertMany(docs);
       const session = client.startSession();
       session.startTransaction();
-      await db.admin().command(
-        {
-          configureFailPoint: 'failCommand',
-          mode: { times: 1 },
-          data: {
-            failCommands: ['saslContinue', 'ping'],
-            closeConnection: true
-          }
+      await db.admin().command({
+        configureFailPoint: 'failCommand',
+        mode: { times: 1 },
+        data: {
+          failCommands: ['saslContinue', 'ping'],
+          closeConnection: true
         }
-      );
-      const result = await coll.insertOne({ _id: 2, x: 22 });
+      });
+      await coll.insertOne({ _id: 2, x: 22 });
       await session.commitTransaction();
       await session.endSession();
       const doc = await coll.findOne({ _id: 2 });
