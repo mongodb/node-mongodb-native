@@ -373,31 +373,30 @@ function updateRsFromPrimary(
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
-  const electionId = serverDescription.electionId ? serverDescription.electionId : null;
-  if (serverDescription.setVersion && electionId) {
-    if (maxSetVersion && maxElectionId) {
-      if (
-        maxSetVersion > serverDescription.setVersion ||
-        compareObjectId(maxElectionId, electionId) > 0
-      ) {
-        // this primary is stale, we must remove it
-        serverDescriptions.set(
-          serverDescription.address,
-          new ServerDescription(serverDescription.address)
-        );
+  const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
+  const maxElectionIdIsEqual = electionIdComparison === 0;
+  const maxElectionIdIsLess = electionIdComparison === -1;
 
-        return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
-      }
-    }
-
-    maxElectionId = serverDescription.electionId;
-  }
+  const setVersionComparison = compareNumber(maxSetVersion, serverDescription.setVersion);
+  const maxSetVersionIsLess = setVersionComparison === -1;
+  const maxSetVersionIsEqual = setVersionComparison === 0;
 
   if (
-    serverDescription.setVersion != null &&
-    (maxSetVersion == null || serverDescription.setVersion > maxSetVersion)
+    maxElectionIdIsLess ||
+    (maxElectionIdIsEqual && (maxSetVersionIsLess || maxSetVersionIsEqual))
   ) {
+    // We've seen a higher ElectionId! Update both!
+    // Or the electionId is the same but the setVersion increased
+    maxElectionId = serverDescription.electionId;
     maxSetVersion = serverDescription.setVersion;
+  } else {
+    // this primary is stale, we must remove it
+    serverDescriptions.set(
+      serverDescription.address,
+      new ServerDescription(serverDescription.address)
+    );
+
+    return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
   // We've heard from the primary. Is it the same primary as before?
