@@ -212,7 +212,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
   monitor.emit(Server.SERVER_HEARTBEAT_STARTED, new ServerHeartbeatStartedEvent(monitor.address));
 
   function failureHandler(err: AnyError) {
-    console.debug('Monitor#failureHandler', err);
     monitor[kConnection]?.destroy({ force: true });
     monitor[kConnection] = undefined;
 
@@ -243,7 +242,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
 
     const options = isAwaitable
       ? {
-          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0
+          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
+          exhaustAllowed: true
         }
       : { socketTimeoutMS: connectTimeoutMS };
 

@@ -94,6 +94,28 @@ describe('driver utils', function () {
     });
 
     describe('#wake', function () {
+      context('when the time since last wake is negative', () => {
+        it('does not execute and returns immediately', () => {
+          executor = makeInterruptibleAsyncInterval(fnSpy, {
+            minInterval: 10,
+            interval: 30,
+            clock: () => {
+              return -50;
+            }
+          });
+          // stop the executor
+          executor.stop();
+          // ensure we havent called the function yet.
+          expect(fnSpy.callCount).to.equal(0);
+          // move the clock forward any amount over the interval.
+          clock.tick(500);
+          // wake the executor.
+          executor.wake();
+          // ensure we havent called the function since the time until next call will never be positive.
+          expect(fnSpy.callCount).to.equal(0);
+        });
+      });
+
       context('when the time until next call is negative', () => {
         // somehow we missed the execution, due to an unreliable clock
 
