@@ -50,15 +50,6 @@ export interface DeleteStatement {
   collation?: CollationOptions;
   /** A document or string that specifies the index to use to support the query predicate. */
   hint?: Hint;
-  /**
-   * Comment to apply to the operation.
-   *
-   * In server versions pre-4.4, 'comment' must be string.  A server
-   * error will be thrown if any other type is provided.
-   *
-   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
-   */
-  comment?: any;
 }
 
 /** @internal */

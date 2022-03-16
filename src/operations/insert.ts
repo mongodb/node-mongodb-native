@@ -41,7 +41,8 @@ export class InsertOperation extends CommandOperation<Document> {
       command.bypassDocumentValidation = options.bypassDocumentValidation;
     }
 
-    if (options.comment != null) {
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
       command.comment = options.comment;
     }
 
