@@ -187,6 +187,86 @@ describe('Change Streams', function () {
   });
   afterEach(async () => await mock.cleanup());
 
+  context('ChangeStreamCursor options', function () {
+    let client, db, collection;
+
+    beforeEach(async function () {
+      client = await this.configuration.newClient().connect();
+      db = client.db('db');
+      collection = db.collection('collection');
+    });
+
+    afterEach(async function () {
+      await client.close();
+      client = undefined;
+      db = undefined;
+      collection = undefined;
+    });
+
+    context('fullDocument', () => {
+      it('does not set fullDocument if no value is provided', function () {
+        const changeStream = client.watch();
+
+        expect(changeStream).not.to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.fullDocument'
+        );
+      });
+
+      it('does not validate the value passed in for the `fullDocument` property', function () {
+        const changeStream = client.watch([], { fullDocument: 'invalid value' });
+
+        expect(changeStream).to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.fullDocument',
+          'invalid value'
+        );
+      });
+
+      it('assigns `fullDocument` to the correct value if it is passed as an option', function () {
+        const changeStream = client.watch([], { fullDocument: 'updateLookup' });
+
+        expect(changeStream).to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.fullDocument',
+          'updateLookup'
+        );
+      });
+    });
+
+    context('allChangesForCluster', () => {
+      it('assigns `allChangesForCluster` to `true` if the ChangeStream.type is Cluster', function () {
+        const changeStream = client.watch();
+
+        expect(changeStream).to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.allChangesForCluster',
+          true
+        );
+      });
+
+      it('does not assign `allChangesForCluster` if the ChangeStream.type is Db', function () {
+        const changeStream = db.watch();
+
+        expect(changeStream).not.to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.allChangesForCluster'
+        );
+      });
+
+      it('does not assign `allChangesForCluster` if the ChangeStream.type is Collection', function () {
+        const changeStream = collection.watch();
+
+        expect(changeStream).not.to.have.nested.property(
+          'cursor.pipeline[0].$changeStream.allChangesForCluster'
+        );
+      });
+    });
+
+    it('ignores any invalid option values', function () {
+      const changeStream = collection.watch([], { invalidOption: true });
+
+      expect(changeStream).not.to.have.nested.property(
+        'cursor.pipeline[0].$changeStream.invalidOption'
+      );
+    });
+  });
+
   it('should close the listeners after the cursor is closed', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
 

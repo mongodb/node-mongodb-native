@@ -45,10 +45,20 @@ const kClosed = Symbol('closed');
 /** @internal */
 const kMode = Symbol('mode');
 
-const CHANGE_STREAM_OPTIONS = ['resumeAfter', 'startAfter', 'startAtOperationTime', 'fullDocument'];
-const CURSOR_OPTIONS = ['batchSize', 'maxAwaitTimeMS', 'collation', 'readPreference'].concat(
-  CHANGE_STREAM_OPTIONS
-);
+const CHANGE_STREAM_OPTIONS = [
+  'resumeAfter',
+  'startAfter',
+  'startAtOperationTime',
+  'fullDocument'
+] as const;
+
+const CURSOR_OPTIONS = [
+  'batchSize',
+  'maxAwaitTimeMS',
+  'collation',
+  'readPreference',
+  ...CHANGE_STREAM_OPTIONS
+] as const;
 
 const CHANGE_DOMAIN_TYPES = {
   COLLECTION: Symbol('Collection'),
@@ -68,6 +78,8 @@ export interface ResumeOptions {
   maxAwaitTimeMS?: number;
   collation?: CollationOptions;
   readPreference?: ReadPreference;
+  resumeAfter?: ResumeToken;
+  startAfter?: ResumeToken;
 }
 
 /**
@@ -94,7 +106,7 @@ export interface PipeOptions {
  * @public
  */
 export interface ChangeStreamOptions extends AggregateOptions {
-  /** Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
+  /** Allowed values: 'updateLookup'. When set to 'updateLookup', the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
   fullDocument?: string;
   /** The maximum amount of time for the server to wait on new documents to satisfy a change stream query. */
   maxAwaitTimeMS?: number;
@@ -446,22 +458,18 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
   }
 
   get resumeOptions(): ResumeOptions {
-    const result = {} as ResumeOptions;
-    for (const optionName of CURSOR_OPTIONS) {
-      if (Reflect.has(this.options, optionName)) {
-        Reflect.set(result, optionName, Reflect.get(this.options, optionName));
-      }
-    }
+    const result: ResumeOptions = applyKnownOptions(this.options, CURSOR_OPTIONS);
 
     if (this.resumeToken || this.startAtOperationTime) {
-      ['resumeAfter', 'startAfter', 'startAtOperationTime'].forEach(key =>
-        Reflect.deleteProperty(result, key)
-      );
+      for (const key of ['resumeAfter', 'startAfter', 'startAtOperationTime']) {
+        Reflect.deleteProperty(result, key);
+      }
 
       if (this.resumeToken) {
         const resumeKey =
           this.options.startAfter && !this.hasReceived ? 'startAfter' : 'resumeAfter';
-        Reflect.set(result, resumeKey, this.resumeToken);
+
+        result[resumeKey] = this.resumeToken;
       } else if (this.startAtOperationTime && maxWireVersion(this.server) >= 7) {
         result.startAtOperationTime = this.startAtOperationTime;
       }
@@ -568,25 +576,25 @@ function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
   }
   changeStream[kMode] = 'iterator';
 }
+
 /**
  * Create a new change stream cursor based on self's configuration
  * @internal
  */
 function createChangeStreamCursor<TSchema>(
   changeStream: ChangeStream<TSchema>,
-  options: ChangeStreamOptions
+  options: ChangeStreamOptions | ResumeOptions
 ): ChangeStreamCursor<TSchema> {
-  const changeStreamStageOptions: Document = { fullDocument: options.fullDocument || 'default' };
-  applyKnownOptions(changeStreamStageOptions, options, CHANGE_STREAM_OPTIONS);
+  const changeStreamStageOptions = applyKnownOptions(options, CHANGE_STREAM_OPTIONS);
   if (changeStream.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
     changeStreamStageOptions.allChangesForCluster = true;
   }
-
   const pipeline = [{ $changeStream: changeStreamStageOptions } as Document].concat(
     changeStream.pipeline
   );
 
-  const cursorOptions = applyKnownOptions({}, options, CURSOR_OPTIONS);
+  const cursorOptions: ChangeStreamCursorOptions = applyKnownOptions(options, CURSOR_OPTIONS);
+
   const changeStreamCursor = new ChangeStreamCursor<TSchema>(
     getTopology(changeStream.parent),
     changeStream.namespace,
@@ -605,16 +613,17 @@ function createChangeStreamCursor<TSchema>(
   return changeStreamCursor;
 }
 
-function applyKnownOptions(target: Document, source: Document, optionNames: string[]) {
-  optionNames.forEach(name => {
-    if (source[name]) {
-      target[name] = source[name];
+function applyKnownOptions(source: Document, options: ReadonlyArray<string>) {
+  const result: Document = {};
+
+  for (const option of options) {
+    if (source[option]) {
+      result[option] = source[option];
     }
-  });
+  }
 
-  return target;
+  return result;
 }
-
 interface TopologyWaitOptions {
   start?: number;
   timeout?: number;
