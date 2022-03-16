@@ -24,7 +24,6 @@ describe('ServerSession', () => {
    * Drivers SHOULD assert that after repeated runs they are able to achieve the use of exactly one session, this will statistically prove we've reduced the allocation amount
    * Drivers MUST assert that the number of allocated sessions never exceeds the number of concurrent operations executing
    */
-
   it('13. may reuse one server session for many operations', async () => {
     const events = [];
     client.on('commandStarted', ev => events.push(ev));
@@ -45,6 +44,7 @@ describe('ServerSession', () => {
     expect(allResults).to.have.lengthOf(operations.length);
     expect(events).to.have.lengthOf(operations.length);
 
-    expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(1); // This is a guarantee in node
+    // This is a guarantee in node, unless you are performing a transaction (which is not being done in this test)
+    expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(1);
   });
 });
