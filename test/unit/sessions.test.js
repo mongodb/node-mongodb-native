@@ -328,6 +328,16 @@ describe('Sessions - unit', function () {
       serverSessionPool = new ServerSessionPool(topology);
     });
 
+    it('serverSession getter should return whatever is defined for serverSession symbol if clientSession is ended', () => {
+      const session = new ClientSession(topology, serverSessionPool, { explicit: false });
+      const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
+      expect(session).to.have.property(serverSessionSymbol, undefined);
+      session.hasEnded = true;
+      expect(session.serverSession).to.be.undefined;
+      session[serverSessionSymbol] = 'wacky crazy value';
+      expect(session.serverSession).to.be.equal('wacky crazy value');
+    });
+
     it('should acquire a serverSession in the constructor if the session is explicit', () => {
       const session = new ClientSession(topology, serverSessionPool, { explicit: true });
       const serverSessionSymbol = getSymbolFrom(session, 'serverSession');

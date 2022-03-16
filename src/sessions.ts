@@ -189,6 +189,13 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   get serverSession(): ServerSession {
+    if (this.hasEnded) {
+      // @ts-expect-error: If the session has ended we do not want to run the acquire code below
+      // regardless of the value of kServerSession potentially being nullish. It *should* always be
+      // a ServerSession at this stage, but if it is not, risking a null access seems worth it
+      // as opposed to accidentally acquiring a new ServerSession for an ended ClientSession
+      return this[kServerSession];
+    }
     let serverSession = this[kServerSession];
     if (serverSession == null) {
       serverSession = this.sessionPool.acquire();
@@ -984,7 +991,6 @@ export function applySession(
   serverSession.lastUse = now();
   command.lsid = serverSession.id;
 
-  // first apply non-transaction-specific sessions data
   const inTxnOrTxnCommand = session.inTransaction() || isTransactionCommand(command);
   const isRetryableWrite = Boolean(options.willRetryWrite);
 

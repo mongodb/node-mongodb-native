@@ -386,7 +386,7 @@ describe('Sessions Spec', function () {
     });
 
     it('should only use one session for many operations when maxPoolSize is 1', async () => {
-      const documents = new Array(50).fill(null).map((_, idx) => ({ _id: idx }));
+      const documents = Array.from({ length: 50 }).map((_, idx) => ({ _id: idx }));
 
       const events = [];
       client.on('commandStarted', ev => events.push(ev));
