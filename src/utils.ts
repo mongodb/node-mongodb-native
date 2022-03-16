@@ -329,14 +329,15 @@ export function decorateWithExplain(command: Document, explain: Explain): Docume
 /**
  * @internal
  */
-export type TopologyProvider<T> = MongoClient | Db | Collection<T>;
+export type TopologyProvider = MongoClient | Db | Collection<any>;
 
 /**
  * A helper function to get the topology from a given provider. Throws
  * if the topology cannot be found.
+ * @throws MongoNotConnectedError
  * @internal
  */
-export function getTopology<T>(provider: TopologyProvider<T>): Topology {
+export function getTopology(provider: TopologyProvider): Topology {
   if (`topology` in provider && provider.topology) {
     return provider.topology;
   } else if ('client' in provider.s && provider.s.client.topology) {

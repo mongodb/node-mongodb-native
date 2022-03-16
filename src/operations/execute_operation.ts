@@ -65,29 +65,25 @@ export interface ExecutionResult {
  */
 export function executeOperation<
   T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>,
-  TSchema = Document
->(topology: Topology | TopologyProvider<TSchema>, operation: T): Promise<TResult>;
+  TResult = ResultTypeFromOperation<T>
+>(topologyProvider: Topology | TopologyProvider, operation: T): Promise<TResult>;
 export function executeOperation<
   T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>,
-  TSchema = Document
->(topology: Topology | TopologyProvider<TSchema>, operation: T, callback: Callback<TResult>): void;
+  TResult = ResultTypeFromOperation<T>
+>(topologyProvider: Topology | TopologyProvider, operation: T, callback: Callback<TResult>): void;
 export function executeOperation<
   T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>,
-  TSchema = Document
+  TResult = ResultTypeFromOperation<T>
 >(
-  topology: Topology | TopologyProvider<TSchema>,
+  topologyProvider: Topology | TopologyProvider,
   operation: T,
   callback?: Callback<TResult>
 ): Promise<TResult> | void;
 export function executeOperation<
   T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>,
-  TSchema = Document
+  TResult = ResultTypeFromOperation<T>
 >(
-  topology: Topology | TopologyProvider<TSchema>,
+  topologyProvider: Topology | TopologyProvider,
   operation: T,
   callback?: Callback<TResult>
 ): Promise<TResult> | void {
@@ -97,8 +93,10 @@ export function executeOperation<
   }
 
   return maybePromise(callback, callback => {
+    let topology: Topology | TopologyProvider;
     try {
-      topology = topology instanceof Topology ? topology : getTopology(topology);
+      topology =
+        topologyProvider instanceof Topology ? topologyProvider : getTopology(topologyProvider);
     } catch (error) {
       return callback(error);
     }
@@ -106,7 +104,7 @@ export function executeOperation<
       return topology.selectServer(ReadPreference.primaryPreferred, {}, err => {
         if (err) return callback(err);
 
-        executeOperation<T, TResult, TSchema>(topology, operation, callback);
+        executeOperation<T, TResult>(topology, operation, callback);
       });
     }
 

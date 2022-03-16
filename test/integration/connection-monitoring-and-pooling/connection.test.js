@@ -1,6 +1,10 @@
 'use strict';
 
-const { ServerHeartbeatStartedEvent, MongoClient } = require('../../../src');
+const {
+  ServerHeartbeatStartedEvent,
+  MongoClient,
+  MongoNotConnectedError
+} = require('../../../src');
 const { Connection } = require('../../../src/cmap/connection');
 const { connect } = require('../../../src/cmap/connect');
 const { expect } = require('chai');
@@ -456,7 +460,7 @@ describe('Connection', function () {
       const client = this.configuration.newClient();
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
       collection.insertOne({ a: 2 }, err => {
-        expect(err).to.match(/must be connected/);
+        expect(err).to.be.instanceof(MongoNotConnectedError);
         done();
       });
     });
@@ -465,11 +469,8 @@ describe('Connection', function () {
       const client = this.configuration.newClient();
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
 
-      try {
-        await collection.insertOne({ a: 2 });
-      } catch (err) {
-        expect(err).to.match(/must be connected/);
-      }
+      const err = await collection.insertOne({ a: 2 }).catch(err => err);
+      expect(err).to.be.instanceof(MongoNotConnectedError);
     });
 
     it(
@@ -484,7 +485,7 @@ describe('Connection', function () {
             expect(err).to.not.exist;
 
             collection.insertOne({ a: 2 }, err => {
-              expect(err).to.match(/must be connected/);
+              expect(err).to.be.instanceof(MongoNotConnectedError);
               done();
             });
           });
@@ -498,11 +499,8 @@ describe('Connection', function () {
       await collection.insertOne({ a: 1 });
       await client.close(true);
 
-      try {
-        await collection.insertOne({ a: 2 });
-      } catch (err) {
-        expect(err).to.match(/must be connected/);
-      }
+      const err = await collection.insertOne({ a: 2 }).catch(err => err);
+      expect(err).to.be.instanceof(MongoNotConnectedError);
     });
   });
 });
