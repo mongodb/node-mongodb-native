@@ -57,6 +57,7 @@ const CURSOR_OPTIONS = [
   'maxAwaitTimeMS',
   'collation',
   'readPreference',
+  'comment',
   ...CHANGE_STREAM_OPTIONS
 ] as const;
 
