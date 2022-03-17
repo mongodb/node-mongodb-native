@@ -411,6 +411,9 @@ export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
   startAtOperationTime?: OperationTime;
   resumeAfter?: ResumeToken;
   startAfter?: boolean;
+
+  /** todo: add comment */
+  comment?: any;
 }
 
 /** @internal */
