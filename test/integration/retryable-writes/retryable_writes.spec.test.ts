@@ -1,11 +1,19 @@
 import { expect } from 'chai';
 import * as path from 'path';
+import * as semver from 'semver';
 
 import type { Collection, Db, MongoClient } from '../../../src';
+import { TopologyType } from '../../../src';
 import { loadSpecTests } from '../../spec';
 import { legacyRunOnToRunOnRequirement } from '../../tools/spec-runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 import { isAnyRequirementSatisfied } from '../../tools/unified-spec-runner/unified-utils';
+
+const VALID_TOPOLOGIES = [
+  TopologyType.ReplicaSetWithPrimary,
+  TopologyType.Sharded,
+  TopologyType.LoadBalanced
+];
 
 interface RetryableWriteTestContext {
   client?: MongoClient;
@@ -209,4 +217,70 @@ const SKIP = [
 
 describe('Retryable Writes (unified)', function () {
   runUnifiedSuite(loadSpecTests(path.join('retryable-writes', 'unified')), SKIP);
+});
+
+describe('Retryable Writes', function () {
+  const dbName = 'retryable-handshake-tests';
+  const collName = 'coll';
+  const docs = [{ _id: 1, x: 11 }];
+  let client;
+  let db;
+  let coll;
+
+  beforeEach(function () {
+    if (
+      semver.lt(this.configuration.buildInfo.version, '4.2.0') ||
+      !VALID_TOPOLOGIES.includes(this.configuration.topologyType)
+    ) {
+      this.currentTest.skipReason =
+        'Retryable writes tests require MongoDB 4.2 and higher and no standalone';
+      this.skip();
+    }
+    client = this.configuration.newClient({});
+    db = client.db(dbName);
+    coll = db.collection(collName);
+  });
+
+  afterEach(async function () {
+    await db?.admin().command({
+      configureFailPoint: 'failCommand',
+      mode: 'off'
+    });
+    await coll?.drop();
+    await client?.close();
+  });
+
+  context('when the handshake fails with a network error', function () {
+    it('retries the write', async function () {
+      await client.connect();
+      await coll.insertMany(docs);
+      await db.admin().command({
+        configureFailPoint: 'failCommand',
+        mode: { times: 2 },
+        data: {
+          failCommands: ['saslContinue', 'ping'],
+          closeConnection: true
+        }
+      });
+      const result = await coll.insertOne({ _id: 2, x: 22 });
+      expect(result.insertedId).to.equal(2);
+    });
+  });
+
+  context('when the handshake fails with shutdown in progress', function () {
+    it('retries the write', async function () {
+      await client.connect();
+      await coll.insertMany(docs);
+      await db.admin().command({
+        configureFailPoint: 'failCommand',
+        mode: { times: 2 },
+        data: {
+          failCommands: ['saslContinue', 'ping'],
+          errorCode: 91 // ShutdownInProgress
+        }
+      });
+      const result = await coll.insertOne({ _id: 2, x: 22 });
+      expect(result.insertedId).to.equal(2);
+    });
+  });
 });
