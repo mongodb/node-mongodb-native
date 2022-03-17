@@ -693,8 +693,8 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   findOne(): Promise<WithId<TSchema> | null>;
-  findOne(callback: Callback<WithId<TSchema> | null>): void;
   findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
+  findOne(callback: Callback<WithId<TSchema> | null>): void;
   findOne(filter: Filter<TSchema>, callback: Callback<WithId<TSchema> | null>): void;
   findOne(filter: Filter<TSchema>, options: FindOptions): Promise<WithId<TSchema> | null>;
   findOne(
@@ -705,8 +705,8 @@ export class Collection<TSchema extends Document = Document> {
 
   // allow an override of the schema.
   findOne<T = TSchema>(): Promise<T | null>;
-  findOne<T = TSchema>(callback: Callback<T | null>): void;
   findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
+  findOne<T = TSchema>(callback: Callback<T | null>): void;
   findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | null>;
   findOne<T = TSchema>(
     filter: Filter<TSchema>,
