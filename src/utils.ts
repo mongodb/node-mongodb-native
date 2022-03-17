@@ -851,7 +851,7 @@ export function makeInterruptibleAsyncInterval(
 ): InterruptibleAsyncInterval {
   let timerId: NodeJS.Timeout | undefined;
   let lastCallTime: number;
-  let lastWakeTime: number;
+  let lastWakeTime = 0;
   let stopped = false;
 
   options = options ?? {};
