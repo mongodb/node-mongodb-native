@@ -655,19 +655,19 @@ function executeCommands(
   try {
     if (isInsertBatch(batch)) {
       executeOperation(
-        bulkOperation.s.topology,
+        bulkOperation.s.collection,
         new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
         resultHandler
       );
     } else if (isUpdateBatch(batch)) {
       executeOperation(
-        bulkOperation.s.topology,
+        bulkOperation.s.collection,
         new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
         resultHandler
       );
     } else if (isDeleteBatch(batch)) {
       executeOperation(
-        bulkOperation.s.topology,
+        bulkOperation.s.collection,
         new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
         resultHandler
       );
@@ -1285,7 +1285,7 @@ export abstract class BulkOperationBase {
     const finalOptions = { ...this.s.options, ...options };
     const operation = new BulkWriteShimOperation(this, finalOptions);
 
-    return executeOperation(this.s.topology, operation, callback);
+    return executeOperation(this.s.collection, operation, callback);
   }
 
   /**

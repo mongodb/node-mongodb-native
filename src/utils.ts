@@ -8,6 +8,8 @@ import type { Connection } from './cmap/connection';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 import type { Collection } from './collection';
 import { LEGACY_HELLO_COMMAND } from './constants';
+import type { AbstractCursor } from './cursor/abstract_cursor';
+import type { FindCursor } from './cursor/find_cursor';
 import type { Db } from './db';
 import {
   AnyError,
@@ -28,6 +30,7 @@ import { ReadPreference } from './read_preference';
 import { ServerType } from './sdam/common';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
+import type { ClientSession } from './sessions';
 import { W, WriteConcern, WriteConcernOptions } from './write_concern';
 
 /**
@@ -329,7 +332,13 @@ export function decorateWithExplain(command: Document, explain: Explain): Docume
 /**
  * @internal
  */
-export type TopologyProvider = MongoClient | Db | Collection<any>;
+export type TopologyProvider =
+  | MongoClient
+  | ClientSession
+  | FindCursor
+  | AbstractCursor
+  | Collection<any>
+  | Db;
 
 /**
  * A helper function to get the topology from a given provider. Throws
@@ -338,11 +347,12 @@ export type TopologyProvider = MongoClient | Db | Collection<any>;
  * @internal
  */
 export function getTopology(provider: TopologyProvider): Topology {
+  // MongoClient or ClientSession or AbstractCursor
   if (`topology` in provider && provider.topology) {
     return provider.topology;
-  } else if ('client' in provider.s && provider.s.client.topology) {
+  } else if ('s' in provider && 'client' in provider.s && provider.s.client.topology) {
     return provider.s.client.topology;
-  } else if ('db' in provider.s && provider.s.db.s.client.topology) {
+  } else if ('s' in provider && 'db' in provider.s && provider.s.db.s.client.topology) {
     return provider.s.db.s.client.topology;
   }
 

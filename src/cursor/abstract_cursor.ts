@@ -618,7 +618,7 @@ export abstract class AbstractCursor<
       batchSize
     });
 
-    executeOperation(this.topology, getMoreOperation, callback);
+    executeOperation(this, getMoreOperation, callback);
   }
 }
 

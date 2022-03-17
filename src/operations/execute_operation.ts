@@ -19,7 +19,7 @@ import {
   secondaryWritableServerSelector,
   ServerSelector
 } from '../sdam/server_selection';
-import { Topology } from '../sdam/topology';
+import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import {
   Callback,
@@ -66,16 +66,16 @@ export interface ExecutionResult {
 export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(topologyProvider: Topology | TopologyProvider, operation: T): Promise<TResult>;
+>(topologyProvider: TopologyProvider, operation: T): Promise<TResult>;
 export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(topologyProvider: Topology | TopologyProvider, operation: T, callback: Callback<TResult>): void;
+>(topologyProvider: TopologyProvider, operation: T, callback: Callback<TResult>): void;
 export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(
-  topologyProvider: Topology | TopologyProvider,
+  topologyProvider: TopologyProvider,
   operation: T,
   callback?: Callback<TResult>
 ): Promise<TResult> | void;
@@ -83,7 +83,7 @@ export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(
-  topologyProvider: Topology | TopologyProvider,
+  topologyProvider: TopologyProvider,
   operation: T,
   callback?: Callback<TResult>
 ): Promise<TResult> | void {
@@ -93,10 +93,9 @@ export function executeOperation<
   }
 
   return maybePromise(callback, callback => {
-    let topology: Topology | TopologyProvider;
+    let topology: Topology;
     try {
-      topology =
-        topologyProvider instanceof Topology ? topologyProvider : getTopology(topologyProvider);
+      topology = getTopology(topologyProvider);
     } catch (error) {
       return callback(error);
     }
@@ -104,7 +103,7 @@ export function executeOperation<
       return topology.selectServer(ReadPreference.primaryPreferred, {}, err => {
         if (err) return callback(err);
 
-        executeOperation<T, TResult>(topology, operation, callback);
+        executeOperation<T, TResult>(topologyProvider, operation, callback);
       });
     }
 
