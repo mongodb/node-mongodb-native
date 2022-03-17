@@ -12,9 +12,12 @@ describe('Change Streams Spec - Unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')), [
     'Test with document comment',
     'Test with string comment',
-    'Test that comment is set on getMore',
-    'Test with document comment - pre 4.4'
+    'Test that comment is set on getMore'
   ]);
+});
+
+describe('Change Streams Spec - Node-Specific', function () {
+  runUnifiedSuite(loadSpecTests(path.join('change-streams', 'node-specific')));
 });
 
 // TODO: NODE-3819: Unskip flaky MacOS tests.
