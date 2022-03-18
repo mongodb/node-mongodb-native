@@ -2,7 +2,7 @@ import type { Document, Long } from '../bson';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback, MongoDBNamespace } from '../utils';
+import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './operation';
 
 /**
@@ -15,10 +15,7 @@ export interface GetMoreOptions extends OperationOptions {
   /**
    * Comment to apply to the operation.
    *
-   * In server versions pre-4.4, 'comment' must be string.  A server
-   * error will be thrown if any other type is provided.
-   *
-   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
+   * getMore only supports 'comment' in server versions 4.4 and above.
    */
   comment?: any;
   /** Number of milliseconds to wait before aborting the query. */
@@ -33,6 +30,12 @@ export class GetMoreOperation extends AbstractOperation {
   constructor(ns: MongoDBNamespace, cursorId: Long, server: Server, options: GetMoreOptions = {}) {
     super(options);
     this.options = options;
+
+    // comment on getMore is only supported for server versions 4.4 and above
+    if (maxWireVersion(server) < 9 && 'comment' in this.options) {
+      delete this.options.comment;
+    }
+
     this.ns = ns;
     this.cursorId = cursorId;
     this.server = server;
