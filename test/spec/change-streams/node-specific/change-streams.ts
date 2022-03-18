@@ -183,8 +183,7 @@ export const suite: UnifiedSuite = {
                   getMore: {
                     $$type: ['int', 'long']
                   },
-                  collection: 'collection0',
-                  comment: 'comment'
+                  collection: 'collection0'
                 },
                 commandName: 'getMore',
                 databaseName: 'database0'
