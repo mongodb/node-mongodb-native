@@ -4,15 +4,8 @@ import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoNetworkError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { Callback, InterruptibleAsyncInterval } from '../utils';
-import {
-  calculateDurationInMs,
-  EventEmitterWithState,
-  makeInterruptibleAsyncInterval,
-  makeStateMachine,
-  now,
-  ns
-} from '../utils';
+import type { Callback } from '../utils';
+import { calculateDurationInMs, EventEmitterWithState, makeStateMachine, now, ns } from '../utils';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
   ServerHeartbeatFailedEvent,
@@ -85,7 +78,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   [kConnection]?: Connection;
   [kCancellationToken]: CancellationToken;
   /** @internal */
-  [kMonitorId]?: InterruptibleAsyncInterval;
+  [kMonitorId]?: InterruptibleInterval;
   [kRTTPinger]?: RTTPinger;
 
   constructor(server: Server, options: MonitorOptions) {
@@ -144,7 +137,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // start
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
+    this[kMonitorId] = new InterruptibleInterval(this.monitorServer, {
       interval: heartbeatFrequencyMS,
       minInterval: minHeartbeatFrequencyMS,
       immediate: true
@@ -174,9 +167,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // restart monitoring
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
+    this[kMonitorId] = new InterruptibleInterval(this.monitorServer, {
       interval: heartbeatFrequencyMS,
-      minInterval: minHeartbeatFrequencyMS
+      minInterval: minHeartbeatFrequencyMS,
+      immediate: false
     });
   }
 
@@ -192,6 +186,43 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.emit('close');
     stateTransition(this, STATE_CLOSED);
   }
+
+  /**
+   * Polling server for state changes
+   *
+   * NOTE: **MUST** remain an arrow function, used as a timer callback
+   */
+  monitorServer = (callback: Callback) => {
+    stateTransition(this, STATE_MONITORING);
+    const done = () => {
+      if (!isInCloseState(this)) {
+        stateTransition(this, STATE_IDLE);
+      }
+
+      callback();
+    };
+
+    checkServer(this, (err, hello) => {
+      if (err) {
+        // otherwise an error occurred on initial discovery, also bail
+        if (this[kServer].description.type === ServerType.Unknown) {
+          this.emit('resetServer', err);
+          return done();
+        }
+      }
+
+      // if the check indicates streaming is supported, immediately reschedule monitoring
+      if (hello?.topologyVersion) {
+        setTimeout(() => {
+          if (!isInCloseState(this)) {
+            this[kMonitorId]?.wake();
+          }
+        }, 0);
+      }
+
+      done();
+    });
+  };
 }
 
 function resetMonitorState(monitor: Monitor) {
@@ -326,40 +357,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
   });
 }
 
-function monitorServer(monitor: Monitor) {
-  return (callback: Callback) => {
-    stateTransition(monitor, STATE_MONITORING);
-    function done() {
-      if (!isInCloseState(monitor)) {
-        stateTransition(monitor, STATE_IDLE);
-      }
-
-      callback();
-    }
-
-    checkServer(monitor, (err, hello) => {
-      if (err) {
-        // otherwise an error occurred on initial discovery, also bail
-        if (monitor[kServer].description.type === ServerType.Unknown) {
-          monitor.emit('resetServer', err);
-          return done();
-        }
-      }
-
-      // if the check indicates streaming is supported, immediately reschedule monitoring
-      if (hello && hello.topologyVersion) {
-        setTimeout(() => {
-          if (!isInCloseState(monitor)) {
-            monitor[kMonitorId]?.wake();
-          }
-        }, 0);
-      }
-
-      done();
-    });
-  };
-}
-
 function makeTopologyVersion(tv: TopologyVersion) {
   return {
     processId: tv.processId,
@@ -458,4 +455,138 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
     measureAndReschedule();
   });
+}
+
+/** @internal */
+export interface InterruptibleIntervalOptions {
+  /** The interval to execute a method on */
+  interval: number;
+  /** A minimum interval that must elapse before the method is called */
+  minInterval: number;
+  /** Whether the method should be called immediately when the interval is started  */
+  immediate: boolean;
+  /** Only used for testing unreliable timer environments */
+  clock?: () => number;
+}
+
+/**
+ * Creates an interval timer which is able to be woken up sooner than
+ * the interval. The timer will also debounce multiple calls to wake
+ * ensuring that the function is only ever called once within a minimum
+ * interval window.
+ * @internal
+ */
+export class InterruptibleInterval {
+  timerId: NodeJS.Timeout | null = null;
+  lastCallTime?: number;
+  cannotBeExpedited = false;
+  stopped = false;
+  interval: number;
+  minInterval: number;
+  immediate: boolean;
+  clock: () => number;
+  private readonly fn: (callback: Callback) => void;
+
+  /**
+   * @param fn - An async function to run on an interval, must accept a `callback` as its only parameter
+   * @param options - interruptible settings
+   */
+  constructor(fn: (callback: Callback) => void, options: InterruptibleIntervalOptions) {
+    this.fn = fn;
+
+    this.interval = options.interval ?? 1000;
+    this.minInterval = options.minInterval ?? 500;
+    this.immediate = options.immediate ?? false;
+    this.clock = options.clock ?? now;
+
+    if (this.immediate) {
+      this.executeAndReschedule();
+    } else {
+      this.lastCallTime = this.clock();
+      this.reschedule(null);
+    }
+  }
+
+  wake() {
+    const currentTime = this.clock();
+    // @ts-expect-error: Known bug, out of scope to fix within refactor
+    const nextScheduledCallTime = this.lastCallTime + this.interval;
+    const timeUntilNextCall = nextScheduledCallTime - currentTime;
+
+    // For the streaming protocol: there is nothing obviously stopping this
+    // interval from being woken up again while we are waiting "infinitely"
+    // for `fn` to be called again`. Since the function effectively
+    // never completes, the `timeUntilNextCall` will continue to grow
+    // negatively unbounded, so it will never trigger a reschedule here.
+
+    // This is possible in virtualized environments like AWS Lambda where our
+    // clock is unreliable. In these cases the timer is "running" but never
+    // actually completes, so we want to execute immediately and then attempt
+    // to reschedule.
+    if (timeUntilNextCall < 0) {
+      this.executeAndReschedule();
+      return;
+    }
+
+    // debounce multiple calls to wake within the `minInterval`
+    if (this.cannotBeExpedited) {
+      return;
+    }
+
+    // reschedule a call as soon as possible, ensuring the call never happens
+    // faster than the `minInterval`
+    if (timeUntilNextCall > this.minInterval) {
+      this.reschedule(this.minInterval);
+      this.cannotBeExpedited = true;
+    }
+  }
+
+  stop() {
+    this.stopped = true;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
+    }
+
+    this.lastCallTime = 0;
+    this.cannotBeExpedited = false;
+  }
+
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    const plain = {
+      InterruptibleInterval: 1,
+      timerId: this.timerId != null ? 'set' : 'cleared',
+      lastCallTime: this.lastCallTime,
+      cannotBeExpedited: this.cannotBeExpedited,
+      stopped: this.stopped,
+      interval: this.interval,
+      minInterval: this.minInterval,
+      immediate: this.immediate
+    };
+    return JSON.stringify(plain);
+  }
+  /** NOTE: **MUST** remain an arrow function, used as a timer callback */
+  private executeAndReschedule = () => {
+    this.cannotBeExpedited = false;
+    this.lastCallTime = this.clock();
+
+    this.fn(err => {
+      if (err) throw err;
+      this.reschedule(this.interval);
+    });
+  };
+
+  private reschedule(ms: number | null) {
+    if (this.stopped) return;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
+    }
+
+    this.timerId = setTimeout(this.executeAndReschedule, ms || this.interval);
+  }
 }
