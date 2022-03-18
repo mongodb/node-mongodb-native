@@ -231,7 +231,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
     const connectTimeoutMS = monitor.options.connectTimeoutMS;
     const maxAwaitTimeMS = monitor.options.heartbeatFrequencyMS;
     const topologyVersion = monitor[kServer].description.topologyVersion;
-    const isAwaitable = topologyVersion != null;
+    const isAwaitable = false;
 
     const cmd = {
       [serverApi?.version || helloOk ? 'hello' : LEGACY_HELLO_COMMAND]: true,
@@ -239,6 +239,11 @@ function checkServer(monitor: Monitor, callback: Callback<Document>) {
         ? { maxAwaitTimeMS, topologyVersion: makeTopologyVersion(topologyVersion) }
         : {})
     };
+
+    // Temp adjustment for NODE-3810
+    if (!isAwaitable && topologyVersion) {
+      cmd.topologyVersion = makeTopologyVersion(topologyVersion);
+    }
 
     const options = isAwaitable
       ? {
