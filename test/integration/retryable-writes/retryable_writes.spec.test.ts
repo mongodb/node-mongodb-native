@@ -219,7 +219,7 @@ describe('Retryable Writes (unified)', function () {
   runUnifiedSuite(loadSpecTests(path.join('retryable-writes', 'unified')), SKIP);
 });
 
-describe('Retryable Writes', function () {
+describe('Retryable Writes Spec Manual Tests', function () {
   const dbName = 'retryable-handshake-tests';
   const collName = 'coll';
   const docs = [{ _id: 1, x: 11 }];
@@ -227,10 +227,12 @@ describe('Retryable Writes', function () {
   let db;
   let coll;
 
-  beforeEach(function () {
+  beforeEach(async function () {
     if (
       semver.lt(this.configuration.buildInfo.version, '4.2.0') ||
-      !VALID_TOPOLOGIES.includes(this.configuration.topologyType)
+      !VALID_TOPOLOGIES.includes(this.configuration.topologyType) ||
+      !this.configuration.options.auth ||
+      !!process.env.SERVERLESS
     ) {
       this.currentTest.skipReason =
         'Retryable writes tests require MongoDB 4.2 and higher and no standalone';
@@ -239,6 +241,8 @@ describe('Retryable Writes', function () {
     client = this.configuration.newClient({});
     db = client.db(dbName);
     coll = db.collection(collName);
+    await client.connect();
+    await coll.insertMany(docs);
   });
 
   afterEach(async function () {
@@ -251,9 +255,9 @@ describe('Retryable Writes', function () {
   });
 
   context('when the handshake fails with a network error', function () {
+    // Manual implementation for:
+    // 'InsertOne succeeds after retryable handshake error ShutdownInProgress'
     it('retries the write', async function () {
-      await client.connect();
-      await coll.insertMany(docs);
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
@@ -268,9 +272,8 @@ describe('Retryable Writes', function () {
   });
 
   context('when the handshake fails with shutdown in progress', function () {
+    // Manual implementation for: 'InsertOne succeeds after retryable handshake error'
     it('retries the write', async function () {
-      await client.connect();
-      await coll.insertMany(docs);
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: { times: 2 },

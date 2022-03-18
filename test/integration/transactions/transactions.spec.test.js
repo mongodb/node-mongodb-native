@@ -136,26 +136,34 @@ describe('Transactions Spec Legacy Tests', function () {
   generateTopologyTests(testSuites, testContext, testFilter);
 });
 
-describe('Transactions', function () {
+describe('Transactions Spec Manual Tests', function () {
   const dbName = 'retryable-handshake-tests';
   const collName = 'coll';
   const docs = [{ _id: 1, x: 11 }];
   let client;
   let db;
   let coll;
+  let session;
 
-  beforeEach(function () {
+  beforeEach(async function () {
     if (
       semver.lt(this.configuration.buildInfo.version, '4.2.0') ||
-      !VALID_TOPOLOGIES.includes(this.configuration.topologyType)
+      !VALID_TOPOLOGIES.includes(this.configuration.topologyType) ||
+      !this.configuration.options.auth ||
+      !!process.env.SERVERLESS
     ) {
       this.currentTest.skipReason =
-        'Transaction tests require MongoDB 4.2 and higher and no standalone';
+        'Transaction tests require authenticated MongoDB 4.2 and higher and no standalone';
       this.skip();
     }
     client = this.configuration.newClient({});
     db = client.db(dbName);
     coll = db.collection(collName);
+    await client.connect();
+    await coll.insertMany(docs);
+    session = client.startSession();
+    session.startTransaction();
+    await coll.insertOne({ _id: 2, x: 22 }, { session });
   });
 
   afterEach(async function () {
@@ -170,11 +178,8 @@ describe('Transactions', function () {
   });
 
   context('when the handshake fails with a network error', function () {
+    // Manual implementation for: 'AbortTransaction succeeds after handshake network error'
     it('retries the abort', async function () {
-      await client.connect();
-      await coll.insertMany(docs);
-      const session = client.startSession();
-      session.startTransaction();
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
@@ -183,18 +188,14 @@ describe('Transactions', function () {
           closeConnection: true
         }
       });
-      await coll.insertOne({ _id: 2, x: 22 }, { session });
       await session.abortTransaction();
       await session.endSession();
       const doc = await coll.findOne({ _id: 2 });
       expect(doc).to.not.exist;
     });
 
+    // Manual implementation for: 'CommitTransaction succeeds after handshake network error'
     it('retries the commit', async function () {
-      await client.connect();
-      await coll.insertMany(docs);
-      const session = client.startSession();
-      session.startTransaction();
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
@@ -203,7 +204,6 @@ describe('Transactions', function () {
           closeConnection: true
         }
       });
-      await coll.insertOne({ _id: 2, x: 22 }, { session });
       await session.commitTransaction();
       await session.endSession();
       const doc = await coll.findOne({ _id: 2 });

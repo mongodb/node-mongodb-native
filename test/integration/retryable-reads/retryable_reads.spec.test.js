@@ -50,7 +50,7 @@ describe('Retryable Reads (unified)', function () {
   runUnifiedSuite(loadSpecTests(path.join('retryable-reads', 'unified')), SKIP);
 });
 
-describe('Retryable Reads', function () {
+describe('Retryable Reads Spec Manual Tests', function () {
   const dbName = 'retryable-handshake-tests';
   const collName = 'coll';
   const docs = [
@@ -62,18 +62,22 @@ describe('Retryable Reads', function () {
   let db;
   let coll;
 
-  beforeEach(function () {
+  beforeEach(async function () {
     if (
       semver.lt(this.configuration.buildInfo.version, '4.2.0') ||
-      !VALID_TOPOLOGIES.includes(this.configuration.topologyType)
+      !VALID_TOPOLOGIES.includes(this.configuration.topologyType) ||
+      !this.configuration.options.auth ||
+      !!process.env.SERVERLESS
     ) {
       this.currentTest.skipReason =
-        'Retryable reads tests require MongoDB 4.2 and higher and no standalone';
+        'Retryable reads tests requires authenticated MongoDB 4.2 and higher and no standalone';
       this.skip();
     }
     client = this.configuration.newClient({});
     db = client.db(dbName);
     coll = db.collection(collName);
+    await client.connect();
+    await coll.insertMany(docs);
   });
 
   afterEach(async function () {
@@ -88,9 +92,8 @@ describe('Retryable Reads', function () {
   });
 
   context('when the handshake fails with a network error', function () {
+    // Manual implementation for: 'find succeeds after retryable handshake network error'
     it('retries the read', async function () {
-      await client.connect();
-      await coll.insertMany(docs);
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
@@ -99,15 +102,15 @@ describe('Retryable Reads', function () {
           closeConnection: true
         }
       });
-      const documents = await coll.find().toArray();
-      expect(documents).to.deep.equal(docs);
+      const doc = await coll.findOne({ _id: 2 });
+      expect(doc).to.deep.equal(docs[1]);
     });
   });
 
   context('when the handshake fails with shutdown in progress', function () {
+    // Manual implementation for:
+    // 'find succeeds after retryable handshake network error (ShutdownInProgress)'
     it('retries the read', async function () {
-      await client.connect();
-      await coll.insertMany(docs);
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
