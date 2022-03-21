@@ -259,7 +259,7 @@ export type Entity =
   | Db
   | Collection
   | ClientSession
-  | AbstractCursor 
+  | AbstractCursor
   | UnifiedChangeStream
   | GridFSBucket
   | Document; // Results from operations
