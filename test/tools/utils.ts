@@ -87,8 +87,18 @@ export class EventCollector {
    * Will only return one event at a time from the front of the list
    * Useful for iterating over the events in the order they occurred
    */
-  waitAndShiftEvent(eventName: string): Promise<Record<string, any>> {
-    return new Promise<Record<string, any>>((resolve, reject) => {
+  waitAndShiftEvent(eventName) {
+    return new Promise((resolve, reject) => {
+      if (!this._events[eventName]) {
+        return reject(
+          `Error: attempted to listen for ${eventName} but no listener handler is set` + eventName
+        );
+      }
+      if (!this._events[eventName]) {
+        return reject(
+          `Error: attempted to listen for ${eventName} but no listener handler is set` + eventName
+        );
+      }
       if (this._events[eventName].length > 0) {
         return resolve(this._events[eventName].shift());
       }

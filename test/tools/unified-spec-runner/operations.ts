@@ -1,21 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
 
-import {
-  AbstractCursor,
-  Collection,
-  Db,
-  Document,
-  GridFSFile,
-  MongoClient,
-  ObjectId
-} from '../../../src';
+import { Collection, Db, Document, GridFSFile, MongoClient, ObjectId } from '../../../src';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
 import { EventCollector } from '../../tools/utils';
-import { EntitiesMap } from './entities';
+import { EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
 import { translateOptions } from './unified-utils';
@@ -209,15 +201,12 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
     batchSize: operation.arguments.batchSize,
     comment: operation.arguments.comment
   });
-  changeStream.eventCollector = new EventCollector(changeStream, ['init', 'change', 'error']);
+
+  changeStream.eventCollector = new EventCollector(changeStream, ['init', 'error']);
 
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(new Error('Change stream never started'));
-    }, 2000);
-
-    changeStream.cursor.once('init', () => {
-      clearTimeout(timeout);
+    changeStream.cursor.initialize(err => {
+      if (err) return reject(err);
       resolve(changeStream);
     });
   });
@@ -305,16 +294,32 @@ operations.set('insertMany', async ({ entities, operation }) => {
 });
 
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
-  try {
-    const changeStream = entities.getEntity('stream', operation.object);
-    // Either change or error promise will finish
+  function getChangeStream(): UnifiedChangeStream | null {
+    try {
+      const changeStream = entities.getEntity('stream', operation.object);
+      return changeStream;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  const changeStream = getChangeStream();
+  if (changeStream == null) {
+    // iterateUntilDocumentOrError is used for changes streams and regular cursors.
+    // we have no other way to distinguish which scenario we are testing when we run an
+    // iterateUntilDocumentOrError operation, so we first try to get the changeStream and
+    // if that fails, we know we need to get a cursor
+    const cursor = entities.getEntity('cursor', operation.object);
+    return await cursor.next();
+  }
+
+  if (changeStream.cursorStream == null) {
+    return changeStream.cursor.next();
+  } else {
     return Promise.race([
       changeStream.eventCollector.waitAndShiftEvent('change'),
       changeStream.eventCollector.waitAndShiftEvent('error')
     ]);
-  } catch (e) {
-    const findCursor = entities.getEntity('cursor', operation.object);
-    return await findCursor.next();
   }
 });
 

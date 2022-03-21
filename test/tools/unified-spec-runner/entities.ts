@@ -18,8 +18,8 @@ import {
   ConnectionPoolCreatedEvent,
   ConnectionReadyEvent
 } from '../../../src/cmap/connection_pool_events';
-import { FindCursor } from '../../../src/cursor/find_cursor';
 import {
+  AbstractCursor,
   Collection,
   Db,
   Document,
@@ -38,7 +38,7 @@ import { trace } from './runner';
 import type { ClientEntity, EntityDescription } from './schema';
 import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
 
-interface UnifiedChangeStream extends ChangeStream {
+export interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
 }
 
@@ -259,7 +259,7 @@ export type Entity =
   | Db
   | Collection
   | ClientSession
-  | FindCursor
+  | AbstractCursor 
   | UnifiedChangeStream
   | GridFSBucket
   | Document; // Results from operations
@@ -270,7 +270,7 @@ export type EntityCtor =
   | typeof Collection
   | typeof ClientSession
   | typeof ChangeStream
-  | typeof FindCursor
+  | typeof AbstractCursor
   | typeof GridFSBucket;
 
 export type EntityTypeId =
@@ -288,7 +288,7 @@ ENTITY_CTORS.set('db', Db);
 ENTITY_CTORS.set('collection', Collection);
 ENTITY_CTORS.set('session', ClientSession);
 ENTITY_CTORS.set('bucket', GridFSBucket);
-ENTITY_CTORS.set('cursor', FindCursor);
+ENTITY_CTORS.set('cursor', AbstractCursor);
 ENTITY_CTORS.set('stream', ChangeStream);
 
 export class EntitiesMap<E = Entity> extends Map<string, E> {
@@ -304,7 +304,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   mapOf(type: 'collection'): EntitiesMap<Collection>;
   mapOf(type: 'session'): EntitiesMap<ClientSession>;
   mapOf(type: 'bucket'): EntitiesMap<GridFSBucket>;
-  mapOf(type: 'cursor'): EntitiesMap<FindCursor>;
+  mapOf(type: 'cursor'): EntitiesMap<AbstractCursor>;
   mapOf(type: 'stream'): EntitiesMap<UnifiedChangeStream>;
   mapOf(type: EntityTypeId): EntitiesMap<Entity> {
     const ctor = ENTITY_CTORS.get(type);
@@ -319,7 +319,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'collection', key: string, assertExists?: boolean): Collection;
   getEntity(type: 'session', key: string, assertExists?: boolean): ClientSession;
   getEntity(type: 'bucket', key: string, assertExists?: boolean): GridFSBucket;
-  getEntity(type: 'cursor', key: string, assertExists?: boolean): FindCursor;
+  getEntity(type: 'cursor', key: string, assertExists?: boolean): AbstractCursor;
   getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
   getEntity(type: EntityTypeId, key: string, assertExists = true): Entity {
     const entity = this.get(key);

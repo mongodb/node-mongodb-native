@@ -23,7 +23,10 @@ const SKIPPED_TESTS = [
   'Dirty explicit session is discarded',
 
   // TODO(NODE-3308):
-  'A successful find event with a getmore and the server kills the cursor'
+  'A successful find event with a getmore and the server kills the cursor',
+
+  // TODO(NODE-4051): fix change stream resume logic
+  'Test consecutive resume'
 ].concat(process.env.AUTH === 'auth' ? FAILING_TESTS_AUTH_ENABLED : []);
 
 describe('Unified test format runner', function unifiedTestRunner() {

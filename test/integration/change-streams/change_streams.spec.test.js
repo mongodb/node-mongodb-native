@@ -7,18 +7,9 @@ const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const camelCase = require('lodash.camelcase');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { delay, setupDatabase } = require('../shared');
-const { suite } = require('../../spec/change-streams/node-specific/change-streams');
 
 describe('Change Streams Spec - Unified', function () {
-  runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')), [
-    'Test with document comment',
-    'Test with string comment',
-    'Test that comment is set on getMore'
-  ]);
-});
-
-describe('Change Streams Spec - Node-Specific', function () {
-  runUnifiedSuite([suite]);
+  runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')));
 });
 
 // TODO: NODE-3819: Unskip flaky MacOS tests.
