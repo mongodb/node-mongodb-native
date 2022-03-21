@@ -478,7 +478,7 @@ export interface InterruptibleIntervalOptions {
  */
 export class InterruptibleInterval {
   timerId: NodeJS.Timeout | null = null;
-  lastCallTime?: number;
+  lastCallTime: number | undefined;
   cannotBeExpedited = false;
   stopped = false;
   interval: number;
@@ -498,6 +498,9 @@ export class InterruptibleInterval {
     this.minInterval = options.minInterval ?? 500;
     this.immediate = options.immediate ?? false;
     this.clock = options.clock ?? now;
+    // TODO(NODE-3810): this should be initialized to a number
+    // it is a bug that I made more explicit here to make it noticeable: (undefined + number = NaN)
+    this.lastCallTime = undefined;
 
     if (this.immediate) {
       this.executeAndReschedule();
@@ -509,7 +512,7 @@ export class InterruptibleInterval {
 
   wake() {
     const currentTime = this.clock();
-    // @ts-expect-error: Known bug, out of scope to fix within refactor
+    // @ts-expect-error: NODE-3810 Known bug, out of scope to fix within refactor
     const nextScheduledCallTime = this.lastCallTime + this.interval;
     const timeUntilNextCall = nextScheduledCallTime - currentTime;
 
@@ -552,12 +555,12 @@ export class InterruptibleInterval {
     this.cannotBeExpedited = false;
   }
 
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  toString() {
+    return JSON.stringify(this);
   }
 
-  inspect(): string {
-    const plain = {
+  toJSON() {
+    return {
       InterruptibleInterval: 1,
       timerId: this.timerId != null ? 'set' : 'cleared',
       lastCallTime: this.lastCallTime,
@@ -567,10 +570,10 @@ export class InterruptibleInterval {
       minInterval: this.minInterval,
       immediate: this.immediate
     };
-    return JSON.stringify(plain);
   }
+
   /** NOTE: **MUST** remain an arrow function, used as a timer callback */
-  private executeAndReschedule = () => {
+  executeAndReschedule = () => {
     this.cannotBeExpedited = false;
     this.lastCallTime = this.clock();
 
@@ -580,13 +583,13 @@ export class InterruptibleInterval {
     });
   };
 
-  private reschedule(ms: number | null) {
+  reschedule(ms: number | null) {
     if (this.stopped) return;
     if (this.timerId) {
       clearTimeout(this.timerId);
       this.timerId = null;
     }
 
-    this.timerId = setTimeout(this.executeAndReschedule, ms || this.interval);
+    this.timerId = setTimeout(this.executeAndReschedule, ms ?? this.interval);
   }
 }

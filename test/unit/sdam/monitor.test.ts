@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { inspect } from 'util';
 
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { ServerType } from '../../../src/sdam/common';
@@ -256,9 +257,37 @@ describe('monitoring', function () {
   });
 
   describe('new InterruptibleInterval()', function () {
+    type SpiedInterruptibleInterval = InterruptibleInterval & {
+      wake: sinon.SinonSpy;
+      stop: sinon.SinonSpy;
+      executeAndReschedule: sinon.SinonSpy;
+      reschedule: sinon.SinonSpy;
+    };
     let clock: sinon.SinonFakeTimers;
-    let executor: InterruptibleInterval;
+    let executor: SpiedInterruptibleInterval;
     let fnSpy: sinon.SinonSpy;
+
+    const makeInterruptibleInterval = function (fn, options): SpiedInterruptibleInterval {
+      const exe = new InterruptibleInterval(fn, options);
+      const methods = ['wake', 'stop', 'executeAndReschedule', 'reschedule'] as const;
+      for (const method of methods) {
+        sinon.spy(exe, method);
+      }
+      return exe as SpiedInterruptibleInterval;
+    };
+
+    const logging = false;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const logExe = (exe: InterruptibleInterval) =>
+      logging
+        ? console.log(
+            inspect(exe.toJSON(), {
+              colors: true,
+              compact: true,
+              breakLength: Infinity
+            })
+          )
+        : null;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers();
@@ -272,11 +301,12 @@ describe('monitoring', function () {
         executor.stop();
       }
       clock.restore();
+      sinon.restore(); // restore all
     });
 
     context('when the immediate option is provided', function () {
       it('executes the function immediately and schedules the next execution on the interval', function () {
-        executor = new InterruptibleInterval(fnSpy, {
+        executor = makeInterruptibleInterval(fnSpy, {
           immediate: true,
           minInterval: 10,
           interval: 30
@@ -294,7 +324,7 @@ describe('monitoring', function () {
 
     context('when the immediate option is not provided', function () {
       it('executes the function on the provided interval', function () {
-        executor = new InterruptibleInterval(fnSpy, {
+        executor = makeInterruptibleInterval(fnSpy, {
           minInterval: 10,
           interval: 30,
           immediate: false
@@ -317,7 +347,7 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is the first wake', () => {
           let fakeClockHasTicked = false;
-          executor = new InterruptibleInterval(fnSpy, {
+          executor = makeInterruptibleInterval(fnSpy, {
             minInterval: 10,
             interval: 30,
             clock: () => {
@@ -347,7 +377,7 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is a repeated wake and the current execution is not rescheduled', () => {
           let fakeClockTickCount = 0;
-          executor = new InterruptibleInterval(fnSpy, {
+          executor = makeInterruptibleInterval(fnSpy, {
             minInterval: 10,
             interval: 30,
             clock: () => {
@@ -385,7 +415,7 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is a repeated wake even if the current execution is rescheduled', () => {
           let fakeClockTickCount = 0;
-          executor = new InterruptibleInterval(fnSpy, {
+          executor = makeInterruptibleInterval(fnSpy, {
             minInterval: 10,
             interval: 30,
             clock: () => {
@@ -426,7 +456,7 @@ describe('monitoring', function () {
         // we can't make it go any faster, so we should let the scheduled execution run
 
         it('should execute on the interval if this is the first wake', () => {
-          executor = new InterruptibleInterval(fnSpy, {
+          executor = makeInterruptibleInterval(fnSpy, {
             minInterval: 10,
             interval: 30,
             immediate: false
@@ -448,7 +478,7 @@ describe('monitoring', function () {
         });
 
         it('should execute on the original interval if this is a repeated wake and the current execution is not rescheduled', () => {
-          executor = new InterruptibleInterval(fnSpy, {
+          executor = makeInterruptibleInterval(fnSpy, {
             minInterval: 10,
             interval: 30,
             immediate: false
@@ -473,7 +503,7 @@ describe('monitoring', function () {
         });
 
         it('should execute on the minInterval from the first wake if this is a repeated wake and the current execution is rescheduled', () => {
-          executor = new InterruptibleInterval(fnSpy, {
+          executor = makeInterruptibleInterval(fnSpy, {
             minInterval: 10,
             interval: 30,
             immediate: false
@@ -503,7 +533,7 @@ describe('monitoring', function () {
         // expedite the execution to minInterval
 
         it('should execute on the minInterval if this is the first wake', () => {
-          executor = new InterruptibleInterval(fnSpy, {
+          executor = makeInterruptibleInterval(fnSpy, {
             minInterval: 10,
             interval: 30,
             immediate: false
@@ -528,7 +558,7 @@ describe('monitoring', function () {
         it('should execute on the minInterval from the first wake if this is a repeated wake', () => {
           // NOTE: under regular circumstances, if the second wake is early enough to warrant a reschedule
           // then the first wake must have already warranted a reschedule
-          executor = new InterruptibleInterval(fnSpy, {
+          executor = makeInterruptibleInterval(fnSpy, {
             minInterval: 10,
             interval: 30,
             immediate: false
