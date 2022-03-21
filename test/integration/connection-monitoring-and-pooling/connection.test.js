@@ -1,6 +1,10 @@
 'use strict';
 
-const { ServerHeartbeatStartedEvent, MongoClient } = require('../../../src');
+const {
+  ServerHeartbeatStartedEvent,
+  MongoClient,
+  MongoNotConnectedError
+} = require('../../../src');
 const { Connection } = require('../../../src/cmap/connection');
 const { connect } = require('../../../src/cmap/connect');
 const { expect } = require('chai');
@@ -452,6 +456,23 @@ describe('Connection', function () {
       })
     );
 
+    it('throws when attempting an operation if the client is not connected', function (done) {
+      const client = this.configuration.newClient();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+      collection.insertOne({ a: 2 }, err => {
+        expect(err).to.be.instanceof(MongoNotConnectedError);
+        done();
+      });
+    });
+
+    it('throws when attempting an operation if the client is not connected (promises)', async function () {
+      const client = this.configuration.newClient();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+
+      const err = await collection.insertOne({ a: 2 }).catch(err => err);
+      expect(err).to.be.instanceof(MongoNotConnectedError);
+    });
+
     it(
       'should correctly fail on retry when client has been closed',
       withClient(function (client, done) {
@@ -463,13 +484,23 @@ describe('Connection', function () {
           client.close(true, function (err) {
             expect(err).to.not.exist;
 
-            expect(() => {
-              collection.insertOne({ a: 2 });
-            }).to.throw(/must be connected/);
-            done();
+            collection.insertOne({ a: 2 }, err => {
+              expect(err).to.be.instanceof(MongoNotConnectedError);
+              done();
+            });
           });
         });
       })
     );
+
+    it('should correctly fail on retry when client has been closed (promises)', async function () {
+      const client = await this.configuration.newClient().connect();
+      const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
+      await collection.insertOne({ a: 1 });
+      await client.close(true);
+
+      const err = await collection.insertOne({ a: 2 }).catch(err => err);
+      expect(err).to.be.instanceof(MongoNotConnectedError);
+    });
   });
 });

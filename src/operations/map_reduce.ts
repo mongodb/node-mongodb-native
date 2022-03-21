@@ -1,7 +1,6 @@
 import type { ObjectId } from '../bson';
 import { Code, Document } from '../bson';
 import type { Collection } from '../collection';
-import { Db } from '../db';
 import { MongoCompatibilityError, MongoServerError } from '../error';
 import { ReadPreference, ReadPreferenceMode } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -210,9 +209,7 @@ export class MapReduceOperation extends CommandOperation<Document | Document[]> 
       if (result.result != null && typeof result.result === 'object') {
         const doc = result.result;
         // Return a collection from another db
-        collection = new Db(coll.s.db.s.client, doc.db, coll.s.db.s.options).collection(
-          doc.collection
-        );
+        collection = coll.s.db.s.client.db(doc.db, coll.s.db.s.options).collection(doc.collection);
       } else {
         // Create a collection object that wraps the result collection
         collection = coll.s.db.collection(result.result);

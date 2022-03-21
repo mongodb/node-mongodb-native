@@ -157,7 +157,7 @@ export class ListCollectionsCursor<
       session
     });
 
-    executeOperation(getTopology(this.parent), operation, (err, response) => {
+    executeOperation(this.parent, operation, (err, response) => {
       if (err || response == null) return callback(err);
 
       // TODO: NODE-2882

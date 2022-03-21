@@ -75,7 +75,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
       session
     });
 
-    executeOperation(this.topology, findOperation, (err, response) => {
+    executeOperation(this, findOperation, (err, response) => {
       if (err || response == null) return callback(err);
 
       // TODO: We only need this for legacy queries that do not support `limit`, maybe
@@ -143,7 +143,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     options = options ?? {};
 
     return executeOperation(
-      this.topology,
+      this,
       new CountOperation(this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
@@ -165,7 +165,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     if (verbosity == null) verbosity = true;
 
     return executeOperation(
-      this.topology,
+      this,
       new FindOperation(undefined, this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,

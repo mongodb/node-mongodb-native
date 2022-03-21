@@ -68,7 +68,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
       session
     });
 
-    executeOperation(this.topology, aggregateOperation, (err, response) => {
+    executeOperation(this, aggregateOperation, (err, response) => {
       if (err || response == null) return callback(err);
 
       // TODO: NODE-2882
@@ -88,7 +88,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     if (verbosity == null) verbosity = true;
 
     return executeOperation(
-      this.topology,
+      this,
       new AggregateOperation(this.namespace, this[kPipeline], {
         ...this[kOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,

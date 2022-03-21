@@ -40,8 +40,15 @@ export function indexInformation(
   // If we specified full information
   const full = options.full == null ? false : options.full;
 
+  let topology;
+  try {
+    topology = getTopology(db);
+  } catch (error) {
+    return callback(error);
+  }
+
   // Did the user destroy the topology
-  if (getTopology(db).isDestroyed()) return callback(new MongoTopologyClosedError());
+  if (topology.isDestroyed()) return callback(new MongoTopologyClosedError());
   // Process all the results from the index command and collection
   function processResults(indexes: any) {
     // Contains all the information

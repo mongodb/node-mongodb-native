@@ -258,7 +258,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_3286,
       callback
     ) as TODO_NODE_3286;
@@ -286,11 +286,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(
-      getTopology(this),
-      new RunCommandOperation(this, command, options ?? {}),
-      callback
-    );
+    return executeOperation(this, new RunCommandOperation(this, command, options ?? {}), callback);
   }
 
   /**
@@ -359,7 +355,7 @@ export class Db {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     return executeOperation(
-      getTopology(this),
+      this,
       new DbStatsOperation(this, resolveOptions(this, options)),
       callback
     );
@@ -438,7 +434,7 @@ export class Db {
     options.new_collection = true;
 
     return executeOperation(
-      getTopology(this),
+      this,
       new RenameOperation(
         this.collection<TSchema>(fromCollection) as TODO_NODE_3286,
         toCollection,
@@ -467,7 +463,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new DropCollectionOperation(this, name, resolveOptions(this, options)),
       callback
     );
@@ -490,7 +486,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new DropDatabaseOperation(this, resolveOptions(this, options)),
       callback
     );
@@ -513,7 +509,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new CollectionsOperation(this, resolveOptions(this, options)),
       callback
     );
@@ -549,7 +545,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options)),
       callback
     );
@@ -595,7 +591,7 @@ export class Db {
     }
 
     return executeOperation(
-      getTopology(this),
+      this,
       new AddUserOperation(this, username, password, resolveOptions(this, options)),
       callback
     );
@@ -620,7 +616,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new RemoveUserOperation(this, username, resolveOptions(this, options)),
       callback
     );
@@ -652,7 +648,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new SetProfilingLevelOperation(this, level, resolveOptions(this, options)),
       callback
     );
@@ -675,7 +671,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new ProfilingLevelOperation(this, resolveOptions(this, options)),
       callback
     );
@@ -704,7 +700,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      getTopology(this),
+      this,
       new IndexInformationOperation(this, name, resolveOptions(this, options)),
       callback
     );

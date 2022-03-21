@@ -757,7 +757,7 @@ function endTransaction(
 
   // send the command
   executeOperation(
-    session.topology,
+    session,
     new RunAdminCommandOperation(undefined, command, {
       session,
       readPreference: ReadPreference.primary,
@@ -781,7 +781,7 @@ function endTransaction(
         }
 
         return executeOperation(
-          session.topology,
+          session,
           new RunAdminCommandOperation(undefined, command, {
             session,
             readPreference: ReadPreference.primary,

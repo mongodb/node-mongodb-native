@@ -511,7 +511,7 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
       session
     });
 
-    executeOperation(this.topology, aggregateOperation, (err, response) => {
+    executeOperation(session, aggregateOperation, (err, response) => {
       if (err || response == null) {
         return callback(err);
       }

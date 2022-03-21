@@ -21,7 +21,13 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { Callback, maybePromise, supportsRetryableWrites } from '../utils';
+import {
+  Callback,
+  getTopology,
+  maybePromise,
+  supportsRetryableWrites,
+  TopologyProvider
+} from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -60,30 +66,44 @@ export interface ExecutionResult {
 export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology, operation: T): Promise<TResult>;
+>(topologyProvider: TopologyProvider, operation: T): Promise<TResult>;
 export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology, operation: T, callback: Callback<TResult>): void;
+>(topologyProvider: TopologyProvider, operation: T, callback: Callback<TResult>): void;
 export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
+>(
+  topologyProvider: TopologyProvider,
+  operation: T,
+  callback?: Callback<TResult>
+): Promise<TResult> | void;
 export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(topology: Topology, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
+>(
+  topologyProvider: TopologyProvider,
+  operation: T,
+  callback?: Callback<TResult>
+): Promise<TResult> | void {
   if (!(operation instanceof AbstractOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
   return maybePromise(callback, callback => {
+    let topology: Topology;
+    try {
+      topology = getTopology(topologyProvider);
+    } catch (error) {
+      return callback(error);
+    }
     if (topology.shouldCheckForSessionSupport()) {
       return topology.selectServer(ReadPreference.primaryPreferred, {}, err => {
         if (err) return callback(err);
 
-        executeOperation<T, TResult>(topology, operation, callback);
+        executeOperation<T, TResult>(topologyProvider, operation, callback);
       });
     }
 
