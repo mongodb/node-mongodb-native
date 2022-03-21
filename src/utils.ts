@@ -850,9 +850,12 @@ export function makeInterruptibleAsyncInterval(
   options?: Partial<InterruptibleAsyncIntervalOptions>
 ): InterruptibleAsyncInterval {
   let timerId: NodeJS.Timeout | undefined;
-  let lastCallTime: number;
-  let lastWakeTime = 0;
+  // let lastCallTime: number;
+  // let lastWakeTime = 0;
   let stopped = false;
+  let lastExecutionEnded = 0;
+  let executionInProgress = false;
+  let expeditedCheckIsScheduled = false;
 
   options = options ?? {};
   const interval = options.interval || 1000;
@@ -862,35 +865,56 @@ export function makeInterruptibleAsyncInterval(
 
   function wake() {
     const currentTime = clock();
-    const timeSinceLastWake = currentTime - lastWakeTime;
-    const timeSinceLastCall = currentTime - lastCallTime;
-    const timeUntilNextCall = interval - timeSinceLastCall;
-    lastWakeTime = currentTime;
+    const timeSinceLastExecutionEnded = currentTime - lastExecutionEnded;
 
-    // For the streaming protocol: there is nothing obviously stopping this
-    // interval from being woken up again while we are waiting "infinitely"
-    // for `fn` to be called again`. Since the function effectively
-    // never completes, the `timeUntilNextCall` will continue to grow
-    // negatively unbounded, so it will never trigger a reschedule here.
-
-    // debounce multiple calls to wake within the `minInterval`
-    if (timeSinceLastWake < minInterval) {
+    // spec
+    if (executionInProgress) {
       return;
     }
 
-    // reschedule a call as soon as possible, ensuring the call never happens
-    // faster than the `minInterval`
-    if (timeUntilNextCall > minInterval) {
+    if (timeSinceLastExecutionEnded < minInterval) {
+      if (expeditedCheckIsScheduled) {
+        return;
+      }
+      expeditedCheckIsScheduled = true;
       reschedule(minInterval);
+      return;
     }
 
-    // This is possible in virtualized environments like AWS Lambda where our
-    // clock is unreliable. In these cases the timer is "running" but never
-    // actually completes, so we want to execute immediately and then attempt
-    // to reschedule.
-    if (timeUntilNextCall < 0) {
-      executeAndReschedule();
-    }
+    // otherwise
+    executeAndReschedule();
+
+    // ---------
+
+    // const timeSinceLastWake = currentTime - lastWakeTime;
+    // const timeSinceLastCall = currentTime - lastCallTime;
+    // const timeUntilNextCall = interval - timeSinceLastCall;
+    // lastWakeTime = currentTime;
+
+    // // For the streaming protocol: there is nothing obviously stopping this
+    // // interval from being woken up again while we are waiting "infinitely"
+    // // for `fn` to be called again`. Since the function effectively
+    // // never completes, the `timeUntilNextCall` will continue to grow
+    // // negatively unbounded, so it will never trigger a reschedule here.
+
+    // // debounce multiple calls to wake within the `minInterval`
+    // if (timeSinceLastWake < minInterval) {
+    //   return;
+    // }
+
+    // // reschedule a call as soon as possible, ensuring the call never happens
+    // // faster than the `minInterval`
+    // if (timeUntilNextCall > minInterval) {
+    //   reschedule(minInterval);
+    // }
+
+    // // This is possible in virtualized environments like AWS Lambda where our
+    // // clock is unreliable. In these cases the timer is "running" but never
+    // // actually completes, so we want to execute immediately and then attempt
+    // // to reschedule.
+    // if (timeUntilNextCall < 0) {
+    //   executeAndReschedule();
+    // }
   }
 
   function stop() {
@@ -900,25 +924,33 @@ export function makeInterruptibleAsyncInterval(
       timerId = undefined;
     }
 
-    lastCallTime = 0;
-    lastWakeTime = 0;
+    // lastCallTime = 0;
+    // lastWakeTime = 0;
   }
 
-  function reschedule(ms?: number) {
+  function reschedule(ms: number) {
     if (stopped) return;
     if (timerId) {
       clearTimeout(timerId);
     }
 
-    timerId = setTimeout(executeAndReschedule, ms || interval);
+    timerId = setTimeout(executeAndReschedule, ms);
   }
 
   function executeAndReschedule() {
-    lastWakeTime = 0;
-    lastCallTime = clock();
+    // lastWakeTime = 0;
+    // lastCallTime = clock();
 
-    fn(err => {
-      if (err) throw err;
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+
+    executionInProgress = true;
+    fn(() => {
+      executionInProgress = false;
+      expeditedCheckIsScheduled = false;
+      lastExecutionEnded = clock();
+
       reschedule(interval);
     });
   }
@@ -926,8 +958,8 @@ export function makeInterruptibleAsyncInterval(
   if (immediate) {
     executeAndReschedule();
   } else {
-    lastCallTime = clock();
-    reschedule(undefined);
+    // lastCallTime = clock();
+    reschedule(interval);
   }
 
   return { wake, stop };
