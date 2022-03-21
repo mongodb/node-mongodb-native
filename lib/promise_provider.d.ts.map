@@ -1,0 +1,1 @@
+{"version":3,"file":"promise_provider.d.ts","sourceRoot":"","sources":["../src/promise_provider.ts"],"names":[],"mappings":"AAaA;;;GAGG;AACH,qBAAa,eAAe;IAC1B,8CAA8C;IAC9C,MAAM,CAAC,QAAQ,CAAC,GAAG,EAAE,OAAO,GAAG,GAAG,IAAI,kBAAkB;IAMxD,+BAA+B;IAC/B,MAAM,CAAC,GAAG,CAAC,GAAG,EAAE,kBAAkB,GAAG,IAAI;IAQzC,4DAA4D;IAC5D,MAAM,CAAC,GAAG,IAAI,kBAAkB;CAGjC"}

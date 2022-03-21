@@ -1,0 +1,1 @@
+{"version":3,"file":"mongodb_aws.d.ts","sourceRoot":"","sources":["../../../src/cmap/auth/mongodb_aws.ts"],"names":[],"mappings":"AAYA,OAAO,EAAE,QAAQ,EAAsB,MAAM,aAAa,CAAC;AAC3D,OAAO,EAAE,WAAW,EAAE,YAAY,EAAE,MAAM,iBAAiB,CAAC;AAqB5D,qBAAa,UAAW,SAAQ,YAAY;IACjC,IAAI,CAAC,WAAW,EAAE,WAAW,EAAE,QAAQ,EAAE,QAAQ,GAAG,IAAI;CA2HlE"}
