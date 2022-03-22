@@ -1,16 +1,8 @@
 const { expect } = require('chai');
 const path = require('path');
-const semver = require('semver');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
 const { loadSpecTests } = require('../../spec');
 const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
-const { TopologyType } = require('../../../src');
-
-const VALID_TOPOLOGIES = [
-  TopologyType.ReplicaSetWithPrimary,
-  TopologyType.Sharded,
-  TopologyType.LoadBalanced
-];
 
 describe('Retryable Reads (legacy)', function () {
   const testContext = new TestRunnerContext();
@@ -51,76 +43,74 @@ describe('Retryable Reads (unified)', function () {
 });
 
 describe('Retryable Reads Spec Manual Tests', function () {
-  const dbName = 'retryable-handshake-tests';
-  const collName = 'coll';
-  const docs = [
-    { _id: 1, x: 11 },
-    { _id: 2, x: 22 },
-    { _id: 3, x: 33 }
-  ];
-  let client;
-  let db;
-  let coll;
+  context('retryable reads handshake failures', function () {
+    const metadata = {
+      requires: {
+        mongodb: '>=4.2.0',
+        auth: 'enabled',
+        topology: '!single'
+      }
+    };
 
-  beforeEach(async function () {
-    if (
-      semver.lt(this.configuration.buildInfo.version, '4.2.0') ||
-      !VALID_TOPOLOGIES.includes(this.configuration.topologyType) ||
-      !this.configuration.options.auth ||
-      !!process.env.SERVERLESS
-    ) {
-      this.currentTest.skipReason =
-        'Retryable reads tests requires authenticated MongoDB 4.2 and higher and no standalone';
-      this.skip();
-    }
-    client = this.configuration.newClient({});
-    db = client.db(dbName);
-    coll = db.collection(collName);
-    await client.connect();
-    await coll.insertMany(docs);
-  });
+    const dbName = 'retryable-handshake-tests';
+    const collName = 'coll';
+    const docs = [
+      { _id: 1, x: 11 },
+      { _id: 2, x: 22 },
+      { _id: 3, x: 33 }
+    ];
+    let client;
+    let db;
+    let coll;
 
-  afterEach(async function () {
-    if (db) {
+    beforeEach(async function () {
+      client = this.configuration.newClient({});
+      db = client.db(dbName);
+      coll = db.collection(collName);
+      await client.connect();
+      await coll.insertMany(docs);
+    });
+
+    afterEach(async function () {
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: 'off'
       });
       await coll.drop();
       await client.close();
-    }
-  });
-
-  context('when the handshake fails with a network error', function () {
-    // Manual implementation for: 'find succeeds after retryable handshake network error'
-    it('retries the read', async function () {
-      await db.admin().command({
-        configureFailPoint: 'failCommand',
-        mode: { times: 2 },
-        data: {
-          failCommands: ['saslContinue', 'ping'],
-          closeConnection: true
-        }
-      });
-      const doc = await coll.findOne({ _id: 2 });
-      expect(doc).to.deep.equal(docs[1]);
     });
-  });
 
-  context('when the handshake fails with shutdown in progress', function () {
-    // Manual implementation for:
-    // 'find succeeds after retryable handshake network error (ShutdownInProgress)'
-    it('retries the read', async function () {
-      await db.admin().command({
-        configureFailPoint: 'failCommand',
-        mode: { times: 2 },
-        data: {
-          failCommands: ['saslContinue', 'ping'],
-          errorCode: 91 // ShutdownInProgress
-        }
+    context('when the handshake fails with a network error', function () {
+      // Manual implementation for: 'find succeeds after retryable handshake network error'
+      it('retries the read', metadata, async function () {
+        await db.admin().command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 2 },
+          data: {
+            failCommands: ['saslContinue', 'ping'],
+            closeConnection: true
+          }
+        });
+        const doc = await coll.find({ _id: 2 }).toArray();
+        expect(doc).to.deep.equal(docs[1]);
       });
-      const documents = await coll.find().toArray();
-      expect(documents).to.deep.equal(docs);
+    });
+
+    context('when the handshake fails with shutdown in progress', function () {
+      // Manual implementation for:
+      // 'find succeeds after retryable handshake network error (ShutdownInProgress)'
+      it('retries the read', metadata, async function () {
+        await db.admin().command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 2 },
+          data: {
+            failCommands: ['saslContinue', 'ping'],
+            errorCode: 91 // ShutdownInProgress
+          }
+        });
+        const doc = await coll.find({ _id: 2 }).toArray();
+        expect(doc).to.deep.equal(docs[1]);
+      });
     });
   });
 });
