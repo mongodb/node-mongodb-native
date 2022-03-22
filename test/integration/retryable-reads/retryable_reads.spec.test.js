@@ -91,8 +91,8 @@ describe('Retryable Reads Spec Manual Tests', function () {
             closeConnection: true
           }
         });
-        const doc = await coll.find({ _id: 2 }).toArray();
-        expect(doc).to.deep.equal(docs[1]);
+        const docs = await coll.find({ _id: 2 }).toArray();
+        expect(docs).to.deep.equal([docs[1]]);
       });
     });
 
@@ -108,8 +108,8 @@ describe('Retryable Reads Spec Manual Tests', function () {
             errorCode: 91 // ShutdownInProgress
           }
         });
-        const doc = await coll.find({ _id: 2 }).toArray();
-        expect(doc).to.deep.equal(docs[1]);
+        const docs = await coll.find({ _id: 2 }).toArray();
+        expect(docs).to.deep.equal([docs[1]]);
       });
     });
   });
