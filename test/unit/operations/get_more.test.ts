@@ -82,10 +82,7 @@ describe('GetMoreOperation', function () {
       const opts = { ...options, session };
       const operation = new GetMoreOperation(ns, cursorId, server, opts);
 
-      const stub = sinon.stub(server, 'getMore').callsFake((_, __, ___, cb) => {
-        console.error('executing');
-        cb();
-      });
+      const stub = sinon.stub(server, 'getMore').callsFake((_, __, ___, cb) => cb());
 
       it('executes a getMore on the provided server', function (done) {
         const callback = () => {

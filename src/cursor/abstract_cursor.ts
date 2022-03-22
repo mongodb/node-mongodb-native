@@ -630,13 +630,19 @@ export abstract class AbstractCursor<
     executeOperation(this, getMoreOperation, callback);
   }
 
-  /** @internal */
-  initialize(callback: Callback<TSchema | null>): void {
+  /**
+   * @internal
+   *
+   * This function is exposed for the unified test runner's createChangeStream
+   * operation.  We cannot refactor to use the abstract _initialize method without
+   * a significant refactor.
+   */
+  __initialize(callback: Callback<TSchema | null>): void {
     if (this[kSession] == null) {
       if (this[kTopology].shouldCheckForSessionSupport()) {
         return this[kTopology].selectServer(ReadPreference.primaryPreferred, {}, err => {
           if (err) return callback(err);
-          return this.initialize(callback);
+          return this.__initialize(callback);
         });
       } else if (this[kTopology].hasSessionSupport()) {
         this[kSession] = this[kTopology].startSession({ owner: this, explicit: false });
@@ -722,7 +728,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    cursor.initialize((err, value) => {
+    cursor.__initialize((err, value) => {
       if (err) return callback(err);
       if (value) {
         return callback(undefined, value);
