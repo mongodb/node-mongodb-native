@@ -54,7 +54,7 @@ describe('Retryable Reads Spec Manual Tests', function () {
 
     const dbName = 'retryable-handshake-tests';
     const collName = 'coll';
-    const docs = [
+    const inputDocs = [
       { _id: 1, x: 11 },
       { _id: 2, x: 22 },
       { _id: 3, x: 33 }
@@ -68,7 +68,7 @@ describe('Retryable Reads Spec Manual Tests', function () {
       db = client.db(dbName);
       coll = db.collection(collName);
       await client.connect();
-      await coll.insertMany(docs);
+      await coll.insertMany(inputDocs);
     });
 
     afterEach(async function () {
@@ -91,8 +91,8 @@ describe('Retryable Reads Spec Manual Tests', function () {
             closeConnection: true
           }
         });
-        const docs = await coll.find({ _id: 2 }).toArray();
-        expect(docs).to.deep.equal([docs[1]]);
+        const documents = await coll.find({ _id: 2 }).toArray();
+        expect(documents).to.deep.equal([inputDocs[1]]);
       });
     });
 
@@ -108,8 +108,8 @@ describe('Retryable Reads Spec Manual Tests', function () {
             errorCode: 91 // ShutdownInProgress
           }
         });
-        const docs = await coll.find({ _id: 2 }).toArray();
-        expect(docs).to.deep.equal([docs[1]]);
+        const documents = await coll.find({ _id: 2 }).toArray();
+        expect(documents).to.deep.equal([inputDocs[1]]);
       });
     });
   });
