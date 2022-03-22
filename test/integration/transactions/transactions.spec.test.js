@@ -1,18 +1,10 @@
 'use strict';
 
 const path = require('path');
-const semver = require('semver');
 const { expect } = require('chai');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
 const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const { loadSpecTests } = require('../../spec');
-const { TopologyType } = require('../../../src');
-
-const VALID_TOPOLOGIES = [
-  TopologyType.ReplicaSetWithPrimary,
-  TopologyType.Sharded,
-  TopologyType.LoadBalanced
-];
 
 function ignoreNsNotFoundForListIndexes(err) {
   if (err.code !== 26) {
@@ -89,6 +81,7 @@ class TransactionsRunnerContext extends TestRunnerContext {
 // These tests are skipped because the driver 1) executes a ping when connecting to
 // an authenticated server and 2) command monitoring is at the connection level so
 // when the handshake fails no command started event is emitted.
+// NOTE: these tests are skipped in the spec itself due to DRIVERS-2032 (unrelated to the above)
 const SKIP = [
   'AbortTransaction succeeds after handshake network error',
   'CommitTransaction succeeds after handshake network error'
@@ -137,49 +130,52 @@ describe('Transactions Spec Legacy Tests', function () {
 });
 
 describe('Transactions Spec Manual Tests', function () {
-  const dbName = 'retryable-handshake-tests';
-  const collName = 'coll';
-  const docs = [{ _id: 1, x: 11 }];
-  let client;
-  let db;
-  let coll;
-  let session;
+  context('when the handshake fails with a network error', function () {
+    const metadata = {
+      requires: {
+        mongodb: '>=4.2.0',
+        auth: 'enabled',
+        topology: '!single'
+      }
+    };
 
-  beforeEach(async function () {
-    if (
-      semver.lt(this.configuration.buildInfo.version, '4.2.0') ||
-      !VALID_TOPOLOGIES.includes(this.configuration.topologyType) ||
-      !this.configuration.options.auth ||
-      !!process.env.SERVERLESS
-    ) {
-      this.currentTest.skipReason =
-        'Transaction tests require authenticated MongoDB 4.2 and higher and no standalone';
-      this.skip();
-    }
-    client = this.configuration.newClient({});
-    db = client.db(dbName);
-    coll = db.collection(collName);
-    await client.connect();
-    await coll.insertMany(docs);
-    session = client.startSession();
-    session.startTransaction();
-    await coll.insertOne({ _id: 2, x: 22 }, { session });
-  });
+    const dbName = 'retryable-handshake-tests';
+    const collName = 'coll';
+    const docs = [{ _id: 1, x: 11 }];
+    let client;
+    let db;
+    let coll;
+    let session;
 
-  afterEach(async function () {
-    if (db) {
+    beforeEach(async function () {
+      if (process.env.SERVERLESS) {
+        this.currentTest.skipReason = 'Transaction tests cannot run against serverless';
+        this.skip();
+      }
+      client = this.configuration.newClient({});
+      db = client.db(dbName);
+      coll = db.collection(collName);
+      await client.connect();
+      await coll.insertMany(docs);
+      session = client.startSession();
+      session.startTransaction();
+      await coll.insertOne({ _id: 2, x: 22 }, { session });
+    });
+
+    afterEach(async function () {
+      await session.endSession();
+
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: 'off'
       });
       await coll.drop();
       await client.close();
-    }
-  });
+    });
 
-  context('when the handshake fails with a network error', function () {
     // Manual implementation for: 'AbortTransaction succeeds after handshake network error'
-    it('retries the abort', async function () {
+    // NOTE: tests are skipped in the spec itself due to DRIVERS-2032 (unrelated to our reasons)
+    it('retries the abort', metadata, async function () {
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
@@ -189,13 +185,13 @@ describe('Transactions Spec Manual Tests', function () {
         }
       });
       await session.abortTransaction();
-      await session.endSession();
       const doc = await coll.findOne({ _id: 2 });
       expect(doc).to.not.exist;
     });
 
     // Manual implementation for: 'CommitTransaction succeeds after handshake network error'
-    it('retries the commit', async function () {
+    // NOTE: tests are skipped in the spec itself due to DRIVERS-2032 (unrelated to our reasons)
+    it('retries the commit', metadata, async function () {
       await db.admin().command({
         configureFailPoint: 'failCommand',
         mode: { times: 2 },
@@ -205,7 +201,6 @@ describe('Transactions Spec Manual Tests', function () {
         }
       });
       await session.commitTransaction();
-      await session.endSession();
       const doc = await coll.findOne({ _id: 2 });
       expect(doc.x).to.equal(22);
     });
