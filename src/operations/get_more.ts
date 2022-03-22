@@ -22,6 +22,13 @@ export interface GetMoreOptions extends OperationOptions {
   maxTimeMS?: number;
 }
 
+function filterOptions(
+  options: Record<string, any>,
+  invalidOptions: Set<string>
+): Record<string, any> {
+  return Object.fromEntries(Object.entries(options).filter(([key]) => !invalidOptions.has(key)));
+}
+
 /** @internal */
 export class GetMoreOperation extends AbstractOperation {
   cursorId: Long;
@@ -29,12 +36,10 @@ export class GetMoreOperation extends AbstractOperation {
 
   constructor(ns: MongoDBNamespace, cursorId: Long, server: Server, options: GetMoreOptions = {}) {
     super(options);
-    this.options = options;
 
     // comment on getMore is only supported for server versions 4.4 and above
-    if (maxWireVersion(server) < 9 && 'comment' in this.options) {
-      delete this.options.comment;
-    }
+    const invalidOptions = maxWireVersion(server) < 9 ? new Set(['comment']) : new Set<string>();
+    this.options = filterOptions(options, invalidOptions);
 
     this.ns = ns;
     this.cursorId = cursorId;

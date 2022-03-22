@@ -291,9 +291,10 @@ describe('Connection String', function () {
 
   describe('resolveSRVRecord()', () => {
     const resolveSRVRecordAsync = promisify(resolveSRVRecord);
+    const sandbox = sinon.createSandbox();
 
-    afterEach(async () => {
-      sinon.restore();
+    afterEach(() => {
+      sandbox.restore();
     });
 
     function makeStub(txtRecord: string) {
@@ -310,11 +311,11 @@ describe('Connection String', function () {
 
       // first call is for stubbing resolveSrv
       // second call is for stubbing resolveTxt
-      sinon.stub(dns, 'resolveSrv').callsFake((address, callback) => {
+      sandbox.stub(dns, 'resolveSrv').callsFake((address, callback) => {
         return process.nextTick(callback, null, mockAddress);
       });
 
-      sinon.stub(dns, 'resolveTxt').callsFake((address, whatWeTest) => {
+      sandbox.stub(dns, 'resolveTxt').callsFake((address, whatWeTest) => {
         whatWeTest(null, mockRecord);
       });
     }
