@@ -17,9 +17,17 @@ const { Long } = require('../../src/bson');
 let test = {};
 
 describe('Sessions - unit', function () {
-  describe('ClientSession', function () {
+  describe('class ClientSession', function () {
     let session;
     let sessionPool;
+
+    let serverSessionPool;
+    let topology;
+
+    beforeEach(() => {
+      topology = {}; // we don't need a real topology, just a truthy value
+      serverSessionPool = new ServerSessionPool(topology);
+    });
 
     afterEach(done => {
       if (sessionPool) {
@@ -27,43 +35,6 @@ describe('Sessions - unit', function () {
       } else {
         done();
       }
-    });
-
-    it('should throw errors with invalid parameters', function () {
-      expect(() => {
-        new ClientSession();
-      }).to.throw(/ClientSession requires a topology/);
-
-      expect(() => {
-        new ClientSession({});
-      }).to.throw(/ClientSession requires a ServerSessionPool/);
-
-      expect(() => {
-        new ClientSession({}, {});
-      }).to.throw(/ClientSession requires a ServerSessionPool/);
-    });
-
-    it('should throw an error if snapshot and causalConsistency options are both set to true', function () {
-      const client = new Topology('localhost:27017', {});
-      sessionPool = client.s.sessionPool;
-      expect(
-        () => new ClientSession(client, sessionPool, { causalConsistency: true, snapshot: true })
-      ).to.throw('Properties "causalConsistency" and "snapshot" are mutually exclusive');
-    });
-
-    it('should default to `null` for `clusterTime`', function () {
-      const client = new Topology('localhost:27017', {});
-      sessionPool = client.s.sessionPool;
-      session = new ClientSession(client, sessionPool);
-      expect(session.clusterTime).to.not.exist;
-    });
-
-    it('should set the internal clusterTime to `initialClusterTime` if provided', function () {
-      const clusterTime = genClusterTime(Date.now());
-      const client = new Topology('localhost:27017');
-      sessionPool = client.s.sessionPool;
-      session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
-      expect(session.clusterTime).to.eql(clusterTime);
     });
 
     describe('startTransaction()', () => {
@@ -188,9 +159,147 @@ describe('Sessions - unit', function () {
         expect(session).property('clusterTime').to.equal(validInitialTime);
       });
     });
+
+    describe('new ClientSession()', () => {
+      it('should throw errors with invalid parameters', function () {
+        expect(() => {
+          new ClientSession();
+        }).to.throw(/ClientSession requires a topology/);
+
+        expect(() => {
+          new ClientSession({});
+        }).to.throw(/ClientSession requires a ServerSessionPool/);
+
+        expect(() => {
+          new ClientSession({}, {});
+        }).to.throw(/ClientSession requires a ServerSessionPool/);
+      });
+
+      it('should throw an error if snapshot and causalConsistency options are both set to true', function () {
+        const client = new Topology('localhost:27017', {});
+        sessionPool = client.s.sessionPool;
+        expect(
+          () => new ClientSession(client, sessionPool, { causalConsistency: true, snapshot: true })
+        ).to.throw('Properties "causalConsistency" and "snapshot" are mutually exclusive');
+      });
+
+      it('should default to `null` for `clusterTime`', function () {
+        const client = new Topology('localhost:27017', {});
+        sessionPool = client.s.sessionPool;
+        session = new ClientSession(client, sessionPool);
+        expect(session.clusterTime).to.not.exist;
+      });
+
+      it('should set the internal clusterTime to `initialClusterTime` if provided', function () {
+        const clusterTime = genClusterTime(Date.now());
+        const client = new Topology('localhost:27017');
+        sessionPool = client.s.sessionPool;
+        session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
+        expect(session.clusterTime).to.eql(clusterTime);
+      });
+      it('should acquire a serverSession in the constructor if the session is explicit', () => {
+        const session = new ClientSession(topology, serverSessionPool, { explicit: true });
+        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
+        expect(session).to.have.property(serverSessionSymbol).that.is.an.instanceOf(ServerSession);
+      });
+
+      it('should leave serverSession null if the session is implicit', () => {
+        // implicit via false (this should not be allowed...)
+        let session = new ClientSession(topology, serverSessionPool, { explicit: false });
+        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
+        expect(session).to.have.property(serverSessionSymbol, undefined);
+        // implicit via omission
+        session = new ClientSession(topology, serverSessionPool, {});
+        expect(session).to.have.property(serverSessionSymbol, undefined);
+      });
+
+      it('should start the txnNumberIncrement at zero', () => {
+        const session = new ClientSession(topology, serverSessionPool);
+        const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
+        expect(session).to.have.property(txnNumberIncrementSymbol, 0);
+      });
+    });
+
+    describe('get serverSession()', () => {
+      it('should return whatever is defined for serverSession symbol if clientSession.hadEnded is true', () => {
+        const session = new ClientSession(topology, serverSessionPool, { explicit: false });
+        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
+        expect(session).to.have.property(serverSessionSymbol, undefined);
+        session.hasEnded = true;
+        expect(session.serverSession).to.be.undefined;
+        session[serverSessionSymbol] = 'wacky crazy value';
+        expect(session.serverSession).to.be.equal('wacky crazy value');
+      });
+
+      it('should acquire a serverSession if clientSession.hadEnded is false', () => {
+        const session = new ClientSession(topology, serverSessionPool, { explicit: false });
+        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
+        expect(session).to.have.property(serverSessionSymbol, undefined);
+        session.hasEnded = false;
+        expect(session.serverSession).to.be.instanceOf(ServerSession);
+      });
+    });
+
+    describe('incrementTransactionNumber()', () => {
+      it('should not allocate serverSession', () => {
+        const session = new ClientSession(topology, serverSessionPool);
+        const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
+
+        session.incrementTransactionNumber();
+        expect(session).to.have.property(txnNumberIncrementSymbol, 1);
+
+        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
+        expect(session).to.have.property(serverSessionSymbol, undefined);
+      });
+      it('should save increments to txnNumberIncrement symbol', () => {
+        const session = new ClientSession(topology, serverSessionPool);
+        const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
+
+        session.incrementTransactionNumber();
+        session.incrementTransactionNumber();
+        session.incrementTransactionNumber();
+
+        expect(session).to.have.property(txnNumberIncrementSymbol, 3);
+      });
+    });
+
+    describe('applySession()', () => {
+      it('should allocate serverSession', () => {
+        const session = new ClientSession(topology, serverSessionPool);
+        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
+
+        const command = { magic: 1 };
+        const result = applySession(session, command, {});
+
+        expect(result).to.not.exist;
+        expect(command).to.have.property('lsid');
+        expect(session).to.have.property(serverSessionSymbol).that.is.instanceOf(ServerSession);
+      });
+
+      it('should apply saved txnNumberIncrements', () => {
+        const session = new ClientSession(topology, serverSessionPool);
+        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
+
+        session.incrementTransactionNumber();
+        session.incrementTransactionNumber();
+        session.incrementTransactionNumber();
+
+        const command = { magic: 1 };
+        const result = applySession(session, command, {
+          // txnNumber will be applied for retryable write command
+          willRetryWrite: true
+        });
+
+        expect(result).to.not.exist;
+        expect(command).to.have.property('lsid');
+        expect(command).to.have.property('txnNumber').instanceOf(Long);
+        expect(command.txnNumber.toNumber()).to.equal(3);
+        expect(session).to.have.property(serverSessionSymbol).that.is.instanceOf(ServerSession);
+      });
+    });
   });
 
-  describe('ServerSessionPool', function () {
+  describe('class ServerSessionPool', function () {
     afterEach(() => {
       test.client.close();
       return mock.cleanup();
@@ -316,102 +425,6 @@ describe('Sessions - unit', function () {
       pool.release(sessionC);
       pool.release(sessionD);
       done();
-    });
-  });
-
-  describe('ServerSession allocation behavior', () => {
-    let serverSessionPool;
-    let topology;
-
-    beforeEach(() => {
-      topology = {}; // we don't need a real topology, just a truthy value
-      serverSessionPool = new ServerSessionPool(topology);
-    });
-
-    it('serverSession getter should return whatever is defined for serverSession symbol if clientSession is ended', () => {
-      const session = new ClientSession(topology, serverSessionPool, { explicit: false });
-      const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-      expect(session).to.have.property(serverSessionSymbol, undefined);
-      session.hasEnded = true;
-      expect(session.serverSession).to.be.undefined;
-      session[serverSessionSymbol] = 'wacky crazy value';
-      expect(session.serverSession).to.be.equal('wacky crazy value');
-    });
-
-    it('should acquire a serverSession in the constructor if the session is explicit', () => {
-      const session = new ClientSession(topology, serverSessionPool, { explicit: true });
-      const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-      expect(session).to.have.property(serverSessionSymbol).that.is.an.instanceOf(ServerSession);
-    });
-
-    it('should leave serverSession null if the session is implicit', () => {
-      // implicit via false (this should not be allowed...)
-      let session = new ClientSession(topology, serverSessionPool, { explicit: false });
-      const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-      expect(session).to.have.property(serverSessionSymbol, undefined);
-      // implicit via omission
-      session = new ClientSession(topology, serverSessionPool, {});
-      expect(session).to.have.property(serverSessionSymbol, undefined);
-    });
-
-    it('should start the txnNumberIncrement at zero', () => {
-      const session = new ClientSession(topology, serverSessionPool);
-      const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
-      expect(session).to.have.property(txnNumberIncrementSymbol, 0);
-    });
-
-    it('incrementTransactionNumber should not allocate serverSession', () => {
-      const session = new ClientSession(topology, serverSessionPool);
-      const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
-
-      session.incrementTransactionNumber();
-      expect(session).to.have.property(txnNumberIncrementSymbol, 1);
-
-      const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-      expect(session).to.have.property(serverSessionSymbol, undefined);
-    });
-    it('incrementTransactionNumber should save increments', () => {
-      const session = new ClientSession(topology, serverSessionPool);
-      const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
-
-      session.incrementTransactionNumber();
-      session.incrementTransactionNumber();
-      session.incrementTransactionNumber();
-
-      expect(session).to.have.property(txnNumberIncrementSymbol, 3);
-    });
-
-    it('applySession should allocate serverSession', () => {
-      const session = new ClientSession(topology, serverSessionPool);
-      const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-
-      const command = { magic: 1 };
-      const result = applySession(session, command, {});
-
-      expect(result).to.not.exist;
-      expect(command).to.have.property('lsid');
-      expect(session).to.have.property(serverSessionSymbol).that.is.instanceOf(ServerSession);
-    });
-
-    it('applySession should apply saved txnNumberIncrements', () => {
-      const session = new ClientSession(topology, serverSessionPool);
-      const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-
-      session.incrementTransactionNumber();
-      session.incrementTransactionNumber();
-      session.incrementTransactionNumber();
-
-      const command = { magic: 1 };
-      const result = applySession(session, command, {
-        // txnNumber will be applied for retryable write command
-        willRetryWrite: true
-      });
-
-      expect(result).to.not.exist;
-      expect(command).to.have.property('lsid');
-      expect(command).to.have.property('txnNumber').instanceOf(Long);
-      expect(command.txnNumber.equals(Long.fromNumber(3)));
-      expect(session).to.have.property(serverSessionSymbol).that.is.instanceOf(ServerSession);
     });
   });
 });
