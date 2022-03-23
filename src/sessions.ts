@@ -118,7 +118,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   [kSnapshotEnabled] = false;
   /** @internal */
   [kPinnedConnection]?: Connection;
-  /** @internal Accumulates total number of increments to perform to txnNumber */
+  /** @internal Accumulates total number of increments to add to txnNumber when applying session to command */
   [kTxnNumberIncrement]: number;
 
   /**
@@ -181,11 +181,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
   /** The server id associated with this session */
   get id(): ServerSessionId | undefined {
-    const serverSession = this[kServerSession];
-    if (serverSession == null) {
-      return undefined;
-    }
-    return serverSession.id;
+    return this[kServerSession]?.id;
   }
 
   get serverSession(): ServerSession {
@@ -364,7 +360,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     return this.id.id.buffer.equals(session.id.id.buffer);
   }
 
-  /** Increment the transaction number on the internal ServerSession */
+  /**
+   * Increment the transaction number on the internal ServerSession
+   *
+   * @privateRemarks
+   * This helper increments a value stored on the client session that will be
+   * added to the serverSession's txnNumber upon applying it to a command.
+   * This is because the serverSession is lazily acquired after a connection is obtained
+   */
   incrementTransactionNumber(): void {
     this[kTxnNumberIncrement] += 1;
   }

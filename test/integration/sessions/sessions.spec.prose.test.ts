@@ -19,10 +19,11 @@ describe('ServerSession', () => {
   });
 
   /**
-   * TODO(DRIVERS-2218): Refactor tests to align exactly with spec wording. Preliminarily implements:
-   * Drivers MAY assert that exactly one session is used for all the concurrent operations listed in the test, however this is a race condition if the session isn't released before checkIn (which SHOULD NOT be attempted)
-   * Drivers SHOULD assert that after repeated runs they are able to achieve the use of exactly one session, this will statistically prove we've reduced the allocation amount
-   * Drivers MUST assert that the number of allocated sessions never exceeds the number of concurrent operations executing
+   * TODO(NODE-4082): Refactor tests to align exactly with spec wording.
+   * Assert the following across at least 5 retries of the above test: (We do not need to retry in nodejs)
+   * Drivers MUST assert that exactly one session is used for all operations at least once across the retries of this test.
+   * Note that it's possible, although rare, for greater than 1 server session to be used because the session is not released until after the connection is checked in.
+   * Drivers MUST assert that the number of allocated sessions is strictly less than the number of concurrent operations in every retry of this test. In this instance it would less than (but NOT equal to) 8.
    */
   it('13. may reuse one server session for many operations', async () => {
     const events = [];
