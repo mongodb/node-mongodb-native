@@ -185,15 +185,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   get serverSession(): ServerSession {
-    if (this.hasEnded && !this.explicit && this[kServerSession] == null) {
-      // If the session has ended we do not want to run the acquire code below
-      // regardless of the value of kServerSession potentially being nullish. It *should* always be
-      // a ServerSession at this stage, but if it is not, we throw a MongoRuntimeError indicating
-      // this is an unexpected scenario, that is not recoverable
-      throw new MongoRuntimeError('Unexpected null serverSession for an ended implicit session');
-    }
     let serverSession = this[kServerSession];
     if (serverSession == null) {
+      if (this.hasEnded && !this.explicit) {
+        throw new MongoRuntimeError('Unexpected null serverSession for an ended implicit session');
+      }
       serverSession = this.sessionPool.acquire();
       this[kServerSession] = serverSession;
     }
