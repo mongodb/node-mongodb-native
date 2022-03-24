@@ -13,6 +13,7 @@ const {
 const { now, isHello } = require('../../src/utils');
 const { getSymbolFrom } = require('../tools/utils');
 const { Long } = require('../../src/bson');
+const { MongoRuntimeError } = require('../../src/error');
 
 let test = {};
 
@@ -197,6 +198,7 @@ describe('Sessions - unit', function () {
         session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
         expect(session.clusterTime).to.eql(clusterTime);
       });
+
       it('should acquire a serverSession in the constructor if the session is explicit', () => {
         const session = new ClientSession(topology, serverSessionPool, { explicit: true });
         const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
@@ -207,10 +209,10 @@ describe('Sessions - unit', function () {
         // implicit via false (this should not be allowed...)
         let session = new ClientSession(topology, serverSessionPool, { explicit: false });
         const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol, undefined);
+        expect(session).to.have.property(serverSessionSymbol, null);
         // implicit via omission
         session = new ClientSession(topology, serverSessionPool, {});
-        expect(session).to.have.property(serverSessionSymbol, undefined);
+        expect(session).to.have.property(serverSessionSymbol, null);
       });
 
       it('should start the txnNumberIncrement at zero', () => {
@@ -222,20 +224,19 @@ describe('Sessions - unit', function () {
 
     describe('get serverSession()', () => {
       it('should return whatever is defined for serverSession symbol if clientSession.hadEnded is true', () => {
-        const session = new ClientSession(topology, serverSessionPool, { explicit: false });
+        const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
         const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol, undefined);
+        expect(session).to.have.property(serverSessionSymbol, null);
         session.hasEnded = true;
-        expect(session.serverSession).to.be.undefined;
-        session[serverSessionSymbol] = 'wacky crazy value';
-        expect(session.serverSession).to.be.equal('wacky crazy value');
+        expect(() => session.serverSession).to.throw(MongoRuntimeError);
       });
 
       it('should acquire a serverSession if clientSession.hadEnded is false', () => {
         const session = new ClientSession(topology, serverSessionPool, { explicit: false });
         const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol, undefined);
+        expect(session).to.have.property(serverSessionSymbol, null);
         session.hasEnded = false;
+        // performs acquire
         expect(session.serverSession).to.be.instanceOf(ServerSession);
       });
     });
@@ -249,8 +250,9 @@ describe('Sessions - unit', function () {
         expect(session).to.have.property(txnNumberIncrementSymbol, 1);
 
         const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol, undefined);
+        expect(session).to.have.property(serverSessionSymbol, null);
       });
+
       it('should save increments to txnNumberIncrement symbol', () => {
         const session = new ClientSession(topology, serverSessionPool);
         const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');

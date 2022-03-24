@@ -75,7 +75,7 @@ const kSnapshotTime = Symbol('snapshotTime');
 const kSnapshotEnabled = Symbol('snapshotEnabled');
 /** @internal */
 const kPinnedConnection = Symbol('pinnedConnection');
-/** @internal Accumulates total number of increments to perform to txnNumber */
+/** @internal Accumulates total number of increments to add to txnNumber when applying session to command */
 const kTxnNumberIncrement = Symbol('txnNumberIncrement');
 
 /** @public */
@@ -111,14 +111,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
   /** @internal */
-  [kServerSession]?: ServerSession;
+  [kServerSession]: ServerSession | null;
   /** @internal */
   [kSnapshotTime]?: Timestamp;
   /** @internal */
   [kSnapshotEnabled] = false;
   /** @internal */
   [kPinnedConnection]?: Connection;
-  /** @internal Accumulates total number of increments to add to txnNumber when applying session to command */
+  /** @internal */
   [kTxnNumberIncrement]: number;
 
   /**
@@ -163,8 +163,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this.hasEnded = false;
     this.clientOptions = clientOptions;
 
-    this.explicit = Boolean(options.explicit);
-    this[kServerSession] = this.explicit ? this.sessionPool.acquire() : undefined;
+    this.explicit = !!options.explicit;
+    this[kServerSession] = this.explicit ? this.sessionPool.acquire() : null;
     this[kTxnNumberIncrement] = 0;
 
     this.supports = {
@@ -185,12 +185,12 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   get serverSession(): ServerSession {
-    if (this.hasEnded) {
-      // @ts-expect-error: If the session has ended we do not want to run the acquire code below
+    if (this.hasEnded && !this.explicit && this[kServerSession] == null) {
+      // If the session has ended we do not want to run the acquire code below
       // regardless of the value of kServerSession potentially being nullish. It *should* always be
-      // a ServerSession at this stage, but if it is not, risking a null access seems worth it
-      // as opposed to accidentally acquiring a new ServerSession for an ended ClientSession
-      return this[kServerSession];
+      // a ServerSession at this stage, but if it is not, we throw a MongoRuntimeError indicating
+      // this is an unexpected scenario, that is not recoverable
+      throw new MongoRuntimeError('Unexpected null serverSession for an ended implicit session');
     }
     let serverSession = this[kServerSession];
     if (serverSession == null) {
@@ -995,7 +995,7 @@ export function applySession(
   command.lsid = serverSession.id;
 
   const inTxnOrTxnCommand = session.inTransaction() || isTransactionCommand(command);
-  const isRetryableWrite = Boolean(options.willRetryWrite);
+  const isRetryableWrite = !!options.willRetryWrite;
 
   if (isRetryableWrite || inTxnOrTxnCommand) {
     serverSession.txnNumber += session[kTxnNumberIncrement];
