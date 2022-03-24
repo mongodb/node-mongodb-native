@@ -224,6 +224,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   static readonly PINNED = PINNED;
   /** @event */
   static readonly UNPINNED = UNPINNED;
+  delayedTimeoutErrorId: NodeJS.Timeout | null;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
@@ -251,9 +252,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       /* ignore errors, listen to `close` instead */
     });
 
+    this.delayedTimeoutErrorId = null;
+
     this[kMessageStream].on('error', error => this.handleIssue({ destroy: error }));
     stream.on('close', () => this.handleIssue({ isClose: true }));
-    stream.on('timeout', () => this.handleIssue({ isTimeout: true, destroy: true }));
+
+    stream.on('timeout', () => {
+      this.delayedTimeoutErrorId = setTimeout(() => {
+        this.handleIssue({ isTimeout: true, destroy: true });
+      }, 1);
+    });
 
     // hook the message stream up to the passed in stream
     stream.pipe(this[kMessageStream]);
@@ -708,6 +716,11 @@ function supportsOpMsg(conn: Connection) {
 
 function messageHandler(conn: Connection) {
   return function messageHandler(message: BinMsg | Response) {
+    if (conn.delayedTimeoutErrorId != null) {
+      clearTimeout(conn.delayedTimeoutErrorId);
+      conn.delayedTimeoutErrorId = null;
+    }
+
     // always emit the message, in case we are streaming
     conn.emit('message', message);
     const operationDescription = conn[kQueue].get(message.responseTo);
