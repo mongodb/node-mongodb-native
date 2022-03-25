@@ -243,6 +243,14 @@ describe('Sessions - unit', function () {
           expect(session).to.have.a.property(serverSessionSymbol).be.an.instanceOf(ServerSession);
           expect(session.serverSession).be.an.instanceOf(ServerSession);
         });
+
+        it('should throw if the serverSession at the symbol property goes missing', () => {
+          const session = new ClientSession(topology, serverSessionPool, { explicit: true });
+          // We really want to make sure a ClientSession is not separated from its serverSession
+          session[serverSessionSymbol] = null;
+          expect(session).to.have.a.property(serverSessionSymbol).be.null;
+          expect(() => session.serverSession).throw(MongoRuntimeError);
+        });
       });
 
       describe('from an implicit session', () => {
