@@ -367,4 +367,37 @@ describe('Sessions Spec', function () {
       });
     });
   });
+
+  describe('Session allocation', () => {
+    let client;
+    let testCollection;
+
+    beforeEach(async function () {
+      client = await this.configuration
+        .newClient({ maxPoolSize: 1, monitorCommands: true })
+        .connect();
+      // reset test collection
+      testCollection = client.db('test').collection('too.many.sessions');
+      await testCollection.drop().catch(() => null);
+    });
+
+    afterEach(async () => {
+      await client?.close();
+    });
+
+    it('should only use one session for many operations when maxPoolSize is 1', async () => {
+      const documents = Array.from({ length: 50 }).map((_, idx) => ({ _id: idx }));
+
+      const events = [];
+      client.on('commandStarted', ev => events.push(ev));
+      const allResults = await Promise.all(
+        documents.map(async doc => testCollection.insertOne(doc))
+      );
+
+      expect(allResults).to.have.lengthOf(documents.length);
+      expect(events).to.have.lengthOf(documents.length);
+
+      expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(1);
+    });
+  });
 });

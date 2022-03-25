@@ -459,6 +459,8 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
   const rawExpectedEvents = spec.expectations.map(x => x.command_started_event);
   const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
 
+  expect(actualEvents).to.have.lengthOf(expectedEvents.length);
+
   for (const [idx, expectedEvent] of expectedEvents.entries()) {
     const actualEvent = actualEvents[idx];
 

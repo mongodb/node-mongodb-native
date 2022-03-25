@@ -42,20 +42,6 @@ import {
 
 const minWireVersionForShardedTransactions = 8;
 
-function assertAlive(session: ClientSession, callback?: Callback): boolean {
-  if (session.serverSession == null) {
-    const error = new MongoExpiredSessionError();
-    if (typeof callback === 'function') {
-      callback(error);
-      return false;
-    }
-
-    throw error;
-  }
-
-  return true;
-}
-
 /** @public */
 export interface ClientSessionOptions {
   /** Whether causal consistency should be enabled on this session */
@@ -89,6 +75,8 @@ const kSnapshotTime = Symbol('snapshotTime');
 const kSnapshotEnabled = Symbol('snapshotEnabled');
 /** @internal */
 const kPinnedConnection = Symbol('pinnedConnection');
+/** @internal Accumulates total number of increments to add to txnNumber when applying session to command */
+const kTxnNumberIncrement = Symbol('txnNumberIncrement');
 
 /** @public */
 export interface EndSessionOptions {
@@ -123,13 +111,15 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   defaultTransactionOptions: TransactionOptions;
   transaction: Transaction;
   /** @internal */
-  [kServerSession]?: ServerSession;
+  [kServerSession]: ServerSession | null;
   /** @internal */
   [kSnapshotTime]?: Timestamp;
   /** @internal */
   [kSnapshotEnabled] = false;
   /** @internal */
   [kPinnedConnection]?: Connection;
+  /** @internal */
+  [kTxnNumberIncrement]: number;
 
   /**
    * Create a client session.
@@ -172,7 +162,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this.sessionPool = sessionPool;
     this.hasEnded = false;
     this.clientOptions = clientOptions;
-    this[kServerSession] = undefined;
+
+    this.explicit = !!options.explicit;
+    this[kServerSession] = this.explicit ? this.sessionPool.acquire() : null;
+    this[kTxnNumberIncrement] = 0;
 
     this.supports = {
       causalConsistency: options.snapshot !== true && options.causalConsistency !== false
@@ -181,7 +174,6 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this.clusterTime = options.initialClusterTime;
 
     this.operationTime = undefined;
-    this.explicit = !!options.explicit;
     this.owner = options.owner;
     this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
     this.transaction = new Transaction();
@@ -189,16 +181,22 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
   /** The server id associated with this session */
   get id(): ServerSessionId | undefined {
-    return this.serverSession?.id;
+    return this[kServerSession]?.id;
   }
 
   get serverSession(): ServerSession {
-    if (this[kServerSession] == null) {
-      this[kServerSession] = this.sessionPool.acquire();
+    let serverSession = this[kServerSession];
+    if (serverSession == null) {
+      if (this.explicit) {
+        throw new MongoRuntimeError('Unexpected null serverSession for an explicit session');
+      }
+      if (this.hasEnded) {
+        throw new MongoRuntimeError('Unexpected null serverSession for an ended implicit session');
+      }
+      serverSession = this.sessionPool.acquire();
+      this[kServerSession] = serverSession;
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this[kServerSession]!;
+    return serverSession;
   }
 
   /** Whether or not this session is configured for snapshot reads */
@@ -267,9 +265,15 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       const completeEndSession = () => {
         maybeClearPinnedConnection(this, finalOptions);
 
-        // release the server session back to the pool
-        this.sessionPool.release(this.serverSession);
-        this[kServerSession] = undefined;
+        const serverSession = this[kServerSession];
+        if (serverSession != null) {
+          // release the server session back to the pool
+          this.sessionPool.release(serverSession);
+          // Make sure a new serverSession never makes it on to the ClientSession
+          Object.defineProperty(this, kServerSession, {
+            value: ServerSession.clone(serverSession)
+          });
+        }
 
         // mark the session as ended, and emit a signal
         this.hasEnded = true;
@@ -279,7 +283,9 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
         done();
       };
 
-      if (this.serverSession && this.inTransaction()) {
+      if (this.inTransaction()) {
+        // If we've reached endSession and the transaction is still active
+        // by default we abort it
         this.abortTransaction(err => {
           if (err) return done(err);
           completeEndSession();
@@ -353,12 +359,16 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     return this.id.id.buffer.equals(session.id.id.buffer);
   }
 
-  /** Increment the transaction number on the internal ServerSession */
+  /**
+   * Increment the transaction number on the internal ServerSession
+   *
+   * @privateRemarks
+   * This helper increments a value stored on the client session that will be
+   * added to the serverSession's txnNumber upon applying it to a command.
+   * This is because the serverSession is lazily acquired after a connection is obtained
+   */
   incrementTransactionNumber(): void {
-    if (this.serverSession) {
-      this.serverSession.txnNumber =
-        typeof this.serverSession.txnNumber === 'number' ? this.serverSession.txnNumber + 1 : 0;
-    }
+    this[kTxnNumberIncrement] += 1;
   }
 
   /** @returns whether this session is currently in a transaction or not */
@@ -376,7 +386,6 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       throw new MongoCompatibilityError('Transactions are not allowed with snapshot sessions');
     }
 
-    assertAlive(this);
     if (this.inTransaction()) {
       throw new MongoTransactionError('Transaction already in progress');
     }
@@ -627,7 +636,7 @@ function attemptTransaction<TSchema>(
         throw err;
       }
 
-      if (session.transaction.isActive) {
+      if (session.inTransaction()) {
         return session.abortTransaction().then(() => maybeRetryOrThrow(err));
       }
 
@@ -641,11 +650,6 @@ function endTransaction(
   commandName: 'abortTransaction' | 'commitTransaction',
   callback: Callback<Document>
 ) {
-  if (!assertAlive(session, callback)) {
-    // checking result in case callback was called
-    return;
-  }
-
   // handle any initial problematic cases
   const txnState = session.transaction.state;
 
@@ -750,7 +754,6 @@ function endTransaction(
     callback(error, result);
   }
 
-  // Assumption here that commandName is "commitTransaction" or "abortTransaction"
   if (session.transaction.recoveryToken) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
@@ -831,6 +834,30 @@ export class ServerSession {
     );
 
     return idleTimeMinutes > sessionTimeoutMinutes - 1;
+  }
+
+  /**
+   * @internal
+   * Cloning meant to keep a readable reference to the server session data
+   * after ClientSession has ended
+   */
+  static clone(serverSession: ServerSession): Readonly<ServerSession> {
+    const arrayBuffer = new ArrayBuffer(16);
+    const idBytes = Buffer.from(arrayBuffer);
+    idBytes.set(serverSession.id.id.buffer);
+
+    const id = new Binary(idBytes, serverSession.id.id.sub_type);
+
+    // Manual prototype construction to avoid modifying the constructor of this class
+    return Object.setPrototypeOf(
+      {
+        id: { id },
+        lastUse: serverSession.lastUse,
+        txnNumber: serverSession.txnNumber,
+        isDirty: serverSession.isDirty
+      },
+      ServerSession.prototype
+    );
   }
 }
 
@@ -944,11 +971,11 @@ export function applySession(
   command: Document,
   options: CommandOptions
 ): MongoDriverError | undefined {
-  // TODO: merge this with `assertAlive`, did not want to throw a try/catch here
   if (session.hasEnded) {
     return new MongoExpiredSessionError();
   }
 
+  // May acquire serverSession here
   const serverSession = session.serverSession;
   if (serverSession == null) {
     return new MongoRuntimeError('Unable to acquire server session');
@@ -966,15 +993,16 @@ export function applySession(
   serverSession.lastUse = now();
   command.lsid = serverSession.id;
 
-  // first apply non-transaction-specific sessions data
-  const inTransaction = session.inTransaction() || isTransactionCommand(command);
-  const isRetryableWrite = options?.willRetryWrite || false;
+  const inTxnOrTxnCommand = session.inTransaction() || isTransactionCommand(command);
+  const isRetryableWrite = !!options.willRetryWrite;
 
-  if (serverSession.txnNumber && (isRetryableWrite || inTransaction)) {
+  if (isRetryableWrite || inTxnOrTxnCommand) {
+    serverSession.txnNumber += session[kTxnNumberIncrement];
+    session[kTxnNumberIncrement] = 0;
     command.txnNumber = Long.fromNumber(serverSession.txnNumber);
   }
 
-  if (!inTransaction) {
+  if (!inTxnOrTxnCommand) {
     if (session.transaction.state !== TxnState.NO_TRANSACTION) {
       session.transaction.transition(TxnState.NO_TRANSACTION);
     }

@@ -25,7 +25,7 @@ export interface OperationConstructor extends Function {
 export interface OperationOptions extends BSONSerializeOptions {
   /** Specify ClientSession for this command */
   session?: ClientSession;
-  willRetryWrites?: boolean;
+  willRetryWrite?: boolean;
 
   /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
   readPreference?: ReadPreferenceLike;
@@ -56,8 +56,7 @@ export abstract class AbstractOperation<TResult = any> {
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
 
-  // TODO: Each operation defines its own options, there should be better typing here
-  options: Document;
+  options: OperationOptions;
 
   [kSession]: ClientSession | undefined;
 
