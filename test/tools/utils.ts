@@ -1,29 +1,23 @@
-'use strict';
+import { EJSON } from 'bson';
+import { expect } from 'chai';
+import util from 'util';
 
-const { Logger } = require('../../src/logger');
-const { deprecateOptions } = require('../../src/utils');
-const util = require('util');
-const chai = require('chai');
+import { Logger } from '../../src/logger';
+import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
 
-const expect = chai.expect;
-const sinonChai = require('sinon-chai');
-const { EJSON } = require('bson');
-
-chai.use(sinonChai);
-
-function makeTestFunction(config) {
-  const fn = options => {
+export function makeTestFunction(config: DeprecateOptionsConfig) {
+  const fn = (options: any) => {
     if (options) options = null;
   };
   return deprecateOptions(config, fn);
 }
 
-function ensureCalledWith(stub, args) {
-  args.forEach(m => expect(stub).to.have.been.calledWith(m));
+export function ensureCalledWith(stub: any, args: any[]) {
+  args.forEach((m: any) => expect(stub).to.have.been.calledWith(m));
 }
 
 // creation of class with a logger
-function ClassWithLogger() {
+export function ClassWithLogger() {
   this.logger = new Logger('ClassWithLogger');
 }
 
@@ -38,7 +32,9 @@ ClassWithLogger.prototype.getLogger = function () {
 };
 
 // creation of class without a logger
-function ClassWithoutLogger() {}
+export function ClassWithoutLogger() {
+  // empty function for class
+}
 
 ClassWithoutLogger.prototype.f = makeTestFunction({
   name: 'f',
@@ -47,7 +43,9 @@ ClassWithoutLogger.prototype.f = makeTestFunction({
 });
 
 // creation of class where getLogger returns undefined
-function ClassWithUndefinedLogger() {}
+export function ClassWithUndefinedLogger() {
+  // empty function for class
+}
 
 ClassWithUndefinedLogger.prototype.f = makeTestFunction({
   name: 'f',
@@ -59,18 +57,24 @@ ClassWithUndefinedLogger.prototype.getLogger = function () {
   return undefined;
 };
 
-class EventCollector {
-  constructor(obj, events, options) {
+export class EventCollector {
+  private _events: Record<string, any[]>;
+  private _timeout: number;
+  constructor(
+    obj: { on: (arg0: any, arg1: (event: any) => number) => void },
+    events: any[],
+    options: { timeout: number }
+  ) {
     this._events = Object.create(null);
     this._timeout = options ? options.timeout : 5000;
 
-    events.forEach(eventName => {
+    events.forEach((eventName: string | number) => {
       this._events[eventName] = [];
-      obj.on(eventName, event => this._events[eventName].push(event));
+      obj.on(eventName, (event: any) => this._events[eventName].push(event));
     });
   }
 
-  waitForEvent(eventName, count, callback) {
+  waitForEvent(eventName: any, count: number, callback: any) {
     if (typeof count === 'function') {
       callback = count;
       count = 1;
@@ -82,23 +86,20 @@ class EventCollector {
   /**
    * Will only return one event at a time from the front of the list
    * Useful for iterating over the events in the order they occurred
-   *
-   * @param {string} eventName
-   * @returns {Promise<Record<string, any>>}
    */
-  waitAndShiftEvent(eventName) {
-    return new Promise((resolve, reject) => {
+  waitAndShiftEvent(eventName: string): Promise<Record<string, any>> {
+    return new Promise<Record<string, any>>((resolve, reject) => {
       if (this._events[eventName].length > 0) {
         return resolve(this._events[eventName].shift());
       }
-      this.waitForEventImpl(this, Date.now(), eventName, 1, error => {
+      this.waitForEventImpl(this, Date.now(), eventName, 1, (error: any) => {
         if (error) return reject(error);
         resolve(this._events[eventName].shift());
       });
     });
   }
 
-  reset(eventName) {
+  reset(eventName: string) {
     if (eventName == null) {
       Object.keys(this._events).forEach(eventName => {
         this._events[eventName] = [];
@@ -114,7 +115,13 @@ class EventCollector {
     this._events[eventName] = [];
   }
 
-  waitForEventImpl(collector, start, eventName, count, callback) {
+  waitForEventImpl(
+    collector: this,
+    start: number,
+    eventName: string | number,
+    count: number,
+    callback: (error?: Error, events?: any[]) => void
+  ) {
     const events = collector._events[eventName];
     if (events.length >= count) {
       return callback(undefined, events);
@@ -128,7 +135,7 @@ class EventCollector {
   }
 }
 
-function getSymbolFrom(target, symbolName, assertExists = true) {
+export function getSymbolFrom(target: any, symbolName: any, assertExists = true) {
   const symbol = Object.getOwnPropertySymbols(target).filter(
     s => s.toString() === `Symbol(${symbolName})`
   )[0];
@@ -140,7 +147,7 @@ function getSymbolFrom(target, symbolName, assertExists = true) {
   return symbol;
 }
 
-function getEnvironmentalOptions() {
+export function getEnvironmentalOptions() {
   const options = {};
   if (process.env.MONGODB_API_VERSION) {
     Object.assign(options, {
@@ -160,7 +167,7 @@ function getEnvironmentalOptions() {
   return options;
 }
 
-function shouldRunServerlessTest(testRequirement, isServerless) {
+export function shouldRunServerlessTest(testRequirement: any, isServerless: any) {
   if (!testRequirement) return true;
   switch (testRequirement) {
     case 'forbid':
@@ -182,11 +189,11 @@ function shouldRunServerlessTest(testRequirement, isServerless) {
  * Attempts to use EJSON (to make type information obvious)
  * falls back to util.inspect if there's an error (circular reference)
  */
-function ejson(strings, ...values) {
+export function ejson(strings: any[], ...values: any[]) {
   const stringParts = [strings[0]];
   for (const [idx, value] of values.entries()) {
     if (typeof value === 'object') {
-      let stringifiedObject;
+      let stringifiedObject: string;
       try {
         stringifiedObject = EJSON.stringify(value, { relaxed: false });
       } catch (error) {
@@ -208,25 +215,24 @@ function ejson(strings, ...values) {
 
 /**
  * Run an async function after some set timeout
- * @param {() => Promise<void>} fn - function to run
- * @param {number} ms - timeout in MS
- * @returns {Promise<void>}
+ * @param fn - function to run
+ * @param ms - timeout in MS
  */
-const runLater = (fn, ms) => {
-  return new Promise((resolve, reject) => {
+export const runLater = (fn: () => Promise<void>, ms: number) => {
+  return new Promise<void>((resolve, reject) => {
     setTimeout(() => fn().then(resolve).catch(reject), ms);
   });
 };
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * If you are using sinon fake timers, it can end up blocking queued IO from running
  * awaiting a nextTick call will allow the event loop to process Networking/FS callbacks
  */
-const processTick = () => new Promise(resolve => process.nextTick(resolve));
+export const processTick = () => new Promise(resolve => process.nextTick(resolve));
 
-function getIndicesOfAuthInUrl(connectionString) {
+export function getIndicesOfAuthInUrl(connectionString: string | string[]) {
   const doubleSlashIndex = connectionString.indexOf('//');
   const atIndex = connectionString.indexOf('@');
 
@@ -240,7 +246,7 @@ function getIndicesOfAuthInUrl(connectionString) {
   };
 }
 
-function removeAuthFromConnectionString(connectionString) {
+export function removeAuthFromConnectionString(connectionString: string) {
   const indices = getIndicesOfAuthInUrl(connectionString);
   if (!indices) {
     return connectionString;
@@ -255,7 +261,7 @@ function removeAuthFromConnectionString(connectionString) {
   return connectionString.slice(0, start) + connectionString.slice(end + 1);
 }
 
-function extractAuthFromConnectionString(connectionString) {
+export function extractAuthFromConnectionString(connectionString: string | any[]) {
   const indices = getIndicesOfAuthInUrl(connectionString);
   if (!indices) {
     return null;
@@ -264,20 +270,19 @@ function extractAuthFromConnectionString(connectionString) {
   return connectionString.slice(indices.start, indices.end);
 }
 
-module.exports = {
-  processTick,
-  sleep,
-  runLater,
-  ejson,
-  EventCollector,
-  makeTestFunction,
-  ensureCalledWith,
-  ClassWithLogger,
-  ClassWithoutLogger,
-  ClassWithUndefinedLogger,
-  getSymbolFrom,
-  getEnvironmentalOptions,
-  shouldRunServerlessTest,
-  removeAuthFromConnectionString,
-  extractAuthFromConnectionString
-};
+export interface FailPoint {
+  configureFailPoint: 'failCommand';
+  mode: { activationProbability: number } | { times: number } | 'alwaysOn' | 'off';
+  data: {
+    failCommands: string[];
+    errorCode?: number;
+    closeConnection?: boolean;
+    blockConnection?: boolean;
+    blockTimeMS?: number;
+    writeConcernError?: { code: number; errmsg: string };
+    threadName?: string;
+    failInternalCommands?: boolean;
+    errorLabels?: string[];
+    appName?: string;
+  };
+}
