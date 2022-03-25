@@ -295,6 +295,16 @@ export interface AutoEncryptionOptions {
     mongocryptdSpawnPath?: string;
     /** Command line arguments to use when auto-spawning a mongocryptd */
     mongocryptdSpawnArgs?: string[];
+    /**
+     * Full path to a CSFLE shared library to be used (instead of mongocryptd)
+     * @experimental
+     */
+    csflePath?: string;
+    /**
+     * Search paths for a CSFLE shared library to be used (instead of mongocryptd)
+     * @experimental
+     */
+    csfleSearchPaths?: string[];
   };
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
@@ -315,4 +325,5 @@ export interface AutoEncrypter {
   teardown(force: boolean, callback: Callback): void;
   encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
   decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
+  readonly csfleVersionInfo: { version: bigint; versionStr: string } | null;
 }
