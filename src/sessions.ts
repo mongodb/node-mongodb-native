@@ -190,7 +190,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       if (this.explicit) {
         throw new MongoRuntimeError('Unexpected null serverSession for an explicit session');
       }
-      if (this.hasEnded && !this.explicit) {
+      if (this.hasEnded) {
         throw new MongoRuntimeError('Unexpected null serverSession for an ended implicit session');
       }
       serverSession = this.sessionPool.acquire();
