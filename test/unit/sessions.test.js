@@ -14,21 +14,19 @@ const { now, isHello } = require('../../src/utils');
 const { getSymbolFrom } = require('../tools/utils');
 const { Long } = require('../../src/bson');
 const { MongoRuntimeError } = require('../../src/error');
+const sinon = require('sinon');
 
-let test = {};
+let test = {
+  topology: null
+};
 
 describe('Sessions - unit', function () {
+  const topology = {};
+  const serverSessionPool = new ServerSessionPool(topology);
+
   describe('class ClientSession', function () {
     let session;
     let sessionPool;
-
-    let serverSessionPool;
-    let topology;
-
-    beforeEach(() => {
-      topology = {}; // we don't need a real topology, just a truthy value
-      serverSessionPool = new ServerSessionPool(topology);
-    });
 
     afterEach(done => {
       if (sessionPool) {
@@ -40,9 +38,9 @@ describe('Sessions - unit', function () {
 
     describe('startTransaction()', () => {
       it('should throw an error if the session is snapshot enabled', function () {
-        const client = new Topology('localhost:27017', {});
-        sessionPool = client.s.sessionPool;
-        session = new ClientSession(client, sessionPool, { snapshot: true });
+        const topology = new Topology('localhost:27017', {});
+        sessionPool = topology.s.sessionPool;
+        session = new ClientSession(topology, sessionPool, { snapshot: true });
         expect(session.snapshotEnabled).to.equal(true);
         expect(() => session.startTransaction()).to.throw(
           'Transactions are not allowed with snapshot sessions'
@@ -52,9 +50,9 @@ describe('Sessions - unit', function () {
 
     describe('advanceClusterTime()', () => {
       beforeEach(() => {
-        const client = new Topology('localhost:27017', {});
-        sessionPool = client.s.sessionPool;
-        session = new ClientSession(client, sessionPool, {});
+        const topology = new Topology('localhost:27017', {});
+        sessionPool = topology.s.sessionPool;
+        session = new ClientSession(topology, sessionPool, {});
       });
 
       it('should throw an error if the input cluster time is not an object', function () {
@@ -177,25 +175,26 @@ describe('Sessions - unit', function () {
       });
 
       it('should throw an error if snapshot and causalConsistency options are both set to true', function () {
-        const client = new Topology('localhost:27017', {});
-        sessionPool = client.s.sessionPool;
+        const topology = new Topology('localhost:27017', {});
+        sessionPool = topology.s.sessionPool;
         expect(
-          () => new ClientSession(client, sessionPool, { causalConsistency: true, snapshot: true })
+          () =>
+            new ClientSession(topology, sessionPool, { causalConsistency: true, snapshot: true })
         ).to.throw('Properties "causalConsistency" and "snapshot" are mutually exclusive');
       });
 
       it('should default to `null` for `clusterTime`', function () {
-        const client = new Topology('localhost:27017', {});
-        sessionPool = client.s.sessionPool;
-        session = new ClientSession(client, sessionPool);
+        const topology = new Topology('localhost:27017', {});
+        sessionPool = topology.s.sessionPool;
+        session = new ClientSession(topology, sessionPool);
         expect(session.clusterTime).to.not.exist;
       });
 
       it('should set the internal clusterTime to `initialClusterTime` if provided', function () {
         const clusterTime = genClusterTime(Date.now());
-        const client = new Topology('localhost:27017');
-        sessionPool = client.s.sessionPool;
-        session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
+        const topology = new Topology('localhost:27017');
+        sessionPool = topology.s.sessionPool;
+        session = new ClientSession(topology, sessionPool, { initialClusterTime: clusterTime });
         expect(session.clusterTime).to.eql(clusterTime);
       });
 
@@ -223,21 +222,46 @@ describe('Sessions - unit', function () {
     });
 
     describe('get serverSession()', () => {
-      it('should return whatever is defined for serverSession symbol if clientSession.hadEnded is true', () => {
-        const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
-        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol, null);
-        session.hasEnded = true;
-        expect(() => session.serverSession).to.throw(MongoRuntimeError);
+      let serverSessionSymbol;
+      before(() => {
+        serverSessionSymbol = getSymbolFrom(
+          new ClientSession({}, serverSessionPool, {}),
+          'serverSession'
+        );
       });
 
-      it('should acquire a serverSession if clientSession.hadEnded is false', () => {
-        const session = new ClientSession(topology, serverSessionPool, { explicit: false });
-        const serverSessionSymbol = getSymbolFrom(session, 'serverSession');
-        expect(session).to.have.property(serverSessionSymbol, null);
-        session.hasEnded = false;
-        // performs acquire
-        expect(session.serverSession).to.be.instanceOf(ServerSession);
+      describe('from an explicit session', () => {
+        it('should always have a non-null serverSession after construction', () => {
+          const session = new ClientSession(topology, serverSessionPool, { explicit: true });
+          expect(session).to.have.a.property(serverSessionSymbol).be.an.instanceOf(ServerSession);
+          expect(session.serverSession).be.an.instanceOf(ServerSession);
+        });
+
+        it('should always have non-null serverSession even if it is ended before getter called', () => {
+          const session = new ClientSession(topology, serverSessionPool, { explicit: true });
+          session.hasEnded = true;
+          expect(session).to.have.a.property(serverSessionSymbol).be.an.instanceOf(ServerSession);
+          expect(session.serverSession).be.an.instanceOf(ServerSession);
+        });
+      });
+
+      describe('from an implicit session', () => {
+        const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
+
+        it('should throw if the session hasEnded before serverSession was acquired', () => {
+          expect(session).to.have.property(serverSessionSymbol, null);
+          session.hasEnded = true;
+          expect(() => session.serverSession).to.throw(MongoRuntimeError);
+        });
+
+        it('should acquire a serverSession if clientSession.hadEnded is false', () => {
+          expect(session).to.have.property(serverSessionSymbol, null);
+          session.hasEnded = false;
+          const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
+          expect(session.serverSession).to.be.instanceOf(ServerSession);
+          expect(acquireSpy.calledOnce).to.be.true;
+          acquireSpy.restore();
+        });
       });
     });
 
@@ -303,7 +327,7 @@ describe('Sessions - unit', function () {
 
   describe('class ServerSessionPool', function () {
     afterEach(() => {
-      test.client.close();
+      test.topology.close();
       return mock.cleanup();
     });
 
@@ -320,12 +344,12 @@ describe('Sessions - unit', function () {
           });
         })
         .then(() => {
-          test.client = new Topology(test.server.hostAddress());
+          test.topology = new Topology(test.server.hostAddress());
 
           return new Promise((resolve, reject) => {
-            test.client.once('error', reject);
-            test.client.once('connect', resolve);
-            test.client.connect();
+            test.topology.once('error', reject);
+            test.topology.once('connect', resolve);
+            test.topology.connect();
           });
         });
     });
@@ -337,7 +361,7 @@ describe('Sessions - unit', function () {
     });
 
     it('should create a new session if the pool is empty', function (done) {
-      const pool = new ServerSessionPool(test.client);
+      const pool = new ServerSessionPool(test.topology);
       done = sessionCleanupHandler(null, pool, done);
       expect(pool.sessions).to.have.length(0);
 
@@ -351,7 +375,7 @@ describe('Sessions - unit', function () {
 
     it('should reuse sessions which have not timed out yet on acquire', function (done) {
       const oldSession = new ServerSession();
-      const pool = new ServerSessionPool(test.client);
+      const pool = new ServerSessionPool(test.topology);
       done = sessionCleanupHandler(null, pool, done);
       pool.sessions.push(oldSession);
 
@@ -367,7 +391,7 @@ describe('Sessions - unit', function () {
       const oldSession = new ServerSession();
       oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
 
-      const pool = new ServerSessionPool(test.client);
+      const pool = new ServerSessionPool(test.topology);
       done = sessionCleanupHandler(null, pool, done);
       pool.sessions.push(oldSession);
 
@@ -386,7 +410,7 @@ describe('Sessions - unit', function () {
         return session;
       });
 
-      const pool = new ServerSessionPool(test.client);
+      const pool = new ServerSessionPool(test.topology);
       done = sessionCleanupHandler(null, pool, done);
       pool.sessions = pool.sessions.concat(oldSessions);
 
@@ -400,7 +424,7 @@ describe('Sessions - unit', function () {
       const session = new ServerSession();
       session.lastUse = now() - 9.5 * 60 * 1000; // add 9.5min
 
-      const pool = new ServerSessionPool(test.client);
+      const pool = new ServerSessionPool(test.topology);
       done = sessionCleanupHandler(null, pool, done);
 
       pool.release(session);
@@ -409,7 +433,7 @@ describe('Sessions - unit', function () {
     });
 
     it('should maintain a LIFO queue of sessions', function (done) {
-      const pool = new ServerSessionPool(test.client);
+      const pool = new ServerSessionPool(test.topology);
       done = sessionCleanupHandler(null, pool, done);
 
       const sessionA = new ServerSession();
