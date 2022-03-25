@@ -256,13 +256,13 @@ describe('Sessions - unit', function () {
       describe('from an implicit session', () => {
         const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
 
-        it('should throw if the session hasEnded before serverSession was acquired', () => {
+        it('should throw if the session ended before serverSession was acquired', () => {
           expect(session).to.have.property(serverSessionSymbol, null);
           session.hasEnded = true;
           expect(() => session.serverSession).to.throw(MongoRuntimeError);
         });
 
-        it('should acquire a serverSession if clientSession.hadEnded is false', () => {
+        it('should acquire a serverSession if clientSession.hasEnded is false and serverSession is not set', () => {
           expect(session).to.have.property(serverSessionSymbol, null);
           session.hasEnded = false;
           const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
