@@ -254,15 +254,15 @@ describe('Sessions - unit', function () {
       });
 
       describe('from an implicit session', () => {
-        const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
-
         it('should throw if the session ended before serverSession was acquired', () => {
+          const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
           expect(session).to.have.property(serverSessionSymbol, null);
           session.hasEnded = true;
           expect(() => session.serverSession).to.throw(MongoRuntimeError);
         });
 
         it('should acquire a serverSession if clientSession.hasEnded is false and serverSession is not set', () => {
+          const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
           expect(session).to.have.property(serverSessionSymbol, null);
           session.hasEnded = false;
           const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
@@ -272,6 +272,7 @@ describe('Sessions - unit', function () {
         });
 
         it('should return the existing serverSession and not acquire a new one if one is already set', () => {
+          const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
           expect(session).to.have.property(serverSessionSymbol, null);
           const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
           const firstServerSessionGetResult = session.serverSession;
@@ -294,6 +295,7 @@ describe('Sessions - unit', function () {
         });
 
         it('should return the existing serverSession and not acquire a new one if one is already set and session is ended', () => {
+          const session = new ClientSession(topology, serverSessionPool, { explicit: false }); // make an implicit session
           expect(session).to.have.property(serverSessionSymbol, null);
           const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
           const firstServerSessionGetResult = session.serverSession;
