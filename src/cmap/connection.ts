@@ -258,9 +258,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     stream.on('close', () => this.handleIssue({ isClose: true }));
 
     stream.on('timeout', () => {
-      this.delayedTimeoutErrorId = setTimeout(() => {
-        this.handleIssue({ isTimeout: true, destroy: true });
-      }, 1);
+      if (this.delayedTimeoutErrorId != null) {
+        this.delayedTimeoutErrorId.refresh();
+      } else {
+        this.delayedTimeoutErrorId = setTimeout(() => {
+          this.handleIssue({ isTimeout: true, destroy: true });
+        }, 1);
+      }
     });
 
     // hook the message stream up to the passed in stream
@@ -718,7 +722,6 @@ function messageHandler(conn: Connection) {
   return function messageHandler(message: BinMsg | Response) {
     if (conn.delayedTimeoutErrorId != null) {
       clearTimeout(conn.delayedTimeoutErrorId);
-      conn.delayedTimeoutErrorId = null;
     }
 
     // always emit the message, in case we are streaming
