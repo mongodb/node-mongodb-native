@@ -270,6 +270,23 @@ describe('Sessions - unit', function () {
           expect(acquireSpy.calledOnce).to.be.true;
           acquireSpy.restore();
         });
+
+        it('should return the existing serverSession and not acquire a new one if one is already set', () => {
+          expect(session).to.have.property(serverSessionSymbol, null);
+          const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
+          expect(session.serverSession).to.be.instanceOf(ServerSession);
+          expect(acquireSpy.calledOnce).to.be.true;
+
+          // call the getter a bunch more times
+          expect(session.serverSession).to.be.instanceOf(ServerSession);
+          expect(session.serverSession).to.be.instanceOf(ServerSession);
+          expect(session.serverSession).to.be.instanceOf(ServerSession);
+
+          // acquire never called again
+          expect(acquireSpy.calledOnce).to.be.true;
+
+          acquireSpy.restore();
+        });
       });
     });
 
