@@ -140,7 +140,50 @@ tests:
   - description: "Test that comment is set on getMore"
     runOnRequirements:
       - minServerVersion: "4.4.0"
-        topologies: [ single, replicaset ]
+        topologies: [ replicaset ]
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: &commentDoc
+            key: "value"
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &new_document
+            _id: 1
+            a: 1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: *commentDoc
+          - commandStartedEvent:
+              command:
+                insert: *collection0
+                documents:
+                  - *new_document
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0
+                comment: *commentDoc
+              commandName: getMore
+              databaseName: *database0
+
+  - description: "Test that comment is not set on getMore - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.3.99"
+        topologies: [ replicaset ]
     operations:
       - name: createChangeStream
         object: *collection0
@@ -174,6 +217,6 @@ tests:
               command:
                 getMore: { $$type: [ int, long ] }
                 collection: *collection0
-                comment: "comment"
+                comment: { $$exists: false }
               commandName: getMore
               databaseName: *database0

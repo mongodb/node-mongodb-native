@@ -254,7 +254,98 @@
         {
           "minServerVersion": "4.4.0",
           "topologies": [
-            "single",
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "comment": {
+              "key": "value"
+            }
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ],
+                  "comment": {
+                    "key": "value"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "collection0",
+                  "documents": [
+                    {
+                      "_id": 1,
+                      "a": 1
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "collection0",
+                  "comment": {
+                    "key": "value"
+                  }
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Test that comment is not set on getMore - pre 4.4",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "maxServerVersion": "4.3.99",
+          "topologies": [
             "replicaset"
           ]
         }
@@ -324,7 +415,9 @@
                     ]
                   },
                   "collection": "collection0",
-                  "comment": "comment"
+                  "comment": {
+                    "$$exists": false
+                  }
                 },
                 "commandName": "getMore",
                 "databaseName": "database0"

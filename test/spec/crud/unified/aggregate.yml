@@ -128,7 +128,51 @@ tests:
   - description: "aggregate with comment sets comment on getMore"
     runOnRequirements:
       - minServerVersion: "4.4.0"
-        topologies: [ single, replicaset ]
+    operations:
+      - name: aggregate
+        arguments:
+          pipeline: [ { $match: { _id: { $gt: 1 } }} ]
+          batchSize: 2
+          comment: *comment0
+        object: *collection0
+        expectResult:
+          - { _id: 2, x: 22 }
+          - { _id: 3, x: 33 }
+          - { _id: 4, x: 44 }
+          - { _id: 5, x: 55 }
+          - { _id: 6, x: 66 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: [ { $match: { _id: { $gt: 1 } }} ]
+                cursor: { batchSize: 2 }
+                comment: *comment0
+              commandName: aggregate
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0Name
+                batchSize: 2
+                comment: *comment0
+              commandName: getMore
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0Name
+                batchSize: 2
+                comment: *comment0
+              commandName: getMore
+              databaseName: *database0Name
+
+  - description: "aggregate with comment does not set comment on getMore - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.3.99"
     operations:
       - name: aggregate
         arguments:
@@ -158,7 +202,7 @@ tests:
                 getMore: { $$type: [ int, long ] }
                 collection: *collection0Name
                 batchSize: 2
-                comment: "comment"
+                comment: { $$exists: false }
               commandName: getMore
               databaseName: *database0Name
           - commandStartedEvent:
@@ -166,6 +210,6 @@ tests:
                 getMore: { $$type: [ int, long ] }
                 collection: *collection0Name
                 batchSize: 2
-                comment: "comment"
+                comment: { $$exists: false }
               commandName: getMore
               databaseName: *database0Name
