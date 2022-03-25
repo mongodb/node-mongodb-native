@@ -274,13 +274,42 @@ describe('Sessions - unit', function () {
         it('should return the existing serverSession and not acquire a new one if one is already set', () => {
           expect(session).to.have.property(serverSessionSymbol, null);
           const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
-          expect(session.serverSession).to.be.instanceOf(ServerSession);
+          const firstServerSessionGetResult = session.serverSession;
+          expect(firstServerSessionGetResult).to.be.instanceOf(ServerSession);
           expect(acquireSpy.calledOnce).to.be.true;
 
           // call the getter a bunch more times
           expect(session.serverSession).to.be.instanceOf(ServerSession);
           expect(session.serverSession).to.be.instanceOf(ServerSession);
           expect(session.serverSession).to.be.instanceOf(ServerSession);
+
+          expect(session.serverSession.id.id.buffer.toString('hex')).to.equal(
+            firstServerSessionGetResult.id.id.buffer.toString('hex')
+          );
+
+          // acquire never called again
+          expect(acquireSpy.calledOnce).to.be.true;
+
+          acquireSpy.restore();
+        });
+
+        it('should return the existing serverSession and not acquire a new one if one is already set and session is ended', () => {
+          expect(session).to.have.property(serverSessionSymbol, null);
+          const acquireSpy = sinon.spy(serverSessionPool, 'acquire');
+          const firstServerSessionGetResult = session.serverSession;
+          expect(firstServerSessionGetResult).to.be.instanceOf(ServerSession);
+          expect(acquireSpy.calledOnce).to.be.true;
+
+          session.hasEnded = true;
+
+          // call the getter a bunch more times
+          expect(session.serverSession).to.be.instanceOf(ServerSession);
+          expect(session.serverSession).to.be.instanceOf(ServerSession);
+          expect(session.serverSession).to.be.instanceOf(ServerSession);
+
+          expect(session.serverSession.id.id.buffer.toString('hex')).to.equal(
+            firstServerSessionGetResult.id.id.buffer.toString('hex')
+          );
 
           // acquire never called again
           expect(acquireSpy.calledOnce).to.be.true;
