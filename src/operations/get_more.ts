@@ -2,7 +2,7 @@ import type { Document, Long } from '../bson';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
+import { Callback, disallowOptions, maxWireVersion, MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './operation';
 
 /**
@@ -22,13 +22,6 @@ export interface GetMoreOptions extends OperationOptions {
   maxTimeMS?: number;
 }
 
-function filterOptions(
-  options: Record<string, any>,
-  invalidOptions: Set<string>
-): Record<string, any> {
-  return Object.fromEntries(Object.entries(options).filter(([key]) => !invalidOptions.has(key)));
-}
-
 /** @internal */
 export class GetMoreOperation extends AbstractOperation {
   cursorId: Long;
@@ -38,8 +31,7 @@ export class GetMoreOperation extends AbstractOperation {
     super(options);
 
     // comment on getMore is only supported for server versions 4.4 and above
-    const invalidOptions = maxWireVersion(server) < 9 ? new Set(['comment']) : new Set<string>();
-    this.options = filterOptions(options, invalidOptions);
+    this.options = maxWireVersion(server) < 9 ? disallowOptions(options, ['comment']) : options;
 
     this.ns = ns;
     this.cursorId = cursorId;

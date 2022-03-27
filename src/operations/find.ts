@@ -7,6 +7,7 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, Sort } from '../sort';
 import {
+  applyComment,
   Callback,
   decorateWithExplain,
   maxWireVersion,
@@ -248,10 +249,7 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
     findCommand.singleBatch = options.singleBatch;
   }
 
-  // eslint-disable-next-line no-restricted-syntax
-  if (options.comment !== undefined) {
-    findCommand.comment = options.comment;
-  }
+  applyComment(options, findCommand);
 
   if (typeof options.maxTimeMS === 'number') {
     findCommand.maxTimeMS = options.maxTimeMS;

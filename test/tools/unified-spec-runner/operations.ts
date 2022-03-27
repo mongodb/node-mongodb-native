@@ -205,7 +205,8 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
   changeStream.eventCollector = new EventCollector(changeStream, ['init', 'error']);
 
   return new Promise((resolve, reject) => {
-    changeStream.cursor.__initialize(err => {
+    const init = Symbol.for('kInit');
+    changeStream.cursor[init](err => {
       if (err) return reject(err);
       resolve(changeStream);
     });

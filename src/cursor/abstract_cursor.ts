@@ -18,7 +18,7 @@ import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
+import { applyComment, Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
@@ -42,6 +42,8 @@ const kInitialized = Symbol('initialized');
 const kClosed = Symbol('closed');
 /** @internal */
 const kKilled = Symbol('killed');
+/** @internal */
+const kInit = Symbol.for('kInit');
 
 /** @public */
 export const CURSOR_FLAGS = [
@@ -170,10 +172,7 @@ export abstract class AbstractCursor<
       this[kOptions].batchSize = options.batchSize;
     }
 
-    // eslint-disable-next-line no-restricted-syntax
-    if (options.comment !== undefined) {
-      this[kOptions].comment = options.comment;
-    }
+    applyComment(options, this[kOptions]);
 
     if (typeof options.maxTimeMS === 'number') {
       this[kOptions].maxTimeMS = options.maxTimeMS;
@@ -637,12 +636,12 @@ export abstract class AbstractCursor<
    * operation.  We cannot refactor to use the abstract _initialize method without
    * a significant refactor.
    */
-  __initialize(callback: Callback<TSchema | null>): void {
+  [kInit](callback: Callback<TSchema | null>): void {
     if (this[kSession] == null) {
       if (this[kTopology].shouldCheckForSessionSupport()) {
         return this[kTopology].selectServer(ReadPreference.primaryPreferred, {}, err => {
           if (err) return callback(err);
-          return this.__initialize(callback);
+          return this[kInit](callback);
         });
       } else if (this[kTopology].hasSessionSupport()) {
         this[kSession] = this[kTopology].startSession({ owner: this, explicit: false });
@@ -728,7 +727,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    cursor.__initialize((err, value) => {
+    cursor[kInit]((err, value) => {
       if (err) return callback(err);
       if (value) {
         return callback(undefined, value);

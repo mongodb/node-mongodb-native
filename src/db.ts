@@ -44,9 +44,9 @@ import { DbStatsOperation, DbStatsOptions } from './operations/stats';
 import { ReadConcern } from './read_concern';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import {
+  allowOptions,
   Callback,
   DEFAULT_PK_FACTORY,
-  filterOptions,
   getTopology,
   MongoDBNamespace,
   resolveOptions
@@ -149,7 +149,7 @@ export class Db {
     options = options ?? {};
 
     // Filter the options
-    options = filterOptions(options, DB_OPTIONS_ALLOW_LIST);
+    options = allowOptions(options, DB_OPTIONS_ALLOW_LIST);
 
     // Ensure we have a valid db name
     validateDatabaseName(databaseName);

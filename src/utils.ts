@@ -176,7 +176,7 @@ export function mergeOptions<T, S>(target: T, source: S): T & S {
 }
 
 /** @internal */
-export function filterOptions(options: AnyOptions, names: string[]): AnyOptions {
+export function allowOptions(options: AnyOptions, names: string[]): AnyOptions {
   const filterOptions: AnyOptions = {};
 
   for (const name in options) {
@@ -187,6 +187,28 @@ export function filterOptions(options: AnyOptions, names: string[]): AnyOptions 
 
   // Filtered options
   return filterOptions;
+}
+
+/** @internal */
+export function disallowOptions(options: AnyOptions, denylist: string[]): AnyOptions {
+  const accumulatedOptions: AnyOptions = {};
+
+  for (const name in options) {
+    if (!denylist.includes(name)) {
+      accumulatedOptions[name] = options[name];
+    }
+  }
+
+  // Filtered options
+  return accumulatedOptions;
+}
+
+/** @internal */
+export function applyComment(options: AnyOptions, command: Document) {
+  // eslint-disable-next-line no-restricted-syntax
+  if (options.comment !== undefined) {
+    command.comment = options.comment;
+  }
 }
 
 interface HasRetryableWrites {
