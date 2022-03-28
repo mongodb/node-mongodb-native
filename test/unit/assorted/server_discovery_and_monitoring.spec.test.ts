@@ -214,7 +214,7 @@ async function executeSDAMTest(testData) {
     topology.on(eventName, event => events.push(event));
   }
 
-  const errorEvents = [];
+  let errorEvents = [];
   topology.on('error', error => errorEvents.push(error));
 
   // connect the topology
@@ -237,6 +237,7 @@ async function executeSDAMTest(testData) {
       }
 
       events = [];
+      errorEvents = [];
     } else if (phase.applicationErrors) {
       for (const appError of phase.applicationErrors) {
         const withConnectionStub = sinon
