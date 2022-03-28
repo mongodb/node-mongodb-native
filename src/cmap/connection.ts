@@ -24,7 +24,6 @@ import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
-  applyComment,
   calculateDurationInMs,
   Callback,
   ClientMetadata,
@@ -583,8 +582,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (typeof options.maxAwaitTimeMS === 'number') {
       getMoreCmd.maxTimeMS = options.maxAwaitTimeMS;
     }
-
-    applyComment(options, getMoreCmd);
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      getMoreCmd.comment = options.comment;
+    }
 
     const commandOptions = Object.assign(
       {

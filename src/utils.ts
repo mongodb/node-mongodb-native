@@ -202,15 +202,6 @@ export function disallowOptions(options: AnyOptions, denylist: string[]): AnyOpt
   // Filtered options
   return accumulatedOptions;
 }
-
-/** @internal */
-export function applyComment(options: AnyOptions, command: Document) {
-  // eslint-disable-next-line no-restricted-syntax
-  if (options.comment !== undefined) {
-    command.comment = options.comment;
-  }
-}
-
 interface HasRetryableWrites {
   retryWrites?: boolean;
 }

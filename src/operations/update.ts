@@ -4,7 +4,6 @@ import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } 
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import {
-  applyComment,
   Callback,
   collationNotSupported,
   hasAtomicOperators,
@@ -108,7 +107,11 @@ export class UpdateOperation extends CommandOperation<Document> {
       command.let = options.let;
     }
 
-    applyComment(options, command);
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      command.comment = options.comment;
+    }
 
     const statementWithCollation = this.statements.find(statement => !!statement.collation);
     if (

@@ -18,7 +18,7 @@ import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { applyComment, Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
+import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
@@ -172,7 +172,11 @@ export abstract class AbstractCursor<
       this[kOptions].batchSize = options.batchSize;
     }
 
-    applyComment(options, this[kOptions]);
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      this[kOptions].comment = options.comment;
+    }
 
     if (typeof options.maxTimeMS === 'number') {
       this[kOptions].maxTimeMS = options.maxTimeMS;

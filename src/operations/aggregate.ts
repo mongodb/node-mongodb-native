@@ -2,7 +2,7 @@ import type { Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { applyComment, Callback, maxWireVersion, MongoDBNamespace } from '../utils';
+import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects, Hint } from './operation';
 
@@ -130,7 +130,11 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
       command.let = options.let;
     }
 
-    applyComment(options, command);
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      command.comment = options.comment;
+    }
 
     command.cursor = options.cursor || {};
     if (options.batchSize && !this.hasWriteStage) {

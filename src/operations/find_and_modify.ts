@@ -5,13 +5,7 @@ import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortForCmd } from '../sort';
-import {
-  applyComment,
-  Callback,
-  decorateWithCollation,
-  hasAtomicOperators,
-  maxWireVersion
-} from '../utils';
+import { Callback, decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
 import type { WriteConcern, WriteConcernSettings } from '../write_concern';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -155,7 +149,11 @@ class FindAndModifyOperation extends CommandOperation<Document> {
       this.cmdBase.let = options.let;
     }
 
-    applyComment(options, this.cmdBase);
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      this.cmdBase.comment = options.comment;
+    }
 
     // force primary read preference
     this.readPreference = ReadPreference.primary;

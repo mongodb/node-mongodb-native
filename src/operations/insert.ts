@@ -5,7 +5,7 @@ import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { applyComment, Callback, MongoDBNamespace } from '../utils';
+import { Callback, MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
 import { CommandOperation, CommandOperationOptions } from './command';
@@ -41,7 +41,11 @@ export class InsertOperation extends CommandOperation<Document> {
       command.bypassDocumentValidation = options.bypassDocumentValidation;
     }
 
-    applyComment(options, command);
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      command.comment = options.comment;
+    }
 
     super.executeCommand(server, session, command, callback);
   }

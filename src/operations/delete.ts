@@ -3,13 +3,7 @@ import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import {
-  applyComment,
-  Callback,
-  collationNotSupported,
-  maxWireVersion,
-  MongoDBNamespace
-} from '../utils';
+import { Callback, collationNotSupported, maxWireVersion, MongoDBNamespace } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects, Hint } from './operation';
@@ -91,7 +85,11 @@ export class DeleteOperation extends CommandOperation<Document> {
       command.let = options.let;
     }
 
-    applyComment(options, command);
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      command.comment = options.comment;
+    }
 
     if (options.explain != null && maxWireVersion(server) < 3) {
       return callback
