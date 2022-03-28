@@ -654,16 +654,18 @@ export abstract class AbstractCursor<
         this[kServer] = state.server;
         this[kSession] = state.session;
 
-        this[kId] =
-          typeof response.cursor.id === 'number'
-            ? Long.fromNumber(response.cursor.id)
-            : response.cursor.id;
+        if (response.cursor) {
+          this[kId] =
+            typeof response.cursor.id === 'number'
+              ? Long.fromNumber(response.cursor.id)
+              : response.cursor.id;
 
-        if (response.cursor.ns) {
-          this[kNamespace] = ns(response.cursor.ns);
+          if (response.cursor.ns) {
+            this[kNamespace] = ns(response.cursor.ns);
+          }
+
+          this[kDocuments] = response.cursor.firstBatch;
         }
-
-        this[kDocuments] = response.cursor.firstBatch;
 
         // When server responses return without a cursor document, we close this cursor
         // and return the raw server response. This is often the case for explain commands
