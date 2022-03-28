@@ -1,22 +1,46 @@
-'use strict';
-const fs = require('fs');
-const path = require('path');
-const { Topology } = require('../../../src/sdam/topology');
-const { TopologyType } = require('../../../src/sdam/common');
-const { Server } = require('../../../src/sdam/server');
-const { ServerDescription } = require('../../../src/sdam/server_description');
-const sdamEvents = require('../../../src/sdam/events');
-const { parseOptions } = require('../../../src/connection_string');
-const sinon = require('sinon');
-const { EJSON } = require('bson');
-const { ConnectionPool } = require('../../../src/cmap/connection_pool');
-const {
+import { Document, EJSON } from 'bson';
+import { expect } from 'chai';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as sinon from 'sinon';
+import { promisify } from 'util';
+
+import { ConnectionPool } from '../../../src/cmap/connection_pool';
+import { parseOptions } from '../../../src/connection_string';
+import {
+  MongoCompatibilityError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerError
-} = require('../../../src/error');
-const { eachAsyncSeries, ns } = require('../../../src/utils');
-const { expect } = require('chai');
+} from '../../../src/error';
+import { TopologyType } from '../../../src/sdam/common';
+import {
+  ServerClosedEvent,
+  ServerDescriptionChangedEvent,
+  ServerHeartbeatFailedEvent,
+  ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent,
+  ServerOpeningEvent,
+  TopologyClosedEvent,
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent
+} from '../../../src/sdam/events';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { Topology } from '../../../src/sdam/topology';
+import { ns } from '../../../src/utils';
+
+const SDAM_EVENT_CLASSES = {
+  ServerDescriptionChangedEvent,
+  ServerOpeningEvent,
+  ServerClosedEvent,
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent,
+  TopologyClosedEvent,
+  ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent,
+  ServerHeartbeatFailedEvent
+};
 
 const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
 function collectTests() {
@@ -26,19 +50,23 @@ function collectTests() {
     .filter(d => d !== 'integration');
 
   const tests = {};
-  testTypes.forEach(testType => {
+  for (const testType of testTypes) {
     tests[testType] = fs
       .readdirSync(path.join(specDir, testType))
       .filter(f => path.extname(f) === '.json')
       .map(f => {
-        const result = EJSON.parse(fs.readFileSync(path.join(specDir, testType, f)), {
-          relaxed: true
-        });
+        const result = EJSON.parse(
+          fs.readFileSync(path.join(specDir, testType, f), { encoding: 'utf8' }),
+          {
+            relaxed: true
+          }
+        ) as Document;
 
         result.type = testType;
+        result.fileName = path.join(testType, f); // unused but helpful when debugging
         return result;
       });
-  });
+  }
 
   return tests;
 }
@@ -56,67 +84,47 @@ describe('Server Discovery and Monitoring (spec)', function () {
     serverConnect.restore();
   });
 
-  const shouldSkip = desc => {
-    const descriptions = [
-      // placeholder for potential skips
-    ];
-    return descriptions.includes(desc);
-  };
-
   const specTests = collectTests();
-  Object.keys(specTests).forEach(specTestName => {
+  for (const specTestName of Object.keys(specTests)) {
     describe(specTestName, () => {
-      specTests[specTestName].forEach(testData => {
-        const skip = shouldSkip(testData.description);
-        const type = skip ? it.skip : it;
-        type(testData.description, function (done) {
-          executeSDAMTest(testData, done);
+      for (const testData of specTests[specTestName]) {
+        it(testData.description, async () => {
+          await executeSDAMTest(testData);
         });
-      });
+      }
     });
-  });
-});
-
-const OUTCOME_TRANSLATIONS = new Map();
-OUTCOME_TRANSLATIONS.set('topologyType', 'type');
-
-function translateOutcomeKey(key) {
-  if (OUTCOME_TRANSLATIONS.has(key)) {
-    return OUTCOME_TRANSLATIONS.get(key);
   }
-
-  return key;
-}
+});
 
 function convertOutcomeEvents(events) {
   return events.map(event => {
     const eventType = Object.keys(event)[0];
     const args = [];
-    Object.keys(event[eventType]).forEach(key => {
-      let argument = event[eventType][key];
+    for (const key of Object.keys(event[eventType])) {
+      const argument = event[eventType][key];
       if (argument.servers) {
-        argument.servers = argument.servers.reduce((result, server) => {
-          result[server.address] = normalizeServerDescription(server);
-          return result;
-        }, {});
+        const serverEntries = argument.servers.map(server => [
+          server.address,
+          normalizeServerDescription(server)
+        ]);
+        argument.servers = Object.fromEntries(serverEntries);
       }
 
-      Object.keys(argument).forEach(key => {
-        if (OUTCOME_TRANSLATIONS.has(key)) {
-          argument[OUTCOME_TRANSLATIONS.get(key)] = argument[key];
-          delete argument[key];
-        }
-      });
+      if (typeof argument.topologyType === 'string') {
+        // Translation for our driver's TopologyDescription class
+        argument.type = argument.topologyType;
+        delete argument.topologyType;
+      }
 
       args.push(argument);
-    });
+    }
 
     // convert snake case to camelCase with capital first letter
     let eventClass = eventType.replace(/_\w/g, c => c[1].toUpperCase());
     eventClass = eventClass.charAt(0).toUpperCase() + eventClass.slice(1);
-    args.unshift(null);
-    const eventConstructor = sdamEvents[eventClass];
-    const eventInstance = new (Function.prototype.bind.apply(eventConstructor, args))();
+    const eventConstructor = SDAM_EVENT_CLASSES[eventClass];
+    expect(eventConstructor).to.be.a('function');
+    const eventInstance = new eventConstructor(...args);
     return eventInstance;
   });
 }
@@ -125,12 +133,12 @@ function convertOutcomeEvents(events) {
 // removes them from the expectation (NOTE: this mutates the expectation)
 function findOmittedFields(expected) {
   const result = [];
-  Object.keys(expected).forEach(key => {
+  for (const key of Object.keys(expected)) {
     if (expected[key] == null) {
       result.push(key);
       delete expected[key];
     }
-  });
+  }
 
   return result;
 }
@@ -148,7 +156,7 @@ function normalizeServerDescription(serverDescription) {
 
 function cloneMap(map) {
   const result = Object.create(null);
-  for (let key of map.keys()) {
+  for (const key of map.keys()) {
     result[key] = JSON.parse(JSON.stringify(map.get(key)));
   }
 
@@ -157,129 +165,109 @@ function cloneMap(map) {
 
 function cloneForCompare(event) {
   const result = JSON.parse(JSON.stringify(event));
-  ['previousDescription', 'newDescription'].forEach(key => {
-    if (event[key] != null && event[key].servers != null) {
-      result[key].servers = cloneMap(event[key].servers);
-    }
-  });
+
+  if (event.previousDescription != null && event.previousDescription.servers != null) {
+    result.previousDescription.servers = cloneMap(event.previousDescription.servers);
+  }
+
+  if (event.newDescription != null && event.newDescription.servers != null) {
+    result.newDescription.servers = cloneMap(event.newDescription.servers);
+  }
 
   return result;
 }
 
-function executeSDAMTest(testData, testDone) {
+const SDAM_EVENTS = [
+  'serverOpening',
+  'serverClosed',
+  'serverDescriptionChanged',
+  'topologyOpening',
+  'topologyClosed',
+  'topologyDescriptionChanged',
+  'serverHeartbeatStarted',
+  'serverHeartbeatSucceeded',
+  'serverHeartbeatFailed'
+];
+
+async function executeSDAMTest(testData) {
   const options = parseOptions(testData.uri);
   // create the topology
   const topology = new Topology(options.hosts, options);
   // Each test will attempt to connect by doing server selection. We want to make the first
   // call to `selectServers` call a fake, and then immediately restore the original behavior.
-  let topologySelectServers = sinon
+  const topologySelectServers = sinon
     .stub(Topology.prototype, 'selectServer')
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .callsFake(function (selector, options, callback) {
       topologySelectServers.restore();
 
-      const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
+      const fakeServer = { s: { state: 'connected' }, removeListener: () => true };
+      // @ts-expect-error: stub doesn't need to be a full server
       callback(undefined, fakeServer);
     });
   // listen for SDAM monitoring events
   let events = [];
-  [
-    'serverOpening',
-    'serverClosed',
-    'serverDescriptionChanged',
-    'topologyOpening',
-    'topologyClosed',
-    'topologyDescriptionChanged',
-    'serverHeartbeatStarted',
-    'serverHeartbeatSucceeded',
-    'serverHeartbeatFailed'
-  ].forEach(eventName => {
+
+  for (const eventName of SDAM_EVENTS) {
     topology.on(eventName, event => events.push(event));
-  });
-
-  function done(err) {
-    topology.close(e => testDone(e || err));
   }
-
-  const incompatibilityHandler = err => {
-    if (err.message.match(/but this version of the driver/)) return;
-    throw err;
-  };
-
   // connect the topology
-  topology.connect(options, err => {
-    expect(err).to.not.exist;
+  await promisify(topology.connect.bind(topology))(options);
 
-    eachAsyncSeries(
-      testData.phases,
-      (phase, cb) => {
-        function phaseDone() {
-          if (phase.outcome) {
-            assertOutcomeExpectations(topology, events, phase.outcome);
-          }
+  for (const phase of testData.phases) {
+    const errorEvents = [];
+    topology.on('error', error => errorEvents.push(error));
 
-          // remove error handler
-          topology.removeListener('error', incompatibilityHandler);
-          // reset the captured events for each phase
-          events = [];
-          cb();
-        }
-
-        const incompatibilityExpected = phase.outcome ? !phase.outcome.compatible : false;
-        if (incompatibilityExpected) {
-          topology.on('error', incompatibilityHandler);
-        }
-
-        // if (phase.description) {
-        //   console.log(`[phase] ${phase.description}`);
-        // }
-
-        if (phase.responses) {
-          // simulate each hello response
-          phase.responses.forEach(response =>
-            topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
-          );
-          phaseDone();
-        } else if (phase.applicationErrors) {
-          eachAsyncSeries(
-            phase.applicationErrors,
-            (appError, phaseCb) => {
-              let withConnectionStub = sinon
-                .stub(ConnectionPool.prototype, 'withConnection')
-                .callsFake(withConnectionStubImpl(appError));
-
-              const server = topology.s.servers.get(appError.address);
-              server.command(ns('admin.$cmd'), { ping: 1 }, undefined, err => {
-                expect(err).to.exist;
-                withConnectionStub.restore();
-
-                phaseCb();
-              });
-            },
-            err => {
-              expect(err).to.not.exist;
-              phaseDone();
-            }
-          );
-        } else {
-          phaseDone();
-        }
-      },
-      err => {
-        expect(err).to.not.exist;
-        done();
+    if (phase.responses) {
+      for (const [address, hello] of phase.responses) {
+        topology.serverUpdateHandler(new ServerDescription(address, hello));
       }
-    );
-  });
+      if (phase.outcome) {
+        assertOutcomeExpectations(topology, events, phase.outcome);
+        if (phase.outcome.compatible === false) {
+          for (const errorEvent of errorEvents) {
+            expect(errorEvent).to.be.instanceOf(MongoCompatibilityError);
+            expect(errorEvent.message).to.match(/but this version of the driver/);
+          }
+        }
+      }
+
+      topology.removeAllListeners('error');
+      events = [];
+    } else if (phase.applicationErrors) {
+      for (const appError of phase.applicationErrors) {
+        const withConnectionStub = sinon
+          .stub(ConnectionPool.prototype, 'withConnection')
+          .callsFake(withConnectionStubImpl(appError));
+
+        const server = topology.s.servers.get(appError.address);
+        const res = promisify(server.command.bind(server))(ns('admin.$cmd'), { ping: 1 }, {});
+        withConnectionStub.restore();
+
+        const thrownError = await res.catch(error => error);
+        const isApplicationError = error => {
+          // These errors all come from the withConnection stub
+          return (
+            error instanceof MongoNetworkError ||
+            error instanceof MongoNetworkTimeoutError ||
+            error instanceof MongoServerError
+          );
+        };
+        expect(thrownError).to.satisfy(isApplicationError);
+      }
+    }
+  }
 }
 
 function withConnectionStubImpl(appError) {
   return function (conn, fn, callback) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const connectionPool = this; // we are stubbing `withConnection` on the `ConnectionPool` class
     const fakeConnection = {
       generation:
         typeof appError.generation === 'number' ? appError.generation : connectionPool.generation,
 
-      command: (ns, cmd, options, callback) => {
+      command(ns, cmd, options, callback) {
         if (appError.type === 'network') {
           callback(new MongoNetworkError('test generated'));
         } else if (appError.type === 'timeout') {
@@ -309,19 +297,24 @@ function withConnectionStubImpl(appError) {
 function assertOutcomeExpectations(topology, events, outcome) {
   // then verify the resulting outcome
   const description = topology.description;
-  Object.keys(outcome).forEach(key => {
+
+  if (typeof outcome.topologyType === 'string') {
+    // Translation for our driver's TopologyDescription class
+    outcome.type = outcome.topologyType;
+    delete outcome.topologyType;
+  }
+
+  for (const key of Object.keys(outcome)) {
     const outcomeValue = outcome[key];
-    const translatedKey = translateOutcomeKey(key);
 
     if (key === 'servers') {
-      expect(description).to.include.keys(translatedKey);
+      expect(description).to.include.keys(key);
       const expectedServers = outcomeValue;
-      const actualServers = description[translatedKey];
+      const actualServers = description[key];
 
-      Object.keys(expectedServers).forEach(serverName => {
+      for (const serverName of Object.keys(expectedServers)) {
         expect(actualServers).to.include.keys(serverName);
 
-        // TODO: clean all this up, always operate directly on `Server` not `ServerDescription`
         if (expectedServers[serverName].pool) {
           const expectedPool = expectedServers[serverName].pool;
           delete expectedServers[serverName].pool;
@@ -338,17 +331,17 @@ function assertOutcomeExpectations(topology, events, outcome) {
         if (omittedFields.length) {
           expect(actualServer).to.not.have.all.keys(omittedFields);
         }
-      });
+      }
 
-      return;
+      continue;
     }
 
-    // Load balancer mode has no monitor hello response and
-    // only expects address and compatible to be set in the
-    // server description.
     if (description.type === TopologyType.LoadBalanced) {
-      if (key !== 'address' || key !== 'compatible') {
-        return;
+      // Load balancer mode has no monitor hello response and
+      // only expects address and compatible to be set in the
+      // server description.
+      if (key !== 'address' && key !== 'compatible') {
+        continue;
       }
     }
 
@@ -361,25 +354,29 @@ function assertOutcomeExpectations(topology, events, outcome) {
         expect(actualEvent).to.matchMongoSpec(expectedEvent);
       }
 
-      return;
+      continue;
     }
 
     if (key === 'compatible' || key === 'setName') {
       if (outcomeValue == null) {
-        expect(topology.description[key]).to.not.exist;
+        expect(topology.description[key]).to.be.undefined;
       } else {
         expect(topology.description).property(key).to.equal(outcomeValue);
       }
 
-      return;
+      continue;
     }
 
-    expect(description).to.include.keys(translatedKey);
+    expect(description).to.include.keys(key);
 
     if (outcomeValue == null) {
-      expect(description[translatedKey]).to.not.exist;
+      expect(description[key]).to.be.undefined;
     } else {
-      expect(description).property(translatedKey).to.eql(outcomeValue, `(key="${translatedKey}")`);
+      if (typeof outcomeValue === 'object') {
+        expect(description).to.have.property(key).that.deep.equals(outcomeValue);
+      } else {
+        expect(description).to.have.property(key, outcomeValue);
+      }
     }
-  });
+  }
 }
