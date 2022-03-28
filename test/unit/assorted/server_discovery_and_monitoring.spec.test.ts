@@ -234,7 +234,6 @@ async function executeSDAMTest(testData) {
         }
       }
 
-      topology.removeAllListeners('error');
       events = [];
     } else if (phase.applicationErrors) {
       for (const appError of phase.applicationErrors) {
@@ -243,10 +242,12 @@ async function executeSDAMTest(testData) {
           .callsFake(withConnectionStubImpl(appError));
 
         const server = topology.s.servers.get(appError.address);
+
         const res = promisify(server.command.bind(server))(ns('admin.$cmd'), { ping: 1 }, {});
+        const thrownError = await res.catch(error => error);
+
         withConnectionStub.restore();
 
-        const thrownError = await res.catch(error => error);
         const isApplicationError = error => {
           // These errors all come from the withConnection stub
           return (
@@ -255,7 +256,10 @@ async function executeSDAMTest(testData) {
             error instanceof MongoServerError
           );
         };
-        expect(thrownError).to.satisfy(isApplicationError);
+        expect(
+          thrownError,
+          'expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError. Referred to in the spec as an "Application Error"'
+        ).to.satisfy(isApplicationError);
       }
     }
   }
