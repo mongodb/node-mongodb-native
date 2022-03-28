@@ -20,10 +20,13 @@ describe('comment option tests', function () {
     await client.close();
   });
 
-  it(`should allow falsy values for the comment field post 4.4`, async function () {
-    let command = null;
-    client.on('commandStarted', ({ command: _command }) => (command = _command));
-    await collection.find({ _id: 0 }, { comment: 0 }).toArray();
-    expect(command.comment).to.equal(0);
+  it(`should allow falsy values for the comment field post 4.4`, {
+    metadata: { requires: { topology: '!server', mongodb: '>=4.4' } },
+    test: async function () {
+      let command = null;
+      client.on('commandStarted', ({ command: _command }) => (command = _command));
+      await collection.find({ _id: 0 }, { comment: 0 }).toArray();
+      expect(command.comment).to.equal(0);
+    }
   });
 });
