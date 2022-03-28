@@ -19,20 +19,12 @@ const falsyToString = (value: typeof falsyValues[number]) => {
   return JSON.stringify(value);
 };
 
-function* test() {
+function* generateTestCombinations() {
   for (const [name, args] of [
-    // ['replaceOne', {}],
-    // ['deleteMany', {}],
     ['find', { filter: { _id: 1 } }] as const,
     ['aggregate', { pipeline: [] }] as const,
-    // ['updateMany', {}],
-    // ['bulkWrite', {}],
-    // ['insertOne', {}],
     ['insertMany', { documents: [{ name: 'john' }] }] as const,
-    // ['deleteOne', {}],
-    // ['updateOne', {}],
-    // ['findOneAndDelete', {}],
-    // ['findOneAndUpdate', {}],
+    ['deleteOne', { filter: { toBeDeleted: true } }] as const,
     ['findOneAndReplace', { filter: { _id: 1 }, replacement: { x: 12 } }] as const
   ]) {
     for (const falsyValue of falsyValues) {
@@ -41,7 +33,7 @@ function* test() {
   }
 }
 
-const operations = Array.from(test());
+const operations = Array.from(generateTestCombinations());
 
 const unifiedTestBase: uni.UnifiedSuite = {
   description: 'comment',
@@ -82,7 +74,7 @@ const unifiedTestBase: uni.UnifiedSuite = {
   tests: operations.map(({ name, args }) => ({
     description: `${name} should pass falsy value ${falsyToString(
       args.comment
-    )} for comment parameter`,
+    )} for comment option`,
     operations: [
       {
         name,
@@ -107,6 +99,6 @@ const unifiedTestBase: uni.UnifiedSuite = {
   }))
 };
 
-describe('falsy values tests', () => {
+describe('comment w/ falsy values ', () => {
   runUnifiedSuite([unifiedTestBase]);
 });
