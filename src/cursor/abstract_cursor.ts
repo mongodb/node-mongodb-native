@@ -43,7 +43,7 @@ const kClosed = Symbol('closed');
 /** @internal */
 const kKilled = Symbol('killed');
 /** @internal */
-const kInit = Symbol.for('kInit');
+const kInit = Symbol('kInit');
 
 /** @public */
 export const CURSOR_FLAGS = [

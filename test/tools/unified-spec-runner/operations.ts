@@ -1,12 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
 
-import { Collection, Db, Document, GridFSFile, MongoClient, ObjectId } from '../../../src';
+import {
+  AbstractCursor,
+  Collection,
+  Db,
+  Document,
+  GridFSFile,
+  MongoClient,
+  ObjectId
+} from '../../../src';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
-import { EventCollector } from '../../tools/utils';
+import { EventCollector, getSymbolFrom } from '../../tools/utils';
 import { EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
@@ -205,7 +213,7 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
   changeStream.eventCollector = new EventCollector(changeStream, ['init', 'error']);
 
   return new Promise((resolve, reject) => {
-    const init = Symbol.for('kInit');
+    const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
     changeStream.cursor[init](err => {
       if (err) return reject(err);
       resolve(changeStream);
