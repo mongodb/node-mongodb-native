@@ -1,52 +1,112 @@
-import { expect } from 'chai';
+import { Long } from '../../../src';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
+import * as uni from '../../tools/unified-spec-runner/schema';
 
-import { Collection, Db } from '../../../src';
-import { MongoClient } from '../../../src/mongo_client';
+const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;
+const falsyToString = (value: typeof falsyValues[number]) => {
+  if (Number.isNaN(value)) {
+    return 'NaN';
+  }
 
-describe('comment option w/ falsy values', function () {
-  let client: MongoClient;
-  let db: Db;
-  let collection: Collection<{ _id: number }>;
+  if (value === '') {
+    return "''";
+  }
 
-  beforeEach(async function () {
-    client = await this.configuration.newClient({ monitorCommands: true }).connect();
-    db = client.db('comment_with_falsy_values');
-    collection = db.collection<{ _id: number }>('test');
-    await collection.insertMany([{ _id: 0 }]);
-  });
+  if (value?._bsontype === 'Long') {
+    return 'Long.ZERO';
+  }
 
-  afterEach(async function () {
-    await db.dropDatabase();
-    await client.close();
-  });
+  return JSON.stringify(value);
+};
 
-  it(`should allow 0 for comment option`, {
-    metadata: { requires: { mongodb: '>=4.4' } },
-    test: async function () {
-      let command = null;
-      client.on('commandStarted', ({ command: _command }) => (command = _command));
-      await collection.find({ _id: 0 }, { comment: 0 }).toArray();
-      expect(command.comment).to.equal(0);
+function* test() {
+  for (const [name, args] of [
+    // ['replaceOne', {}],
+    // ['deleteMany', {}],
+    ['find', { filter: { _id: 1 } }] as const,
+    ['aggregate', { pipeline: [] }] as const,
+    // ['updateMany', {}],
+    // ['bulkWrite', {}],
+    // ['insertOne', {}],
+    ['insertMany', { documents: [{ name: 'john' }] }] as const,
+    // ['deleteOne', {}],
+    // ['updateOne', {}],
+    // ['findOneAndDelete', {}],
+    // ['findOneAndUpdate', {}],
+    ['findOneAndReplace', { filter: { _id: 1 }, replacement: { x: 12 } }] as const
+  ]) {
+    for (const falsyValue of falsyValues) {
+      yield { name, args: { ...args, comment: falsyValue } };
     }
-  });
+  }
+}
 
-  it(`should allow the empty string ('') for comment option`, {
-    metadata: { requires: { mongodb: '>=4.4' } },
-    test: async function () {
-      let command = null;
-      client.on('commandStarted', ({ command: _command }) => (command = _command));
-      await collection.find({ _id: 0 }, { comment: '' }).toArray();
-      expect(command.comment).to.equal('');
-    }
-  });
+const operations = Array.from(test());
 
-  it(`should allow false for comment option`, {
-    metadata: { requires: { mongodb: '>=4.4' } },
-    test: async function () {
-      let command = null;
-      client.on('commandStarted', ({ command: _command }) => (command = _command));
-      await collection.find({ _id: 0 }, { comment: false }).toArray();
-      expect(command.comment).to.equal(false);
+const unifiedTestBase: uni.UnifiedSuite = {
+  description: 'comment',
+  schemaVersion: '1.0',
+  createEntities: [
+    {
+      client: {
+        id: 'client0',
+        useMultipleMongoses: true,
+        observeEvents: ['commandStartedEvent']
+      }
+    },
+    {
+      database: {
+        id: 'database0',
+        client: 'client0',
+        databaseName: 'comment-falsy-values-tests'
+      }
+    },
+    {
+      collection: {
+        id: 'collection0',
+        database: 'database0',
+        collectionName: 'coll0'
+      }
     }
-  });
+  ],
+  initialData: [
+    {
+      collectionName: 'coll0',
+      databaseName: 'comment-falsy-values-tests',
+      documents: [
+        { _id: 1, x: 11 },
+        { _id: 2, toBeDeleted: true } // This should only be used by the delete test
+      ]
+    }
+  ],
+  tests: operations.map(({ name, args }) => ({
+    description: `${name} should pass falsy value ${falsyToString(
+      args.comment
+    )} for comment parameter`,
+    operations: [
+      {
+        name,
+        object: 'collection0',
+        arguments: args
+      }
+    ],
+    expectEvents: [
+      {
+        client: 'client0',
+        events: [
+          {
+            commandStartedEvent: {
+              command: {
+                comment: args.comment
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }))
+};
+
+describe('falsy values tests', () => {
+  runUnifiedSuite([unifiedTestBase]);
 });

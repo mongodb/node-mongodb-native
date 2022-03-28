@@ -20,9 +20,10 @@ export interface UnifiedSuite {
   description: string;
   schemaVersion: string;
   runOnRequirements?: RunOnRequirement[];
-  createEntities?: [EntityDescription, ...EntityDescription[]];
+  createEntities?: EntityDescription[];
+  /** Data inserted before **all tests */
   initialData?: [CollectionData, ...CollectionData[]];
-  tests: [Test, ...Test[]];
+  tests: Test[];
   _yamlAnchors?: Document;
 }
 export const TopologyType = Object.freeze({
