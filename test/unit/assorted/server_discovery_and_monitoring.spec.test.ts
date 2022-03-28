@@ -1,4 +1,4 @@
-import { Document, EJSON } from 'bson';
+import { EJSON } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -28,7 +28,7 @@ import {
 import { Server } from '../../../src/sdam/server';
 import { ServerDescription } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
-import { ns } from '../../../src/utils';
+import { isRecord, ns } from '../../../src/utils';
 
 const SDAM_EVENT_CLASSES = {
   ServerDescriptionChangedEvent,
@@ -55,12 +55,14 @@ function collectTests() {
       .readdirSync(path.join(specDir, testType))
       .filter(f => path.extname(f) === '.json')
       .map(f => {
-        const result = EJSON.parse(
-          fs.readFileSync(path.join(specDir, testType, f), { encoding: 'utf8' }),
-          {
-            relaxed: true
-          }
-        ) as Document;
+        const filePath = path.join(specDir, testType, f);
+        const result = EJSON.parse(fs.readFileSync(filePath, { encoding: 'utf8' }), {
+          relaxed: true
+        });
+
+        if (!isRecord(result) || Array.isArray(result)) {
+          throw new Error(`${filePath} did not contain a top-level object`);
+        }
 
         result.type = testType;
         result.fileName = path.join(testType, f); // unused but helpful when debugging
@@ -72,7 +74,7 @@ function collectTests() {
 }
 
 describe('Server Discovery and Monitoring (spec)', function () {
-  let serverConnect;
+  let serverConnect: sinon.SinonStub;
   before(() => {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';
