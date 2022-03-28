@@ -376,21 +376,17 @@ function updateRsFromPrimary(
   const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
   const maxElectionIdIsEqual = electionIdComparison === 0;
   const maxElectionIdIsLess = electionIdComparison === -1;
+  const maxSetVersionIsLessOrEqual = (maxSetVersion ?? -1) <= (serverDescription.setVersion ?? -1);
 
-  const setVersionComparison = compareNumber(maxSetVersion, serverDescription.setVersion);
-  const maxSetVersionIsLess = setVersionComparison === -1;
-  const maxSetVersionIsEqual = setVersionComparison === 0;
-
-  if (
-    maxElectionIdIsLess ||
-    (maxElectionIdIsEqual && (maxSetVersionIsLess || maxSetVersionIsEqual))
-  ) {
-    // We've seen a higher ElectionId! Update both!
-    // Or the electionId is the same but the setVersion increased
+  if (maxElectionIdIsLess || (maxElectionIdIsEqual && maxSetVersionIsLessOrEqual)) {
+    // The reported electionId was greater
+    // or the electionId was equal and reported setVersion was greater
+    // Always update both values, they are a tuple
     maxElectionId = serverDescription.electionId;
     maxSetVersion = serverDescription.setVersion;
   } else {
-    // this primary is stale, we must remove it
+    // Stale primary
+    // replace serverDescription with a default ServerDescription of type "Unknown"
     serverDescriptions.set(
       serverDescription.address,
       new ServerDescription(serverDescription.address)
