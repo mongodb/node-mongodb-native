@@ -382,12 +382,10 @@ function assertOutcomeExpectations(topology, events, outcome) {
         'logicalSessionTimeoutMinutes',
         outcomeValue ?? undefined
       );
-      return;
+      continue;
     }
 
     expect(description).to.include.keys(key);
     expect(description).to.have.deep.property(key, outcomeValue);
   }
 }
-const keys = new Set();
-process.on('beforeExit', () => console.log(keys));
