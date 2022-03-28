@@ -246,21 +246,21 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       ...options,
       maxBsonMessageSize: this.hello?.maxBsonMessageSize
     });
-    this[kMessageStream].on('message', message => this.onMessage(message));
     this[kStream] = stream;
-    stream.on('error', () => {
-      /* ignore errors, listen to `close` instead */
-    });
 
     this.delayedTimeoutErrorId = null;
 
+    this[kMessageStream].on('message', message => this.onMessage(message));
     this[kMessageStream].on('error', error => this.onError(error));
-    stream.on('close', () => this.onClose());
-    stream.on('timeout', () => this.onTimeout());
+    this[kStream].on('close', () => this.onClose());
+    this[kStream].on('timeout', () => this.onTimeout());
+    this[kStream].on('error', () => {
+      /* ignore errors, listen to `close` instead */
+    });
 
     // hook the message stream up to the passed in stream
-    stream.pipe(this[kMessageStream]);
-    this[kMessageStream].pipe(stream);
+    this[kStream].pipe(this[kMessageStream]);
+    this[kMessageStream].pipe(this[kStream]);
   }
 
   get description(): StreamDescription {
