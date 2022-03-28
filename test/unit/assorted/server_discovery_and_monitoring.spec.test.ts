@@ -213,13 +213,14 @@ async function executeSDAMTest(testData) {
   for (const eventName of SDAM_EVENTS) {
     topology.on(eventName, event => events.push(event));
   }
+
+  const errorEvents = [];
+  topology.on('error', error => errorEvents.push(error));
+
   // connect the topology
   await promisify(topology.connect.bind(topology))(options);
 
   for (const phase of testData.phases) {
-    const errorEvents = [];
-    topology.on('error', error => errorEvents.push(error));
-
     if (phase.responses) {
       for (const [address, hello] of phase.responses) {
         topology.serverUpdateHandler(new ServerDescription(address, hello));
@@ -227,6 +228,7 @@ async function executeSDAMTest(testData) {
       if (phase.outcome) {
         assertOutcomeExpectations(topology, events, phase.outcome);
         if (phase.outcome.compatible === false) {
+          expect(errorEvents).to.have.length.greaterThanOrEqual(1);
           for (const errorEvent of errorEvents) {
             expect(errorEvent).to.be.instanceOf(MongoCompatibilityError);
             expect(errorEvent.message).to.match(/but this version of the driver/);
@@ -258,7 +260,7 @@ async function executeSDAMTest(testData) {
         };
         expect(
           thrownError,
-          'expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError. Referred to in the spec as an "Application Error"'
+          'expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError (referred to in the spec as an "Application Error")'
         ).to.satisfy(isApplicationError);
       }
     }
@@ -373,7 +375,19 @@ function assertOutcomeExpectations(topology, events, outcome) {
       continue;
     }
 
+    if (key === 'logicalSessionTimeoutMinutes') {
+      // logicalSessionTimeoutMinutes is always defined
+      // but can be initialized to undefined
+      expect(description).to.have.property(
+        'logicalSessionTimeoutMinutes',
+        outcomeValue ?? undefined
+      );
+      return;
+    }
+
     expect(description).to.include.keys(key);
-    expect(description).to.have.deep.property(key, outcomeValue == null ? undefined : outcomeValue);
+    expect(description).to.have.deep.property(key, outcomeValue);
   }
 }
+const keys = new Set();
+process.on('beforeExit', () => console.log(keys));
