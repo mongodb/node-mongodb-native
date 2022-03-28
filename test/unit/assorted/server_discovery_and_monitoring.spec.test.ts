@@ -374,15 +374,6 @@ function assertOutcomeExpectations(topology, events, outcome) {
     }
 
     expect(description).to.include.keys(key);
-
-    if (outcomeValue == null) {
-      expect(description[key]).to.be.undefined;
-    } else {
-      if (typeof outcomeValue === 'object') {
-        expect(description).to.have.property(key).that.deep.equals(outcomeValue);
-      } else {
-        expect(description).to.have.property(key, outcomeValue);
-      }
-    }
+    expect(description).to.have.deep.property(key, outcomeValue == null ? undefined : outcomeValue);
   }
 }
