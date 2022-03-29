@@ -22,7 +22,7 @@ export interface UnifiedSuite {
   runOnRequirements?: RunOnRequirement[];
   createEntities?: EntityDescription[];
   /** Data inserted before **all tests */
-  initialData?: [CollectionData, ...CollectionData[]];
+  initialData?: CollectionData[];
   tests: Test[];
   _yamlAnchors?: Document;
 }

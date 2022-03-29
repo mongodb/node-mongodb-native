@@ -1,6 +1,6 @@
 import { Long } from '../../../src';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
-import * as uni from '../../tools/unified-spec-runner/schema';
+import { UnifiedTestSuite } from '../../tools/utils';
 
 const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;
 const falsyToString = (value: typeof falsyValues[number]) => {
@@ -35,11 +35,9 @@ function* generateTestCombinations() {
 
 const operations = Array.from(generateTestCombinations());
 
-const unifiedTestBase: uni.UnifiedSuite = {
-  description: 'comment',
-  schemaVersion: '1.0',
-  runOnRequirements: [{ minServerVersion: '4.4' }],
-  createEntities: [
+const test = new UnifiedTestSuite('Comment with Falsy Values')
+  .runOnRequirement({ minServerVersion: '4.0' })
+  .createEntities([
     {
       client: {
         id: 'client0',
@@ -51,7 +49,7 @@ const unifiedTestBase: uni.UnifiedSuite = {
       database: {
         id: 'database0',
         client: 'client0',
-        databaseName: 'comment-falsy-values-tests'
+        databaseName: ''
       }
     },
     {
@@ -61,45 +59,45 @@ const unifiedTestBase: uni.UnifiedSuite = {
         collectionName: 'coll0'
       }
     }
-  ],
-  initialData: [
-    {
-      collectionName: 'coll0',
-      databaseName: 'comment-falsy-values-tests',
-      documents: [
-        { _id: 1, x: 11 },
-        { _id: 2, toBeDeleted: true } // This should only be used by the delete test
-      ]
-    }
-  ],
-  tests: operations.map(({ name, args }) => ({
-    description: `${name} should pass falsy value ${falsyToString(
-      args.comment
-    )} for comment option`,
-    operations: [
-      {
-        name,
-        object: 'collection0',
-        arguments: args
-      }
-    ],
-    expectEvents: [
-      {
-        client: 'client0',
-        events: [
-          {
-            commandStartedEvent: {
-              command: {
-                comment: args.comment
+  ])
+  .initialData({
+    collectionName: 'coll0',
+    databaseName: 'comment-falsy-values-tests',
+    documents: [
+      { _id: 1, x: 11 },
+      { _id: 2, toBeDeleted: true } // This should only be used by the delete test
+    ]
+  })
+  .test(
+    operations.map(({ name, args }) => ({
+      description: `${name} should pass falsy value ${falsyToString(
+        args.comment
+      )} for comment option`,
+      operations: [
+        {
+          name,
+          object: 'collection0',
+          arguments: args
+        }
+      ],
+      expectEvents: [
+        {
+          client: 'client0',
+          events: [
+            {
+              commandStartedEvent: {
+                command: {
+                  comment: args.comment
+                }
               }
             }
-          }
-        ]
-      }
-    ]
-  }))
-};
+          ]
+        }
+      ]
+    }))
+  )
+  .build();
 
-describe('comment w/ falsy values ', () => {
-  runUnifiedSuite([unifiedTestBase]);
+describe.only('comment w/ falsy values ', () => {
+  runUnifiedSuite([test]);
 });

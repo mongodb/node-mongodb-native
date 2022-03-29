@@ -4,6 +4,13 @@ import util from 'util';
 
 import { Logger } from '../../src/logger';
 import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
+import {
+  CollectionData,
+  EntityDescription,
+  RunOnRequirement,
+  Test,
+  UnifiedSuite
+} from './unified-spec-runner/schema';
 
 export function makeTestFunction(config: DeprecateOptionsConfig) {
   const fn = (options: any) => {
@@ -293,4 +300,112 @@ export interface FailPoint {
     errorLabels?: string[];
     appName?: string;
   };
+}
+
+export class UnifiedTestSuite {
+  /**
+   * TODO: add node ticket to complete the entitity work
+   */
+  private _anchors = {};
+  private _description = 'Default Description';
+  private _databaseName = '';
+  private _schemaVersion = '1.0';
+  private _createEntities: EntityDescription[] = [];
+  private _runOnRequirement: RunOnRequirement[] = [];
+  private _initialData: CollectionData[] = [];
+  private _tests: Test[] = [];
+
+  constructor(description: string) {
+    this._description = description;
+  }
+
+  description(description: string): this {
+    this._description = description;
+    return this;
+  }
+
+  test(test: Test): this;
+  test(test: Test[]): this;
+  test(test: Test | Test[]): this {
+    if (Array.isArray(test)) {
+      this._tests.push(...test);
+    } else {
+      this._tests.push(test);
+    }
+    return this;
+  }
+
+  createEntities(entity: EntityDescription): this;
+  createEntities(entity: EntityDescription[]): this;
+  createEntities(entity: EntityDescription | EntityDescription[]): this {
+    if (Array.isArray(entity)) {
+      this._createEntities.push(...entity);
+    } else {
+      this._createEntities.push(entity);
+    }
+    return this;
+  }
+
+  initialData(data: CollectionData): this;
+  initialData(data: CollectionData[]): this;
+  initialData(data: CollectionData | CollectionData[]): this {
+    if (Array.isArray(data)) {
+      this._initialData.push(...data);
+    } else {
+      this._initialData.push(data);
+    }
+    return this;
+  }
+
+  /**
+   * sets the database name for the tests
+   */
+  databaseName(name: string): this {
+    this._databaseName = name;
+    return this;
+  }
+
+  runOnRequirement(requirement: RunOnRequirement): this;
+  runOnRequirement(requirement: RunOnRequirement[]): this;
+  runOnRequirement(requirement: RunOnRequirement | RunOnRequirement[]): this {
+    Array.isArray(requirement)
+      ? this._runOnRequirement.push(...requirement)
+      : this._runOnRequirement.push(requirement);
+    return this;
+  }
+
+  schemaVersion(version: string): this {
+    this._schemaVersion = version;
+    return this;
+  }
+
+  build(): UnifiedSuite {
+    const databaseName =
+      this._databaseName !== '' ? this._databaseName : this._description.replaceAll(' ', '_');
+    return {
+      description: this._description,
+      schemaVersion: this._schemaVersion,
+      runOnRequirements: this._runOnRequirement,
+      createEntities: this._createEntities.map((entity: any) => {
+        if (entity.database) {
+          return {
+            database: { ...entity.database, databaseName }
+          } as EntityDescription;
+        }
+
+        return entity as EntityDescription;
+      }),
+      initialData: this._initialData.map(data => {
+        return {
+          ...data,
+          databaseName
+        };
+      }),
+      tests: this._tests
+    };
+  }
+
+  clone(): UnifiedSuite {
+    return JSON.parse(JSON.stringify(this.build()));
+  }
 }
