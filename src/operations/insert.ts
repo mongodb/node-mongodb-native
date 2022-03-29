@@ -5,7 +5,7 @@ import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, MongoDBNamespace } from '../utils';
+import type { Callback, MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
 import { CommandOperation, CommandOperationOptions } from './command';
