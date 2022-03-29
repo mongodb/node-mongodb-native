@@ -38,6 +38,7 @@ const operations = Array.from(generateTestCombinations());
 const unifiedTestBase: uni.UnifiedSuite = {
   description: 'comment',
   schemaVersion: '1.0',
+  runOnRequirements: [{ minServerVersion: '4.4' }],
   createEntities: [
     {
       client: {
