@@ -127,11 +127,11 @@ export interface CollectionData {
 }
 export interface Test {
   description: string;
-  runOnRequirements?: [RunOnRequirement, ...RunOnRequirement[]];
+  runOnRequirements?: RunOnRequirement[];
   skipReason?: string;
   operations: OperationDescription[];
   expectEvents?: ExpectedEventsForClient[];
-  outcome?: [CollectionData, ...CollectionData[]];
+  outcome?: CollectionData[];
 }
 export interface ExpectedEventsForClient {
   client: string;

@@ -7,6 +7,8 @@ import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
 import {
   CollectionData,
   EntityDescription,
+  ExpectedEventsForClient,
+  OperationDescription,
   RunOnRequirement,
   Test,
   UnifiedSuite
@@ -302,7 +304,49 @@ export interface FailPoint {
   };
 }
 
-export class UnifiedTestSuite {
+export class TestBuilder {
+  private _description: string;
+  private runOnRequirements: RunOnRequirement[];
+  private _skipReason?: string;
+  private _operations: OperationDescription[] = [];
+  private _expectEvents?: ExpectedEventsForClient[] = [];
+  private _outcome?: CollectionData[] = [];
+
+  constructor(description: string) {
+    this._description = description;
+  }
+
+  operation(operation: OperationDescription): this {
+    this._operations.push({
+      object: 'collection0',
+      ...operation
+    });
+    return this;
+  }
+
+  expectEvents(event: ExpectedEventsForClient): this {
+    this._expectEvents.push(event);
+    return this;
+  }
+
+  toJSON(): Test {
+    const test: Test = {
+      description: this._description,
+      runOnRequirements: this.runOnRequirements,
+      operations: this._operations,
+      expectEvents: this._expectEvents,
+      outcome: this._outcome
+    };
+
+    if (this._skipReason != null) {
+      test.skipReason = this._skipReason;
+    }
+
+    return test;
+  }
+}
+
+export class UnifiedTestSuiteBuilder {
   /**
    * TODO: add node ticket to complete the entitity work
    */
@@ -310,7 +354,29 @@ export class UnifiedTestSuite {
   private _description = 'Default Description';
   private _databaseName = '';
   private _schemaVersion = '1.0';
-  private _createEntities: EntityDescription[] = [];
+  private _createEntities: EntityDescription[] = [
+    {
+      client: {
+        id: 'client0',
+        useMultipleMongoses: true,
+        observeEvents: ['commandStartedEvent']
+      }
+    },
+    {
+      database: {
+        id: 'database0',
+        client: 'client0',
+        databaseName: ''
+      }
+    },
+    {
+      collection: {
+        id: 'collection0',
+        database: 'database0',
+        collectionName: 'coll0'
+      }
+    }
+  ];
   private _runOnRequirement: RunOnRequirement[] = [];
   private _initialData: CollectionData[] = [];
   private _tests: Test[] = [];
@@ -379,21 +445,21 @@ export class UnifiedTestSuite {
     return this;
   }
 
-  build(): UnifiedSuite {
+  toJSON(): UnifiedSuite {
     const databaseName =
       this._databaseName !== '' ? this._databaseName : this._description.replaceAll(' ', '_');
     return {
       description: this._description,
       schemaVersion: this._schemaVersion,
       runOnRequirements: this._runOnRequirement,
-      createEntities: this._createEntities.map((entity: any) => {
-        if (entity.database) {
+      createEntities: this._createEntities.map(entity => {
+        if ('database' in entity) {
           return {
             database: { ...entity.database, databaseName }
-          } as EntityDescription;
+          };
         }
 
-        return entity as EntityDescription;
+        return entity;
       }),
       initialData: this._initialData.map(data => {
         return {
@@ -406,6 +472,6 @@ export class UnifiedTestSuite {
   }
 
   clone(): UnifiedSuite {
-    return JSON.parse(JSON.stringify(this.build()));
+    return JSON.parse(JSON.stringify(this));
   }
 }
