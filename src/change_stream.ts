@@ -627,7 +627,7 @@ function applyKnownOptions(source: Document, options: ReadonlyArray<string>) {
   const result: Document = {};
 
   for (const option of options) {
-    if (source[option]) {
+    if (option in source) {
       result[option] = source[option];
     }
   }
