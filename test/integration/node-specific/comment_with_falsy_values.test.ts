@@ -59,7 +59,7 @@ const tests = Array.from(generateTestCombinations()).map(({ name, args }) => {
 });
 
 const testSuite = new UnifiedTestSuiteBuilder('Comment with Falsy Values')
-  .runOnRequirement({ minServerVersion: '4.4' })
+  .runOnRequirement({ minServerVersion: '4.4.0' })
   .initialData({
     collectionName: 'coll0',
     databaseName: '',
@@ -160,7 +160,7 @@ const changeStreamTestSuite = new UnifiedTestSuiteBuilder(
   'Change Streams - Comment with Falsy Values'
 )
   .schemaVersion('1.0')
-  .runOnRequirement({ minServerVersion: '4.4' })
+  .runOnRequirement({ minServerVersion: '4.4.0' })
   .runOnRequirement({ topologies: ['replicaset', 'sharded-replicaset'] })
   .test(testsForChangeStreamsAggregate)
   .test(testsForGetMore)

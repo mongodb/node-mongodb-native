@@ -303,7 +303,7 @@ export interface FailPoint {
 
 export class TestBuilder {
   private _description: string;
-  private runOnRequirements: RunOnRequirement[];
+  private runOnRequirements: RunOnRequirement[] = [];
   private _skipReason?: string;
   private _operations: OperationDescription[] = [];
   private _expectEvents?: ExpectedEventsForClient[] = [];
@@ -318,6 +318,11 @@ export class TestBuilder {
       object: 'collection0',
       ...operation
     });
+    return this;
+  }
+
+  runOnRequirement(requirement: RunOnRequirement): this {
+    this.runOnRequirements.push(requirement);
     return this;
   }
 
