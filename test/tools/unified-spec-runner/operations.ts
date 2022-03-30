@@ -14,7 +14,7 @@ import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
-import { EventCollector, getSymbolFrom } from '../../tools/utils';
+import { getSymbolFrom } from '../../tools/utils';
 import { EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
@@ -200,17 +200,9 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
   if (!('watch' in watchable)) {
     throw new Error(`Entity ${operation.object} must be watchable`);
   }
-  const changeStream = watchable.watch(operation.arguments.pipeline, {
-    fullDocument: operation.arguments.fullDocument,
-    maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
-    resumeAfter: operation.arguments.resumeAfter,
-    startAfter: operation.arguments.startAfter,
-    startAtOperationTime: operation.arguments.startAtOperationTime,
-    batchSize: operation.arguments.batchSize,
-    comment: operation.arguments.comment
-  });
 
-  changeStream.eventCollector = new EventCollector(changeStream, ['init', 'error']);
+  const { pipeline, ...args } = operation.arguments;
+  const changeStream = watchable.watch(pipeline, args);
 
   return new Promise((resolve, reject) => {
     const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
@@ -322,14 +314,7 @@ operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) =>
     return await cursor.next();
   }
 
-  if (changeStream.cursorStream == null) {
-    return changeStream.cursor.next();
-  } else {
-    return Promise.race([
-      changeStream.eventCollector.waitAndShiftEvent('change'),
-      changeStream.eventCollector.waitAndShiftEvent('error')
-    ]);
-  }
+  return changeStream.cursor.next();
 });
 
 operations.set('listCollections', async ({ entities, operation }) => {

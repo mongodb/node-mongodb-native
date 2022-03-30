@@ -99,9 +99,6 @@ export class EventCollector {
   waitAndShiftEvent(eventName) {
     return new Promise((resolve, reject) => {
       if (!this._events[eventName]) {
-        return reject(`Error: attempted to listen for ${eventName} but no listener handler is set`);
-      }
-      if (!this._events[eventName]) {
         return reject(
           `Error: attempted to listen for ${eventName} but no listener handler is set` + eventName
         );
@@ -447,7 +444,12 @@ export class UnifiedTestSuiteBuilder {
 
   toJSON(): UnifiedSuite {
     const databaseName =
-      this._databaseName !== '' ? this._databaseName : this._description.replaceAll(' ', '_');
+      this._databaseName !== ''
+        ? this._databaseName
+        : this._description
+            .split(' ')
+            .filter(s => s.length > 0)
+            .join('_');
     return {
       description: this._description,
       schemaVersion: this._schemaVersion,

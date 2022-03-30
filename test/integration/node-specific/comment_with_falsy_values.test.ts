@@ -1,5 +1,3 @@
-import { ObjectId } from 'bson';
-
 import { Long } from '../../../src';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';

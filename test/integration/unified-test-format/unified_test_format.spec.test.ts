@@ -25,7 +25,7 @@ const SKIPPED_TESTS = [
   // TODO(NODE-3308):
   'A successful find event with a getmore and the server kills the cursor',
 
-  // TODO(NODE-4051): fix change stream resume logic
+  // TODO(NODE-4125): Fix change streams resume logic when used in iterator mode
   'Test consecutive resume'
 ].concat(process.env.AUTH === 'auth' ? FAILING_TESTS_AUTH_ENABLED : []);
 
