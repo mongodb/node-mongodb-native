@@ -13,7 +13,7 @@ const testSuite = new UnifiedTestSuiteBuilder('listIndexes with comment option')
   .databaseName('listIndexes-with-falsy-values')
   .test(
     new TestBuilder('listIndexes should not send comment for server versions < 4.4')
-      .runOnRequirement({ maxServerVersion: '4.4' })
+      .runOnRequirement({ maxServerVersion: '4.4.0' })
       .operation({
         name: 'listIndexes',
         arguments: {

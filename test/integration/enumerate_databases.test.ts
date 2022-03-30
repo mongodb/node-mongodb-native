@@ -155,7 +155,7 @@ const testSuite = new UnifiedTestSuiteBuilder('listDatabases with comment option
   .databaseName('listDatabases-with-falsy-values')
   .test(
     new TestBuilder('listDatabases should not send comment for server versions < 4.4')
-      .runOnRequirement({ maxServerVersion: '4.4' })
+      .runOnRequirement({ maxServerVersion: '4.4.0' })
       .operation({
         name: 'listDatabases',
         arguments: {

@@ -13,7 +13,7 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
   .databaseName('listCollections-with-falsy-values')
   .test(
     new TestBuilder('listCollections should not send comment for server versions < 4.4')
-      .runOnRequirement({ maxServerVersion: '4.4' })
+      .runOnRequirement({ maxServerVersion: '4.4.0' })
       .operation({
         name: 'listCollections',
         arguments: {
