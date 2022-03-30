@@ -1,12 +1,11 @@
-'use strict';
+import { expect } from 'chai';
+import { EventEmitter } from 'events';
+import * as util from 'util';
 
-const util = require('util');
-const { loadSpecTests } = require('../../spec');
-const { ConnectionPool } = require('../../../src/cmap/connection_pool');
-const { EventEmitter } = require('events');
-const mock = require('../../tools/mongodb-mock/index');
-const { expect } = require('chai');
-const { isHello } = require('../../../src/utils');
+import { ConnectionPool } from '../../../src/cmap/connection_pool';
+import { isHello } from '../../../src/utils';
+import { loadSpecTests } from '../../spec';
+import * as mock from '../../tools/mongodb-mock/index';
 
 const ALL_POOL_EVENTS = new Set([
   'connectionPoolCreated',
@@ -235,7 +234,7 @@ describe('Connection Monitoring and Pooling', function () {
 
         let basePromise = Promise.resolve();
 
-        for (let idx in operations) {
+        for (const idx in operations) {
           const op = operations[idx];
 
           const threadKey = op.thread || MAIN_THREAD_KEY;
