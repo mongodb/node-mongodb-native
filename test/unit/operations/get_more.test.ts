@@ -76,15 +76,22 @@ describe('GetMoreOperation', function () {
   });
 
   describe('#execute', function () {
+    afterEach(function () {
+      sinon.restore();
+    });
+
     context('when the server is the same as the instance', function () {
-      const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
-      const session = sinon.createStubInstance(ClientSession);
-      const opts = { ...options, session };
-      const operation = new GetMoreOperation(ns, cursorId, server, opts);
-
-      const stub = sinon.stub(server, 'getMore').callsFake((_, __, ___, cb) => cb());
-
       it('executes a getMore on the provided server', function (done) {
+        const server = new Server(
+          new Topology([], {} as any),
+          new ServerDescription(''),
+          {} as any
+        );
+        const session = sinon.createStubInstance(ClientSession);
+        const opts = { ...options, session };
+        const operation = new GetMoreOperation(ns, cursorId, server, opts);
+        const stub = sinon.stub(server, 'getMore').callsFake((_, __, ___, cb) => cb());
+
         const callback = () => {
           const call = stub.getCall(0);
           expect(stub.calledOnce).to.be.true;
@@ -98,13 +105,20 @@ describe('GetMoreOperation', function () {
     });
 
     context('when the server is not the same as the instance', function () {
-      const server1 = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
-      const server2 = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
-      const session = sinon.createStubInstance(ClientSession);
-      const opts = { ...options, session };
-      const operation = new GetMoreOperation(ns, cursorId, server1, opts);
-
       it('errors in the callback', function (done) {
+        const server1 = new Server(
+          new Topology([], {} as any),
+          new ServerDescription(''),
+          {} as any
+        );
+        const server2 = new Server(
+          new Topology([], {} as any),
+          new ServerDescription(''),
+          {} as any
+        );
+        const session = sinon.createStubInstance(ClientSession);
+        const opts = { ...options, session };
+        const operation = new GetMoreOperation(ns, cursorId, server1, opts);
         const callback = error => {
           expect(error).to.be.instanceOf(MongoRuntimeError);
           expect(error.message).to.equal('Getmore must run on the same server operation began on');
