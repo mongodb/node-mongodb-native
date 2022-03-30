@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
-import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
-import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
-import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
+import { AddUserOptions, MongoClient, MongoServerError } from '../../src';
+import { runUnifiedSuite } from '../tools/unified-spec-runner/runner';
+import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
@@ -143,7 +143,7 @@ describe('listDatabases() authorizedDatabases flag', function () {
   );
 });
 
-const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment option')
+const testSuite = new UnifiedTestSuiteBuilder('listDatabases with comment option')
   .initialData({
     collectionName: 'coll0',
     databaseName: '',
@@ -152,17 +152,17 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
       { _id: 2, toBeDeleted: true } // This should only be used by the delete test
     ]
   })
-  .databaseName('listCollections-with-falsy-values')
+  .databaseName('listDatabases-with-falsy-values')
   .test(
-    new TestBuilder('listCollections should not send comment for server versions < 4.4')
+    new TestBuilder('listDatabases should not send comment for server versions < 4.4')
       .runOnRequirement({ maxServerVersion: '4.4' })
       .operation({
-        name: 'listCollections',
+        name: 'listDatabases',
         arguments: {
           filter: {},
           comment: 'string value'
         },
-        object: 'database0'
+        object: 'client0'
       })
       .expectEvents({
         client: 'client0',
@@ -170,7 +170,7 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
           {
             commandStartedEvent: {
               command: {
-                listCollections: 1
+                listDatabases: 1
               }
             }
           }
@@ -179,15 +179,15 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
       .toJSON()
   )
   .test(
-    new TestBuilder('listCollections should send string comment for server versions >= 4.4')
+    new TestBuilder('listDatabases should send string comment for server versions >= 4.4')
       .runOnRequirement({ minServerVersion: '4.4.0' })
       .operation({
-        name: 'listCollections',
+        name: 'listDatabases',
         arguments: {
           filter: {},
           comment: 'string value'
         },
-        object: 'database0'
+        object: 'client0'
       })
       .expectEvents({
         client: 'client0',
@@ -195,7 +195,7 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
           {
             commandStartedEvent: {
               command: {
-                listCollections: 1,
+                listDatabases: 1,
                 comment: 'string value'
               }
             }
@@ -205,10 +205,10 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
       .toJSON()
   )
   .test(
-    new TestBuilder('listCollections should send non-string comment for server versions >= 4.4')
+    new TestBuilder('listDatabases should send non-string comment for server versions >= 4.4')
       .runOnRequirement({ minServerVersion: '4.4.0' })
       .operation({
-        name: 'listCollections',
+        name: 'listDatabases',
         arguments: {
           filter: {},
 
@@ -216,7 +216,7 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
             key: 'value'
           }
         },
-        object: 'database0'
+        object: 'client0'
       })
       .expectEvents({
         client: 'client0',
@@ -224,7 +224,7 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
           {
             commandStartedEvent: {
               command: {
-                listCollections: 1,
+                listDatabases: 1,
                 comment: {
                   key: 'value'
                 }
@@ -237,6 +237,6 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
   )
   .toJSON();
 
-describe('listCollections w/ comment option', () => {
+describe('listDatabases w/ comment option', () => {
   runUnifiedSuite([testSuite]);
 });
