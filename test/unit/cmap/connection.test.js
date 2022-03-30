@@ -150,19 +150,27 @@ describe('new Connection()', function () {
     });
 
     it('should delay timeout errors by one tick', async () => {
+      expect(connection).to.have.property(kDelayedTimeoutId, null);
+
       driverSocket.emit('timeout');
       expect(connection.onTimeout).to.have.been.calledOnce;
       expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
+
       clock.tick(1);
+
       expect(driverSocket.destroy).to.have.been.calledOnce;
       expect(connection).to.have.property('closed', true);
       expect(connection).to.have.property(kDelayedTimeoutId, null);
     });
 
     it('should clear timeout errors if more data is available', () => {
+      expect(connection).to.have.property(kDelayedTimeoutId, null);
+
       driverSocket.emit('timeout');
       expect(connection.onTimeout).to.have.been.calledOnce;
       expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
+
+      // emit a message before the clock ticks even once
       messageStream.emit('message', Buffer.from('abc'));
 
       // New message before clock ticks 1 will clear the timeout
@@ -170,6 +178,7 @@ describe('new Connection()', function () {
 
       // ticking the clock should do nothing, there is no timeout anymore
       clock.tick(1);
+
       expect(driverSocket.destroy).to.not.have.been.calledOnce;
       expect(connection).to.have.property('closed', false);
     });
