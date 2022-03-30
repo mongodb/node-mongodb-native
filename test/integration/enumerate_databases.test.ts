@@ -159,8 +159,7 @@ const testSuite = new UnifiedTestSuiteBuilder('listDatabases with comment option
       .operation({
         name: 'listDatabases',
         arguments: {
-          filter: {},
-          comment: 'string value'
+          filter: {}
         },
         object: 'client0'
       })
