@@ -127,6 +127,7 @@ describe('new Connection()', function () {
       NodeJSTimeoutClass = setTimeout(() => null, 1).constructor;
 
       driverSocket = sinon.spy(
+        // The absolute minimum socket API needed as of writing this test
         new (class extends EventEmitter {
           address() {}
           pipe() {}
@@ -160,6 +161,7 @@ describe('new Connection()', function () {
 
       expect(driverSocket.destroy).to.have.been.calledOnce;
       expect(connection).to.have.property('closed', true);
+      // timeout callback should clear it's own reference
       expect(connection).to.have.property(kDelayedTimeoutId, null);
     });
 
@@ -171,7 +173,8 @@ describe('new Connection()', function () {
       expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
 
       // emit a message before the clock ticks even once
-      messageStream.emit('message', Buffer.from('abc'));
+      // onMessage ignores unknown 'responseTo' value
+      messageStream.emit('message', { responseTo: null });
 
       // New message before clock ticks 1 will clear the timeout
       expect(connection).to.have.property(kDelayedTimeoutId, null);
@@ -181,6 +184,7 @@ describe('new Connection()', function () {
 
       expect(driverSocket.destroy).to.not.have.been.calledOnce;
       expect(connection).to.have.property('closed', false);
+      expect(connection).to.have.property(kDelayedTimeoutId, null);
     });
   });
 
