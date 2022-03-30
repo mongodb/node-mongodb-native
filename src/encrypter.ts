@@ -19,7 +19,7 @@ export interface EncrypterOptions {
 
 /** @internal */
 export class Encrypter {
-  [kInternalClient]: MongoClient;
+  [kInternalClient]: MongoClient | null;
   bypassAutoEncryption: boolean;
   needsConnecting: boolean;
   autoEncrypter: AutoEncrypter;
@@ -62,10 +62,11 @@ export class Encrypter {
     options.autoEncryption.bson!.deserialize = deserialize;
 
     this.autoEncrypter = new AutoEncrypterClass(client, options.autoEncryption);
+    this[kInternalClient] = null;
   }
 
   getInternalClient(client: MongoClient, uri: string, options: MongoClientOptions): MongoClient {
-    if (!this[kInternalClient]) {
+    if (this[kInternalClient] == null) {
       const clonedOptions: MongoClientOptions = {};
 
       for (const key of Object.keys(options)) {
@@ -76,7 +77,8 @@ export class Encrypter {
 
       clonedOptions.minPoolSize = 0;
 
-      this[kInternalClient] = new MongoClient(uri, clonedOptions);
+      const internalClient = new MongoClient(uri, clonedOptions);
+      this[kInternalClient] = internalClient;
 
       for (const eventName of MONGO_CLIENT_EVENTS) {
         for (const listener of client.listeners(eventName)) {
@@ -85,7 +87,7 @@ export class Encrypter {
       }
 
       client.on('newListener', (eventName, listener) => {
-        this[kInternalClient].on(eventName, listener);
+        internalClient.on(eventName, listener);
       });
 
       this.needsConnecting = true;
@@ -94,7 +96,7 @@ export class Encrypter {
   }
 
   connectInternalClient(callback: Callback): void {
-    if (this.needsConnecting) {
+    if (this.needsConnecting && this[kInternalClient] != null) {
       this.needsConnecting = false;
       return this[kInternalClient].connect(callback);
     }

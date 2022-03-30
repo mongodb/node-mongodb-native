@@ -207,7 +207,7 @@ function resetMonitorState(monitor: Monitor) {
   monitor[kConnection] = undefined;
 }
 
-function checkServer(monitor: Monitor, callback: Callback<Document>) {
+function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let start = now();
   monitor.emit(Server.SERVER_HEARTBEAT_STARTED, new ServerHeartbeatStartedEvent(monitor.address));
 

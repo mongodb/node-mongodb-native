@@ -1089,7 +1089,7 @@ export function deepCopy<T>(value: T): T {
       case 'set':
         return new Set(value as any) as unknown as T;
       case 'buffer':
-        return Buffer.from(value as Buffer) as unknown as T;
+        return Buffer.from(value as unknown as Buffer) as unknown as T;
     }
   }
 

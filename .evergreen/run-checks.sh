@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit # Exit the script with error if any of the commands fail
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+# source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
 # Attempt to update our EVG config
 # if it changes, crash so that any gen script changes are forced to be run before pushing
@@ -30,6 +30,12 @@ npm i --no-save typescript@4.1.6
 echo "Typescript $($TSC -v)"
 $TSC --noEmit mongodb.ts34.d.ts
 # check that resolution uses the downleveled types
-echo "import * as mdb from '.'" > file.ts && $TSC --noEmit --traceResolution file.ts | grep 'mongodb.ts34.d.ts' && rm file.ts
+echo "import * as mdb from '.'" > file.ts && $TSC --noEmit --traceResolution file.ts | grep 'mongodb.d.ts' && rm file.ts
 
 rm -f file.ts
+
+# Check the next version of typescript
+echo "Check the next version of typescript"
+npm i --no-save typescript@next
+echo "Typescript $($TSC -v)"
+npm run build:ts

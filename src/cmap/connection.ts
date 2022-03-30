@@ -217,9 +217,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   [kStream]: Stream;
   /** @internal */
-  [kHello]: Document;
+  [kHello]: Document | null;
   /** @internal */
-  [kClusterTime]: Document;
+  [kClusterTime]: Document | null;
 
   /** @event */
   static readonly COMMAND_STARTED = COMMAND_STARTED;
@@ -247,6 +247,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.serverApi = options.serverApi;
     this.closed = false;
     this.destroyed = false;
+    this[kHello] = null;
+    this[kClusterTime] = null;
 
     this[kDescription] = new StreamDescription(this.address, options);
     this[kGeneration] = options.generation;
@@ -279,12 +281,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return this[kDescription];
   }
 
-  get hello(): Document {
+  get hello(): Document | null {
     return this[kHello];
   }
 
   // the `connect` method stores the result of the handshake hello on the connection
-  set hello(response: Document) {
+  set hello(response: Document | null) {
     this[kDescription].receiveResponse(response);
     this[kDescription] = Object.freeze(this[kDescription]);
 
@@ -312,7 +314,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return calculateDurationInMs(this[kLastUseTime]);
   }
 
-  get clusterTime(): Document {
+  get clusterTime(): Document | null {
     return this[kClusterTime];
   }
 

@@ -747,7 +747,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   find(): FindCursor<WithId<TSchema>>;
   find(filter: Filter<TSchema>, options?: FindOptions): FindCursor<WithId<TSchema>>;
-  find<T>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
+  find<T extends Document>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
   find(filter?: Filter<TSchema>, options?: FindOptions): FindCursor<WithId<TSchema>> {
     if (arguments.length > 2) {
       throw new MongoInvalidArgumentError(
@@ -1389,7 +1389,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param pipeline - An array of aggregation pipelines to execute
    * @param options - Optional settings for the command
    */
-  aggregate<T = Document>(
+  aggregate<T extends Document = Document>(
     pipeline: Document[] = [],
     options?: AggregateOptions
   ): AggregationCursor<T> {

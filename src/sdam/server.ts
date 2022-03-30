@@ -120,7 +120,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   s: ServerPrivate;
   serverApi?: ServerApi;
   hello?: Document;
-  [kMonitor]: Monitor;
+  [kMonitor]: Monitor | null;
 
   /** @event */
   static readonly SERVER_HEARTBEAT_STARTED = SERVER_HEARTBEAT_STARTED;
@@ -164,8 +164,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.clusterTime = clusterTime;
     });
 
-    // monitoring is disabled in load balancing mode
-    if (this.loadBalanced) return;
+    if (this.loadBalanced) {
+      this[kMonitor] = null;
+      // monitoring is disabled in load balancing mode
+      return;
+    }
 
     // create the monitor
     this[kMonitor] = new Monitor(this, this.s.options);
@@ -235,7 +238,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     // a load balancer. It never transitions out of this state and
     // has no monitor.
     if (!this.loadBalanced) {
-      this[kMonitor].connect();
+      this[kMonitor]?.connect();
     } else {
       stateTransition(this, STATE_CONNECTED);
       this.emit(Server.CONNECT, this);
@@ -258,7 +261,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     stateTransition(this, STATE_CLOSING);
 
     if (!this.loadBalanced) {
-      this[kMonitor].close();
+      this[kMonitor]?.close();
     }
 
     this.s.pool.close(options, err => {
@@ -276,7 +279,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   requestCheck(): void {
     if (!this.loadBalanced) {
-      this[kMonitor].requestCheck();
+      this[kMonitor]?.requestCheck();
     }
   }
 
@@ -466,7 +469,7 @@ function markServerUnknown(server: Server, error?: MongoError) {
   }
 
   if (error instanceof MongoNetworkError && !(error instanceof MongoNetworkTimeoutError)) {
-    server[kMonitor].reset();
+    server[kMonitor]?.reset();
   }
 
   server.emit(

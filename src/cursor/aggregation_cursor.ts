@@ -25,7 +25,9 @@ const kOptions = Symbol('options');
  * or higher stream
  * @public
  */
-export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchema> {
+export class AggregationCursor<
+  TSchema extends Document = Document
+> extends AbstractCursor<TSchema> {
   /** @internal */
   [kPipeline]: Document[];
   /** @internal */
@@ -56,7 +58,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
     });
   }
 
-  override map<T>(transform: (doc: TSchema) => T): AggregationCursor<T> {
+  override map<T extends Document>(transform: (doc: TSchema) => T): AggregationCursor<T> {
     return super.map(transform) as AggregationCursor<T>;
   }
 
@@ -99,7 +101,7 @@ export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchem
   }
 
   /** Add a group stage to the aggregation pipeline */
-  group<T = TSchema>($group: Document): AggregationCursor<T>;
+  group<T extends Document = TSchema>($group: Document): AggregationCursor<T>;
   group($group: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $group });

@@ -30,7 +30,7 @@ export const FLAGS = [
 ] as const;
 
 /** @public */
-export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
+export class FindCursor<TSchema extends Document = Document> extends AbstractCursor<TSchema> {
   /** @internal */
   [kFilter]: Document;
   /** @internal */
@@ -63,7 +63,7 @@ export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
     });
   }
 
-  override map<T>(transform: (doc: TSchema) => T): FindCursor<T> {
+  override map<T extends Document>(transform: (doc: TSchema) => T): FindCursor<T> {
     return super.map(transform) as FindCursor<T>;
   }
 

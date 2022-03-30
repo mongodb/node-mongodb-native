@@ -112,7 +112,7 @@ export type AbstractCursorEvents = {
 
 /** @public */
 export abstract class AbstractCursor<
-  TSchema = any,
+  TSchema extends Document = any,
   CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
 > extends TypedEventEmitter<CursorEvents> {
   /** @internal */
@@ -489,7 +489,7 @@ export abstract class AbstractCursor<
    * ```
    * @param transform - The mapping transformation method.
    */
-  map<T = any>(transform: (doc: TSchema) => T): AbstractCursor<T> {
+  map<T extends Document = any>(transform: (doc: TSchema) => T): AbstractCursor<T> {
     assertUninitialized(this);
     const oldTransform = this[kTransform] as (doc: TSchema) => TSchema; // TODO(NODE-3283): Improve transform typing
     if (oldTransform) {
@@ -693,7 +693,7 @@ export abstract class AbstractCursor<
   }
 }
 
-function nextDocument<T>(cursor: AbstractCursor): T | null | undefined {
+function nextDocument<T extends Document>(cursor: AbstractCursor): T | null {
   if (cursor[kDocuments] == null || !cursor[kDocuments].length) {
     return null;
   }
@@ -711,14 +711,18 @@ function nextDocument<T>(cursor: AbstractCursor): T | null | undefined {
   return null;
 }
 
-function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T | null>): void {
+function next<T extends Document>(
+  cursor: AbstractCursor,
+  blocking: boolean,
+  callback: Callback<T | null>
+): void {
   const cursorId = cursor[kId];
   if (cursor.closed) {
     return callback(undefined, null);
   }
 
   if (cursor[kDocuments] && cursor[kDocuments].length) {
-    callback(undefined, nextDocument(cursor));
+    callback(undefined, nextDocument<T>(cursor));
     return;
   }
 
@@ -753,7 +757,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
     }
 
     if (err || cursorIsDead(cursor)) {
-      return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument(cursor)));
+      return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument<T>(cursor)));
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
