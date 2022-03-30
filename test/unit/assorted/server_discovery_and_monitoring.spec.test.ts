@@ -1,4 +1,4 @@
-import { EJSON } from 'bson';
+import { EJSON, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -6,14 +6,13 @@ import * as sinon from 'sinon';
 import { promisify } from 'util';
 
 import { ConnectionPool } from '../../../src/cmap/connection_pool';
-import { parseOptions } from '../../../src/connection_string';
 import {
   MongoCompatibilityError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerError
 } from '../../../src/error';
-import { TopologyType } from '../../../src/sdam/common';
+import { MongoClient } from '../../../src/mongo_client';
 import {
   ServerClosedEvent,
   ServerDescriptionChangedEvent,
@@ -26,9 +25,10 @@ import {
   TopologyOpeningEvent
 } from '../../../src/sdam/events';
 import { Server } from '../../../src/sdam/server';
-import { ServerDescription } from '../../../src/sdam/server_description';
+import { ServerDescription, TopologyVersion } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
 import { isRecord, ns } from '../../../src/utils';
+import { assertNoExtraKeys, ejson } from '../../tools/utils';
 
 const SDAM_EVENT_CLASSES = {
   ServerDescriptionChangedEvent,
@@ -40,10 +40,10 @@ const SDAM_EVENT_CLASSES = {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
   ServerHeartbeatFailedEvent
-};
+} as const;
 
 const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
-function collectTests() {
+function collectTests(): Record<string, SDAMTest[]> {
   const testTypes = fs
     .readdirSync(specDir)
     .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory())
@@ -73,6 +73,104 @@ function collectTests() {
   return tests;
 }
 
+interface SDAMTest {
+  description: string;
+  uri: string;
+  phases: SDAMPhase[];
+}
+/**
+ * A phase of the test optionally sends inputs to the client,
+ * then tests the client's resulting TopologyDescription.
+ */
+type SDAMPhase =
+  | {
+      description?: string;
+      applicationErrors: ApplicationError[];
+      outcome: TopologyDescriptionOutcome;
+    }
+  | {
+      description?: string;
+      responses?: SDAMResponse[];
+      outcome: MonitoringOutcome | TopologyDescriptionOutcome;
+    };
+
+interface MonitoringOutcome {
+  events: typeof SDAM_EVENT_CLASSES[keyof typeof SDAM_EVENT_CLASSES][];
+}
+interface OutcomeServerDescription {
+  type?: string;
+  setName?: string;
+  setVersion?: number;
+  electionId?: ObjectId | null;
+  logicalSessionTimeoutMinutes?: number;
+  minWireVersion?: number;
+  maxWireVersion?: number;
+  topologyVersion?: TopologyVersion;
+  pool?: { generation: number };
+}
+interface TopologyDescriptionOutcome {
+  topologyType: string;
+  setName?: string;
+  servers?: Record<string, OutcomeServerDescription>;
+  logicalSessionTimeoutMinutes?: number;
+  maxSetVersion?: number;
+  maxElectionId?: ObjectId;
+  compatible: false | undefined;
+}
+type SDAMResponse = [serverAddress: string, hello: Document];
+type ApplicationErrorCommon = {
+  address: string;
+  generation?: number;
+  maxWireVersion?: number;
+  when: 'beforeHandshakeCompletes' | 'afterHandshakeCompletes';
+};
+type ApplicationError =
+  | (ApplicationErrorCommon & { type: 'network' | 'timeout' })
+  | (ApplicationErrorCommon & { type: 'command'; response: Document });
+
+function isTopologyDescriptionOutcome(outcome: any): outcome is TopologyDescriptionOutcome {
+  try {
+    assertTopologyDescriptionOutcome(outcome);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function assertTopologyDescriptionOutcome(
+  outcome: any
+): asserts outcome is TopologyDescriptionOutcome {
+  expect(outcome).to.be.an('object').that.is.not.null;
+  expect(outcome).to.have.property('topologyType').that.is.a('string');
+  expect(outcome).to.have.property('servers').that.is.an('object');
+  assertNoExtraKeys<TopologyDescriptionOutcome>(
+    [
+      'topologyType',
+      'setName',
+      'servers',
+      'logicalSessionTimeoutMinutes',
+      'maxSetVersion',
+      'maxElectionId',
+      'compatible'
+    ],
+    outcome
+  );
+}
+
+function isMonitoringOutcome(outcome: any): outcome is MonitoringOutcome {
+  try {
+    assertMonitoringOutcome(outcome);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function assertMonitoringOutcome(outcome: any): asserts outcome is MonitoringOutcome {
+  expect(outcome).to.be.an('object').that.is.not.null;
+  expect(outcome).to.have.property('events').that.is.an('array');
+}
+
 describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect: sinon.SinonStub;
   before(() => {
@@ -89,6 +187,27 @@ describe('Server Discovery and Monitoring (spec)', function () {
   const specTests = collectTests();
   for (const specTestName of Object.keys(specTests)) {
     describe(specTestName, () => {
+      let topologySelectServers: sinon.SinonStub;
+
+      beforeEach(() => {
+        // Each test will attempt to connect by doing server selection. We want to make the first
+        // call to `selectServers` call a fake, and then immediately restore the original behavior.
+        topologySelectServers = sinon
+          .stub(Topology.prototype, 'selectServer')
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .callsFake(function (selector, options, callback) {
+            topologySelectServers.restore();
+
+            const fakeServer = { s: { state: 'connected' }, removeListener: () => true };
+            // @ts-expect-error: stub doesn't need to be a full server
+            callback(undefined, fakeServer);
+          });
+      });
+
+      afterEach(() => {
+        topologySelectServers.restore();
+      });
+
       for (const testData of specTests[specTestName]) {
         it(testData.description, async () => {
           await executeSDAMTest(testData);
@@ -191,64 +310,42 @@ const SDAM_EVENTS = [
   'serverHeartbeatFailed'
 ];
 
-async function executeSDAMTest(testData) {
-  const options = parseOptions(testData.uri);
-  // create the topology
-  const topology = new Topology(options.hosts, options);
-  // Each test will attempt to connect by doing server selection. We want to make the first
-  // call to `selectServers` call a fake, and then immediately restore the original behavior.
-  const topologySelectServers = sinon
-    .stub(Topology.prototype, 'selectServer')
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .callsFake(function (selector, options, callback) {
-      topologySelectServers.restore();
-
-      const fakeServer = { s: { state: 'connected' }, removeListener: () => true };
-      // @ts-expect-error: stub doesn't need to be a full server
-      callback(undefined, fakeServer);
-    });
+async function executeSDAMTest(testData: SDAMTest) {
+  const client = new MongoClient(testData.uri);
   // listen for SDAM monitoring events
   let events = [];
-
   for (const eventName of SDAM_EVENTS) {
-    topology.on(eventName, event => events.push(event));
+    client.on(eventName, event => events.push(event));
   }
 
-  let errorEvents = [];
-  topology.on('error', error => errorEvents.push(error));
+  let errorsThrown = [];
+  client.on('error', error => errorsThrown.push(error));
 
   // connect the topology
-  await promisify(topology.connect.bind(topology))(options);
+  await client.connect();
 
   for (const phase of testData.phases) {
-    if (phase.responses) {
+    // Determine which of the two kinds of phases we're running
+    if ('responses' in phase && phase.responses != null) {
+      // phase with responses for hello simulations
       for (const [address, hello] of phase.responses) {
-        topology.serverUpdateHandler(new ServerDescription(address, hello));
+        client.topology.serverUpdateHandler(new ServerDescription(address, hello));
       }
-      if (phase.outcome) {
-        assertOutcomeExpectations(topology, events, phase.outcome);
-        if (phase.outcome.compatible === false) {
-          expect(errorEvents).to.have.length.greaterThanOrEqual(1);
-          for (const errorEvent of errorEvents) {
-            expect(errorEvent).to.be.instanceOf(MongoCompatibilityError);
-            expect(errorEvent.message).to.match(/but this version of the driver/);
-          }
-        }
-      }
-
-      events = [];
-      errorEvents = [];
-    } else if (phase.applicationErrors) {
+    } else if ('applicationErrors' in phase && phase.applicationErrors) {
+      // phase with applicationErrors simulating error's from network, timeouts, server
       for (const appError of phase.applicationErrors) {
+        // Stub will return appError to SDAM machinery
         const withConnectionStub = sinon
           .stub(ConnectionPool.prototype, 'withConnection')
           .callsFake(withConnectionStubImpl(appError));
 
-        const server = topology.s.servers.get(appError.address);
+        const server = client.topology.s.servers.get(appError.address);
 
+        // Run a dummy command to encounter the error
         const res = promisify(server.command.bind(server))(ns('admin.$cmd'), { ping: 1 }, {});
         const thrownError = await res.catch(error => error);
 
+        // Restore the stub before asserting anything in case of errors
         withConnectionStub.restore();
 
         const isApplicationError = error => {
@@ -264,6 +361,46 @@ async function executeSDAMTest(testData) {
           'expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError (referred to in the spec as an "Application Error")'
         ).to.satisfy(isApplicationError);
       }
+    } else if (phase.outcome != null && Object.keys(phase).length === 1) {
+      // Load Balancer SDAM tests have no "work" to be done for the phase
+    } else {
+      expect.fail(ejson`Unknown phase shape - ${phase}`);
+    }
+
+    if ('outcome' in phase && phase.outcome != null) {
+      if (isMonitoringOutcome(phase.outcome)) {
+        // Test for monitoring events
+        const expectedEvents = convertOutcomeEvents(phase.outcome.events);
+
+        expect(events).to.have.length(expectedEvents.length);
+        for (const [i, actualEvent] of Object.entries(events)) {
+          const actualEventClone = cloneForCompare(actualEvent);
+          expect(actualEventClone).to.matchMongoSpec(expectedEvents[i]);
+        }
+      } else if (isTopologyDescriptionOutcome(phase.outcome)) {
+        // Test for SDAM machinery correctly changing the topology type among other properties
+        assertTopologyDescriptionOutcomeExpectations(client.topology, phase.outcome);
+        if (phase.outcome.compatible === false) {
+          // driver specific error throwing
+          if (testData.description === 'Multiple mongoses with large minWireVersion') {
+            // TODO(DRIVERS-2250): There is test bug that causes two errors
+            // this will start failing when the test is synced and fixed
+            expect(errorsThrown).to.have.lengthOf(2);
+          } else {
+            expect(errorsThrown).to.have.lengthOf(1);
+          }
+          expect(errorsThrown[0]).to.be.instanceOf(MongoCompatibilityError);
+          expect(errorsThrown[0].message).to.match(/but this version of the driver/);
+        } else {
+          // unset or true means no errors should be thrown
+          expect(errorsThrown).to.be.empty;
+        }
+      } else {
+        expect.fail(ejson`Unknown outcome shape - ${phase.outcome}`);
+      }
+
+      events = [];
+      errorsThrown = [];
     }
   }
 }
@@ -303,90 +440,75 @@ function withConnectionStubImpl(appError) {
   };
 }
 
-function assertOutcomeExpectations(topology, events, outcome) {
+function assertTopologyDescriptionOutcomeExpectations(
+  topology: Topology,
+  outcome: TopologyDescriptionOutcome
+) {
+  assertTopologyDescriptionOutcome(outcome);
   // then verify the resulting outcome
   const description = topology.description;
 
-  if (typeof outcome.topologyType === 'string') {
-    // Translation for our driver's TopologyDescription class
-    outcome.type = outcome.topologyType;
-    delete outcome.topologyType;
+  expect(description).to.have.property('type', outcome.topologyType);
+
+  const expectedServers = new Map(Object.entries(outcome.servers));
+  const actualServers = description.servers;
+  expect(actualServers).to.be.instanceOf(Map);
+
+  // TODO(NODE-XXXX): The node driver keeps unknown servers where it should discard
+  // expect(actualServers.size).to.equal(expectedServers.size);
+
+  for (const serverName of expectedServers.keys()) {
+    expect(actualServers).to.include.keys(serverName);
+    const expectedServer = expectedServers.get(serverName);
+
+    if (expectedServer.pool != null) {
+      const expectedPool = expectedServers.get(serverName).pool;
+      const actualPoolGeneration = topology.s.servers.get(serverName).s.pool;
+      expect(actualPoolGeneration).to.have.property('generation', expectedPool.generation);
+      delete expectedServer.pool;
+    }
+
+    const normalizedExpectedServer = normalizeServerDescription(expectedServer);
+    const omittedFields = findOmittedFields(normalizedExpectedServer);
+    const actualServer = actualServers.get(serverName);
+    expect(actualServer).to.matchMongoSpec(normalizedExpectedServer);
+
+    if (omittedFields.length !== 0) {
+      expect(actualServer).to.not.have.all.keys(omittedFields);
+    }
   }
 
-  for (const key of Object.keys(outcome)) {
-    const outcomeValue = outcome[key];
-
-    if (key === 'servers') {
-      expect(description).to.include.keys(key);
-      const expectedServers = outcomeValue;
-      const actualServers = description[key];
-
-      for (const serverName of Object.keys(expectedServers)) {
-        expect(actualServers).to.include.keys(serverName);
-
-        if (expectedServers[serverName].pool) {
-          const expectedPool = expectedServers[serverName].pool;
-          delete expectedServers[serverName].pool;
-          const actualPoolGeneration = topology.s.servers.get(serverName).s.pool.generation;
-          expect(actualPoolGeneration).to.equal(expectedPool.generation);
-        }
-
-        const expectedServer = normalizeServerDescription(expectedServers[serverName]);
-        const omittedFields = findOmittedFields(expectedServer);
-
-        const actualServer = actualServers.get(serverName);
-        expect(actualServer).to.matchMongoSpec(expectedServer);
-
-        if (omittedFields.length) {
-          expect(actualServer).to.not.have.all.keys(omittedFields);
-        }
-      }
-
-      continue;
-    }
-
-    if (description.type === TopologyType.LoadBalanced) {
-      // Load balancer mode has no monitor hello response and
-      // only expects address and compatible to be set in the
-      // server description.
-      if (key !== 'address' && key !== 'compatible') {
-        continue;
-      }
-    }
-
-    if (key === 'events') {
-      const expectedEvents = convertOutcomeEvents(outcomeValue);
-      expect(events).to.have.length(expectedEvents.length);
-      for (let i = 0; i < events.length; ++i) {
-        const expectedEvent = expectedEvents[i];
-        const actualEvent = cloneForCompare(events[i]);
-        expect(actualEvent).to.matchMongoSpec(expectedEvent);
-      }
-
-      continue;
-    }
-
-    if (key === 'compatible' || key === 'setName') {
-      if (outcomeValue == null) {
-        expect(topology.description[key]).to.be.undefined;
-      } else {
-        expect(topology.description).property(key).to.equal(outcomeValue);
-      }
-
-      continue;
-    }
-
-    if (key === 'logicalSessionTimeoutMinutes') {
-      // logicalSessionTimeoutMinutes is always defined
-      // but can be initialized to undefined
-      expect(description).to.have.property(
-        'logicalSessionTimeoutMinutes',
-        outcomeValue ?? undefined
-      );
-      continue;
-    }
-
-    expect(description).to.include.keys(key);
-    expect(description).to.have.deep.property(key, outcomeValue);
+  if (outcome.setName != null) {
+    expect(description).to.have.property('setName', outcome.setName);
+  } else {
+    expect(description).to.not.have.property('setName');
   }
+
+  if (outcome.maxSetVersion != null) {
+    expect(description).to.have.property('maxSetVersion', outcome.maxSetVersion);
+  } else {
+    expect(description).to.not.have.property('maxSetVersion');
+  }
+
+  if (outcome.maxElectionId != null) {
+    expect(description).to.have.property('maxElectionId').that.is.instanceOf(ObjectId);
+    const driverMaxId = description.maxElectionId.toString('hex');
+    const testMaxId = outcome.maxElectionId.toString('hex');
+    // Much easier to debug a hex string mismatch
+    expect(driverMaxId).to.equal(testMaxId);
+  } else {
+    expect(description).to.not.have.property('maxElectionId');
+  }
+
+  if (outcome.compatible != null) {
+    expect(description).to.have.property('compatible', outcome.compatible);
+  } else {
+    expect(description).to.have.property('compatible', true);
+  }
+
+  // logicalSessionTimeoutMinutes is always defined
+  expect(description).to.have.property(
+    'logicalSessionTimeoutMinutes',
+    outcome.logicalSessionTimeoutMinutes ?? undefined
+  );
 }
