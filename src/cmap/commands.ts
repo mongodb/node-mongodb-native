@@ -458,6 +458,7 @@ export class KillCursor {
   }
 }
 
+/** @internal */
 export interface MessageHeader {
   length: number;
   requestId: number;
@@ -466,6 +467,7 @@ export interface MessageHeader {
   fromCompressed?: boolean;
 }
 
+/** @internal */
 export interface OpResponseOptions extends BSONSerializeOptions {
   raw?: boolean;
   documentsReturnedIn?: string | null;
@@ -640,6 +642,7 @@ const OPTS_CHECKSUM_PRESENT = 1;
 const OPTS_MORE_TO_COME = 2;
 const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
+/** @internal */
 export interface OpMsgOptions {
   requestId: number;
   serializeFunctions: boolean;

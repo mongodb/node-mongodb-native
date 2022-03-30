@@ -66,15 +66,14 @@ async function initializeFilters(client) {
 }
 
 const testSkipBeforeEachHook = async function () {
-  // `metadata` always exists, `requires` is optional
-  const requires = this.currentTest.metadata.requires;
+  const metadata = this.currentTest.metadata;
 
-  if (requires && Object.keys(requires).length > 0) {
+  if (metadata && metadata.requires && Object.keys(metadata.requires).length > 0) {
     const failedFilter = filters.find(filter => !filter.filter(this.currentTest));
 
     if (failedFilter) {
       const filterName = failedFilter.constructor.name;
-      const metadataString = inspect(requires, {
+      const metadataString = inspect(metadata.requires, {
         colors: true,
         compact: true,
         depth: 10,

@@ -75,6 +75,8 @@ const kHello = Symbol('hello');
 const kAutoEncrypter = Symbol('autoEncrypter');
 /** @internal */
 const kFullResult = Symbol('fullResult');
+/** @internal */
+const kDelayedTimeoutId = Symbol('delayedTimeoutId');
 
 /** @internal */
 export interface QueryOptions extends BSONSerializeOptions {
@@ -191,6 +193,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
+
+  /**@internal */
+  [kDelayedTimeoutId]: NodeJS.Timeout | null;
   /** @internal */
   [kDescription]: StreamDescription;
   /** @internal */
@@ -224,7 +229,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   static readonly PINNED = PINNED;
   /** @event */
   static readonly UNPINNED = UNPINNED;
-  delayedTimeoutErrorId: NodeJS.Timeout | null;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
@@ -248,7 +252,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     });
     this[kStream] = stream;
 
-    this.delayedTimeoutErrorId = null;
+    this[kDelayedTimeoutId] = null;
 
     this[kMessageStream].on('message', message => this.onMessage(message));
     this[kMessageStream].on('error', error => this.onError(error));
@@ -312,7 +316,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
-  private onError(error: Error) {
+  onError(error: Error) {
     if (this.closed) {
       return;
     }
@@ -329,7 +333,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.emit(Connection.CLOSE);
   }
 
-  private onClose() {
+  onClose() {
     if (this.closed) {
       return;
     }
@@ -345,12 +349,18 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.emit(Connection.CLOSE);
   }
 
-  private onTimeout() {
+  onTimeout() {
     if (this.closed) {
       return;
     }
 
-    this.delayedTimeoutErrorId = setTimeout(() => {
+    this[kDelayedTimeoutId] = setTimeout(() => {
+      const delayedTimeoutId = this[kDelayedTimeoutId];
+      if (delayedTimeoutId != null) {
+        clearTimeout(delayedTimeoutId);
+        this[kDelayedTimeoutId] = null;
+      }
+
       this[kStream].destroy();
 
       this.closed = true;
@@ -366,10 +376,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }, 1);
   }
 
-  private onMessage(message: BinMsg | Response) {
-    if (this.delayedTimeoutErrorId != null) {
-      clearTimeout(this.delayedTimeoutErrorId);
-      this.delayedTimeoutErrorId = null;
+  onMessage(message: BinMsg | Response) {
+    const delayedTimeoutId = this[kDelayedTimeoutId];
+    if (delayedTimeoutId != null) {
+      clearTimeout(delayedTimeoutId);
+      this[kDelayedTimeoutId] = null;
     }
 
     // always emit the message, in case we are streaming
