@@ -266,6 +266,31 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
       });
   });
 
+  const compareInputToSpec = (input, expected) => {
+    if (expected === 42) {
+      expect(input).to.be.ok; // not null or undefined
+      return;
+    }
+
+    if (Array.isArray(expected)) {
+      expect(input).to.be.an('array');
+      expected.forEach((expectedValue, index) => {
+        compareInputToSpec(input[index], expectedValue);
+      });
+      return;
+    }
+
+    if (expected && typeof expected === 'object') {
+      for (const [expectedPropName, expectedValue] of Object.entries(expected)) {
+        expect(input).to.have.property(expectedPropName);
+        compareInputToSpec(input[expectedPropName], expectedValue);
+      }
+      return;
+    }
+
+    expect(input).to.equal(expected);
+  };
+
   const suites: cmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
   for (const test of suites) {
@@ -305,20 +330,23 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
         actualError = e;
       });
 
-      const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(eventType(ev)) < 0);
       if (expectedError) {
         expect(actualError).to.exist;
-        expect(actualError).property('message', expectedError.message);
-      } else if (actualError) {
-        throw actualError;
+        const { type: errorType, ...errorPropsToCheck } = expectedError;
+        expect(actualError).to.have.property('name', `Mongo${errorType}`);
+        compareInputToSpec(actualError, errorPropsToCheck);
+      } else {
+        expect(actualError).to.not.exist;
       }
+
+      const actualEvents = poolEvents.filter(ev => !ignoreEvents.includes(eventType(ev)));
 
       expect(actualEvents).to.have.lengthOf(expectedEvents.length);
       for (const expected of expectedEvents) {
         const actual = actualEvents.shift();
-        expect(actual.constructor.name).to.equal(`${expected.type}Event`);
-        delete expected.type;
-        expect(actual).to.matchMongoSpec(expected);
+        const { type: eventType, ...eventPropsToCheck } = expected;
+        expect(actual.constructor.name).to.equal(`${eventType}Event`);
+        compareInputToSpec(actual, eventPropsToCheck);
       }
     });
   }
