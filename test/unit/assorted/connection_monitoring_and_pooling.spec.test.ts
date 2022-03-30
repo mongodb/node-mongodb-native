@@ -7,6 +7,8 @@ import { isHello } from '../../../src/utils';
 import { loadSpecTests } from '../../spec';
 import * as mock from '../../tools/mongodb-mock/index';
 
+const asyncTimeout = util.promisify(setTimeout);
+
 type cmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
   | { name: 'wait'; ms: number }
@@ -30,7 +32,19 @@ type cmapEvent = {
   reason: string;
 };
 
+const knownTestKeys = [
+  'name',
+  'version',
+  'style',
+  'description',
+  'poolOptions',
+  'operations',
+  'error',
+  'events',
+  'ignore'
+];
 type cmapTest = {
+  name?: string; // filename path added by the spec loader
   version: number;
   style: 'unit';
   description: string;
@@ -134,9 +148,9 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     close: function () {
       return PROMISIFIED_POOL_FUNCTIONS.close.call(pool);
     },
-    wait: function (options) {
+    wait: async function (options) {
       const ms = options.ms;
-      return new Promise(r => setTimeout(r, ms));
+      return asyncTimeout(ms);
     },
     start: function (options) {
       const target = options.target;
@@ -203,10 +217,10 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
 
       return Promise.resolve()
         .then(() => operationFn(op, this))
-        .then(() => new Promise(r => setTimeout(r)));
+        .then(() => asyncTimeout());
     }
 
-    finish() {
+    async finish() {
       this._killed = true;
       return this._promise.then(() => {
         if (this._error) {
@@ -255,12 +269,14 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
   const suites: cmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
   for (const test of suites) {
-    it(test.description, function () {
+    it(test.description, async function () {
+      expect(knownTestKeys).to.include.members(Object.keys(test));
+
+      const poolOptions = test.poolOptions || {};
       const operations = test.operations;
+      const expectedError = test.error;
       const expectedEvents = test.events || [];
       const ignoreEvents = test.ignore || [];
-      const expectedError = test.error;
-      const poolOptions = test.poolOptions || {};
 
       let actualError;
 
@@ -271,48 +287,39 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
 
       createPool(poolOptions);
 
-      let basePromise = Promise.resolve();
-
       for (const idx in operations) {
         const op = operations[idx];
 
         const threadKey = op.thread || MAIN_THREAD_KEY;
         const thread = getThread(threadKey);
 
-        basePromise = basePromise.then(() => {
-          if (!thread) {
-            throw new Error(`Invalid thread ${threadKey}`);
-          }
+        if (!thread) {
+          throw new Error(`Invalid thread ${threadKey}`);
+        }
 
-          return Promise.resolve()
-            .then(() => thread.run(op))
-            .then(() => new Promise(r => setTimeout(r)));
-        });
+        await thread.run(op);
+        await asyncTimeout();
       }
 
-      return basePromise
-        .then(() => mainThread.finish())
-        .catch(e => (actualError = e))
-        .then(() => {
-          const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(eventType(ev)) < 0);
+      await mainThread.finish().catch(e => {
+        actualError = e;
+      });
 
-          if (expectedError) {
-            expect(actualError).to.exist;
-            expect(actualError).property('message').to.equal(expectedError.message);
-          } else if (actualError) {
-            throw actualError;
-          }
+      const actualEvents = poolEvents.filter(ev => ignoreEvents.indexOf(eventType(ev)) < 0);
+      if (expectedError) {
+        expect(actualError).to.exist;
+        expect(actualError).property('message', expectedError.message);
+      } else if (actualError) {
+        throw actualError;
+      }
 
-          expectedEvents.forEach((expected, index) => {
-            const actual = actualEvents[index];
-            if (expected.type) {
-              expect(actual.constructor.name).to.equal(`${expected.type}Event`);
-              delete expected.type;
-            }
-
-            expect(actual).to.matchMongoSpec(expected);
-          });
-        });
+      expect(actualEvents).to.have.lengthOf(expectedEvents.length);
+      for (const expected of expectedEvents) {
+        const actual = actualEvents.shift();
+        expect(actual.constructor.name).to.equal(`${expected.type}Event`);
+        delete expected.type;
+        expect(actual).to.matchMongoSpec(expected);
+      }
     });
   }
 });
