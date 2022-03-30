@@ -411,16 +411,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
 export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
   startAtOperationTime?: OperationTime;
   resumeAfter?: ResumeToken;
-  startAfter?: boolean;
-  /**
-   * Comment to apply to the operation.
-   *
-   * In server versions pre-4.4, 'comment' must be string.  A server
-   * error will be thrown if any other type is provided.
-   *
-   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
-   */
-  comment?: any;
+  startAfter?: ResumeToken;
 }
 
 /** @internal */

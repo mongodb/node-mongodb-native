@@ -132,7 +132,7 @@ export interface GetMoreOptions extends CommandOptions {
    *
    * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
-  comment?: any;
+  comment?: unknown;
 }
 
 /** @public */

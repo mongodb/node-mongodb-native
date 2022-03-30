@@ -92,27 +92,6 @@ export class EventCollector {
     this.waitForEventImpl(this, Date.now(), eventName, count, callback);
   }
 
-  /**
-   * Will only return one event at a time from the front of the list
-   * Useful for iterating over the events in the order they occurred
-   */
-  waitAndShiftEvent(eventName) {
-    return new Promise((resolve, reject) => {
-      if (!this._events[eventName]) {
-        return reject(
-          `Error: attempted to listen for ${eventName} but no listener handler is set` + eventName
-        );
-      }
-      if (this._events[eventName].length > 0) {
-        return resolve(this._events[eventName].shift());
-      }
-      this.waitForEventImpl(this, Date.now(), eventName, 1, (error: any) => {
-        if (error) return reject(error);
-        resolve(this._events[eventName].shift());
-      });
-    });
-  }
-
   reset(eventName: string) {
     if (eventName == null) {
       Object.keys(this._events).forEach(eventName => {
@@ -349,10 +328,6 @@ export class TestBuilder {
 }
 
 export class UnifiedTestSuiteBuilder {
-  /**
-   * TODO: add node ticket to complete the entitity work
-   */
-  private _anchors = {};
   private _description = 'Default Description';
   private _databaseName = '';
   private _schemaVersion = '1.0';

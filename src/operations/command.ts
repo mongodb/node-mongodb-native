@@ -53,7 +53,7 @@ export interface CommandOperationOptions
    *
    * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
-  comment?: any;
+  comment?: unknown;
   /** Should retry failed writes */
   retryWrites?: boolean;
 

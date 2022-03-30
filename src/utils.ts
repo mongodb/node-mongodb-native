@@ -176,7 +176,7 @@ export function mergeOptions<T, S>(target: T, source: S): T & S {
 }
 
 /** @internal */
-export function allowOptions(options: AnyOptions, names: string[]): AnyOptions {
+export function filterOptions(options: AnyOptions, names: string[]): AnyOptions {
   const filterOptions: AnyOptions = {};
 
   for (const name in options) {
@@ -189,19 +189,6 @@ export function allowOptions(options: AnyOptions, names: string[]): AnyOptions {
   return filterOptions;
 }
 
-/** @internal */
-export function disallowOptions(options: AnyOptions, denylist: string[]): AnyOptions {
-  const accumulatedOptions: AnyOptions = {};
-
-  for (const name in options) {
-    if (!denylist.includes(name)) {
-      accumulatedOptions[name] = options[name];
-    }
-  }
-
-  // Filtered options
-  return accumulatedOptions;
-}
 interface HasRetryableWrites {
   retryWrites?: boolean;
 }

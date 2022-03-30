@@ -87,7 +87,7 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    *
    * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
-  comment?: any;
+  comment?: unknown;
   tailable?: boolean;
   awaitData?: boolean;
   noCursorTimeout?: boolean;

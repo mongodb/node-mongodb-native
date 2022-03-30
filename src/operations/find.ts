@@ -46,15 +46,6 @@ export interface FindOptions<TSchema extends Document = Document> extends Comman
   min?: Document;
   /** The exclusive upper bound for a specific index */
   max?: Document;
-  /**
-   * Comment to apply to the operation.
-   *
-   * In server versions pre-4.4, 'comment' must be string.  A server
-   * error will be thrown if any other type is provided.
-   *
-   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
-   */
-  comment?: any;
   /** Number of milliseconds to wait before aborting the query. */
   maxTimeMS?: number;
   /** The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. Requires `tailable` and `awaitData` to be true */
