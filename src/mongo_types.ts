@@ -515,7 +515,7 @@ export type NestedPaths<Type> = Type extends
           ArrayType extends Type
           ? [Key] // we have a recursive array union
           : // child is an array, but it's not a recursive array
-            [Key, ...NestedPaths<Type[Key]>]
+            [Key] | [Key, ...NestedPaths<Type[Key]>]
         : // child is not structured the same as the parent
           [Key, ...NestedPaths<Type[Key]>];
     }[Extract<keyof Type, string>]
