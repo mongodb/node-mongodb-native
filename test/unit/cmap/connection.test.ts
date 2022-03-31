@@ -1,14 +1,14 @@
-'use strict';
+import { expect } from 'chai';
+import { EventEmitter } from 'events';
+import { Socket } from 'net';
+import sinon from 'sinon';
 
-const mock = require('../../tools/mongodb-mock/index');
-const { connect } = require('../../../src/cmap/connect');
-const { Connection, hasSessionSupport } = require('../../../src/cmap/connection');
-const { expect } = require('chai');
-const { Socket } = require('net');
-const { ns, isHello } = require('../../../src/utils');
-const { getSymbolFrom } = require('../../tools/utils');
-const sinon = require('sinon');
-const { EventEmitter } = require('events');
+import { connect } from '../../../src/cmap/connect';
+import { Connection, hasSessionSupport } from '../../../src/cmap/connection';
+import { MessageStream } from '../../../src/cmap/message_stream';
+import { isHello, ns } from '../../../src/utils';
+import * as mock from '../../tools/mongodb-mock/index';
+import { getSymbolFrom } from '../../tools/utils';
 
 describe('new Connection()', function () {
   let server;
@@ -25,6 +25,7 @@ describe('new Connection()', function () {
       // blackhole all other requests
     });
 
+    // @ts-expect-error: This subset of options is all that is needed
     connect({ connectionType: Connection, hostAddress: server.hostAddress() }, (err, conn) => {
       expect(err).to.not.exist;
       expect(conn).to.exist;
@@ -48,6 +49,7 @@ describe('new Connection()', function () {
       // blackhole all other requests
     });
 
+    // @ts-expect-error: This subset of options is all that is needed
     connect({ connectionType: Connection, hostAddress: server.hostAddress() }, (err, conn) => {
       expect(err).to.not.exist;
       expect(conn).to.exist;
@@ -76,6 +78,7 @@ describe('new Connection()', function () {
       hostAddress: server.hostAddress()
     };
 
+    // @ts-expect-error: This subset of options is all that is needed
     connect(options, (err, conn) => {
       expect(err).to.be.a('undefined');
       expect(conn).to.be.instanceOf(Connection);
@@ -92,14 +95,16 @@ describe('new Connection()', function () {
   });
 
   it('should throw a network error with kBeforeHandshake set to true on timeout before hand shake', function (done) {
-    // respond to no requests to trigger timeout event
-    server.setMessageHandler(() => {});
+    server.setMessageHandler(() => {
+      // respond to no requests to trigger timeout event
+    });
 
     const options = {
       hostAddress: server.hostAddress(),
       socketTimeoutMS: 50
     };
 
+    // @ts-expect-error: This subset of options is all that is needed
     connect(options, (err, conn) => {
       expect(conn).to.be.a('undefined');
 
@@ -111,35 +116,39 @@ describe('new Connection()', function () {
   });
 
   describe('onTimeout()', () => {
-    /** @type {import('../../../src/cmap/connection').Connection} */
-    let connection;
-    let clock;
-    /** @type {FakeSocket} */
-    let driverSocket;
-    /** @type {MessageStream} */
-    let messageStream;
-    let kDelayedTimeoutId;
-    let NodeJSTimeoutClass;
+    let connection: sinon.SinonSpiedInstance<Connection>;
+    let clock: sinon.SinonFakeTimers;
+    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
+    let messageStream: MessageStream;
+    let kDelayedTimeoutId: symbol;
+    let NodeJSTimeoutClass: any;
+
+    /** The absolute minimum socket API needed by Connection as of writing this test */
+    class FakeSocket extends EventEmitter {
+      address() {
+        // is never called
+      }
+      pipe() {
+        // does not need to do anything
+      }
+      destroy() {
+        // is called, has no side effects
+      }
+      get remoteAddress() {
+        return 'iLoveJavaScript';
+      }
+      get remotePort() {
+        return 123;
+      }
+    }
 
     beforeEach(() => {
       clock = sinon.useFakeTimers();
 
       NodeJSTimeoutClass = setTimeout(() => null, 1).constructor;
 
-      driverSocket = sinon.spy(
-        // The absolute minimum socket API needed as of writing this test
-        new (class extends EventEmitter {
-          address() {}
-          pipe() {}
-          destroy() {}
-          get remoteAddress() {
-            return 'iLoveJavaScript';
-          }
-          get remotePort() {
-            return 123;
-          }
-        })()
-      );
+      driverSocket = sinon.spy(new FakeSocket());
+      // @ts-expect-error: This subset of options is all that is needed
       connection = sinon.spy(new Connection(driverSocket, { id: 1 }));
       const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
       kDelayedTimeoutId = getSymbolFrom(connection, 'delayedTimeoutId');
@@ -194,6 +203,7 @@ describe('new Connection()', function () {
 
     context('when logicalSessionTimeoutMinutes is present', function () {
       beforeEach(function () {
+        // @ts-expect-error: This subset of options is all that is needed
         connection = new Connection(stream, {
           hostAddress: server.hostAddress(),
           logicalSessionTimeoutMinutes: 5
@@ -208,6 +218,7 @@ describe('new Connection()', function () {
     context('when logicalSessionTimeoutMinutes is not present', function () {
       context('when in load balancing mode', function () {
         beforeEach(function () {
+          // @ts-expect-error: This subset of options is all that is needed
           connection = new Connection(stream, {
             hostAddress: server.hostAddress(),
             loadBalanced: true
@@ -221,6 +232,7 @@ describe('new Connection()', function () {
 
       context('when not in load balancing mode', function () {
         beforeEach(function () {
+          // @ts-expect-error: This subset of options is all that is needed
           connection = new Connection(stream, {
             hostAddress: server.hostAddress()
           });
