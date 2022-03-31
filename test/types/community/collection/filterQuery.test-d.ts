@@ -204,6 +204,14 @@ expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'laps.foo': 'string' });
 expectNotType<Filter<PetModel>>({ 'treats.0': 123 });
 
+/// it should not accept wrong types for nested document array fields
+expectError<Filter<PetModel>>({
+  treats: {
+    $elemMatch: true
+  }
+});
+expectError<Filter<PetModel>>({ treats: 123 });
+
 // Nested arrays aren't checked
 expectNotType<Filter<PetModel>>({ 'meta.deep.nestedArray.0': 'not a number' });
 
