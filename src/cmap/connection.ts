@@ -373,7 +373,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       this[kQueue].clear();
       this.emit(Connection.CLOSE);
-    }, 1);
+    }, 1).unref(); // No need for this timer to hold the event loop open
   }
 
   onMessage(message: BinMsg | Response) {
