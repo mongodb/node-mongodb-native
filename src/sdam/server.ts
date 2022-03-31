@@ -171,18 +171,20 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     // create the monitor
-    this[kMonitor] = new Monitor(this, this.s.options);
+    // TODO(NODE-4144): Remove new variable for type narrowing
+    const monitor = new Monitor(this, this.s.options);
+    this[kMonitor] = monitor;
 
     for (const event of HEARTBEAT_EVENTS) {
-      this[kMonitor].on(event, (e: any) => this.emit(event, e));
+      monitor.on(event, (e: any) => this.emit(event, e));
     }
 
-    this[kMonitor].on('resetConnectionPool', () => {
+    monitor.on('resetConnectionPool', () => {
       this.s.pool.clear();
     });
 
-    this[kMonitor].on('resetServer', (error: MongoError) => markServerUnknown(this, error));
-    this[kMonitor].on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
+    monitor.on('resetServer', (error: MongoError) => markServerUnknown(this, error));
+    monitor.on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
       this.emit(
         Server.DESCRIPTION_RECEIVED,
         new ServerDescription(this.description.hostAddress, event.reply, {

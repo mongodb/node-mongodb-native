@@ -592,6 +592,20 @@ SINGLETON_TASKS.push({
   ]
 });
 
+SINGLETON_TASKS.push({
+  name: 'run-typescript-next',
+  tags: ['run-typescript-next'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: LOWEST_LTS
+      }
+    },
+    { func: 'run typescript next' }
+  ]
+});
+
 BUILD_VARIANTS.push({
   name: 'lint',
   display_name: 'lint',

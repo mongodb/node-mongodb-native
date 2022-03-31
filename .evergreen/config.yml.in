@@ -247,6 +247,17 @@ functions:
           ${PREPARE_SHELL}
           bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
 
+  "run typescript next":
+    - command: subprocess.exec
+      params:
+        working_dir: "src"
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-typescript-next.sh"
+
   "run mongosh integration tests":
     - command: shell.exec
       type: test

@@ -66,7 +66,9 @@ export class Encrypter {
   }
 
   getInternalClient(client: MongoClient, uri: string, options: MongoClientOptions): MongoClient {
-    if (this[kInternalClient] == null) {
+    // TODO(NODE-4144): Remove new variable for type narrowing
+    let internalClient = this[kInternalClient];
+    if (internalClient == null) {
       const clonedOptions: MongoClientOptions = {};
 
       for (const key of Object.keys(options)) {
@@ -77,28 +79,30 @@ export class Encrypter {
 
       clonedOptions.minPoolSize = 0;
 
-      const internalClient = new MongoClient(uri, clonedOptions);
+      internalClient = new MongoClient(uri, clonedOptions);
       this[kInternalClient] = internalClient;
 
       for (const eventName of MONGO_CLIENT_EVENTS) {
         for (const listener of client.listeners(eventName)) {
-          this[kInternalClient].on(eventName, listener);
+          internalClient.on(eventName, listener);
         }
       }
 
       client.on('newListener', (eventName, listener) => {
-        internalClient.on(eventName, listener);
+        internalClient?.on(eventName, listener);
       });
 
       this.needsConnecting = true;
     }
-    return this[kInternalClient];
+    return internalClient;
   }
 
   connectInternalClient(callback: Callback): void {
-    if (this.needsConnecting && this[kInternalClient] != null) {
+    // TODO(NODE-4144): Remove new variable for type narrowing
+    const internalClient = this[kInternalClient];
+    if (this.needsConnecting && internalClient != null) {
       this.needsConnecting = false;
-      return this[kInternalClient].connect(callback);
+      return internalClient.connect(callback);
     }
 
     return callback();
@@ -106,8 +110,9 @@ export class Encrypter {
 
   close(client: MongoClient, force: boolean, callback: Callback): void {
     this.autoEncrypter.teardown(!!force, e => {
-      if (this[kInternalClient] && client !== this[kInternalClient]) {
-        return this[kInternalClient].close(force, callback);
+      const internalClient = this[kInternalClient];
+      if (internalClient != null && client !== internalClient) {
+        return internalClient.close(force, callback);
       }
       callback(e);
     });
