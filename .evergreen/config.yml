@@ -2326,6 +2326,7 @@ buildvariants:
     run_on: ubuntu1804-large
     tasks:
       - run-checks
+      - run-typescript-next
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-test

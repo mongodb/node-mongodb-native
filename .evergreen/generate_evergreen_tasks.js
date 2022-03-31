@@ -610,7 +610,7 @@ BUILD_VARIANTS.push({
   name: 'lint',
   display_name: 'lint',
   run_on: DEFAULT_OS,
-  tasks: ['run-checks']
+  tasks: ['run-checks', 'run-typescript-next']
 });
 
 // TODO NODE-3897 - generate combined coverage report
