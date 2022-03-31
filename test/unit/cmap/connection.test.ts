@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
 import { Socket } from 'net';
-import sinon from 'sinon';
+import * as sinon from 'sinon';
 
 import { connect } from '../../../src/cmap/connect';
 import { Connection, hasSessionSupport } from '../../../src/cmap/connection';
