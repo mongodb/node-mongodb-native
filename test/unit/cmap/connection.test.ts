@@ -4,7 +4,7 @@ import { Socket } from 'net';
 import * as sinon from 'sinon';
 
 import { connect } from '../../../src/cmap/connect';
-import { Connection, ConnectionOptions, hasSessionSupport } from '../../../src/cmap/connection';
+import { Connection, hasSessionSupport } from '../../../src/cmap/connection';
 import { MessageStream } from '../../../src/cmap/message_stream';
 import { MongoNetworkTimeoutError } from '../../../src/error';
 import { isHello, ns } from '../../../src/utils';
