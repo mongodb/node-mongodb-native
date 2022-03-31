@@ -4,12 +4,21 @@ import { Socket } from 'net';
 import * as sinon from 'sinon';
 
 import { connect } from '../../../src/cmap/connect';
-import { Connection, hasSessionSupport } from '../../../src/cmap/connection';
+import { Connection, ConnectionOptions, hasSessionSupport } from '../../../src/cmap/connection';
 import { MessageStream } from '../../../src/cmap/message_stream';
 import { MongoNetworkTimeoutError } from '../../../src/error';
 import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { getSymbolFrom } from '../../tools/utils';
+
+const connectionOptionsDefaults = {
+  id: 0,
+  generation: 0,
+  monitorCommands: false,
+  tls: false,
+  metadata: undefined,
+  loadBalanced: false
+};
 
 describe('new Connection()', function () {
   let server;
@@ -26,8 +35,13 @@ describe('new Connection()', function () {
       // blackhole all other requests
     });
 
-    // @ts-expect-error: This subset of options is all that is needed
-    connect({ connectionType: Connection, hostAddress: server.hostAddress() }, (err, conn) => {
+    const options = {
+      ...connectionOptionsDefaults,
+      connectionType: Connection,
+      hostAddress: server.hostAddress()
+    };
+
+    connect(options, (err, conn) => {
       expect(err).to.not.exist;
       expect(conn).to.exist;
 
@@ -50,8 +64,13 @@ describe('new Connection()', function () {
       // blackhole all other requests
     });
 
-    // @ts-expect-error: This subset of options is all that is needed
-    connect({ connectionType: Connection, hostAddress: server.hostAddress() }, (err, conn) => {
+    const options = {
+      ...connectionOptionsDefaults,
+      connectionType: Connection,
+      hostAddress: server.hostAddress()
+    };
+
+    connect(options, (err, conn) => {
       expect(err).to.not.exist;
       expect(conn).to.exist;
 
@@ -76,10 +95,10 @@ describe('new Connection()', function () {
     });
 
     const options = {
-      hostAddress: server.hostAddress()
+      hostAddress: server.hostAddress(),
+      ...connectionOptionsDefaults
     };
 
-    // @ts-expect-error: This subset of options is all that is needed
     connect(options, (err, conn) => {
       expect(err).to.be.a('undefined');
       expect(conn).to.be.instanceOf(Connection);
@@ -101,11 +120,11 @@ describe('new Connection()', function () {
     });
 
     const options = {
+      ...connectionOptionsDefaults,
       hostAddress: server.hostAddress(),
       socketTimeoutMS: 50
     };
 
-    // @ts-expect-error: This subset of options is all that is needed
     connect(options, (err, conn) => {
       expect(conn).to.be.a('undefined');
 
@@ -149,8 +168,8 @@ describe('new Connection()', function () {
       NodeJSTimeoutClass = setTimeout(() => null, 1).constructor;
 
       driverSocket = sinon.spy(new FakeSocket());
-      // @ts-expect-error: This subset of options is all that is needed
-      connection = sinon.spy(new Connection(driverSocket, { id: 1 }));
+      // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
       const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
       kDelayedTimeoutId = getSymbolFrom(connection, 'delayedTimeoutId');
       messageStream = connection[messageStreamSymbol];
@@ -204,11 +223,12 @@ describe('new Connection()', function () {
 
     context('when logicalSessionTimeoutMinutes is present', function () {
       beforeEach(function () {
-        // @ts-expect-error: This subset of options is all that is needed
-        connection = new Connection(stream, {
+        const options = {
+          ...connectionOptionsDefaults,
           hostAddress: server.hostAddress(),
           logicalSessionTimeoutMinutes: 5
-        });
+        };
+        connection = new Connection(stream, options);
       });
 
       it('returns true', function () {
@@ -219,11 +239,12 @@ describe('new Connection()', function () {
     context('when logicalSessionTimeoutMinutes is not present', function () {
       context('when in load balancing mode', function () {
         beforeEach(function () {
-          // @ts-expect-error: This subset of options is all that is needed
-          connection = new Connection(stream, {
+          const options = {
+            ...connectionOptionsDefaults,
             hostAddress: server.hostAddress(),
             loadBalanced: true
-          });
+          };
+          connection = new Connection(stream, options);
         });
 
         it('returns true', function () {
@@ -233,10 +254,12 @@ describe('new Connection()', function () {
 
       context('when not in load balancing mode', function () {
         beforeEach(function () {
-          // @ts-expect-error: This subset of options is all that is needed
-          connection = new Connection(stream, {
-            hostAddress: server.hostAddress()
-          });
+          const options = {
+            ...connectionOptionsDefaults,
+            hostAddress: server.hostAddress(),
+            loadBalanced: false
+          };
+          connection = new Connection(stream, options);
         });
 
         it('returns false', function () {
