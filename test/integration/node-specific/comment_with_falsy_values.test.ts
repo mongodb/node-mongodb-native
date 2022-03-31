@@ -105,9 +105,10 @@ const testsForChangeStreamsAggregate = falsyValues.map(falsyValue => {
 const testsForGetMore = falsyValues.map(falsyValue => {
   const description = `ChangeStreams should pass falsy value ${falsyToString(
     falsyValue
-  )} for comment option on initial aggregate`;
+  )} for comment option on getMore`;
 
   return new TestBuilder(description)
+    .runOnRequirement({ topologies: ['replicaset'] })
     .operation({
       name: 'createChangeStream',
       object: 'collection0',
@@ -157,15 +158,21 @@ const testsForGetMore = falsyValues.map(falsyValue => {
 });
 
 const changeStreamTestSuite = new UnifiedTestSuiteBuilder(
-  'Change Streams - Comment with Falsy Values'
+  'Change Streams Comment with Falsy Values'
 )
   .schemaVersion('1.0')
+  .initialData({
+    collectionName: 'coll0',
+    databaseName: '',
+    documents: []
+  })
+  .databaseName('change-streams-comment-with-falsy-values')
   .runOnRequirement({ minServerVersion: '4.4.0', topologies: ['replicaset', 'sharded-replicaset'] })
   .test(testsForChangeStreamsAggregate)
   .test(testsForGetMore)
   .toJSON();
 
-describe('comment w/ falsy values ', () => {
+describe.only('comment w/ falsy values ', () => {
   runUnifiedSuite([testSuite]);
   runUnifiedSuite([changeStreamTestSuite]);
 });
