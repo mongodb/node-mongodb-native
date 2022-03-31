@@ -355,12 +355,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     this[kDelayedTimeoutId] = setTimeout(() => {
-      const delayedTimeoutId = this[kDelayedTimeoutId];
-      if (delayedTimeoutId != null) {
-        clearTimeout(delayedTimeoutId);
-        this[kDelayedTimeoutId] = null;
-      }
-
       this[kStream].destroy();
 
       this.closed = true;

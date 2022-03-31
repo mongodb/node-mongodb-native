@@ -59,14 +59,14 @@ describe('new Connection()', function () {
         expect(err).to.be.instanceOf(MongoNetworkTimeoutError);
         expect(result).to.not.exist;
 
-        expect(conn).property('stream').property('destroyed').to.be.true;
+        expect(conn).property('stream').property('destroyed', true);
 
         done();
       });
     });
   });
 
-  it('should throw a network error with kBeforeHandshake set to false on timeout after hand shake', function (done) {
+  it('should throw a network error with kBeforeHandshake set to false on timeout after handshake', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -95,7 +95,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it('should throw a network error with kBeforeHandshake set to true on timeout before hand shake', function (done) {
+  it('should throw a network error with kBeforeHandshake set to true on timeout before handshake', function (done) {
     server.setMessageHandler(() => {
       // respond to no requests to trigger timeout event
     });
@@ -166,12 +166,14 @@ describe('new Connection()', function () {
       driverSocket.emit('timeout');
       expect(connection.onTimeout).to.have.been.calledOnce;
       expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
+      expect(connection).to.have.property('closed', false);
+      expect(driverSocket.destroy).to.not.have.been.called;
 
       clock.tick(1);
 
       expect(driverSocket.destroy).to.have.been.calledOnce;
       expect(connection).to.have.property('closed', true);
-      // timeout callback should clear it's own reference
+      // timeout callback should clear its own reference
       expect(connection).to.have.property(kDelayedTimeoutId, null);
     });
 
@@ -192,7 +194,7 @@ describe('new Connection()', function () {
       // ticking the clock should do nothing, there is no timeout anymore
       clock.tick(1);
 
-      expect(driverSocket.destroy).to.not.have.been.calledOnce;
+      expect(driverSocket.destroy).to.not.have.been.called;
       expect(connection).to.have.property('closed', false);
       expect(connection).to.have.property(kDelayedTimeoutId, null);
     });
