@@ -172,7 +172,7 @@ const changeStreamTestSuite = new UnifiedTestSuiteBuilder(
   .test(testsForGetMore)
   .toJSON();
 
-describe.only('comment w/ falsy values ', () => {
+describe('comment w/ falsy values ', () => {
   runUnifiedSuite([testSuite]);
   runUnifiedSuite([changeStreamTestSuite]);
 });
