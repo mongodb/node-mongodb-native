@@ -173,8 +173,6 @@ describe('new Connection()', function () {
 
       expect(driverSocket.destroy).to.have.been.calledOnce;
       expect(connection).to.have.property('closed', true);
-      // timeout callback should clear its own reference
-      expect(connection).to.have.property(kDelayedTimeoutId, null);
     });
 
     it('should clear timeout errors if more data is available', () => {
