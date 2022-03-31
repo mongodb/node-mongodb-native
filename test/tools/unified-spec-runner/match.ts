@@ -186,7 +186,6 @@ export function resultCheck(
       expect(expected.equals(actual)).to.be.true;
     } else if (Number.isNaN(actual) && Number.isNaN(expected)) {
       // in JS, NaN isn't equal to NaN but we want to not fail if we have two NaN
-      return;
     } else if (
       typeof expected === 'number' &&
       typeof actual === 'number' &&
@@ -195,7 +194,6 @@ export function resultCheck(
     ) {
       // case to handle +0 and -0
       expect(Object.is(expected, actual)).to.be.true;
-      return;
     } else {
       expect(actual).to.equal(expected);
     }
