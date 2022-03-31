@@ -94,7 +94,7 @@ tests:
             data:
               failCommands: [saslContinue, ping]
               errorCode: 91 # ShutdownInProgress
-
+              errorLabels: ["RetryableWriteError"]
       - name: runCommand
         object: *database0
         arguments:

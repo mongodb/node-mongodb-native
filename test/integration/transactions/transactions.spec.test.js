@@ -78,17 +78,8 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
-// These tests are skipped because the driver 1) executes a ping when connecting to
-// an authenticated server and 2) command monitoring is at the connection level so
-// when the handshake fails no command started event is emitted.
-// NOTE: these tests are skipped in the spec itself due to DRIVERS-2032 (unrelated to the above)
-const SKIP = [
-  'AbortTransaction succeeds after handshake network error',
-  'CommitTransaction succeeds after handshake network error'
-];
-
 describe('Transactions Spec Unified Tests', function () {
-  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')), SKIP);
+  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')));
 });
 
 const SKIP_TESTS = [
@@ -127,82 +118,4 @@ describe('Transactions Spec Legacy Tests', function () {
   }
 
   generateTopologyTests(testSuites, testContext, testFilter);
-});
-
-describe('Transactions Spec Manual Tests', function () {
-  context('when the handshake fails with a network error', function () {
-    const metadata = {
-      requires: {
-        mongodb: '>=4.2.0',
-        auth: 'enabled',
-        topology: '!single'
-      }
-    };
-
-    const dbName = 'retryable-handshake-tests';
-    const collName = 'coll';
-    const docs = [{ _id: 1, x: 11 }];
-    let client;
-    let db;
-    let coll;
-    let session;
-
-    beforeEach(async function () {
-      if (process.env.SERVERLESS) {
-        this.currentTest.skipReason = 'Transaction tests cannot run against serverless';
-        this.skip();
-      }
-      client = this.configuration.newClient({});
-      db = client.db(dbName);
-      coll = db.collection(collName);
-      await client.connect();
-      await coll.insertMany(docs);
-      session = client.startSession();
-      session.startTransaction();
-      await coll.insertOne({ _id: 2, x: 22 }, { session });
-    });
-
-    afterEach(async function () {
-      await session.endSession();
-
-      await db.admin().command({
-        configureFailPoint: 'failCommand',
-        mode: 'off'
-      });
-      await coll.drop();
-      await client.close();
-    });
-
-    // Manual implementation for: 'AbortTransaction succeeds after handshake network error'
-    // NOTE: tests are skipped in the spec itself due to DRIVERS-2032 (unrelated to our reasons)
-    it('retries the abort', metadata, async function () {
-      await db.admin().command({
-        configureFailPoint: 'failCommand',
-        mode: { times: 2 },
-        data: {
-          failCommands: ['saslContinue', 'ping'],
-          closeConnection: true
-        }
-      });
-      await session.abortTransaction();
-      const doc = await coll.findOne({ _id: 2 });
-      expect(doc).to.not.exist;
-    });
-
-    // Manual implementation for: 'CommitTransaction succeeds after handshake network error'
-    // NOTE: tests are skipped in the spec itself due to DRIVERS-2032 (unrelated to our reasons)
-    it('retries the commit', metadata, async function () {
-      await db.admin().command({
-        configureFailPoint: 'failCommand',
-        mode: { times: 2 },
-        data: {
-          failCommands: ['saslContinue', 'ping'],
-          closeConnection: true
-        }
-      });
-      await session.commitTransaction();
-      const doc = await coll.findOne({ _id: 2 });
-      expect(doc.x).to.equal(22);
-    });
-  });
 });

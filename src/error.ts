@@ -744,21 +744,18 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set<number>([
 ]);
 
 export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): boolean {
-  if (maxWireVersion >= 9) {
-    // 4.4+ servers attach their own retryable write error
-    return false;
-  }
   // pre-4.4 server, then the driver adds an error label for every valid case
   // execute operation will only inspect the label, code/message logic is handled here
-
   if (error instanceof MongoNetworkError) {
     return true;
   }
 
-  if (error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) {
-    // Before 4.4 the error label can be one way of identifying retry
-    // so we can return true if we have the label, but fall back to code checking below
-    return true;
+  if (
+    maxWireVersion >= 9 ||
+    (error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.RetryableWriteError))
+  ) {
+    // If we already have the error label no need to add it again. 4.4+ servers add the label.
+    return false;
   }
 
   if (error instanceof MongoWriteConcernError) {

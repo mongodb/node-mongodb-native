@@ -1,4 +1,3 @@
-const { expect } = require('chai');
 const path = require('path');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
 const { loadSpecTests } = require('../../spec');
@@ -30,87 +29,6 @@ describe('Retryable Reads (legacy)', function () {
   });
 });
 
-// These tests are skipped because the driver 1) executes a ping when connecting to
-// an authenticated server and 2) command monitoring is at the connection level so
-// when the handshake fails no command started event is emitted.
-const SKIP = [
-  'find succeeds after retryable handshake network error',
-  'find succeeds after retryable handshake network error (ShutdownInProgress)'
-];
-
 describe('Retryable Reads (unified)', function () {
-  runUnifiedSuite(loadSpecTests(path.join('retryable-reads', 'unified')), SKIP);
-});
-
-describe('Retryable Reads Spec Manual Tests', function () {
-  context('retryable reads handshake failures', function () {
-    const metadata = {
-      requires: {
-        mongodb: '>=4.2.0',
-        auth: 'enabled',
-        topology: '!single'
-      }
-    };
-
-    const dbName = 'retryable-handshake-tests';
-    const collName = 'coll';
-    const inputDocs = [
-      { _id: 1, x: 11 },
-      { _id: 2, x: 22 },
-      { _id: 3, x: 33 }
-    ];
-    let client;
-    let db;
-    let coll;
-
-    beforeEach(async function () {
-      client = this.configuration.newClient({});
-      db = client.db(dbName);
-      coll = db.collection(collName);
-      await client.connect();
-      await coll.insertMany(inputDocs);
-    });
-
-    afterEach(async function () {
-      await db.admin().command({
-        configureFailPoint: 'failCommand',
-        mode: 'off'
-      });
-      await coll.drop();
-      await client.close();
-    });
-
-    context('when the handshake fails with a network error', function () {
-      // Manual implementation for: 'find succeeds after retryable handshake network error'
-      it('retries the read', metadata, async function () {
-        await db.admin().command({
-          configureFailPoint: 'failCommand',
-          mode: { times: 2 },
-          data: {
-            failCommands: ['saslContinue', 'ping'],
-            closeConnection: true
-          }
-        });
-        const documents = await coll.find({ _id: 2 }).toArray();
-        expect(documents).to.deep.equal([inputDocs[1]]);
-      });
-    });
-
-    context('when the handshake fails with shutdown in progress', function () {
-      // Manual implementation for:
-      // 'find succeeds after retryable handshake network error (ShutdownInProgress)'
-      it('retries the read', metadata, async function () {
-        await db.admin().command({
-          configureFailPoint: 'failCommand',
-          mode: { times: 2 },
-          data: {
-            failCommands: ['saslContinue', 'ping'],
-            errorCode: 91 // ShutdownInProgress
-          }
-        });
-        const documents = await coll.find({ _id: 2 }).toArray();
-        expect(documents).to.deep.equal([inputDocs[1]]);
-      });
-    });
-  });
+  runUnifiedSuite(loadSpecTests(path.join('retryable-reads', 'unified')));
 });
