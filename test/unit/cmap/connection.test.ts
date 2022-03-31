@@ -6,6 +6,7 @@ import * as sinon from 'sinon';
 import { connect } from '../../../src/cmap/connect';
 import { Connection, hasSessionSupport } from '../../../src/cmap/connection';
 import { MessageStream } from '../../../src/cmap/message_stream';
+import { MongoNetworkTimeoutError } from '../../../src/error';
 import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { getSymbolFrom } from '../../tools/utils';
@@ -55,7 +56,7 @@ describe('new Connection()', function () {
       expect(conn).to.exist;
 
       conn.command(ns('$admin.cmd'), { ping: 1 }, { socketTimeoutMS: 50 }, (err, result) => {
-        expect(err).to.exist;
+        expect(err).to.be.instanceOf(MongoNetworkTimeoutError);
         expect(result).to.not.exist;
 
         expect(conn).property('stream').property('destroyed').to.be.true;
