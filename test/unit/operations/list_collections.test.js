@@ -77,8 +77,9 @@ describe('ListCollectionsOperation', function () {
           expect(command).not.to.haveOwnProperty('comment');
         });
       });
+
       context('when the wireVersion >= 9', function () {
-        it('does not set a comment on the command', function () {
+        it('sets a comment on the command', function () {
           const operation = new ListCollectionsOperation(
             db,
             {},

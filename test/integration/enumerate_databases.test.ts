@@ -147,15 +147,12 @@ const testSuite = new UnifiedTestSuiteBuilder('listDatabases with comment option
   .initialData({
     collectionName: 'coll0',
     databaseName: '',
-    documents: [
-      { _id: 1, x: 11 },
-      { _id: 2, toBeDeleted: true } // This should only be used by the delete test
-    ]
+    documents: [{ _id: 1, x: 11 }]
   })
   .databaseName('listDatabases-with-falsy-values')
   .test(
     new TestBuilder('listDatabases should not send comment for server versions < 4.4')
-      .runOnRequirement({ maxServerVersion: '4.4.0' })
+      .runOnRequirement({ maxServerVersion: '4.3.99' })
       .operation({
         name: 'listDatabases',
         arguments: {
