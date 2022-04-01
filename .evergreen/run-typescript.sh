@@ -1,8 +1,9 @@
 #!/bin/bash
 set -o errexit # Exit the script with error if any of the commands fail
-set -o xtrace
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+
+set -o xtrace
 
 function get_current_ts_version {
     node -e "console.log(require('./package-lock.json').dependencies.typescript.version)"
