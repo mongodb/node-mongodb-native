@@ -49,7 +49,7 @@ For version compatibility matrices, please refer to the following links:
 We recommend using the latest version of typescript, however we do provide a [downleveled](https://github.com/sandersn/downlevel-dts#readme) version of the type definitions that we ensure compiles against `typescript@4.1.6`.
 This is the lowest typescript version guaranteed to work with our driver, older versions may work but use at your own risk.
 Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes) we consider this support best effort.
-If you run into any unexpected compiler failures against our supported TypeScript versions please let us know and we will do our best to correct it.
+If you run into any unexpected compiler failures against our supported TypeScript versions please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
 
 ## Installation
 

@@ -51,7 +51,6 @@
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
     "chalk": "^4.1.2",
-    "downlevel-dts": "^0.9.0",
     "eslint": "^8.12.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.25.4",
