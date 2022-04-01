@@ -45,8 +45,15 @@ export interface CommandOperationOptions
   /** Collation */
   collation?: CollationOptions;
   maxTimeMS?: number;
-  /** A user-provided comment to attach to this command */
-  comment?: string | Document;
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions pre-4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
+   */
+  comment?: unknown;
   /** Should retry failed writes */
   retryWrites?: boolean;
 

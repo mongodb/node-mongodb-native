@@ -124,7 +124,15 @@ export interface GetMoreOptions extends CommandOptions {
   batchSize?: number;
   maxTimeMS?: number;
   maxAwaitTimeMS?: number;
-  comment?: Document | string;
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions pre-4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
+   */
+  comment?: unknown;
 }
 
 /** @public */
@@ -573,6 +581,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     if (typeof options.maxAwaitTimeMS === 'number') {
       getMoreCmd.maxTimeMS = options.maxAwaitTimeMS;
+    }
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      getMoreCmd.comment = options.comment;
     }
 
     const commandOptions = Object.assign(

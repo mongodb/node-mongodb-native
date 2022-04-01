@@ -4,6 +4,15 @@ import util from 'util';
 
 import { Logger } from '../../src/logger';
 import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
+import {
+  CollectionData,
+  EntityDescription,
+  ExpectedEventsForClient,
+  OperationDescription,
+  RunOnRequirement,
+  Test,
+  UnifiedSuite
+} from './unified-spec-runner/schema';
 
 export function makeTestFunction(config: DeprecateOptionsConfig) {
   const fn = (options: any) => {
@@ -81,22 +90,6 @@ export class EventCollector {
     }
 
     this.waitForEventImpl(this, Date.now(), eventName, count, callback);
-  }
-
-  /**
-   * Will only return one event at a time from the front of the list
-   * Useful for iterating over the events in the order they occurred
-   */
-  waitAndShiftEvent(eventName: string): Promise<Record<string, any>> {
-    return new Promise<Record<string, any>>((resolve, reject) => {
-      if (this._events[eventName].length > 0) {
-        return resolve(this._events[eventName].shift());
-      }
-      this.waitForEventImpl(this, Date.now(), eventName, 1, (error: any) => {
-        if (error) return reject(error);
-        resolve(this._events[eventName].shift());
-      });
-    });
   }
 
   reset(eventName: string) {
@@ -285,4 +278,182 @@ export interface FailPoint {
     errorLabels?: string[];
     appName?: string;
   };
+}
+
+export class TestBuilder {
+  private _description: string;
+  private runOnRequirements: RunOnRequirement[] = [];
+  private _skipReason?: string;
+  private _operations: OperationDescription[] = [];
+  private _expectEvents?: ExpectedEventsForClient[] = [];
+  private _outcome?: CollectionData[] = [];
+
+  constructor(description: string) {
+    this._description = description;
+  }
+
+  operation(operation: OperationDescription): this {
+    this._operations.push({
+      object: 'collection0',
+      ...operation
+    });
+    return this;
+  }
+
+  runOnRequirement(requirement: RunOnRequirement): this {
+    this.runOnRequirements.push(requirement);
+    return this;
+  }
+
+  expectEvents(event: ExpectedEventsForClient): this {
+    this._expectEvents.push(event);
+    return this;
+  }
+
+  toJSON(): Test {
+    const test: Test = {
+      description: this._description,
+      runOnRequirements: this.runOnRequirements,
+      operations: this._operations,
+      expectEvents: this._expectEvents,
+      outcome: this._outcome
+    };
+
+    if (this._skipReason != null) {
+      test.skipReason = this._skipReason;
+    }
+
+    return test;
+  }
+}
+
+export class UnifiedTestSuiteBuilder {
+  private _description = 'Default Description';
+  private _databaseName = '';
+  private _schemaVersion = '1.0';
+  private _createEntities: EntityDescription[] = [
+    {
+      client: {
+        id: 'client0',
+        useMultipleMongoses: true,
+        observeEvents: ['commandStartedEvent']
+      }
+    },
+    {
+      database: {
+        id: 'database0',
+        client: 'client0',
+        databaseName: ''
+      }
+    },
+    {
+      collection: {
+        id: 'collection0',
+        database: 'database0',
+        collectionName: 'coll0'
+      }
+    }
+  ];
+  private _runOnRequirement: RunOnRequirement[] = [];
+  private _initialData: CollectionData[] = [];
+  private _tests: Test[] = [];
+
+  constructor(description: string) {
+    this._description = description;
+  }
+
+  description(description: string): this {
+    this._description = description;
+    return this;
+  }
+
+  test(test: Test): this;
+  test(test: Test[]): this;
+  test(test: Test | Test[]): this {
+    if (Array.isArray(test)) {
+      this._tests.push(...test);
+    } else {
+      this._tests.push(test);
+    }
+    return this;
+  }
+
+  createEntities(entity: EntityDescription): this;
+  createEntities(entity: EntityDescription[]): this;
+  createEntities(entity: EntityDescription | EntityDescription[]): this {
+    if (Array.isArray(entity)) {
+      this._createEntities.push(...entity);
+    } else {
+      this._createEntities.push(entity);
+    }
+    return this;
+  }
+
+  initialData(data: CollectionData): this;
+  initialData(data: CollectionData[]): this;
+  initialData(data: CollectionData | CollectionData[]): this {
+    if (Array.isArray(data)) {
+      this._initialData.push(...data);
+    } else {
+      this._initialData.push(data);
+    }
+    return this;
+  }
+
+  /**
+   * sets the database name for the tests
+   */
+  databaseName(name: string): this {
+    this._databaseName = name;
+    return this;
+  }
+
+  runOnRequirement(requirement: RunOnRequirement): this;
+  runOnRequirement(requirement: RunOnRequirement[]): this;
+  runOnRequirement(requirement: RunOnRequirement | RunOnRequirement[]): this {
+    Array.isArray(requirement)
+      ? this._runOnRequirement.push(...requirement)
+      : this._runOnRequirement.push(requirement);
+    return this;
+  }
+
+  schemaVersion(version: string): this {
+    this._schemaVersion = version;
+    return this;
+  }
+
+  toJSON(): UnifiedSuite {
+    const databaseName =
+      this._databaseName !== ''
+        ? this._databaseName
+        : this._description
+            .split(' ')
+            .filter(s => s.length > 0)
+            .join('_');
+    return {
+      description: this._description,
+      schemaVersion: this._schemaVersion,
+      runOnRequirements: this._runOnRequirement,
+      createEntities: this._createEntities.map(entity => {
+        if ('database' in entity) {
+          return {
+            database: { ...entity.database, databaseName }
+          };
+        }
+
+        return entity;
+      }),
+      initialData: this._initialData.map(data => {
+        return {
+          ...data,
+          databaseName
+        };
+      }),
+      tests: this._tests
+    };
+  }
+
+  clone(): UnifiedSuite {
+    return JSON.parse(JSON.stringify(this));
+  }
 }

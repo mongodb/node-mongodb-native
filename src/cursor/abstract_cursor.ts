@@ -42,6 +42,8 @@ const kInitialized = Symbol('initialized');
 const kClosed = Symbol('closed');
 /** @internal */
 const kKilled = Symbol('killed');
+/** @internal */
+const kInit = Symbol('kInit');
 
 /** @public */
 export const CURSOR_FLAGS = [
@@ -77,7 +79,15 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   readConcern?: ReadConcernLike;
   batchSize?: number;
   maxTimeMS?: number;
-  comment?: Document | string;
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions pre-4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
+   */
+  comment?: unknown;
   tailable?: boolean;
   awaitData?: boolean;
   noCursorTimeout?: boolean;
@@ -162,7 +172,9 @@ export abstract class AbstractCursor<
       this[kOptions].batchSize = options.batchSize;
     }
 
-    if (options.comment != null) {
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
       this[kOptions].comment = options.comment;
     }
 
@@ -620,6 +632,65 @@ export abstract class AbstractCursor<
 
     executeOperation(this, getMoreOperation, callback);
   }
+
+  /**
+   * @internal
+   *
+   * This function is exposed for the unified test runner's createChangeStream
+   * operation.  We cannot refactor to use the abstract _initialize method without
+   * a significant refactor.
+   */
+  [kInit](callback: Callback<TSchema | null>): void {
+    if (this[kSession] == null) {
+      if (this[kTopology].shouldCheckForSessionSupport()) {
+        return this[kTopology].selectServer(ReadPreference.primaryPreferred, {}, err => {
+          if (err) return callback(err);
+          return this[kInit](callback);
+        });
+      } else if (this[kTopology].hasSessionSupport()) {
+        this[kSession] = this[kTopology].startSession({ owner: this, explicit: false });
+      }
+    }
+
+    this._initialize(this[kSession], (err, state) => {
+      if (state) {
+        const response = state.response;
+        this[kServer] = state.server;
+        this[kSession] = state.session;
+
+        if (response.cursor) {
+          this[kId] =
+            typeof response.cursor.id === 'number'
+              ? Long.fromNumber(response.cursor.id)
+              : response.cursor.id;
+
+          if (response.cursor.ns) {
+            this[kNamespace] = ns(response.cursor.ns);
+          }
+
+          this[kDocuments] = response.cursor.firstBatch;
+        }
+
+        // When server responses return without a cursor document, we close this cursor
+        // and return the raw server response. This is often the case for explain commands
+        // for example
+        if (this[kId] == null) {
+          this[kId] = Long.ZERO;
+          // TODO(NODE-3286): ExecutionResult needs to accept a generic parameter
+          this[kDocuments] = [state.response as TODO_NODE_3286];
+        }
+      }
+
+      // the cursor is now initialized, even if an error occurred or it is dead
+      this[kInitialized] = true;
+
+      if (err || cursorIsDead(this)) {
+        return cleanupCursor(this, { error: err }, () => callback(err, nextDocument(this)));
+      }
+
+      callback();
+    });
+  }
 }
 
 function nextDocument<T>(cursor: AbstractCursor): T | null | undefined {
@@ -653,61 +724,12 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    if (cursor[kSession] == null) {
-      if (cursor[kTopology].shouldCheckForSessionSupport()) {
-        return cursor[kTopology].selectServer(ReadPreference.primaryPreferred, {}, err => {
-          if (err) return callback(err);
-          return next(cursor, blocking, callback);
-        });
-      } else if (cursor[kTopology].hasSessionSupport()) {
-        cursor[kSession] = cursor[kTopology].startSession({ owner: cursor, explicit: false });
+    cursor[kInit]((err, value) => {
+      if (err) return callback(err);
+      if (value) {
+        return callback(undefined, value);
       }
-    }
-
-    cursor._initialize(cursor[kSession], (err, state) => {
-      if (state) {
-        const response = state.response;
-        cursor[kServer] = state.server;
-        cursor[kSession] = state.session;
-
-        if (response.cursor) {
-          cursor[kId] =
-            typeof response.cursor.id === 'number'
-              ? Long.fromNumber(response.cursor.id)
-              : response.cursor.id;
-
-          if (response.cursor.ns) {
-            cursor[kNamespace] = ns(response.cursor.ns);
-          }
-
-          cursor[kDocuments] = response.cursor.firstBatch;
-        } else {
-          // NOTE: This is for support of older servers (<3.2) which do not use commands
-          cursor[kId] =
-            typeof response.cursorId === 'number'
-              ? Long.fromNumber(response.cursorId)
-              : response.cursorId;
-          cursor[kDocuments] = response.documents;
-        }
-
-        // When server responses return without a cursor document, we close this cursor
-        // and return the raw server response. This is often the case for explain commands
-        // for example
-        if (cursor[kId] == null) {
-          cursor[kId] = Long.ZERO;
-          // TODO(NODE-3286): ExecutionResult needs to accept a generic parameter
-          cursor[kDocuments] = [state.response as TODO_NODE_3286];
-        }
-      }
-
-      // the cursor is now initialized, even if an error occurred or it is dead
-      cursor[kInitialized] = true;
-
-      if (err || cursorIsDead(cursor)) {
-        return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument(cursor)));
-      }
-
-      next(cursor, blocking, callback);
+      return next(cursor, blocking, callback);
     });
 
     return;

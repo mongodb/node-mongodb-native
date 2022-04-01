@@ -1,8 +1,12 @@
 description: "change-streams"
 schemaVersion: "1.0"
+runOnRequirements:
+  - topologies: [ replicaset, sharded-replicaset ]
 createEntities:
   - client:
       id: &client0 client0
+      observeEvents:
+        - commandStartedEvent
   - database:
       id: &database0 database0
       client: *client0
@@ -15,11 +19,11 @@ initialData:
   - collectionName: *collection0
     databaseName: *database0
     documents: []
+
 tests:
   - description: "Test array truncation"
     runOnRequirements:
       - minServerVersion: "4.7"
-        topologies: [replicaset]
     operations:
       - name: insertOne
         object: *collection0
@@ -70,3 +74,149 @@ tests:
             ]
           }
         }
+
+  - description: "Test with document comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: &comment0 { name: "test1" }
+        saveResultAsEntity: &changeStream0 changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: *comment0
+
+  - description: "Test with document comment - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.2.99"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: &comment0 { name: "test1" }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: *comment0
+
+  - description: "Test with string comment"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: "comment"
+        saveResultAsEntity: &changeStream0 changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: "comment"
+
+  - description: "Test that comment is set on getMore"
+    runOnRequirements:
+      - minServerVersion: "4.4.0"
+        topologies: [ replicaset ]
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: &commentDoc
+            key: "value"
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &new_document
+            _id: 1
+            a: 1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: *commentDoc
+          - commandStartedEvent:
+              command:
+                insert: *collection0
+                documents:
+                  - *new_document
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0
+                comment: *commentDoc
+              commandName: getMore
+              databaseName: *database0
+
+  - description: "Test that comment is not set on getMore - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.3.99"
+        topologies: [ replicaset ]
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          comment: "comment"
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &new_document
+            _id: 1
+            a: 1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $changeStream: {}
+                comment: "comment"
+          - commandStartedEvent:
+              command:
+                insert: *collection0
+                documents:
+                  - *new_document
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection0
+                comment: { $$exists: false }
+              commandName: getMore
+              databaseName: *database0

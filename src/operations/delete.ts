@@ -12,8 +12,6 @@ import { Aspect, defineAspects, Hint } from './operation';
 export interface DeleteOptions extends CommandOperationOptions, WriteConcernOptions {
   /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
   ordered?: boolean;
-  /** A user-provided comment to attach to this command */
-  comment?: string | Document;
   /** Specifies the collation to use for the operation */
   collation?: CollationOptions;
   /** Specify that the update query should only consider plans using the hinted index */
@@ -43,8 +41,6 @@ export interface DeleteStatement {
   collation?: CollationOptions;
   /** A document or string that specifies the index to use to support the query predicate. */
   hint?: Hint;
-  /** A user-provided comment to attach to this command */
-  comment?: string | Document;
 }
 
 /** @internal */
@@ -78,6 +74,12 @@ export class DeleteOperation extends CommandOperation<Document> {
 
     if (options.let) {
       command.let = options.let;
+    }
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      command.comment = options.comment;
     }
 
     if (options.explain != null && maxWireVersion(server) < 3) {
@@ -173,10 +175,6 @@ export function makeDeleteStatement(
 
   if (options.hint) {
     op.hint = options.hint;
-  }
-
-  if (options.comment) {
-    op.comment = options.comment;
   }
 
   return op;

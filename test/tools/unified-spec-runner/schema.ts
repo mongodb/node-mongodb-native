@@ -20,9 +20,10 @@ export interface UnifiedSuite {
   description: string;
   schemaVersion: string;
   runOnRequirements?: RunOnRequirement[];
-  createEntities?: [EntityDescription, ...EntityDescription[]];
-  initialData?: [CollectionData, ...CollectionData[]];
-  tests: [Test, ...Test[]];
+  createEntities?: EntityDescription[];
+  /** Data inserted before **all tests */
+  initialData?: CollectionData[];
+  tests: Test[];
   _yamlAnchors?: Document;
 }
 export const TopologyType = Object.freeze({
@@ -126,11 +127,11 @@ export interface CollectionData {
 }
 export interface Test {
   description: string;
-  runOnRequirements?: [RunOnRequirement, ...RunOnRequirement[]];
+  runOnRequirements?: RunOnRequirement[];
   skipReason?: string;
   operations: OperationDescription[];
   expectEvents?: ExpectedEventsForClient[];
-  outcome?: [CollectionData, ...CollectionData[]];
+  outcome?: CollectionData[];
 }
 export interface ExpectedEventsForClient {
   client: string;

@@ -46,8 +46,6 @@ export interface FindOptions<TSchema extends Document = Document> extends Comman
   min?: Document;
   /** The exclusive upper bound for a specific index */
   max?: Document;
-  /** You can put a $comment field on a query to make looking in the profiler logs simpler. */
-  comment?: string | Document;
   /** Number of milliseconds to wait before aborting the query. */
   maxTimeMS?: number;
   /** The maximum amount of time for the server to wait on new documents to satisfy a tailable cursor query. Requires `tailable` and `awaitData` to be true */
@@ -241,7 +239,9 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
     findCommand.singleBatch = options.singleBatch;
   }
 
-  if (options.comment) {
+  // we check for undefined specifically here to allow falsy values
+  // eslint-disable-next-line no-restricted-syntax
+  if (options.comment !== undefined) {
     findCommand.comment = options.comment;
   }
 

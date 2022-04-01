@@ -82,6 +82,15 @@ interface FindAndModifyCmdBase {
   maxTimeMS?: number;
   let?: Document;
   writeConcern?: WriteConcern | WriteConcernSettings;
+  /**
+   * Comment to apply to the operation.
+   *
+   * In server versions pre-4.4, 'comment' must be string.  A server
+   * error will be thrown if any other type is provided.
+   *
+   * In server versions 4.4 and above, 'comment' can be any valid BSON type.
+   */
+  comment?: unknown;
 }
 
 function configureFindAndModifyCmdBaseUpdateOpts(
@@ -138,6 +147,12 @@ class FindAndModifyOperation extends CommandOperation<Document> {
 
     if (options.let) {
       this.cmdBase.let = options.let;
+    }
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      this.cmdBase.comment = options.comment;
     }
 
     // force primary read preference

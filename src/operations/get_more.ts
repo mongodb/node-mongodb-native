@@ -2,7 +2,7 @@ import type { Document, Long } from '../bson';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback, MongoDBNamespace } from '../utils';
+import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './operation';
 
 /**
@@ -12,8 +12,12 @@ import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './op
 export interface GetMoreOptions extends OperationOptions {
   /** Set the batchSize for the getMoreCommand when iterating over the query results. */
   batchSize?: number;
-  /** You can put a $comment field on a query to make looking in the profiler logs simpler. */
-  comment?: string | Document;
+  /**
+   * Comment to apply to the operation.
+   *
+   * getMore only supports 'comment' in server versions 4.4 and above.
+   */
+  comment?: unknown;
   /** Number of milliseconds to wait before aborting the query. */
   maxTimeMS?: number;
 }
@@ -25,7 +29,14 @@ export class GetMoreOperation extends AbstractOperation {
 
   constructor(ns: MongoDBNamespace, cursorId: Long, server: Server, options: GetMoreOptions = {}) {
     super(options);
+
     this.options = options;
+
+    // comment on getMore is only supported for server versions 4.4 and above
+    if (maxWireVersion(server) < 9) {
+      delete this.options.comment;
+    }
+
     this.ns = ns;
     this.cursorId = cursorId;
     this.server = server;

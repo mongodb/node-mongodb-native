@@ -2,7 +2,7 @@ import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, MongoDBNamespace } from '../utils';
+import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -50,6 +50,12 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
 
     if (typeof this.options.authorizedDatabases === 'boolean') {
       cmd.authorizedDatabases = this.options.authorizedDatabases;
+    }
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (maxWireVersion(server) >= 9 && this.options.comment !== undefined) {
+      cmd.comment = this.options.comment;
     }
 
     super.executeCommand(server, session, cmd, callback);

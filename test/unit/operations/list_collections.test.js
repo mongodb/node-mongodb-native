@@ -65,12 +65,37 @@ describe('ListCollectionsOperation', function () {
   });
 
   describe('#generateCommand', function () {
+    context('when comment is provided', function () {
+      context('when the wireVersion < 9', function () {
+        it('does not set a comment on the command', function () {
+          const operation = new ListCollectionsOperation(
+            db,
+            {},
+            { dbName: db, comment: 'test comment' }
+          );
+          const command = operation.generateCommand(8);
+          expect(command).not.to.haveOwnProperty('comment');
+        });
+      });
+
+      context('when the wireVersion >= 9', function () {
+        it('sets a comment on the command', function () {
+          const operation = new ListCollectionsOperation(
+            db,
+            {},
+            { dbName: db, comment: 'test comment' }
+          );
+          const command = operation.generateCommand(9);
+          expect(command).to.have.property('comment').that.equals('test comment');
+        });
+      });
+    });
     context('when nameOnly is provided', function () {
       context('when nameOnly is true', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: true, dbName: db });
 
         it('sets nameOnly to true', function () {
-          expect(operation.generateCommand()).to.deep.equal({
+          expect(operation.generateCommand(8)).to.deep.equal({
             listCollections: 1,
             cursor: {},
             filter: {},
@@ -84,7 +109,7 @@ describe('ListCollectionsOperation', function () {
         const operation = new ListCollectionsOperation(db, {}, { nameOnly: false, dbName: db });
 
         it('sets nameOnly to false', function () {
-          expect(operation.generateCommand()).to.deep.equal({
+          expect(operation.generateCommand(8)).to.deep.equal({
             listCollections: 1,
             cursor: {},
             filter: {},
@@ -104,7 +129,7 @@ describe('ListCollectionsOperation', function () {
         );
 
         it('sets authorizedCollections to true', function () {
-          expect(operation.generateCommand()).to.deep.equal({
+          expect(operation.generateCommand(8)).to.deep.equal({
             listCollections: 1,
             cursor: {},
             filter: {},
@@ -122,7 +147,7 @@ describe('ListCollectionsOperation', function () {
         );
 
         it('sets authorizedCollections to false', function () {
-          expect(operation.generateCommand()).to.deep.equal({
+          expect(operation.generateCommand(8)).to.deep.equal({
             listCollections: 1,
             cursor: {},
             filter: {},
@@ -137,7 +162,7 @@ describe('ListCollectionsOperation', function () {
       const operation = new ListCollectionsOperation(db, {}, { dbName: db });
 
       it('sets nameOnly and authorizedCollections properties to false', function () {
-        expect(operation.generateCommand()).to.deep.equal({
+        expect(operation.generateCommand(8)).to.deep.equal({
           listCollections: 1,
           cursor: {},
           filter: {},

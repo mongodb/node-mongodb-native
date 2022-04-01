@@ -2,8 +2,7 @@ import type { Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { maxWireVersion, MongoDBNamespace } from '../utils';
+import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects, Hint } from './operation';
 
@@ -31,6 +30,7 @@ export interface AggregateOptions extends CommandOperationOptions {
   hint?: Hint;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+
   out?: string;
 }
 
@@ -119,6 +119,12 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
 
     if (options.let) {
       command.let = options.let;
+    }
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      command.comment = options.comment;
     }
 
     command.cursor = options.cursor || {};

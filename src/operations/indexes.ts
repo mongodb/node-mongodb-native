@@ -24,7 +24,6 @@ import { indexInformation, IndexInformationOptions } from './common_functions';
 import { executeOperation, ExecutionResult } from './execute_operation';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 
-const LIST_INDEXES_WIRE_VERSION = 3;
 const VALID_INDEX_OPTIONS = new Set([
   'background',
   'unique',
@@ -404,26 +403,18 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     callback: Callback<Document>
   ): void {
     const serverWireVersion = maxWireVersion(server);
-    if (serverWireVersion < LIST_INDEXES_WIRE_VERSION) {
-      const systemIndexesNS = this.collectionNamespace.withCollection('system.indexes');
-      const collectionNS = this.collectionNamespace.toString();
-
-      server.query(
-        systemIndexesNS,
-        { query: { ns: collectionNS } },
-        { ...this.options, readPreference: this.readPreference },
-        callback
-      );
-      return;
-    }
 
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
-    super.executeCommand(
-      server,
-      session,
-      { listIndexes: this.collectionNamespace.collection, cursor },
-      callback
-    );
+
+    const command: Document = { listIndexes: this.collectionNamespace.collection, cursor };
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (serverWireVersion >= 9 && this.options.comment !== undefined) {
+      command.comment = this.options.comment;
+    }
+
+    super.executeCommand(server, session, command, callback);
   }
 }
 

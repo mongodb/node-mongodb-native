@@ -1,15 +1,12 @@
 import type { Binary, Document } from '../bson';
-import * as CONSTANTS from '../constants';
 import { AbstractCursor } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, getTopology, maxWireVersion, MongoDBNamespace } from '../utils';
+import { Callback, getTopology, maxWireVersion } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { executeOperation, ExecutionResult } from './execute_operation';
 import { Aspect, defineAspects } from './operation';
-
-const LIST_COLLECTIONS_WIRE_VERSION = 3;
 
 /** @public */
 export interface ListCollectionsOptions extends CommandOperationOptions {
@@ -49,67 +46,31 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     session: ClientSession | undefined,
     callback: Callback<string[]>
   ): void {
-    if (maxWireVersion(server) < LIST_COLLECTIONS_WIRE_VERSION) {
-      let filter = this.filter;
-      const databaseName = this.db.s.namespace.db;
-
-      // If we have legacy mode and have not provided a full db name filter it
-      if (typeof filter.name === 'string' && !new RegExp(`^${databaseName}\\.`).test(filter.name)) {
-        filter = Object.assign({}, filter);
-        filter.name = this.db.s.namespace.withCollection(filter.name).toString();
-      }
-
-      // No filter, filter by current database
-      if (filter == null) {
-        filter = { name: `/${databaseName}/` };
-      }
-
-      // Rewrite the filter to use $and to filter out indexes
-      if (filter.name) {
-        filter = { $and: [{ name: filter.name }, { name: /^((?!\$).)*$/ }] };
-      } else {
-        filter = { name: /^((?!\$).)*$/ };
-      }
-
-      const documentTransform = (doc: Document) => {
-        const matching = `${databaseName}.`;
-        const index = doc.name.indexOf(matching);
-        // Remove database name if available
-        if (doc.name && index === 0) {
-          doc.name = doc.name.substr(index + matching.length);
-        }
-
-        return doc;
-      };
-
-      server.query(
-        new MongoDBNamespace(databaseName, CONSTANTS.SYSTEM_NAMESPACE_COLLECTION),
-        { query: filter },
-        { batchSize: this.batchSize || 1000, readPreference: this.readPreference },
-        (err, result) => {
-          if (result && result.documents && Array.isArray(result.documents)) {
-            result.documents = result.documents.map(documentTransform);
-          }
-
-          callback(err, result);
-        }
-      );
-
-      return;
-    }
-
-    return super.executeCommand(server, session, this.generateCommand(), callback);
+    return super.executeCommand(
+      server,
+      session,
+      this.generateCommand(maxWireVersion(server)),
+      callback
+    );
   }
 
   /* This is here for the purpose of unit testing the final command that gets sent. */
-  generateCommand(): Document {
-    return {
+  generateCommand(wireVersion: number): Document {
+    const command: Document = {
       listCollections: 1,
       filter: this.filter,
       cursor: this.batchSize ? { batchSize: this.batchSize } : {},
       nameOnly: this.nameOnly,
       authorizedCollections: this.authorizedCollections
     };
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (wireVersion >= 9 && this.options.comment !== undefined) {
+      command.comment = this.options.comment;
+    }
+
+    return command;
   }
 }
 

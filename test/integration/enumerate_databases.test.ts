@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 
-import { AddUserOptions, MongoClient, MongoServerError } from '../../../src';
+import { AddUserOptions, MongoClient, MongoServerError } from '../../src';
+import { runUnifiedSuite } from '../tools/unified-spec-runner/runner';
+import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
   requires: {
@@ -139,4 +141,98 @@ describe('listDatabases() authorizedDatabases flag', function () {
       expect(thrownError).to.have.property('message').that.includes('list');
     }
   );
+});
+
+const testSuite = new UnifiedTestSuiteBuilder('listDatabases with comment option')
+  .initialData({
+    collectionName: 'coll0',
+    databaseName: '',
+    documents: [{ _id: 1, x: 11 }]
+  })
+  .databaseName('listDatabases-with-falsy-values')
+  .test(
+    new TestBuilder('listDatabases should not send comment for server versions < 4.4')
+      .runOnRequirement({ maxServerVersion: '4.3.99' })
+      .operation({
+        name: 'listDatabases',
+        arguments: {
+          filter: {}
+        },
+        object: 'client0'
+      })
+      .expectEvents({
+        client: 'client0',
+        events: [
+          {
+            commandStartedEvent: {
+              command: {
+                listDatabases: 1
+              }
+            }
+          }
+        ]
+      })
+      .toJSON()
+  )
+  .test(
+    new TestBuilder('listDatabases should send string comment for server versions >= 4.4')
+      .runOnRequirement({ minServerVersion: '4.4.0' })
+      .operation({
+        name: 'listDatabases',
+        arguments: {
+          filter: {},
+          comment: 'string value'
+        },
+        object: 'client0'
+      })
+      .expectEvents({
+        client: 'client0',
+        events: [
+          {
+            commandStartedEvent: {
+              command: {
+                listDatabases: 1,
+                comment: 'string value'
+              }
+            }
+          }
+        ]
+      })
+      .toJSON()
+  )
+  .test(
+    new TestBuilder('listDatabases should send non-string comment for server versions >= 4.4')
+      .runOnRequirement({ minServerVersion: '4.4.0' })
+      .operation({
+        name: 'listDatabases',
+        arguments: {
+          filter: {},
+
+          comment: {
+            key: 'value'
+          }
+        },
+        object: 'client0'
+      })
+      .expectEvents({
+        client: 'client0',
+        events: [
+          {
+            commandStartedEvent: {
+              command: {
+                listDatabases: 1,
+                comment: {
+                  key: 'value'
+                }
+              }
+            }
+          }
+        ]
+      })
+      .toJSON()
+  )
+  .toJSON();
+
+describe('listDatabases w/ comment option', () => {
+  runUnifiedSuite([testSuite]);
 });

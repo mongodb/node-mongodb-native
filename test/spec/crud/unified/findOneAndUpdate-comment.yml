@@ -1,0 +1,95 @@
+description: "findOneAndUpdate-comment"
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1 }
+      - { _id: 2 }
+
+tests:
+  - description: "findOneAndUpdate with string comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: &filter
+            _id: 1
+          update: &update
+            - $set: {x: 5 }
+          comment: "comment"
+        expectResult:
+          _id: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *filter
+                update: *update
+                comment: "comment"
+
+  - description: "findOneAndUpdate with document comment"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: &filter
+            _id: 1
+          update: &update
+            - $set: {x: 5 }
+          comment: &comment { key: "value"}
+        expectResult:
+          _id: 1
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *filter
+                update: *update
+                comment: *comment
+
+  - description: "findOneAndUpdate with comment - pre 4.4"
+    runOnRequirements:
+      - minServerVersion: "4.2.0" # findAndModify option validation was introduced in 4.2
+        maxServerVersion: "4.2.99"
+    operations:
+      - name: findOneAndUpdate
+        object: *collection0
+        arguments:
+          filter: *filter
+          update: *update
+          comment: "comment"
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                findAndModify: *collection0Name
+                query: *filter
+                update: *update
+                comment: "comment"
+    outcome: *initialData

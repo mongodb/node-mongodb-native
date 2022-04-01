@@ -14,8 +14,8 @@ import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
-import { EventCollector } from '../../tools/utils';
-import { EntitiesMap } from './entities';
+import { getSymbolFrom } from '../../tools/utils';
+import { EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
 import { translateOptions } from './unified-utils';
@@ -173,8 +173,8 @@ operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation
 
 operations.set('bulkWrite', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { requests: operations, ...options } = operation.arguments;
-  return collection.bulkWrite(operations, options);
+  const { requests, ...opts } = operation.arguments;
+  return collection.bulkWrite(requests, opts);
 });
 
 // The entity exists for the name but can potentially have the wrong
@@ -200,23 +200,14 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
   if (!('watch' in watchable)) {
     throw new Error(`Entity ${operation.object} must be watchable`);
   }
-  const changeStream = watchable.watch(operation.arguments.pipeline, {
-    fullDocument: operation.arguments.fullDocument,
-    maxAwaitTimeMS: operation.arguments.maxAwaitTimeMS,
-    resumeAfter: operation.arguments.resumeAfter,
-    startAfter: operation.arguments.startAfter,
-    startAtOperationTime: operation.arguments.startAtOperationTime,
-    batchSize: operation.arguments.batchSize
-  });
-  changeStream.eventCollector = new EventCollector(changeStream, ['init', 'change', 'error']);
+
+  const { pipeline, ...args } = operation.arguments;
+  const changeStream = watchable.watch(pipeline, args);
 
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(new Error('Change stream never started'));
-    }, 2000);
-
-    changeStream.cursor.once('init', () => {
-      clearTimeout(timeout);
+    const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
+    changeStream.cursor[init](err => {
+      if (err) return reject(err);
       resolve(changeStream);
     });
   });
@@ -304,17 +295,26 @@ operations.set('insertMany', async ({ entities, operation }) => {
 });
 
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
-  try {
-    const changeStream = entities.getEntity('stream', operation.object);
-    // Either change or error promise will finish
-    return Promise.race([
-      changeStream.eventCollector.waitAndShiftEvent('change'),
-      changeStream.eventCollector.waitAndShiftEvent('error')
-    ]);
-  } catch (e) {
-    const findCursor = entities.getEntity('cursor', operation.object);
-    return await findCursor.next();
+  function getChangeStream(): UnifiedChangeStream | null {
+    try {
+      const changeStream = entities.getEntity('stream', operation.object);
+      return changeStream;
+    } catch (e) {
+      return null;
+    }
   }
+
+  const changeStream = getChangeStream();
+  if (changeStream == null) {
+    // iterateUntilDocumentOrError is used for changes streams and regular cursors.
+    // we have no other way to distinguish which scenario we are testing when we run an
+    // iterateUntilDocumentOrError operation, so we first try to get the changeStream and
+    // if that fails, we know we need to get a cursor
+    const cursor = entities.getEntity('cursor', operation.object);
+    return await cursor.next();
+  }
+
+  return changeStream.cursor.next();
 });
 
 operations.set('listCollections', async ({ entities, operation }) => {

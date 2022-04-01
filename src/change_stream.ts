@@ -57,6 +57,7 @@ const CURSOR_OPTIONS = [
   'maxAwaitTimeMS',
   'collation',
   'readPreference',
+  'comment',
   ...CHANGE_STREAM_OPTIONS
 ] as const;
 
@@ -410,7 +411,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
 export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
   startAtOperationTime?: OperationTime;
   resumeAfter?: ResumeToken;
-  startAfter?: boolean;
+  startAfter?: ResumeToken;
 }
 
 /** @internal */
@@ -617,7 +618,7 @@ function applyKnownOptions(source: Document, options: ReadonlyArray<string>) {
   const result: Document = {};
 
   for (const option of options) {
-    if (source[option]) {
+    if (option in source) {
       result[option] = source[option];
     }
   }

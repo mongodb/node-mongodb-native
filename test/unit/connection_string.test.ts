@@ -292,7 +292,7 @@ describe('Connection String', function () {
   describe('resolveSRVRecord()', () => {
     const resolveSRVRecordAsync = promisify(resolveSRVRecord);
 
-    afterEach(async () => {
+    afterEach(() => {
       sinon.restore();
     });
 

@@ -107,6 +107,12 @@ export class UpdateOperation extends CommandOperation<Document> {
       command.let = options.let;
     }
 
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (options.comment !== undefined) {
+      command.comment = options.comment;
+    }
+
     const statementWithCollation = this.statements.find(statement => !!statement.collation);
     if (
       collationNotSupported(server, options) ||
