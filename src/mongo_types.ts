@@ -496,7 +496,7 @@ export type NestedPaths<Type> = Type extends
   | { _bsontype: string }
   ? []
   : Type extends ReadonlyArray<infer ArrayType>
-  ? [number, ...NestedPaths<ArrayType>]
+  ? [] | [number, ...NestedPaths<ArrayType>]
   : Type extends Map<string, any>
   ? [string]
   : // eslint-disable-next-line @typescript-eslint/ban-types
@@ -515,7 +515,7 @@ export type NestedPaths<Type> = Type extends
           ArrayType extends Type
           ? [Key] // we have a recursive array union
           : // child is an array, but it's not a recursive array
-            [Key] | [Key, ...NestedPaths<Type[Key]>]
+            [Key, ...NestedPaths<Type[Key]>]
         : // child is not structured the same as the parent
           [Key, ...NestedPaths<Type[Key]>];
     }[Extract<keyof Type, string>]
