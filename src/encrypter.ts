@@ -28,6 +28,8 @@ export class Encrypter {
     if (typeof options.autoEncryption !== 'object') {
       throw new MongoInvalidArgumentError('Option "autoEncryption" must be specified');
     }
+    // initialize to null, if we call getInternalClient, we may set this it is important to not overwrite those function calls.
+    this[kInternalClient] = null;
 
     this.bypassAutoEncryption = !!options.autoEncryption.bypassAutoEncryption;
     this.needsConnecting = false;
@@ -62,7 +64,6 @@ export class Encrypter {
     options.autoEncryption.bson!.deserialize = deserialize;
 
     this.autoEncrypter = new AutoEncrypterClass(client, options.autoEncryption);
-    this[kInternalClient] = null;
   }
 
   getInternalClient(client: MongoClient, uri: string, options: MongoClientOptions): MongoClient {
