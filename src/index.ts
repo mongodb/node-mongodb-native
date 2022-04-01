@@ -186,12 +186,17 @@ export type {
   MongoCredentialsOptions
 } from './cmap/auth/mongo_credentials';
 export type {
+  BinMsg,
   GetMore,
   KillCursor,
+  MessageHeader,
   Msg,
   OpGetMoreOptions,
+  OpMsgOptions,
   OpQueryOptions,
+  OpResponseOptions,
   Query,
+  Response,
   WriteProtocolMessageType
 } from './cmap/commands';
 export type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS, Stream } from './cmap/connect';
