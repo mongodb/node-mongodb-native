@@ -133,8 +133,9 @@ expectError(
 );
 
 // defined _id's that are not of type ObjectId cannot be cast to ObjectId
-const collectionWithRequiredNumericId =
-  db.collection<{ _id: number; otherField: string }>('testCollection');
+const collectionWithRequiredNumericId = db.collection<{ _id: number; otherField: string }>(
+  'testCollection'
+);
 
 expectError(
   collectionWithRequiredNumericId.insertOne({
@@ -143,8 +144,9 @@ expectError(
   })
 );
 
-const collectionWithOptionalNumericId =
-  db.collection<{ _id?: number; otherField: string }>('testCollection');
+const collectionWithOptionalNumericId = db.collection<{ _id?: number; otherField: string }>(
+  'testCollection'
+);
 
 expectError(
   collectionWithOptionalNumericId.insertOne({
