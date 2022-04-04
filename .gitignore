@@ -12,6 +12,7 @@ pids
 *.png
 test*.*
 output
+etc/docs/template/.hugo_build.lock
 
 types
 docs/gen
