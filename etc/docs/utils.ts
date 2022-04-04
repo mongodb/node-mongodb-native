@@ -10,7 +10,7 @@ export interface JsonVersionSchema {
 
 export interface VersionSchema {
   version: string;
-  status: string;
+  status: 'supported' | 'not-supported' | 'latest' | 'next';
   api: string;
   usesMongoDBManual?: boolean;
   docs?: string;
@@ -50,7 +50,11 @@ export async function confirm(message: string) {
   }
 }
 
-export function getCommandLineArguments(): { tag: string; status: string; skipPrompts } {
+export function getCommandLineArguments(): {
+  tag: string;
+  status: VersionSchema['status'];
+  skipPrompts;
+} {
   const {
     status,
     tag,
@@ -64,7 +68,7 @@ export function getCommandLineArguments(): { tag: string; status: string; skipPr
     })
     .option('status', {
       type: 'string',
-      choices: ['supported', 'not-supported', 'latest'],
+      choices: ['supported', 'not-supported', 'latest', 'next'],
       default: 'latest',
       requiresArg: true
     })
@@ -77,7 +81,7 @@ export function getCommandLineArguments(): { tag: string; status: string; skipPr
 
   return {
     tag: capitalize(tag),
-    status,
+    status: tag.toLowerCase().includes('next') ? 'next' : status,
     skipPrompts
   };
 }

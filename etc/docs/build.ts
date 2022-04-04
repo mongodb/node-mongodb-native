@@ -50,7 +50,7 @@ async function updateSiteTemplateForNewVersion(
     for (const version of tomlData.versions) {
       // This new version is going to be the current, we have to change the previous one to supported
       // Looping is probably overkill
-      if (version.status === 'current') {
+      if (version.status === 'latest') {
         // existing current versions or any 'Next' version is marked as 'supported'
         version.status = 'supported';
       }
