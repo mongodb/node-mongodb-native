@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.5.0](https://github.com/mongodb/node-mongodb-native/compare/v4.4.1...v4.5.0) (2022-04-04)
+
+
+### Features
+
+* **NODE-3697:** reduce serverSession allocation ([#3171](https://github.com/mongodb/node-mongodb-native/issues/3171)) ([5132bc9](https://github.com/mongodb/node-mongodb-native/commit/5132bc9d8ba816b0d98e1fceb6dfc96be0beb1da))
+* **NODE-3699:** add support for `comment` field ([#3167](https://github.com/mongodb/node-mongodb-native/issues/3167)) ([4e2f9bf](https://github.com/mongodb/node-mongodb-native/commit/4e2f9bf924872067b6ddbf98809bd0c1577f2017))
+* **NODE-4014:** Add let option to bulk write operations ([#3160](https://github.com/mongodb/node-mongodb-native/issues/3160)) ([6f633d1](https://github.com/mongodb/node-mongodb-native/commit/6f633d1a742fbb150cdb654c37c1380f40e798b1))
+* **NODE-4085:** add typings for csfle shared library option support ([#3179](https://github.com/mongodb/node-mongodb-native/issues/3179)) ([d2897ab](https://github.com/mongodb/node-mongodb-native/commit/d2897ab4010a74e5fc98617785dfc9068c453c93))
+
+
+### Bug Fixes
+
+* **NODE-3769:** retryable writes are not compliant with specification ([#3144](https://github.com/mongodb/node-mongodb-native/issues/3144)) ([ff26b12](https://github.com/mongodb/node-mongodb-native/commit/ff26b12543206f58a379460348dbef8144fd1ac4))
+* **NODE-3810:** delay timeout errors by one event loop tick ([#3180](https://github.com/mongodb/node-mongodb-native/issues/3180)) ([0ed7cbf](https://github.com/mongodb/node-mongodb-native/commit/0ed7cbff646725655d1bc3855be0570c19dad91c))
+* **NODE-4069:** remove 'default' from options for fullDocument field in change stream options ([#3169](https://github.com/mongodb/node-mongodb-native/issues/3169)) ([799689e](https://github.com/mongodb/node-mongodb-native/commit/799689e9f831dce00db8b95799491a2f873b95cf))
+* **NODE-4074:** ensure getTopology doesn't throw synchronously ([#3172](https://github.com/mongodb/node-mongodb-native/issues/3172)) ([329f081](https://github.com/mongodb/node-mongodb-native/commit/329f08166d13eafe282cc2e5912a603a9bb336c1))
+* **NODE-4129:** constrain `watch` type parameter to extend `ChangeStream` type parameter ([#3183](https://github.com/mongodb/node-mongodb-native/issues/3183)) ([43ba9fc](https://github.com/mongodb/node-mongodb-native/commit/43ba9fcc2730081a25d608af95a4193cc4a1ce8c))
+
 ### [4.4.1](https://github.com/mongodb/node-mongodb-native/compare/v4.4.0...v4.4.1) (2022-03-03)
 
 
