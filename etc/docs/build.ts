@@ -48,10 +48,10 @@ async function updateSiteTemplateForNewVersion(
     tomlData.versions[existingVersionIndex] = newVersion;
   } else {
     for (const version of tomlData.versions) {
-      // This new version is going to be the current, we have to change the previous one to supported
+      // This new version is going to be the latest, we have to change the previous one to supported
       // Looping is probably overkill
       if (version.status === 'latest') {
-        // existing current versions or any 'Next' version is marked as 'supported'
+        // existing latest versions or any 'Next' version is marked as 'supported'
         version.status = 'supported';
       }
     }
