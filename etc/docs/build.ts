@@ -47,8 +47,14 @@ async function updateSiteTemplateForNewVersion(
     const existingVersionIndex = tomlData.versions.findIndex(({ tag }) => tag === newVersion.tag);
     tomlData.versions[existingVersionIndex] = newVersion;
   } else {
-    tomlData.versions.unshift(newVersion);
+    for (const version of tomlData.versions) {
+      // This new version is going to be the latest, we have to change the previous one to supported
+      if (version.status === 'latest') {
+        version.status = 'supported';
+      }
+    }
 
+    tomlData.versions.unshift(newVersion);
     jsonVersions.unshift({ version: newVersion.tag });
   }
 

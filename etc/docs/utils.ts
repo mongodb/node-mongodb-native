@@ -10,7 +10,7 @@ export interface JsonVersionSchema {
 
 export interface VersionSchema {
   version: string;
-  status: string;
+  status: 'supported' | 'not-supported' | 'latest' | 'next';
   api: string;
   usesMongoDBManual?: boolean;
   docs?: string;
@@ -23,7 +23,8 @@ export interface TomlVersionSchema {
   versions: VersionSchema[];
 }
 
-const capitalize = (s: string) => (s.length === 0 ? s : s[0].toUpperCase() + s.slice(1));
+const capitalize = (s: string) =>
+  s.length === 0 ? s : s[0].toUpperCase() + s.slice(1).toLowerCase();
 
 // eslint-disable-next-line no-console
 export const log = (...args: any[]) => console.error(args);
@@ -50,7 +51,11 @@ export async function confirm(message: string) {
   }
 }
 
-export function getCommandLineArguments(): { tag: string; status: string; skipPrompts } {
+export function getCommandLineArguments(): {
+  tag: string;
+  status: VersionSchema['status'];
+  skipPrompts;
+} {
   const {
     status,
     tag,
@@ -64,8 +69,8 @@ export function getCommandLineArguments(): { tag: string; status: string; skipPr
     })
     .option('status', {
       type: 'string',
-      choices: ['supported', 'not-supported', 'current'],
-      default: 'current',
+      choices: ['supported', 'not-supported', 'latest', 'next'],
+      default: 'latest',
       requiresArg: true
     })
     .option('yes', {
@@ -77,7 +82,7 @@ export function getCommandLineArguments(): { tag: string; status: string; skipPr
 
   return {
     tag: capitalize(tag),
-    status,
+    status: tag.toLowerCase().includes('next') ? 'next' : status,
     skipPrompts
   };
 }
