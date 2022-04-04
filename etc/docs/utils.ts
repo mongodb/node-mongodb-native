@@ -23,7 +23,8 @@ export interface TomlVersionSchema {
   versions: VersionSchema[];
 }
 
-const capitalize = (s: string) => (s.length === 0 ? s : s[0].toUpperCase() + s.slice(1));
+const capitalize = (s: string) =>
+  s.length === 0 ? s : s[0].toUpperCase() + s.slice(1).toLowerCase();
 
 // eslint-disable-next-line no-console
 export const log = (...args: any[]) => console.error(args);
