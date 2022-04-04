@@ -84,9 +84,10 @@ Core Server (i.e. SERVER) project are <strong>public</strong>.</p>
 <a href="#typescript-version" id="typescript-version" style="color: inherit; text-decoration: none;">
   <h4>Typescript Version</h4>
 </a>
-<p>We recommend using the latest version of typescript, however we do provide a <a href="https://github.com/sandersn/downlevel-dts#readme">downleveled</a> version of the type definitions that we test compiling against <code>typescript@4.1.6</code>.
+<p>We recommend using the latest version of typescript, however we currently ensure the driver&#39;s public types compile against <code>typescript@4.1.6</code>.
+This is the lowest typescript version guaranteed to work with our driver: older versions may or may not work - use at your own risk.
 Since typescript <a href="https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes">does not restrict breaking changes to major versions</a> we consider this support best effort.
-If you run into any unexpected compiler failures please let us know and we will do our best to correct it.</p>
+If you run into any unexpected compiler failures against our supported TypeScript versions please let us know by filing an issue on our <a href="https://jira.mongodb.org/browse/NODE">JIRA</a>.</p>
 
 <a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
   <h2>Installation</h2>
