@@ -46,17 +46,11 @@ async function updateSiteTemplateForNewVersion(
   if (versionExists) {
     const existingVersionIndex = tomlData.versions.findIndex(({ tag }) => tag === newVersion.tag);
     tomlData.versions[existingVersionIndex] = newVersion;
-    for (const version of tomlData.versions) {
-      if (version.version.includes('Next')) {
-        // 'Next' version is marked as 'supported'
-        version.status = 'supported';
-      }
-    }
   } else {
     for (const version of tomlData.versions) {
       // This new version is going to be the current, we have to change the previous one to supported
       // Looping is probably overkill
-      if (version.status === 'current' || version.version.includes('Next')) {
+      if (version.status === 'current') {
         // existing current versions or any 'Next' version is marked as 'supported'
         version.status = 'supported';
       }

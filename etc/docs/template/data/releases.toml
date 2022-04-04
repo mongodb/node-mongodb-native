@@ -3,14 +3,14 @@ mongoDBManual = "https://docs.mongodb.com/drivers/node/"
 
 [[versions]]
 version = "Next Driver"
-status = "supported"
+status = "next"
 api = "./Next"
 usesMongoDBManual = true
 tag = "Next"
 
 [[versions]]
 version = "4.5 Driver"
-status = "current"
+status = "latest"
 api = "./4.5"
 usesMongoDBManual = true
 tag = "4.5"

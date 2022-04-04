@@ -64,8 +64,8 @@ export function getCommandLineArguments(): { tag: string; status: string; skipPr
     })
     .option('status', {
       type: 'string',
-      choices: ['supported', 'not-supported', 'current'],
-      default: 'current',
+      choices: ['supported', 'not-supported', 'latest'],
+      default: 'latest',
       requiresArg: true
     })
     .option('yes', {
