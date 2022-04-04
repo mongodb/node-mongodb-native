@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 
-import { Collection } from '../../../src/index';
+import type { Collection, CommandStartedEvent, MongoClient } from '../../../src/index';
 
 describe('ServerSession', () => {
-  let client;
+  let client: MongoClient;
   let testCollection: Collection<{ _id: number; a?: number }>;
   beforeEach(async function () {
     const configuration = this.configuration;
@@ -26,7 +26,7 @@ describe('ServerSession', () => {
    * Drivers MUST assert that the number of allocated sessions is strictly less than the number of concurrent operations in every retry of this test. In this instance it would be less than (but NOT equal to) 8.
    */
   it('13. may reuse one server session for many operations', async () => {
-    const events = [];
+    const events: CommandStartedEvent[] = [];
     client.on('commandStarted', ev => events.push(ev));
 
     const operations = [
