@@ -128,7 +128,7 @@ export abstract class AbstractCursor<
   /** @internal */
   [kTopology]: Topology;
   /** @internal */
-  [kTransform]?: (doc: TSchema) => Document;
+  [kTransform]?: (doc: TSchema) => any;
   /** @internal */
   [kInitialized]: boolean;
   /** @internal */
@@ -693,7 +693,7 @@ export abstract class AbstractCursor<
   }
 }
 
-function nextDocument<T>(cursor: AbstractCursor): T | null | undefined {
+function nextDocument<T>(cursor: AbstractCursor): T | null {
   if (cursor[kDocuments] == null || !cursor[kDocuments].length) {
     return null;
   }
@@ -711,14 +711,14 @@ function nextDocument<T>(cursor: AbstractCursor): T | null | undefined {
   return null;
 }
 
-function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T | null>): void {
+function next<T>(cursor: AbstractCursor<T>, blocking: boolean, callback: Callback<T | null>): void {
   const cursorId = cursor[kId];
   if (cursor.closed) {
     return callback(undefined, null);
   }
 
   if (cursor[kDocuments] && cursor[kDocuments].length) {
-    callback(undefined, nextDocument(cursor));
+    callback(undefined, nextDocument<T>(cursor));
     return;
   }
 
@@ -753,7 +753,7 @@ function next<T>(cursor: AbstractCursor, blocking: boolean, callback: Callback<T
     }
 
     if (err || cursorIsDead(cursor)) {
-      return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument(cursor)));
+      return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument<T>(cursor)));
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
@@ -841,7 +841,7 @@ export function assertUninitialized(cursor: AbstractCursor): void {
   }
 }
 
-function makeCursorStream<TSchema extends Document>(cursor: AbstractCursor<TSchema>) {
+function makeCursorStream(cursor: AbstractCursor) {
   const readable = new Readable({
     objectMode: true,
     autoDestroy: false,

@@ -578,25 +578,87 @@ OPERATING_SYSTEMS.forEach(
 );
 
 // singleton build variant for linting
-SINGLETON_TASKS.push({
-  name: 'run-checks',
-  tags: ['run-checks'],
-  commands: [
+SINGLETON_TASKS.push(
+  ...[
     {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: LOWEST_LTS
-      }
+      name: 'run-unit-tests',
+      tags: ['run-unit-tests'],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        { func: 'run unit tests' }
+      ]
     },
-    { func: 'run checks' }
+    {
+      name: 'run-lint-checks',
+      tags: ['run-lint-checks'],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        { func: 'run lint checks' }
+      ]
+    },
+    {
+      name: 'run-typescript-next',
+      tags: ['run-typescript-next'],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        { func: 'run typescript next' }
+      ]
+    },
+    {
+      name: 'run-typescript-current',
+      tags: ['run-typescript-current'],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        { func: 'run typescript current' }
+      ]
+    },
+    {
+      name: 'run-typescript-oldest',
+      tags: ['run-typescript-oldest'],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        { func: 'run typescript oldest' }
+      ]
+    }
   ]
-});
+);
 
 BUILD_VARIANTS.push({
   name: 'lint',
   display_name: 'lint',
   run_on: DEFAULT_OS,
-  tasks: ['run-checks']
+  tasks: [
+    'run-unit-tests',
+    'run-lint-checks',
+    'run-typescript-current',
+    'run-typescript-oldest',
+    'run-typescript-next'
+  ]
 });
 
 // TODO NODE-3897 - generate combined coverage report

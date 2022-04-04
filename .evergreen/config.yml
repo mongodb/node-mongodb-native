@@ -213,14 +213,60 @@ functions:
           NO_EXIT=${NO_EXIT|1} \
           LOAD_BALANCER="${LOAD_BALANCER}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
-  run checks:
-    - command: shell.exec
-      type: test
+  run lint checks:
+    - command: subprocess.exec
       params:
         working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-lint-checks.sh
+  run unit tests:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh
+  run typescript next:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TS_VERSION: next
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
+  run typescript oldest:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TS_VERSION: 4.1.6
+          TRY_COMPILING_DRIVER: 'false'
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
+  run typescript current:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TS_VERSION: ''
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
   run mongosh integration tests:
     - command: shell.exec
       type: test
@@ -1734,14 +1780,46 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws ECS auth test
-  - name: run-checks
+  - name: run-unit-tests
     tags:
-      - run-checks
+      - run-unit-tests
     commands:
       - func: install dependencies
         vars:
           NODE_LTS_NAME: erbium
-      - func: run checks
+      - func: run unit tests
+  - name: run-lint-checks
+    tags:
+      - run-lint-checks
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: run lint checks
+  - name: run-typescript-next
+    tags:
+      - run-typescript-next
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: run typescript next
+  - name: run-typescript-current
+    tags:
+      - run-typescript-current
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: run typescript current
+  - name: run-typescript-oldest
+    tags:
+      - run-typescript-oldest
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: run typescript oldest
   - name: run-mongosh-integration-tests
     tags:
       - run-mongosh-integration-tests
@@ -2307,7 +2385,11 @@ buildvariants:
     display_name: lint
     run_on: ubuntu1804-large
     tasks:
-      - run-checks
+      - run-unit-tests
+      - run-lint-checks
+      - run-typescript-current
+      - run-typescript-oldest
+      - run-typescript-next
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-test

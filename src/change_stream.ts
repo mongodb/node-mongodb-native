@@ -558,7 +558,7 @@ const CHANGE_STREAM_EVENTS = [
   ChangeStream.CLOSE
 ];
 
-function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
+function setIsEmitter<TSchema extends Document>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'iterator') {
     // TODO(NODE-3485): Replace with MongoChangeStreamModeError
     throw new MongoAPIError(
@@ -568,7 +568,7 @@ function setIsEmitter<TSchema>(changeStream: ChangeStream<TSchema>): void {
   changeStream[kMode] = 'emitter';
 }
 
-function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
+function setIsIterator<TSchema extends Document>(changeStream: ChangeStream<TSchema>): void {
   if (changeStream[kMode] === 'emitter') {
     // TODO(NODE-3485): Replace with MongoChangeStreamModeError
     throw new MongoAPIError(
@@ -582,7 +582,7 @@ function setIsIterator<TSchema>(changeStream: ChangeStream<TSchema>): void {
  * Create a new change stream cursor based on self's configuration
  * @internal
  */
-function createChangeStreamCursor<TSchema>(
+function createChangeStreamCursor<TSchema extends Document>(
   changeStream: ChangeStream<TSchema>,
   options: ChangeStreamOptions | ResumeOptions
 ): ChangeStreamCursor<TSchema> {
@@ -658,8 +658,8 @@ function waitForTopologyConnected(
   }, 500); // this is an arbitrary wait time to allow SDAM to transition
 }
 
-function closeWithError<T>(
-  changeStream: ChangeStream<T>,
+function closeWithError<TSchema extends Document>(
+  changeStream: ChangeStream<TSchema>,
   error: AnyError,
   callback?: Callback
 ): void {
@@ -670,7 +670,7 @@ function closeWithError<T>(
   changeStream.close(() => callback && callback(error));
 }
 
-function streamEvents<TSchema>(
+function streamEvents<TSchema extends Document>(
   changeStream: ChangeStream<TSchema>,
   cursor: ChangeStreamCursor<TSchema>
 ): void {
@@ -681,7 +681,7 @@ function streamEvents<TSchema>(
   stream.on('error', error => processError(changeStream, error));
 }
 
-function endStream<TSchema>(changeStream: ChangeStream<TSchema>): void {
+function endStream<TSchema extends Document>(changeStream: ChangeStream<TSchema>): void {
   const cursorStream = changeStream[kCursorStream];
   if (cursorStream) {
     ['data', 'close', 'end', 'error'].forEach(event => cursorStream.removeAllListeners(event));
@@ -691,7 +691,7 @@ function endStream<TSchema>(changeStream: ChangeStream<TSchema>): void {
   changeStream[kCursorStream] = undefined;
 }
 
-function processNewChange<TSchema>(
+function processNewChange<TSchema extends Document>(
   changeStream: ChangeStream<TSchema>,
   change: Nullable<ChangeStreamDocument<TSchema>>,
   callback?: Callback<ChangeStreamDocument<TSchema>>
@@ -728,7 +728,7 @@ function processNewChange<TSchema>(
   return callback(undefined, change);
 }
 
-function processError<TSchema>(
+function processError<TSchema extends Document>(
   changeStream: ChangeStream<TSchema>,
   error: AnyError,
   callback?: Callback
@@ -796,7 +796,10 @@ function processError<TSchema>(
  *
  * @param changeStream - the parent ChangeStream
  */
-function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeStreamCursor<T>>) {
+function getCursor<T extends Document>(
+  changeStream: ChangeStream<T>,
+  callback: Callback<ChangeStreamCursor<T>>
+) {
   if (changeStream[kClosed]) {
     // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
     callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
@@ -819,7 +822,10 @@ function getCursor<T>(changeStream: ChangeStream<T>, callback: Callback<ChangeSt
  * @param changeStream - the parent ChangeStream
  * @param err - error getting a new cursor
  */
-function processResumeQueue<TSchema>(changeStream: ChangeStream<TSchema>, err?: Error) {
+function processResumeQueue<TSchema extends Document>(
+  changeStream: ChangeStream<TSchema>,
+  err?: Error
+) {
   while (changeStream[kResumeQueue].length) {
     const request = changeStream[kResumeQueue].pop();
     if (!request) break; // Should never occur but TS can't use the length check in the while condition

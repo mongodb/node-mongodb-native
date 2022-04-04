@@ -17,19 +17,3 @@ set -o xtrace
 
 ## Checks typescript, eslint, and prettier
 npm run check:lint
-
-npx nyc npm run check:unit
-
-export TSC="./node_modules/typescript/bin/tsc"
-
-echo "Typescript $($TSC -v)"
-# check resolution uses the default latest types
-echo "import * as mdb from '.'" > file.ts && $TSC --noEmit --traceResolution file.ts | grep 'mongodb.d.ts' && rm file.ts
-
-npm i --no-save typescript@4.1.6
-echo "Typescript $($TSC -v)"
-$TSC --noEmit mongodb.ts34.d.ts
-# check that resolution uses the downleveled types
-echo "import * as mdb from '.'" > file.ts && $TSC --noEmit --traceResolution file.ts | grep 'mongodb.ts34.d.ts' && rm file.ts
-
-rm -f file.ts

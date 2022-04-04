@@ -127,6 +127,7 @@ export class MongoError extends Error {
     } else {
       super(message);
     }
+    this[kErrorLabels] = new Set();
   }
 
   override get name(): string {
@@ -145,23 +146,15 @@ export class MongoError extends Error {
    * @returns returns true if the error has the provided error label
    */
   hasErrorLabel(label: string): boolean {
-    if (this[kErrorLabels] == null) {
-      return false;
-    }
-
     return this[kErrorLabels].has(label);
   }
 
   addErrorLabel(label: string): void {
-    if (this[kErrorLabels] == null) {
-      this[kErrorLabels] = new Set();
-    }
-
     this[kErrorLabels].add(label);
   }
 
   get errorLabels(): string[] {
-    return this[kErrorLabels] ? Array.from(this[kErrorLabels]) : [];
+    return Array.from(this[kErrorLabels]);
   }
 }
 

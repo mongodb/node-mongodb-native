@@ -153,10 +153,10 @@ export class ServerHeartbeatSucceededEvent {
   reply: Document;
 
   /** @internal */
-  constructor(connectionId: string, duration: number, reply: Document) {
+  constructor(connectionId: string, duration: number, reply: Document | null) {
     this.connectionId = connectionId;
     this.duration = duration;
-    this.reply = reply;
+    this.reply = reply ?? {};
   }
 }
 

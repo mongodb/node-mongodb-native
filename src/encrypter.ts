@@ -19,7 +19,7 @@ export interface EncrypterOptions {
 
 /** @internal */
 export class Encrypter {
-  [kInternalClient]: MongoClient;
+  [kInternalClient]: MongoClient | null;
   bypassAutoEncryption: boolean;
   needsConnecting: boolean;
   autoEncrypter: AutoEncrypter;
@@ -28,6 +28,8 @@ export class Encrypter {
     if (typeof options.autoEncryption !== 'object') {
       throw new MongoInvalidArgumentError('Option "autoEncryption" must be specified');
     }
+    // initialize to null, if we call getInternalClient, we may set this it is important to not overwrite those function calls.
+    this[kInternalClient] = null;
 
     this.bypassAutoEncryption = !!options.autoEncryption.bypassAutoEncryption;
     this.needsConnecting = false;
@@ -65,7 +67,9 @@ export class Encrypter {
   }
 
   getInternalClient(client: MongoClient, uri: string, options: MongoClientOptions): MongoClient {
-    if (!this[kInternalClient]) {
+    // TODO(NODE-4144): Remove new variable for type narrowing
+    let internalClient = this[kInternalClient];
+    if (internalClient == null) {
       const clonedOptions: MongoClientOptions = {};
 
       for (const key of Object.keys(options)) {
@@ -76,27 +80,30 @@ export class Encrypter {
 
       clonedOptions.minPoolSize = 0;
 
-      this[kInternalClient] = new MongoClient(uri, clonedOptions);
+      internalClient = new MongoClient(uri, clonedOptions);
+      this[kInternalClient] = internalClient;
 
       for (const eventName of MONGO_CLIENT_EVENTS) {
         for (const listener of client.listeners(eventName)) {
-          this[kInternalClient].on(eventName, listener);
+          internalClient.on(eventName, listener);
         }
       }
 
       client.on('newListener', (eventName, listener) => {
-        this[kInternalClient].on(eventName, listener);
+        internalClient?.on(eventName, listener);
       });
 
       this.needsConnecting = true;
     }
-    return this[kInternalClient];
+    return internalClient;
   }
 
   connectInternalClient(callback: Callback): void {
-    if (this.needsConnecting) {
+    // TODO(NODE-4144): Remove new variable for type narrowing
+    const internalClient = this[kInternalClient];
+    if (this.needsConnecting && internalClient != null) {
       this.needsConnecting = false;
-      return this[kInternalClient].connect(callback);
+      return internalClient.connect(callback);
     }
 
     return callback();
@@ -104,8 +111,9 @@ export class Encrypter {
 
   close(client: MongoClient, force: boolean, callback: Callback): void {
     this.autoEncrypter.teardown(!!force, e => {
-      if (this[kInternalClient] && client !== this[kInternalClient]) {
-        return this[kInternalClient].close(force, callback);
+      const internalClient = this[kInternalClient];
+      if (internalClient != null && client !== internalClient) {
+        return internalClient.close(force, callback);
       }
       callback(e);
     });

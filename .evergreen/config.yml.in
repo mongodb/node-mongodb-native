@@ -238,14 +238,64 @@ functions:
           LOAD_BALANCER="${LOAD_BALANCER}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
-  "run checks":
-    - command: shell.exec
-      type: test
+  "run lint checks":
+    - command: subprocess.exec
       params:
         working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-lint-checks.sh"
+
+  "run unit tests":
+    - command: subprocess.exec
+      params:
+        working_dir: "src"
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh"
+
+  "run typescript next":
+    - command: subprocess.exec
+      params:
+        working_dir: "src"
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TS_VERSION: "next"
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
+
+  "run typescript oldest":
+    - command: subprocess.exec
+      params:
+        working_dir: "src"
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TS_VERSION: "4.1.6"
+          TRY_COMPILING_DRIVER: "false" # 4.1.6 can consume the public API but not compile the driver
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
+
+  "run typescript current":
+    - command: subprocess.exec
+      params:
+        working_dir: "src"
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TS_VERSION: "" # leaving this empty will use the version in package-lock.json
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
 
   "run mongosh integration tests":
     - command: shell.exec

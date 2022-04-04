@@ -53,7 +53,10 @@ export class StreamDescription {
         : [];
   }
 
-  receiveResponse(response: Document): void {
+  receiveResponse(response: Document | null): void {
+    if (response == null) {
+      return;
+    }
     this.type = parseServerType(response);
     for (const field of RESPONSE_FIELDS) {
       if (response[field] != null) {

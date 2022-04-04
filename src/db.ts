@@ -295,7 +295,7 @@ export class Db {
    * @param pipeline - An array of aggregation stages to be executed
    * @param options - Optional settings for the command
    */
-  aggregate<T = Document>(
+  aggregate<T extends Document = Document>(
     pipeline: Document[] = [],
     options?: AggregateOptions
   ): AggregationCursor<T> {

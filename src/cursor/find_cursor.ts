@@ -30,7 +30,7 @@ export const FLAGS = [
 ] as const;
 
 /** @public */
-export class FindCursor<TSchema = Document> extends AbstractCursor<TSchema> {
+export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   /** @internal */
   [kFilter]: Document;
   /** @internal */

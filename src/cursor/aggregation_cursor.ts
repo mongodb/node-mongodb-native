@@ -25,7 +25,7 @@ const kOptions = Symbol('options');
  * or higher stream
  * @public
  */
-export class AggregationCursor<TSchema = Document> extends AbstractCursor<TSchema> {
+export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   /** @internal */
   [kPipeline]: Document[];
   /** @internal */
