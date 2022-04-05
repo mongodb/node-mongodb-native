@@ -132,7 +132,7 @@ function isTopologyDescriptionOutcome(outcome: any): outcome is TopologyDescript
   try {
     assertTopologyDescriptionOutcome(outcome);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -170,7 +170,7 @@ function assertMonitoringOutcome(outcome: any): asserts outcome is MonitoringOut
   expect(outcome).to.have.property('events').that.is.an('array');
 }
 
-describe.only('Server Discovery and Monitoring (spec)', function () {
+describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect: sinon.SinonStub;
   before(() => {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
@@ -381,7 +381,7 @@ async function executeSDAMTest(testData: SDAMTest) {
         assertTopologyDescriptionOutcomeExpectations(client.topology, phase.outcome);
         if (phase.outcome.compatible === false) {
           // driver specific error throwing
-          if (testData.description === 'Multiple\x20mongoses with large minWireVersion') {
+          if (testData.description === 'Multiple mongoses with large minWireVersion') {
             // TODO(DRIVERS-2250): There is test bug that causes two errors
             // this will start failing when the test is synced and fixed
             expect(errorsThrown).to.have.lengthOf(2);
