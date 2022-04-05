@@ -496,7 +496,7 @@ export type NestedPaths<Type> = Type extends
   | { _bsontype: string }
   ? []
   : Type extends ReadonlyArray<infer ArrayType>
-  ? [number, ...NestedPaths<ArrayType>]
+  ? [] | [number, ...NestedPaths<ArrayType>]
   : Type extends Map<string, any>
   ? [string]
   : // eslint-disable-next-line @typescript-eslint/ban-types
