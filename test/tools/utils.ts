@@ -263,31 +263,6 @@ export function extractAuthFromConnectionString(connectionString: string | any[]
   return connectionString.slice(indices.start, indices.end);
 }
 
-/**
- * Ensures no extra keys are provided on an object
- * @param knownKeys - the super set of keys allowed to exist on objectWithKeys
- * @param objectWithKeys - An object (usually from JSON) that has an unknown amount of keys
- *
- * Users should combine the usage of this helper with an interface
- * ```ts
- * interface Pet { name: string }
- * const maybePet: any = { name: 'spot', age: number };
- * assertSubsetOfKeys<Pet>(['name'], maybePet); // throws!
- * assertSubsetOfKeys<Pet>(['name', 'age'], maybePet); // compiler error! (age not defined)
- * assertSubsetOfKeys<Pet>([], maybePet); // compiler error! (missing keys)
- * ```
- */
-export function assertNoExtraKeys<T extends { [k: string]: any }>(
-  knownKeys: Array<keyof Required<T>>,
-  objectWithKeys: Partial<T>
-): asserts objectWithKeys is { [P in keyof T]-?: T[P] } {
-  expect(knownKeys).to.have.lengthOf(knownKeys.length);
-  const subsetKeys = Object.keys(objectWithKeys);
-  const difference = Array.from(setDifference(subsetKeys, knownKeys));
-  const message = `Expected no extra keys. Found: [${difference.join(', ')}]`;
-  expect(difference, message).to.be.empty;
-}
-
 export interface FailPoint {
   configureFailPoint: 'failCommand';
   mode: { activationProbability: number } | { times: number } | 'alwaysOn' | 'off';
