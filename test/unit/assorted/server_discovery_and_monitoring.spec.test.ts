@@ -453,7 +453,7 @@ function assertTopologyDescriptionOutcomeExpectations(
   const actualServers = description.servers;
   expect(actualServers).to.be.instanceOf(Map);
 
-  // TODO(NODE-XXXX): The node driver keeps unknown servers where it should discard
+  // TODO(NODE-4159): The node driver keeps unknown servers where it should discard
   // expect(actualServers.size).to.equal(expectedServers.size);
 
   for (const serverName of expectedServers.keys()) {
