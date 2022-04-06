@@ -174,25 +174,25 @@ describe('Connection String', function () {
     context('when the options are provided in the URI', function () {
       context('when the options are equal', function () {
         context('when both options are true', function () {
-          const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
-
           it('sets the tls option', function () {
+          const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
             expect(options.tls).to.be.true;
           });
 
           it('does not set the ssl option', function () {
+            const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
             expect(options).to.not.have.property('ssl');
           });
         });
 
         context('when both options are false', function () {
-          const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
-
           it('sets the tls option', function () {
+          const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
             expect(options.tls).to.be.false;
           });
 
           it('does not set the ssl option', function () {
+            const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
             expect(options).to.not.have.property('ssl');
           });
         });
@@ -210,38 +210,38 @@ describe('Connection String', function () {
     context('when the options are provided in the options', function () {
       context('when the options are equal', function () {
         context('when both options are true', function () {
-          const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
-
           it('sets the tls option', function () {
+          const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
             expect(options.tls).to.be.true;
           });
 
           it('does not set the ssl option', function () {
+            const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
             expect(options).to.not.have.property('ssl');
           });
         });
 
         context('when both options are false', function () {
           context('when the URI is an SRV URI', function () {
-            const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
-
             it('overrides the tls option', function () {
+            const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
               expect(options.tls).to.be.false;
             });
 
             it('does not set the ssl option', function () {
+              const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
               expect(options).to.not.have.property('ssl');
             });
           });
 
           context('when the URI is not SRV', function () {
-            const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
-
             it('sets the tls option', function () {
+            const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
               expect(options.tls).to.be.false;
             });
 
             it('does not set the ssl option', function () {
+              const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
               expect(options).to.not.have.property('ssl');
             });
           });
