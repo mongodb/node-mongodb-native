@@ -160,6 +160,98 @@ const compareInputToSpec = (input, expected) => {
   expect(input).to.equal(expected);
 };
 
+const OPERATION_FUNCTIONS = threadContext => ({
+  checkOut: async function (op) {
+    const connection: Connection = await PROMISIFIED_POOL_FUNCTIONS.checkOut.call(
+      threadContext.pool
+    );
+    if (op.label != null) {
+      threadContext.connections.set(op.label, connection);
+    } else {
+      threadContext.orphans.add(connection);
+    }
+  },
+  checkIn: function (op) {
+    const connection = threadContext.connections.get(op.connection);
+    threadContext.connections.delete(op.connection);
+
+    if (!connection) {
+      throw new Error(`Attempted to release non-existient connection ${op.connection}`);
+    }
+
+    return threadContext.pool.checkIn(connection);
+  },
+  clear: function () {
+    return threadContext.pool.clear();
+  },
+  close: function () {
+    return PROMISIFIED_POOL_FUNCTIONS.close.call(threadContext.pool);
+  },
+  wait: async function (options) {
+    const ms = options.ms;
+    return asyncTimeout(ms);
+  },
+  start: function (options) {
+    const target = options.target;
+    const thread = threadContext.getThread(target);
+    thread.start();
+  },
+  waitForThread: async function (options): Promise<void> {
+    const name = options.name;
+    const target = options.target;
+
+    const threadObj = threadContext.threads.get(target);
+
+    if (!threadObj) {
+      throw new Error(`Attempted to run op ${name} on non-existent thread ${target}`);
+    }
+
+    await threadObj.finish();
+  },
+  waitForEvent: function (options) {
+    const event = options.event;
+    const count = options.count;
+    return new Promise(resolve => {
+      function run() {
+        if (threadContext.poolEvents.filter(ev => getEventType(ev) === event).length >= count) {
+          return resolve();
+        }
+
+        threadContext.poolEventsEventEmitter.once('poolEvent', run);
+      }
+      run();
+    });
+  }
+});
+
+class ThreadContext {
+  threads: Map<any, Thread>;
+  connections: Map<string, Connection>;
+  orphans: Set<Connection>;
+  poolEvents = [];
+  poolEventsEventEmitter = new EventEmitter();
+  supportedOperations;
+
+  constructor() {
+    this.threads = new Map();
+    this.connections = new Map();
+    this.orphans = new Set();
+    this.poolEvents = [];
+    this.poolEventsEventEmitter = new EventEmitter();
+    this.supportedOperations = OPERATION_FUNCTIONS(this);
+  }
+
+  getThread(name) {
+    let thread = this.threads.get(name);
+    if (!thread) {
+      thread = new Thread(this.supportedOperations);
+      this.threads.set(name, thread);
+    }
+
+    return thread;
+  }
+}
+
 describe('Connection Monitoring and Pooling Spec Tests', function () {
   let hostAddress, threadContext;
   after(() => mock.cleanup());
@@ -176,34 +268,8 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     hostAddress = server.hostAddress();
   });
 
-  const createThreadContext = () => {
-    const threads = new Map();
-    const connections: Map<string, Connection> = new Map();
-    const orphans: Set<Connection> = new Set();
-
-    const poolEvents = [];
-    const poolEventsEventEmitter = new EventEmitter();
-
-    return {
-      threads,
-      connections,
-      orphans,
-      poolEvents,
-      poolEventsEventEmitter,
-      getThread: name => {
-        let thread = threads.get(name);
-        if (!thread) {
-          thread = new Thread(OPERATION_FUNCTIONS);
-          threads.set(name, thread);
-        }
-
-        return thread;
-      }
-    };
-  };
-
   beforeEach(() => {
-    threadContext = createThreadContext();
+    threadContext = new ThreadContext();
   });
 
   function createPool(options, threadContext) {
@@ -215,70 +281,6 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
       });
     });
   }
-
-  const OPERATION_FUNCTIONS = {
-    checkOut: async function (op) {
-      const connection: Connection = await PROMISIFIED_POOL_FUNCTIONS.checkOut.call(
-        threadContext.pool
-      );
-      if (op.label != null) {
-        threadContext.connections.set(op.label, connection);
-      } else {
-        threadContext.orphans.add(connection);
-      }
-    },
-    checkIn: function (op) {
-      const connection = threadContext.connections.get(op.connection);
-      threadContext.connections.delete(op.connection);
-
-      if (!connection) {
-        throw new Error(`Attempted to release non-existient connection ${op.connection}`);
-      }
-
-      return threadContext.pool.checkIn(connection);
-    },
-    clear: function () {
-      return threadContext.pool.clear();
-    },
-    close: function () {
-      return PROMISIFIED_POOL_FUNCTIONS.close.call(threadContext.pool);
-    },
-    wait: async function (options) {
-      const ms = options.ms;
-      return asyncTimeout(ms);
-    },
-    start: function (options) {
-      const target = options.target;
-      const thread = threadContext.getThread(target);
-      thread.start();
-    },
-    waitForThread: async function (options): Promise<void> {
-      const name = options.name;
-      const target = options.target;
-
-      const threadObj = threadContext.threads.get(target);
-
-      if (!threadObj) {
-        throw new Error(`Attempted to run op ${name} on non-existent thread ${target}`);
-      }
-
-      await threadObj.finish();
-    },
-    waitForEvent: function (options) {
-      const event = options.event;
-      const count = options.count;
-      return new Promise(resolve => {
-        function run() {
-          if (threadContext.poolEvents.filter(ev => getEventType(ev) === event).length >= count) {
-            return resolve();
-          }
-
-          threadContext.poolEventsEventEmitter.once('poolEvent', run);
-        }
-        run();
-      });
-    }
-  };
 
   afterEach(async () => {
     if (threadContext.pool) {
