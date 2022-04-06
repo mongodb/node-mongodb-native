@@ -931,11 +931,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         },
         succeed: false,
         errorValidator: err => {
-          //    Expect this to fail with an exception with a message containing the string: "us-east-1"
-          expect(err)
-            .to.be.an.instanceOf(Error)
-            .and.to.have.property('message')
-            .that.matches(/us-east-1/);
+          // TODO(NODE-4162): aws region test should only check if an error is thrown
+          expect(err).to.be.an.instanceOf(Error);
         }
       },
       {
