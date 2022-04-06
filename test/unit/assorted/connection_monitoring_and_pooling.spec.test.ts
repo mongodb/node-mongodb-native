@@ -73,6 +73,11 @@ const ALL_POOL_EVENTS = new Set([
   'connectionPoolCleared'
 ]);
 
+function getEventType(event) {
+  const eventName = event.constructor.name;
+  return eventName.substring(0, eventName.lastIndexOf('Event'));
+}
+
 const PROMISIFIED_POOL_FUNCTIONS = {
   checkOut: util.promisify(ConnectionPool.prototype.checkOut),
   close: util.promisify(ConnectionPool.prototype.close)
@@ -177,12 +182,14 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     const orphans: Set<Connection> = new Set();
 
     const poolEvents = [];
+    const poolEventsEventEmitter = new EventEmitter();
 
     return {
       threads,
       connections,
       orphans,
       poolEvents,
+      poolEventsEventEmitter,
       getThread: name => {
         let thread = threads.get(name);
         if (!thread) {
@@ -199,27 +206,21 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     threadContext = createThreadContext();
   });
 
-  const poolEventsEventEmitter = new EventEmitter();
-  let pool: ConnectionPool;
-
   function createPool(options, threadContext) {
-    pool = new ConnectionPool({ ...options, hostAddress });
+    threadContext.pool = new ConnectionPool({ ...options, hostAddress });
     ALL_POOL_EVENTS.forEach(ev => {
-      pool.on(ev, x => {
+      threadContext.pool.on(ev, x => {
         threadContext.poolEvents.push(x);
-        poolEventsEventEmitter.emit('poolEvent');
+        threadContext.poolEventsEventEmitter.emit('poolEvent');
       });
     });
   }
 
-  function eventType(event) {
-    const eventName = event.constructor.name;
-    return eventName.substring(0, eventName.lastIndexOf('Event'));
-  }
-
   const OPERATION_FUNCTIONS = {
     checkOut: async function (op) {
-      const connection: Connection = await PROMISIFIED_POOL_FUNCTIONS.checkOut.call(pool);
+      const connection: Connection = await PROMISIFIED_POOL_FUNCTIONS.checkOut.call(
+        threadContext.pool
+      );
       if (op.label != null) {
         threadContext.connections.set(op.label, connection);
       } else {
@@ -234,13 +235,13 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
         throw new Error(`Attempted to release non-existient connection ${op.connection}`);
       }
 
-      return pool.checkIn(connection);
+      return threadContext.pool.checkIn(connection);
     },
     clear: function () {
-      return pool.clear();
+      return threadContext.pool.clear();
     },
     close: function () {
-      return PROMISIFIED_POOL_FUNCTIONS.close.call(pool);
+      return PROMISIFIED_POOL_FUNCTIONS.close.call(threadContext.pool);
     },
     wait: async function (options) {
       const ms = options.ms;
@@ -268,11 +269,11 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
       const count = options.count;
       return new Promise(resolve => {
         function run() {
-          if (threadContext.poolEvents.filter(ev => eventType(ev) === event).length >= count) {
+          if (threadContext.poolEvents.filter(ev => getEventType(ev) === event).length >= count) {
             return resolve();
           }
 
-          poolEventsEventEmitter.once('poolEvent', run);
+          threadContext.poolEventsEventEmitter.once('poolEvent', run);
         }
         run();
       });
@@ -280,8 +281,8 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
   };
 
   afterEach(async () => {
-    if (pool) {
-      await closePool(pool);
+    if (threadContext.pool) {
+      await closePool(threadContext.pool);
     }
     const connectionsToDestroy = Array.from(threadContext.orphans).concat(
       Array.from(threadContext.connections.values())
@@ -295,9 +296,7 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
       );
     });
     await Promise.all(promises);
-    pool = undefined;
-    // poolEvents.length = 0;
-    poolEventsEventEmitter.removeAllListeners();
+    threadContext.poolEventsEventEmitter.removeAllListeners();
   });
 
   const suites: cmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
@@ -343,7 +342,7 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
       }
 
       const actualEvents = threadContext.poolEvents.filter(
-        ev => !ignoreEvents.includes(eventType(ev))
+        ev => !ignoreEvents.includes(getEventType(ev))
       );
 
       expect(actualEvents).to.have.lengthOf(expectedEvents.length);
