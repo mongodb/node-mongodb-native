@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 
-import { Collection } from '../../../src/index';
+import type { Collection, CommandStartedEvent, MongoClient } from '../../../src/index';
 
 describe('ServerSession', () => {
-  let client;
+  let client: MongoClient;
   let testCollection: Collection<{ _id: number; a?: number }>;
   beforeEach(async function () {
     const configuration = this.configuration;
@@ -19,14 +19,14 @@ describe('ServerSession', () => {
   });
 
   /**
-   * TODO(NODE-4082): Refactor tests to align exactly with spec wording.
-   * Assert the following across at least 5 retries of the above test: (We do not need to retry in nodejs)
+   * Create a MongoClient with the following options: maxPoolSize=1 and retryWrites=true
+   * Attach a command started listener that collects each command's lsid
    * Drivers MUST assert that exactly one session is used for all operations at least once across the retries of this test.
    * Note that it's possible, although rare, for greater than 1 server session to be used because the session is not released until after the connection is checked in.
-   * Drivers MUST assert that the number of allocated sessions is strictly less than the number of concurrent operations in every retry of this test. In this instance it would less than (but NOT equal to) 8.
+   * Drivers MUST assert that the number of allocated sessions is strictly less than the number of concurrent operations in every retry of this test. In this instance it would be less than (but NOT equal to) 8.
    */
   it('13. may reuse one server session for many operations', async () => {
-    const events = [];
+    const events: CommandStartedEvent[] = [];
     client.on('commandStarted', ev => events.push(ev));
 
     const operations = [
