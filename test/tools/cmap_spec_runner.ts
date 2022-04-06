@@ -57,16 +57,16 @@ export type cmapTest = {
 };
 
 const ALL_POOL_EVENTS = new Set([
-  'connectionPoolCreated',
-  'connectionPoolClosed',
-  'connectionCreated',
-  'connectionReady',
-  'connectionClosed',
-  'connectionCheckOutStarted',
-  'connectionCheckOutFailed',
-  'connectionCheckedOut',
-  'connectionCheckedIn',
-  'connectionPoolCleared'
+  ConnectionPool.CONNECTION_POOL_CREATED,
+  ConnectionPool.CONNECTION_POOL_CLOSED,
+  ConnectionPool.CONNECTION_POOL_CLEARED,
+  ConnectionPool.CONNECTION_CREATED,
+  ConnectionPool.CONNECTION_READY,
+  ConnectionPool.CONNECTION_CLOSED,
+  ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
+  ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+  ConnectionPool.CONNECTION_CHECKED_OUT,
+  ConnectionPool.CONNECTION_CHECKED_IN
 ]);
 
 function getEventType(event) {
@@ -123,6 +123,10 @@ class Thread {
   }
 }
 
+/**
+ * Implements the spec test match function, see:
+ * [CMAP Spec Test README](https://github.com/mongodb/specifications/tree/master/source/connection-monitoring-and-pooling/tests#spec-test-match-function)
+ */
 const compareInputToSpec = (input, expected) => {
   if (expected === 42) {
     expect(input).to.be.ok; // not null or undefined
