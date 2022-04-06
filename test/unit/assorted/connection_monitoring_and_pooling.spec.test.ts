@@ -78,18 +78,6 @@ function getEventType(event) {
   return eventName.substring(0, eventName.lastIndexOf('Event'));
 }
 
-const PROMISIFIED_POOL_FUNCTIONS = {
-  checkOut: util.promisify(ConnectionPool.prototype.checkOut),
-  close: util.promisify(ConnectionPool.prototype.close)
-};
-
-function closePool(pool) {
-  return new Promise(resolve => {
-    ALL_POOL_EVENTS.forEach(ev => pool.removeAllListeners(ev));
-    pool.close(resolve);
-  });
-}
-
 class Thread {
   _promise: Promise<void>;
   _error: Error;
@@ -160,11 +148,11 @@ const compareInputToSpec = (input, expected) => {
   expect(input).to.equal(expected);
 };
 
-const OPERATION_FUNCTIONS = threadContext => ({
+const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   checkOut: async function (op) {
-    const connection: Connection = await PROMISIFIED_POOL_FUNCTIONS.checkOut.call(
-      threadContext.pool
-    );
+    const connection: Connection = await util
+      .promisify(ConnectionPool.prototype.checkOut)
+      .call(threadContext.pool);
     if (op.label != null) {
       threadContext.connections.set(op.label, connection);
     } else {
@@ -185,7 +173,7 @@ const OPERATION_FUNCTIONS = threadContext => ({
     return threadContext.pool.clear();
   },
   close: function () {
-    return PROMISIFIED_POOL_FUNCTIONS.close.call(threadContext.pool);
+    return util.promisify(ConnectionPool.prototype.close).call(threadContext.pool);
   },
   wait: async function (options) {
     const ms = options.ms;
@@ -208,7 +196,7 @@ const OPERATION_FUNCTIONS = threadContext => ({
 
     await threadObj.finish();
   },
-  waitForEvent: function (options) {
+  waitForEvent: function (options): Promise<void> {
     const event = options.event;
     const count = options.count;
     return new Promise(resolve => {
@@ -225,20 +213,23 @@ const OPERATION_FUNCTIONS = threadContext => ({
 });
 
 class ThreadContext {
+  pool: ConnectionPool;
   threads: Map<any, Thread>;
   connections: Map<string, Connection>;
   orphans: Set<Connection>;
   poolEvents = [];
   poolEventsEventEmitter = new EventEmitter();
+  hostAddress;
   supportedOperations;
 
-  constructor() {
+  constructor(hostAddress) {
     this.threads = new Map();
     this.connections = new Map();
     this.orphans = new Set();
     this.poolEvents = [];
     this.poolEventsEventEmitter = new EventEmitter();
-    this.supportedOperations = OPERATION_FUNCTIONS(this);
+    this.hostAddress = hostAddress;
+    this.supportedOperations = getTestOpDefinitions(this);
   }
 
   getThread(name) {
@@ -249,6 +240,42 @@ class ThreadContext {
     }
 
     return thread;
+  }
+
+  createPool(options) {
+    this.pool = new ConnectionPool({ ...options, hostAddress: this.hostAddress });
+    ALL_POOL_EVENTS.forEach(ev => {
+      this.pool.on(ev, x => {
+        this.poolEvents.push(x);
+        this.poolEventsEventEmitter.emit('poolEvent');
+      });
+    });
+  }
+
+  closePool() {
+    return new Promise(resolve => {
+      ALL_POOL_EVENTS.forEach(ev => this.pool.removeAllListeners(ev));
+      this.pool.close(resolve);
+    });
+  }
+
+  async tearDown() {
+    if (this.pool) {
+      await this.closePool();
+    }
+    const connectionsToDestroy = Array.from(this.orphans).concat(
+      Array.from(this.connections.values())
+    );
+    const promises = connectionsToDestroy.map(conn => {
+      return new Promise<void>((resolve, reject) =>
+        conn.destroy({ force: true }, err => {
+          if (err) return reject(err);
+          resolve();
+        })
+      );
+    });
+    await Promise.all(promises);
+    this.poolEventsEventEmitter.removeAllListeners();
   }
 }
 
@@ -269,36 +296,11 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
   });
 
   beforeEach(() => {
-    threadContext = new ThreadContext();
+    threadContext = new ThreadContext(hostAddress);
   });
 
-  function createPool(options, threadContext) {
-    threadContext.pool = new ConnectionPool({ ...options, hostAddress });
-    ALL_POOL_EVENTS.forEach(ev => {
-      threadContext.pool.on(ev, x => {
-        threadContext.poolEvents.push(x);
-        threadContext.poolEventsEventEmitter.emit('poolEvent');
-      });
-    });
-  }
-
   afterEach(async () => {
-    if (threadContext.pool) {
-      await closePool(threadContext.pool);
-    }
-    const connectionsToDestroy = Array.from(threadContext.orphans).concat(
-      Array.from(threadContext.connections.values())
-    );
-    const promises = connectionsToDestroy.map(conn => {
-      return new Promise<void>((resolve, reject) =>
-        conn.destroy({ force: true }, err => {
-          if (err) return reject(err);
-          resolve();
-        })
-      );
-    });
-    await Promise.all(promises);
-    threadContext.poolEventsEventEmitter.removeAllListeners();
+    await threadContext.tearDown();
   });
 
   const suites: cmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
@@ -319,7 +321,7 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
       const mainThread = threadContext.getThread(MAIN_THREAD_KEY);
       mainThread.start();
 
-      createPool(poolOptions, threadContext);
+      threadContext.createPool(poolOptions);
 
       for (const idx in operations) {
         const op = operations[idx];
