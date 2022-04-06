@@ -7,8 +7,7 @@ import { ConnectionPool } from '../../../src/cmap/connection_pool';
 import { isHello } from '../../../src/utils';
 import { loadSpecTests } from '../../spec';
 import * as mock from '../../tools/mongodb-mock/index';
-
-const asyncTimeout = util.promisify(setTimeout);
+import { sleep as asyncTimeout } from '../../tools/utils';
 
 type cmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
