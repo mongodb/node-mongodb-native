@@ -85,6 +85,51 @@ function closePool(pool) {
   });
 }
 
+class Thread {
+  _promise: Promise<void>;
+  _error: Error;
+  _killed = false;
+
+  _knownCommands: any;
+
+  // concurrent execution context
+  constructor(operations) {
+    this._promise = new Promise(resolve => {
+      this.start = () => resolve();
+    });
+
+    this._knownCommands = operations;
+  }
+
+  start: () => void;
+
+  queue(op: cmapOperation) {
+    if (this._killed || this._error) {
+      return;
+    }
+
+    this._promise = this._promise.then(() => this._runOperation(op)).catch(e => (this._error = e));
+  }
+
+  async _runOperation(op: cmapOperation) {
+    const operationFn = this._knownCommands[op.name];
+    if (!operationFn) {
+      throw new Error(`Invalid command ${op.name}`);
+    }
+
+    await operationFn(op);
+    await asyncTimeout();
+  }
+
+  async finish() {
+    this._killed = true;
+    await this._promise;
+    if (this._error) {
+      throw this._error;
+    }
+  }
+}
+
 const compareInputToSpec = (input, expected) => {
   if (expected === 42) {
     expect(input).to.be.ok; // not null or undefined
@@ -111,7 +156,7 @@ const compareInputToSpec = (input, expected) => {
 };
 
 describe('Connection Monitoring and Pooling Spec Tests', function () {
-  let hostAddress;
+  let hostAddress, threadContext;
   after(() => mock.cleanup());
   before(async () => {
     const server = await mock.createServer();
@@ -126,32 +171,45 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     hostAddress = server.hostAddress();
   });
 
-  const threads: Map<any, Thread> = new Map();
-  const connections: Map<string, Connection> = new Map();
-  const orphans: Set<Connection> = new Set();
-  const poolEvents = [];
+  const createThreadContext = () => {
+    const threads = new Map();
+    const connections: Map<string, Connection> = new Map();
+    const orphans: Set<Connection> = new Set();
+
+    const poolEvents = [];
+
+    return {
+      threads,
+      connections,
+      orphans,
+      poolEvents,
+      getThread: name => {
+        let thread = threads.get(name);
+        if (!thread) {
+          thread = new Thread(OPERATION_FUNCTIONS);
+          threads.set(name, thread);
+        }
+
+        return thread;
+      }
+    };
+  };
+
+  beforeEach(() => {
+    threadContext = createThreadContext();
+  });
+
   const poolEventsEventEmitter = new EventEmitter();
   let pool: ConnectionPool;
 
-  function createPool(options) {
-    options = Object.assign({}, options, { hostAddress });
-    pool = new ConnectionPool(options);
+  function createPool(options, threadContext) {
+    pool = new ConnectionPool({ ...options, hostAddress });
     ALL_POOL_EVENTS.forEach(ev => {
       pool.on(ev, x => {
-        poolEvents.push(x);
+        threadContext.poolEvents.push(x);
         poolEventsEventEmitter.emit('poolEvent');
       });
     });
-  }
-
-  function getThread(name) {
-    let thread = threads.get(name);
-    if (!thread) {
-      thread = new Thread();
-      threads.set(name, thread);
-    }
-
-    return thread;
   }
 
   function eventType(event) {
@@ -163,14 +221,14 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     checkOut: async function (op) {
       const connection: Connection = await PROMISIFIED_POOL_FUNCTIONS.checkOut.call(pool);
       if (op.label != null) {
-        connections.set(op.label, connection);
+        threadContext.connections.set(op.label, connection);
       } else {
-        orphans.add(connection);
+        threadContext.orphans.add(connection);
       }
     },
     checkIn: function (op) {
-      const connection = connections.get(op.connection);
-      connections.delete(op.connection);
+      const connection = threadContext.connections.get(op.connection);
+      threadContext.connections.delete(op.connection);
 
       if (!connection) {
         throw new Error(`Attempted to release non-existient connection ${op.connection}`);
@@ -190,14 +248,14 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     },
     start: function (options) {
       const target = options.target;
-      const thread = getThread(target);
+      const thread = threadContext.getThread(target);
       thread.start();
     },
     waitForThread: async function (options): Promise<void> {
       const name = options.name;
       const target = options.target;
 
-      const threadObj = threads.get(target);
+      const threadObj = threadContext.threads.get(target);
 
       if (!threadObj) {
         throw new Error(`Attempted to run op ${name} on non-existent thread ${target}`);
@@ -210,7 +268,7 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
       const count = options.count;
       return new Promise(resolve => {
         function run() {
-          if (poolEvents.filter(ev => eventType(ev) === event).length >= count) {
+          if (threadContext.poolEvents.filter(ev => eventType(ev) === event).length >= count) {
             return resolve();
           }
 
@@ -221,54 +279,13 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     }
   };
 
-  class Thread {
-    _promise: Promise<void>;
-    _error: Error;
-    _killed = false;
-
-    // concurrent execution context
-    constructor() {
-      this._promise = new Promise(resolve => {
-        this.start = () => resolve();
-      });
-    }
-
-    start: () => void;
-
-    queue(op: cmapOperation) {
-      if (this._killed || this._error) {
-        return;
-      }
-
-      this._promise = this._promise
-        .then(() => this._runOperation(op))
-        .catch(e => (this._error = e));
-    }
-
-    async _runOperation(op: cmapOperation) {
-      const operationFn = OPERATION_FUNCTIONS[op.name];
-      if (!operationFn) {
-        throw new Error(`Invalid command ${op.name}`);
-      }
-
-      await operationFn(op, this);
-      await asyncTimeout();
-    }
-
-    async finish() {
-      this._killed = true;
-      await this._promise;
-      if (this._error) {
-        throw this._error;
-      }
-    }
-  }
-
   afterEach(async () => {
     if (pool) {
       await closePool(pool);
     }
-    const connectionsToDestroy = Array.from(orphans).concat(Array.from(connections.values()));
+    const connectionsToDestroy = Array.from(threadContext.orphans).concat(
+      Array.from(threadContext.connections.values())
+    );
     const promises = connectionsToDestroy.map(conn => {
       return new Promise<void>((resolve, reject) =>
         conn.destroy({ force: true }, err => {
@@ -279,10 +296,7 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     });
     await Promise.all(promises);
     pool = undefined;
-    threads.clear();
-    connections.clear();
-    orphans.clear();
-    poolEvents.length = 0;
+    // poolEvents.length = 0;
     poolEventsEventEmitter.removeAllListeners();
   });
 
@@ -301,21 +315,16 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
       let actualError;
 
       const MAIN_THREAD_KEY = Symbol('Main Thread');
-      const mainThread = new Thread();
-      threads.set(MAIN_THREAD_KEY, mainThread);
+      const mainThread = threadContext.getThread(MAIN_THREAD_KEY);
       mainThread.start();
 
-      createPool(poolOptions);
+      createPool(poolOptions, threadContext);
 
       for (const idx in operations) {
         const op = operations[idx];
 
         const threadKey = op.name === 'checkOut' ? op.thread || MAIN_THREAD_KEY : MAIN_THREAD_KEY;
-        const thread = getThread(threadKey);
-
-        if (!thread) {
-          throw new Error(`Invalid thread ${String(threadKey)}`);
-        }
+        const thread = threadContext.getThread(threadKey);
 
         thread.queue(op);
       }
@@ -333,7 +342,9 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
         expect(actualError).to.not.exist;
       }
 
-      const actualEvents = poolEvents.filter(ev => !ignoreEvents.includes(eventType(ev)));
+      const actualEvents = threadContext.poolEvents.filter(
+        ev => !ignoreEvents.includes(eventType(ev))
+      );
 
       expect(actualEvents).to.have.lengthOf(expectedEvents.length);
       for (const expected of expectedEvents) {
