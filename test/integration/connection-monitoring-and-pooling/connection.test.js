@@ -456,24 +456,24 @@ describe('Connection', function () {
       })
     );
 
-    it('throws when attempting an operation if the client is not connected', function (done) {
+    it.skip('throws when attempting an operation if the client is not connected', function (done) {
       const client = this.configuration.newClient();
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
       collection.insertOne({ a: 2 }, err => {
         expect(err).to.be.instanceof(MongoNotConnectedError);
         done();
       });
-    });
+    }).skipReason = 'Not anymore!!!';
 
-    it('throws when attempting an operation if the client is not connected (promises)', async function () {
+    it.skip('throws when attempting an operation if the client is not connected (promises)', async function () {
       const client = this.configuration.newClient();
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
 
       const err = await collection.insertOne({ a: 2 }).catch(err => err);
       expect(err).to.be.instanceof(MongoNotConnectedError);
-    });
+    }).skipReason = 'Not anymore!!!';
 
-    it(
+    it.skip(
       'should correctly fail on retry when client has been closed',
       withClient(function (client, done) {
         const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
@@ -491,9 +491,9 @@ describe('Connection', function () {
           });
         });
       })
-    );
+    ).skipReason = 'Not anymore!!!';
 
-    it('should correctly fail on retry when client has been closed (promises)', async function () {
+    it.skip('should correctly fail on retry when client has been closed (promises)', async function () {
       const client = await this.configuration.newClient().connect();
       const collection = client.db('shouldCorrectlyFailOnRetry').collection('test');
       await collection.insertOne({ a: 1 });
@@ -501,6 +501,6 @@ describe('Connection', function () {
 
       const err = await collection.insertOne({ a: 2 }).catch(err => err);
       expect(err).to.be.instanceof(MongoNotConnectedError);
-    });
+    }).skipReason = 'Not anymore!!!';
   });
 });

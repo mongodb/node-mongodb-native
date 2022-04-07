@@ -3,7 +3,7 @@ import { AbstractCursor } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, getTopology, maxWireVersion } from '../utils';
+import { Callback, getClient, getTopology, maxWireVersion } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { executeOperation, ExecutionResult } from './execute_operation';
 import { Aspect, defineAspects } from './operation';
@@ -97,7 +97,7 @@ export class ListCollectionsCursor<
   options?: ListCollectionsOptions;
 
   constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
-    super(getTopology(db), db.s.namespace, options);
+    super(getClient(db), db.s.namespace, options);
     this.parent = db;
     this.filter = filter;
     this.options = options;

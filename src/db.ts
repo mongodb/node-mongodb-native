@@ -47,6 +47,7 @@ import {
   Callback,
   DEFAULT_PK_FACTORY,
   filterOptions,
+  getClient,
   getTopology,
   MongoDBNamespace,
   resolveOptions
@@ -310,7 +311,7 @@ export class Db {
     }
 
     return new AggregationCursor(
-      getTopology(this),
+      getClient(this),
       this.s.namespace,
       pipeline,
       resolveOptions(this, options)

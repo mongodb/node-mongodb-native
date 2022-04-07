@@ -9,6 +9,7 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import {
   Callback,
+  getClient,
   getTopology,
   maxWireVersion,
   MongoDBNamespace,
@@ -424,7 +425,7 @@ export class ListIndexesCursor extends AbstractCursor {
   options?: ListIndexesOptions;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
-    super(getTopology(collection), collection.s.namespace, options);
+    super(getClient(collection), collection.s.namespace, options);
     this.parent = collection;
     this.options = options;
   }

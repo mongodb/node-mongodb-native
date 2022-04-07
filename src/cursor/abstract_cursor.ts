@@ -10,6 +10,7 @@ import {
   MongoRuntimeError,
   MongoTailableCursorError
 } from '../error';
+import type { MongoClient } from '../mongo_client';
 import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
@@ -29,7 +30,7 @@ const kServer = Symbol('server');
 /** @internal */
 const kNamespace = Symbol('namespace');
 /** @internal */
-const kTopology = Symbol('topology');
+const kClient = Symbol('client');
 /** @internal */
 const kSession = Symbol('session');
 /** @internal */
@@ -126,7 +127,7 @@ export abstract class AbstractCursor<
   /** @internal */
   [kDocuments]: TSchema[];
   /** @internal */
-  [kTopology]: Topology;
+  [kClient]: MongoClient;
   /** @internal */
   [kTransform]?: (doc: TSchema) => any;
   /** @internal */
@@ -143,13 +144,13 @@ export abstract class AbstractCursor<
 
   /** @internal */
   constructor(
-    topology: Topology,
+    client: MongoClient,
     namespace: MongoDBNamespace,
     options: AbstractCursorOptions = {}
   ) {
     super();
 
-    this[kTopology] = topology;
+    this[kClient] = client;
     this[kNamespace] = namespace;
     this[kDocuments] = []; // TODO: https://github.com/microsoft/TypeScript/issues/36230
     this[kInitialized] = false;
@@ -192,8 +193,13 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
-  get topology(): Topology {
-    return this[kTopology];
+  get client(): MongoClient {
+    return this[kClient];
+  }
+
+  /** @internal */
+  get topology(): Topology | null {
+    return this.client.topology;
   }
 
   /** @internal */
@@ -236,7 +242,7 @@ export abstract class AbstractCursor<
   }
 
   get loadBalanced(): boolean {
-    return this[kTopology].loadBalanced;
+    return !!this.topology?.loadBalanced;
   }
 
   /** Returns current buffered documents length */
@@ -642,13 +648,13 @@ export abstract class AbstractCursor<
    */
   [kInit](callback: Callback<TSchema | null>): void {
     if (this[kSession] == null) {
-      if (this[kTopology].shouldCheckForSessionSupport()) {
-        return this[kTopology].selectServer(ReadPreference.primaryPreferred, {}, err => {
+      if (this.topology?.shouldCheckForSessionSupport()) {
+        return this.topology?.selectServer(ReadPreference.primaryPreferred, {}, err => {
           if (err) return callback(err);
           return this[kInit](callback);
         });
-      } else if (this[kTopology].hasSessionSupport()) {
-        this[kSession] = this[kTopology].startSession({ owner: this, explicit: false });
+      } else if (this.topology?.hasSessionSupport()) {
+        this[kSession] = this.topology?.startSession({ owner: this, explicit: false });
       }
     }
 

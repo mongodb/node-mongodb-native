@@ -93,6 +93,7 @@ import {
   checkCollectionName,
   DEFAULT_PK_FACTORY,
   emitWarningOnce,
+  getClient,
   getTopology,
   MongoDBNamespace,
   normalizeHintField,
@@ -759,7 +760,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return new FindCursor<WithId<TSchema>>(
-      getTopology(this),
+      getClient(this),
       this.s.namespace,
       filter,
       resolveOptions(this as TODO_NODE_3286, options)
@@ -1408,7 +1409,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return new AggregationCursor(
-      getTopology(this),
+      getClient(this),
       this.s.namespace,
       pipeline,
       resolveOptions(this, options)

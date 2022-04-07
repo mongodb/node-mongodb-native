@@ -1,5 +1,6 @@
 import type { Document } from '../bson';
 import type { ExplainVerbosityLike } from '../explain';
+import type { MongoClient } from '../mongo_client';
 import { AggregateOperation, AggregateOptions } from '../operations/aggregate';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import type { Topology } from '../sdam/topology';
@@ -33,12 +34,12 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   constructor(
-    topology: Topology,
+    client: MongoClient,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
     options: AggregateOptions = {}
   ) {
-    super(topology, namespace, options);
+    super(client, namespace, options);
 
     this[kPipeline] = pipeline;
     this[kOptions] = options;
@@ -51,7 +52,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   clone(): AggregationCursor<TSchema> {
     const clonedOptions = mergeOptions({}, this[kOptions]);
     delete clonedOptions.session;
-    return new AggregationCursor(this.topology, this.namespace, this[kPipeline], {
+    return new AggregationCursor(this.client, this.namespace, this[kPipeline], {
       ...clonedOptions
     });
   }

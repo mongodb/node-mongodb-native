@@ -29,6 +29,7 @@ import type { ClientSession } from './sessions';
 import {
   calculateDurationInMs,
   Callback,
+  getClient,
   getTopology,
   maxWireVersion,
   maybePromise,
@@ -430,12 +431,12 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
   pipeline: Document[];
 
   constructor(
-    topology: Topology,
+    client: MongoClient,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
     options: ChangeStreamCursorOptions = {}
   ) {
-    super(topology, namespace, options);
+    super(client, namespace, options);
 
     this.pipeline = pipeline;
     this.options = options;
@@ -500,7 +501,7 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
   }
 
   clone(): AbstractCursor<ChangeStreamDocument<TSchema>> {
-    return new ChangeStreamCursor(this.topology, this.namespace, this.pipeline, {
+    return new ChangeStreamCursor(this.client, this.namespace, this.pipeline, {
       ...this.cursorOptions
     });
   }
@@ -597,7 +598,7 @@ function createChangeStreamCursor<TSchema extends Document>(
   const cursorOptions: ChangeStreamCursorOptions = applyKnownOptions(options, CURSOR_OPTIONS);
 
   const changeStreamCursor = new ChangeStreamCursor<TSchema>(
-    getTopology(changeStream.parent),
+    getClient(changeStream.parent),
     changeStream.namespace,
     pipeline,
     cursorOptions

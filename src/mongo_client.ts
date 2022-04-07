@@ -326,7 +326,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */
   s: MongoClientPrivate;
   /** @internal */
-  topology?: Topology;
+  topology: Topology | null;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -338,6 +338,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     super();
 
     this[kOptions] = parseOptions(url, this, options);
+    this.topology = null;
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
@@ -365,6 +366,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         return client[kOptions].logger;
       }
     };
+  }
+
+  /** @internal */
+  get name(): 'MongoClient' {
+    return 'MongoClient';
   }
 
   get options(): Readonly<MongoOptions> {
@@ -456,7 +462,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
       // clear out references to old topology
       const topology = this.topology;
-      this.topology = undefined;
+      this.topology = null;
 
       topology.close({ force }, error => {
         if (error) return callback(error);

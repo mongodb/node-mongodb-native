@@ -1,6 +1,7 @@
 import type { Document } from '../bson';
 import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
+import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
@@ -40,12 +41,12 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   constructor(
-    topology: Topology,
+    client: MongoClient,
     namespace: MongoDBNamespace,
     filter: Document | undefined,
     options: FindOptions = {}
   ) {
-    super(topology, namespace, options);
+    super(client, namespace, options);
 
     this[kFilter] = filter || {};
     this[kBuiltOptions] = options;
@@ -58,7 +59,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   clone(): FindCursor<TSchema> {
     const clonedOptions = mergeOptions({}, this[kBuiltOptions]);
     delete clonedOptions.session;
-    return new FindCursor(this.topology, this.namespace, this[kFilter], {
+    return new FindCursor(this.client, this.namespace, this[kFilter], {
       ...clonedOptions
     });
   }

@@ -23,6 +23,7 @@ import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import {
   Callback,
+  getClient,
   getTopology,
   maybePromise,
   supportsRetryableWrites,
@@ -97,7 +98,11 @@ export function executeOperation<
     try {
       topology = getTopology(topologyProvider);
     } catch (error) {
-      return callback(error);
+      const client = getClient(topologyProvider);
+      return client.connect(error => {
+        if (error) return callback(error);
+        executeOperation(topologyProvider, operation, callback);
+      });
     }
     if (topology.shouldCheckForSessionSupport()) {
       return topology.selectServer(ReadPreference.primaryPreferred, {}, err => {
