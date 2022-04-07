@@ -13,7 +13,6 @@ import {
   SERVER_OPENING,
   TOPOLOGY_CLOSED,
   TOPOLOGY_DESCRIPTION_CHANGED,
-  TOPOLOGY_EVENTS,
   TOPOLOGY_OPENING
 } from '../../../src/constants';
 import {
