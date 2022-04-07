@@ -1,10 +1,11 @@
+import { HostAddress } from '../../../src';
 import { isHello } from '../../../src/utils';
 import { loadSpecTests } from '../../spec';
-import { cmapTest, runCmapTest, ThreadContext } from '../../tools/cmap_spec_runner';
+import { CmapTest, runCmapTest, ThreadContext } from '../../tools/cmap_spec_runner';
 import * as mock from '../../tools/mongodb-mock/index';
 
 describe('Connection Monitoring and Pooling Spec Tests', function () {
-  let hostAddress, threadContext;
+  let hostAddress: HostAddress, threadContext: ThreadContext;
   after(() => mock.cleanup());
   before(async () => {
     const server = await mock.createServer();
@@ -27,7 +28,7 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
     await threadContext.tearDown();
   });
 
-  const suites: cmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
+  const suites: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
   for (const test of suites) {
     it(test.description, async function () {

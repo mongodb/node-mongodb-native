@@ -2,11 +2,11 @@ import { expect } from 'chai';
 import { EventEmitter } from 'events';
 import * as util from 'util';
 
-import { Connection } from '../../src';
+import { Connection, HostAddress } from '../../src';
 import { ConnectionPool } from '../../src/cmap/connection_pool';
 import { sleep } from './utils';
 
-type cmapOperation =
+type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
   | { name: 'wait'; ms: number }
   | { name: 'waitForEvent'; event: string; count: number }
@@ -14,22 +14,22 @@ type cmapOperation =
   | { name: 'checkIn'; connection: string }
   | { name: 'clear' | 'close' | 'ready' };
 
-type cmapPoolOptions = {
+type CmapPoolOptions = {
   maxPoolSize?: number;
   minPoolSize?: number;
   maxIdleTimeMS?: number;
   waitQueueTimeoutMS?: number;
 };
 
-type cmapEvent = {
+type CmapEvent = {
   type: string;
   address?: 42;
   connectionId?: number;
-  options?: 42 | cmapPoolOptions;
+  options?: 42 | CmapPoolOptions;
   reason: string;
 };
 
-const knownTestKeys = [
+const knownTestKeys: Array<keyof CmapTest> = [
   'name',
   'version',
   'style',
@@ -40,19 +40,19 @@ const knownTestKeys = [
   'events',
   'ignore'
 ];
-export type cmapTest = {
+export type CmapTest = {
   name?: string; // filename path added by the spec loader
   version: number;
   style: 'unit';
   description: string;
-  poolOptions?: cmapPoolOptions;
-  operations: cmapOperation[];
+  poolOptions?: CmapPoolOptions;
+  operations: CmapOperation[];
   error?: {
     type: string;
     message: string;
     address?: number;
   };
-  events?: cmapEvent[];
+  events?: CmapEvent[];
   ignore?: string[];
 };
 
@@ -96,7 +96,7 @@ class Thread {
 
   start: () => void;
 
-  queue(op: cmapOperation) {
+  queue(op: CmapOperation) {
     if (this._killed || this._error) {
       return;
     }
@@ -104,7 +104,7 @@ class Thread {
     this._promise = this._promise.then(() => this._runOperation(op)).catch(e => (this._error = e));
   }
 
-  async _runOperation(op: cmapOperation) {
+  async _runOperation(op: CmapOperation) {
     const operationFn = this._knownCommands[op.name];
     if (!operationFn) {
       throw new Error(`Invalid command ${op.name}`);
@@ -128,6 +128,8 @@ class Thread {
  * [CMAP Spec Test README](https://github.com/mongodb/specifications/tree/master/source/connection-monitoring-and-pooling/tests#spec-test-match-function)
  */
 const compareInputToSpec = (input, expected) => {
+  // the spec uses 42 and "42" as special keywords to express that the value does not matter
+  // however, "42" does not appear in the spec tests, so only the numeric value is checked here
   if (expected === 42) {
     expect(input).to.be.ok; // not null or undefined
     return;
@@ -135,9 +137,9 @@ const compareInputToSpec = (input, expected) => {
 
   if (Array.isArray(expected)) {
     expect(input).to.be.an('array');
-    expected.forEach((expectedValue, index) => {
+    for (const [index, expectedValue] of input.entries()) {
       compareInputToSpec(input[index], expectedValue);
-    });
+    }
     return;
   }
 
@@ -176,8 +178,8 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   clear: function () {
     return threadContext.pool.clear();
   },
-  close: function () {
-    return util.promisify(ConnectionPool.prototype.close).call(threadContext.pool);
+  close: async function () {
+    return await util.promisify(ConnectionPool.prototype.close).call(threadContext.pool);
   },
   wait: async function (options) {
     const ms = options.ms;
@@ -223,8 +225,8 @@ export class ThreadContext {
   orphans: Set<Connection>;
   poolEvents = [];
   poolEventsEventEmitter = new EventEmitter();
-  hostAddress;
-  supportedOperations;
+  hostAddress: HostAddress;
+  supportedOperations: ReturnType<typeof getTestOpDefinitions>;
 
   constructor(hostAddress) {
     this.threads = new Map();
@@ -283,7 +285,7 @@ export class ThreadContext {
   }
 }
 
-export async function runCmapTest(test: cmapTest, threadContext: ThreadContext) {
+export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   expect(knownTestKeys).to.include.members(Object.keys(test));
 
   const poolOptions = test.poolOptions || {};
