@@ -25,7 +25,8 @@ const testSuite = new UnifiedTestSuiteBuilder('listCollections with comment opti
           {
             commandStartedEvent: {
               command: {
-                listCollections: 1
+                listCollections: 1,
+                comment: { $$exists: false }
               }
             }
           }

@@ -156,7 +156,8 @@ const testSuite = new UnifiedTestSuiteBuilder('listDatabases with comment option
       .operation({
         name: 'listDatabases',
         arguments: {
-          filter: {}
+          filter: {},
+          comment: 'string value'
         },
         object: 'client0'
       })
@@ -166,7 +167,8 @@ const testSuite = new UnifiedTestSuiteBuilder('listDatabases with comment option
           {
             commandStartedEvent: {
               command: {
-                listDatabases: 1
+                listDatabases: 1,
+                comment: { $$exists: false }
               }
             }
           }

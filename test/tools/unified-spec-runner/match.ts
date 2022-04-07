@@ -253,7 +253,12 @@ export function specialCheck(
   } else if (isExistsOperator(expected)) {
     // $$exists
     const actualExists = actual !== undefined && actual !== null;
-    expect((expected.$$exists && actualExists) || (!expected.$$exists && !actualExists)).to.be.true;
+    expect(
+      (expected.$$exists && actualExists) || (!expected.$$exists && !actualExists),
+      `expected value at ${path.join('')} to not exist, but received ${JSON.stringify(
+        actual
+      )} instead`
+    ).to.be.true;
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
   }
