@@ -153,7 +153,12 @@ function assertTopologyDescriptionOutcome(
     'maxElectionId',
     'compatible'
   ] as const;
-  expect(outcome).to.have.any.keys(knownTopologyDescriptionOutcomeKeys);
+
+  for (const key of Object.keys(outcome)) {
+    // if outcome has an extra key we don't know about
+    // we need to add an assertion for it in assertTopologyDescriptionOutcomeExpectations
+    expect(knownTopologyDescriptionOutcomeKeys).to.include(key);
+  }
 }
 
 function isMonitoringOutcome(outcome: any): outcome is MonitoringOutcome {
@@ -256,6 +261,7 @@ function findOmittedFields(expected) {
   for (const key of Object.keys(expected)) {
     if (expected[key] == null) {
       result.push(key);
+      // TODO(NODE-4159): remove this delete
       delete expected[key];
     }
   }
@@ -473,6 +479,8 @@ function assertTopologyDescriptionOutcomeExpectations(
     expect(actualServer).to.matchMongoSpec(normalizedExpectedServer);
 
     if (omittedFields.length !== 0) {
+      // TODO(NODE-4159): There are properties that should be nulled out when the server transitions to Unknown
+      // should be: to.not.have.any.keys, or better server[key] === null, fix findOmittedFields
       expect(actualServer).to.not.have.all.keys(omittedFields);
     }
   }
