@@ -19,7 +19,6 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
-import type { OneOrMore } from './mongo_types';
 import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -220,12 +219,7 @@ function getUint(name: string, value: unknown): number {
   return parsedValue;
 }
 
-/** Wrap a single value in an array if the value is not an array */
-function toArray<T>(value: OneOrMore<T>): T[] {
-  return Array.isArray(value) ? value : [value];
-}
-
-function* entriesFromString(value: string) {
+function* entriesFromString(value: string): Generator<[string, string]> {
   const keyValuePairs = value.split(',');
   for (const keyValue of keyValuePairs) {
     const [key, value] = keyValue.split(':');
@@ -333,11 +327,19 @@ export function parseOptions(
   ]);
 
   for (const key of allKeys) {
-    const values = [objectOptions, urlOptions, DEFAULT_OPTIONS].flatMap(optionsObject => {
-      const options = optionsObject.get(key) ?? [];
-      return toArray(options);
-    });
-
+    const values = [];
+    const objectOptionValue = objectOptions.get(key);
+    if (objectOptionValue != null) {
+      values.push(objectOptionValue);
+    }
+    const urlValue = urlOptions.get(key);
+    if (urlValue != null) {
+      values.push(...urlValue);
+    }
+    const defaultOptionsValue = DEFAULT_OPTIONS.get(key);
+    if (defaultOptionsValue != null) {
+      values.push(defaultOptionsValue);
+    }
     allOptions.set(key, values);
   }
 
@@ -982,9 +984,18 @@ export const OPTIONS = {
   },
   readPreferenceTags: {
     target: 'readPreference',
-    transform({ values, options }) {
+    transform({
+      values,
+      options
+    }: {
+      values: Array<string | Record<string, string>[]>;
+      options: MongoClientOptions;
+    }) {
+      const tags: Array<string | Record<string, string>> = Array.isArray(values[0])
+        ? values[0]
+        : (values as Array<string>);
       const readPreferenceTags = [];
-      for (const tag of values) {
+      for (const tag of tags) {
         const readPreferenceTag: TagSet = Object.create(null);
         if (typeof tag === 'string') {
           for (const [k, v] of entriesFromString(tag)) {

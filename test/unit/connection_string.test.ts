@@ -46,16 +46,137 @@ describe('Connection String', function () {
     expect(options.hosts[0].port).to.equal(27017);
   });
 
-  context('readPreferenceTags', function () {
-    it('should parse multiple readPreferenceTags when passed in the uri', () => {
-      const options = parseOptions(
-        'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar'
-      );
-      expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
+  describe('ca option', () => {
+    context('when set in the options object', () => {
+      it('should parse a string', () => {
+        const options = parseOptions('mongodb://localhost', {
+          ca: 'hello'
+        });
+        expect(options).to.have.property('ca').to.equal('hello');
+      });
+
+      it('should parse a NodeJS buffer', () => {
+        const options = parseOptions('mongodb://localhost', {
+          ca: Buffer.from([1, 2, 3, 4])
+        });
+
+        expect(options)
+          .to.have.property('ca')
+          .to.deep.equal(Buffer.from([1, 2, 3, 4]));
+      });
+
+      it('should parse arrays with a single element', () => {
+        const options = parseOptions('mongodb://localhost', {
+          ca: ['hello']
+        });
+        expect(options).to.have.property('ca').to.deep.equal(['hello']);
+      });
+
+      it('should parse an empty array', () => {
+        const options = parseOptions('mongodb://localhost', {
+          ca: []
+        });
+        expect(options).to.have.property('ca').to.deep.equal([]);
+      });
+
+      it('should parse arrays with multiple elements', () => {
+        const options = parseOptions('mongodb://localhost', {
+          ca: ['hello', 'world']
+        });
+        expect(options).to.have.property('ca').to.deep.equal(['hello', 'world']);
+      });
     });
 
-    it('should parse multiple readPreferenceTags when passed in options object', () => {
-      const options = parseOptions('mongodb://hostname?', {
+    context('when set in the uri', () => {
+      it('should parse a string value', () => {
+        const options = parseOptions('mongodb://localhost?ca=hello', {});
+        expect(options).to.have.property('ca').to.equal('hello');
+      });
+
+      it('should throw an error with a buffer value', () => {
+        const buffer = Buffer.from([1, 2, 3, 4]);
+        expect(() => {
+          parseOptions(`mongodb://localhost?ca=${buffer.toString()}`, {});
+        }).to.throw(MongoAPIError);
+      });
+
+      it('should not parse multiple string values (array of options)', () => {
+        const options = parseOptions('mongodb://localhost?ca=hello,world', {});
+        expect(options).to.have.property('ca').to.equal('hello,world');
+      });
+    });
+
+    it('should prioritize options set in the object over those set in the URI', () => {
+      const options = parseOptions('mongodb://localhost?ca=hello', {
+        ca: ['world']
+      });
+      expect(options).to.have.property('ca').to.deep.equal(['world']);
+    });
+  });
+
+  describe('readPreferenceTags option', function () {
+    context('when the option is passed in the uri', () => {
+      it('should throw an error if no value is passed for readPreferenceTags', () => {
+        expect(() => parseOptions('mongodb://hostname?readPreferenceTags=')).to.throw(
+          MongoAPIError
+        );
+      });
+      it('should parse a single read preference tag', () => {
+        const options = parseOptions('mongodb://hostname?readPreferenceTags=bar:foo');
+        expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }]);
+      });
+      it('should parse multiple readPreferenceTags', () => {
+        const options = parseOptions(
+          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar'
+        );
+        expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
+      });
+      it('should parse multiple readPreferenceTags for the same key', () => {
+        const options = parseOptions(
+          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=bar:banana&readPreferenceTags=baz:bar'
+        );
+        expect(options.readPreference.tags).to.deep.equal([
+          { bar: 'foo' },
+          { bar: 'banana' },
+          { baz: 'bar' }
+        ]);
+      });
+    });
+
+    context('when the option is passed in the options object', () => {
+      it('should not parse an empty readPreferenceTags object', () => {
+        const options = parseOptions('mongodb://hostname?', {
+          readPreferenceTags: []
+        });
+        expect(options.readPreference.tags).to.deep.equal([]);
+      });
+      it('should parse a single readPreferenceTags object', () => {
+        const options = parseOptions('mongodb://hostname?', {
+          readPreferenceTags: [{ bar: 'foo' }]
+        });
+        expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }]);
+      });
+      it('should parse multiple readPreferenceTags', () => {
+        const options = parseOptions('mongodb://hostname?', {
+          readPreferenceTags: [{ bar: 'foo' }, { baz: 'bar' }]
+        });
+        expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
+      });
+
+      it('should parse multiple readPreferenceTags for the same key', () => {
+        const options = parseOptions('mongodb://hostname?', {
+          readPreferenceTags: [{ bar: 'foo' }, { bar: 'banana' }, { baz: 'bar' }]
+        });
+        expect(options.readPreference.tags).to.deep.equal([
+          { bar: 'foo' },
+          { bar: 'banana' },
+          { baz: 'bar' }
+        ]);
+      });
+    });
+
+    it('should prioritize options from the options object over the uri options', () => {
+      const options = parseOptions('mongodb://hostname?readPreferenceTags=a:b', {
         readPreferenceTags: [{ bar: 'foo' }, { baz: 'bar' }]
       });
       expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
@@ -175,7 +296,7 @@ describe('Connection String', function () {
       context('when the options are equal', function () {
         context('when both options are true', function () {
           it('sets the tls option', function () {
-          const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
+            const options = parseOptions('mongodb://localhost/?tls=true&ssl=true');
             expect(options.tls).to.be.true;
           });
 
@@ -187,7 +308,7 @@ describe('Connection String', function () {
 
         context('when both options are false', function () {
           it('sets the tls option', function () {
-          const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
+            const options = parseOptions('mongodb://localhost/?tls=false&ssl=false');
             expect(options.tls).to.be.false;
           });
 
@@ -211,7 +332,7 @@ describe('Connection String', function () {
       context('when the options are equal', function () {
         context('when both options are true', function () {
           it('sets the tls option', function () {
-          const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
+            const options = parseOptions('mongodb://localhost/', { tls: true, ssl: true });
             expect(options.tls).to.be.true;
           });
 
@@ -224,7 +345,7 @@ describe('Connection String', function () {
         context('when both options are false', function () {
           context('when the URI is an SRV URI', function () {
             it('overrides the tls option', function () {
-            const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
+              const options = parseOptions('mongodb+srv://localhost/', { tls: false, ssl: false });
               expect(options.tls).to.be.false;
             });
 
@@ -236,7 +357,7 @@ describe('Connection String', function () {
 
           context('when the URI is not SRV', function () {
             it('sets the tls option', function () {
-            const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
+              const options = parseOptions('mongodb://localhost/', { tls: false, ssl: false });
               expect(options.tls).to.be.false;
             });
 
