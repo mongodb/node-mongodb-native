@@ -201,6 +201,7 @@ export class TopologyDescription {
     let { type: topologyType, setName, maxSetVersion, maxElectionId, commonWireVersion } = this;
 
     if (serverDescription.setName && setName && serverDescription.setName !== setName) {
+      // TODO(NODE-4159): servers with an incorrect setName should be removed not marked Unknown
       serverDescription = new ServerDescription(address, undefined);
     }
 

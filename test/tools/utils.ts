@@ -1,6 +1,6 @@
 import { EJSON } from 'bson';
 import { expect } from 'chai';
-import * as util from 'util';
+import { inspect, promisify } from 'util';
 
 import { Logger } from '../../src/logger';
 import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
@@ -182,7 +182,7 @@ export function shouldRunServerlessTest(testRequirement: any, isServerless: any)
  * Attempts to use EJSON (to make type information obvious)
  * falls back to util.inspect if there's an error (circular reference)
  */
-export function ejson(strings: any[], ...values: any[]) {
+export function ejson(strings: TemplateStringsArray, ...values: any[]) {
   const stringParts = [strings[0]];
   for (const [idx, value] of values.entries()) {
     if (typeof value === 'object') {
@@ -190,7 +190,7 @@ export function ejson(strings: any[], ...values: any[]) {
       try {
         stringifiedObject = EJSON.stringify(value, { relaxed: false });
       } catch (error) {
-        stringifiedObject = util.inspect(value, {
+        stringifiedObject = inspect(value, {
           depth: Infinity,
           showHidden: true,
           compact: true
@@ -217,7 +217,7 @@ export const runLater = (fn: () => Promise<void>, ms: number) => {
   });
 };
 
-export const sleep = util.promisify(setTimeout);
+export const sleep = promisify(setTimeout);
 
 /**
  * If you are using sinon fake timers, it can end up blocking queued IO from running
