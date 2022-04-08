@@ -2,12 +2,16 @@
 
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
-const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
 const { MongoDBNamespace, isHello } = require('../../../src/utils');
 const { AggregationCursor } = require('../../../src/cursor/aggregation_cursor');
+const { MongoClient } = require('../../../src');
 
-const test = {};
+const test = {
+  get uri() {
+    return `mongodb://${this.server.hostAddress().toString()}`;
+  }
+};
 describe('Aggregation Cursor', function () {
   describe('#next', function () {
     afterEach(function () {
@@ -37,17 +41,17 @@ describe('Aggregation Cursor', function () {
       });
 
       it('sets the session on the cursor', function (done) {
-        const topology = new Topology(test.server.hostAddress());
+        const client = new MongoClient(test.uri);
         const cursor = new AggregationCursor(
-          topology,
+          client,
           MongoDBNamespace.fromString('test.test'),
           [],
           {}
         );
-        topology.connect(function () {
+        client.connect(function () {
           cursor.next(function () {
             expect(cursor.session).to.exist;
-            topology.close(done);
+            client.close(done);
           });
         });
       });
@@ -73,19 +77,19 @@ describe('Aggregation Cursor', function () {
       });
 
       it('does not set the session on the cursor', function (done) {
-        const topology = new Topology(test.server.hostAddress(), {
+        const client = new MongoClient(test.uri, {
           serverSelectionTimeoutMS: 1000
         });
         const cursor = new AggregationCursor(
-          topology,
+          client,
           MongoDBNamespace.fromString('test.test'),
           [],
           {}
         );
-        topology.connect(function () {
+        client.connect(function () {
           cursor.next(function () {
             expect(cursor.session).to.not.exist;
-            topology.close(done);
+            client.close(done);
           });
         });
       });
@@ -117,19 +121,19 @@ describe('Aggregation Cursor', function () {
       });
 
       it('sets the session on the cursor', function (done) {
-        const topology = new Topology(test.server.hostAddress(), {
+        const client = new MongoClient(test.uri, {
           serverSelectionTimeoutMS: 1000
         });
         const cursor = new AggregationCursor(
-          topology,
+          client,
           MongoDBNamespace.fromString('test.test'),
           [],
           {}
         );
-        topology.connect(function () {
+        client.connect(function () {
           cursor.next(function () {
             expect(cursor.session).to.exist;
-            topology.close(done);
+            client.close(done);
           });
         });
       });
