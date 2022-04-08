@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
-import * as util from 'util';
+import { promisify } from 'util';
 
 import { Connection, HostAddress } from '../../src';
 import { ConnectionPool } from '../../src/cmap/connection_pool';
@@ -29,7 +29,7 @@ type CmapEvent = {
   reason: string;
 };
 
-const knownTestKeys: Array<keyof CmapTest> = [
+const CMAP_TEST_KEYS: Array<keyof CmapTest> = [
   'name',
   'version',
   'style',
@@ -79,33 +79,25 @@ function getEventType(event) {
  * a "thread" refers to a concurrent execution context
  */
 class Thread {
-  _promise: Promise<void>;
-  _error: Error;
-  _killed = false;
+  #promise: Promise<void>;
+  #error: Error;
+  #killed = false;
 
-  _knownCommands: any;
-
-  // concurrent execution context
-  constructor(operations) {
-    this._promise = new Promise(resolve => {
-      this.start = () => resolve();
-    });
-
-    this._knownCommands = operations;
-  }
+  #knownCommands: any;
 
   start: () => void;
 
-  queue(op: CmapOperation) {
-    if (this._killed || this._error) {
-      return;
-    }
+  // concurrent execution context
+  constructor(operations) {
+    this.#promise = new Promise(resolve => {
+      this.start = () => resolve();
+    });
 
-    this._promise = this._promise.then(() => this._runOperation(op)).catch(e => (this._error = e));
+    this.#knownCommands = operations;
   }
 
-  async _runOperation(op: CmapOperation) {
-    const operationFn = this._knownCommands[op.name];
+  private async _runOperation(op: CmapOperation): Promise<void> {
+    const operationFn = this.#knownCommands[op.name];
     if (!operationFn) {
       throw new Error(`Invalid command ${op.name}`);
     }
@@ -114,11 +106,19 @@ class Thread {
     await sleep();
   }
 
+  queue(op: CmapOperation) {
+    if (this.#killed || this.#error) {
+      return;
+    }
+
+    this.#promise = this.#promise.then(() => this._runOperation(op)).catch(e => (this.#error = e));
+  }
+
   async finish() {
-    this._killed = true;
-    await this._promise;
-    if (this._error) {
-      throw this._error;
+    this.#killed = true;
+    await this.#promise;
+    if (this.#error) {
+      throw this.#error;
     }
   }
 }
@@ -156,9 +156,9 @@ const compareInputToSpec = (input, expected) => {
 
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   checkOut: async function (op) {
-    const connection: Connection = await util
-      .promisify(ConnectionPool.prototype.checkOut)
-      .call(threadContext.pool);
+    const connection: Connection = await promisify(ConnectionPool.prototype.checkOut).call(
+      threadContext.pool
+    );
     if (op.label != null) {
       threadContext.connections.set(op.label, connection);
     } else {
@@ -179,7 +179,7 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
     return threadContext.pool.clear();
   },
   close: async function () {
-    return await util.promisify(ConnectionPool.prototype.close).call(threadContext.pool);
+    return await promisify(ConnectionPool.prototype.close).call(threadContext.pool);
   },
   wait: async function (options) {
     const ms = options.ms;
@@ -220,28 +220,24 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
 
 export class ThreadContext {
   pool: ConnectionPool;
-  threads: Map<any, Thread>;
-  connections: Map<string, Connection>;
-  orphans: Set<Connection>;
+  threads: Map<any, Thread> = new Map();
+  connections: Map<string, Connection> = new Map();
+  orphans: Set<Connection> = new Set();
   poolEvents = [];
   poolEventsEventEmitter = new EventEmitter();
-  hostAddress: HostAddress;
-  supportedOperations: ReturnType<typeof getTestOpDefinitions>;
+
+  #hostAddress: HostAddress;
+  #supportedOperations: ReturnType<typeof getTestOpDefinitions>;
 
   constructor(hostAddress) {
-    this.threads = new Map();
-    this.connections = new Map();
-    this.orphans = new Set();
-    this.poolEvents = [];
-    this.poolEventsEventEmitter = new EventEmitter();
-    this.hostAddress = hostAddress;
-    this.supportedOperations = getTestOpDefinitions(this);
+    this.#hostAddress = hostAddress;
+    this.#supportedOperations = getTestOpDefinitions(this);
   }
 
   getThread(name) {
     let thread = this.threads.get(name);
     if (!thread) {
-      thread = new Thread(this.supportedOperations);
+      thread = new Thread(this.#supportedOperations);
       this.threads.set(name, thread);
     }
 
@@ -249,7 +245,7 @@ export class ThreadContext {
   }
 
   createPool(options) {
-    this.pool = new ConnectionPool({ ...options, hostAddress: this.hostAddress });
+    this.pool = new ConnectionPool({ ...options, hostAddress: this.#hostAddress });
     ALL_POOL_EVENTS.forEach(ev => {
       this.pool.on(ev, x => {
         this.poolEvents.push(x);
@@ -286,7 +282,7 @@ export class ThreadContext {
 }
 
 export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
-  expect(knownTestKeys).to.include.members(Object.keys(test));
+  expect(CMAP_TEST_KEYS).to.include.members(Object.keys(test));
 
   const poolOptions = test.poolOptions || {};
   const operations = test.operations;
