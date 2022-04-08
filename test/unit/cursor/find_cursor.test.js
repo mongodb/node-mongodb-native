@@ -3,13 +3,17 @@
 const expect = require('chai').expect;
 const { MongoError } = require('../../../src/error');
 const mock = require('../../tools/mongodb-mock/index');
-const { Topology } = require('../../../src/sdam/topology');
 const { Long } = require('bson');
 const { MongoDBNamespace, isHello } = require('../../../src/utils');
 const { FindCursor } = require('../../../src/cursor/find_cursor');
+const { MongoClient } = require('../../../src');
 
-const test = {};
-describe('Find Cursor', function () {
+const test = {
+  get uri() {
+    return `mongodb://${this.server.hostAddress().toString()}`;
+  }
+};
+describe.only('Find Cursor', function () {
   describe('#next', function () {
     afterEach(function () {
       mock.cleanup();
@@ -38,12 +42,12 @@ describe('Find Cursor', function () {
       });
 
       it('sets the session on the cursor', function (done) {
-        const topology = new Topology(test.server.hostAddress());
-        const cursor = new FindCursor(topology, MongoDBNamespace.fromString('test.test'), {}, {});
-        topology.connect(function () {
+        const client = new MongoClient(test.uri);
+        const cursor = new FindCursor(client, MongoDBNamespace.fromString('test.test'), {}, {});
+        client.connect(function () {
           cursor.next(function () {
             expect(cursor.session).to.exist;
-            topology.close(done);
+            client.close(done);
           });
         });
       });
@@ -69,7 +73,7 @@ describe('Find Cursor', function () {
       });
 
       it('does not set the session on the cursor', function (done) {
-        const topology = new Topology(test.server.hostAddress(), {
+        const topology = new MongoClient(test.uri, {
           serverSelectionTimeoutMS: 1000
         });
         const cursor = new FindCursor(topology, MongoDBNamespace.fromString('test.test'), {}, {});
@@ -108,7 +112,7 @@ describe('Find Cursor', function () {
       });
 
       it('sets the session on the cursor', function (done) {
-        const topology = new Topology(test.server.hostAddress(), {
+        const topology = new MongoClient(test.uri, {
           serverSelectionTimeoutMS: 1000
         });
         const cursor = new FindCursor(topology, MongoDBNamespace.fromString('test.test'), {}, {});
@@ -135,7 +139,7 @@ describe('Find Cursor', function () {
         errmsg: 'Cursor not found (namespace: "liveearth.entityEvents", id: 2018648316188432590).'
       };
 
-      const client = new Topology(test.server.hostAddress());
+      const client = new MongoClient(test.uri);
 
       test.server.setMessageHandler(request => {
         const doc = request.document;
@@ -162,7 +166,7 @@ describe('Find Cursor', function () {
       });
 
       client.on('error', done);
-      client.once('connect', () => {
+      client.once('open', () => {
         const cursor = new FindCursor(client, MongoDBNamespace.fromString('test.test'), {}, {});
 
         // Execute next
