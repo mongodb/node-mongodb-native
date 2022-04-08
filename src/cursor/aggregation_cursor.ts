@@ -3,7 +3,6 @@ import type { ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import { AggregateOperation, AggregateOptions } from '../operations/aggregate';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
-import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';

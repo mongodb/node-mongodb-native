@@ -7,14 +7,7 @@ import type { OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import {
-  Callback,
-  getClient,
-  getTopology,
-  maxWireVersion,
-  MongoDBNamespace,
-  parseIndexOptions
-} from '../utils';
+import { Callback, getClient, maxWireVersion, MongoDBNamespace, parseIndexOptions } from '../utils';
 import {
   CollationOptions,
   CommandOperation,

@@ -3,7 +3,7 @@ import { AbstractCursor } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, getClient, getTopology, maxWireVersion } from '../utils';
+import { Callback, getClient, maxWireVersion } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { executeOperation, ExecutionResult } from './execute_operation';
 import { Aspect, defineAspects } from './operation';

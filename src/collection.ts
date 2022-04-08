@@ -94,7 +94,6 @@ import {
   DEFAULT_PK_FACTORY,
   emitWarningOnce,
   getClient,
-  getTopology,
   MongoDBNamespace,
   normalizeHintField,
   resolveOptions

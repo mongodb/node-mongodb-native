@@ -7,7 +7,6 @@ import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { FindOperation, FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
-import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import { Callback, emitWarningOnce, mergeOptions, MongoDBNamespace } from '../utils';
