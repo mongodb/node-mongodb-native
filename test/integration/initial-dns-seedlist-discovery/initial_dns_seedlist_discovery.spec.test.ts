@@ -18,7 +18,9 @@ function makeTest(test, topology) {
   });
 
   it(test.comment, async function () {
-    return this.skip(); // FIXME(NODE-3757): These tests require specific environment setups, also the error cases need better assertions
+    this.test.skipReason =
+      'TODO(NODE-3757): These tests require specific environment setups, also the error cases need better assertions';
+    return this.skip();
     if (topology === 'replica-set' && this.configuration.topologyType !== 'ReplicaSetWithPrimary') {
       return this.skip();
     }

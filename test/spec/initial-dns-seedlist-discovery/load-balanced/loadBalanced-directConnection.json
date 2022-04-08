@@ -1,10 +1,10 @@
 {
-  "uri": "mongodb+srv://test20.test.build.10gen.cc/?directConnection=false",
+  "uri": "mongodb+srv://test24.test.build.10gen.cc/?directConnection=false",
   "seeds": [
-    "localhost.test.build.10gen.cc:27017"
+    "localhost.test.build.10gen.cc:8000"
   ],
   "hosts": [
-    "localhost.test.build.10gen.cc:27017"
+    "localhost.test.build.10gen.cc:8000"
   ],
   "options": {
     "loadBalanced": true,

@@ -1,5 +1,5 @@
 {
-  "uri": "mongodb+srv://test20.test.build.10gen.cc/?replicaSet=replset",
+  "uri": "mongodb+srv://test24.test.build.10gen.cc/?replicaSet=replset",
   "seeds": [],
   "hosts": [],
   "error": true,
