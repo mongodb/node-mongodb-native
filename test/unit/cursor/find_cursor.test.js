@@ -13,7 +13,7 @@ const test = {
     return `mongodb://${this.server.hostAddress().toString()}`;
   }
 };
-describe.only('Find Cursor', function () {
+describe('Find Cursor', function () {
   describe('#next', function () {
     afterEach(function () {
       mock.cleanup();
