@@ -1,6 +1,6 @@
 import { EJSON } from 'bson';
 import { expect } from 'chai';
-import util from 'util';
+import * as util from 'util';
 
 import { Logger } from '../../src/logger';
 import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
@@ -217,7 +217,7 @@ export const runLater = (fn: () => Promise<void>, ms: number) => {
   });
 };
 
-export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const sleep = util.promisify(setTimeout);
 
 /**
  * If you are using sinon fake timers, it can end up blocking queued IO from running
