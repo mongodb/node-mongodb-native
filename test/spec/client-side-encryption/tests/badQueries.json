@@ -1318,7 +1318,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot encrypt element of type array"
+            "errorContains": "Cannot encrypt element of type"
           }
         }
       ]
@@ -1387,7 +1387,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot encrypt element of type array"
+            "errorContains": "Cannot encrypt element of type"
           }
         }
       ]
