@@ -1,11 +1,5 @@
 import type { Document, Long } from '../bson';
-import {
-  CommandOptions,
-  Connection,
-  DestroyOptions,
-  GetMoreOptions,
-  QueryOptions
-} from '../cmap/connection';
+import { CommandOptions, Connection, DestroyOptions, GetMoreOptions } from '../cmap/connection';
 import {
   ConnectionPool,
   ConnectionPoolEvents,
@@ -359,30 +353,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           finalOptions,
           makeOperationHandler(this, conn, cmd, finalOptions, cb)
         );
-      },
-      callback
-    );
-  }
-
-  /**
-   * Execute a query against the server
-   * @internal
-   */
-  query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
-    if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoServerClosedError());
-      return;
-    }
-
-    this.s.pool.withConnection(
-      undefined,
-      (err, conn, cb) => {
-        if (err || !conn) {
-          markServerUnknown(this, err);
-          return cb(err);
-        }
-
-        conn.query(ns, cmd, options, makeOperationHandler(this, conn, cmd, options, cb));
       },
       callback
     );

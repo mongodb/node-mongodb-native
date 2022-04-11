@@ -1,5 +1,4 @@
 import type { Document } from '../bson';
-import { isSharded } from '../cmap/wire_protocol/shared';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
 import { ReadConcern } from '../read_concern';
@@ -123,37 +122,6 @@ export class FindOperation extends CommandOperation<Document> {
         new MongoCompatibilityError(
           `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
         )
-      );
-
-      return;
-    }
-
-    if (serverWireVersion < 4) {
-      if (this.readConcern && this.readConcern.level !== 'local') {
-        callback(
-          new MongoCompatibilityError(
-            `Server find command does not support a readConcern level of ${this.readConcern.level}`
-          )
-        );
-
-        return;
-      }
-
-      const findCommand = makeLegacyFindCommand(this.ns, this.filter, options);
-      if (isSharded(server) && this.readPreference) {
-        findCommand.$readPreference = this.readPreference.toJSON();
-      }
-
-      server.query(
-        this.ns,
-        findCommand,
-        {
-          ...this.options,
-          ...this.bsonOptions,
-          documentsReturnedIn: 'firstBatch',
-          readPreference: this.readPreference
-        },
-        callback
       );
 
       return;
@@ -298,54 +266,6 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
 
   if (options.let) {
     findCommand.let = options.let;
-  }
-
-  return findCommand;
-}
-
-function makeLegacyFindCommand(
-  ns: MongoDBNamespace,
-  filter: Document,
-  options: FindOptions
-): Document {
-  const findCommand: Document = {
-    $query: filter
-  };
-
-  if (options.sort) {
-    findCommand.$orderby = formatSort(options.sort);
-  }
-
-  if (options.hint) {
-    findCommand.$hint = normalizeHintField(options.hint);
-  }
-
-  if (typeof options.returnKey === 'boolean') {
-    findCommand.$returnKey = options.returnKey;
-  }
-
-  if (options.max) {
-    findCommand.$max = options.max;
-  }
-
-  if (options.min) {
-    findCommand.$min = options.min;
-  }
-
-  if (typeof options.showRecordId === 'boolean') {
-    findCommand.$showDiskLoc = options.showRecordId;
-  }
-
-  if (options.comment) {
-    findCommand.$comment = options.comment;
-  }
-
-  if (typeof options.maxTimeMS === 'number') {
-    findCommand.$maxTimeMS = options.maxTimeMS;
-  }
-
-  if (options.explain != null) {
-    findCommand.$explain = true;
   }
 
   return findCommand;
