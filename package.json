@@ -44,6 +44,7 @@
     "@types/saslprep": "^1.0.1",
     "@types/semver": "^7.3.9",
     "@types/sinon": "^10.0.11",
+    "@types/sinon-chai": "^3.2.8",
     "@types/whatwg-url": "^8.2.1",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
