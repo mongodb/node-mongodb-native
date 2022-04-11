@@ -21,7 +21,7 @@ import {
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import type { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   calculateDurationInMs,
@@ -45,7 +45,6 @@ import {
   GetMore,
   KillCursor,
   Msg,
-  OpQueryOptions,
   Query,
   Response,
   WriteProtocolMessageType
@@ -563,78 +562,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     } catch (err) {
       callback(err);
     }
-  }
-
-  query(ns: MongoDBNamespace, cmd: Document, options: QueryOptions, callback: Callback): void {
-    const isExplain = cmd.$explain != null;
-    const readPreference = options.readPreference ?? ReadPreference.primary;
-    const batchSize = options.batchSize || 0;
-    const limit = options.limit;
-    const numberToSkip = options.skip || 0;
-    let numberToReturn = 0;
-    if (
-      limit &&
-      (limit < 0 || (limit !== 0 && limit < batchSize) || (limit > 0 && batchSize === 0))
-    ) {
-      numberToReturn = limit;
-    } else {
-      numberToReturn = batchSize;
-    }
-
-    if (isExplain) {
-      // nToReturn must be 0 (match all) or negative (match N and close cursor)
-      // nToReturn > 0 will give explain results equivalent to limit(0)
-      numberToReturn = -Math.abs(limit || 0);
-    }
-
-    const queryOptions: OpQueryOptions = {
-      numberToSkip,
-      numberToReturn,
-      pre32Limit: typeof limit === 'number' ? limit : undefined,
-      checkKeys: false,
-      secondaryOk: readPreference.secondaryOk()
-    };
-
-    if (options.projection) {
-      queryOptions.returnFieldSelector = options.projection;
-    }
-
-    const query = new Query(ns.toString(), cmd, queryOptions);
-    if (typeof options.tailable === 'boolean') {
-      query.tailable = options.tailable;
-    }
-
-    if (typeof options.oplogReplay === 'boolean') {
-      query.oplogReplay = options.oplogReplay;
-    }
-
-    if (typeof options.timeout === 'boolean') {
-      query.noCursorTimeout = !options.timeout;
-    } else if (typeof options.noCursorTimeout === 'boolean') {
-      query.noCursorTimeout = options.noCursorTimeout;
-    }
-
-    if (typeof options.awaitData === 'boolean') {
-      query.awaitData = options.awaitData;
-    }
-
-    if (typeof options.partial === 'boolean') {
-      query.partial = options.partial;
-    }
-
-    write(
-      this,
-      query,
-      { [kFullResult]: true, ...pluckBSONSerializeOptions(options) },
-      (err, result) => {
-        if (err || !result) return callback(err, result);
-        if (isExplain && result.documents && result.documents[0]) {
-          return callback(undefined, result.documents[0]);
-        }
-
-        callback(undefined, result);
-      }
-    );
   }
 
   getMore(
