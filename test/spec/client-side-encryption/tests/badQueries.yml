@@ -476,7 +476,12 @@ tests:
           filter: { }
           update: { $set : { "encrypted_string": [1,2] }}
         result:
-          errorContains: "Cannot encrypt element of type array"
+          # DRIVERS-2272: The expected error message changed in mongocryptd 6.0. Before it was:
+          # "Cannot encrypt element of type array because schema requires that type is one of: [ string ]"
+          # After it is:
+          # "Cannot encrypt element of type: array"
+          # Only check for the common prefix.
+          errorContains: "Cannot encrypt element of type"
   - description: "an insert with encrypted field on _id errors"
     clientOptions:
       autoEncryptOpts:
@@ -500,7 +505,12 @@ tests:
         arguments:
           document: { encrypted_string: [ "123", "456"] }
         result:
-          errorContains: "Cannot encrypt element of type array"
+          # DRIVERS-2272: The expected error message changed in mongocryptd 6.0. Before it was:
+          # "Cannot encrypt element of type array because schema requires that type is one of: [ string ]"
+          # After it is:
+          # "Cannot encrypt element of type: array"
+          # Only check for the common prefix.
+          errorContains: "Cannot encrypt element of type"
   - description: "an insert with a Timestamp(0,0) value in the top-level fails"
     clientOptions:
       autoEncryptOpts:

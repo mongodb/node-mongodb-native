@@ -504,7 +504,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot use deterministic encryption for element of type: double"
+            "errorContains": "element of type: double"
           }
         }
       ]
@@ -551,7 +551,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot use deterministic encryption for element of type: decimal"
+            "errorContains": "element of type: decimal"
           }
         }
       ]
@@ -883,7 +883,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot use deterministic encryption for element of type: javascriptWithScope"
+            "errorContains": "element of type: javascriptWithScope"
           }
         }
       ]
@@ -928,7 +928,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot use deterministic encryption for element of type: object"
+            "errorContains": "element of type: object"
           }
         }
       ]
@@ -1547,7 +1547,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot use deterministic encryption for element of type: array"
+            "errorContains": "element of type: array"
           }
         }
       ]
@@ -1592,7 +1592,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot use deterministic encryption for element of type: bool"
+            "errorContains": "element of type: bool"
           }
         }
       ]
