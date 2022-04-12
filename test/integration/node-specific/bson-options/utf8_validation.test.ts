@@ -1,9 +1,7 @@
 import { expect } from 'chai';
-import { spy } from 'sinon';
+import * as sinon from 'sinon';
 
 import * as BSON from '../../../../src/bson';
-
-const deserializeSpy = spy(BSON, 'deserialize');
 
 const EXPECTED_VALIDATION_DISABLED_ARGUMENT = {
   utf8: false
@@ -16,8 +14,15 @@ const EXPECTED_VALIDATION_ENABLED_ARGUMENT = {
 };
 
 describe('class BinMsg', () => {
+  let deserializeSpy: sinon.SinonSpy;
+
   beforeEach(() => {
-    deserializeSpy.resetHistory();
+    deserializeSpy = sinon.spy(BSON, 'deserialize');
+  });
+
+  afterEach(() => {
+    deserializeSpy.restore();
+    deserializeSpy = null;
   });
 
   describe('enableUtf8Validation option set to false', () => {
