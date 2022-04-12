@@ -484,15 +484,15 @@ export class Response {
   responseTo: number;
   opCode: number;
   fromCompressed?: boolean;
-  responseFlags: number;
-  cursorId: Long;
-  startingFrom: number;
-  numberReturned: number;
-  documents: (Document | Buffer)[];
-  cursorNotFound: boolean;
-  queryFailure: boolean;
-  shardConfigStale: boolean;
-  awaitCapable: boolean;
+  responseFlags?: number;
+  cursorId?: Long;
+  startingFrom?: number;
+  numberReturned?: number;
+  documents: (Document | Buffer)[] = new Array(0);
+  cursorNotFound?: boolean;
+  queryFailure?: boolean;
+  shardConfigStale?: boolean;
+  awaitCapable?: boolean;
   promoteLongs: boolean;
   promoteValues: boolean;
   promoteBuffers: boolean;
@@ -522,20 +522,7 @@ export class Response {
     this.opCode = msgHeader.opCode;
     this.fromCompressed = msgHeader.fromCompressed;
 
-    // Read the message body
-    this.responseFlags = msgBody.readInt32LE(0);
-    this.cursorId = new BSON.Long(msgBody.readInt32LE(4), msgBody.readInt32LE(8));
-    this.startingFrom = msgBody.readInt32LE(12);
-    this.numberReturned = msgBody.readInt32LE(16);
-
-    // Preallocate document array
-    this.documents = new Array(this.numberReturned);
-
     // Flag values
-    this.cursorNotFound = (this.responseFlags & CURSOR_NOT_FOUND) !== 0;
-    this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
-    this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
-    this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
     this.promoteLongs = typeof this.opts.promoteLongs === 'boolean' ? this.opts.promoteLongs : true;
     this.promoteValues =
       typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
@@ -573,6 +560,20 @@ export class Response {
     // Position within OP_REPLY at which documents start
     // (See https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#wire-op-reply)
     this.index = 20;
+
+    // Read the message body
+    this.responseFlags = this.data.readInt32LE(0);
+    this.cursorId = new BSON.Long(this.data.readInt32LE(4), this.data.readInt32LE(8));
+    this.startingFrom = this.data.readInt32LE(12);
+    this.numberReturned = this.data.readInt32LE(16);
+
+    // Preallocate document array
+    this.documents = new Array(this.numberReturned);
+
+    this.cursorNotFound = (this.responseFlags & CURSOR_NOT_FOUND) !== 0;
+    this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
+    this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
+    this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
 
     // Parse Body
     for (let i = 0; i < this.numberReturned; i++) {
