@@ -18,7 +18,6 @@ describe('class BinMsg', () => {
 
   beforeEach(() => {
     deserializeSpy = sinon.spy(BSON, 'deserialize');
-    deserializeSpy.resetHistory();
   });
 
   afterEach(() => {
