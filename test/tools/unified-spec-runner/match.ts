@@ -256,11 +256,15 @@ export function specialCheck(
     const actualExists = actual !== undefined && actual !== null;
 
     if (expected.$$exists) {
-      expect(actualExists, ejson`expected value at path ${path.join} to exist, but received ${actual}`)
-        .to.be.true;
+      expect(
+        actualExists,
+        ejson`expected value at path ${path.join} to exist, but received ${actual}`
+      ).to.be.true;
     } else {
-      expect(actualExists, ejson`expected value at path ${path.join} NOT to exist, but received ${actual}`)
-        .to.be.false;
+      expect(
+        actualExists,
+        ejson`expected value at path ${path.join} NOT to exist, but received ${actual}`
+      ).to.be.false;
     }
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
