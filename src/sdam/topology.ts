@@ -10,6 +10,7 @@ import {
   CONNECT,
   ERROR,
   LOCAL_SERVER_EVENTS,
+  MONGO_CLIENT_EVENTS,
   OPEN,
   SERVER_CLOSED,
   SERVER_DESCRIPTION_CHANGED,
@@ -27,7 +28,7 @@ import {
   MongoServerSelectionError,
   MongoTopologyClosedError
 } from '../error';
-import type { MongoOptions, ServerApi } from '../mongo_client';
+import type { MongoClient, MongoOptions, ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import {
@@ -73,6 +74,9 @@ import { compareTopologyVersion, ServerDescription } from './server_description'
 import { readPreferenceServerSelector, ServerSelector } from './server_selection';
 import { SrvPoller, SrvPollingEvent } from './srv_polling';
 import { TopologyDescription } from './topology_description';
+
+/** @internal */
+const kClient = Symbol('client');
 
 // Global state
 let globalTopologyCounter = 0;
@@ -131,6 +135,8 @@ export interface TopologyPrivate {
   srvPoller?: SrvPoller;
   detectShardedTopology: (event: TopologyDescriptionChangedEvent) => void;
   detectSrvRecords: (event: SrvPollingEvent) => void;
+
+  client: MongoClient;
 }
 
 /** @public */
@@ -197,6 +203,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @internal */
   [kWaitQueue]: Denque<ServerSelectionRequest>;
   /** @internal */
+  [kClient]: MongoClient;
+  /** @internal */
   hello?: Document;
   /** @internal */
   _type?: string;
@@ -237,8 +245,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
-  constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
+  constructor(client: MongoClient, options: TopologyOptions) {
     super();
+
+    this[kClient] = client;
+    let seeds = client.options.hosts;
 
     // Legacy CSFLE support
     this.bson = Object.create(null);
@@ -294,7 +305,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         ? seedlist
         : shuffle(seedlist, options.srvMaxHosts);
 
-    const serverDescriptions = new Map();
+    const serverDescriptions = new Map<string, ServerDescription>();
     for (const hostAddress of selectedHosts) {
       serverDescriptions.set(hostAddress.toString(), new ServerDescription(hostAddress));
     }
@@ -335,7 +346,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       connectionTimers: new Set<NodeJS.Timeout>(),
 
       detectShardedTopology: ev => this.detectShardedTopology(ev),
-      detectSrvRecords: ev => this.detectSrvRecords(ev)
+      detectSrvRecords: ev => this.detectSrvRecords(ev),
+
+      get client(): MongoClient {
+        return client;
+      }
     };
 
     if (options.srvHost && !options.loadBalanced) {
@@ -350,6 +365,23 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
     }
+
+    this.s.servers = new Map(
+      Array.from(this.s.description.servers.values()).map(serverDescription => [
+        serverDescription.address,
+        createAndConnectServer(this, serverDescription)
+      ])
+    );
+
+    this.once(Topology.OPEN, () => client.emit('open', client));
+    for (const event of MONGO_CLIENT_EVENTS) {
+      this.on(event, (...args: any[]) => client.emit(event, ...(args as any)));
+    }
+  }
+
+  /** @internal */
+  get client() {
+    return this[kClient];
   }
 
   private detectShardedTopology(event: TopologyDescriptionChangedEvent) {
@@ -406,15 +438,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /** Initiate server connect */
-  connect(options?: ConnectOptions, callback?: Callback): void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+  connect(options: ConnectOptions, callback: Callback<this>): void {
     if (this.s.state === STATE_CONNECTED) {
-      if (typeof callback === 'function') {
-        callback();
-      }
-
-      return;
+      return callback(undefined, this);
     }
 
     stateTransition(this, STATE_CONNECTING);
@@ -432,7 +458,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       )
     );
 
-    // connect all known servers, then attempt server selection to connect
+    // start monitoring all known servers
     const serverDescriptions = Array.from(this.s.description.servers.values());
     this.s.servers = new Map(
       serverDescriptions.map(serverDescription => [
@@ -452,39 +478,83 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
+    if (this[kClient].s[Symbol.for('@@mdb.auto.connecting')]) {
+      return callback(undefined, this);
+    }
+
+    // Manual call to the MongoClient.connect method will server select and test credentials
     const readPreference = options.readPreference ?? ReadPreference.primary;
     this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
       if (err) {
         this.close();
-
-        typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
-        return;
+        return callback(err);
       }
 
-      // TODO: NODE-2471
+      // TODO(NODE-2471): ping is used to determine if credentials are valid
       if (server && this.s.credentials) {
-        server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
+        return server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
           if (err) {
-            typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
-            return;
+            return callback(err);
           }
 
           stateTransition(this, STATE_CONNECTED);
           this.emit(Topology.OPEN, this);
           this.emit(Topology.CONNECT, this);
 
-          if (typeof callback === 'function') callback(undefined, this);
+          callback(undefined, this);
         });
-
-        return;
       }
 
       stateTransition(this, STATE_CONNECTED);
       this.emit(Topology.OPEN, this);
       this.emit(Topology.CONNECT, this);
 
-      if (typeof callback === 'function') callback(undefined, this);
+      return callback(undefined, this);
     });
+  }
+
+  connectSync(): this {
+    if (this.s.state === STATE_CONNECTED) {
+      return this;
+    }
+
+    stateTransition(this, STATE_CONNECTING);
+
+    // emit SDAM monitoring events
+    this.emit(Topology.TOPOLOGY_OPENING, new TopologyOpeningEvent(this.s.id));
+
+    // emit an event for the topology change
+    this.emit(
+      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+      new TopologyDescriptionChangedEvent(
+        this.s.id,
+        new TopologyDescription(TopologyType.Unknown), // initial is always Unknown
+        this.s.description
+      )
+    );
+
+    // start monitoring all known servers
+    const serverDescriptions = Array.from(this.s.description.servers.values());
+    this.s.servers = new Map(
+      serverDescriptions.map(serverDescription => [
+        serverDescription.address,
+        createAndConnectServer(this, serverDescription)
+      ])
+    );
+
+    // In load balancer mode we need to fake a server description getting
+    // emitted from the monitor, since the monitor doesn't exist.
+    if (this.s.options.loadBalanced) {
+      for (const description of serverDescriptions) {
+        const newDescription = new ServerDescription(description.hostAddress, undefined, {
+          loadBalanced: this.s.options.loadBalanced
+        });
+        this.serverUpdateHandler(newDescription);
+      }
+    }
+
+    stateTransition(this, STATE_CONNECTED);
+    return this;
   }
 
   /** Close this topology */
@@ -577,6 +647,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       serverSelector = selector;
     }
 
+    if (this.s.state === STATE_CLOSED) {
+      this.connectSync();
+    }
+
     options = Object.assign(
       {},
       { serverSelectionTimeoutMS: this.s.serverSelectionTimeoutMS },
@@ -603,10 +677,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       waitQueueMember.timer = setTimeout(() => {
         waitQueueMember[kCancelled] = true;
         waitQueueMember.timer = undefined;
-        const timeoutError = new MongoServerSelectionError(
-          `Server selection timed out after ${serverSelectionTimeoutMS} ms`,
-          this.description
-        );
+        const timeoutError =
+          this.description.error == null
+            ? new MongoServerSelectionError(
+                `Server selection timed out after ${serverSelectionTimeoutMS} ms`,
+                this.description
+              )
+            : this.description.error;
 
         waitQueueMember.callback(timeoutError);
       }, serverSelectionTimeoutMS);

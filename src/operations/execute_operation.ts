@@ -12,7 +12,9 @@ import {
   MongoTransactionError,
   MongoUnexpectedServerResponseError
 } from '../error';
+import type { MongoClient } from '../mongo_client';
 import { ReadPreference } from '../read_preference';
+import { STATE_CLOSED, STATE_CONNECTED } from '../sdam/common';
 import type { Server } from '../sdam/server';
 import {
   sameServerSelector,
@@ -21,14 +23,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import {
-  Callback,
-  getClient,
-  getTopology,
-  maybePromise,
-  supportsRetryableWrites,
-  TopologyProvider
-} from '../utils';
+import { Callback, maybePromise, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -67,24 +62,8 @@ export interface ExecutionResult {
 export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(topologyProvider: TopologyProvider, operation: T): Promise<TResult>;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(topologyProvider: TopologyProvider, operation: T, callback: Callback<TResult>): void;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
 >(
-  topologyProvider: TopologyProvider,
-  operation: T,
-  callback?: Callback<TResult>
-): Promise<TResult> | void;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(
-  topologyProvider: TopologyProvider,
+  { client }: { client: MongoClient },
   operation: T,
   callback?: Callback<TResult>
 ): Promise<TResult> | void {
@@ -94,21 +73,16 @@ export function executeOperation<
   }
 
   return maybePromise(callback, callback => {
-    let topology: Topology;
-    try {
-      topology = getTopology(topologyProvider);
-    } catch (error) {
-      const client = getClient(topologyProvider);
-      return client.connect(error => {
-        if (error) return callback(error);
-        executeOperation(topologyProvider, operation, callback);
-      });
+    const topology = client.topology;
+    if (topology.s.state === STATE_CLOSED) {
+      topology.connectSync();
     }
+
     if (topology.shouldCheckForSessionSupport()) {
       return topology.selectServer(ReadPreference.primaryPreferred, {}, err => {
         if (err) return callback(err);
 
-        executeOperation<T, TResult>(topologyProvider, operation, callback);
+        executeOperation<T, TResult>({ client }, operation, callback);
       });
     }
 

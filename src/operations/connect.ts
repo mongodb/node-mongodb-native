@@ -15,7 +15,7 @@ export function connect(
   }
 
   // If a connection already been established, we can terminate early
-  if (mongoClient.topology && mongoClient.topology.isConnected()) {
+  if (mongoClient.topology.isConnected()) {
     return callback(undefined, mongoClient);
   }
 
@@ -57,17 +57,13 @@ function createTopology(
   options: MongoOptions,
   callback: Callback<Topology>
 ) {
-  // Create the topology
-  const topology = new Topology(options.hosts, options);
-  // Events can be emitted before initialization is complete so we have to
-  // save the reference to the topology on the client ASAP if the event handlers need to access it
-  mongoClient.topology = topology;
+  const topology = mongoClient.topology;
 
-  topology.once(Topology.OPEN, () => mongoClient.emit('open', mongoClient));
+  // topology.once(Topology.OPEN, () => mongoClient.emit('open', mongoClient));
 
-  for (const event of MONGO_CLIENT_EVENTS) {
-    topology.on(event, (...args: any[]) => mongoClient.emit(event, ...(args as any)));
-  }
+  // for (const event of MONGO_CLIENT_EVENTS) {
+  //   topology.on(event, (...args: any[]) => mongoClient.emit(event, ...(args as any)));
+  // }
 
   // initialize CSFLE if requested
   if (mongoClient.autoEncrypter) {

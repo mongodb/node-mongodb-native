@@ -61,7 +61,7 @@ export async function runUnifiedTest(
     ctx.skip();
   }
 
-  let utilClient;
+  let utilClient: MongoClient;
   if (ctx.configuration.isLoadBalanced) {
     // The util client can always point at the single mongos LB frontend.
     utilClient = ctx.configuration.newClient(ctx.configuration.singleMongosLoadBalancerUri);
@@ -72,14 +72,6 @@ export async function runUnifiedTest(
   let entities: EntitiesMap;
   try {
     trace('\n starting test:');
-    try {
-      await utilClient.connect();
-    } catch (error) {
-      console.error(
-        ejson`failed to connect utilClient ${utilClient.s.url} - ${utilClient.options}`
-      );
-      throw error;
-    }
 
     // terminate all sessions before each test suite
     await terminateOpenTransactions(utilClient);

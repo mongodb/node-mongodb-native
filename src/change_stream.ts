@@ -29,7 +29,6 @@ import type { ClientSession } from './sessions';
 import {
   calculateDurationInMs,
   Callback,
-  getClient,
   getTopology,
   maxWireVersion,
   maybePromise,
@@ -431,7 +430,7 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
   pipeline: Document[];
 
   constructor(
-    client: MongoClient,
+    { client }: { client: MongoClient },
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
     options: ChangeStreamCursorOptions = {}
@@ -598,7 +597,7 @@ function createChangeStreamCursor<TSchema extends Document>(
   const cursorOptions: ChangeStreamCursorOptions = applyKnownOptions(options, CURSOR_OPTIONS);
 
   const changeStreamCursor = new ChangeStreamCursor<TSchema>(
-    getClient(changeStream.parent),
+    changeStream.parent,
     changeStream.namespace,
     pipeline,
     cursorOptions

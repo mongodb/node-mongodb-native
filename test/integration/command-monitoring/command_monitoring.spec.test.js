@@ -231,11 +231,20 @@ describe('Command Monitoring spec tests', function () {
           const promise = coll[commandName].apply(coll, params);
           return promise
             .catch(() => {} /* ignore */)
-            .then(() =>
+            .then(() => {
+              expect(monitoringResults.starts).to.have.lengthOf(
+                test.expectations.filter(e => 'command_started_event' in e).length
+              );
+              expect(monitoringResults.successes).to.have.lengthOf(
+                test.expectations.filter(e => 'command_succeeded_event' in e).length
+              );
+              expect(monitoringResults.failures).to.have.lengthOf(
+                test.expectations.filter(e => 'command_failed_event' in e).length
+              );
               test.expectations.forEach(expectation =>
                 validateExpectations(expectation, monitoringResults)
-              )
-            );
+              );
+            });
         });
     }
 

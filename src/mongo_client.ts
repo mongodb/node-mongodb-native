@@ -13,7 +13,7 @@ import type { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
-import { MongoInvalidArgumentError, MongoNotConnectedError } from './error';
+import { MongoInvalidArgumentError } from './error';
 import type { Logger, LoggerLevel } from './logger';
 import { TypedEventEmitter } from './mongo_types';
 import { connect } from './operations/connect';
@@ -22,7 +22,7 @@ import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_conc
 import type { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
 import type { SrvPoller } from './sdam/srv_polling';
-import type { Topology, TopologyEvents } from './sdam/topology';
+import { Topology, TopologyEvents } from './sdam/topology';
 import type { ClientSession, ClientSessionOptions } from './sessions';
 import {
   Callback,
@@ -270,6 +270,7 @@ export interface MongoClientPrivate {
   readonly writeConcern?: WriteConcern;
   readonly readPreference: ReadPreference;
   readonly logger: Logger;
+  [featureFlag: symbol]: any;
 }
 
 /** @public */
@@ -326,7 +327,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */
   s: MongoClientPrivate;
   /** @internal */
-  topology: Topology | null;
+  topology: Topology;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -338,7 +339,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     super();
 
     this[kOptions] = parseOptions(url, this, options);
-    this.topology = null;
+    this.topology = new Topology(this, this[kOptions]);
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
@@ -369,6 +370,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   }
 
   /** @internal */
+  get client() {
+    return this;
+  }
+
+  /** @internal */
   get name(): 'MongoClient' {
     return 'MongoClient';
   }
@@ -377,7 +383,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return Object.freeze({ ...this[kOptions] });
   }
 
-  get serverApi(): Readonly<ServerApi | undefined> {
+  get serverApi(): Readonly<ServerApi> | undefined {
     return this[kOptions].serverApi && Object.freeze({ ...this[kOptions].serverApi });
   }
   /**
@@ -462,7 +468,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
       // clear out references to old topology
       const topology = this.topology;
-      this.topology = null;
+      this.topology = null as unknown as any;
 
       topology.close({ force }, error => {
         if (error) return callback(error);
@@ -541,10 +547,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   startSession(options: ClientSessionOptions): ClientSession;
   startSession(options?: ClientSessionOptions): ClientSession {
     options = Object.assign({ explicit: true }, options);
-    if (!this.topology) {
-      throw new MongoNotConnectedError('MongoClient must be connected to start a session');
-    }
-
     return this.topology.startSession(options, this.s.options);
   }
 

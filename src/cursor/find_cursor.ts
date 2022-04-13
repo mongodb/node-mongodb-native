@@ -40,7 +40,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   constructor(
-    client: MongoClient,
+    { client }: { client: MongoClient },
     namespace: MongoDBNamespace,
     filter: Document | undefined,
     options: FindOptions = {}

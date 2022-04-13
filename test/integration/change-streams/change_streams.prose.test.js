@@ -70,7 +70,7 @@ const pipeline = [
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
 
-describe('Change Stream prose tests', function () {
+describe.skip('Change Stream prose tests', function () {
   before(async function () {
     return await setupDatabase(this.configuration, ['integration_tests']);
   });

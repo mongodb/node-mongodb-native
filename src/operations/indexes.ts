@@ -7,7 +7,7 @@ import type { OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, getClient, maxWireVersion, MongoDBNamespace, parseIndexOptions } from '../utils';
+import { Callback, maxWireVersion, MongoDBNamespace, parseIndexOptions } from '../utils';
 import {
   CollationOptions,
   CommandOperation,
@@ -418,7 +418,7 @@ export class ListIndexesCursor extends AbstractCursor {
   options?: ListIndexesOptions;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
-    super(getClient(collection), collection.s.namespace, options);
+    super(collection, collection.s.namespace, options);
     this.parent = collection;
     this.options = options;
   }

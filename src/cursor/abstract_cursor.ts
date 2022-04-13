@@ -144,7 +144,7 @@ export abstract class AbstractCursor<
 
   /** @internal */
   constructor(
-    client: MongoClient,
+    { client }: { client: MongoClient },
     namespace: MongoDBNamespace,
     options: AbstractCursorOptions = {}
   ) {
@@ -198,7 +198,7 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
-  get topology(): Topology | null {
+  get topology(): Topology {
     return this.client.topology;
   }
 
@@ -648,8 +648,8 @@ export abstract class AbstractCursor<
    */
   [kInit](callback: Callback<TSchema | null>): void {
     if (this[kSession] == null) {
-      if (this.topology?.shouldCheckForSessionSupport()) {
-        return this.topology?.selectServer(ReadPreference.primaryPreferred, {}, err => {
+      if (this.topology.shouldCheckForSessionSupport()) {
+        return this.topology.selectServer(ReadPreference.primaryPreferred, {}, err => {
           if (err) return callback(err);
           return this[kInit](callback);
         });

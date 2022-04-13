@@ -360,27 +360,6 @@ export function getTopology(provider: TopologyProvider): Topology {
 }
 
 /**
- * A helper function to get the client from a given provider. Throws
- * if the topology cannot be found.
- * @throws MongoNotConnectedError
- * @internal
- */
-export function getClient(provider: TopologyProvider): MongoClient {
-  // MongoClient or ClientSession or AbstractCursor
-  if ('name' in provider && provider.name === 'MongoClient') {
-    return provider;
-  } else if ('client' in provider && provider.client) {
-    return provider.client;
-  } else if ('s' in provider && 'client' in provider.s && provider.s.client) {
-    return provider.s.client;
-  } else if ('s' in provider && 'db' in provider.s && provider.s.db.s.client) {
-    return provider.s.db.s.client;
-  }
-
-  throw new MongoRuntimeError('MongoClient must exist');
-}
-
-/**
  * Default message handler for generating deprecation warnings.
  * @internal
  *

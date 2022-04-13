@@ -33,7 +33,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   constructor(
-    client: MongoClient,
+    { client }: { client: MongoClient },
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
     options: AggregateOptions = {}

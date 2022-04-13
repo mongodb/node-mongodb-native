@@ -47,7 +47,6 @@ import {
   Callback,
   DEFAULT_PK_FACTORY,
   filterOptions,
-  getClient,
   getTopology,
   MongoDBNamespace,
   resolveOptions
@@ -175,6 +174,11 @@ export class Db {
       // Namespace
       namespace: new MongoDBNamespace(databaseName)
     };
+  }
+
+  /** @internal */
+  get client() {
+    return this.s.client;
   }
 
   get databaseName(): string {
@@ -310,12 +314,7 @@ export class Db {
       throw new MongoInvalidArgumentError('Argument "options" must not be function');
     }
 
-    return new AggregationCursor(
-      getClient(this),
-      this.s.namespace,
-      pipeline,
-      resolveOptions(this, options)
-    );
+    return new AggregationCursor(this, this.s.namespace, pipeline, resolveOptions(this, options));
   }
 
   /** Return the Admin db instance */

@@ -93,7 +93,6 @@ import {
   checkCollectionName,
   DEFAULT_PK_FACTORY,
   emitWarningOnce,
-  getClient,
   MongoDBNamespace,
   normalizeHintField,
   resolveOptions
@@ -185,6 +184,11 @@ export class Collection<TSchema extends Document = Document> {
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options)
     };
+  }
+
+  /** @internal */
+  get client() {
+    return this.s.db.s.client;
   }
 
   /**
@@ -759,7 +763,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return new FindCursor<WithId<TSchema>>(
-      getClient(this),
+      this,
       this.s.namespace,
       filter,
       resolveOptions(this as TODO_NODE_3286, options)
@@ -1407,12 +1411,7 @@ export class Collection<TSchema extends Document = Document> {
       throw new MongoInvalidArgumentError('Argument "options" must not be function');
     }
 
-    return new AggregationCursor(
-      getClient(this),
-      this.s.namespace,
-      pipeline,
-      resolveOptions(this, options)
-    );
+    return new AggregationCursor(this, this.s.namespace, pipeline, resolveOptions(this, options));
   }
 
   /**

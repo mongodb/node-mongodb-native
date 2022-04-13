@@ -179,6 +179,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this.transaction = new Transaction();
   }
 
+  /** @internal */
+  get client() {
+    return this.topology.s.client;
+  }
+
   /** The server id associated with this session */
   get id(): ServerSessionId | undefined {
     return this[kServerSession]?.id;
@@ -784,7 +789,7 @@ function endTransaction(
         }
 
         return executeOperation(
-          session,
+          session.topology.s.client,
           new RunAdminCommandOperation(undefined, command, {
             session,
             readPreference: ReadPreference.primary,
