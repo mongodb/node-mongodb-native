@@ -1,17 +1,15 @@
-'use strict';
-const { Topology } = require('../../../src/sdam/topology');
-const { ServerType, TopologyType } = require('../../../src/sdam/common');
-const { ServerDescription } = require('../../../src/sdam/server_description');
-const { ReadPreference } = require('../../../src/read_preference');
-const { MongoServerSelectionError } = require('../../../src/error');
-const ServerSelectors = require('../../../src/sdam/server_selection');
+import { Topology, TopologyOptions } from '../../../src/sdam/topology';
+import { ServerType, TopologyType } from '../../../src/sdam/common';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { ReadPreference, ReadPreferenceOptions } from '../../../src/read_preference';
+import { MongoServerSelectionError } from '../../../src/error';
+import * as ServerSelectors from '../../../src/sdam/server_selection';
+import { Document } from 'bson';
 
 const sinon = require('sinon');
 const { expect } = require('chai');
 
-function serverDescriptionFromDefinition(definition, hosts) {
-  hosts = hosts || [];
-
+function serverDescriptionFromDefinition(definition, hosts = []) {
   const serverType = definition.type;
 
   if (serverType === ServerType.Unknown) {
@@ -28,7 +26,7 @@ function serverDescriptionFromDefinition(definition, hosts) {
     return description;
   }
 
-  const fakeHello = { ok: 1, hosts };
+  const fakeHello: Document = { ok: 1, hosts };
   if (serverType !== ServerType.Standalone && serverType !== ServerType.Mongos) {
     fakeHello.setName = 'rs';
   }
@@ -71,7 +69,7 @@ function readPreferenceFromDefinition(definition) {
     ? definition.mode.charAt(0).toLowerCase() + definition.mode.slice(1)
     : 'primary';
 
-  const options = {};
+  const options: ReadPreferenceOptions = {};
   if (typeof definition.maxStalenessSeconds !== 'undefined')
     options.maxStalenessSeconds = definition.maxStalenessSeconds;
   const tags = definition.tag_sets || [];
@@ -79,7 +77,7 @@ function readPreferenceFromDefinition(definition) {
   return new ReadPreference(mode, tags, options);
 }
 
-function executeServerSelectionTest(testDefinition, testDone) {
+export function executeServerSelectionTest(testDefinition, testDone) {
   const topologyDescription = testDefinition.topology_description;
   const seedData = topologyDescription.servers.reduce(
     (result, seed) => {
@@ -90,11 +88,10 @@ function executeServerSelectionTest(testDefinition, testDone) {
     { seedlist: [], hosts: [] }
   );
 
-  const topologyOptions = {
+  const topologyOptions: TopologyOptions = {
     heartbeatFrequencyMS: testDefinition.heartbeatFrequencyMS,
-    monitorFunction: () => {},
     loadBalanced: topologyDescription.type === TopologyType.LoadBalanced
-  };
+  } as unknown as TopologyOptions;
 
   const topology = new Topology(seedData.seedlist, topologyOptions);
   // Each test will attempt to connect by doing server selection. We want to make the first
@@ -104,15 +101,15 @@ function executeServerSelectionTest(testDefinition, testDone) {
     .callsFake(function (selector, options, callback) {
       topologySelectServers.restore();
 
-      const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
+      const fakeServer = { s: { state: 'connected' }, removeListener: () => { } };
       callback(undefined, fakeServer);
     });
 
   function done(err) {
-    topology.close(e => testDone(e || err));
+    topology.close((e) => testDone(e || err));
   }
 
-  topology.connect(err => {
+  topology.connect((err)=> {
     expect(err).to.not.exist;
 
     // Update topologies with server descriptions.
@@ -129,7 +126,7 @@ function executeServerSelectionTest(testDefinition, testDone) {
         const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
         selector = ServerSelectors.readPreferenceServerSelector(readPreference);
       } catch (e) {
-        if (testDefinition.error) return done();
+        if (testDefinition.error) return done(null);
         return done(e);
       }
     }
@@ -150,12 +147,12 @@ function executeServerSelectionTest(testDefinition, testDone) {
           return done(new Error('Expected an error, but found none!'));
         }
 
-        return done();
+        return done(null);
       }
 
       if (err) {
         // this is another expected error case
-        if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return done();
+        if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return done(null);
         return done(err);
       }
 
@@ -188,12 +185,10 @@ function executeServerSelectionTest(testDefinition, testDone) {
             `Mismatched selected server "${prop}"`
           );
         }
-        done();
+        done(null);
       } catch (e) {
         done(e);
       }
     });
   });
 }
-
-module.exports = { executeServerSelectionTest };
