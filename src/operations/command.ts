@@ -179,10 +179,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       cmd.maxTimeMS = options.maxTimeMS;
     }
 
-    if (typeof options.comment === 'string') {
-      cmd.comment = options.comment;
-    }
-
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
       if (serverWireVersion < 6 && cmd.aggregate) {
         // Prior to 3.6, with aggregate, verbosity is ignored, and we must pass in "explain: true"

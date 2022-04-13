@@ -19,6 +19,7 @@ import {
   ConnectionPoolCreatedEvent,
   ConnectionReadyEvent
 } from '../../../src/cmap/connection_pool_events';
+import { ejson } from '../utils';
 import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
 import { ExpectedCmapEvent, ExpectedCommandEvent, ExpectedError } from './schema';
 
@@ -253,7 +254,18 @@ export function specialCheck(
   } else if (isExistsOperator(expected)) {
     // $$exists
     const actualExists = actual !== undefined && actual !== null;
-    expect((expected.$$exists && actualExists) || (!expected.$$exists && !actualExists)).to.be.true;
+
+    if (expected.$$exists) {
+      expect(
+        actualExists,
+        ejson`expected value at path ${path.join} to exist, but received ${actual}`
+      ).to.be.true;
+    } else {
+      expect(
+        actualExists,
+        ejson`expected value at path ${path.join} NOT to exist, but received ${actual}`
+      ).to.be.false;
+    }
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
   }

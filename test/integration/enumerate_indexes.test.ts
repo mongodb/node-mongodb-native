@@ -24,7 +24,10 @@ const testSuite = new UnifiedTestSuiteBuilder('listIndexes with comment option')
         events: [
           {
             commandStartedEvent: {
-              command: {}
+              command: {
+                listIndexes: 'coll0',
+                comment: { $$exists: false }
+              }
             }
           }
         ]
