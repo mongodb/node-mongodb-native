@@ -196,4 +196,4 @@ function executeServerSelectionTest(testDefinition, testDone) {
   });
 }
 
-module.exports = { executeServerSelectionTest };
+module.exports = { executeServerSelectionTest, serverDescriptionFromDefinition };

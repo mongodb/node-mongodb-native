@@ -1,128 +1,43 @@
-import { Document } from 'bson';
 import { expect } from 'chai';
 
-import { ReadPreference, ReadPreferenceOptions } from '../../../src/read_preference';
+import {
+  ReadPreference,
+  ReadPreferenceMode,
+  ReadPreferenceOptions
+} from '../../../src/read_preference';
 import { ServerType, TopologyType } from '../../../src/sdam/common';
 import { ServerDescription, TagSet } from '../../../src/sdam/server_description';
 import * as ServerSelectors from '../../../src/sdam/server_selection';
 import { TopologyDescription } from '../../../src/sdam/topology_description';
+import { serverDescriptionFromDefinition } from './server_selection_spec_helper';
 
-function serverDescriptionFromDefinition(definition, hosts = []): ServerDescription {
-  const serverType = definition.type;
-
-  if (serverType === ServerType.Unknown) {
-    return new ServerDescription(definition.address);
-  }
-
-  // There's no monitor in load balanced mode so no fake hello
-  // is needed.
-  if (serverType === ServerType.LoadBalancer) {
-    const description = new ServerDescription(definition.address, undefined, {
-      loadBalanced: true
-    });
-    delete description.lastUpdateTime;
-    return description;
-  }
-
-  const fakeHello: Document = { ok: 1, hosts };
-  if (serverType !== ServerType.Standalone && serverType !== ServerType.Mongos) {
-    fakeHello.setName = 'rs';
-  }
-
-  if (serverType === ServerType.RSPrimary) {
-    fakeHello.isWritablePrimary = true;
-  } else if (serverType === ServerType.RSSecondary) {
-    fakeHello.secondary = true;
-  } else if (serverType === ServerType.Mongos) {
-    fakeHello.msg = 'isdbgrid';
-  }
-
-  ['maxWireVersion', 'tags', 'idleWritePeriodMillis'].forEach(field => {
-    if (definition[field]) {
-      fakeHello[field] = definition[field];
-    }
-  });
-
-  fakeHello.lastWrite = definition.lastWrite;
-
-  // default max wire version is `6`
-  fakeHello.maxWireVersion = fakeHello.maxWireVersion || 6;
-
-  const serverDescription = new ServerDescription(definition.address, fakeHello, {
-    roundTripTime: definition.avg_rtt_ms
-  });
-
-  // source of flakiness, if we don't need it then remove it
-  if (typeof definition.lastUpdateTime !== 'undefined') {
-    serverDescription.lastUpdateTime = definition.lastUpdateTime;
-  } else {
-    delete serverDescription.lastUpdateTime;
-  }
-
-  return serverDescription;
+interface ServerSelectionLogicTestServer {
+  address: string;
+  avg_rtt_ms: number;
+  type: ServerType;
+  tags?: TagSet;
 }
-
-/**
- * Compares two server descriptions and compares all fields that are present
- * in the yaml spec tests.  Overkill?  Probably.
- */
-function compareServerDescriptions(s1: ServerDescription, s2: ServerDescription) {
-  expect(s1.address).to.equal(s2.address);
-  expect(s1.roundTripTime).to.equal(s2.roundTripTime);
-  expect(s1.type).to.equal(s2.type);
-  expect(s1.tags).to.deep.equal(s2.tags);
-}
-
-function descriptionsToMap(descriptions: ServerDescription[]): Map<string, ServerDescription> {
-  const descriptionMap = new Map<string, ServerDescription>();
-
-  for (const description of descriptions) {
-    descriptionMap.set(description.address, description);
-  }
-
-  return descriptionMap;
-}
-
-export interface Test {
+interface Test {
   topology_description: {
     type: TopologyType;
-    servers: Server[];
+    servers: ServerSelectionLogicTestServer[];
   };
-  operation: Operation;
-  read_preference: LogicTestReadPreference;
+  operation: 'read' | 'write';
+  read_preference: {
+    mode: ReadPreferenceMode;
+    tag_sets?: TagSet[];
+  };
   /**
    * The spec says we should confirm the list of suitable servers in addition to the list of
    * servers in the latency window, if possible.  We apply the latency window inside the
    * selector so for Node this is not possible.
    * https://github.com/mongodb/specifications/tree/master/source/server-selection/tests#server-selection-logic-tests
    */
-  // suitable_servers: Server[];
-  in_latency_window: Server[];
+  suitable_servers: never;
+  in_latency_window: ServerSelectionLogicTestServer[];
 }
 
-export interface Server {
-  address: string;
-  avg_rtt_ms: number;
-  type: ServerType;
-  tags?: TagSet;
-}
-
-type Operation = 'read' | 'write';
-
-export interface LogicTestReadPreference {
-  mode: Mode;
-  tag_sets?: TagSet[];
-}
-
-export enum Mode {
-  Nearest = 'Nearest',
-  Primary = 'Primary',
-  PrimaryPreferred = 'PrimaryPreferred',
-  Secondary = 'Secondary',
-  SecondaryPreferred = 'SecondaryPreferred'
-}
-
-export function readPreferenceFromDefinition(definition) {
+function readPreferenceFromDefinition(definition) {
   const mode = definition.mode
     ? definition.mode.charAt(0).toLowerCase() + definition.mode.slice(1)
     : 'primary';
@@ -136,20 +51,43 @@ export function readPreferenceFromDefinition(definition) {
 }
 
 /**
+ * Compares two server descriptions and compares all fields that are present
+ * in the yaml spec tests.
+ */
+function compareServerDescriptions(s1: ServerDescription, s2: ServerDescription) {
+  expect(s1.address).to.equal(s2.address);
+  expect(s1.roundTripTime).to.equal(s2.roundTripTime);
+  expect(s1.type).to.equal(s2.type);
+  expect(s1.tags).to.deep.equal(s2.tags);
+}
+
+function serverDescriptionsToMap(
+  descriptions: ServerDescription[]
+): Map<string, ServerDescription> {
+  const descriptionMap = new Map<string, ServerDescription>();
+
+  for (const description of descriptions) {
+    descriptionMap.set(description.address, description);
+  }
+
+  return descriptionMap;
+}
+
+/**
  * Executes a server selection logic test
  * @see https://github.com/mongodb/specifications/tree/master/source/server-selection/tests#server-selection-logic-tests
  */
-export function runTest(testDefinition: Test) {
+export function runServerSelectionLogicTest(testDefinition: Test) {
   const allHosts = testDefinition.topology_description.servers.map(({ address }) => address);
   const serversInTopology = testDefinition.topology_description.servers.map(s =>
     serverDescriptionFromDefinition(s, allHosts)
   );
-  const serverDescriptions = descriptionsToMap(serversInTopology);
+  const serverDescriptions = serverDescriptionsToMap(serversInTopology);
   const topologyDescription = new TopologyDescription(
     testDefinition.topology_description.type,
     serverDescriptions
   );
-  const expectedServers = descriptionsToMap(
+  const expectedServers = serverDescriptionsToMap(
     testDefinition.in_latency_window.map(s => serverDescriptionFromDefinition(s))
   );
 

@@ -2,7 +2,7 @@ import { Document, EJSON } from 'bson';
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { basename, extname, join } from 'path';
 
-import { runTest, Test } from './server_selection_logic_spec_utils';
+import { runServerSelectionLogicTest } from './server_selection_logic_spec_utils';
 
 function collectServerSelectionLogicTests(specDir) {
   const testTypes = readdirSync(specDir).filter(d => statSync(join(specDir, d)).isDirectory());
@@ -56,7 +56,7 @@ describe('Server Selection Logic (spec)', function () {
         describe(subType, function () {
           for (const test of serverSelectionLogicTests[topologyType][subType]) {
             it(test.name, function () {
-              runTest(test);
+              runServerSelectionLogicTest(test);
             });
           }
         });
