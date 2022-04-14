@@ -1,4 +1,7 @@
+import { Document, EJSON } from 'bson';
 import { expect } from 'chai';
+import { readdirSync, readFileSync, statSync } from 'fs';
+import { basename, extname, join } from 'path';
 
 import {
   ReadPreference,
@@ -115,4 +118,34 @@ export function runServerSelectionLogicTest(testDefinition: Test) {
   }
 
   expect(expectedServers.size).to.equal(0);
+}
+
+export function collectServerSelectionLogicTests(specDir) {
+  const testTypes = readdirSync(specDir).filter(d => statSync(join(specDir, d)).isDirectory());
+
+  const tests = {};
+  for (const testType of testTypes) {
+    const testsOfType = readdirSync(join(specDir, testType)).filter(d =>
+      statSync(join(specDir, testType, d)).isDirectory()
+    );
+    const result = {};
+    for (const subType of testsOfType) {
+      result[subType] = readdirSync(join(specDir, testType, subType))
+        .filter(f => extname(f) === '.json')
+        .map(f => {
+          const fileContents = readFileSync(join(specDir, testType, subType, f), {
+            encoding: 'utf-8'
+          });
+          const test = EJSON.parse(fileContents, { relaxed: true }) as unknown as Document;
+          test.name = basename(f, '.json');
+          test.type = testType;
+          test.subType = subType;
+          return test;
+        });
+    }
+
+    tests[testType] = result;
+  }
+
+  return tests;
 }
