@@ -1,75 +1,62 @@
-import { EJSON } from "bson";
-import { readdirSync, readFileSync, statSync } from "fs";
-import { basename, extname, join } from "path";
-import { Server } from "../../../src/sdam/server";
-import { executeServerSelectionTest } from "./server_selection_spec_helper";
-import { Document } from 'bson';
+import { Document, EJSON } from 'bson';
+import { readdirSync, readFileSync, statSync } from 'fs';
+import { basename, extname, join } from 'path';
 
-import * as sinon from 'sinon'
+import { runTest, Test } from './server_selection_logic_spec_utils';
 
-const selectionSpecDir = join(__dirname, '../../spec/server-selection/server_selection');
-function collectSelectionTests(specDir) {
-  const testTypes =
-    readdirSync(specDir)
-      .filter(d => statSync(join(specDir, d)).isDirectory());
+function collectServerSelectionLogicTests(specDir) {
+  const testTypes = readdirSync(specDir).filter(d => statSync(join(specDir, d)).isDirectory());
 
   const tests = {};
-  testTypes.forEach(testType => {
-    tests[testType] =
-      readdirSync(join(specDir, testType))
-        .filter(d => statSync(join(specDir, testType, d)).isDirectory())
-        .reduce((result, subType) => {
-          result[subType] =
-            readdirSync(join(specDir, testType, subType))
-              .filter(f => extname(f) === '.json')
-              .map(f => {
-                const fileContents = readFileSync(join(
-                  specDir, testType, subType, f
-                ), { encoding: 'utf-8' });
-                const subTypeData = EJSON.parse(
-                  fileContents,
-                  { relaxed: true }
-                ) as unknown as Document;
-                subTypeData.name = basename(f, '.json');
-                subTypeData.type = testType;
-                subTypeData.subType = subType
-                return subTypeData
-              });
+  for (const testType of testTypes) {
+    const testsOfType = readdirSync(join(specDir, testType)).filter(d =>
+      statSync(join(specDir, testType, d)).isDirectory()
+    );
+    const result = {};
+    for (const subType of testsOfType) {
+      result[subType] = readdirSync(join(specDir, testType, subType))
+        .filter(f => extname(f) === '.json')
+        .map(f => {
+          const fileContents = readFileSync(join(specDir, testType, subType, f), {
+            encoding: 'utf-8'
+          });
+          const test = EJSON.parse(fileContents, { relaxed: true }) as unknown as Document;
+          test.name = basename(f, '.json');
+          test.type = testType;
+          test.subType = subType;
+          return test;
+        });
+    }
 
-          return result;
-        }, {});
-  });
+    tests[testType] = result;
+  }
 
   return tests;
 }
 
-describe('Server Selection (spec)', function () {
-  let serverConnect;
-  before(() => {
-    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
-      this.s.state = 'connected';
-    });
-  });
-
+describe('Server Selection Logic (spec)', function () {
   beforeEach(function () {
     if (this.currentTest.title.match(/Possible/)) {
       (this.currentTest as any).skipReason = 'Nodejs driver does not support PossiblePrimary';
       this.skip();
     }
+
+    if (this.currentTest.title.match(/nearest_multiple/i)) {
+      (this.currentTest as any).skipReason =
+        'TODO(NODE-4188): localThresholdMS should default to 15ms';
+      this.skip();
+    }
   });
 
-  after(() => {
-    serverConnect.restore();
-  });
-
-  const specTests = collectSelectionTests(selectionSpecDir);
-  for (const topologyType of Object.keys(specTests)) {
+  const selectionSpecDir = join(__dirname, '../../spec/server-selection/server_selection');
+  const serverSelectionLogicTests = collectServerSelectionLogicTests(selectionSpecDir);
+  for (const topologyType of Object.keys(serverSelectionLogicTests)) {
     describe(topologyType, function () {
-      for (const subType of Object.keys(specTests[topologyType])) {
+      for (const subType of Object.keys(serverSelectionLogicTests[topologyType])) {
         describe(subType, function () {
-          for (const test of specTests[topologyType][subType]) {
-            it(test.name, function (done) {
-              executeServerSelectionTest(test, done);
+          for (const test of serverSelectionLogicTests[topologyType][subType]) {
+            it(test.name, function () {
+              runTest(test);
             });
           }
         });
