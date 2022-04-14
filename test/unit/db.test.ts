@@ -4,11 +4,17 @@ import { MongoClient } from '../../src';
 import { Db, DbOptions } from '../../src/db';
 import { ReadPreference } from '../../src/read_preference';
 
-describe('class Db', function () {
+describe.only('class Db', function () {
   describe('secondaryOk', function () {
     const client = new MongoClient('mongodb://localhost:27017');
     const legacy_secondary_ok = 'slaveOk';
     const secondary_ok = 'secondaryOk';
+
+    let fd;
+    require('fs').open('./package.json', (e, f) => {
+      if (e) throw e;
+      fd = f;
+    });
 
     it('should be false when readPreference is Primary', function () {
       const options: DbOptions = { readPreference: ReadPreference.PRIMARY };
