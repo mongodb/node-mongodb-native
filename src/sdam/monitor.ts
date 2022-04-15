@@ -1,3 +1,5 @@
+import { createWriteStream } from 'fs';
+
 import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
@@ -71,6 +73,8 @@ export type MonitorEvents = {
   resetConnectionPool(): void;
   close(): void;
 } & EventEmitterWithState;
+
+const durationFile = createWriteStream('durations.txt', { encoding: 'utf-8' });
 
 /** @internal */
 export class Monitor extends TypedEventEmitter<MonitorEvents> {
@@ -275,6 +279,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(monitor.address, duration, hello)
       );
+
+      durationFile.write(`${duration} \t ${performance.now()}\n`);
 
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
