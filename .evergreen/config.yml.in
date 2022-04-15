@@ -241,6 +241,7 @@ functions:
 
   "run lint checks":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60
@@ -252,6 +253,7 @@ functions:
 
   "run unit tests":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60
@@ -263,6 +265,7 @@ functions:
 
   "run typescript next":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60
@@ -275,6 +278,7 @@ functions:
 
   "run typescript oldest":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60
@@ -288,6 +292,7 @@ functions:
 
   "run typescript current":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60

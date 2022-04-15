@@ -699,5 +699,6 @@ export interface MongoOptions
    */
   tls: boolean;
 
+  /** @internal */
   [featureFlag: symbol]: any;
 }

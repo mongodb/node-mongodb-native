@@ -216,6 +216,7 @@ functions:
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run lint checks:
     - command: subprocess.exec
+      type: test
       params:
         working_dir: src
         timeout_secs: 60
@@ -226,6 +227,7 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/run-lint-checks.sh
   run unit tests:
     - command: subprocess.exec
+      type: test
       params:
         working_dir: src
         timeout_secs: 60
@@ -236,6 +238,7 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh
   run typescript next:
     - command: subprocess.exec
+      type: test
       params:
         working_dir: src
         timeout_secs: 60
@@ -247,6 +250,7 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
   run typescript oldest:
     - command: subprocess.exec
+      type: test
       params:
         working_dir: src
         timeout_secs: 60
@@ -259,6 +263,7 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
   run typescript current:
     - command: subprocess.exec
+      type: test
       params:
         working_dir: src
         timeout_secs: 60
