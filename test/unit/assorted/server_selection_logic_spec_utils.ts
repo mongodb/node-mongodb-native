@@ -20,7 +20,7 @@ interface ServerSelectionLogicTestServer {
   type: ServerType;
   tags?: TagSet;
 }
-interface Test {
+interface ServerSelectionLogicTest {
   topology_description: {
     type: TopologyType;
     servers: ServerSelectionLogicTestServer[];
@@ -80,7 +80,7 @@ function serverDescriptionsToMap(
  * Executes a server selection logic test
  * @see https://github.com/mongodb/specifications/tree/master/source/server-selection/tests#server-selection-logic-tests
  */
-export function runServerSelectionLogicTest(testDefinition: Test) {
+export function runServerSelectionLogicTest(testDefinition: ServerSelectionLogicTest) {
   const allHosts = testDefinition.topology_description.servers.map(({ address }) => address);
   const serversInTopology = testDefinition.topology_description.servers.map(s =>
     serverDescriptionFromDefinition(s, allHosts)
@@ -120,6 +120,9 @@ export function runServerSelectionLogicTest(testDefinition: Test) {
   expect(expectedServers.size).to.equal(0);
 }
 
+/**
+ * reads in the server selection logic tests from the provided directory
+ */
 export function collectServerSelectionLogicTests(specDir) {
   const testTypes = readdirSync(specDir).filter(d => statSync(join(specDir, d)).isDirectory());
 

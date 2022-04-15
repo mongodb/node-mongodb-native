@@ -8,13 +8,12 @@ import {
 describe('Server Selection Logic (spec)', function () {
   beforeEach(function () {
     if (this.currentTest.title.match(/Possible/)) {
-      (this.currentTest as any).skipReason = 'Nodejs driver does not support PossiblePrimary';
+      this.currentTest.skipReason = 'Nodejs driver does not support PossiblePrimary';
       this.skip();
     }
 
     if (this.currentTest.title.match(/nearest_multiple/i)) {
-      (this.currentTest as any).skipReason =
-        'TODO(NODE-4188): localThresholdMS should default to 15ms';
+      this.currentTest.skipReason = 'TODO(NODE-4188): localThresholdMS should default to 15ms';
       this.skip();
     }
   });
