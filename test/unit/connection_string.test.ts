@@ -5,7 +5,7 @@ import { promisify } from 'util';
 
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
-import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
+import { FEATURE_FLAGS, parseOptions, resolveSRVRecord } from '../../src/connection_string';
 import {
   MongoAPIError,
   MongoDriverError,
@@ -408,6 +408,47 @@ describe('Connection String', function () {
       expect(options).to.have.nested.property('credentials.username', '');
       expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
       expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
+    });
+  });
+
+  describe('feature flags', () => {
+    it('should map known symbols onto options', () => {
+      const randomFlag = Symbol();
+      const client = new MongoClient('mongodb://iLoveJavaScript', { [randomFlag]: 23n });
+      expect(client.s.options).to.not.have.property(randomFlag);
+    });
+
+    it('should map all default symbols and values onto options', () => {
+      const client = new MongoClient('mongodb://iLoveJavaScript');
+      expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
+      for (const [flag, featureSetting] of FEATURE_FLAGS) {
+        // asserts value and flag is NOT enumerable
+        expect(client.s.options).to.have.ownPropertyDescriptor(flag, {
+          value: featureSetting,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        });
+
+        // Non-enumerable properties do not get surfaced to the public options
+        expect(client.options).to.not.have.property(flag);
+      }
+    });
+
+    it('should be prefixed with @@mdb.', () => {
+      expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
+      for (const flag of FEATURE_FLAGS.keys()) {
+        expect(flag).to.be.a('symbol');
+        expect(flag).to.have.property('description');
+        expect(flag.description).to.match(/@@mdb\..+/);
+      }
+    });
+
+    it('should support nullish values', () => {
+      expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
+      const flag = Array.from(FEATURE_FLAGS.keys())[0]; // grab a random supported flag
+      const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: null });
+      expect(client.s.options).to.have.property(flag, null);
     });
   });
 });

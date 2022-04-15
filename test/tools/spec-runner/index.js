@@ -341,19 +341,15 @@ const CMAP_EVENTS = new Set([
 
 function runTestSuiteTest(configuration, spec, context) {
   context.commandEvents = [];
-  const clientOptions = translateClientOptions(
-    Object.assign(
-      {
-        heartbeatFrequencyMS: 100,
-        minHeartbeatFrequencyMS: 100,
-        monitorCommands: true
-      },
-      spec.clientOptions
-    )
-  );
+  const clientOptions = translateClientOptions({
+    heartbeatFrequencyMS: 100,
+    minHeartbeatFrequencyMS: 100,
+    monitorCommands: true,
+    ...spec.clientOptions,
+    [Symbol.for('@@mdb.check.auth.on.connect')]: false
+  });
 
   const url = resolveConnectionString(configuration, spec, context);
-  clientOptions[Symbol.for('@@mdb.check.auth.on.connect')] = false;
   const client = configuration.newClient(url, clientOptions);
   CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
   SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));

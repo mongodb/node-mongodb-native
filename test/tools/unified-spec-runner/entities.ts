@@ -26,6 +26,7 @@ import {
   GridFSBucket,
   HostAddress,
   MongoClient,
+  MongoClientOptions,
   MongoCredentials
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
@@ -100,12 +101,12 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
-  constructor(uri: string, description: ClientEntity, options: MongoClientOptions) {
+  constructor(uri: string, description: ClientEntity) {
     super(uri, {
       monitorCommands: true,
+      [Symbol.for('@@mdb.check.auth.on.connect')]: false,
       ...getEnvironmentalOptions(),
-      ...(description.serverApi ? { serverApi: description.serverApi } : {}),
-      ...options
+      ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
 
     this.commandEvents = [];
@@ -115,10 +116,7 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
     ];
-    // FIXME(NODE-3549): hack to get tests passing, extra unexpected events otherwise
-    // if (process.env.SERVERLESS) {
-    //   this.ignoredEvents.push('ping');
-    // }
+
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);
@@ -150,7 +148,7 @@ export class UnifiedMongoClient extends MongoClient {
   };
 
   stopCapturingEvents(pushFn: PushFunction): void {
-    const observedEvents = this.observedCommandEvents.concat(this.observedCmapEvents);
+    const observedEvents = [...this.observedCommandEvents, ...this.observedCmapEvents];
     for (const eventName of observedEvents) {
       this.off(eventName, pushFn);
     }
@@ -350,9 +348,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           config.url({ useMultipleMongoses }),
           entity.client.uriOptions
         );
-        const client = new UnifiedMongoClient(uri, entity.client, {
-          [Symbol.for('@@mdb.check.auth.on.connect')]: false
-        });
+        const client = new UnifiedMongoClient(uri, entity.client);
         try {
           await client.connect();
         } catch (error) {
