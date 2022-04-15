@@ -346,7 +346,7 @@ function runTestSuiteTest(configuration, spec, context) {
     minHeartbeatFrequencyMS: 100,
     monitorCommands: true,
     ...spec.clientOptions,
-    [Symbol.for('@@mdb.check.auth.on.connect')]: false
+    [Symbol.for('@@mdb.skipInitialPing')]: false
   });
 
   const url = resolveConnectionString(configuration, spec, context);

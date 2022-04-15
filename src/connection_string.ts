@@ -270,15 +270,16 @@ export function parseOptions(
 
   const mongoOptions = Object.create(null);
 
-  // Feature flag capturing
-  for (const [flag, defaultFeatureSetting] of FEATURE_FLAGS) {
-    // Use 'in' to support null values for flags
-    Object.defineProperty(mongoOptions, flag, {
-      value: flag in options ? options[flag] : defaultFeatureSetting,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    });
+  // Feature flags
+  for (const flag of Object.getOwnPropertySymbols(options)) {
+    if (FEATURE_FLAGS.has(flag)) {
+      Object.defineProperty(mongoOptions, flag, {
+        value: options[flag],
+        enumerable: false,
+        writable: true,
+        configurable: true
+      });
+    }
   }
 
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
@@ -1243,5 +1244,5 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
     .map(([k, d]) => [k, d.default])
 );
 
-/** Specify the default values of feature flags */
-export const FEATURE_FLAGS = new Map([[Symbol.for('@@mdb.check.auth.on.connect'), true]]);
+/** Set of permitted feature flags @internal */
+export const FEATURE_FLAGS = new Set([Symbol.for('@@mdb.skipInitialPing')]);

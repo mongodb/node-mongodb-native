@@ -421,16 +421,9 @@ describe('Connection String', function () {
     it('should map all default symbols and values onto options', () => {
       const client = new MongoClient('mongodb://iLoveJavaScript');
       expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
-      for (const [flag, featureSetting] of FEATURE_FLAGS) {
-        // asserts value and flag is NOT enumerable
-        expect(client.s.options).to.have.ownPropertyDescriptor(flag, {
-          value: featureSetting,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        });
-
-        // Non-enumerable properties do not get surfaced to the public options
+      for (const flag of FEATURE_FLAGS) {
+        // Flags do not have default values
+        expect(client.s.options).to.not.have.property(flag);
         expect(client.options).to.not.have.property(flag);
       }
     });
@@ -442,6 +435,14 @@ describe('Connection String', function () {
         expect(flag).to.have.property('description');
         expect(flag.description).to.match(/@@mdb\..+/);
       }
+    });
+
+    it('should only exist if specified on options', () => {
+      expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
+      const flag = Array.from(FEATURE_FLAGS.keys())[0]; // grab a random supported flag
+      const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: true });
+      expect(client.s.options).to.have.property(flag, true);
+      expect(client.options).to.not.have.property(flag);
     });
 
     it('should support nullish values', () => {

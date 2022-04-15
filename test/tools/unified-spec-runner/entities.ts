@@ -103,7 +103,7 @@ export class UnifiedMongoClient extends MongoClient {
   constructor(uri: string, description: ClientEntity) {
     super(uri, {
       monitorCommands: true,
-      [Symbol.for('@@mdb.check.auth.on.connect')]: false,
+      [Symbol.for('@@mdb.skipInitialPing')]: false,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
