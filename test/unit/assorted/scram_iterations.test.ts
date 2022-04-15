@@ -1,23 +1,26 @@
-'use strict';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
-const mock = require('../../tools/mongodb-mock/index');
-const { Topology } = require('../../../src/sdam/topology');
-const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
-const { isHello } = require('../../../src/utils');
+import { MongoNetworkError, MongoRuntimeError } from '../../../src';
+import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
+import { MongoClient } from '../../../src/mongo_client';
+import { isHello } from '../../../src/utils';
+import * as mock from '../../tools/mongodb-mock/index';
 
 describe('SCRAM Iterations Tests', function () {
   let server;
+  let client: MongoClient;
 
-  beforeEach(() => {
-    return mock.createServer().then(mockServer => {
-      server = mockServer;
-    });
+  beforeEach(async () => {
+    server = await mock.createServer();
+    client = new MongoClient(`mongodb://${server.uri()}`);
   });
 
-  afterEach(() => mock.cleanup());
+  afterEach(async () => {
+    mock.cleanup();
+    await client.close();
+  });
 
-  it('should error if iteration count is less than 4096', function (_done) {
+  it('should error if iteration count is less than 4096', async function () {
     const scramResponse =
       'r=IE+xNFeOcslsupAA+zkDVzHd5HfwoRuP7Wi8S4py+erf8PcNm7XIdXQyT52Nj3+M,s=AzomrlMs99A7oFxDLpgFvVb+CSvdyXuNagoWVw==,i=4000';
 
@@ -25,13 +28,10 @@ describe('SCRAM Iterations Tests', function () {
       mechanism: 'DEFAULT',
       source: 'db',
       username: 'user',
-      password: 'pencil'
+      password: 'pencil',
+      mechanismProperties: {}
     });
-
-    let done = e => {
-      done = () => {};
-      return _done(e);
-    };
+    client.s.options.credentials = credentials;
 
     server.setMessageHandler(request => {
       const doc = request.document;
@@ -44,40 +44,26 @@ describe('SCRAM Iterations Tests', function () {
           payload: Buffer.from(scramResponse)
         });
       } else if (doc.saslContinue) {
-        done('SHOULD NOT BE HERE');
+        throw new Error('should not be here');
       }
     });
 
-    const client = new Topology(server.hostAddress(), { credentials });
-    client.on('error', err => {
-      let testErr;
-      try {
-        expect(err).to.not.be.null;
-        expect(err)
-          .to.have.property('message')
-          .that.matches(/Server returned an invalid iteration count/);
-      } catch (e) {
-        testErr = e;
-      }
-      client.close();
-      done(testErr);
-    });
-
-    client.connect();
+    const thrownError = await client.connect().catch(error => error);
+    expect(thrownError).to.be.instanceOf(MongoRuntimeError);
+    expect(thrownError)
+      .to.have.property('message')
+      .that.matches(/Server returned an invalid iteration count/);
   });
 
-  it('should error if server digest is invalid', function (_done) {
+  it('should error if server digest is invalid', async function () {
     const credentials = new MongoCredentials({
       mechanism: 'DEFAULT',
       source: 'db',
       username: 'user',
-      password: 'pencil'
+      password: 'pencil',
+      mechanismProperties: {}
     });
-
-    let done = e => {
-      done = () => {};
-      return _done(e);
-    };
+    client.s.options.credentials = credentials;
 
     server.setMessageHandler(request => {
       const doc = request.document;
@@ -100,31 +86,22 @@ describe('SCRAM Iterations Tests', function () {
       }
     });
 
-    const client = new Topology(server.hostAddress(), { credentials });
-    client.on('error', err => {
-      expect(err).to.not.be.null;
-      expect(err)
-        .to.have.property('message')
-        .that.matches(/Server returned an invalid signature/);
-
-      client.close(done);
-    });
-
-    client.connect();
+    const thrownError = await client.connect().catch(error => error);
+    expect(thrownError).to.be.instanceOf(MongoRuntimeError);
+    expect(thrownError)
+      .to.have.property('message')
+      .that.matches(/Server returned an invalid signature/);
   });
 
-  it('should properly handle network errors on `saslContinue`', function (_done) {
+  it('should properly handle network errors on `saslContinue`', async function () {
     const credentials = new MongoCredentials({
       mechanism: 'DEFAULT',
       source: 'db',
       username: 'user',
-      password: 'pencil'
+      password: 'pencil',
+      mechanismProperties: {}
     });
-
-    let done = e => {
-      done = () => {};
-      return _done(e);
-    };
+    client.s.options.credentials = credentials;
 
     server.setMessageHandler(request => {
       const doc = request.document;
@@ -143,16 +120,10 @@ describe('SCRAM Iterations Tests', function () {
       }
     });
 
-    const client = new Topology(server.hostAddress(), { credentials });
-    client.on('error', err => {
-      expect(err).to.not.be.null;
-      expect(err)
-        .to.have.property('message')
-        .that.matches(/connection(.+)closed/);
-
-      client.close(done);
-    });
-
-    client.connect();
+    const thrownError = await client.connect().catch(error => error);
+    expect(thrownError).to.be.instanceOf(MongoNetworkError);
+    expect(thrownError)
+      .to.have.property('message')
+      .that.matches(/connection(.+)closed/);
   });
 });

@@ -57,10 +57,6 @@ function createTopology(
   options: MongoOptions,
   callback: Callback<Topology>
 ) {
-  // Map feature on to options
-  options[Symbol.for('@@mdb.check.auth.on.connect')] =
-    mongoClient.s[Symbol.for('@@mdb.check.auth.on.connect')] ?? true;
-
   // Create the topology
   const topology = new Topology(options.hosts, options);
   // Events can be emitted before initialization is complete so we have to

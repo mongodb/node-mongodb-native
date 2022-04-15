@@ -254,6 +254,9 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   srvPoller?: SrvPoller;
   /** @internal */
   connectionType?: typeof Connection;
+
+  /** @internal */
+  [featureFlag: symbol]: any;
 }
 
 /** @public */
@@ -270,8 +273,6 @@ export interface MongoClientPrivate {
   readonly writeConcern?: WriteConcern;
   readonly readPreference: ReadPreference;
   readonly logger: Logger;
-
-  [featureFlag: symbol]: any;
 }
 
 /** @public */
@@ -365,10 +366,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       },
       get logger() {
         return client[kOptions].logger;
-      },
-
-      // Known feature flags:
-      [Symbol.for('@@mdb.check.auth.on.connect')]: true
+      }
     };
   }
 

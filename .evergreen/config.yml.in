@@ -15,10 +15,11 @@ exec_timeout_secs: 1200
 
 # What to do when evergreen hits the timeout (`post:` tasks are run automatically)
 timeout:
-  - command: shell.exec
+  - command: subprocess.exec
     params:
-      script: |
-        ls -la
+      binary: ls
+      args:
+        - "-la"
 
 functions:
   "fetch source":

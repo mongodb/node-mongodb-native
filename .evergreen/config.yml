@@ -2,10 +2,11 @@ stepback: true
 command_type: system
 exec_timeout_secs: 1200
 timeout:
-  - command: shell.exec
+  - command: subprocess.exec
     params:
-      script: |
-        ls -la
+      binary: ls
+      args:
+        - '-la'
 functions:
   fetch source:
     - command: git.get_project

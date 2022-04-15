@@ -100,11 +100,12 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
-  constructor(uri: string, description: ClientEntity) {
+  constructor(uri: string, description: ClientEntity, options: MongoClientOptions) {
     super(uri, {
       monitorCommands: true,
       ...getEnvironmentalOptions(),
-      ...(description.serverApi ? { serverApi: description.serverApi } : {})
+      ...(description.serverApi ? { serverApi: description.serverApi } : {}),
+      ...options
     });
 
     this.commandEvents = [];
@@ -349,8 +350,9 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           config.url({ useMultipleMongoses }),
           entity.client.uriOptions
         );
-        const client = new UnifiedMongoClient(uri, entity.client);
-        client.s[Symbol.for('@@mdb.check.auth.on.connect')] = false; // no initial ping
+        const client = new UnifiedMongoClient(uri, entity.client, {
+          [Symbol.for('@@mdb.check.auth.on.connect')]: false
+        });
         try {
           await client.connect();
         } catch (error) {
