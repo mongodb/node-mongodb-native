@@ -153,6 +153,8 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   metadata: ClientMetadata;
   /** MongoDB server API version */
   serverApi?: ServerApi;
+
+  [feature: symbol]: any;
 }
 
 /** @public */
@@ -333,7 +335,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       // timer management
       connectionTimers: new Set<NodeJS.Timeout>(),
-
       detectShardedTopology: ev => this.detectShardedTopology(ev),
       detectSrvRecords: ev => this.detectSrvRecords(ev)
     };
@@ -462,7 +463,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
 
       // TODO: NODE-2471
-      if (server && this.s.credentials) {
+      if (
+        server &&
+        this.s.credentials &&
+        this.s.options[Symbol.for('@@mdb.check.auth.on.connect')]
+      ) {
         server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
           if (err) {
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);

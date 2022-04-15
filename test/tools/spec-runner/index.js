@@ -339,7 +339,6 @@ const CMAP_EVENTS = new Set([
   'connectionPoolCleared'
 ]);
 
-let displayCommands = false;
 function runTestSuiteTest(configuration, spec, context) {
   context.commandEvents = [];
   const clientOptions = translateClientOptions(
@@ -355,27 +354,13 @@ function runTestSuiteTest(configuration, spec, context) {
 
   const url = resolveConnectionString(configuration, spec, context);
   const client = configuration.newClient(url, clientOptions);
+  client.s[Symbol.for('@@mdb.check.auth.on.connect')] = false; // skip initial ping
   CMAP_EVENTS.forEach(eventName => client.on(eventName, event => context.cmapEvents.push(event)));
   SDAM_EVENTS.forEach(eventName => client.on(eventName, event => context.sdamEvents.push(event)));
 
-  let skippedInitialPing = false;
   client.on('commandStarted', event => {
-    if (IGNORED_COMMANDS.has(event.commandName)) {
-      return;
-    }
-
-    // If credentials were provided, then the Topology sends an initial `ping` command
-    // that we want to skip
-    if (event.commandName === 'ping' && client.topology.s.credentials && !skippedInitialPing) {
-      skippedInitialPing = true;
-      return;
-    }
-
-    context.commandEvents.push(event);
-
-    // very useful for debugging
-    if (displayCommands) {
-      // console.dir(event, { depth: 5 });
+    if (!IGNORED_COMMANDS.has(event.commandName)) {
+      context.commandEvents.push(event);
     }
   });
 
@@ -406,8 +391,6 @@ function runTestSuiteTest(configuration, spec, context) {
         // ignore
       }
     }
-    // enable to see useful APM debug information at the time of actual test run
-    // displayCommands = true;
 
     const operationContext = {
       client,

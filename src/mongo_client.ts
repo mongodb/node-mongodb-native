@@ -270,6 +270,8 @@ export interface MongoClientPrivate {
   readonly writeConcern?: WriteConcern;
   readonly readPreference: ReadPreference;
   readonly logger: Logger;
+
+  [featureFlag: symbol]: any;
 }
 
 /** @public */
@@ -363,7 +365,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       },
       get logger() {
         return client[kOptions].logger;
-      }
+      },
+
+      // Known feature flags:
+      [Symbol.for('@@mdb.check.auth.on.connect')]: true
     };
   }
 
@@ -696,8 +701,5 @@ export interface MongoOptions
    */
   tls: boolean;
 
-  /**
-   * Turn these options into a reusable connection URI
-   */
-  toURI(): string;
+  [featureFlag: symbol]: any;
 }

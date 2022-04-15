@@ -59,7 +59,7 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
-type PushFunction = (e: CommandEvent | CmapEvent) => void;
+type PushFunction = (e: any) => void;
 
 export class UnifiedMongoClient extends MongoClient {
   commandEvents: CommandEvent[];
@@ -80,8 +80,6 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedIn'
   )[];
   _credentials: MongoCredentials | null;
-  _pingEvents = [];
-  _initialPingCmapEvents = [];
 
   static COMMAND_EVENT_NAME_LOOKUP = {
     commandStartedEvent: 'commandStarted',
@@ -117,9 +115,9 @@ export class UnifiedMongoClient extends MongoClient {
       'configureFailPoint'
     ];
     // FIXME(NODE-3549): hack to get tests passing, extra unexpected events otherwise
-    if (process.env.SERVERLESS) {
-      this.ignoredEvents.push('ping');
-    }
+    // if (process.env.SERVERLESS) {
+    //   this.ignoredEvents.push('ping');
+    // }
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);
@@ -134,25 +132,12 @@ export class UnifiedMongoClient extends MongoClient {
     }
   }
 
-  isIgnored(e: CommandEvent | CmapEvent): boolean {
+  isIgnored(e: CommandEvent): boolean {
     return this.ignoredEvents.includes(e.commandName);
   }
 
   // NOTE: pushCommandEvent must be an arrow function
   pushCommandEvent: (e: CommandEvent) => void = e => {
-    if (e.commandName === 'ping' && this.credentials) {
-      // initial ping command
-      if (this._pingEvents.length === 0) {
-        this._pingEvents.push(e);
-        return;
-      }
-      // if there is a CommandSucceedEvent, add that as well
-      if (this._pingEvents.length === 1 && e instanceof CommandSucceededEvent) {
-        this._pingEvents.push(e);
-        return;
-      }
-    }
-
     if (!this.isIgnored(e)) {
       this.commandEvents.push(e);
     }
@@ -160,12 +145,6 @@ export class UnifiedMongoClient extends MongoClient {
 
   // NOTE: pushCmapEvent must be an arrow function
   pushCmapEvent: (e: CmapEvent) => void = e => {
-    if (this.credentials && this._initialPingCmapEvents.length !== 2) {
-      if (e instanceof ConnectionCheckedOutEvent || e instanceof ConnectionCheckedInEvent) {
-        this._initialPingCmapEvents.push(e);
-        return;
-      }
-    }
     this.cmapEvents.push(e);
   };
 
@@ -185,14 +164,6 @@ export class UnifiedMongoClient extends MongoClient {
   stopCapturingCmapEvents(): CmapEvent[] {
     this.stopCapturingEvents(this.pushCmapEvent);
     return this.cmapEvents;
-  }
-
-  get credentials() {
-    if (this._credentials == null) {
-      this._credentials = this.options.credentials;
-    }
-
-    return this._credentials;
   }
 }
 
@@ -379,6 +350,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           entity.client.uriOptions
         );
         const client = new UnifiedMongoClient(uri, entity.client);
+        client.s[Symbol.for('@@mdb.check.auth.on.connect')] = false; // no initial ping
         try {
           await client.connect();
         } catch (error) {
