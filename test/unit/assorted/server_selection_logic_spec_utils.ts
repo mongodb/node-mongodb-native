@@ -10,7 +10,10 @@ import {
 } from '../../../src/read_preference';
 import { ServerType, TopologyType } from '../../../src/sdam/common';
 import { ServerDescription, TagSet } from '../../../src/sdam/server_description';
-import * as ServerSelectors from '../../../src/sdam/server_selection';
+import {
+  readPreferenceServerSelector,
+  writableServerSelector
+} from '../../../src/sdam/server_selection';
 import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';
 
@@ -48,7 +51,7 @@ function readPreferenceFromDefinition(definition) {
   const options: ReadPreferenceOptions = {};
   if (typeof definition.maxStalenessSeconds !== 'undefined')
     options.maxStalenessSeconds = definition.maxStalenessSeconds;
-  const tags = definition.tag_sets || [];
+  const tags = definition.tag_sets ?? [];
 
   return new ReadPreference(mode, tags, options);
 }
@@ -96,14 +99,16 @@ export function runServerSelectionLogicTest(testDefinition: ServerSelectionLogic
 
   let selector;
   if (testDefinition.operation === 'write') {
-    selector = ServerSelectors.writableServerSelector();
+    selector = writableServerSelector();
   } else if (testDefinition.operation === 'read' || testDefinition.read_preference) {
     try {
       const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
-      selector = ServerSelectors.readPreferenceServerSelector(readPreference);
-    } catch (e) {
-      expect(e, ejson`Invalid readPreference: ${testDefinition.read_preference}`).not.to.exist;
+      selector = readPreferenceServerSelector(readPreference);
+    } catch {
+      expect.fail(ejson`Invalid readPreference: ${testDefinition.read_preference}`);
     }
+  } else {
+    expect.fail('test operation was neither read nor write, and no read preference was provided.');
   }
 
   const result = selector(topologyDescription, serversInTopology);
@@ -139,7 +144,7 @@ export function collectServerSelectionLogicTests(specDir) {
           const fileContents = readFileSync(join(specDir, testType, subType, f), {
             encoding: 'utf-8'
           });
-          const test = EJSON.parse(fileContents, { relaxed: true }) as unknown as Document;
+          const test = EJSON.parse(fileContents) as unknown as Document;
           test.name = basename(f, '.json');
           test.type = testType;
           test.subType = subType;
