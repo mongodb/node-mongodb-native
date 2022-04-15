@@ -11,12 +11,6 @@ describe('Server Selection Logic (spec)', function () {
       (this.currentTest as any).skipReason = 'Nodejs driver does not support PossiblePrimary';
       this.skip();
     }
-
-    if (this.currentTest.title.match(/nearest_multiple/i)) {
-      (this.currentTest as any).skipReason =
-        'TODO(NODE-4188): localThresholdMS should default to 15ms';
-      this.skip();
-    }
   });
 
   const selectionSpecDir = join(__dirname, '../../spec/server-selection/server_selection');
