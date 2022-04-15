@@ -35,9 +35,8 @@ describe('commands', function () {
         it('does not throw an exception', function () {
           let error;
           try {
-            const response = new Response(message, header, body);
-          }
-          catch(err) {
+            new Response(message, header, body);
+          } catch (err) {
             error = err;
           }
           expect(error).to.be.undefined;
