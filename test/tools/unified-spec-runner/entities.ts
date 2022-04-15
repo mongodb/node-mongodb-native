@@ -26,7 +26,6 @@ import {
   GridFSBucket,
   HostAddress,
   MongoClient,
-  MongoClientOptions,
   MongoCredentials
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
