@@ -467,10 +467,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param fn - A lambda to run within a transaction
    * @param options - Optional settings for the transaction
    */
-  withTransaction<T = void>(
-    fn: WithTransactionCallback<T>,
+  withTransaction(
+    fn: WithTransactionCallback<void>,
     options?: TransactionOptions
-  ): ReturnType<typeof fn> {
+  ): Promise<void> {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }
