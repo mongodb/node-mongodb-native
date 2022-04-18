@@ -439,10 +439,10 @@ describe('Connection String', function () {
 
     it('should only exist if specified on options', () => {
       expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
-      const flag = Array.from(FEATURE_FLAGS.keys())[0]; // grab a random supported flag
+      const flag = Array.from(FEATURE_FLAGS)[0]; // grab a random supported flag
       const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: true });
       expect(client.s.options).to.have.property(flag, true);
-      expect(client.options).to.not.have.property(flag);
+      expect(client.options).to.have.property(flag, true);
     });
 
     it('should support nullish values', () => {
