@@ -95,6 +95,7 @@ export function executeOperation<
   return maybePromise(callback, callback => {
     let topology: Topology;
     try {
+      // TODO(NODE-4151): Use skipPingOnConnect and call connect here to make client.connect optional
       topology = getTopology(topologyProvider);
     } catch (error) {
       return callback(error);

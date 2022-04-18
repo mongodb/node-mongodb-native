@@ -263,6 +263,14 @@ export function parseOptions(
   const { hosts, isSRV } = url;
 
   const mongoOptions = Object.create(null);
+
+  // Feature flags
+  for (const flag of Object.getOwnPropertySymbols(options)) {
+    if (FEATURE_FLAGS.has(flag)) {
+      mongoOptions[flag] = options[flag];
+    }
+  }
+
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
 
   const urlOptions = new CaseInsensitiveMap<any[]>();
@@ -1241,3 +1249,9 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
     .filter(([, descriptor]) => descriptor.default != null)
     .map(([k, d]) => [k, d.default])
 );
+
+/**
+ * Set of permitted feature flags
+ * @internal
+ */
+export const FEATURE_FLAGS = new Set([Symbol.for('@@mdb.skipPingOnConnect')]);

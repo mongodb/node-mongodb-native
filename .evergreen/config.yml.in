@@ -15,10 +15,11 @@ exec_timeout_secs: 1200
 
 # What to do when evergreen hits the timeout (`post:` tasks are run automatically)
 timeout:
-  - command: shell.exec
+  - command: subprocess.exec
     params:
-      script: |
-        ls -la
+      binary: ls
+      args:
+        - "-la"
 
 functions:
   "fetch source":
@@ -240,6 +241,7 @@ functions:
 
   "run lint checks":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60
@@ -251,6 +253,7 @@ functions:
 
   "run unit tests":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60
@@ -262,6 +265,7 @@ functions:
 
   "run typescript next":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60
@@ -274,6 +278,7 @@ functions:
 
   "run typescript oldest":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60
@@ -287,6 +292,7 @@ functions:
 
   "run typescript current":
     - command: subprocess.exec
+      type: test
       params:
         working_dir: "src"
         timeout_secs: 60

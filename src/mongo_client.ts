@@ -254,6 +254,9 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   srvPoller?: SrvPoller;
   /** @internal */
   connectionType?: typeof Connection;
+
+  /** @internal */
+  [featureFlag: symbol]: any;
 }
 
 /** @public */
@@ -696,8 +699,6 @@ export interface MongoOptions
    */
   tls: boolean;
 
-  /**
-   * Turn these options into a reusable connection URI
-   */
-  toURI(): string;
+  /** @internal */
+  [featureFlag: symbol]: any;
 }

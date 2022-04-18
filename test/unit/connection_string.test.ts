@@ -5,7 +5,7 @@ import { promisify } from 'util';
 
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
-import { parseOptions, resolveSRVRecord } from '../../src/connection_string';
+import { FEATURE_FLAGS, parseOptions, resolveSRVRecord } from '../../src/connection_string';
 import {
   MongoAPIError,
   MongoDriverError,
@@ -530,6 +530,41 @@ describe('Connection String', function () {
       expect(options).to.have.nested.property('credentials.username', '');
       expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
       expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
+    });
+  });
+
+  describe('feature flags', () => {
+    it('should be stored in the FEATURE_FLAGS Set', () => {
+      expect(FEATURE_FLAGS.size).to.equal(1);
+      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.skipPingOnConnect'))).to.be.true;
+      // Add more flags here
+    });
+
+    it('should should ignore unknown symbols', () => {
+      const randomFlag = Symbol();
+      const client = new MongoClient('mongodb://iLoveJavaScript', { [randomFlag]: 23n });
+      expect(client.s.options).to.not.have.property(randomFlag);
+    });
+
+    it('should be prefixed with @@mdb.', () => {
+      for (const flag of FEATURE_FLAGS) {
+        expect(flag).to.be.a('symbol');
+        expect(flag).to.have.property('description');
+        expect(flag.description).to.match(/@@mdb\..+/);
+      }
+    });
+
+    it('should only exist if specified on options', () => {
+      const flag = Array.from(FEATURE_FLAGS)[0]; // grab a random supported flag
+      const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: true });
+      expect(client.s.options).to.have.property(flag, true);
+      expect(client.options).to.have.property(flag, true);
+    });
+
+    it('should support nullish values', () => {
+      const flag = Array.from(FEATURE_FLAGS.keys())[0]; // grab a random supported flag
+      const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: null });
+      expect(client.s.options).to.have.property(flag, null);
     });
   });
 });

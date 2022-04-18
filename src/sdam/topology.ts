@@ -4,7 +4,7 @@ import { deserialize, serialize } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
-import { DEFAULT_OPTIONS } from '../connection_string';
+import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
   CLOSE,
   CONNECT,
@@ -153,6 +153,8 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   metadata: ClientMetadata;
   /** MongoDB server API version */
   serverApi?: ServerApi;
+  /** @internal */
+  [featureFlag: symbol]: any;
 }
 
 /** @public */
@@ -248,22 +250,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
       hosts: [HostAddress.fromString('localhost:27017')],
-      retryReads: DEFAULT_OPTIONS.get('retryReads'),
-      retryWrites: DEFAULT_OPTIONS.get('retryWrites'),
-      serverSelectionTimeoutMS: DEFAULT_OPTIONS.get('serverSelectionTimeoutMS'),
-      directConnection: DEFAULT_OPTIONS.get('directConnection'),
-      loadBalanced: DEFAULT_OPTIONS.get('loadBalanced'),
-      metadata: DEFAULT_OPTIONS.get('metadata'),
-      monitorCommands: DEFAULT_OPTIONS.get('monitorCommands'),
-      tls: DEFAULT_OPTIONS.get('tls'),
-      maxPoolSize: DEFAULT_OPTIONS.get('maxPoolSize'),
-      minPoolSize: DEFAULT_OPTIONS.get('minPoolSize'),
-      waitQueueTimeoutMS: DEFAULT_OPTIONS.get('waitQueueTimeoutMS'),
-      connectionType: DEFAULT_OPTIONS.get('connectionType'),
-      connectTimeoutMS: DEFAULT_OPTIONS.get('connectTimeoutMS'),
-      maxIdleTimeMS: DEFAULT_OPTIONS.get('maxIdleTimeMS'),
-      heartbeatFrequencyMS: DEFAULT_OPTIONS.get('heartbeatFrequencyMS'),
-      minHeartbeatFrequencyMS: DEFAULT_OPTIONS.get('minHeartbeatFrequencyMS')
+      ...Object.fromEntries(DEFAULT_OPTIONS.entries()),
+      ...Object.fromEntries(FEATURE_FLAGS.entries())
     };
 
     if (typeof seeds === 'string') {
@@ -333,7 +321,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       // timer management
       connectionTimers: new Set<NodeJS.Timeout>(),
-
       detectShardedTopology: ev => this.detectShardedTopology(ev),
       detectSrvRecords: ev => this.detectSrvRecords(ev)
     };
@@ -462,7 +449,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
 
       // TODO: NODE-2471
-      if (server && this.s.credentials) {
+      const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
+      if (!skipPingOnConnect && server && this.s.credentials) {
         server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
           if (err) {
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
