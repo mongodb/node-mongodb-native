@@ -1239,5 +1239,8 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
     .map(([k, d]) => [k, d.default])
 );
 
-/** Set of permitted feature flags @internal */
+/**
+ * Set of permitted feature flags
+ * @internal
+ */
 export const FEATURE_FLAGS = new Set([Symbol.for('@@mdb.skipPingOnConnect')]);

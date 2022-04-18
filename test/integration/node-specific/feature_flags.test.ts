@@ -1,14 +1,14 @@
 import { expect } from 'chai';
 
 describe('Feature Flags', () => {
-  beforeEach(function () {
-    if (process.env.AUTH !== 'auth') {
-      this.currentTest.skipReason = 'ping count relies on auth to be enabled';
-      this.skip();
-    }
-  });
-
   describe('@@mdb.skipPingOnConnect', () => {
+    beforeEach(function () {
+      if (process.env.AUTH !== 'auth') {
+        this.currentTest.skipReason = 'ping count relies on auth to be enabled';
+        this.skip();
+      }
+    });
+
     const tests = [
       // only skipInitiaPing=true will have no events upon connect
       { description: 'should skip ping command when set to true', value: true, expectEvents: 0 },

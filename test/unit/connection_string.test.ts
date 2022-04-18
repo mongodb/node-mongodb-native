@@ -412,20 +412,10 @@ describe('Connection String', function () {
   });
 
   describe('feature flags', () => {
-    it('should map known symbols onto options', () => {
+    it('should should ignore unknown symbols', () => {
       const randomFlag = Symbol();
       const client = new MongoClient('mongodb://iLoveJavaScript', { [randomFlag]: 23n });
       expect(client.s.options).to.not.have.property(randomFlag);
-    });
-
-    it('should map all default symbols and values onto options', () => {
-      const client = new MongoClient('mongodb://iLoveJavaScript');
-      expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
-      for (const flag of FEATURE_FLAGS) {
-        // Flags do not have default values
-        expect(client.s.options).to.not.have.property(flag);
-        expect(client.options).to.not.have.property(flag);
-      }
     });
 
     it('should be prefixed with @@mdb.', () => {
