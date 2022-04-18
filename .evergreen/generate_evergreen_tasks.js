@@ -4,7 +4,7 @@ const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const NODE_VERSIONS = ['erbium', 'fermium'];
+const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
 NODE_VERSIONS.sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
 
@@ -799,7 +799,7 @@ BUILD_VARIANTS.push({
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
 });
 
-const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
+const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.in.yml`, 'utf8'));
 fileData.tasks = (fileData.tasks || [])
   .concat(BASE_TASKS)
   .concat(TASKS)
