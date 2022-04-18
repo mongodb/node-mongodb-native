@@ -101,12 +101,8 @@ export function runServerSelectionLogicTest(testDefinition: ServerSelectionLogic
   if (testDefinition.operation === 'write') {
     selector = writableServerSelector();
   } else if (testDefinition.operation === 'read' || testDefinition.read_preference) {
-    try {
-      const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
-      selector = readPreferenceServerSelector(readPreference);
-    } catch {
-      expect.fail(ejson`Invalid readPreference: ${testDefinition.read_preference}`);
-    }
+    const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
+    selector = readPreferenceServerSelector(readPreference);
   } else {
     expect.fail('test operation was neither read nor write, and no read preference was provided.');
   }
@@ -144,7 +140,7 @@ export function collectServerSelectionLogicTests(specDir) {
           const fileContents = readFileSync(join(specDir, testType, subType, f), {
             encoding: 'utf-8'
           });
-          const test = EJSON.parse(fileContents) as unknown as Document;
+          const test = EJSON.parse(fileContents, { relaxed: true }) as unknown as Document;
           test.name = basename(f, '.json');
           test.type = testType;
           test.subType = subType;
