@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-describe.only('Feature Flags', () => {
+describe('Feature Flags', () => {
   describe('@@mdb.skipInitialPing', () => {
     const tests = [
       // only skipInitiaPing=true will have no events upon connect
