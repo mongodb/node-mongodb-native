@@ -412,6 +412,12 @@ describe('Connection String', function () {
   });
 
   describe('feature flags', () => {
+    it('should be stored in the FEATURE_FLAGS Set', () => {
+      expect(FEATURE_FLAGS.size).to.equal(1);
+      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.skipPingOnConnect'))).to.be.true;
+      // Add more flags here
+    });
+
     it('should should ignore unknown symbols', () => {
       const randomFlag = Symbol();
       const client = new MongoClient('mongodb://iLoveJavaScript', { [randomFlag]: 23n });
@@ -419,8 +425,7 @@ describe('Connection String', function () {
     });
 
     it('should be prefixed with @@mdb.', () => {
-      expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
-      for (const flag of FEATURE_FLAGS.keys()) {
+      for (const flag of FEATURE_FLAGS) {
         expect(flag).to.be.a('symbol');
         expect(flag).to.have.property('description');
         expect(flag.description).to.match(/@@mdb\..+/);
@@ -428,7 +433,6 @@ describe('Connection String', function () {
     });
 
     it('should only exist if specified on options', () => {
-      expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
       const flag = Array.from(FEATURE_FLAGS)[0]; // grab a random supported flag
       const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: true });
       expect(client.s.options).to.have.property(flag, true);
@@ -436,7 +440,6 @@ describe('Connection String', function () {
     });
 
     it('should support nullish values', () => {
-      expect(FEATURE_FLAGS.size).to.be.greaterThanOrEqual(1);
       const flag = Array.from(FEATURE_FLAGS.keys())[0]; // grab a random supported flag
       const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: null });
       expect(client.s.options).to.have.property(flag, null);
