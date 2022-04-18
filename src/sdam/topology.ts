@@ -449,8 +449,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
 
       // TODO: NODE-2471
-      const skipInitialPing = this.s.options[Symbol.for('@@mdb.skipInitialPing')] === true;
-      if (!skipInitialPing && server && this.s.credentials) {
+      const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
+      if (!skipPingOnConnect && server && this.s.credentials) {
         server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
           if (err) {
             typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);

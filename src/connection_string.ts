@@ -273,12 +273,7 @@ export function parseOptions(
   // Feature flags
   for (const flag of Object.getOwnPropertySymbols(options)) {
     if (FEATURE_FLAGS.has(flag)) {
-      Object.defineProperty(mongoOptions, flag, {
-        value: options[flag],
-        enumerable: false,
-        writable: true,
-        configurable: true
-      });
+      mongoOptions[flag] = options[flag];
     }
   }
 
@@ -1245,4 +1240,4 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
 );
 
 /** Set of permitted feature flags @internal */
-export const FEATURE_FLAGS = new Set([Symbol.for('@@mdb.skipInitialPing')]);
+export const FEATURE_FLAGS = new Set([Symbol.for('@@mdb.skipPingOnConnect')]);

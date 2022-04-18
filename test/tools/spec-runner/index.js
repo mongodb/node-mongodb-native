@@ -346,7 +346,7 @@ function runTestSuiteTest(configuration, spec, context) {
     minHeartbeatFrequencyMS: 100,
     monitorCommands: true,
     ...spec.clientOptions,
-    [Symbol.for('@@mdb.skipInitialPing')]: false
+    [Symbol.for('@@mdb.skipPingOnConnect')]: true
   });
 
   const url = resolveConnectionString(configuration, spec, context);
