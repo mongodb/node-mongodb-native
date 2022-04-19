@@ -1,5 +1,4 @@
-import { join, resolve } from 'path';
-import { inspect } from 'util';
+import { join } from 'path';
 
 import {
   loadLatencyWindowTests,
@@ -35,7 +34,7 @@ describe('Server Selection Logic (spec)', function () {
   }
 });
 
-describe.only('Server Selection Latency Window Tests (spec)', function () {
+describe('Server Selection Latency Window Tests (spec)', function () {
   const selectionSpecDir = join(__dirname, '../../spec/server-selection/in_window');
   const tests = loadLatencyWindowTests(selectionSpecDir);
 
