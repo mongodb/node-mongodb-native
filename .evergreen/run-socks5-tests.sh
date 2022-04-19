@@ -5,6 +5,8 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 set -o errexit  # Exit the script with error if any of the commands fail
 set -o xtrace  # For debuggability, no external credentials are used here
 
+node -v
+
 PYTHON_BINARY=${PYTHON_BINARY:-python3}
 
 # ssl setup
