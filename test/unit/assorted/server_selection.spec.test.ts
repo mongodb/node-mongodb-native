@@ -1,5 +1,10 @@
-import { join } from 'path';
+import { join, resolve } from 'path';
+import { inspect } from 'util';
 
+import {
+  loadLatencyWindowTests,
+  runServerSelectionLatencyWindowTest
+} from './server_selection_latency_window_utils';
 import {
   collectServerSelectionLogicTests,
   runServerSelectionLogicTest
@@ -26,6 +31,17 @@ describe('Server Selection Logic (spec)', function () {
           }
         });
       }
+    });
+  }
+});
+
+describe.only('Server Selection Latency Window Tests (spec)', function () {
+  const selectionSpecDir = join(__dirname, '../../spec/server-selection/in_window');
+  const tests = loadLatencyWindowTests(selectionSpecDir);
+
+  for (const test of tests) {
+    it(test.description, async function () {
+      await runServerSelectionLatencyWindowTest(test);
     });
   }
 });
