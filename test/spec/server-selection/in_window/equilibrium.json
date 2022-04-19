@@ -1,0 +1,46 @@
+{
+  "description": "When in equilibrium selection is evenly distributed",
+  "topology_description": {
+    "type": "Sharded",
+    "servers": [
+      {
+        "address": "a:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "b:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "c:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      }
+    ]
+  },
+  "mocked_topology_state": [
+    {
+      "address": "a:27017",
+      "operation_count": 5
+    },
+    {
+      "address": "b:27017",
+      "operation_count": 5
+    },
+    {
+      "address": "c:27017",
+      "operation_count": 5
+    }
+  ],
+  "iterations": 2000,
+  "outcome": {
+    "tolerance": 0.05,
+    "expected_frequencies": {
+      "a:27017": 0.33,
+      "b:27017": 0.33,
+      "c:27017": 0.33
+    }
+  }
+}
