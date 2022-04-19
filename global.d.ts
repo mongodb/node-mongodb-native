@@ -15,7 +15,7 @@ declare global {
       apiVersion?: '1';
       clientSideEncryption?: boolean;
       serverless?: 'forbid' | 'allow' | 'require';
-      auth: 'enabled' | 'disabled';
+      auth?: 'enabled' | 'disabled';
     };
 
     sessions?: {

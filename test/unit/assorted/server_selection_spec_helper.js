@@ -53,7 +53,8 @@ function serverDescriptionFromDefinition(definition, hosts) {
   fakeHello.maxWireVersion = fakeHello.maxWireVersion || 6;
 
   const serverDescription = new ServerDescription(definition.address, fakeHello, {
-    roundTripTime: definition.avg_rtt_ms
+    roundTripTime: definition.avg_rtt_ms,
+    operationCount: definition.operationCount
   });
 
   // source of flakiness, if we don't need it then remove it
