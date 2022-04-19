@@ -132,6 +132,10 @@ function executeServerSelectionTest(testDefinition, testDone) {
         if (testDefinition.error) return done();
         return done(e);
       }
+    } else {
+      return done(
+        new Error('received neither read nor write, and did not receive a read preference')
+      );
     }
 
     // expectations
@@ -196,4 +200,4 @@ function executeServerSelectionTest(testDefinition, testDone) {
   });
 }
 
-module.exports = { executeServerSelectionTest };
+module.exports = { executeServerSelectionTest, serverDescriptionFromDefinition };
