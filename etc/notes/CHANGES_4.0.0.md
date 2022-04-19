@@ -330,7 +330,7 @@ await db.collection('fs.files').updateOne({ _id }, { $set: { md5 } });
 
 This version includes an upgrade from js-bson 1.x to js-bson 4.x.
 
-#### Timestamps no longer inherit from `Long`
+#### Timestamps math operations return Javascript `Long`s
 
 In versions prior to 4.x of the BSON library, Timestamps were represented with a custom class.  In version 4.x of the BSON library, the Timestamp class was refactored to
 be a subclass of the Javascript Long class.  As a result of this refactor, math operations on Timestamp objects now return Long objects instead of Timestamp objects.
