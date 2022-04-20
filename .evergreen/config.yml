@@ -1821,9 +1821,9 @@ buildvariants:
       NODE_LTS_NAME: hydrogen
       CLIENT_ENCRYPTION: true
     tasks: *ref_0
-  - name: ubuntu-18.04-erbium
-    display_name: Ubuntu 18.04 Node Erbium
-    run_on: ubuntu1804-large
+  - name: ubuntu-20.04-erbium
+    display_name: Ubuntu 20.04 Node Erbium
+    run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
@@ -1858,23 +1858,23 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-18.04-fermium
-    display_name: Ubuntu 18.04 Node Fermium
-    run_on: ubuntu1804-large
+  - name: ubuntu-20.04-fermium
+    display_name: Ubuntu 20.04 Node Fermium
+    run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: fermium
       CLIENT_ENCRYPTION: true
     tasks: *ref_1
-  - name: ubuntu-18.04-gallium
-    display_name: Ubuntu 18.04 Node Gallium
-    run_on: ubuntu1804-large
+  - name: ubuntu-20.04-gallium
+    display_name: Ubuntu 20.04 Node Gallium
+    run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
     tasks: *ref_1
-  - name: ubuntu-18.04-hydrogen
-    display_name: Ubuntu 18.04 Node Hydrogen
-    run_on: ubuntu1804-large
+  - name: ubuntu-20.04-hydrogen
+    display_name: Ubuntu 20.04 Node Hydrogen
+    run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: hydrogen
       CLIENT_ENCRYPTION: true
@@ -1935,7 +1935,7 @@ buildvariants:
     tasks: *ref_2
   - name: lint
     display_name: lint
-    run_on: ubuntu1804-large
+    run_on: ubuntu2004-large
     tasks:
       - run-unit-tests
       - run-lint-checks
@@ -1973,7 +1973,7 @@ buildvariants:
       - aws-4.4-auth-test-run-aws-ECS-auth-test
   - name: ubuntu1804-custom-dependency-tests
     display_name: Custom Dependency Version Test
-    run_on: ubuntu1804-large
+    run_on: ubuntu2004-large
     tasks:
       - run-custom-snappy-tests
       - run-bson-ext-test
@@ -1987,7 +1987,7 @@ buildvariants:
       - serverless_task_group
   - name: ubuntu1804-no-auth-tests
     display_name: No Auth Tests
-    run_on: ubuntu1804-large
+    run_on: ubuntu2004-large
     expansions:
       CLIENT_ENCRYPTION: true
     tasks:

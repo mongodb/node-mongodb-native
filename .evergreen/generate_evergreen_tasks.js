@@ -10,10 +10,9 @@ const LOWEST_LTS = NODE_VERSIONS[0];
 
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '5.0', '4.4'];
-const OCSP_VERSIONS = ['latest', '5.0', '4.4'];
 const TLS_VERSIONS = ['latest', '5.0', '4.4', '4.2'];
 
-const DEFAULT_OS = 'ubuntu1804-large';
+const DEFAULT_OS = 'ubuntu2004-large';
 
 const OPERATING_SYSTEMS = [
   {
@@ -22,9 +21,9 @@ const OPERATING_SYSTEMS = [
     run_on: 'macos-1014'
   },
   {
-    name: 'ubuntu-18.04',
-    display_name: 'Ubuntu 18.04',
-    run_on: 'ubuntu1804-large'
+    name: 'ubuntu-20.04',
+    display_name: 'Ubuntu 20.04',
+    run_on: 'ubuntu2004-large'
   },
   {
     name: 'windows-64-vs2019',
