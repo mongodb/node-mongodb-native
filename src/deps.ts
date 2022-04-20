@@ -313,13 +313,15 @@ export interface AutoEncryptionOptions {
      * If this option is not provided and `csfleRequired` is not specified,
      * the AutoEncrypter will attempt to spawn and/or use mongocryptd according
      * to the mongocryptd-specific `extraOptions` options.
+     *
+     * Specifying a path prevents mongocryptd from being used as a fallback.
      */
     csflePath?: string;
     /**
      * If specified, never use mongocryptd and instead fail when the CSFLE shared library
      * could not be loaded.
      *
-     * This is implied when `csflePath` is specified.
+     * This is always true when `csflePath` is specified.
      */
     csfleRequired?: boolean;
     /**
