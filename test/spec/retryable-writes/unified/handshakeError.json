@@ -181,10 +181,7 @@
                   "saslContinue",
                   "ping"
                 ],
-                "errorCode": 91,
-                "errorLabels": [
-                  "RetryableWriteError"
-                ]
+                "errorCode": 91
               }
             }
           }

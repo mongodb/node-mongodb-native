@@ -88,7 +88,8 @@ export const MongoErrorLabel = Object.freeze({
   RetryableWriteError: 'RetryableWriteError',
   TransientTransactionError: 'TransientTransactionError',
   UnknownTransactionCommitResult: 'UnknownTransactionCommitResult',
-  ResumableChangeStreamError: 'ResumableChangeStreamError'
+  ResumableChangeStreamError: 'ResumableChangeStreamError',
+  HandshakeError: 'HandshakeError'
 } as const);
 
 /** @public */
@@ -777,6 +778,13 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
   }
 
   return false;
+}
+
+export function isRetryableWriteError(error: MongoError): boolean {
+  return (
+    error.hasErrorLabel(MongoErrorLabel.RetryableWriteError) ||
+    error.hasErrorLabel(MongoErrorLabel.HandshakeError)
+  );
 }
 
 /** Determines whether an error is something the driver should attempt to retry */
