@@ -163,14 +163,8 @@ export async function runUnifiedTest(
       }
     }
 
-    let testPing = false;
     for (const operation of test.operations) {
       trace(operation.name);
-      // TODO: NODE-2149: Making connect optional should get rid of the initial ping in
-      // the driver so this block can then be removed.
-      if (operation.name === 'runCommand' && operation.arguments.commandName === 'ping') {
-        testPing = true;
-      }
       try {
         await executeOperationAndCheck(operation, entities, utilClient);
       } catch (e) {
@@ -198,11 +192,6 @@ export async function runUnifiedTest(
         const actualEvents =
           eventType === 'cmap' ? clientCmapEvents.get(clientId) : clientCommandEvents.get(clientId);
 
-        // TODO: NODE-2149: Making connect optional should get rid of the initial ping in
-        // the driver so this block can then be removed.
-        if (eventType === 'cmap' && testPing) {
-          expectedEventList.events.push({ connectionCheckOutStartedEvent: {} });
-        }
         expect(actualEvents, `No client entity found with id ${clientId}`).to.exist;
         matchesEvents(expectedEventList.events, actualEvents, entities);
       }
