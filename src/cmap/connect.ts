@@ -186,10 +186,7 @@ function performInitialHandshake(
         }
         provider.auth(authContext, err => {
           if (err) {
-            if (
-              err instanceof MongoError &&
-              needsRetryableWriteLabel(err, response.maxWireVersion)
-            ) {
+            if (err instanceof MongoError && needsRetryableWriteLabel(err)) {
               err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
             }
             return callback(err);
