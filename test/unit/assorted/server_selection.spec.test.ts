@@ -1,5 +1,7 @@
 import { join } from 'path';
+import * as sinon from 'sinon';
 
+import { Topology } from '../../../src/sdam/topology';
 import {
   loadLatencyWindowTests,
   runServerSelectionLatencyWindowTest
@@ -34,7 +36,7 @@ describe('Server Selection Logic (spec)', function () {
   }
 });
 
-describe('Server Selection Latency Window Tests (spec)', function () {
+describe.only('Server Selection Latency Window Tests (spec)', function () {
   const selectionSpecDir = join(__dirname, '../../spec/server-selection/in_window');
   const tests = loadLatencyWindowTests(selectionSpecDir);
 
