@@ -5,18 +5,37 @@ describe('commands', function () {
   describe('Response', function () {
     describe('#parse', function () {
       context('when the message body is invalid', function () {
-        const message = Buffer.from([]);
-        const header = {
-          length: 0,
-          requestId: 0,
-          responseTo: 0,
-          opCode: 0
-        };
-        const body = Buffer.from([]);
+        context('when the buffer is empty', function () {
+          const message = Buffer.from([]);
+          const header = {
+            length: 0,
+            requestId: 0,
+            responseTo: 0,
+            opCode: 0
+          };
+          const body = Buffer.from([]);
 
-        it('throws an exception', function () {
-          const response = new Response(message, header, body);
-          expect(() => response.parse()).to.throw();
+          it('throws an exception', function () {
+            const response = new Response(message, header, body);
+            expect(() => response.parse()).to.throw(RangeError, /outside buffer bounds/);
+          });
+        });
+
+        context('when numReturned is invalid', function () {
+          const message = Buffer.from([]);
+          const header = {
+            length: 0,
+            requestId: 0,
+            responseTo: 0,
+            opCode: 0
+          };
+          const body = Buffer.alloc(5 * 4);
+          body.writeInt32LE(-1, 16);
+
+          it('throws an exception', function () {
+            const response = new Response(message, header, body);
+            expect(() => response.parse()).to.throw(RangeError, /Invalid array length/);
+          });
         });
       });
     });
