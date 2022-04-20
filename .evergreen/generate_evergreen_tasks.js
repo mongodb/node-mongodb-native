@@ -4,7 +4,8 @@ const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const NODE_VERSIONS = ['erbium', 'fermium', 'gallium', 'seventeen'];
+const NODE_VERSIONS = ['erbium', 'fermium', 'gallium', 'hydrogen'];
+NODE_VERSIONS.sort()
 const LOWEST_LTS = NODE_VERSIONS[0];
 
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];

@@ -1814,11 +1814,11 @@ buildvariants:
       NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
     tasks: *ref_0
-  - name: macos-1014-seventeen
-    display_name: macOS 10.14 Node Seventeen
+  - name: macos-1014-hydrogen
+    display_name: macOS 10.14 Node Hydrogen
     run_on: macos-1014
     expansions:
-      NODE_LTS_NAME: seventeen
+      NODE_LTS_NAME: hydrogen
       CLIENT_ENCRYPTION: true
     tasks: *ref_0
   - name: ubuntu-18.04-erbium
@@ -1872,11 +1872,11 @@ buildvariants:
       NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
     tasks: *ref_1
-  - name: ubuntu-18.04-seventeen
-    display_name: Ubuntu 18.04 Node Seventeen
+  - name: ubuntu-18.04-hydrogen
+    display_name: Ubuntu 18.04 Node Hydrogen
     run_on: ubuntu1804-large
     expansions:
-      NODE_LTS_NAME: seventeen
+      NODE_LTS_NAME: hydrogen
       CLIENT_ENCRYPTION: true
     tasks: *ref_1
   - name: windows-64-vs2019-erbium
@@ -1926,11 +1926,11 @@ buildvariants:
       NODE_LTS_NAME: gallium
       MSVS_VERSION: 2019
     tasks: *ref_2
-  - name: windows-64-vs2019-seventeen
-    display_name: Windows (VS2019) Node Seventeen
+  - name: windows-64-vs2019-hydrogen
+    display_name: Windows (VS2019) Node Hydrogen
     run_on: windows-64-vs2019-large
     expansions:
-      NODE_LTS_NAME: seventeen
+      NODE_LTS_NAME: hydrogen
       MSVS_VERSION: 2019
     tasks: *ref_2
   - name: lint
