@@ -843,8 +843,22 @@ function topologyTypeFromOptions(options?: TopologyOptions) {
   return TopologyType.Unknown;
 }
 
-function randomSelection(array: ServerDescription[]): ServerDescription {
-  return array[Math.floor(Math.random() * array.length)];
+function randomSelection(array: ServerDescription[]): {
+  server1: ServerDescription;
+  server2: ServerDescription;
+} {
+  const servers = shuffle(array);
+  if (servers.length === 1) {
+    return {
+      server1: servers[0],
+      server2: servers[0]
+    };
+  }
+
+  return {
+    server1: servers[0],
+    server2: servers[1]
+  };
 }
 
 /**
@@ -968,8 +982,16 @@ function processWaitQueue(topology: Topology) {
       continue;
     }
 
-    const selectedServerDescription = randomSelection(selectedDescriptions);
-    const selectedServer = topology.s.servers.get(selectedServerDescription.address);
+    const { server1, server2 } = randomSelection(selectedDescriptions);
+    let serverDescription;
+
+    if (server1.operationCount < server2.operationCount) {
+      serverDescription = server1;
+    } else {
+      serverDescription = server2;
+    }
+
+    const selectedServer = topology.s.servers.get(serverDescription.address);
     const transaction = waitQueueMember.transaction;
     if (isSharded && transaction && transaction.isActive && selectedServer) {
       transaction.pinServer(selectedServer);

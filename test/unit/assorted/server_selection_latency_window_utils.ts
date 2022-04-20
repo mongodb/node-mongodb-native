@@ -53,18 +53,17 @@ function compareResultsToExpected(
   observed_frequencies: FrequencyMap
 ) {
   for (const [address, frequency] of Object.entries(expected_frequencies)) {
-    expect(observed_frequencies).to.haveOwnProperty(address).not.to.be.undefined;
-    const actual_frequency = observed_frequencies[address];
-    const is_too_low = actual_frequency < frequency - tolerance;
-    expect(is_too_low, 'failed - too low').to.be.false;
-    const is_too_high = actual_frequency > frequency + tolerance;
-    expect(is_too_high, 'failed - too high').to.be.false;
+    if (frequency === 0) {
+      expect(observed_frequencies).not.to.haveOwnProperty(address);
+    } else {
+      expect(observed_frequencies).to.haveOwnProperty(address).not.to.be.undefined;
+      const actual_frequency = observed_frequencies[address];
+      const is_too_low = actual_frequency < frequency - tolerance;
+      expect(is_too_low, 'failed - too low').to.be.false;
+      const is_too_high = actual_frequency > frequency + tolerance;
+      expect(is_too_high, 'failed - too high').to.be.false;
+    }
   }
-
-  const expected_hosts = new Set(Object.keys(expected_frequencies));
-  const actual_hosts = new Set(Object.keys(observed_frequencies));
-
-  expect(expected_hosts.size).to.equal(actual_hosts.size);
 }
 
 function calculateObservedFrequencies(
@@ -104,8 +103,8 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
     expect(avg_rtt_ms).not.to.be.undefined;
     description.roundTripTime = avg_rtt_ms;
     description.type = type;
-    // serverDescription.operationCount = operation_count;
     const serverDescription = serverDescriptionFromDefinition(description, allHosts);
+    serverDescription.operationCount = operation_count;
     topology.serverUpdateHandler(serverDescription);
   }
 

@@ -182,7 +182,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.emit(
         Server.DESCRIPTION_RECEIVED,
         new ServerDescription(this.description.hostAddress, event.reply, {
-          roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration)
+          roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration),
+          operationCount: this.description.operationCount
         })
       );
 
@@ -322,6 +323,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     const session = finalOptions.session;
     const conn = session?.pinnedConnection;
 
+    this.description.operationCount += 1;
+
     // NOTE: This is a hack! We can't retrieve the connections used for executing an operation
     //       (and prevent them from being checked back in) at the point of operation execution.
     //       This should be considered as part of the work for NODE-2882
@@ -333,7 +336,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         }
 
         session.pin(checkedOut);
-        this.command(ns, cmd, finalOptions, callback);
+        this.command(ns, cmd, finalOptions, (error, response) => {
+          this.description.operationCount -= 1;
+          callback(error, response);
+        });
       });
 
       return;
@@ -351,7 +357,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           ns,
           cmd,
           finalOptions,
-          makeOperationHandler(this, conn, cmd, finalOptions, cb)
+          makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
+            this.description.operationCount -= 1;
+            cb(error, response);
+          })
         );
       },
       callback
@@ -373,6 +382,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
+    this.description.operationCount += 1;
+
     this.s.pool.withConnection(
       options.session?.pinnedConnection,
       (err, conn, cb) => {
@@ -381,7 +392,15 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           return cb(err);
         }
 
-        conn.getMore(ns, cursorId, options, makeOperationHandler(this, conn, {}, options, cb));
+        conn.getMore(
+          ns,
+          cursorId,
+          options,
+          makeOperationHandler(this, conn, {}, options, (error, response) => {
+            this.description.operationCount -= 1;
+            cb(error, response);
+          })
+        );
       },
       callback
     );
@@ -405,6 +424,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
+    this.description.operationCount += 1;
     this.s.pool.withConnection(
       options.session?.pinnedConnection,
       (err, conn, cb) => {
@@ -417,7 +437,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           ns,
           cursorIds,
           options,
-          makeOperationHandler(this, conn, {}, undefined, cb)
+          makeOperationHandler(this, conn, {}, undefined, (error, response) => {
+            this.description.operationCount -= 1;
+            cb(error, response);
+          })
         );
       },
       callback
@@ -449,7 +472,8 @@ function markServerUnknown(server: Server, error?: MongoError) {
     new ServerDescription(server.description.hostAddress, undefined, {
       error,
       topologyVersion:
-        error && error.topologyVersion ? error.topologyVersion : server.description.topologyVersion
+        error && error.topologyVersion ? error.topologyVersion : server.description.topologyVersion,
+      operationCount: server.description.operationCount
     })
   );
 }
