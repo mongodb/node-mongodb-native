@@ -554,7 +554,7 @@ function makeOperationHandler(
     } else {
       if (
         (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
-        needsRetryableWriteLabel(error) &&
+        needsRetryableWriteLabel(error, maxWireVersion(server)) &&
         !inActiveTransaction(session, cmd)
       ) {
         error.addErrorLabel(MongoErrorLabel.RetryableWriteError);

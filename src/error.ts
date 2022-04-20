@@ -743,14 +743,18 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set<number>([
   MONGODB_ERROR_CODES.ExceededTimeLimit
 ]);
 
-export function needsRetryableWriteLabel(error: Error): boolean {
-  // Network errors are always retryable.
+export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): boolean {
+  // pre-4.4 server, then the driver adds an error label for every valid case
+  // execute operation will only inspect the label, code/message logic is handled here
   if (error instanceof MongoNetworkError) {
     return true;
   }
 
-  // We don't need to apply the label if it's already there.
-  if (error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) {
+  if (
+    maxWireVersion >= 9 ||
+    (error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.RetryableWriteError))
+  ) {
+    // If we already have the error label no need to add it again. 4.4+ servers add the label.
     return false;
   }
 
