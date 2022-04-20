@@ -16,7 +16,8 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
-  MongoServerError
+  MongoServerError,
+  needsRetryableWriteLabel
 } from '../error';
 import { Callback, ClientMetadata, HostAddress, makeClientMetadata, ns } from '../utils';
 import { AuthContext, AuthProvider } from './auth/auth_provider';
@@ -187,6 +188,9 @@ function performInitialHandshake(
           if (err) {
             if (err instanceof MongoError) {
               err.addErrorLabel(MongoErrorLabel.HandshakeError);
+              if (needsRetryableWriteLabel(err, response.maxWireVersion)) {
+                err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+              }
             }
             return callback(err);
           }

@@ -751,12 +751,16 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
     return true;
   }
 
-  if (
-    maxWireVersion >= 9 ||
-    (error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.RetryableWriteError))
-  ) {
-    // If we already have the error label no need to add it again. 4.4+ servers add the label.
-    return false;
+  if (error instanceof MongoError) {
+    if (
+      (maxWireVersion >= 9 || error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) &&
+      !error.hasErrorLabel(MongoErrorLabel.HandshakeError)
+    ) {
+      // If we already have the error label no need to add it again. 4.4+ servers add the label.
+      // In the case where we have a handshake error, need to fall down to the logic checking
+      // the codes.
+      return false;
+    }
   }
 
   if (error instanceof MongoWriteConcernError) {
@@ -781,10 +785,7 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
 }
 
 export function isRetryableWriteError(error: MongoError): boolean {
-  return (
-    error.hasErrorLabel(MongoErrorLabel.RetryableWriteError) ||
-    error.hasErrorLabel(MongoErrorLabel.HandshakeError)
-  );
+  return error.hasErrorLabel(MongoErrorLabel.RetryableWriteError);
 }
 
 /** Determines whether an error is something the driver should attempt to retry */
