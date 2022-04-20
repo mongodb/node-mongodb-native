@@ -50,31 +50,44 @@ export function loadLatencyWindowTests(directory: PathLike) {
 
 function compareResultsToExpected(
   { tolerance, expected_frequencies }: Outcome,
-  actual_frequencies: FrequencyMap
+  observed_frequencies: FrequencyMap
 ) {
-  console.error(tolerance);
-  console.error(expected_frequencies);
-  console.error(actual_frequencies);
   for (const [address, frequency] of Object.entries(expected_frequencies)) {
-    expect(actual_frequencies).to.haveOwnProperty(address).not.to.be.undefined;
-    const actual_frequency = actual_frequencies[address];
+    expect(observed_frequencies).to.haveOwnProperty(address).not.to.be.undefined;
+    const actual_frequency = observed_frequencies[address];
     const is_too_low = actual_frequency < frequency - tolerance;
+    expect(is_too_low, 'failed - too low').to.be.false;
     const is_too_high = actual_frequency > frequency + tolerance;
     expect(is_too_high, 'failed - too high').to.be.false;
-    expect(is_too_low, 'failed - too low').to.be.false;
   }
 
   const expected_hosts = new Set(Object.keys(expected_frequencies));
-  const actual_hosts = new Set(Object.keys(actual_frequencies));
+  const actual_hosts = new Set(Object.keys(observed_frequencies));
 
   expect(expected_hosts.size).to.equal(actual_hosts.size);
 }
 
+function calculateObservedFrequencies(
+  observedServers: ReadonlyArray<Server>,
+  iterations: number
+): FrequencyMap {
+  const actualResults: FrequencyMap = {};
+
+  for (const server of observedServers) {
+    const count = actualResults[server.description.address] ?? 0;
+    actualResults[server.description.address] = count + 1;
+  }
+
+  for (const [address, count] of Object.entries(actualResults)) {
+    actualResults[address] = count / iterations;
+  }
+
+  return actualResults;
+}
+
 export async function runServerSelectionLatencyWindowTest(test: ServerSelectionLatencyWindowTest) {
   const allHosts = test.topology_description.servers.map(({ address }) => address);
-  const topology = new Topology(allHosts, {
-    serverSelectionTimeoutMS: 8000
-  } as any);
+  const topology = new Topology(allHosts, {} as any);
 
   topology.s.description.type = test.topology_description.type;
   topology.s.state = STATE_CONNECTED;
@@ -96,27 +109,19 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
     topology.serverUpdateHandler(serverDescription);
   }
 
-  const results: Server[] = [];
+  const selectedServers: Server[] = [];
 
   for (let i = 0; i < test.iterations; ++i) {
     const server: Server = await promisify(topology.selectServer.bind(topology))(
       ReadPreference.NEAREST,
       {}
     );
-    results.push(server);
+    selectedServers.push(server);
   }
 
-  expect(results).to.have.lengthOf(test.iterations);
+  expect(selectedServers).to.have.lengthOf(test.iterations);
 
-  let actualResults: FrequencyMap = {};
-  for (const server of results) {
-    const count = actualResults[server.description.address] ?? 0;
-    actualResults[server.description.address] = count + 1;
-  }
+  const observedFrequencies = calculateObservedFrequencies(selectedServers, test.iterations);
 
-  actualResults = Object.fromEntries(
-    Object.entries(actualResults).map(([address, count]) => [address, count / test.iterations])
-  );
-
-  compareResultsToExpected(test.outcome, actualResults);
+  compareResultsToExpected(test.outcome, observedFrequencies);
 }
