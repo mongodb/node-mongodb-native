@@ -277,8 +277,12 @@ export interface AutoEncryptionOptions {
    * Other validation rules in the JSON schema will not be enforced by the driver and will result in an error.
    */
   schemaMap?: Document;
+  /** @experimental */
+  encryptedFieldsMap?: Document;
   /** Allows the user to bypass auto encryption, maintaining implicit decryption */
   bypassAutoEncryption?: boolean;
+  /** @experimental */
+  bypassQueryAnalysis?: boolean;
   options?: {
     /** An optional hook to catch logging messages from the underlying encryption engine */
     logger?: (level: AutoEncryptionLoggerLevel, message: string) => void;
