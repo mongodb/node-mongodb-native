@@ -17,3 +17,5 @@ if [[ "$OS" == "Windows_NT" ]]; then
 else
     [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
 fi
+
+export NODE_OPTIONS="--trace-deprecation --trace-warnings"

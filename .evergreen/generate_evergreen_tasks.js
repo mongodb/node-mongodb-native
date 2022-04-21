@@ -4,13 +4,12 @@ const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
 const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const NODE_VERSIONS = ['erbium', 'fermium'];
-NODE_VERSIONS.sort();
+const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
+NODE_VERSIONS.sort()
 const LOWEST_LTS = NODE_VERSIONS[0];
 
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '5.0', '4.4'];
-const OCSP_VERSIONS = ['latest', '5.0', '4.4'];
 const TLS_VERSIONS = ['latest', '5.0', '4.4', '4.2'];
 
 const DEFAULT_OS = 'ubuntu1804-large';
@@ -186,130 +185,6 @@ TASKS.push(
         },
         { func: 'run socks5 tests', vars: { SSL: 'ssl' } }
       ]
-    },
-    {
-      name: 'test-ocsp-valid-cert-server-staples',
-      tags: ['ocsp'],
-      commands: [
-        { func: 'run-valid-ocsp-server' },
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple.json',
-            VERSION: 'latest',
-            TOPOLOGY: 'server',
-            AUTH: 'auth'
-          }
-        },
-        { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
-      ]
-    },
-    {
-      name: 'test-ocsp-invalid-cert-server-staples',
-      tags: ['ocsp'],
-      commands: [
-        { func: 'run-revoked-ocsp-server' },
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple.json',
-            VERSION: 'latest',
-            TOPOLOGY: 'server',
-            AUTH: 'auth'
-          }
-        },
-        { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
-      ]
-    },
-    {
-      name: 'test-ocsp-valid-cert-server-does-not-staple',
-      tags: ['ocsp'],
-      commands: [
-        { func: 'run-valid-ocsp-server' },
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
-            VERSION: 'latest',
-            TOPOLOGY: 'server',
-            AUTH: 'auth'
-          }
-        },
-        { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
-      ]
-    },
-    {
-      name: 'test-ocsp-invalid-cert-server-does-not-staple',
-      tags: ['ocsp'],
-      commands: [
-        { func: 'run-revoked-ocsp-server' },
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
-            VERSION: 'latest',
-            TOPOLOGY: 'server',
-            AUTH: 'auth'
-          }
-        },
-        { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
-      ]
-    },
-    {
-      name: 'test-ocsp-soft-fail',
-      tags: ['ocsp'],
-      commands: [
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
-            VERSION: 'latest',
-            TOPOLOGY: 'server',
-            AUTH: 'auth'
-          }
-        },
-        { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
-      ]
-    },
-    {
-      name: 'test-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple',
-      tags: ['ocsp'],
-      commands: [
-        { func: 'run-revoked-ocsp-server' },
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple-disableStapling.json',
-            VERSION: 'latest',
-            TOPOLOGY: 'server',
-            AUTH: 'auth'
-          }
-        },
-        { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
-      ]
-    },
-    {
-      name: 'test-ocsp-malicious-no-responder-mustStaple-server-does-not-staple',
-      tags: ['ocsp'],
-      commands: [
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple-disableStapling.json',
-            VERSION: 'latest',
-            TOPOLOGY: 'server',
-            AUTH: 'auth'
-          }
-        },
-        { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
-      ]
     }
   ]
 );
@@ -333,138 +208,6 @@ TLS_VERSIONS.forEach(VERSION => {
       { func: 'run tls tests' }
     ]
   });
-});
-
-OCSP_VERSIONS.forEach(VERSION => {
-  // manually added tasks
-  TASKS.push(
-    ...[
-      {
-        name: `test-${VERSION}-ocsp-valid-cert-server-staples`,
-        tags: ['ocsp'],
-        commands: [
-          { func: `run-valid-ocsp-server` },
-          { func: 'install dependencies' },
-          {
-            func: 'bootstrap mongo-orchestration',
-            vars: {
-              ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple.json',
-              VERSION: VERSION,
-              TOPOLOGY: 'server',
-              AUTH: 'auth'
-            }
-          },
-          { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
-        ]
-      },
-      {
-        name: `test-${VERSION}-ocsp-invalid-cert-server-staples`,
-        tags: ['ocsp'],
-        commands: [
-          { func: 'run-revoked-ocsp-server' },
-          { func: 'install dependencies' },
-          {
-            func: 'bootstrap mongo-orchestration',
-            vars: {
-              ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple.json',
-              VERSION: VERSION,
-              TOPOLOGY: 'server',
-              AUTH: 'auth'
-            }
-          },
-          { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
-        ]
-      },
-      {
-        name: `test-${VERSION}-ocsp-valid-cert-server-does-not-staple`,
-        tags: ['ocsp'],
-        commands: [
-          { func: 'run-valid-ocsp-server' },
-          { func: 'install dependencies' },
-          {
-            func: 'bootstrap mongo-orchestration',
-            vars: {
-              ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
-              VERSION: VERSION,
-              TOPOLOGY: 'server',
-              AUTH: 'auth'
-            }
-          },
-          { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
-        ]
-      },
-      {
-        name: `test-${VERSION}-ocsp-invalid-cert-server-does-not-staple`,
-        tags: ['ocsp'],
-        commands: [
-          { func: 'run-revoked-ocsp-server' },
-          { func: 'install dependencies' },
-          {
-            func: 'bootstrap mongo-orchestration',
-            vars: {
-              ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
-              VERSION: VERSION,
-              TOPOLOGY: 'server',
-              AUTH: 'auth'
-            }
-          },
-          { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
-        ]
-      },
-      {
-        name: `test-${VERSION}-ocsp-soft-fail`,
-        tags: ['ocsp'],
-        commands: [
-          { func: 'install dependencies' },
-          {
-            func: 'bootstrap mongo-orchestration',
-            vars: {
-              ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-disableStapling.json',
-              VERSION: VERSION,
-              TOPOLOGY: 'server',
-              AUTH: 'auth'
-            }
-          },
-          { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 1 } }
-        ]
-      },
-      {
-        name: `test-${VERSION}-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple`,
-        tags: ['ocsp'],
-        commands: [
-          { func: 'run-revoked-ocsp-server' },
-          { func: 'install dependencies' },
-          {
-            func: 'bootstrap mongo-orchestration',
-            vars: {
-              ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple-disableStapling.json',
-              VERSION: VERSION,
-              TOPOLOGY: 'server',
-              AUTH: 'auth'
-            }
-          },
-          { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
-        ]
-      },
-      {
-        name: `test-${VERSION}-ocsp-malicious-no-responder-mustStaple-server-does-not-staple`,
-        tags: ['ocsp'],
-        commands: [
-          { func: 'install dependencies' },
-          {
-            func: 'bootstrap mongo-orchestration',
-            vars: {
-              ORCHESTRATION_FILE: 'rsa-basic-tls-ocsp-mustStaple-disableStapling.json',
-              VERSION: VERSION,
-              TOPOLOGY: 'server',
-              AUTH: 'auth'
-            }
-          },
-          { func: 'run-ocsp-test', vars: { OCSP_TLS_SHOULD_SUCCEED: 0 } }
-        ]
-      }
-    ]
-  );
 });
 
 const AWS_AUTH_TASKS = [];
@@ -799,7 +542,7 @@ BUILD_VARIANTS.push({
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
 });
 
-const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'));
+const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.in.yml`, 'utf8'));
 fileData.tasks = (fileData.tasks || [])
   .concat(BASE_TASKS)
   .concat(TASKS)

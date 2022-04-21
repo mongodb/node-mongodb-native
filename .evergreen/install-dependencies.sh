@@ -97,7 +97,7 @@ EOT
 # install Node.js on Linux/MacOS
 else
   curl -o- $NVM_URL | bash
-  [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
+  [ -s "${NVM_DIR}/nvm.sh" ] && source "${NVM_DIR}/nvm.sh"
   nvm install --no-progress "$NODE_VERSION"
 
   # setup npm cache in a local directory
