@@ -435,5 +435,78 @@ describe('server selection', function () {
         });
       });
     });
+
+    context('localThresholdMS is respected as an option', function () {
+      let serverDescription1, serverDescription2, serverDescription3, serverDescriptions;
+      beforeEach(() => {
+        serverDescription1 = new ServerDescription(
+          '127.0.0.1:27017',
+          {
+            setName: 'test',
+            isWritablePrimary: true,
+            ok: 1
+          },
+          { roundTripTime: 15 }
+        );
+        serverDescription2 = new ServerDescription(
+          '127.0.0.1:27018',
+          {
+            setName: 'test',
+            secondary: true,
+            ok: 1
+          },
+          { roundTripTime: 25 }
+        );
+        serverDescription3 = new ServerDescription(
+          '127.0.0.1:27019',
+          {
+            setName: 'test',
+            secondary: true,
+            ok: 1
+          },
+          { roundTripTime: 35 }
+        );
+        serverDescriptions = new Map();
+        serverDescriptions.set(serverDescription1.address, serverDescription1);
+        serverDescriptions.set(serverDescription2.address, serverDescription2);
+        serverDescriptions.set(serverDescription3.address, serverDescription3);
+      });
+      it('includes servers inside the latency window with default localThresholdMS', function () {
+        const topologyDescription = new TopologyDescription(
+          TopologyType.Single,
+          serverDescriptions,
+          'test',
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
+          new ObjectId(),
+          MIN_SECONDARY_WRITE_WIRE_VERSION
+        );
+        const selector = secondaryWritableServerSelector();
+        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+        expect(servers).to.have.lengthOf(2);
+        const selectedAddresses = new Set(servers.map(({ address }) => address));
+        expect(selectedAddresses.has(serverDescription1.address)).to.be.true;
+        expect(selectedAddresses.has(serverDescription2.address)).to.be.true;
+        expect(selectedAddresses.has(serverDescription3.address)).to.be.false;
+      });
+
+      it('includes servers inside the latency window with custom localThresholdMS', function () {
+        const topologyDescription = new TopologyDescription(
+          TopologyType.Single,
+          serverDescriptions,
+          'test',
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
+          new ObjectId(),
+          MIN_SECONDARY_WRITE_WIRE_VERSION,
+          { localThresholdMS: 5 }
+        );
+        const selector = secondaryWritableServerSelector();
+        const servers = selector(topologyDescription, Array.from(serverDescriptions.values()));
+        expect(servers).to.have.lengthOf(1);
+        const selectedAddresses = new Set(servers.map(({ address }) => address));
+        expect(selectedAddresses.has(serverDescription1.address)).to.be.true;
+        expect(selectedAddresses.has(serverDescription2.address)).to.be.false;
+        expect(selectedAddresses.has(serverDescription3.address)).to.be.false;
+      });
+    });
   });
 });
