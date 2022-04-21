@@ -41,9 +41,6 @@ case $NODE_LTS_NAME in
   "gallium")
     VERSION=16
     ;;
-  "seventeen")
-    VERSION=17
-    ;;
   "hydrogen")
     VERSION=18
     ;;
