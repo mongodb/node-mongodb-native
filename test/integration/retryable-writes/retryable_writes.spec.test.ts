@@ -1,8 +1,10 @@
 import { expect } from 'chai';
+import * as path from 'path';
 
 import type { Collection, Db, MongoClient } from '../../../src';
 import { loadSpecTests } from '../../spec';
 import { legacyRunOnToRunOnRequirement } from '../../tools/spec-runner';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 import { isAnyRequirementSatisfied } from '../../tools/unified-spec-runner/unified-utils';
 
 interface RetryableWriteTestContext {
@@ -196,3 +198,7 @@ async function turnOffFailPoint(client, name) {
     mode: 'off'
   });
 }
+
+describe('Retryable Writes (unified)', function () {
+  runUnifiedSuite(loadSpecTests(path.join('retryable-writes', 'unified')));
+});

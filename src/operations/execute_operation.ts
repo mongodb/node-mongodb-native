@@ -1,10 +1,10 @@
 import type { Document } from '../bson';
 import {
   isRetryableReadError,
+  isRetryableWriteError,
   MongoCompatibilityError,
   MONGODB_ERROR_CODES,
   MongoError,
-  MongoErrorLabel,
   MongoExpiredSessionError,
   MongoNetworkError,
   MongoRuntimeError,
@@ -195,7 +195,7 @@ function executeWithServerSelection<TResult>(
       );
     }
 
-    if (isWriteOperation && !originalError.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) {
+    if (isWriteOperation && !isRetryableWriteError(originalError)) {
       return callback(originalError);
     }
 

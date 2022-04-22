@@ -88,7 +88,8 @@ export const MongoErrorLabel = Object.freeze({
   RetryableWriteError: 'RetryableWriteError',
   TransientTransactionError: 'TransientTransactionError',
   UnknownTransactionCommitResult: 'UnknownTransactionCommitResult',
-  ResumableChangeStreamError: 'ResumableChangeStreamError'
+  ResumableChangeStreamError: 'ResumableChangeStreamError',
+  HandshakeError: 'HandshakeError'
 } as const);
 
 /** @public */
@@ -744,21 +745,22 @@ const RETRYABLE_WRITE_ERROR_CODES = new Set<number>([
 ]);
 
 export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): boolean {
-  if (maxWireVersion >= 9) {
-    // 4.4+ servers attach their own retryable write error
-    return false;
-  }
   // pre-4.4 server, then the driver adds an error label for every valid case
   // execute operation will only inspect the label, code/message logic is handled here
-
   if (error instanceof MongoNetworkError) {
     return true;
   }
 
-  if (error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) {
-    // Before 4.4 the error label can be one way of identifying retry
-    // so we can return true if we have the label, but fall back to code checking below
-    return true;
+  if (error instanceof MongoError) {
+    if (
+      (maxWireVersion >= 9 || error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) &&
+      !error.hasErrorLabel(MongoErrorLabel.HandshakeError)
+    ) {
+      // If we already have the error label no need to add it again. 4.4+ servers add the label.
+      // In the case where we have a handshake error, need to fall down to the logic checking
+      // the codes.
+      return false;
+    }
   }
 
   if (error instanceof MongoWriteConcernError) {
@@ -780,6 +782,10 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
   }
 
   return false;
+}
+
+export function isRetryableWriteError(error: MongoError): boolean {
+  return error.hasErrorLabel(MongoErrorLabel.RetryableWriteError);
 }
 
 /** Determines whether an error is something the driver should attempt to retry */

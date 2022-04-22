@@ -462,7 +462,7 @@ describe('MongoErrors', () => {
         },
         {
           description: 'a MongoWriteConcernError with a RetryableWriteError label below server 4.4',
-          result: true,
+          result: false,
           error: new MongoWriteConcernError({}, { errorLabels: ['RetryableWriteError'] }),
           maxWireVersion: BELOW_4_4
         },

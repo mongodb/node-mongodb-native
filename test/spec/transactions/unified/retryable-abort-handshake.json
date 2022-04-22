@@ -1,0 +1,204 @@
+{
+  "description": "retryable abortTransaction on handshake errors",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.2",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ],
+      "serverless": "forbid",
+      "auth": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent",
+          "connectionCheckOutStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "retryable-handshake-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    },
+    {
+      "session": {
+        "id": "session1",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "retryable-handshake-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "AbortTransaction succeeds after handshake network error",
+      "skipReason": "DRIVERS-2032: Pinned servers need to be checked if they are still selectable",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 2,
+              "x": 22
+            }
+          }
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "session": "session1",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "saslContinue",
+                  "ping"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            },
+            "session": "session1"
+          },
+          "expectError": {
+            "isError": true
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "connectionCheckOutStartedEvent": {}
+            },
+            {
+              "connectionCheckOutStartedEvent": {}
+            },
+            {
+              "connectionCheckOutStartedEvent": {}
+            },
+            {
+              "connectionCheckOutStartedEvent": {}
+            },
+            {
+              "connectionCheckOutStartedEvent": {}
+            }
+          ]
+        },
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "coll",
+                  "documents": [
+                    {
+                      "_id": 2,
+                      "x": 22
+                    }
+                  ],
+                  "startTransaction": true
+                },
+                "commandName": "insert",
+                "databaseName": "retryable-handshake-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1
+                },
+                "databaseName": "retryable-handshake-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "abortTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  }
+                },
+                "commandName": "abortTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "coll",
+          "databaseName": "retryable-handshake-tests",
+          "documents": [
+            {
+              "_id": 1,
+              "x": 11
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
