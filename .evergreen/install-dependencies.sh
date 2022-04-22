@@ -109,5 +109,4 @@ tmp=${NPM_TMP_DIR}
 EOT
 fi
 
-npm i --force --global npm
 npm install
