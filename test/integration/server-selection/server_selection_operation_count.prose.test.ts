@@ -55,6 +55,7 @@ describe('Server Selection Operation Count Prose', {
     };
 
     beforeEach(async function () {
+      // Step 3: Create a client with both mongoses' addresses in its seed list, appName="loadBalancingTest", and localThresholdMS=30000.
       const uri = this.configuration.url({
         appName: 'loadBalancingTest',
         localThresholdMS: 30000,
@@ -78,6 +79,7 @@ describe('Server Selection Operation Count Prose', {
 
       await client.connect();
 
+      // Step 4: Using CMAP events, ensure the client's connection pools for both mongoses have been saturated
       await poolIsFullPromise;
 
       seeds = client.topology.s.seedlist.map(address => address.toString());
@@ -99,6 +101,7 @@ describe('Server Selection Operation Count Prose', {
       let failCommandClient: MongoClient;
 
       beforeEach(async function () {
+        // Step 2: Enable the following failpoint against exactly one of the mongoses:
         const failingSeed = seeds[0];
 
         failCommandClient = this.configuration.newClient(
@@ -110,6 +113,7 @@ describe('Server Selection Operation Count Prose', {
       });
 
       afterEach(async function () {
+        // Step 7: Disable the failpoint.
         await failCommandClient.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: 'off',
@@ -129,8 +133,11 @@ describe('Server Selection Operation Count Prose', {
         const failingSeed = seeds[0];
         const collection = client.db('test-db').collection('collection0');
 
+        // Step 5: Start 10 concurrent threads / tasks that each run 10 findOne operations with empty filters using that client.
         await Promise.all(Array.from({ length: 10 }, () => runTaskGroup(collection, 10)));
 
+        // Step 6: Using command monitoring events, assert that fewer than 25% of the CommandStartedEvents
+        // occurred on the mongos that the failpoint was enabled on.
         const port = failingSeed.split(':')[1];
         const percentageSentToSlowHost = (counts[port] / 100) * 100;
         expect(percentageSentToSlowHost).to.be.lessThan(25);
@@ -140,10 +147,11 @@ describe('Server Selection Operation Count Prose', {
     it('equally distributes operations with both hosts are fine', async function () {
       const collection = client.db('test-db').collection('collection0');
 
+      // Step 8: Start 10 concurrent threads / tasks that each run 100 findOne operations with empty filters using that client.
       await Promise.all(Array.from({ length: 10 }, () => runTaskGroup(collection, 100)));
 
+      // Step 9: Using command monitoring events, assert that each mongos was selected roughly 50% of the time (within +/- 10%).
       const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
-
       const percentageToHost1 = (counts[host1] / 1000) * 100;
       const percentageToHost2 = (counts[host2] / 1000) * 100;
       expect(percentageToHost1).to.be.greaterThan(40).and.lessThan(60);
