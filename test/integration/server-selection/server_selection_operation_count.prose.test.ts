@@ -37,10 +37,9 @@ async function ensurePoolIsFull(client) {
   }
 }
 
-describe(
-  'Server Selction Operation Count Prose',
-  { requires: { mongodb: '>=4.2.9', topology: 'sharded' } },
-  function () {
+describe('Server Selection Operation Count Prose', {
+  metadata: { requires: { mongodb: '>=4.2.9', topology: 'sharded' } },
+  function() {
     let client: MongoClient;
     let seeds: Array<string>;
     let failCommandClient: MongoClient;
@@ -106,7 +105,7 @@ describe(
     it('sends fewer requests to a server with a high operation count', async function () {
       counts = {};
 
-      const [failingSeed, _] = seeds;
+      const failingSeed = seeds[0];
       failCommandClient = this.configuration.newClient(`mongodb://${failingSeed}/integration_test`);
 
       await failCommandClient.connect();
@@ -139,4 +138,4 @@ describe(
       expect(count2).to.be.lessThanOrEqual(600);
     });
   }
-);
+} as any);
