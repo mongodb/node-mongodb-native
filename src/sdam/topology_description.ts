@@ -63,7 +63,7 @@ export class TopologyDescription {
     this.stale = false;
     this.compatible = true;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 0;
-    this.localThresholdMS = options.localThresholdMS ?? 0;
+    this.localThresholdMS = options.localThresholdMS ?? 15;
 
     if (setName) {
       this.setName = setName;
