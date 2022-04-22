@@ -94,6 +94,12 @@
                       },
                       "u": {
                         "x": "foo"
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
                       }
                     }
                   ],
@@ -176,6 +182,12 @@
                       },
                       "u": {
                         "x": "foo"
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
                       }
                     }
                   ],

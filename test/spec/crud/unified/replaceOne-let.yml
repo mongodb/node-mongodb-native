@@ -51,6 +51,8 @@ tests:
                   -
                     q: *filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 let: *let
     outcome:
       -
@@ -84,6 +86,8 @@ tests:
                   -
                     q: *filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 let: *let
     outcome:
       -

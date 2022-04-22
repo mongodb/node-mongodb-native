@@ -69,8 +69,7 @@ tests:
                     u: *update
                     multi: true
                     hint: _id_
-                    upsert:
-                      $$unsetOrMatches: false
+                    upsert: { $$unsetOrMatches: false }
     outcome: &outcome
       -
         collectionName: *collection_name
@@ -112,6 +111,5 @@ tests:
                     multi: true
                     hint:
                       _id: 1
-                    upsert:
-                      $$unsetOrMatches: false
+                    upsert: { $$unsetOrMatches: false }
     outcome: *outcome

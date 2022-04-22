@@ -80,7 +80,10 @@
                           "x": 22
                         }
                       },
-                      "multi": true
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "comment": "comment"
@@ -147,7 +150,10 @@
                           "x": 22
                         }
                       },
-                      "multi": true
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "comment": {
@@ -217,7 +223,10 @@
                           "x": 22
                         }
                       },
-                      "multi": true
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "comment": "comment"

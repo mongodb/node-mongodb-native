@@ -103,7 +103,13 @@
                             "x": "$$x"
                           }
                         }
-                      ]
+                      ],
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "let": {
@@ -184,7 +190,13 @@
                             "x": "$$x"
                           }
                         }
-                      ]
+                      ],
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "let": {

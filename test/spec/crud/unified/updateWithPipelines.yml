@@ -74,10 +74,8 @@ tests:
                     u:
                       - { $replaceRoot: { newRoot: $t } }
                       - { $addFields: { foo: 1 } }
-                    multi:
-                      $$unsetOrMatches: false
-                    upsert:
-                      $$unsetOrMatches: false
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
               commandName: update
               databaseName: *database_name
     outcome:
@@ -128,8 +126,7 @@ tests:
                       - { $project: { x: 1 } }
                       - { $addFields: { foo: 1 } }
                     multi: true
-                    upsert:
-                      $$unsetOrMatches: false
+                    upsert: { $$unsetOrMatches: false }
               commandName: update
               databaseName: *database_name
     outcome:
@@ -229,10 +226,8 @@ tests:
                     u:
                       - { $replaceRoot: { newRoot: $t } }
                       - { $addFields: { foo: 1 } }
-                    multi:
-                      $$unsetOrMatches: false
-                    upsert:
-                      $$unsetOrMatches: false
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
               commandName: update
               databaseName: *database_name
     outcome:
@@ -286,8 +281,7 @@ tests:
                       - { $project: { x: 1 } }
                       - { $addFields: { foo: 1 } }
                     multi: true
-                    upsert:
-                      $$unsetOrMatches: false
+                    upsert: { $$unsetOrMatches: false }
               commandName: update
               databaseName: *database_name
     outcome:

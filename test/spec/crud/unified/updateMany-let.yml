@@ -56,6 +56,7 @@ tests:
                     q: *filter
                     u: *update
                     multi: true
+                    upsert: { $$unsetOrMatches: false }
                 let: *let0
     outcome:
       -
@@ -94,6 +95,7 @@ tests:
                     q: *filter1
                     u: *update1
                     multi: true
+                    upsert: { $$unsetOrMatches: false }
                 let: *let1
     outcome:
       -

@@ -42,6 +42,8 @@ tests:
                   -
                     q: *filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 comment: "comment"
     outcome: &outcome
       - collectionName: *collection0Name
@@ -69,6 +71,8 @@ tests:
                   -
                     q: *filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 comment: *comment
     outcome: *outcome
 
@@ -94,5 +98,7 @@ tests:
                   -
                     q: *filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 comment: "comment"
     outcome: *initialData
