@@ -24,30 +24,34 @@ async function runTaskGroup(collection: Collection, count: 10 | 100) {
   }
 }
 
-async function ensurePoolIsFull(client) {
+async function ensurePoolIsFull(client: MongoClient) {
   let connectionCount = 0;
-  client.on('connectionCreated', () => {
-    connectionCount++;
-  });
+  const onConnectionCreated = () => connectionCount++;
+  client.on('connectionCreated', onConnectionCreated);
 
-  // todo: ensure that the connection pool is filled
-  while (connectionCount < POOL_SIZE) {
-    // do nothing
+  // 250ms should be plenty of time to fill the connection pool,
+  // but just in case we'll loop a couple of times.
+  for (let i = 0; connectionCount < POOL_SIZE * 2 && i < 10; ++i) {
     await promisify(setTimeout)(250);
+  }
+
+  client.removeListener('connectionCreated', onConnectionCreated);
+
+  if (connectionCount !== POOL_SIZE * 2) {
+    throw new Error('Connection pool did not fill up');
   }
 }
 
 describe('Server Selection Operation Count Prose', {
   metadata: { requires: { mongodb: '>=4.2.9', topology: 'sharded' } },
-  function() {
+  test: function () {
     let client: MongoClient;
     let seeds: Array<string>;
-    let failCommandClient: MongoClient;
     let counts: Record<string, number> = {};
     const updateCount = ({ address }: CommandStartedEvent) => {
       const mongosPort = address.split(':')[1];
-      counts[mongosPort] = counts[mongosPort] ?? 0;
-      counts[mongosPort]++;
+      const count = counts[mongosPort] ?? 0;
+      counts[mongosPort] = count + 1;
     };
 
     beforeEach(async function () {
@@ -59,8 +63,7 @@ describe('Server Selection Operation Count Prose', {
         monitorCommands: true,
         useMultipleMongoses: true
       });
-      // setup sharded cluster using 4.2.9 or later
-      // enable failpoint against exactly one of them
+
       client = this.configuration.newClient(uri, {
         appName: 'loadBalancingTest',
         localThresholdMS: 30000,
@@ -72,20 +75,41 @@ describe('Server Selection Operation Count Prose', {
       client.on('commandStarted', updateCount);
 
       const poolIsFullPromise = ensurePoolIsFull(client);
-      // TODO : ensure that both mongoses' addresses are in the seedlist for the client
+
       await client.connect();
+
+      await poolIsFullPromise;
 
       seeds = client.topology.s.seedlist.map(address => address.toString());
 
-      // todo: ensure that the connection pool is filled
-      await poolIsFullPromise;
+      counts = {};
     });
 
     afterEach(async function () {
       await client.close();
       client = undefined;
       seeds = [];
-      if (failCommandClient) {
+    });
+
+    it('needs to run on exactly two mongoses', function () {
+      expect(seeds).to.have.lengthOf(2);
+    });
+
+    context('when one mongos is overloaded', function () {
+      let failCommandClient: MongoClient;
+
+      beforeEach(async function () {
+        const failingSeed = seeds[0];
+
+        failCommandClient = this.configuration.newClient(
+          `mongodb://${failingSeed}/integration_test`
+        );
+
+        await failCommandClient.connect();
+        await failCommandClient.db('admin').command(failPoint);
+      });
+
+      afterEach(async function () {
         await failCommandClient.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: 'off',
@@ -99,43 +123,31 @@ describe('Server Selection Operation Count Prose', {
 
         await failCommandClient.close();
         failCommandClient = undefined;
-      }
+      });
+
+      it('sends fewer requests to the overloaded server', async function () {
+        const failingSeed = seeds[0];
+        const collection = client.db('test-db').collection('collection0');
+
+        await Promise.all(Array.from({ length: 10 }, () => runTaskGroup(collection, 10)));
+
+        const port = failingSeed.split(':')[1];
+        const percentageSentToSlowHost = (counts[port] / 100) * 100;
+        expect(percentageSentToSlowHost).to.be.lessThan(25);
+      });
     });
 
-    it('sends fewer requests to a server with a high operation count', async function () {
-      counts = {};
-
-      const failingSeed = seeds[0];
-      failCommandClient = this.configuration.newClient(`mongodb://${failingSeed}/integration_test`);
-
-      await failCommandClient.connect();
-
-      await failCommandClient.db('admin').command(failPoint);
-
-      const collection = client.db('test-db').collection('collection0');
-
-      await Promise.all(Array.from({ length: 10 }, () => runTaskGroup(collection, 10)));
-
-      const port = failingSeed.split(':')[1];
-      expect(counts[port]).to.be.lessThan(25);
-    });
-
-    it('splits 50/50 when no failcommand is set', async function () {
-      counts = {};
+    it('equally distributes operations with both hosts are fine', async function () {
       const collection = client.db('test-db').collection('collection0');
 
       await Promise.all(Array.from({ length: 10 }, () => runTaskGroup(collection, 100)));
 
-      const [port1, port2] = seeds.map(seed => seed.split(':')[1]);
-      const count1 = counts[port1];
-      const count2 = counts[port2];
+      const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
 
-      // the server counts need to be within 10% of 50% of the operations
-      //  so between 400-600 operations each
-      expect(count1).to.be.greaterThanOrEqual(400);
-      expect(count2).to.be.greaterThanOrEqual(400);
-      expect(count1).to.be.lessThanOrEqual(600);
-      expect(count2).to.be.lessThanOrEqual(600);
+      const percentageToHost1 = (counts[host1] / 1000) * 100;
+      const percentageToHost2 = (counts[host2] / 1000) * 100;
+      expect(percentageToHost1).to.be.greaterThan(40).and.lessThan(60);
+      expect(percentageToHost2).to.be.greaterThan(40).and.lessThan(60);
     });
   }
 } as any);
