@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit  # Exit the script with error if any of the commands fail
 
-NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.7/nvm-noinstall.zip"
+NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.9/nvm-noinstall.zip"
 NVM_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh"
 
 NODE_LTS_NAME=${NODE_LTS_NAME:-erbium}
@@ -109,4 +109,5 @@ tmp=${NPM_TMP_DIR}
 EOT
 fi
 
-npm install --unsafe-perm
+npm i --force --global npm
+npm install
