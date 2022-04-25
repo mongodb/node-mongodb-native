@@ -894,7 +894,11 @@ export function isNetworkTimeoutError(err: MongoError): err is MongoNetworkError
 //
 // An error on an aggregate command is not a resumable error. Only errors on a getMore command may be considered resumable errors.
 
-export function isResumableError(error?: MongoError, wireVersion?: number): boolean {
+export function isResumableError(error?: Error, wireVersion?: number): boolean {
+  if (!(error instanceof MongoError)) {
+    return false;
+  }
+
   if (error instanceof MongoNetworkError) {
     return true;
   }
