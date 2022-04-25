@@ -206,7 +206,7 @@ functions:
         script: |
           KRB5_KEYTAB='${gssapi_auth_keytab_base64}' KRB5_PRINCIPAL='${gssapi_auth_principal}' \
           MONGODB_URI='${gssapi_auth_mongodb_uri}' UNIFIED=${UNIFIED} \
-          NODE_LTS_NAME='${NODE_LTS_NAME}' NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
+          NODE_LTS_NAME='${NODE_LTS_NAME}' bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
   run ldap tests:
     - command: shell.exec
       type: test
@@ -1804,11 +1804,11 @@ tasks:
           UNIFIED: 1
           NODE_LTS_NAME: erbium
 buildvariants:
-  - name: macos-1014-fermium
-    display_name: macOS 10.14 Node Fermium
+  - name: macos-1014-gallium
+    display_name: macOS 10.14 Node Gallium
     run_on: macos-1014
     expansions:
-      NODE_LTS_NAME: fermium
+      NODE_LTS_NAME: gallium
     tasks: &ref_0
       - test-latest-server-unified
       - test-latest-replica_set-unified
@@ -1894,6 +1894,12 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: macos-1014-fermium
+    display_name: macOS 10.14 Node Fermium
+    run_on: macos-1014
+    expansions:
+      NODE_LTS_NAME: fermium
+    tasks: *ref_0
   - name: macos-1014-erbium
     display_name: macOS 10.14 Node Erbium
     run_on: macos-1014
@@ -1924,11 +1930,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
-  - name: rhel70-fermium
-    display_name: RHEL 7.0 Node Fermium
+  - name: rhel70-gallium
+    display_name: RHEL 7.0 Node Gallium
     run_on: rhel70-small
     expansions:
-      NODE_LTS_NAME: fermium
+      NODE_LTS_NAME: gallium
     tasks: &ref_1
       - test-latest-server-unified
       - test-latest-replica_set-unified
@@ -2014,6 +2020,12 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: rhel70-fermium
+    display_name: RHEL 7.0 Node Fermium
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: fermium
+    tasks: *ref_1
   - name: rhel70-erbium
     display_name: RHEL 7.0 Node Erbium
     run_on: rhel70-small
@@ -2044,11 +2056,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_1
-  - name: ubuntu-14.04-fermium
-    display_name: Ubuntu 14.04 Node Fermium
+  - name: ubuntu-14.04-gallium
+    display_name: Ubuntu 14.04 Node Gallium
     run_on: ubuntu1404-test
     expansions:
-      NODE_LTS_NAME: fermium
+      NODE_LTS_NAME: gallium
     tasks: &ref_2
       - test-4.0-server
       - test-4.0-replica_set
@@ -2090,6 +2102,12 @@ buildvariants:
       - test-auth-kerberos-legacy
       - test-auth-kerberos-unified
       - test-auth-ldap
+  - name: ubuntu-14.04-fermium
+    display_name: Ubuntu 14.04 Node Fermium
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: fermium
+    tasks: *ref_2
   - name: ubuntu-14.04-erbium
     display_name: Ubuntu 14.04 Node Erbium
     run_on: ubuntu1404-test
@@ -2120,11 +2138,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_2
-  - name: ubuntu-18.04-fermium
-    display_name: Ubuntu 18.04 Node Fermium
+  - name: ubuntu-18.04-gallium
+    display_name: Ubuntu 18.04 Node Gallium
     run_on: ubuntu1804-test
     expansions:
-      NODE_LTS_NAME: fermium
+      NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
     tasks: &ref_3
       - test-latest-server-unified
@@ -2199,6 +2217,13 @@ buildvariants:
       - test-4.4-ocsp-soft-fail
       - test-4.4-ocsp-malicious-invalid-cert-mustStaple-server-does-not-staple
       - test-4.4-ocsp-malicious-no-responder-mustStaple-server-does-not-staple
+  - name: ubuntu-18.04-fermium
+    display_name: Ubuntu 18.04 Node Fermium
+    run_on: ubuntu1804-test
+    expansions:
+      NODE_LTS_NAME: fermium
+      CLIENT_ENCRYPTION: true
+    tasks: *ref_3
   - name: ubuntu-18.04-erbium
     display_name: Ubuntu 18.04 Node Erbium
     run_on: ubuntu1804-test
@@ -2298,6 +2323,13 @@ buildvariants:
       NODE_LTS_NAME: argon
       MSVS_VERSION: 2013
     tasks: *ref_4
+  - name: windows-64-vs2015-gallium
+    display_name: Windows (VS2015) Node Gallium
+    run_on: windows-64-vs2015-large
+    expansions:
+      NODE_LTS_NAME: gallium
+      MSVS_VERSION: 2015
+    tasks: *ref_4
   - name: windows-64-vs2015-fermium
     display_name: Windows (VS2015) Node Fermium
     run_on: windows-64-vs2015-large
@@ -2339,6 +2371,13 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
       MSVS_VERSION: 2015
+    tasks: *ref_4
+  - name: windows-64-vs2017-gallium
+    display_name: Windows (VS2017) Node Gallium
+    run_on: windows-64-vs2017-large
+    expansions:
+      NODE_LTS_NAME: gallium
+      MSVS_VERSION: 2017
     tasks: *ref_4
   - name: windows-64-vs2017-fermium
     display_name: Windows (VS2017) Node Fermium
