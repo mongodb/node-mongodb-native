@@ -337,10 +337,28 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         }
 
         session.pin(checkedOut);
-        this.command(ns, cmd, finalOptions, (error, response) => {
-          this.description.operationCount -= 1;
-          callback(error, response);
-        });
+
+        this.s.pool.withConnection(
+          conn,
+          (err, conn, cb) => {
+            if (err || !conn) {
+              this.description.operationCount -= 1;
+              markServerUnknown(this, err);
+              return cb(err);
+            }
+
+            conn.command(
+              ns,
+              cmd,
+              finalOptions,
+              makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
+                this.description.operationCount -= 1;
+                cb(error, response);
+              })
+            );
+          },
+          callback
+        );
       });
 
       return;
