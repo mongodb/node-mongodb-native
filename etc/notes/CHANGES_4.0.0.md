@@ -326,7 +326,7 @@ await db.collection('fs.files').updateOne({ _id }, { $set: { md5 } });
 
 ### BSON
 
-> Updated 4/19/2022
+> Updated April 4th, 2022
 
 This version includes an upgrade from js-bson 1.x to js-bson 4.x.
 
