@@ -39,6 +39,15 @@ case $NODE_LTS_NAME in
   "fermium")
     VERSION=14
     ;;
+  "gallium")
+    VERSION=16
+    ;;
+  "hydrogen")
+    VERSION=18
+    ;;
+  "iron")
+    VERSION=20
+    ;;
   *)
     echo "Unsupported Node LTS version $1"
     exit 1
