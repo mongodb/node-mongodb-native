@@ -324,6 +324,26 @@ const md5 = await new Promise((resolve, reject) => {
 await db.collection('fs.files').updateOne({ _id }, { $set: { md5 } });
 ```
 
+### BSON
+
+> Updated April 4th, 2022
+
+This version includes an upgrade from js-bson 1.x to js-bson 4.x.
+
+#### Timestamps math operations return Javascript `Long`s
+
+In versions prior to 4.x of the BSON library, Timestamps were represented with a custom class.  In version 4.x of the BSON library, the Timestamp class was refactored to
+be a subclass of the Javascript Long class.  As a result of this refactor, math operations on Timestamp objects now return Long objects instead of Timestamp objects.
+
+Math operations with Timestamps is not recommended.  However, if Timestamp math must be used, the old behavior can be replicated by using the Timestamp
+constructor, which takes a Long as an argument.
+
+```typescript
+const four = Timestamp.fromNumber(4);
+const five = Timestamp.fromNumber(5);
+const nine = new TimeStamp(four.add(five));
+```
+
 ## Intentional Breaking Changes
 
 - [`NODE-3368`](https://jira.mongodb.org/browse/NODE-3368): make name prop on error classes read-only ([#2879](https://github.com/mongodb/node-mongodb-native/pull/2879))
