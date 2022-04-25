@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as chalk from 'chalk';
 
 let startingMemoryUsage;
 
@@ -6,23 +7,38 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface Process {
-      _getActiveHandles(): ReadonlyArray<{ fd?: number }>;
+      _getActiveHandles(): ReadonlyArray<{
+        fd?: number;
+        _peername?: {
+          address: string;
+          family: string;
+          port: number;
+        };
+      }>;
       _getActiveRequests(): unknown[];
     }
   }
 }
 
-const sorted = array => {
-  const copy = Array.from(array);
-  copy.sort((a, b) => Number(a) - Number(b));
-  return copy;
+const getActiveHandles = () => {
+  const handles = process._getActiveHandles();
+  const results = { files: [], sockets: [] };
+  for (const { fd, _peername: peer } of handles) {
+    if (typeof fd === 'number') {
+      results.files.push(fd);
+    } else {
+      results.sockets.push(peer);
+    }
+  }
+  return results;
 };
 
 async function mochaGlobalSetup() {
-  const activeHandles = process._getActiveHandles();
+  const activeHandles = getActiveHandles();
   const activeRequests = process._getActiveRequests();
 
-  expect(sorted(activeHandles.map(({ fd = null }) => fd))).to.deep.equal([1, 2]);
+  expect(activeHandles.files).to.have.lengthOf.lessThanOrEqual(3); // stdin/out/err
+  expect(activeHandles.sockets).to.have.lengthOf(0);
   expect(activeRequests).to.have.a.lengthOf(0);
 
   startingMemoryUsage = process.memoryUsage();
@@ -30,15 +46,25 @@ async function mochaGlobalSetup() {
 
 async function mochaGlobalTeardown() {
   const endingMemoryUsage = process.memoryUsage();
-  const activeHandles = process._getActiveHandles();
+  const activeHandles = getActiveHandles();
   const activeRequests = process._getActiveRequests();
 
+  const startingInMB = (startingMemoryUsage.heapUsed / 1000 ** 2).toFixed(3);
+  const endingInMB = (endingMemoryUsage.heapUsed / 1000 ** 2).toFixed(3);
+  const memoryMessage = `startup heapUsed:  ${startingInMB} MB\n  shutdown heapUsed: ${endingInMB} MB`;
+  console.log(`  ${chalk.yellow(memoryMessage)}\n`);
+
   try {
-    expect(sorted(activeHandles.map(({ fd }) => fd))).to.deep.equal([1, 2]);
+    expect(activeHandles.files).to.have.lengthOf.lessThanOrEqual(3); // stdin/out/err
+    expect(activeHandles.sockets).to.have.lengthOf(0);
     expect(activeRequests).to.have.a.lengthOf(0);
-    // Very generous check to double memory usage by the end of testing
+    // Very generous check to quadruple memory usage by the end of testing
     // should catch wildly unbounded allocations only
-    expect(endingMemoryUsage.heapUsed).to.be.lessThan(startingMemoryUsage.heapUsed * 2);
+    // (technically the garbage collector may never be run, but this was observed to be the least flakey)
+    expect(
+      endingMemoryUsage.heapUsed,
+      `${memoryMessage}, We assert memory can grow up to 4x during a test run, is there a leak?`
+    ).to.be.lessThan(startingMemoryUsage.heapUsed * 4);
   } catch (error) {
     console.error(error.message);
     console.error(error.stack);
