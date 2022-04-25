@@ -277,8 +277,12 @@ export interface AutoEncryptionOptions {
    * Other validation rules in the JSON schema will not be enforced by the driver and will result in an error.
    */
   schemaMap?: Document;
+  /** @experimental */
+  encryptedFieldsMap?: Document;
   /** Allows the user to bypass auto encryption, maintaining implicit decryption */
   bypassAutoEncryption?: boolean;
+  /** @experimental */
+  bypassQueryAnalysis?: boolean;
   options?: {
     /** An optional hook to catch logging messages from the underlying encryption engine */
     logger?: (level: AutoEncryptionLoggerLevel, message: string) => void;
@@ -296,13 +300,38 @@ export interface AutoEncryptionOptions {
     /** Command line arguments to use when auto-spawning a mongocryptd */
     mongocryptdSpawnArgs?: string[];
     /**
-     * Full path to a CSFLE shared library to be used (instead of mongocryptd)
-     * @experimental
+     * Full path to a CSFLE shared library to be used (instead of mongocryptd).
+     *
+     * This needs to be the path to the file itself, not a directory.
+     * It can be an absolute or relative path. If the path is relative and
+     * its first component is `$ORIGIN`, it will be replaced by the directory
+     * containing the mongodb-client-encryption native addon file. Otherwise,
+     * the path will be interpreted relative to the current working directory.
+     *
+     * Currently, loading different CSFLE shared library files from different
+     * MongoClients in the same process is not supported.
+     *
+     * If this option is provided and no CSFLE shared library could be loaded
+     * from the specified location, creating the MongoClient will fail.
+     *
+     * If this option is not provided and `csfleRequired` is not specified,
+     * the AutoEncrypter will attempt to spawn and/or use mongocryptd according
+     * to the mongocryptd-specific `extraOptions` options.
+     *
+     * Specifying a path prevents mongocryptd from being used as a fallback.
      */
     csflePath?: string;
     /**
+     * If specified, never use mongocryptd and instead fail when the CSFLE shared library
+     * could not be loaded.
+     *
+     * This is always true when `csflePath` is specified.
+     */
+    csfleRequired?: boolean;
+    /**
      * Search paths for a CSFLE shared library to be used (instead of mongocryptd)
-     * @experimental
+     * Only for driver testing!
+     * @internal
      */
     csfleSearchPaths?: string[];
   };
