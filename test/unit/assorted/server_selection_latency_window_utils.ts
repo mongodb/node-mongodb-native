@@ -1,6 +1,7 @@
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { PathLike, readdirSync, readFileSync } from 'fs';
+import { join } from 'path';
 import { promisify } from 'util';
 
 import { ReadPreference } from '../../../src/read_preference';
@@ -34,13 +35,13 @@ interface ServerSelectionLatencyWindowTest {
 type Outcome = ServerSelectionLatencyWindowTest['outcome'];
 type FrequencyMap = Outcome['expected_frequencies'];
 
-export function loadLatencyWindowTests(directory: PathLike) {
+export function loadLatencyWindowTests(directory: string) {
   const files = readdirSync(directory).filter(fileName => fileName.includes('.json'));
 
   const tests: ServerSelectionLatencyWindowTest[] = [];
 
   for (const fileName of files) {
-    const path = directory + '/' + fileName;
+    const path = join(directory, '/', fileName);
     const contents = readFileSync(path, { encoding: 'utf-8' });
     tests.push(EJSON.parse(contents) as ServerSelectionLatencyWindowTest);
   }
@@ -56,12 +57,18 @@ function compareResultsToExpected(
     if (frequency === 0) {
       expect(observed_frequencies).not.to.haveOwnProperty(address);
     } else {
-      expect(observed_frequencies).to.haveOwnProperty(address).not.to.be.undefined;
+      expect(observed_frequencies).to.haveOwnProperty(address).to.exist;
       const actual_frequency = observed_frequencies[address];
       const is_too_low = actual_frequency < frequency - tolerance;
-      expect(is_too_low, 'failed - too low').to.be.false;
+      expect(
+        is_too_low,
+        `expected frequency of ${frequency}+/-${tolerance} but received ${actual_frequency}`
+      ).to.be.false;
       const is_too_high = actual_frequency > frequency + tolerance;
-      expect(is_too_high, 'failed - too high').to.be.false;
+      expect(
+        is_too_high,
+        `expected frequency of ${frequency}+/-${tolerance} but received ${actual_frequency}`
+      ).to.be.false;
     }
   }
 }
@@ -98,9 +105,9 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
     const { type, avg_rtt_ms } = test.topology_description.servers.find(
       ({ address }) => address === serverAddress
     );
-    expect(operation_count).not.to.be.undefined;
-    expect(type).not.to.be.undefined;
-    expect(avg_rtt_ms).not.to.be.undefined;
+    expect(operation_count).to.exist;
+    expect(type).to.exist;
+    expect(avg_rtt_ms).to.exist;
     description.roundTripTime = avg_rtt_ms;
     description.type = type;
     const serverDescription = serverDescriptionFromDefinition(description, allHosts);
