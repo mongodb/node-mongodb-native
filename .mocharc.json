@@ -3,7 +3,7 @@
   "require": [
     "source-map-support/register",
     "ts-node/register",
-    "test/tools/runner/hooks/resource_check.fixture.js",
+    "test/tools/runner/hooks/resource_check.fixture.ts",
     "test/tools/runner/chai-addons.js"
   ],
   "extension": ["js", "ts"],

@@ -4,7 +4,7 @@
     "source-map-support/register",
     "ts-node/register",
     "test/tools/runner/chai-addons.js",
-    "test/tools/runner/hooks/resource_check.fixture.js",
+    "test/tools/runner/hooks/resource_check.fixture.ts",
     "test/tools/runner/hooks/configuration.js",
     "test/tools/runner/hooks/client_leak_checker.js",
     "test/tools/runner/hooks/session_leak_checker.js"
