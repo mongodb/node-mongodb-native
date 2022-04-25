@@ -1,0 +1,37 @@
+# Test auto encryption on a collection with no jsonSchema configured.
+# This is a regression test for MONGOCRYPT-378/PYTHON-3188.
+runOn:
+  - minServerVersion: "4.1.10"
+database_name: &database_name "default"
+collection_name: &collection_name "unencrypted"
+
+tests:
+  - description: "Insert on an unencrypted collection"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 { _id: 1 }
+    expectations:
+      # Auto encryption will request the collection info.
+      - command_started_event:
+          command:
+            listCollections: 1
+            filter:
+              name: *collection_name
+          command_name: listCollections
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - *doc0
+            ordered: true
+          command_name: insert
+    outcome:
+      collection:
+        # Outcome is checked using a separate MongoClient without auto encryption.
+        data:
+          - *doc0

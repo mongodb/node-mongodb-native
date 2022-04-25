@@ -6,6 +6,7 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
+import { CreateIndexOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
@@ -75,6 +76,8 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   timeseries?: TimeSeriesCollectionOptions;
   /** The number of seconds after which a document in a timeseries collection expires. */
   expireAfterSeconds?: number;
+  /** @experimental */
+  encryptedFields?: Document;
 }
 
 /** @internal */
@@ -92,6 +95,74 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
   }
 
   override execute(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<Collection>
+  ): void {
+    const db = this.db;
+    const name = this.name;
+    const options = this.options;
+
+    const encryptedFields =
+      options.encryptedFields ??
+      db.s.client.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
+    if (!encryptedFields) {
+      return this.executeWithoutEncryptedFieldCheck(server, session, callback);
+    }
+
+    const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
+    const eccCollection = encryptedFields.eccCollection || `enxcol_.${name}.ecc`;
+    const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
+    new CreateCollectionOperation(db, escCollection).executeWithoutEncryptedFieldCheck(
+      server,
+      session,
+      err => {
+        if (err) {
+          return callback(err);
+        }
+
+        new CreateCollectionOperation(db, eccCollection).executeWithoutEncryptedFieldCheck(
+          server,
+          session,
+          err => {
+            if (err) {
+              return callback(err);
+            }
+
+            new CreateCollectionOperation(db, ecocCollection).executeWithoutEncryptedFieldCheck(
+              server,
+              session,
+              err => {
+                if (err) {
+                  return callback(err);
+                }
+
+                this.executeWithoutEncryptedFieldCheck(server, session, (err, coll) => {
+                  if (err) {
+                    return callback(err);
+                  }
+
+                  new CreateIndexOperation(db, name, { __safeContent__: 1 }, {}).execute(
+                    server,
+                    session,
+                    err => {
+                      if (err) {
+                        return callback(err);
+                      }
+
+                      return callback(undefined, coll);
+                    }
+                  );
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  }
+
+  private executeWithoutEncryptedFieldCheck(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Collection>
