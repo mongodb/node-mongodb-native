@@ -331,6 +331,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
       this.s.pool.checkOut((err, checkedOut) => {
         if (err || checkedOut == null) {
+          this.description.operationCount -= 1;
           if (callback) return callback(err);
           return;
         }
@@ -349,6 +350,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       conn,
       (err, conn, cb) => {
         if (err || !conn) {
+          this.description.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
@@ -388,6 +390,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       options.session?.pinnedConnection,
       (err, conn, cb) => {
         if (err || !conn) {
+          this.description.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
@@ -429,6 +432,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       options.session?.pinnedConnection,
       (err, conn, cb) => {
         if (err || !conn) {
+          this.description.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
