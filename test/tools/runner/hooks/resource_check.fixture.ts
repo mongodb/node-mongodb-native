@@ -1,7 +1,13 @@
 import { expect } from 'chai';
 import * as chalk from 'chalk';
+///// Test the memory leak checker with the following:
+import * as sinon from 'sinon';
 
-let startingMemoryUsage;
+import * as BSON from '../../../../src/bson';
+
+const serializeSpy = sinon.spy(BSON, 'serialize');
+
+let startingMemoryUsage: NodeJS.MemoryUsage;
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -33,7 +39,9 @@ const getActiveHandles = () => {
   return results;
 };
 
-async function mochaGlobalSetup() {
+const toMBString = (byteCount: number) => `${(byteCount / 1000 ** 2).toFixed(3)} MB`;
+
+function mochaGlobalSetup() {
   const activeHandles = getActiveHandles();
   const activeRequests = process._getActiveRequests();
 
@@ -44,15 +52,18 @@ async function mochaGlobalSetup() {
   startingMemoryUsage = process.memoryUsage();
 }
 
-async function mochaGlobalTeardown() {
-  const endingMemoryUsage = process.memoryUsage();
+function mochaGlobalTeardown() {
+  const shutdownMemoryUsage = process.memoryUsage();
   const activeHandles = getActiveHandles();
   const activeRequests = process._getActiveRequests();
 
-  const startingInMB = (startingMemoryUsage.heapUsed / 1000 ** 2).toFixed(3);
-  const endingInMB = (endingMemoryUsage.heapUsed / 1000 ** 2).toFixed(3);
-  const memoryMessage = `startup heapUsed:  ${startingInMB} MB\n  shutdown heapUsed: ${endingInMB} MB`;
-  console.log(`  ${chalk.yellow(memoryMessage)}\n`);
+  const startupHeapUsed = startingMemoryUsage.heapUsed;
+  const shutdownHeapUsed = shutdownMemoryUsage.heapUsed;
+  const memoryMessage = [
+    `  startup heapUsed:  ${toMBString(startupHeapUsed)}`,
+    `  shutdown heapUsed: ${toMBString(shutdownHeapUsed)}`
+  ].join('\n');
+  console.log(`${chalk.yellow(memoryMessage)}\n`);
 
   if (process.platform === 'darwin' || process.env.ATLAS_DATA_LAKE === 'true') {
     // TODO(NODE-XXXX): on macos we don't check for leaks currently
@@ -68,14 +79,21 @@ async function mochaGlobalTeardown() {
     // should catch wildly unbounded allocations only
     // (technically the garbage collector may never be run, but this was observed to be the least flakey)
     expect(
-      endingMemoryUsage.heapUsed,
-      `${memoryMessage}, We assert memory can grow up to 4x during a test run, is there a leak?`
-    ).to.be.lessThan(startingMemoryUsage.heapUsed * 4);
+      shutdownHeapUsed,
+      `${toMBString(shutdownHeapUsed)} is more than 4x ${toMBString(startupHeapUsed)}`
+    ).to.be.lessThan(startupHeapUsed * 4);
   } catch (error) {
     console.error(error.message);
     console.error(error.stack);
     process.exit(1);
   }
+
+  setTimeout(() => {
+    console.error(
+      'Nodejs is still open after 30 seconds of completing the test run there must be a resource leak'
+    );
+    process.exit(1);
+  }, 30_000).unref();
 }
 
 module.exports = { mochaGlobalTeardown, mochaGlobalSetup };
