@@ -54,6 +54,11 @@ async function mochaGlobalTeardown() {
   const memoryMessage = `startup heapUsed:  ${startingInMB} MB\n  shutdown heapUsed: ${endingInMB} MB`;
   console.log(`  ${chalk.yellow(memoryMessage)}\n`);
 
+  if (process.platform === 'darwin') {
+    // TODO(NODE-XXXX): on macos we don't check for leaks currently
+    return;
+  }
+
   try {
     expect(activeHandles.files).to.have.lengthOf.lessThanOrEqual(3); // stdin/out/err
     expect(activeHandles.sockets).to.have.lengthOf(0);
