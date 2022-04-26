@@ -546,6 +546,6 @@ describe('MongoErrors', () => {
       expect(isResumableError(new MongoNetworkError('ah!'))).to.be.true;
     });
 
-    // TODO(NODE-4125): Add more cases to isResumableError tesing
+    // TODO(NODE-4125): Add more cases to isResumableError testing
   });
 });
