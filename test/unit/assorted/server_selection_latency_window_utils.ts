@@ -1,6 +1,6 @@
 import { EJSON } from 'bson';
 import { expect } from 'chai';
-import { PathLike, readdirSync, readFileSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { promisify } from 'util';
 
@@ -111,8 +111,9 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
     description.roundTripTime = avg_rtt_ms;
     description.type = type;
     const serverDescription = serverDescriptionFromDefinition(description, allHosts);
-    serverDescription.operationCount = operation_count;
     topology.serverUpdateHandler(serverDescription);
+    const server = topology.s.servers.get(serverAddress);
+    server.s.operationCount = operation_count;
   }
 
   const selectedServers: Server[] = [];

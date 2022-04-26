@@ -388,7 +388,7 @@ export abstract class AbstractCursor<
     });
   }
 
-  close(): void;
+  close(): Promise<void>;
   close(callback: Callback): void;
   /**
    * @deprecated options argument is deprecated

@@ -93,6 +93,8 @@ export interface ServerPrivate {
   pool: ConnectionPool;
   /** MongoDB server API version */
   serverApi?: ServerApi;
+  /** A count of the operations currently running against the server. */
+  operationCount: number;
 }
 
 /** @public */
@@ -147,7 +149,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       logger: new Logger('Server'),
       state: STATE_CLOSED,
       topology,
-      pool: new ConnectionPool(poolOptions)
+      pool: new ConnectionPool(poolOptions),
+      operationCount: 0
     };
 
     for (const event of [...CMAP_EVENTS, ...APM_EVENTS]) {
@@ -182,8 +185,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.emit(
         Server.DESCRIPTION_RECEIVED,
         new ServerDescription(this.description.hostAddress, event.reply, {
-          roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration),
-          operationCount: this.description.operationCount
+          roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration)
         })
       );
 
@@ -323,52 +325,29 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     const session = finalOptions.session;
     const conn = session?.pinnedConnection;
 
-    this.description.operationCount += 1;
-
     // NOTE: This is a hack! We can't retrieve the connections used for executing an operation
     //       (and prevent them from being checked back in) at the point of operation execution.
     //       This should be considered as part of the work for NODE-2882
     if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
       this.s.pool.checkOut((err, checkedOut) => {
         if (err || checkedOut == null) {
-          this.description.operationCount -= 1;
           if (callback) return callback(err);
           return;
         }
 
         session.pin(checkedOut);
-
-        this.s.pool.withConnection(
-          conn,
-          (err, conn, cb) => {
-            if (err || !conn) {
-              this.description.operationCount -= 1;
-              markServerUnknown(this, err);
-              return cb(err);
-            }
-
-            conn.command(
-              ns,
-              cmd,
-              finalOptions,
-              makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-                this.description.operationCount -= 1;
-                cb(error, response);
-              })
-            );
-          },
-          callback
-        );
+        this.command(ns, cmd, finalOptions, callback);
       });
-
       return;
     }
+
+    this.s.operationCount += 1;
 
     this.s.pool.withConnection(
       conn,
       (err, conn, cb) => {
         if (err || !conn) {
-          this.description.operationCount -= 1;
+          this.s.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
@@ -378,7 +357,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           cmd,
           finalOptions,
           makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-            this.description.operationCount -= 1;
+            this.s.operationCount -= 1;
             cb(error, response);
           })
         );
@@ -402,13 +381,13 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
-    this.description.operationCount += 1;
+    this.s.operationCount += 1;
 
     this.s.pool.withConnection(
       options.session?.pinnedConnection,
       (err, conn, cb) => {
         if (err || !conn) {
-          this.description.operationCount -= 1;
+          this.s.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
@@ -418,7 +397,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           cursorId,
           options,
           makeOperationHandler(this, conn, {}, options, (error, response) => {
-            this.description.operationCount -= 1;
+            this.s.operationCount -= 1;
             cb(error, response);
           })
         );
@@ -445,12 +424,12 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
-    this.description.operationCount += 1;
+    this.s.operationCount += 1;
     this.s.pool.withConnection(
       options.session?.pinnedConnection,
       (err, conn, cb) => {
         if (err || !conn) {
-          this.description.operationCount -= 1;
+          this.s.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
@@ -460,7 +439,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           cursorIds,
           options,
           makeOperationHandler(this, conn, {}, undefined, (error, response) => {
-            this.description.operationCount -= 1;
+            this.s.operationCount -= 1;
             cb(error, response);
           })
         );
@@ -494,8 +473,7 @@ function markServerUnknown(server: Server, error?: MongoError) {
     new ServerDescription(server.description.hostAddress, undefined, {
       error,
       topologyVersion:
-        error && error.topologyVersion ? error.topologyVersion : server.description.topologyVersion,
-      operationCount: server.description.operationCount
+        error && error.topologyVersion ? error.topologyVersion : server.description.topologyVersion
     })
   );
 }

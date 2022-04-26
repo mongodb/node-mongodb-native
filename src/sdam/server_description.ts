@@ -41,9 +41,6 @@ export interface ServerDescriptionOptions {
 
   /** If the client is in load balancing mode. */
   loadBalanced?: boolean;
-
-  /** The current number of operations running against a server. */
-  operationCount?: number;
 }
 
 /**
@@ -76,8 +73,6 @@ export class ServerDescription {
   electionId?: ObjectId;
   logicalSessionTimeoutMinutes?: number;
 
-  operationCount: number;
-
   // NOTE: does this belong here? It seems we should gossip the cluster time at the CMAP level
   $clusterTime?: ClusterTime;
 
@@ -106,7 +101,6 @@ export class ServerDescription {
     this.roundTripTime = options?.roundTripTime ?? -1;
     this.lastUpdateTime = now();
     this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? 0;
-    this.operationCount = 0;
 
     if (options?.topologyVersion) {
       this.topologyVersion = options.topologyVersion;
