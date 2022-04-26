@@ -79,18 +79,14 @@ tests:
                     q: *updateOne_filter
                     u: *updateOne_update
                     hint: *hint_string
-                    multi:
-                      $$unsetOrMatches: false
-                    upsert:
-                      $$unsetOrMatches: false
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                   -
                     q: *updateOne_filter
                     u: *updateOne_update
                     hint: *hint_doc
-                    multi:
-                      $$unsetOrMatches: false
-                    upsert:
-                      $$unsetOrMatches: false
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 ordered: true
     outcome:
       -
@@ -148,15 +144,13 @@ tests:
                     u: *updateMany_update
                     multi: true
                     hint: *hint_string
-                    upsert:
-                      $$unsetOrMatches: false
+                    upsert: { $$unsetOrMatches: false }
                   -
                     q: *updateMany_filter
                     u: *updateMany_update
                     multi: true
                     hint: *hint_doc
-                    upsert:
-                      $$unsetOrMatches: false
+                    upsert: { $$unsetOrMatches: false }
                 ordered: true
     outcome:
       -
@@ -215,20 +209,16 @@ tests:
                     u:
                       x: 333
                     hint: *hint_string
-                    multi:
-                      $$unsetOrMatches: false
-                    upsert:
-                      $$unsetOrMatches: false
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                   -
                     q:
                       _id: 4
                     u:
                       x: 444
                     hint: *hint_doc
-                    multi:
-                      $$unsetOrMatches: false
-                    upsert:
-                      $$unsetOrMatches: false
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 ordered: true
     outcome:
       -

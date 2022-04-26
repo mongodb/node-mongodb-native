@@ -114,7 +114,10 @@
                           }
                         }
                       ],
-                      "multi": true
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "let": {
@@ -207,7 +210,10 @@
                           }
                         }
                       ],
-                      "multi": true
+                      "multi": true,
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      }
                     }
                   ],
                   "let": {

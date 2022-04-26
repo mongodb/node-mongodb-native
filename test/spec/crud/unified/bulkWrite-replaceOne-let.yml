@@ -47,6 +47,8 @@ tests:
                 updates:
                   - q: *filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 let: *let
     outcome:
       - collectionName: *collection0Name
@@ -80,6 +82,8 @@ tests:
                 updates:
                   - q: *filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 let: *let
     outcome:
       - collectionName: *collection0Name

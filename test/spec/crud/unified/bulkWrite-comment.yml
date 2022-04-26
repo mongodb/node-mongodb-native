@@ -77,8 +77,12 @@ tests:
                 updates:
                   - q: *replaceOne_filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                   - q: *updateOne_filter
                     u: *update
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 ordered: true
                 comment: *string_comment
           - commandStartedEvent:
@@ -128,8 +132,12 @@ tests:
                 updates:
                   - q: *replaceOne_filter
                     u: *replacement
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                   - q: *updateOne_filter
                     u: *update
+                    multi: { $$unsetOrMatches: false }
+                    upsert: { $$unsetOrMatches: false }
                 ordered: true
                 comment: *document_comment
           - commandStartedEvent:

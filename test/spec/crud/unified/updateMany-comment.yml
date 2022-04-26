@@ -42,6 +42,7 @@ tests:
                     q: *filter
                     u: *update
                     multi: true
+                    upsert: { $$unsetOrMatches: false }
                 comment: "comment"
     outcome: &outcome
       - collectionName: *collection0Name
@@ -70,6 +71,7 @@ tests:
                     q: *filter
                     u: *update
                     multi: true
+                    upsert: { $$unsetOrMatches: false }
                 comment: *comment
     outcome: *outcome
 
@@ -96,5 +98,6 @@ tests:
                     q: *filter
                     u: *update
                     multi: true
+                    upsert: { $$unsetOrMatches: false }
                 comment: "comment"
     outcome: *initialData
