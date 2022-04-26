@@ -5,6 +5,7 @@ import {
   WaitQueueTimeoutError as MongoWaitQueueTimeoutError
 } from '../../src/cmap/errors';
 import {
+  isResumableError,
   isRetryableReadError,
   isSDAMUnrecoverableError,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
@@ -532,6 +533,13 @@ describe('MongoErrors', () => {
           expect(isRetryableReadError(error)).to.be.equal(result);
         });
       }
+    });
+  });
+
+  describe('isResumableError', () => {
+    it('should return false for errors that are not MongoError', () => {
+      expect(isResumableError(new Error('ah!'))).to.be.false;
+      expect(isResumableError(new TypeError('ah!'))).to.be.false;
     });
   });
 });
