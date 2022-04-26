@@ -536,10 +536,16 @@ describe('MongoErrors', () => {
     });
   });
 
-  describe('isResumableError', () => {
+  describe('isResumableError()', () => {
     it('should return false for errors that are not MongoError', () => {
       expect(isResumableError(new Error('ah!'))).to.be.false;
       expect(isResumableError(new TypeError('ah!'))).to.be.false;
     });
+
+    it('should return true for MongoNetworkError', () => {
+      expect(isResumableError(new MongoNetworkError('ah!'))).to.be.true;
+    });
+
+    // TODO(NODE-4125): Add more cases to isResumableError tesing
   });
 });
