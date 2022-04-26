@@ -1,11 +1,8 @@
 import { expect } from 'chai';
 import * as chalk from 'chalk';
+
 ///// Test the memory leak checker with the following:
-import * as sinon from 'sinon';
-
-import * as BSON from '../../../../src/bson';
-
-const serializeSpy = sinon.spy(BSON, 'serialize');
+// const serializeSpy = require('sinon').spy(require('bson'), 'serialize');
 
 let startingMemoryUsage: NodeJS.MemoryUsage;
 
