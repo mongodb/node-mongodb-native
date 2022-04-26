@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { Collection, CommandStartedEvent, MongoClient } from '../../../src';
+import { Collection, MongoClient } from '../../../src';
 import { ConnectionPool } from '../../../src/cmap/connection_pool';
 
 const TEST_METADATA: MongoDBMetadataUI = {
@@ -13,24 +13,11 @@ const TEST_METADATA: MongoDBMetadataUI = {
 
 describe('Server Selection', function () {
   let client: MongoClient;
-  let commands: CommandStartedEvent[];
   let collection: Collection;
 
   beforeEach(async function () {
-    client = this.configuration.newClient({
-      monitorCommands: true
-    });
-
-    commands = [];
-
-    client.on('commandStarted', e => {
-      commands.push(e);
-    });
-
-    await client.connect();
-
+    client = await this.configuration.newClient().connect();
     collection = client.db('server-selection-operation-count').collection('collection0');
-
     await collection.insertMany([{ name: 'joe' }, { name: 'smith' }]);
   });
 
