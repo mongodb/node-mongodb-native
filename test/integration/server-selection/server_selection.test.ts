@@ -6,7 +6,8 @@ import { ConnectionPool } from '../../../src/cmap/connection_pool';
 
 const TEST_METADATA: MongoDBMetadataUI = {
   requires: {
-    topology: 'single'
+    topology: 'single',
+    mongodb: '>=4.0.0'
   }
 };
 
