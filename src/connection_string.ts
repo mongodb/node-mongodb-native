@@ -1075,13 +1075,21 @@ export const OPTIONS = {
   sslCert: {
     target: 'cert',
     transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
+      let text = String(value);
+      if (!fs.existsSync(text)) {
+        return text;
+      }
+      return fs.readFileSync(text, { encoding: 'ascii' });
     }
   },
   sslKey: {
     target: 'key',
     transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
+      let text = String(value);
+      if (!fs.existsSync(text)) {
+        return text;
+      }
+      return fs.readFileSync(text, { encoding: 'ascii' });
     }
   },
   sslPass: {

@@ -193,9 +193,9 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   sslValidate?: boolean;
   /** SSL Certificate file path. */
   sslCA?: string;
-  /** SSL Certificate file path. */
+  /** SSL Certificate file path, or certificate value. */
   sslCert?: string;
-  /** SSL Key file file path. */
+  /** SSL Key file file path, or key value. */
   sslKey?: string;
   /** SSL Certificate pass phrase. */
   sslPass?: string;
