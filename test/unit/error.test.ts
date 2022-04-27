@@ -548,11 +548,27 @@ describe('MongoErrors', () => {
       expect(isResumableError(new MongoNetworkError('ah!'))).to.be.true;
     });
 
-    it('should return false for Error with code', () => {
+    it('should return false for an error that is not a MongoError regardless of code property or wire version', () => {
+      // a plain error with and without wire version argument
+      expect(isResumableError(new Error('ah!'))).to.be.false;
+      expect(isResumableError(new Error('ah!'), 9)).to.be.false;
+      expect(isResumableError(new Error('ah!'), 8)).to.be.false;
+
       const errorWithCode = new (class extends Error {
-        code = MONGODB_ERROR_CODES.CursorNotFound;
+        get code() {
+          throw new Error('code on a non-MongoError should not be inspected');
+        }
+        hasErrorLabel() {
+          throw new Error('hasErrorLabel should not be checked on a non-MongoError');
+        }
       })();
+      // Expectations that prove this syntax provides what is desired for the test
+      expect(errorWithCode).to.be.instanceOf(Error);
+      expect(errorWithCode).to.not.be.instanceOf(MongoError);
+      // Testing that even coded and labeled non-MongoErrors will not get resumed
       expect(isResumableError(errorWithCode)).to.be.false;
+      expect(isResumableError(errorWithCode, 8)).to.be.false;
+      expect(isResumableError(errorWithCode, 9)).to.be.false;
     });
 
     it('should return false for nullish error argument regardless of wire version', () => {
