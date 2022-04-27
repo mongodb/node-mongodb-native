@@ -31,90 +31,81 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     session: ClientSession | undefined,
     callback: Callback<boolean>
   ): void {
-    const db = this.db;
-    const options = this.options;
-    const name = this.name;
-    const encryptedFieldsMap = db.s.client.options.autoEncryption?.encryptedFieldsMap;
-    let encryptedFields: Document | undefined =
-      options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
-    if (!encryptedFields && encryptedFieldsMap) {
-      db.listCollections({ name }, { nameOnly: false }).toArray((err, result) => {
-        if (err) {
-          return callback(err);
+    (async () => {
+      const db = this.db;
+      const options = this.options;
+      const name = this.name;
+
+      const encryptedFieldsMap = db.s.client.options.autoEncryption?.encryptedFieldsMap;
+      let encryptedFields: Document | undefined =
+        options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
+
+      if (!encryptedFields && encryptedFieldsMap) {
+        // If the MongoClient was configued with an encryptedFieldsMap,
+        // and no encryptedFields config was available in it or explicitly
+        // passed as an argument, the spec tells us to look one up using
+        // listCollections().
+        const listCollectionsResult = await db
+          .listCollections({ name }, { nameOnly: false })
+          .toArray();
+        encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
+      }
+
+      let result;
+      let errorForMainOperation;
+      try {
+        result = await this.executeWithoutEncryptedFieldsCheck(server, session);
+      } catch (err) {
+        if (
+          !encryptedFields ||
+          (err as MongoServerError).code !== MONGODB_ERROR_CODES.NamespaceNotFound
+        ) {
+          throw err;
         }
+        // Save a possible NamespaceNotFound error for later
+        // in the encryptedFields case, so that the auxilliary
+        // collections will still be dropped.
+        errorForMainOperation = err;
+      }
 
-        encryptedFields = result?.[0]?.options?.encryptedFields;
-        proceedAfterFetchingEncryptedFields(this);
-      });
-    } else {
-      proceedAfterFetchingEncryptedFields(this);
-    }
-
-    function proceedAfterFetchingEncryptedFields(self: DropCollectionOperation) {
-      self.executeWithoutEncryptedFieldsCheck(server, session, (err, result) => {
-        if (err && (err as MongoServerError).code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
-          return callback(err);
-        }
-
-        if (!encryptedFields) {
-          return callback(err, result);
-        }
-
-        const errorForMainOperation = err;
-
+      if (encryptedFields) {
         const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
         const eccCollection = encryptedFields.eccCollection || `enxcol_.${name}.ecc`;
         const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
-        new DropCollectionOperation(db, escCollection).executeWithoutEncryptedFieldsCheck(
-          server,
-          session,
-          err => {
-            if (err && (err as MongoServerError).code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
-              return callback(err);
+
+        for (const collectionName of [escCollection, eccCollection, ecocCollection]) {
+          // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
+          const dropOp = new DropCollectionOperation(db, collectionName);
+          try {
+            await dropOp.executeWithoutEncryptedFieldsCheck(server, session);
+          } catch (err) {
+            if ((err as MongoServerError).code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+              throw err;
             }
-
-            new DropCollectionOperation(db, eccCollection).executeWithoutEncryptedFieldsCheck(
-              server,
-              session,
-              err => {
-                if (
-                  err &&
-                  (err as MongoServerError).code !== MONGODB_ERROR_CODES.NamespaceNotFound
-                ) {
-                  return callback(err);
-                }
-
-                new DropCollectionOperation(db, ecocCollection).executeWithoutEncryptedFieldsCheck(
-                  server,
-                  session,
-                  err => {
-                    if (
-                      err &&
-                      (err as MongoServerError).code !== MONGODB_ERROR_CODES.NamespaceNotFound
-                    ) {
-                      return callback(err);
-                    }
-
-                    return callback(errorForMainOperation, result);
-                  }
-                );
-              }
-            );
           }
-        );
-      });
-    }
+        }
+
+        if (errorForMainOperation) {
+          throw errorForMainOperation;
+        }
+      }
+
+      return result;
+    })().then(
+      result => callback(undefined, result),
+      err => callback(err)
+    );
   }
 
   private executeWithoutEncryptedFieldsCheck(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<boolean>
-  ): void {
-    super.executeCommand(server, session, { drop: this.name }, (err, result) => {
-      if (err) return callback(err);
-      if (result.ok) return callback(undefined, true);
-      callback(undefined, false);
+    session: ClientSession | undefined
+  ): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      super.executeCommand(server, session, { drop: this.name }, (err, result) => {
+        if (err) return reject(err);
+        resolve(!!result.ok);
+      });
     });
   }
 }
