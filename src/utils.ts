@@ -176,7 +176,7 @@ export function mergeOptions<T, S>(target: T, source: S): T & S {
 }
 
 /** @internal */
-export function filterOptions(options: AnyOptions, names: string[]): AnyOptions {
+export function filterOptions(options: AnyOptions, names: ReadonlyArray<string>): AnyOptions {
   const filterOptions: AnyOptions = {};
 
   for (const name in options) {

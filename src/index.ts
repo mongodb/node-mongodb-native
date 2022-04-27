@@ -169,6 +169,7 @@ export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
 export type {
   ChangeStream,
+  ChangeStreamAggregateRawResult,
   ChangeStreamCursor,
   ChangeStreamCursorOptions,
   ChangeStreamDocument,

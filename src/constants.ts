@@ -40,6 +40,12 @@ export const COMMAND_FAILED = 'commandFailed' as const;
 export const SERVER_HEARTBEAT_STARTED = 'serverHeartbeatStarted' as const;
 export const SERVER_HEARTBEAT_SUCCEEDED = 'serverHeartbeatSucceeded' as const;
 export const SERVER_HEARTBEAT_FAILED = 'serverHeartbeatFailed' as const;
+export const RESPONSE = 'response' as const;
+export const MORE = 'more' as const;
+export const INIT = 'init' as const;
+export const CHANGE = 'change' as const;
+export const END = 'end' as const;
+export const RESUME_TOKEN_CHANGED = 'resumeTokenChanged' as const;
 
 /** @public */
 export const HEARTBEAT_EVENTS = Object.freeze([

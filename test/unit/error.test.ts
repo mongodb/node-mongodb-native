@@ -5,10 +5,14 @@ import {
   WaitQueueTimeoutError as MongoWaitQueueTimeoutError
 } from '../../src/cmap/errors';
 import {
+  isResumableError,
   isRetryableReadError,
   isSDAMUnrecoverableError,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
+  MONGODB_ERROR_CODES,
+  MongoErrorLabel,
+  MongoNetworkTimeoutError,
   MongoSystemError,
   needsRetryableWriteLabel,
   NODE_IS_RECOVERING_ERROR_MESSAGE
@@ -532,6 +536,106 @@ describe('MongoErrors', () => {
           expect(isRetryableReadError(error)).to.be.equal(result);
         });
       }
+    });
+  });
+
+  describe('isResumableError()', () => {
+    describe('should return true', () => {
+      it('for MongoNetworkError regardless of wire version', () => {
+        expect(isResumableError(new MongoNetworkError('ah!'))).to.be.true;
+        expect(isResumableError(new MongoNetworkError('ah!'), 8)).to.be.true;
+        expect(isResumableError(new MongoNetworkError('ah!'), 9)).to.be.true;
+        expect(isResumableError(new MongoNetworkTimeoutError('ah!'))).to.be.true;
+        expect(isResumableError(new MongoNetworkTimeoutError('ah!'), 8)).to.be.true;
+        expect(isResumableError(new MongoNetworkTimeoutError('ah!'), 9)).to.be.true;
+      });
+      it('for labelless MongoError with CursorNotFound code regardless of wire version', () => {
+        const mongoError = new MongoError('ah!');
+        mongoError.code = MONGODB_ERROR_CODES.CursorNotFound;
+        expect(isResumableError(mongoError)).to.be.true;
+        expect(isResumableError(mongoError, 9)).to.be.true;
+        expect(isResumableError(mongoError, 8)).to.be.true;
+      });
+
+      it('for resumable codes if wireVersion is below 9 or unspecified', () => {
+        const mongoError = new MongoError('ah!');
+        mongoError.code = MONGODB_ERROR_CODES.ShutdownInProgress; // Shutdown in progress is resumable
+        expect(isResumableError(mongoError)).to.be.true;
+        expect(isResumableError(mongoError, 8)).to.be.true;
+      });
+
+      it('for labeled MongoError only if the wireVersion is at least 9', () => {
+        const mongoError = new MongoError('ah!');
+        mongoError.addErrorLabel(MongoErrorLabel.ResumableChangeStreamError);
+        expect(mongoError.hasErrorLabel(MongoErrorLabel.ResumableChangeStreamError)).to.be.true;
+        expect(isResumableError(mongoError, 9)).to.be.true;
+      });
+    });
+
+    describe('should return false', () => {
+      it('for errors that are not MongoError', () => {
+        expect(isResumableError(new Error('ah!'))).to.be.false;
+        expect(isResumableError(new TypeError('ah!'))).to.be.false;
+      });
+
+      it('for an error that is not a MongoError regardless of code property or wire version', () => {
+        // a plain error with and without wire version argument
+        expect(isResumableError(new Error('ah!'))).to.be.false;
+        expect(isResumableError(new Error('ah!'), 9)).to.be.false;
+        expect(isResumableError(new Error('ah!'), 8)).to.be.false;
+
+        const errorWithCode = new (class extends Error {
+          get code() {
+            throw new Error('code on a non-MongoError should not be inspected');
+          }
+          hasErrorLabel() {
+            throw new Error('hasErrorLabel should not be checked on a non-MongoError');
+          }
+        })();
+        // Expectations that prove this syntax provides what is desired for the test
+        expect(errorWithCode).to.be.instanceOf(Error);
+        expect(errorWithCode).to.not.be.instanceOf(MongoError);
+        // Testing that even coded and labeled non-MongoErrors will not get resumed
+        expect(isResumableError(errorWithCode)).to.be.false;
+        expect(isResumableError(errorWithCode, 8)).to.be.false;
+        expect(isResumableError(errorWithCode, 9)).to.be.false;
+      });
+
+      it('for nullish error argument regardless of wire version', () => {
+        expect(isResumableError()).to.be.false;
+        expect(isResumableError(undefined)).to.be.false;
+        expect(isResumableError(null)).to.be.false;
+        expect(isResumableError(null, null)).to.be.false;
+        expect(isResumableError(undefined, undefined)).to.be.false;
+        expect(isResumableError(null, undefined)).to.be.false;
+        expect(isResumableError(undefined, null)).to.be.false;
+        expect(isResumableError(null, 8)).to.be.false;
+        expect(isResumableError(null, 9)).to.be.false;
+        expect(isResumableError(undefined, 8)).to.be.false;
+        expect(isResumableError(undefined, 9)).to.be.false;
+      });
+
+      it('for resumable codes if wireVersion is at least 9', () => {
+        const mongoError = new MongoError('ah!');
+        mongoError.code = MONGODB_ERROR_CODES.ShutdownInProgress; // Shutdown in progress is resumable
+        expect(isResumableError(mongoError, 9)).to.be.false; // 4.4+ uses label only except for CursorNotFound
+      });
+
+      it('for non numeric code regardless of wire version', () => {
+        const mongoError = new MongoError('ah!');
+        mongoError.code = 'Random String';
+        expect(isResumableError(mongoError)).to.be.false;
+        expect(isResumableError(mongoError, 8)).to.be.false;
+        expect(isResumableError(mongoError, 9)).to.be.false;
+      });
+
+      it('for labeled error below wire version 9', () => {
+        const mongoError = new MongoError('ah!');
+        mongoError.addErrorLabel(MongoErrorLabel.ResumableChangeStreamError);
+        expect(mongoError.hasErrorLabel(MongoErrorLabel.ResumableChangeStreamError)).to.be.true;
+        expect(isResumableError(mongoError, 8)).to.be.false;
+        expect(isResumableError(mongoError)).to.be.false;
+      });
     });
   });
 });

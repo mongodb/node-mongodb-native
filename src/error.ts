@@ -882,35 +882,26 @@ export function isNetworkTimeoutError(err: MongoError): err is MongoNetworkError
   return !!(err instanceof MongoNetworkError && err.message.match(/timed out/));
 }
 
-// From spec@https://github.com/mongodb/specifications/blob/7a2e93d85935ee4b1046a8d2ad3514c657dc74fa/source/change-streams/change-streams.rst#resumable-error:
-//
-// An error is considered resumable if it meets any of the following criteria:
-// - any error encountered which is not a server error (e.g. a timeout error or network error)
-// - any server error response from a getMore command excluding those containing the error label
-//   NonRetryableChangeStreamError and those containing the following error codes:
-//   - Interrupted: 11601
-//   - CappedPositionLost: 136
-//   - CursorKilled: 237
-//
-// An error on an aggregate command is not a resumable error. Only errors on a getMore command may be considered resumable errors.
+export function isResumableError(error?: Error, wireVersion?: number): boolean {
+  if (error == null || !(error instanceof MongoError)) {
+    return false;
+  }
 
-export function isResumableError(error?: MongoError, wireVersion?: number): boolean {
   if (error instanceof MongoNetworkError) {
     return true;
   }
 
   if (wireVersion != null && wireVersion >= 9) {
     // DRIVERS-1308: For 4.4 drivers running against 4.4 servers, drivers will add a special case to treat the CursorNotFound error code as resumable
-    if (error && error instanceof MongoError && error.code === MONGODB_ERROR_CODES.CursorNotFound) {
+    if (error.code === MONGODB_ERROR_CODES.CursorNotFound) {
       return true;
     }
-    return (
-      error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.ResumableChangeStreamError)
-    );
+    return error.hasErrorLabel(MongoErrorLabel.ResumableChangeStreamError);
   }
 
-  if (error && typeof error.code === 'number') {
+  if (typeof error.code === 'number') {
     return GET_MORE_RESUMABLE_CODES.has(error.code);
   }
+
   return false;
 }
