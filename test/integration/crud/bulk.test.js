@@ -23,6 +23,72 @@ describe('Bulk', function () {
     return setupDatabase(this.configuration);
   });
 
+  context('ops tests', () => {
+    // eslint-disable-next-line no-restricted-properties
+    it.only('Should raise an error when attempting bulkwrite operation on undefined operation', function (done) {
+      var configuration = this.configuration;
+      const client = configuration.newClient();
+      const docs = [];
+      docs[1] = {}; // works for docs[0] = {}
+      // client.db('test').collection('test').insertMany(docs);
+      // client.close();
+
+      let error = null;
+      let result = null;
+
+      client
+        .connect()
+        .then(function (client) {
+          return client.db('test').collection('test').insertMany(docs);
+        })
+        .then(function (r) {
+          result = r;
+        })
+        .catch(function (err) {
+          console.log(err);
+          error = err;
+        })
+        .then(function () {
+          expect(result).to.not.exist;
+          test.ok(error);
+          console.log(error, 'KOBBY');
+          client.close(done);
+        });
+    });
+
+    // eslint-disable-next-line no-restricted-properties
+    it.only('Should not raise an error when attempting bulkwrite operation on undefined operation', function (done) {
+      var configuration = this.configuration;
+      const client = configuration.newClient();
+      const docs = [];
+      docs[0] = {}; // works for docs[0] = {}
+      // client.db('test').collection('test').insertMany(docs);
+      // client.close();
+
+      let error = null;
+      let result = null;
+
+      client
+        .connect()
+        .then(function (client) {
+          return client.db('test').collection('test').insertMany(docs);
+        })
+        .then(function (r) {
+          result = r;
+        })
+        .catch(function (err) {
+          console.log(err);
+          error = err;
+        })
+        .then(function () {
+          expect(error).to.not.exist;
+          console.log(result, 'KOBBY');
+          test.ok(result);
+          client.close(done);
+        });
+    });
+  });
+
   context('promise tests', () => {
     it('Should correctly execute unordered bulk operation in promise form', function (done) {
       const configuration = this.configuration;
