@@ -117,7 +117,7 @@ export interface PipeOptions {
 export type ChangeStreamAggregateRawResult<TChange> = {
   $clusterTime: { clusterTime: Timestamp };
   cursor: {
-    postBatchResumeToken: unknown;
+    postBatchResumeToken: ResumeToken;
     ns: string;
     id: number | Long;
   } & ({ firstBatch: TChange[] } | { nextBatch: TChange[] });

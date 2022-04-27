@@ -10,6 +10,8 @@ import {
   isSDAMUnrecoverableError,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
+  MONGODB_ERROR_CODES,
+  MongoErrorLabel,
   MongoSystemError,
   needsRetryableWriteLabel,
   NODE_IS_RECOVERING_ERROR_MESSAGE
@@ -544,6 +546,56 @@ describe('MongoErrors', () => {
 
     it('should return true for MongoNetworkError', () => {
       expect(isResumableError(new MongoNetworkError('ah!'))).to.be.true;
+    });
+
+    it('should return false for Error with code', () => {
+      const errorWithCode = new (class extends Error {
+        code = MONGODB_ERROR_CODES.CursorNotFound;
+      })();
+      expect(isResumableError(errorWithCode)).to.be.false;
+    });
+
+    it('should return false nullish arguments', () => {
+      expect(isResumableError()).to.be.false;
+      expect(isResumableError(null)).to.be.false;
+      expect(isResumableError(null, null)).to.be.false;
+    });
+
+    it('should return true for labelless MongoError with CursorNotFound code', () => {
+      const mongoError = new MongoError('ah!');
+      mongoError.code = MONGODB_ERROR_CODES.CursorNotFound;
+      expect(isResumableError(mongoError)).to.be.true;
+      expect(isResumableError(mongoError, 9)).to.be.true;
+      expect(isResumableError(mongoError, 8)).to.be.true;
+    });
+
+    it('should return true for labeled MongoError above wireVersion 9', () => {
+      const mongoError = new MongoError('ah!');
+      mongoError.addErrorLabel(MongoErrorLabel.ResumableChangeStreamError);
+      expect(isResumableError(mongoError)).to.be.false;
+      expect(isResumableError(mongoError, 9)).to.be.true;
+      expect(isResumableError(mongoError, 8)).to.be.false;
+    });
+
+    it('should return false for resumable codes if wireVersion is above 9', () => {
+      const mongoError = new MongoError('ah!');
+      mongoError.code = MONGODB_ERROR_CODES.ShutdownInProgress; // Shutdown in progress is resumable
+      expect(isResumableError(mongoError, 9)).to.be.false; // 4.4+ uses label only except for CursorNotFound
+    });
+
+    it('should return true for resumable codes if wireVersion is below 9', () => {
+      const mongoError = new MongoError('ah!');
+      mongoError.code = MONGODB_ERROR_CODES.ShutdownInProgress; // Shutdown in progress is resumable
+      expect(isResumableError(mongoError)).to.be.true;
+      expect(isResumableError(mongoError, 8)).to.be.true;
+    });
+
+    it('should return false for non numeric code', () => {
+      const mongoError = new MongoError('ah!');
+      mongoError.code = 'Random String';
+      expect(isResumableError(mongoError)).to.be.false;
+      expect(isResumableError(mongoError, 8)).to.be.false;
+      expect(isResumableError(mongoError, 9)).to.be.false;
     });
 
     // TODO(NODE-4125): Add more cases to isResumableError testing
