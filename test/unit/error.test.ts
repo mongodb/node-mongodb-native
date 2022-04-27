@@ -555,13 +555,13 @@ describe('MongoErrors', () => {
       expect(isResumableError(errorWithCode)).to.be.false;
     });
 
-    it('should return false nullish arguments', () => {
+    it('should return false for nullish error argument regardless of wire version', () => {
       expect(isResumableError()).to.be.false;
       expect(isResumableError(null)).to.be.false;
       expect(isResumableError(null, null)).to.be.false;
     });
 
-    it('should return true for labelless MongoError with CursorNotFound code', () => {
+    it('should return true for labelless MongoError with CursorNotFound code regardless of wire version', () => {
       const mongoError = new MongoError('ah!');
       mongoError.code = MONGODB_ERROR_CODES.CursorNotFound;
       expect(isResumableError(mongoError)).to.be.true;
@@ -569,7 +569,7 @@ describe('MongoErrors', () => {
       expect(isResumableError(mongoError, 8)).to.be.true;
     });
 
-    it('should return true for labeled MongoError above wireVersion 9', () => {
+    it('should return true for labeled MongoError only if the wireVersion is at least 9', () => {
       const mongoError = new MongoError('ah!');
       mongoError.addErrorLabel(MongoErrorLabel.ResumableChangeStreamError);
       expect(isResumableError(mongoError)).to.be.false;
@@ -577,20 +577,20 @@ describe('MongoErrors', () => {
       expect(isResumableError(mongoError, 8)).to.be.false;
     });
 
-    it('should return false for resumable codes if wireVersion is above 9', () => {
+    it('should return false for resumable codes if wireVersion is at least 9', () => {
       const mongoError = new MongoError('ah!');
       mongoError.code = MONGODB_ERROR_CODES.ShutdownInProgress; // Shutdown in progress is resumable
       expect(isResumableError(mongoError, 9)).to.be.false; // 4.4+ uses label only except for CursorNotFound
     });
 
-    it('should return true for resumable codes if wireVersion is below 9', () => {
+    it('should return true for resumable codes if wireVersion is below 9 or unspecified', () => {
       const mongoError = new MongoError('ah!');
       mongoError.code = MONGODB_ERROR_CODES.ShutdownInProgress; // Shutdown in progress is resumable
       expect(isResumableError(mongoError)).to.be.true;
       expect(isResumableError(mongoError, 8)).to.be.true;
     });
 
-    it('should return false for non numeric code', () => {
+    it('should return false for non numeric code regardless of wire version', () => {
       const mongoError = new MongoError('ah!');
       mongoError.code = 'Random String';
       expect(isResumableError(mongoError)).to.be.false;
