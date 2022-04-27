@@ -53,6 +53,11 @@ function compareResultsToExpected(
   { tolerance, expected_frequencies }: Outcome,
   observed_frequencies: FrequencyMap
 ) {
+  const expectedFrequencies = Object.entries(expected_frequencies);
+  expect(
+    expectedFrequencies,
+    'Encountered an empty set of frequencies to assert on.  Is there an error with the spec test or with the runner?'
+  ).to.have.length.greaterThan(0);
   for (const [address, frequency] of Object.entries(expected_frequencies)) {
     if (frequency === 0) {
       expect(observed_frequencies).not.to.haveOwnProperty(address);
@@ -89,7 +94,7 @@ function calculateObservedFrequencies(observedServers: ReadonlyArray<Server>): F
   return actualResults;
 }
 
-export async function runServerSelectionLatencyWindowTest(test: ServerSelectionLatencyWindowTest) {
+function setupTest(test: ServerSelectionLatencyWindowTest): Topology {
   const allHosts = test.topology_description.servers.map(({ address }) => address);
   const topology = new Topology(allHosts, {} as any);
 
@@ -113,6 +118,12 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
     const server = topology.s.servers.get(serverAddress);
     server.s.operationCount = operation_count;
   }
+
+  return topology;
+}
+
+export async function runServerSelectionLatencyWindowTest(test: ServerSelectionLatencyWindowTest) {
+  const topology = setupTest(test);
 
   const selectedServers: Server[] = [];
 
