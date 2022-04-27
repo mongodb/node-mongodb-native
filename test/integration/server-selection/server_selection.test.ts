@@ -18,7 +18,11 @@ describe('Server Selection', function () {
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     collection = client.db('server-selection-operation-count').collection('collection0');
-    await collection.insertMany([{ name: 'joe' }, { name: 'smith' }]);
+    await collection.insertMany(
+      Array.from({ length: 100 }, (_, i) => ({
+        id: i
+      }))
+    );
   });
 
   afterEach(async function () {
@@ -29,15 +33,113 @@ describe('Server Selection', function () {
   });
 
   context('operationCount', function () {
+    context('load balanced mode with pinnable operations', function () {
+      afterEach(async function () {
+        sinon.restore();
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: 'off',
+          data: {
+            failCommands: ['find'] // TODO : fill this out,
+          }
+        });
+      });
+      it(
+        'is zero after a successful command',
+        {
+          requires: { topology: 'load-balanced', mongodb: '>=4.0.0' }
+        },
+        async function () {
+          const server = Array.from(client.topology.s.servers.values())[0];
+          expect(server.s.operationCount).to.equal(0);
+          const commandSpy = sinon.spy(server, 'command');
+
+          await collection.findOne({
+            name: 'Joe'
+          });
+
+          expect(commandSpy.called).to.be.true;
+          expect(server.s.operationCount).to.equal(0);
+        }
+      );
+
+      it(
+        'is zero after a command fails',
+
+        {
+          requires: { topology: 'load-balanced', mongodb: '>=4.0.0' }
+        },
+        async function () {
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['find'], // TODO : fill this out,
+              errorCode: 80
+            }
+          });
+
+          const server = Array.from(client.topology.s.servers.values())[0];
+          expect(server.s.operationCount).to.equal(0);
+
+          const commandSpy = sinon.spy(server, 'command');
+
+          const error = await collection
+            .findOne({
+              name: 'Joe'
+            })
+            .catch(e => e);
+
+          expect(error).to.exist;
+          expect(commandSpy.called).to.be.true;
+
+          expect(server.s.operationCount).to.equal(0);
+        }
+      );
+
+      it(
+        'is zero after failing to check out a connection for a command',
+        {
+          requires: { topology: 'load-balanced', mongodb: '>=4.0.0' }
+        },
+        async function () {
+          const server = Array.from(client.topology.s.servers.values())[0];
+          expect(server.s.operationCount).to.equal(0);
+
+          sinon.stub(ConnectionPool.prototype, 'checkOut').callsFake(function (cb) {
+            cb(new Error('unable to checkout connection'), undefined);
+          });
+          const commandSpy = sinon.spy(server, 'command');
+
+          const error = await collection
+            .findOne({
+              name: 'Joe'
+            })
+            .catch(e => e);
+
+          expect(error).to.exist;
+          expect(error).to.match(/unable to checkout connection/i);
+          expect(commandSpy.called).to.be.true;
+          expect(server.s.operationCount).to.equal(0);
+        }
+      );
+    });
+
     context('operationCount is adjusted properly on successful operation', function () {
       it('is zero after a successful command', TEST_METADATA, async function () {
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
         const commandSpy = sinon.spy(server, 'command');
 
-        await collection.insertOne({
-          name: 'Joe'
-        });
+        const operationPromises = Array.from({ length: 10 }, () =>
+          collection.insertOne({
+            name: 'Joe'
+          })
+        );
+
+        expect(server.s.operationCount).to.equal(10);
+
+        await Promise.all(operationPromises);
 
         expect(commandSpy.called).to.be.true;
         expect(server.s.operationCount).to.equal(0);
@@ -52,7 +154,11 @@ describe('Server Selection', function () {
 
         const getMoreSpy = sinon.spy(server, 'getMore');
 
-        await cursor.next();
+        const operations = Array.from({ length: 10 }, () => cursor.next());
+
+        expect(server.s.operationCount).to.equal(10);
+
+        await Promise.all(operations);
 
         expect(getMoreSpy.called).to.be.true;
         expect(server.s.operationCount).to.equal(0);
@@ -69,7 +175,11 @@ describe('Server Selection', function () {
 
         const killCursorsSpy = sinon.spy(server, 'killCursors');
 
-        await cursor.close();
+        const promise = cursor.close();
+
+        expect(server.s.operationCount).to.equal(1);
+
+        await promise;
 
         expect(killCursorsSpy.called).to.be.true;
         expect(server.s.operationCount).to.equal(0);
