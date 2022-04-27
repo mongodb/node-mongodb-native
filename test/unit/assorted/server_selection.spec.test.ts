@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { join, resolve } from 'path';
 import * as sinon from 'sinon';
 
 import { Server } from '../../../src/sdam/server';
@@ -37,9 +37,9 @@ describe('Server Selection Logic (spec)', function () {
 });
 
 describe('Server Selection Latency Window Tests (spec)', function () {
-  const selectionSpecDir = join(__dirname, '../../spec/server-selection/in_window');
+  const selectionSpecDir = resolve(__dirname + '../../../spec/server-selection/in_window');
   const tests = loadLatencyWindowTests(selectionSpecDir);
-  let serverConnect;
+  let serverConnect: sinon.SinonStub;
 
   before(() => {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {

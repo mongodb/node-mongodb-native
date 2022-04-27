@@ -13,7 +13,7 @@ const TEST_METADATA: MongoDBMetadataUI = {
 
 describe('Server Selection', function () {
   let client: MongoClient;
-  let collection: Collection;
+  let collection: Collection<{ id: number }>;
 
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
@@ -133,7 +133,7 @@ describe('Server Selection', function () {
 
         const operationPromises = Array.from({ length: 10 }, () =>
           collection.insertOne({
-            name: 'Joe'
+            id: 1
           })
         );
 

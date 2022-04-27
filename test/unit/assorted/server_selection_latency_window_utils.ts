@@ -36,12 +36,12 @@ type Outcome = ServerSelectionLatencyWindowTest['outcome'];
 type FrequencyMap = Outcome['expected_frequencies'];
 
 export function loadLatencyWindowTests(directory: string) {
-  const files = readdirSync(directory).filter(fileName => fileName.includes('.json'));
+  const files = readdirSync(directory).filter(fileName => fileName.endsWith('.json'));
 
   const tests: ServerSelectionLatencyWindowTest[] = [];
 
   for (const fileName of files) {
-    const path = join(directory, '/', fileName);
+    const path = join(directory, fileName);
     const contents = readFileSync(path, { encoding: 'utf-8' });
     tests.push(EJSON.parse(contents) as ServerSelectionLatencyWindowTest);
   }
@@ -73,11 +73,9 @@ function compareResultsToExpected(
   }
 }
 
-function calculateObservedFrequencies(
-  observedServers: ReadonlyArray<Server>,
-  iterations: number
-): FrequencyMap {
+function calculateObservedFrequencies(observedServers: ReadonlyArray<Server>): FrequencyMap {
   const actualResults: FrequencyMap = {};
+  const iterations = observedServers.length;
 
   for (const server of observedServers) {
     const count = actualResults[server.description.address] ?? 0;
@@ -126,9 +124,7 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
     selectedServers.push(server);
   }
 
-  expect(selectedServers).to.have.lengthOf(test.iterations);
-
-  const observedFrequencies = calculateObservedFrequencies(selectedServers, test.iterations);
+  const observedFrequencies = calculateObservedFrequencies(selectedServers);
 
   compareResultsToExpected(test.outcome, observedFrequencies);
 }
