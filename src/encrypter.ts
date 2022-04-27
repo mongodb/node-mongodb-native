@@ -72,7 +72,10 @@ export class Encrypter {
     if (internalClient == null) {
       const clonedOptions: MongoClientOptions = {};
 
-      for (const key of Object.keys(options)) {
+      for (const key of [
+        ...Object.getOwnPropertyNames(options),
+        ...Object.getOwnPropertySymbols(options)
+      ] as string[]) {
         if (['autoEncryption', 'minPoolSize', 'servers', 'caseTranslate', 'dbName'].includes(key))
           continue;
         Reflect.set(clonedOptions, key, Reflect.get(options, key));
