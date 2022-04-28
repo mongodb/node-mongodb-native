@@ -1,7 +1,15 @@
 import { expect } from 'chai';
 import { inspect } from 'util';
 
-import { Binary, Document, Long, MongoError, ObjectId } from '../../../src';
+import {
+  Binary,
+  BSONTypeAlias,
+  Document,
+  Long,
+  MongoError,
+  ObjectId,
+  OneOrMore
+} from '../../../src';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
@@ -30,7 +38,7 @@ export function isExistsOperator(value: unknown): value is ExistsOperator {
   return typeof value === 'object' && value != null && '$$exists' in value;
 }
 export interface TypeOperator {
-  $$type: boolean;
+  $$type: OneOrMore<BSONTypeAlias>;
 }
 export function isTypeOperator(value: unknown): value is TypeOperator {
   return typeof value === 'object' && value != null && '$$type' in value;

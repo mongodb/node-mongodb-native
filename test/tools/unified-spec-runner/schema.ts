@@ -7,10 +7,63 @@ import type { W } from '../../../src/write_concern';
 
 export const SupportedVersion = '^1.0';
 
+export const OperationNames = [
+  'abortTransaction',
+  'aggregate',
+  'assertCollectionExists',
+  'assertCollectionNotExists',
+  'assertIndexExists',
+  'assertIndexNotExists',
+  'assertDifferentLsidOnLastTwoCommands',
+  'assertSameLsidOnLastTwoCommands',
+  'assertSessionDirty',
+  'assertSessionNotDirty',
+  'assertSessionPinned',
+  'assertSessionUnpinned',
+  'assertSessionTransactionState',
+  'assertNumberConnectionsCheckedOut',
+  'bulkWrite',
+  'close',
+  'commitTransaction',
+  'createChangeStream',
+  'createCollection',
+  'createFindCursor',
+  'createIndex',
+  'deleteOne',
+  'dropCollection',
+  'endSession',
+  'find',
+  'findOneAndReplace',
+  'findOneAndUpdate',
+  'findOneAndDelete',
+  'failPoint',
+  'insertOne',
+  'insertMany',
+  'iterateUntilDocumentOrError',
+  'listCollections',
+  'listDatabases',
+  'listIndexes',
+  'replaceOne',
+  'startTransaction',
+  'targetedFailPoint',
+  'delete',
+  'download',
+  'upload',
+  'withTransaction',
+  'countDocuments',
+  'deleteMany',
+  'distinct',
+  'estimatedDocumentCount',
+  'runCommand',
+  'updateMany',
+  'updateOne'
+] as const;
+export type OperationName = typeof OperationNames[number];
+
 export interface OperationDescription {
-  name: string;
+  name: OperationName;
   object: string;
-  arguments: Document;
+  arguments?: Document;
   expectError?: ExpectedError;
   expectResult?: unknown;
   saveResultAsEntity?: string;
