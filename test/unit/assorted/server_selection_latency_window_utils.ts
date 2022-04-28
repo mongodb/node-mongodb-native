@@ -56,7 +56,7 @@ function compareResultsToExpected(
   const expectedFrequencies = Object.entries(expected_frequencies);
   expect(
     expectedFrequencies,
-    'Encountered an empty set of frequencies to assert on.  Is there an error with the spec test or with the runner?'
+    'Encountered an empty set of frequencies to assert on.  Is there something wrong with the test or the runner?'
   ).to.have.length.greaterThan(0);
   for (const [address, frequency] of Object.entries(expected_frequencies)) {
     if (frequency === 0) {
@@ -108,9 +108,18 @@ function setupTest(test: ServerSelectionLatencyWindowTest): Topology {
     const { type, avg_rtt_ms } = test.topology_description.servers.find(
       ({ address }) => address === serverAddress
     );
-    expect(operation_count).to.exist;
-    expect(type).to.exist;
-    expect(avg_rtt_ms).to.exist;
+    expect(
+      operation_count,
+      'Encountered server without an operation count.  Is there something wrong with the test format or the runner?'
+    ).to.exist;
+    expect(
+      type,
+      'Encountered server without a server type.  Is there something wrong with the test format or the runner?'
+    ).to.exist;
+    expect(
+      avg_rtt_ms,
+      'Encountered server without an avg_rtt_ms.  Is there something wrong with the test format or the runner?'
+    ).to.exist;
     description.roundTripTime = avg_rtt_ms;
     description.type = type;
     const serverDescription = serverDescriptionFromDefinition(description, allHosts);

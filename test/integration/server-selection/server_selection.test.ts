@@ -3,6 +3,7 @@ import * as sinon from 'sinon';
 
 import { Collection, MongoClient } from '../../../src';
 import { ConnectionPool } from '../../../src/cmap/connection_pool';
+import { FailPoint } from '../../tools/utils';
 
 const TEST_METADATA: MongoDBMetadataUI = {
   requires: {
@@ -27,6 +28,13 @@ describe('Server Selection', function () {
 
   afterEach(async function () {
     sinon.restore();
+    await client.db('admin').command(<FailPoint>{
+      configureFailPoint: 'failCommand',
+      mode: 'off',
+      data: {
+        failCommands: ['insert', 'getMore', 'killCursors']
+      }
+    });
     await collection.deleteMany({});
     await client.close();
     client = undefined;
@@ -34,16 +42,6 @@ describe('Server Selection', function () {
 
   context('operationCount', function () {
     context('load balanced mode with pinnable operations', function () {
-      afterEach(async function () {
-        sinon.restore();
-        await client.db('admin').command({
-          configureFailPoint: 'failCommand',
-          mode: 'off',
-          data: {
-            failCommands: ['find'] // TODO : fill this out,
-          }
-        });
-      });
       it(
         'is zero after a successful command',
         {
@@ -74,7 +72,7 @@ describe('Server Selection', function () {
             configureFailPoint: 'failCommand',
             mode: 'alwaysOn',
             data: {
-              failCommands: ['find'], // TODO : fill this out,
+              failCommands: ['find'],
               errorCode: 80
             }
           });
@@ -188,21 +186,21 @@ describe('Server Selection', function () {
 
     context('operationCount is adjusted properly when operations fail', function () {
       afterEach(async function () {
-        await client.db('admin').command({
+        await client.db('admin').command(<FailPoint>{
           configureFailPoint: 'failCommand',
           mode: 'off',
           data: {
-            failCommands: ['insert', 'getMore', 'killCursors'] // TODO : fill this out,
+            failCommands: ['insert', 'getMore', 'killCursors']
           }
         });
       });
 
       it('is zero after a command fails', TEST_METADATA, async function () {
-        await client.db('admin').command({
+        await client.db('admin').command(<FailPoint>{
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
           data: {
-            failCommands: ['insert'], // TODO : fill this out,
+            failCommands: ['insert'],
             errorCode: 80
           }
         });
@@ -214,7 +212,7 @@ describe('Server Selection', function () {
 
         const error = await collection
           .insertOne({
-            name: 'Joe'
+            id: 1
           })
           .catch(e => e);
 
@@ -228,11 +226,11 @@ describe('Server Selection', function () {
         const cursor = collection.find({}, { batchSize: 1 });
         await cursor.next();
 
-        await client.db('admin').command({
+        await client.db('admin').command(<FailPoint>{
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
           data: {
-            failCommands: ['getMore'], // TODO : fill this out,
+            failCommands: ['getMore'],
             errorCode: 80
           }
         });
@@ -254,11 +252,11 @@ describe('Server Selection', function () {
         const cursor = collection.find({}, { batchSize: 1 });
         await cursor.next(); // initialize the cursor
 
-        await client.db('admin').command({
+        await client.db('admin').command(<FailPoint>{
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
           data: {
-            failCommands: ['killCursors'], // TODO : fill this out,
+            failCommands: ['killCursors'],
             errorCode: 80
           }
         });
@@ -268,6 +266,7 @@ describe('Server Selection', function () {
         const killCursorsSpy = sinon.spy(server, 'killCursors');
 
         await cursor.close().catch(err => err);
+        // TODO(NODE-4217): update test to check for error existence
         // expect(error).to.exist;
 
         expect(killCursorsSpy.called).to.be.true;
@@ -292,7 +291,7 @@ describe('Server Selection', function () {
 
             const error = await collection
               .insertOne({
-                name: 'Joe'
+                id: 1
               })
               .catch(e => e);
 
@@ -346,6 +345,7 @@ describe('Server Selection', function () {
             const killCursorsSpy = sinon.spy(server, 'killCursors');
 
             await cursor.close().catch(err => err);
+            // TODO(NODE-4217): update test to check for error existence
             // expect(error).to.exist;
 
             expect(killCursorsSpy.called).to.be.true;
