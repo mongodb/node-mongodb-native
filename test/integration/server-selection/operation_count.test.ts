@@ -5,101 +5,92 @@ import { Collection, MongoClient } from '../../../src';
 import { ConnectionPool } from '../../../src/cmap/connection_pool';
 import { FailPoint } from '../../tools/utils';
 
-const TEST_METADATA: MongoDBMetadataUI = {
+const testMetadata: MongoDBMetadataUI = {
   requires: {
     topology: 'single',
     mongodb: '>=4.0.0'
   }
 };
 
+const loadBalancedTestMetadata: MongoDBMetadataUI = {
+  requires: {
+    topology: 'load-balanced',
+    mongodb: '>=4.0.0'
+  }
+};
+
+const enableFailPointCommand: FailPoint = {
+  configureFailPoint: 'failCommand',
+  mode: 'alwaysOn',
+  data: {
+    failCommands: ['insert', 'getMore', 'killCursors', 'find'],
+    errorCode: 80
+  }
+};
+
+const disableFailPointCommand: FailPoint = {
+  configureFailPoint: 'failCommand',
+  mode: 'off',
+  data: {
+    failCommands: ['insert', 'getMore', 'killCursors', 'find']
+  }
+};
+
 describe('Server Selection', function () {
   let client: MongoClient;
-  let collection: Collection<{ id: number }>;
+  let collection: Collection<{ count: number }>;
 
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();
     collection = client.db('server-selection-operation-count').collection('collection0');
     await collection.insertMany(
       Array.from({ length: 100 }, (_, i) => ({
-        id: i
+        count: i
       }))
     );
   });
 
   afterEach(async function () {
     sinon.restore();
-    await client.db('admin').command(<FailPoint>{
-      configureFailPoint: 'failCommand',
-      mode: 'off',
-      data: {
-        failCommands: ['insert', 'getMore', 'killCursors']
-      }
-    });
+    await client.db('admin').command(disableFailPointCommand);
     await collection.deleteMany({});
     await client.close();
     client = undefined;
+    collection = undefined;
   });
 
   context('operationCount', function () {
     context('load balanced mode with pinnable operations', function () {
-      it(
-        'is zero after a successful command',
-        {
-          requires: { topology: 'load-balanced', mongodb: '>=4.0.0' }
-        },
-        async function () {
-          const server = Array.from(client.topology.s.servers.values())[0];
-          expect(server.s.operationCount).to.equal(0);
-          const commandSpy = sinon.spy(server, 'command');
+      it('is zero after a successful command', loadBalancedTestMetadata, async function () {
+        const server = Array.from(client.topology.s.servers.values())[0];
+        expect(server.s.operationCount).to.equal(0);
+        const commandSpy = sinon.spy(server, 'command');
 
-          await collection.findOne({
-            name: 'Joe'
-          });
+        await collection.findOne({ count: 1 });
 
-          expect(commandSpy.called).to.be.true;
-          expect(server.s.operationCount).to.equal(0);
-        }
-      );
+        expect(commandSpy.called).to.be.true;
+        expect(server.s.operationCount).to.equal(0);
+      });
 
-      it(
-        'is zero after a command fails',
+      it('is zero after a command fails', loadBalancedTestMetadata, async function () {
+        await client.db('admin').command(enableFailPointCommand);
 
-        {
-          requires: { topology: 'load-balanced', mongodb: '>=4.0.0' }
-        },
-        async function () {
-          await client.db('admin').command({
-            configureFailPoint: 'failCommand',
-            mode: 'alwaysOn',
-            data: {
-              failCommands: ['find'],
-              errorCode: 80
-            }
-          });
+        const server = Array.from(client.topology.s.servers.values())[0];
+        expect(server.s.operationCount).to.equal(0);
 
-          const server = Array.from(client.topology.s.servers.values())[0];
-          expect(server.s.operationCount).to.equal(0);
+        const commandSpy = sinon.spy(server, 'command');
 
-          const commandSpy = sinon.spy(server, 'command');
+        const error = await collection.findOne({ count: 1 }).catch(e => e);
 
-          const error = await collection
-            .findOne({
-              name: 'Joe'
-            })
-            .catch(e => e);
+        expect(error).to.exist;
+        expect(commandSpy.called).to.be.true;
 
-          expect(error).to.exist;
-          expect(commandSpy.called).to.be.true;
-
-          expect(server.s.operationCount).to.equal(0);
-        }
-      );
+        expect(server.s.operationCount).to.equal(0);
+      });
 
       it(
         'is zero after failing to check out a connection for a command',
-        {
-          requires: { topology: 'load-balanced', mongodb: '>=4.0.0' }
-        },
+        loadBalancedTestMetadata,
         async function () {
           const server = Array.from(client.topology.s.servers.values())[0];
           expect(server.s.operationCount).to.equal(0);
@@ -109,11 +100,7 @@ describe('Server Selection', function () {
           });
           const commandSpy = sinon.spy(server, 'command');
 
-          const error = await collection
-            .findOne({
-              name: 'Joe'
-            })
-            .catch(e => e);
+          const error = await collection.findOne({ count: 1 }).catch(e => e);
 
           expect(error).to.exist;
           expect(error).to.match(/unable to checkout connection/i);
@@ -124,15 +111,13 @@ describe('Server Selection', function () {
     });
 
     context('operationCount is adjusted properly on successful operation', function () {
-      it('is zero after a successful command', TEST_METADATA, async function () {
+      it('is zero after a successful command', testMetadata, async function () {
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
         const commandSpy = sinon.spy(server, 'command');
 
         const operationPromises = Array.from({ length: 10 }, () =>
-          collection.insertOne({
-            id: 1
-          })
+          collection.insertOne({ count: 1 })
         );
 
         expect(server.s.operationCount).to.equal(10);
@@ -143,9 +128,9 @@ describe('Server Selection', function () {
         expect(server.s.operationCount).to.equal(0);
       });
 
-      it('is zero after a successful getMore', TEST_METADATA, async function () {
+      it('is zero after a successful getMore', testMetadata, async function () {
         const cursor = collection.find({}, { batchSize: 1 });
-        await cursor.next(); // initialize the cursor
+        await cursor.next();
 
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
@@ -164,9 +149,9 @@ describe('Server Selection', function () {
         await cursor.close();
       });
 
-      it('is zero after a successful killCursors', TEST_METADATA, async function () {
+      it('is zero after a successful killCursors', testMetadata, async function () {
         const cursor = collection.find({}, { batchSize: 1 });
-        await cursor.next(); // initialize the cursor
+        await cursor.next();
 
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
@@ -185,36 +170,15 @@ describe('Server Selection', function () {
     });
 
     context('operationCount is adjusted properly when operations fail', function () {
-      afterEach(async function () {
-        await client.db('admin').command(<FailPoint>{
-          configureFailPoint: 'failCommand',
-          mode: 'off',
-          data: {
-            failCommands: ['insert', 'getMore', 'killCursors']
-          }
-        });
-      });
-
-      it('is zero after a command fails', TEST_METADATA, async function () {
-        await client.db('admin').command(<FailPoint>{
-          configureFailPoint: 'failCommand',
-          mode: 'alwaysOn',
-          data: {
-            failCommands: ['insert'],
-            errorCode: 80
-          }
-        });
+      it('is zero after a command fails', testMetadata, async function () {
+        await client.db('admin').command(enableFailPointCommand);
 
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
 
         const commandSpy = sinon.spy(server, 'command');
 
-        const error = await collection
-          .insertOne({
-            id: 1
-          })
-          .catch(e => e);
+        const error = await collection.insertOne({ count: 1 }).catch(e => e);
 
         expect(error).to.exist;
         expect(commandSpy.called).to.be.true;
@@ -222,18 +186,11 @@ describe('Server Selection', function () {
         expect(server.s.operationCount).to.equal(0);
       });
 
-      it('is zero after a getMore fails', TEST_METADATA, async function () {
+      it('is zero after a getMore fails', testMetadata, async function () {
         const cursor = collection.find({}, { batchSize: 1 });
         await cursor.next();
 
-        await client.db('admin').command(<FailPoint>{
-          configureFailPoint: 'failCommand',
-          mode: 'alwaysOn',
-          data: {
-            failCommands: ['getMore'],
-            errorCode: 80
-          }
-        });
+        await client.db('admin').command(enableFailPointCommand);
 
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
@@ -248,18 +205,11 @@ describe('Server Selection', function () {
         await cursor.close();
       });
 
-      it('is zero after a killCursors fails', TEST_METADATA, async function () {
+      it('is zero after a killCursors fails', testMetadata, async function () {
         const cursor = collection.find({}, { batchSize: 1 });
         await cursor.next(); // initialize the cursor
 
-        await client.db('admin').command(<FailPoint>{
-          configureFailPoint: 'failCommand',
-          mode: 'alwaysOn',
-          data: {
-            failCommands: ['killCursors'],
-            errorCode: 80
-          }
-        });
+        await client.db('admin').command(enableFailPointCommand);
 
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
@@ -279,7 +229,7 @@ describe('Server Selection', function () {
       function () {
         it(
           'is zero after failing to check out a connection for a command',
-          TEST_METADATA,
+          testMetadata,
           async function () {
             const server = Array.from(client.topology.s.servers.values())[0];
             expect(server.s.operationCount).to.equal(0);
@@ -289,11 +239,7 @@ describe('Server Selection', function () {
             });
             const commandSpy = sinon.spy(server, 'command');
 
-            const error = await collection
-              .insertOne({
-                id: 1
-              })
-              .catch(e => e);
+            const error = await collection.insertOne({ count: 1 }).catch(e => e);
 
             expect(error).to.exist;
             expect(error).to.match(/unable to checkout connection/i);
@@ -304,7 +250,7 @@ describe('Server Selection', function () {
 
         it(
           'is zero after failing to check out a connection for a getMore',
-          TEST_METADATA,
+          testMetadata,
           async function () {
             const cursor = collection.find({}, { batchSize: 1 });
             await cursor.next();
@@ -331,7 +277,7 @@ describe('Server Selection', function () {
 
         it(
           'is zero after failing to check out a connection for a killCursors',
-          TEST_METADATA,
+          testMetadata,
           async function () {
             const cursor = collection.find({}, { batchSize: 1 });
             await cursor.next();
