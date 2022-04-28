@@ -15,7 +15,7 @@ declare global {
       apiVersion?: '1';
       clientSideEncryption?: boolean;
       serverless?: 'forbid' | 'allow' | 'require';
-      auth: 'enabled' | 'disabled';
+      auth?: 'enabled' | 'disabled';
     };
 
     sessions?: {
@@ -39,9 +39,15 @@ declare global {
     interface TestFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
+      (title: string, metadataAndTest: MetadataAndTest<Mocha.Func>): Mocha.Test;
+      (title: string, metadataAndTest: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
+    }
 
-      (title: string, testAndMetadata: MetadataAndTest<Mocha.Func>): Mocha.Test;
-      (title: string, testAndMetadata: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
+    interface PendingTestFunction {
+      (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
+      (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
+      (title: string, metadataAndTest: MetadataAndTest<Mocha.Func>): Mocha.Test;
+      (title: string, metadataAndTest: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
     }
 
     interface Context {

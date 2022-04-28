@@ -72,7 +72,7 @@ export class EventCollector {
   constructor(
     obj: { on: (arg0: any, arg1: (event: any) => number) => void },
     events: any[],
-    options: { timeout: number }
+    options?: { timeout: number }
   ) {
     this._events = Object.create(null);
     this._timeout = options ? options.timeout : 5000;
@@ -83,7 +83,13 @@ export class EventCollector {
     });
   }
 
-  waitForEvent(eventName: any, count: number, callback: any) {
+  waitForEvent(eventName: string, callback: (error?: Error, events?: any[]) => void);
+  waitForEvent(eventName: string, count: number, callback: (error?: Error, events?: any[]) => void);
+  waitForEvent(
+    eventName: string,
+    count?: number | ((error?: Error, events?: any[]) => void),
+    callback?: (error?: Error, events?: any[]) => void
+  ) {
     if (typeof count === 'function') {
       callback = count;
       count = 1;
