@@ -959,16 +959,16 @@ function processWaitQueue(topology: Topology) {
       continue;
     }
 
+    let selectedServer;
     if (selectedDescriptions.length === 0) {
       topology[kWaitQueue].push(waitQueueMember);
       continue;
-    }
-
-    let selectedServer;
-    if (selectedDescriptions.length === 1) {
+    } else if (selectedDescriptions.length === 1) {
       selectedServer = topology.s.servers.get(selectedDescriptions[0].address);
     } else {
-      const descriptions = shuffle(selectedDescriptions, 2);
+      // don't shuffle the array if there are only two elements
+      const descriptions =
+        selectedDescriptions.length === 2 ? selectedDescriptions : shuffle(selectedDescriptions, 2);
       const server1 = topology.s.servers.get(descriptions[0].address);
       const server2 = topology.s.servers.get(descriptions[1].address);
 
