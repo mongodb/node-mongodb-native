@@ -7,7 +7,12 @@ const {
   ignoreNsNotFound,
   assert: test
 } = require('../shared');
-const { Long, MongoBatchReExecutionError, MongoDriverError } = require('../../../src');
+const {
+  Long,
+  MongoBatchReExecutionError,
+  MongoDriverError,
+  MongoInvalidArgumentError
+} = require('../../../src');
 const crypto = require('crypto');
 const chai = require('chai');
 
@@ -24,47 +29,42 @@ describe('Bulk', function () {
   });
 
   context('ops tests', () => {
-    // eslint-disable-next-line no-restricted-properties
-    it.only('Should raise an error when attempting bulkwrite operation on undefined operation', function (done) {
+    it('Should raise an error when attempting bulkwrite operation on undefined operation', async function () {
       var configuration = this.configuration;
       const client = configuration.newClient();
-      const docs = [];
-      docs[1] = {}; // works for docs[0] = {}
-      // client.db('test').collection('test').insertMany(docs);
-      // client.close();
+      await client.connect();
 
-      let error = null;
-      let result = null;
+      try {
+        client.db('test').collection('test').initializeUnorderedBulkOp().raw(undefined);
+        expect.fail('Failure to throw error');
+      } catch (error) {
+        expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+      }
+      await client.close();
+    });
 
-      client
-        .connect()
-        .then(function (client) {
-          return client.db('test').collection('test').insertMany(docs);
-        })
-        .then(function (r) {
-          result = r;
-        })
-        .catch(function (err) {
-          console.log(err);
-          error = err;
-        })
-        .then(function () {
-          expect(result).to.not.exist;
-          test.ok(error);
-          console.log(error, 'KOBBY');
-          client.close(done);
-        });
+    it('Should not raise an error when attempting bulkwrite operation on undefined operation', async function () {
+      var configuration = this.configuration;
+      const client = configuration.newClient();
+      await client.connect();
+
+      try {
+        client.db('test').collection('test').initializeUnorderedBulkOp().raw({ insertOne: {} });
+      } catch (error) {
+        expect(error).not.to.exist;
+      }
+      await client.close();
     });
 
     // eslint-disable-next-line no-restricted-properties
-    it.only('Should not raise an error when attempting bulkwrite operation on undefined operation', function (done) {
+    it('Should not raise an error when attempting bulkwrite operation on undefined operation', function (done) {
       var configuration = this.configuration;
       const client = configuration.newClient();
-      const docs = [];
-      docs[0] = {}; // works for docs[0] = {}
+      // const docs = [];
+      // docs[0] = {}; // works for docs[0] = {}
       // client.db('test').collection('test').insertMany(docs);
       // client.close();
-
+      client.connect();
       let error = null;
       let result = null;
 
