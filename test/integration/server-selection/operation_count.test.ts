@@ -36,7 +36,7 @@ const disableFailPointCommand: FailPoint = {
   }
 };
 
-describe.only('Server Operation Count Tests', function () {
+describe('Server Operation Count Tests', function () {
   let client: MongoClient;
   let collection: Collection<{ count: number }>;
   let cursor: AbstractCursor;
