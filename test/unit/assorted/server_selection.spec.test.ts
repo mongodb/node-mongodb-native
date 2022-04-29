@@ -1,5 +1,11 @@
-import { join } from 'path';
+import { join, resolve } from 'path';
+import * as sinon from 'sinon';
 
+import { Server } from '../../../src/sdam/server';
+import {
+  loadLatencyWindowTests,
+  runServerSelectionLatencyWindowTest
+} from './server_selection_latency_window_utils';
 import {
   collectServerSelectionLogicTests,
   runServerSelectionLogicTest
@@ -26,6 +32,28 @@ describe('Server Selection Logic (spec)', function () {
           }
         });
       }
+    });
+  }
+});
+
+describe('Server Selection Latency Window Tests (spec)', function () {
+  const selectionSpecDir = resolve(__dirname + '../../../spec/server-selection/in_window');
+  const tests = loadLatencyWindowTests(selectionSpecDir);
+  let serverConnect: sinon.SinonStub;
+
+  before(() => {
+    serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
+      this.s.state = 'connected';
+    });
+  });
+
+  after(() => {
+    serverConnect.restore();
+  });
+
+  for (const test of tests) {
+    it(test.description, async function () {
+      await runServerSelectionLatencyWindowTest(test);
     });
   }
 });

@@ -4,7 +4,7 @@ const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const net = require('net');
-const { MongoClient, ReadPreference } = require('../../../src');
+const { MongoClient, MongoServerSelectionError, ReadPreference } = require('../../../src');
 const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
@@ -190,8 +190,73 @@ describe('Topology (unit)', function () {
 
   describe('error handling', function () {
     let mockServer;
-    beforeEach(() => mock.createServer().then(server => (mockServer = server)));
-    afterEach(() => mock.cleanup());
+    let secondMockServer;
+    beforeEach(async () => {
+      await mock.createServer().then(server => (mockServer = server));
+      await mock.createServer().then(server => (secondMockServer = server));
+    });
+    afterEach(async () => {
+      await mock.cleanup();
+      sinon.restore();
+    });
+
+    context(
+      'when server selection returns a server description but the description is not in the topology',
+      function () {
+        beforeEach(() => {
+          mockServer.setMessageHandler(request => {
+            const doc = request.document;
+            if (isHello(doc)) {
+              request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
+            } else {
+              request.reply({ ok: 1 });
+            }
+          });
+          secondMockServer.setMessageHandler(request => {
+            const doc = request.document;
+            if (isHello(doc)) {
+              request.reply(Object.assign({}, mock.HELLO, { maxWireVersion: 9 }));
+            } else {
+              request.reply({ ok: 1 });
+            }
+          });
+        });
+        context('when the topology originally only contained one server', function () {
+          it('returns a MongoServerSelectionError', function (done) {
+            topology = new Topology([mockServer.hostAddress(), secondMockServer.hostAddress()]);
+
+            topology.connect(err => {
+              expect(err).to.not.exist;
+              sinon.stub(topology.s.servers, 'get').callsFake(() => {
+                return undefined;
+              });
+              topology.selectServer('primary', {}, (err, server) => {
+                expect(err).to.be.instanceOf(MongoServerSelectionError);
+                expect(server).not.to.exist;
+                done();
+              });
+            });
+          });
+        });
+        context('when the topology originally contained more than one server', function () {
+          it('returns a MongoServerSelectionError', function (done) {
+            topology = new Topology([mockServer.hostAddress(), secondMockServer.hostAddress()]);
+
+            topology.connect(err => {
+              expect(err).to.not.exist;
+              sinon.stub(topology.s.servers, 'get').callsFake(() => {
+                return undefined;
+              });
+              topology.selectServer('primary', {}, (err, server) => {
+                expect(err).to.be.instanceOf(MongoServerSelectionError);
+                expect(server).not.to.exist;
+                done();
+              });
+            });
+          });
+        });
+      }
+    );
 
     it('should set server to unknown and reset pool on `node is recovering` error', function (done) {
       mockServer.setMessageHandler(request => {

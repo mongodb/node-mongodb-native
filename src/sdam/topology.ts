@@ -843,10 +843,6 @@ function topologyTypeFromOptions(options?: TopologyOptions) {
   return TopologyType.Unknown;
 }
 
-function randomSelection(array: ServerDescription[]): ServerDescription {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
 /**
  * Creates new server instances and attempts to connect them
  *
@@ -963,13 +959,34 @@ function processWaitQueue(topology: Topology) {
       continue;
     }
 
+    let selectedServer;
     if (selectedDescriptions.length === 0) {
       topology[kWaitQueue].push(waitQueueMember);
       continue;
+    } else if (selectedDescriptions.length === 1) {
+      selectedServer = topology.s.servers.get(selectedDescriptions[0].address);
+    } else {
+      // don't shuffle the array if there are only two elements
+      const descriptions =
+        selectedDescriptions.length === 2 ? selectedDescriptions : shuffle(selectedDescriptions, 2);
+      const server1 = topology.s.servers.get(descriptions[0].address);
+      const server2 = topology.s.servers.get(descriptions[1].address);
+
+      selectedServer =
+        server1 && server2 && server1.s.operationCount < server2.s.operationCount
+          ? server1
+          : server2;
     }
 
-    const selectedServerDescription = randomSelection(selectedDescriptions);
-    const selectedServer = topology.s.servers.get(selectedServerDescription.address);
+    if (!selectedServer) {
+      waitQueueMember.callback(
+        new MongoServerSelectionError(
+          'server selection returned a server description but the server was not found in the topology',
+          topology.description
+        )
+      );
+      return;
+    }
     const transaction = waitQueueMember.transaction;
     if (isSharded && transaction && transaction.isActive && selectedServer) {
       transaction.pinServer(selectedServer);

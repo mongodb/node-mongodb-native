@@ -93,6 +93,8 @@ export interface ServerPrivate {
   pool: ConnectionPool;
   /** MongoDB server API version */
   serverApi?: ServerApi;
+  /** A count of the operations currently running against the server. */
+  operationCount: number;
 }
 
 /** @public */
@@ -147,7 +149,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       logger: new Logger('Server'),
       state: STATE_CLOSED,
       topology,
-      pool: new ConnectionPool(poolOptions)
+      pool: new ConnectionPool(poolOptions),
+      operationCount: 0
     };
 
     for (const event of [...CMAP_EVENTS, ...APM_EVENTS]) {
@@ -325,6 +328,15 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     // NOTE: This is a hack! We can't retrieve the connections used for executing an operation
     //       (and prevent them from being checked back in) at the point of operation execution.
     //       This should be considered as part of the work for NODE-2882
+    // NOTE:
+    //       When incrementing operation count, it's important that we increment it before we
+    //       attempt to check out a connection from the pool.  This ensures that operations that
+    //       are waiting for a connection are included in the operation count.  Load balanced
+    //       mode will only ever have a single server, so the operation count doesn't matter.
+    //       Incrementing the operation count above the logic to handle load balanced mode would
+    //       require special logic to decrement it again, or would double increment (the load
+    //       balanced code makes a recursive call).  Instead, we increment the count after this
+    //       check.
     if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
       this.s.pool.checkOut((err, checkedOut) => {
         if (err || checkedOut == null) {
@@ -335,14 +347,16 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         session.pin(checkedOut);
         this.command(ns, cmd, finalOptions, callback);
       });
-
       return;
     }
+
+    this.s.operationCount += 1;
 
     this.s.pool.withConnection(
       conn,
       (err, conn, cb) => {
         if (err || !conn) {
+          this.s.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
@@ -351,7 +365,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           ns,
           cmd,
           finalOptions,
-          makeOperationHandler(this, conn, cmd, finalOptions, cb)
+          makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
+            this.s.operationCount -= 1;
+            cb(error, response);
+          })
         );
       },
       callback
@@ -373,15 +390,26 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
+    this.s.operationCount += 1;
+
     this.s.pool.withConnection(
       options.session?.pinnedConnection,
       (err, conn, cb) => {
         if (err || !conn) {
+          this.s.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
 
-        conn.getMore(ns, cursorId, options, makeOperationHandler(this, conn, {}, options, cb));
+        conn.getMore(
+          ns,
+          cursorId,
+          options,
+          makeOperationHandler(this, conn, {}, options, (error, response) => {
+            this.s.operationCount -= 1;
+            cb(error, response);
+          })
+        );
       },
       callback
     );
@@ -405,10 +433,12 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
+    this.s.operationCount += 1;
     this.s.pool.withConnection(
       options.session?.pinnedConnection,
       (err, conn, cb) => {
         if (err || !conn) {
+          this.s.operationCount -= 1;
           markServerUnknown(this, err);
           return cb(err);
         }
@@ -417,7 +447,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           ns,
           cursorIds,
           options,
-          makeOperationHandler(this, conn, {}, undefined, cb)
+          makeOperationHandler(this, conn, {}, undefined, (error, response) => {
+            this.s.operationCount -= 1;
+            cb(error, response);
+          })
         );
       },
       callback

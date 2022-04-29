@@ -1,0 +1,21 @@
+description: Better of two choices always selected
+topology_description:
+  type: Sharded
+  servers:
+    - address: a:27017
+      avg_rtt_ms: 35
+      type: Mongos
+    - address: b:27017
+      avg_rtt_ms: 35
+      type: Mongos
+mocked_topology_state:
+  - address: a:27017
+    operation_count: 0
+  - address: b:27017
+    operation_count: 5
+iterations: 100
+outcome:
+  tolerance: 0.0
+  expected_frequencies:
+    a:27017: 1
+    b:27017: 0

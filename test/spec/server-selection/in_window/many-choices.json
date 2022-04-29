@@ -1,0 +1,106 @@
+{
+  "description": "Selections from many choices occur at correct frequencies",
+  "topology_description": {
+    "type": "Sharded",
+    "servers": [
+      {
+        "address": "a:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "b:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "c:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "d:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "e:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "f:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "g:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "h:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      },
+      {
+        "address": "i:27017",
+        "avg_rtt_ms": 35,
+        "type": "Mongos"
+      }
+    ]
+  },
+  "mocked_topology_state": [
+    {
+      "address": "a:27017",
+      "operation_count": 0
+    },
+    {
+      "address": "b:27017",
+      "operation_count": 5
+    },
+    {
+      "address": "c:27017",
+      "operation_count": 5
+    },
+    {
+      "address": "d:27017",
+      "operation_count": 10
+    },
+    {
+      "address": "e:27017",
+      "operation_count": 10
+    },
+    {
+      "address": "f:27017",
+      "operation_count": 20
+    },
+    {
+      "address": "g:27017",
+      "operation_count": 20
+    },
+    {
+      "address": "h:27017",
+      "operation_count": 50
+    },
+    {
+      "address": "i:27017",
+      "operation_count": 60
+    }
+  ],
+  "iterations": 10000,
+  "outcome": {
+    "tolerance": 0.03,
+    "expected_frequencies": {
+      "a:27017": 0.22,
+      "b:27017": 0.18,
+      "c:27017": 0.18,
+      "d:27017": 0.125,
+      "e:27017": 0.125,
+      "f:27017": 0.074,
+      "g:27017": 0.074,
+      "h:27017": 0.0277,
+      "i:27017": 0
+    }
+  }
+}
