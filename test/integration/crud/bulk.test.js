@@ -55,38 +55,6 @@ describe('Bulk', function () {
       }
       await client.close();
     });
-
-    // eslint-disable-next-line no-restricted-properties
-    it('Should not raise an error when attempting bulkwrite operation on undefined operation', function (done) {
-      var configuration = this.configuration;
-      const client = configuration.newClient();
-      // const docs = [];
-      // docs[0] = {}; // works for docs[0] = {}
-      // client.db('test').collection('test').insertMany(docs);
-      // client.close();
-      client.connect();
-      let error = null;
-      let result = null;
-
-      client
-        .connect()
-        .then(function (client) {
-          return client.db('test').collection('test').insertMany(docs);
-        })
-        .then(function (r) {
-          result = r;
-        })
-        .catch(function (err) {
-          console.log(err);
-          error = err;
-        })
-        .then(function () {
-          expect(error).to.not.exist;
-          console.log(result, 'KOBBY');
-          test.ok(result);
-          client.close(done);
-        });
-    });
   });
 
   context('promise tests', () => {
