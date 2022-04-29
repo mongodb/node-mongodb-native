@@ -263,7 +263,7 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
 The following steps will walk you through how to start and test a load balancer.
 
-1. Start a sharded cluster with two mongos, so you have a URI similar to `MONGODB_URI=mongodb://host1,host2/`.
+1. Start a sharded cluster with two mongos, so you have a URI similar to `MONGODB_URI=mongodb://host1,host2/`. The server must be version 5.2.0 or higher.
     Create the config server:
     `mongod --configsvr --replSet test --dbpath config1 --bind_ip localhost --port 27217`
 
