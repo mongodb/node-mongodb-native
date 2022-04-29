@@ -192,8 +192,8 @@ describe('Topology (unit)', function () {
     let mockServer;
     let secondMockServer;
     beforeEach(async () => {
-      await mock.createServer(27218).then(server => (mockServer = server));
-      await mock.createServer(27219).then(server => (secondMockServer = server));
+      await mock.createServer().then(server => (mockServer = server));
+      await mock.createServer().then(server => (secondMockServer = server));
     });
     afterEach(async () => {
       await mock.cleanup();
