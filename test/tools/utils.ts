@@ -84,7 +84,17 @@ export class EventCollector {
     });
   }
 
-  waitForEvent(eventName: any, count: number, callback: any) {
+  waitForEvent(eventName: string, callback: (error?: Error, events?: any[]) => void): void;
+  waitForEvent(
+    eventName: string,
+    count: number,
+    callback: (error?: Error, events?: any[]) => void
+  ): void;
+  waitForEvent(
+    eventName: string,
+    count: number | ((error?: Error, events?: any[]) => void),
+    callback?: (error?: Error, events?: any[]) => void
+  ): void {
     if (typeof count === 'function') {
       callback = count;
       count = 1;
