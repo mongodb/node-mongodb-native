@@ -16,12 +16,7 @@ import {
 import { isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
-import {
-  EventCollector,
-  getSymbolFrom,
-  TestBuilder,
-  UnifiedTestSuiteBuilder
-} from '../../tools/utils';
+import { EventCollector, getSymbolFrom } from '../../tools/utils';
 import { delay, setupDatabase, withClient, withCursor } from '../shared';
 
 function withChangeStream(
