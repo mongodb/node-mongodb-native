@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import { strict as assert } from 'assert';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
 import * as sinon from 'sinon';
@@ -380,14 +380,13 @@ describe('Change Streams', function () {
             assert.equal(true, hasNext);
             changeStream.next((err, change) => {
               expect(err).to.not.exist;
-              assert.equal(change.operationType, 'insert');
-              assert.equal(change.fullDocument.e, 5);
-              assert.equal(change.ns.db, 'integration_tests');
-              assert.equal(change.ns.coll, 'docsCallback');
-              assert.ok(!change.documentKey);
-              assert.equal(
-                // @ts-expect-error: NODE-4059 will improve typescript capability of change stream
-                change.comment,
+              expect(change).to.have.property('operationType', 'insert');
+              expect(change).to.have.nested.property('fullDocument.e', 5);
+              expect(change).to.have.nested.property('ns.db', 'integration_tests');
+              expect(change).to.have.nested.property('ns.coll', 'docsCallback');
+              expect(change).to.not.have.property('documentKey');
+              expect(change).to.have.property(
+                'comment',
                 'The documentKey field has been projected out of this document.'
               );
 
@@ -463,24 +462,21 @@ describe('Change Streams', function () {
             assert.equal(changes[1].operationType, 'insert');
             assert.equal(changes[2].operationType, 'insert');
 
-            assert.equal(changes[0].fullDocument.a, 1);
-            assert.equal(changes[1].fullDocument.a, 1);
-            assert.equal(changes[2].fullDocument.a, 1);
+            expect(changes[0]).to.have.nested.property('fullDocument.a', 1);
+            expect(changes[1]).to.have.nested.property('fullDocument.a', 1);
+            expect(changes[2]).to.have.nested.property('fullDocument.a', 1);
 
-            assert.equal(changes[0].ns.db, 'integration_tests');
-            assert.equal(changes[1].ns.db, 'integration_tests');
-            assert.equal(changes[2].ns.db, 'integration_tests');
+            expect(changes[0]).to.have.nested.property('ns.db', 'integration_tests');
+            expect(changes[1]).to.have.nested.property('ns.db', 'integration_tests');
+            expect(changes[2]).to.have.nested.property('ns.db', 'integration_tests');
 
-            assert.equal(changes[0].ns.coll, 'simultaneous1');
-            assert.equal(changes[1].ns.coll, 'simultaneous2');
-            assert.equal(changes[2].ns.coll, 'simultaneous2');
+            expect(changes[0]).to.have.nested.property('ns.coll', 'simultaneous1');
+            expect(changes[1]).to.have.nested.property('ns.coll', 'simultaneous2');
+            expect(changes[2]).to.have.nested.property('ns.coll', 'simultaneous2');
 
-            // @ts-expect-error: NODE-4059 will improve typescript capability of change stream
-            assert.equal(changes[0].changeStreamNumber, 1);
-            // @ts-expect-error: NODE-4059 will improve typescript capability of change stream
-            assert.equal(changes[1].changeStreamNumber, 2);
-            // @ts-expect-error: NODE-4059 will improve typescript capability of change stream
-            assert.equal(changes[2].changeStreamNumber, 3);
+            expect(changes[0]).to.have.nested.property('changeStreamNumber', 1);
+            expect(changes[1]).to.have.nested.property('changeStreamNumber', 2);
+            expect(changes[2]).to.have.nested.property('changeStreamNumber', 3);
           })
           .then(
             () => done(),
@@ -743,14 +739,13 @@ describe('Change Streams', function () {
 
         // Attach first event listener
         changeStream.once('change', change => {
-          assert.equal(change.operationType, 'insert');
-          assert.equal(change.fullDocument.a, 1);
-          assert.equal(change.ns.db, 'integration_tests');
-          assert.equal(change.ns.coll, 'invalidateListeners');
-          assert.ok(!change.documentKey);
-          assert.equal(
-            // @ts-expect-error: NODE-4059 will improve typescript capability of change stream
-            change.comment,
+          expect(change).to.have.property('operationType', 'insert');
+          expect(change).to.have.nested.property('fullDocument.a', 1);
+          expect(change).to.have.nested.property('ns.db', 'integration_tests');
+          expect(change).to.have.nested.property('ns.coll', 'invalidateListeners');
+          expect(change).to.not.have.property('documentKey');
+          expect(change).to.have.property(
+            'comment',
             'The documentKey field has been projected out of this document.'
           );
 
@@ -922,22 +917,22 @@ describe('Change Streams', function () {
             return firstChangeStream.next();
           })
           .then(change => {
-            assert.equal(change.operationType, 'insert');
-            assert.equal(change.fullDocument.a, docs[0].a);
+            expect(change).to.have.property('operationType', 'insert');
+            expect(change).to.have.nested.property('fullDocument.a', docs[0].a);
 
             // Save the resumeToken
             resumeToken = change._id;
             return firstChangeStream.next();
           })
           .then(change => {
-            assert.equal(change.operationType, 'insert');
-            assert.equal(change.fullDocument.a, docs[1].a);
+            expect(change).to.have.property('operationType', 'insert');
+            expect(change).to.have.nested.property('fullDocument.a', docs[1].a);
 
             return firstChangeStream.next();
           })
           .then(change => {
-            assert.equal(change.operationType, 'insert');
-            assert.equal(change.fullDocument.a, docs[2].a);
+            expect(change).to.have.property('operationType', 'insert');
+            expect(change).to.have.nested.property('fullDocument.a', docs[2].a);
 
             return firstChangeStream.close();
           })
@@ -996,14 +991,13 @@ describe('Change Streams', function () {
             return changeStream.next();
           })
           .then(function (change) {
-            assert.equal(change.operationType, 'insert');
-            assert.equal(change.fullDocument.f, 128);
-            assert.equal(change.ns.db, database.databaseName);
-            assert.equal(change.ns.coll, collection.collectionName);
-            assert.ok(!change.documentKey);
-            assert.equal(
-              // @ts-expect-error: NODE-4059 will improve typescript capability of change stream
-              change.comment,
+            expect(change).to.have.property('operationType', 'insert');
+            expect(change).to.have.nested.property('fullDocument.f', 128);
+            expect(change).to.have.nested.property('ns.db', database.databaseName);
+            expect(change).to.have.nested.property('ns.coll', collection.collectionName);
+            expect(change).to.not.have.property('documentKey');
+            expect(change).to.have.property(
+              'comment',
               'The documentKey field has been projected out of this document.'
             );
             return collection.updateOne({ f: 128 }, { $set: { c: 2 } });
@@ -1015,9 +1009,9 @@ describe('Change Streams', function () {
             assert.equal(change.operationType, 'update');
 
             // Check the correct fullDocument is present
-            assert.ok(change.fullDocument);
-            assert.equal(change.fullDocument.f, 128);
-            assert.equal(change.fullDocument.c, 2);
+            expect(change).to.have.property('fullDocument').that.is.a('object');
+            expect(change).to.have.nested.property('fullDocument.f', 128);
+            expect(change).to.have.nested.property('fullDocument.c', 2);
           });
       });
     }
@@ -1054,17 +1048,15 @@ describe('Change Streams', function () {
             return changeStream.next();
           })
           .then(function (change) {
-            assert.equal(change.operationType, 'insert');
-            assert.equal(change.fullDocument.i, 128);
-            assert.equal(change.ns.db, database.databaseName);
-            assert.equal(change.ns.coll, collection.collectionName);
-            assert.ok(!change.documentKey);
-            assert.equal(
-              // @ts-expect-error: NODE-4059 will improve typescript capability of change stream
-              change.comment,
+            expect(change).to.have.property('operationType', 'insert');
+            expect(change).to.have.nested.property('fullDocument.i', 128);
+            expect(change).to.have.nested.property('ns.db', database.databaseName);
+            expect(change).to.have.nested.property('ns.coll', collection.collectionName);
+            expect(change).to.not.have.property('documentKey');
+            expect(change).to.have.property(
+              'comment',
               'The documentKey field has been projected out of this document.'
             );
-
             // Trigger the second database event
             return collection.updateOne({ i: 128 }, { $set: { c: 2 } });
           })
@@ -1074,9 +1066,8 @@ describe('Change Streams', function () {
             return changeStream.next();
           })
           .then(function (change) {
-            assert.equal(change.operationType, 'delete');
-            // @ts-expect-error: NODE-4059 will improve typescript capability of change stream
-            assert.equal(change.lookedUpDocument, null);
+            expect(change).to.have.property('operationType', 'delete');
+            expect(change).to.not.have.property('lookedUpDocument');
           });
       });
     }
@@ -1741,4 +1732,219 @@ describe('Change Streams', function () {
       });
     });
   });
+
+  // UnifiedTestSuiteBuilder.describe('document shapes')
+  //   .runOnRequirement({
+  //     minServerVersion: '4.0.0',
+  //     topologies: ['replicaset', 'load-balanced', 'sharded', 'sharded-replicaset']
+  //   })
+  //   .createEntities([
+  //     ...UnifiedTestSuiteBuilder.defaultEntities,
+
+  //     // transaction test
+  //     { session: { id: 'session0', client: 'client0' } },
+
+  //     // rename test
+  //     { database: { id: 'admin', databaseName: 'admin', client: 'client0' } },
+  //     { database: { id: 'renameDb', databaseName: 'renameDb', client: 'client0' } },
+  //     { collection: { id: 'collToRename', collectionName: 'collToRename', database: 'renameDb' } },
+
+  //     // drop test
+  //     { database: { id: 'dbToDrop', databaseName: 'dbToDrop', client: 'client0' } },
+  //     {
+  //       collection: { id: 'collInDbToDrop', collectionName: 'collInDbToDrop', database: 'dbToDrop' }
+  //     }
+  //   ])
+  //   .test(
+  //     new TestBuilder('change stream dropDatabase, drop, and invalidate events')
+  //       .operation({
+  //         object: 'admin',
+  //         name: 'runCommand',
+  //         arguments: { command: { create: 'dbToDrop.collInDbToDrop' } },
+  //         ignoreResultAndError: true
+  //       })
+  //       .operation({
+  //         object: 'client0',
+  //         name: 'createChangeStream',
+  //         saveResultAsEntity: 'changeStreamOnClient'
+  //       })
+  //       .operation({
+  //         object: 'collInDbToDrop',
+  //         name: 'createChangeStream',
+  //         saveResultAsEntity: 'changeStreamOnCollection'
+  //       })
+  //       .operation({
+  //         object: 'dbToDrop',
+  //         name: 'runCommand',
+  //         arguments: { command: { dropDatabase: 1 } },
+  //         expectResult: { ok: 1 }
+  //       })
+  //       .operation({
+  //         object: 'changeStreamOnClient',
+  //         name: 'iterateUntilDocumentOrError',
+  //         expectResult: {
+  //           _id: { $$exists: true },
+  //           operationType: 'drop',
+  //           ns: { db: 'dbToDrop', coll: 'collInDbToDrop' },
+  //           clusterTime: { $$type: 'timestamp' },
+  //           txnNumber: { $$exists: false },
+  //           lsid: { $$exists: false }
+  //         }
+  //       })
+  //       .operation({
+  //         object: 'changeStreamOnClient',
+  //         name: 'iterateUntilDocumentOrError',
+  //         expectResult: {
+  //           _id: { $$exists: true },
+  //           operationType: 'dropDatabase',
+  //           ns: { db: 'dbToDrop', coll: { $$exists: false } },
+  //           clusterTime: { $$type: 'timestamp' },
+  //           txnNumber: { $$exists: false },
+  //           lsid: { $$exists: false }
+  //         }
+  //       })
+  //       .operation({
+  //         object: 'changeStreamOnCollection',
+  //         name: 'iterateUntilDocumentOrError',
+  //         expectResult: {
+  //           _id: { $$exists: true },
+  //           operationType: 'drop',
+  //           ns: { db: 'dbToDrop', coll: 'collInDbToDrop' },
+  //           clusterTime: { $$type: 'timestamp' },
+  //           txnNumber: { $$exists: false },
+  //           lsid: { $$exists: false }
+  //         }
+  //       })
+  //       .operation({
+  //         object: 'changeStreamOnCollection',
+  //         name: 'iterateUntilDocumentOrError',
+  //         expectResult: {
+  //           _id: { $$exists: true },
+  //           operationType: 'invalidate',
+  //           clusterTime: { $$type: 'timestamp' },
+  //           txnNumber: { $$exists: false },
+  //           lsid: { $$exists: false }
+  //         }
+  //       })
+  //       .toJSON()
+  //   )
+  //   .test(
+  //     new TestBuilder('change stream event inside transaction')
+  //       .operation({
+  //         object: 'collection0',
+  //         name: 'createChangeStream',
+  //         saveResultAsEntity: 'changeStreamOnCollection'
+  //       })
+  //       .operation({
+  //         name: 'startTransaction',
+  //         object: 'session0'
+  //       })
+  //       .operation({
+  //         name: 'insertOne',
+  //         object: 'collection0',
+  //         arguments: {
+  //           session: 'session0',
+  //           document: {
+  //             _id: 3
+  //           }
+  //         },
+  //         expectResult: {
+  //           $$unsetOrMatches: {
+  //             insertedId: {
+  //               $$unsetOrMatches: 3
+  //             }
+  //           }
+  //         }
+  //       })
+  //       .operation({
+  //         name: 'commitTransaction',
+  //         object: 'session0'
+  //       })
+  //       .operation({
+  //         object: 'changeStreamOnCollection',
+  //         name: 'iterateUntilDocumentOrError',
+  //         expectResult: {
+  //           _id: { $$exists: true },
+  //           operationType: 'insert',
+  //           fullDocument: { _id: 3 },
+  //           documentKey: { _id: 3 },
+  //           ns: { db: 'database0', coll: 'collection0' },
+  //           clusterTime: { $$type: 'timestamp' },
+  //           txnNumber: { $$type: ['long', 'int'] },
+  //           lsid: { $$sessionLsid: 'session0' }
+  //         }
+  //       })
+  //       .toJSON()
+  //   )
+  //   .test(
+  //     new TestBuilder('change stream rename event')
+  //       .operation({
+  //         object: 'admin',
+  //         name: 'runCommand',
+  //         arguments: { command: { create: 'renameDb.collToRename' } },
+  //         ignoreResultAndError: true
+  //       })
+  //       .operation({
+  //         object: 'renameDb',
+  //         name: 'createChangeStream',
+  //         saveResultAsEntity: 'changeStreamOnDb'
+  //       })
+  //       .operation({
+  //         name: 'insertOne',
+  //         object: 'collToRename',
+  //         arguments: {
+  //           document: {
+  //             _id: 3
+  //           }
+  //         },
+  //         expectResult: {
+  //           $$unsetOrMatches: {
+  //             insertedId: {
+  //               $$unsetOrMatches: 3
+  //             }
+  //           }
+  //         }
+  //       })
+  //       .operation({
+  //         object: 'changeStreamOnDb',
+  //         name: 'iterateUntilDocumentOrError',
+  //         expectResult: {
+  //           _id: { $$exists: true },
+  //           operationType: 'insert',
+  //           fullDocument: { _id: 3 },
+  //           documentKey: { _id: 3 },
+  //           ns: { db: 'renameDb', coll: 'collToRename' },
+  //           clusterTime: { $$type: 'timestamp' },
+  //           txnNumber: { $$exists: false },
+  //           lsid: { $$exists: false }
+  //         }
+  //       })
+  //       .operation({
+  //         name: 'runCommand',
+  //         object: 'admin',
+  //         arguments: {
+  //           command: {
+  //             renameCollection: 'renameDb.collToRename',
+  //             to: 'renameDb.newCollectionName',
+  //             dropTarget: false
+  //           }
+  //         },
+  //         expectResult: { ok: 1 }
+  //       })
+  //       .operation({
+  //         object: 'changeStreamOnDb',
+  //         name: 'iterateUntilDocumentOrError',
+  //         expectResult: {
+  //           _id: { $$exists: true },
+  //           operationType: 'rename',
+  //           ns: { db: 'renameDb', coll: 'collToRename' },
+  //           to: { db: 'renameDb', coll: 'newCollectionName' },
+  //           clusterTime: { $$type: 'timestamp' },
+  //           txnNumber: { $$exists: false },
+  //           lsid: { $$exists: false }
+  //         }
+  //       })
+  //       .toJSON()
+  //   )
+  //   .run();
 });

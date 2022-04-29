@@ -50,10 +50,10 @@ expectType<string[]>(await composedMap.toArray());
 const tschemaColl = db.collection<TSchema>('test');
 const changeStream = tschemaColl.watch();
 changeStream.on('init', doc => {
-  expectType<TSchema>(doc);
+  expectType<any>(doc); // raw response object
 });
 changeStream.on('more', doc => {
-  expectType<TSchema | undefined>(doc);
+  expectType<any>(doc); // raw response object
 });
 changeStream.on('change', doc => {
   expectType<ChangeStreamDocument<TSchema>>(doc);

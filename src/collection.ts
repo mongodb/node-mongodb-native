@@ -2,7 +2,7 @@ import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { UnorderedBulkOperation } from './bulk/unordered';
-import { ChangeStream, ChangeStreamOptions } from './change_stream';
+import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
 import type { Db } from './db';
@@ -1422,17 +1422,17 @@ export class Collection<TSchema extends Document = Document> {
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    */
-  watch<TLocal extends Document = TSchema>(
-    pipeline: Document[] = [],
-    options: ChangeStreamOptions = {}
-  ): ChangeStream<TLocal> {
+  watch<
+    TLocal extends Document = TSchema,
+    TChange extends ChangeStreamDocument<TLocal> = ChangeStreamDocument<TLocal>
+  >(pipeline: Document[] = [], options: ChangeStreamOptions = {}): ChangeStream<TLocal, TChange> {
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
       options = pipeline;
       pipeline = [];
     }
 
-    return new ChangeStream<TLocal>(this, pipeline, resolveOptions(this, options));
+    return new ChangeStream<TLocal, TChange>(this, pipeline, resolveOptions(this, options));
   }
 
   /**

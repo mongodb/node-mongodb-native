@@ -2,7 +2,7 @@ import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
-import { ChangeStream, ChangeStreamOptions } from './change_stream';
+import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
 import type { AuthMechanismProperties, MongoCredentials } from './cmap/auth/mongo_credentials';
 import type { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
@@ -593,17 +593,17 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    */
-  watch<TSchema extends Document = Document>(
-    pipeline: Document[] = [],
-    options: ChangeStreamOptions = {}
-  ): ChangeStream<TSchema> {
+  watch<
+    TSchema extends Document = Document,
+    TChange extends ChangeStreamDocument<TSchema> = ChangeStreamDocument<TSchema>
+  >(pipeline: Document[] = [], options: ChangeStreamOptions = {}): ChangeStream<TSchema, TChange> {
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
       options = pipeline;
       pipeline = [];
     }
 
-    return new ChangeStream<TSchema>(this, pipeline, resolveOptions(this, options));
+    return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
 
   /** Return the mongo client logger */
