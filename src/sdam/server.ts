@@ -333,6 +333,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     //       attempt to check out a connection from the pool.  This ensures that operations that
     //       are waiting for a connection are included in the operation count.  Load balanced
     //       mode will only ever have a single server, so the operation count doesn't matter.
+    //       Incrementing the operation count above the logic to handle load balanced mode would
+    //       require special logic to decrement it again, or would double increment (the load
+    //       balanced code makes a recursive call).  Instead, we increment the count after this
+    //       check.
     if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
       this.s.pool.checkOut((err, checkedOut) => {
         if (err || checkedOut == null) {
