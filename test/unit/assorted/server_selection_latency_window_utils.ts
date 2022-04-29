@@ -51,29 +51,26 @@ export function loadLatencyWindowTests(directory: string) {
 
 function compareResultsToExpected(
   { tolerance, expected_frequencies }: Outcome,
-  observed_frequencies: FrequencyMap
+  observedFrequencies: FrequencyMap
 ) {
-  const expectedFrequencies = Object.entries(expected_frequencies);
   expect(
-    expectedFrequencies,
+    Object.entries(expected_frequencies),
     'Encountered an empty set of frequencies to assert on.  Is there something wrong with the test or the runner?'
   ).to.have.length.greaterThan(0);
   for (const [address, frequency] of Object.entries(expected_frequencies)) {
     if (frequency === 0) {
-      expect(observed_frequencies).not.to.haveOwnProperty(address);
+      expect(observedFrequencies).not.to.haveOwnProperty(address);
     } else {
-      expect(observed_frequencies).to.haveOwnProperty(address).to.exist;
-      const actual_frequency = observed_frequencies[address];
-      const is_too_low = actual_frequency < frequency - tolerance;
-      expect(
-        is_too_low,
-        `expected frequency of ${frequency}+/-${tolerance} but received ${actual_frequency}`
-      ).to.be.false;
-      const is_too_high = actual_frequency > frequency + tolerance;
-      expect(
-        is_too_high,
-        `expected frequency of ${frequency}+/-${tolerance} but received ${actual_frequency}`
-      ).to.be.false;
+      expect(observedFrequencies).to.haveOwnProperty(address).that.is.a('number');
+      const actualFrequency = observedFrequencies[address];
+      const isTooLow = actualFrequency < frequency - tolerance;
+      const isTooHigh = actualFrequency > frequency + tolerance;
+
+      if (isTooHigh || isTooLow) {
+        expect.fail(
+          `expected frequency of ${frequency}+/-${tolerance} but received ${actualFrequency}`
+        );
+      }
     }
   }
 }

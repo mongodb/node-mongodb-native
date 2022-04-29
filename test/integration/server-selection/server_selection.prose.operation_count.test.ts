@@ -41,9 +41,11 @@ async function ensurePoolIsFull(client: MongoClient) {
     throw new Error('Connection pool did not fill up');
   }
 }
+
+// Step 1: Configure a sharded cluster with two mongoses. Use a 4.2.9 or newer server version.
 const TEST_METADATA: MongoDBMetadataUI = { requires: { mongodb: '>=4.2.9', topology: 'sharded' } };
 
-describe('Server Selection Operation Count Prose', function () {
+describe('operationCount-based Selection Within Latency Window - Prose Test', function () {
   let client: MongoClient;
   let seeds: Array<string>;
   let counts: Record<string, number> = {};
