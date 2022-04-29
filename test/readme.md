@@ -268,7 +268,7 @@ The following steps will walk you through how to start and test a load balancer.
     `mongod --configsvr --replSet test --dbpath config1 --bind_ip localhost --port 27217`
 
     Initiate the config server in the shell:
-    `s.initiate( { _id: "test", configsvr: true, members: [ { _id: 0, host: "localhost:27217" } ] })`
+    `rs.initiate( { _id: "test", configsvr: true, members: [ { _id: 0, host: "localhost:27217" } ] })`
 
     Create shard replica sets:
     `mongod --shardsvr --replSet testing  --dbpath repl1 --bind_ip localhost --port 27218 --setParameter enableTestCommands=true`
