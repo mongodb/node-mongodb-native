@@ -978,6 +978,15 @@ function processWaitQueue(topology: Topology) {
           : server2;
     }
 
+    if (!selectedServer) {
+      waitQueueMember.callback(
+        new MongoServerSelectionError(
+          'server selection returned a server description but the server was not found in the topology',
+          topology.description
+        )
+      );
+      return;
+    }
     const transaction = waitQueueMember.transaction;
     if (isSharded && transaction && transaction.isActive && selectedServer) {
       transaction.pinServer(selectedServer);
