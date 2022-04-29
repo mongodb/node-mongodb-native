@@ -27,31 +27,69 @@ describe('Bulk', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
-  describe('class BulkOperationBase', () => {
-    context('.raw()', () => {
-      it('should throw a MongoInvalidArgument error when called with an undefined operation', async function () {
+  describe('BulkOperationBase', () => {
+    describe('#raw', function () {
+      beforeEach(async function () {
         const client = this.configuration.newClient();
         await client.connect();
-
-        try {
-          client.db('test').collection('test').initializeUnorderedBulkOp().raw(undefined);
-          expect.fail('Failure to throw error');
-        } catch (error) {
-          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-        }
+      });
+      afterEach(async function () {
         await client.close();
       });
+      context('when called with an undefined operation', function () {
+        it('should throw a MongoInvalidArgument error ', async function () {
+          try {
+            client.db('test').collection('test').initializeUnorderedBulkOp().raw(undefined);
+            expect.fail('Failure to throw error');
+          } catch (error) {
+            expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+          }
+        });
+      });
 
-      it('should not throw a MongoInvalidArgument error when called with a valid operation', async function () {
+      context('when called with a valid operation', function () {
+        it('should not throw a MongoInvalidArgument error', async function () {
+          try {
+            client.db('test').collection('test').initializeUnorderedBulkOp().raw({ insertOne: {} });
+          } catch (error) {
+            expect(error).not.to.exist;
+          }
+        });
+      });
+    });
+  });
+
+  describe('Db.collection', function () {
+    describe('#insertMany', function () {
+      beforeEach(async function () {
         const client = this.configuration.newClient();
         await client.connect();
-
-        try {
-          client.db('test').collection('test').initializeUnorderedBulkOp().raw({ insertOne: {} });
-        } catch (error) {
-          expect(error).not.to.exist;
-        }
+      });
+      afterEach(async function () {
         await client.close();
+      });
+      context('when passed an invalid or sparse list', function () {
+        it('insertmany should throw a MongoInvalidArgument error when called with a valid operation', async function () {
+          try {
+            const docs = [];
+            docs[1] = {}; // works for docs[0] = {}
+            await client.db('test').collection('test').insertMany(docs);
+            expect.fail('Failure to throw error');
+          } catch (error) {
+            expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+          }
+        });
+      });
+      context('when passed a valid document list', function () {
+        it('insertmany should not throw a MongoInvalidArgument error when called with a valid operation', async function () {
+          try {
+            const docs = [];
+            docs[0] = {}; // works for docs[0] = {}
+            await client.db('test').collection('test').insertMany(docs);
+          } catch (error) {
+            expect(error).not.to.exist;
+          }
+        });
       });
     });
   });
