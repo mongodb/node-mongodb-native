@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   BSONSerializeOptions,
   Document,
@@ -1135,7 +1134,7 @@ export abstract class BulkOperationBase {
   /** Specifies a raw operation to perform in the bulk write. */
   raw(op: AnyBulkWriteOperation): this {
     if (!op) {
-      throw new MongoInvalidArgumentError('Cannot perform bulkwrite operation on undefined operation');
+      throw new MongoInvalidArgumentError('Cannot call .raw() with an undefined operation');
     }
     if ('insertOne' in op) {
       const forceServerObjectId = shouldForceServerObjectId(this);

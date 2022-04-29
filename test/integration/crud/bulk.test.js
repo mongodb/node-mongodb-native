@@ -27,33 +27,32 @@ describe('Bulk', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
+  describe('class BulkOperationBase', () => {
+    context('.raw()', () => {
+      it('should throw a MongoInvalidArgument error when called with an undefined operation', async function () {
+        const client = this.configuration.newClient();
+        await client.connect();
 
-  context('ops tests', () => {
-    it('Should raise an error when attempting bulkwrite operation on undefined operation', async function () {
-      var configuration = this.configuration;
-      const client = configuration.newClient();
-      await client.connect();
+        try {
+          client.db('test').collection('test').initializeUnorderedBulkOp().raw(undefined);
+          expect.fail('Failure to throw error');
+        } catch (error) {
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+        }
+        await client.close();
+      });
 
-      try {
-        client.db('test').collection('test').initializeUnorderedBulkOp().raw(undefined);
-        expect.fail('Failure to throw error');
-      } catch (error) {
-        expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-      }
-      await client.close();
-    });
+      it('should not throw a MongoInvalidArgument error when called with a valid operation', async function () {
+        const client = this.configuration.newClient();
+        await client.connect();
 
-    it('Should not raise an error when attempting bulkwrite operation on undefined operation', async function () {
-      var configuration = this.configuration;
-      const client = configuration.newClient();
-      await client.connect();
-
-      try {
-        client.db('test').collection('test').initializeUnorderedBulkOp().raw({ insertOne: {} });
-      } catch (error) {
-        expect(error).not.to.exist;
-      }
-      await client.close();
+        try {
+          client.db('test').collection('test').initializeUnorderedBulkOp().raw({ insertOne: {} });
+        } catch (error) {
+          expect(error).not.to.exist;
+        }
+        await client.close();
+      });
     });
   });
 
