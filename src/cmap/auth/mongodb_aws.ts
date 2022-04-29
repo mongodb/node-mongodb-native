@@ -283,6 +283,11 @@ function request(uri: string, _options: RequestOptions | undefined, callback: Ca
     });
   });
 
+  req.on('timeout', () => {
+    console.log('DEBUG: hit timeout');
+    req.destroy(new Error('Aws request timed out'));
+  });
+
   req.on('error', err => callback(err));
   req.end();
 }
