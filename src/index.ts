@@ -38,6 +38,7 @@ export const ObjectID = ObjectId;
 export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
 export {
   MongoAPIError,
+  MongoAWSError,
   MongoBatchReExecutionError,
   MongoChangeStreamError,
   MongoCompatibilityError,

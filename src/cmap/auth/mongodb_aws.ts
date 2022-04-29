@@ -6,6 +6,7 @@ import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
 import { aws4 } from '../../deps';
 import {
+  MongoAWSError,
   MongoCompatibilityError,
   MongoMissingCredentialsError,
   MongoRuntimeError
@@ -284,8 +285,7 @@ function request(uri: string, _options: RequestOptions | undefined, callback: Ca
   });
 
   req.on('timeout', () => {
-    console.log('DEBUG: hit timeout');
-    req.destroy(new Error('Aws request timed out'));
+    req.destroy(new MongoAWSError(`AWS request to ${uri} timed out after ${options.timeout} ms`));
   });
 
   req.on('error', err => callback(err));
