@@ -196,7 +196,7 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
         ? encodingOrCallback
         : callback;
 
-    if (checkAborted(this, callback)) return this;
+    if (this.state.streamEnd || checkAborted(this, callback)) return this;
 
     this.state.streamEnd = true;
 
