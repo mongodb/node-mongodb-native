@@ -60,7 +60,6 @@
     "eslint-plugin-tsdoc": "^0.2.14",
     "express": "^4.17.3",
     "js-yaml": "^4.1.0",
-    "lodash.camelcase": "^4.3.0",
     "mocha": "^9.2.2",
     "mocha-sinon": "^2.1.2",
     "nyc": "^15.1.0",

@@ -1,22 +1,36 @@
-const { expect } = require('chai');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-const { setupDatabase } = require('../shared');
-const mock = require('../../tools/mongodb-mock/index');
-
-const sinon = require('sinon');
-const { ObjectId, Timestamp, Long, MongoNetworkError } = require('../../../src');
-const { isHello } = require('../../../src/utils');
+import {
+  ChangeStream,
+  CommandFailedEvent,
+  CommandStartedEvent,
+  CommandSucceededEvent,
+  Document,
+  Long,
+  MongoNetworkError,
+  ObjectId,
+  Timestamp
+} from '../../../src';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { isHello } from '../../../src/utils';
+import * as mock from '../../tools/mongodb-mock/index';
+import { setupDatabase } from '../shared';
 
 /**
  * Triggers a fake resumable error on a change stream
- *
- * @param {ChangeStream} changeStream
- * @param {number} [delay] optional delay before triggering error
- * @param {Function} onClose callback when cursor closed due this error
+ * changeStream
+ * [delay] optional delay before triggering error
+ * onClose callback when cursor closed due this error
  */
-function triggerResumableError(changeStream, delay, onClose) {
-  if (arguments.length === 2) {
+function triggerResumableError(changeStream: ChangeStream, onClose?: () => void);
+function triggerResumableError(changeStream: ChangeStream, delay: number, onClose?: () => void);
+function triggerResumableError(
+  changeStream: ChangeStream,
+  delay: number | (() => void),
+  onClose?: () => void
+) {
+  if (typeof delay === 'function') {
     onClose = delay;
     delay = undefined;
   }
@@ -40,10 +54,12 @@ function triggerResumableError(changeStream, delay, onClose) {
       nextStub.restore();
     });
 
-    changeStream.next(() => {});
+    changeStream.next(() => {
+      // ignore
+    });
   }
 
-  if (delay != null) {
+  if (typeof delay === 'number') {
     setTimeout(triggerError, delay);
     return;
   }
@@ -51,12 +67,7 @@ function triggerResumableError(changeStream, delay, onClose) {
   triggerError();
 }
 
-/**
- * Waits for a change stream to start
- *
- * @param {ChangeStream} changeStream
- * @param {Function} callback
- */
+/** Waits for a change stream to start */
 function waitForStarted(changeStream, callback) {
   changeStream.cursor.once('init', () => {
     callback();
@@ -177,8 +188,10 @@ describe('Change Stream prose tests', function () {
       let server;
       let client;
 
-      let finish = err => {
-        finish = () => {};
+      let finish = (err?: Error) => {
+        finish = () => {
+          // ignore
+        };
         Promise.resolve()
           .then(() => changeStream && changeStream.close())
           .then(() => client && client.close())
@@ -254,6 +267,25 @@ describe('Change Stream prose tests', function () {
 
   describe('Change Stream prose 11-14', () => {
     class MockServerManager {
+      config: any;
+      cmdList: Set<string>;
+      database: string;
+      collection: string;
+      ns: string;
+      _timestampCounter: number;
+      cursorId: Long;
+      commandIterators: any;
+      promise: Promise<any>;
+      server: any;
+      client: any;
+      apm: {
+        started: CommandStartedEvent[];
+        succeeded: CommandSucceededEvent[];
+        failed: CommandFailedEvent[];
+      };
+      changeStream: any;
+      resumeTokenChangedEvents: any[];
+      namespace: any;
       constructor(config, commandIterators) {
         this.config = config;
         this.cmdList = new Set([
@@ -294,11 +326,13 @@ describe('Change Stream prose tests', function () {
           this.client = this.config.newClient(this.mongodbURI, { monitorCommands: true });
           return this.client.connect().then(() => {
             this.apm = { started: [], succeeded: [], failed: [] };
-            [
-              ['commandStarted', this.apm.started],
-              ['commandSucceeded', this.apm.succeeded],
-              ['commandFailed', this.apm.failed]
-            ].forEach(opts => {
+            (
+              [
+                ['commandStarted', this.apm.started],
+                ['commandSucceeded', this.apm.succeeded],
+                ['commandFailed', this.apm.failed]
+              ] as const
+            ).forEach(opts => {
               const eventName = opts[0];
               const target = opts[1];
 
@@ -312,7 +346,7 @@ describe('Change Stream prose tests', function () {
         });
       }
 
-      makeChangeStream(options) {
+      makeChangeStream(options?: Document) {
         this.changeStream = this.client
           .db(this.database)
           .collection(this.collection)
@@ -326,7 +360,7 @@ describe('Change Stream prose tests', function () {
         return this.changeStream;
       }
 
-      teardown(e) {
+      teardown(e?: Error) {
         let promise = Promise.resolve();
         if (this.changeStream) {
           promise = promise.then(() => this.changeStream.close()).catch();
@@ -420,7 +454,7 @@ describe('Change Stream prose tests', function () {
         const batch = Array.from({ length: config.numDocuments || 0 }).map(() =>
           this.changeEvent()
         );
-        const cursor = {
+        const cursor: Document = {
           [batchKey]: batch,
           id: this.cursorId,
           ns: this.ns
@@ -431,7 +465,7 @@ describe('Change Stream prose tests', function () {
         return cursor;
       }
 
-      changeEvent(operationType, fullDocument) {
+      changeEvent(operationType?: string, fullDocument?: Document) {
         fullDocument = fullDocument || {};
         return {
           _id: this.resumeToken(),
@@ -482,6 +516,7 @@ describe('Change Stream prose tests', function () {
             const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
             const successes = manager.apm.succeeded.map(e => {
               try {
+                // @ts-expect-error: e.reply is unknown
                 return e.reply.cursor;
               } catch (e) {
                 return {};
@@ -531,6 +566,7 @@ describe('Change Stream prose tests', function () {
             const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
             const successes = manager.apm.succeeded.map(e => {
               try {
+                // @ts-expect-error: e.reply is unknown
                 return e.reply.cursor;
               } catch (e) {
                 return {};
@@ -559,7 +595,7 @@ describe('Change Stream prose tests', function () {
         return manager
           .ready()
           .then(() => {
-            return new Promise(resolve => {
+            return new Promise<void>(resolve => {
               const changeStream = manager.makeChangeStream({ resumeAfter });
               let counter = 0;
               changeStream.cursor.on('response', () => {
@@ -570,8 +606,9 @@ describe('Change Stream prose tests', function () {
                 counter += 1;
               });
 
-              // Note: this is expected to fail
-              changeStream.next().catch(() => {});
+              changeStream.next().catch(() => {
+                // Note: this is expected to fail
+              });
             });
           })
           .then(
@@ -596,7 +633,7 @@ describe('Change Stream prose tests', function () {
         return manager
           .ready()
           .then(() => {
-            return new Promise(resolve => {
+            return new Promise<void>(resolve => {
               const changeStream = manager.makeChangeStream();
               let counter = 0;
               changeStream.cursor.on('response', () => {
@@ -607,8 +644,9 @@ describe('Change Stream prose tests', function () {
                 counter += 1;
               });
 
-              // Note: this is expected to fail
-              changeStream.next().catch(() => {});
+              changeStream.next().catch(() => {
+                // Note: this is expected to fail
+              });
             });
           })
           .then(
@@ -632,7 +670,9 @@ describe('Change Stream prose tests', function () {
           aggregate: (function* () {
             yield { numDocuments: 2, postBatchResumeToken: true };
           })(),
-          getMore: (function* () {})()
+          getMore: (function* () {
+            // fake getMore
+          })()
         });
 
         return manager
@@ -648,6 +688,7 @@ describe('Change Stream prose tests', function () {
             const tokens = manager.resumeTokenChangedEvents.map(e => e.resumeToken);
             const successes = manager.apm.succeeded.map(e => {
               try {
+                // @ts-expect-error: e.reply is unknown
                 return e.reply.cursor;
               } catch (e) {
                 return {};
@@ -691,15 +732,16 @@ describe('Change Stream prose tests', function () {
         return manager
           .ready()
           .then(() => {
-            return new Promise(resolve => {
+            return new Promise<void>(resolve => {
               const changeStream = manager.makeChangeStream({ startAfter, resumeAfter });
               changeStream.cursor.once('response', () => {
                 token = changeStream.resumeToken;
                 resolve();
               });
 
-              // Note: this is expected to fail
-              changeStream.next().catch(() => {});
+              changeStream.next().catch(() => {
+                // Note: this is expected to fail
+              });
             });
           })
           .then(
@@ -725,15 +767,16 @@ describe('Change Stream prose tests', function () {
         return manager
           .ready()
           .then(() => {
-            return new Promise(resolve => {
+            return new Promise<void>(resolve => {
               const changeStream = manager.makeChangeStream({ resumeAfter });
               changeStream.cursor.once('response', () => {
                 token = changeStream.resumeToken;
                 resolve();
               });
 
-              // Note: this is expected to fail
-              changeStream.next().catch(() => {});
+              changeStream.next().catch(() => {
+                // Note: this is expected to fail
+              });
             });
           })
           .then(
@@ -758,15 +801,16 @@ describe('Change Stream prose tests', function () {
         return manager
           .ready()
           .then(() => {
-            return new Promise(resolve => {
+            return new Promise<void>(resolve => {
               const changeStream = manager.makeChangeStream();
               changeStream.cursor.once('response', () => {
                 token = changeStream.resumeToken;
                 resolve();
               });
 
-              // Note: this is expected to fail
-              changeStream.next().catch(() => {});
+              changeStream.next().catch(() => {
+                // Note: this is expected to fail
+              });
             });
           })
           .then(

@@ -192,8 +192,8 @@ function withMonitoredClient(commands, options, callback) {
 /**
  * Safely perform a test with an arbitrary cursor.
  *
- * @param {Function} cursor any cursor that needs to be closed
- * @param {(cursor: object, done: Function) => void} body test body
+ * @param {{close: () => void}} cursor any cursor that needs to be closed
+ * @param {(cursor: object, done: Mocha.Done) => void} body test body
  * @param {Function} done called after cleanup
  */
 function withCursor(cursor, body, done) {

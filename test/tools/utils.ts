@@ -4,6 +4,7 @@ import { inspect, promisify } from 'util';
 
 import { Logger } from '../../src/logger';
 import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
+import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   CollectionData,
   EntityDescription,
@@ -72,7 +73,7 @@ export class EventCollector {
   constructor(
     obj: { on: (arg0: any, arg1: (event: any) => number) => void },
     events: any[],
-    options: { timeout: number }
+    options?: { timeout: number }
   ) {
     this._events = Object.create(null);
     this._timeout = options ? options.timeout : 5000;
@@ -83,7 +84,17 @@ export class EventCollector {
     });
   }
 
-  waitForEvent(eventName: any, count: number, callback: any) {
+  waitForEvent(eventName: string, callback: (error?: Error, events?: any[]) => void): void;
+  waitForEvent(
+    eventName: string,
+    count: number,
+    callback: (error?: Error, events?: any[]) => void
+  ): void;
+  waitForEvent(
+    eventName: string,
+    count: number | ((error?: Error, events?: any[]) => void),
+    callback?: (error?: Error, events?: any[]) => void
+  ): void {
     if (typeof count === 'function') {
       callback = count;
       count = 1;
@@ -295,6 +306,7 @@ export class TestBuilder {
   operation(operation: OperationDescription): this {
     this._operations.push({
       object: 'collection0',
+      arguments: {},
       ...operation
     });
     return this;
@@ -329,37 +341,51 @@ export class TestBuilder {
 
 export class UnifiedTestSuiteBuilder {
   private _description = 'Default Description';
-  private _databaseName = '';
   private _schemaVersion = '1.0';
-  private _createEntities: EntityDescription[] = [
-    {
-      client: {
-        id: 'client0',
-        useMultipleMongoses: true,
-        observeEvents: ['commandStartedEvent']
-      }
-    },
-    {
-      database: {
-        id: 'database0',
-        client: 'client0',
-        databaseName: ''
-      }
-    },
-    {
-      collection: {
-        id: 'collection0',
-        database: 'database0',
-        collectionName: 'coll0'
-      }
-    }
-  ];
+  private _createEntities: EntityDescription[];
   private _runOnRequirement: RunOnRequirement[] = [];
   private _initialData: CollectionData[] = [];
   private _tests: Test[] = [];
 
+  static describe(title: string) {
+    return new UnifiedTestSuiteBuilder(title);
+  }
+
+  /**
+   * Establish common defaults
+   * - id and name = client0, listens for commandStartedEvent
+   * - id and name = database0
+   * - id and name = collection0
+   */
+  static get defaultEntities(): EntityDescription[] {
+    return [
+      {
+        client: {
+          id: 'client0',
+          useMultipleMongoses: true,
+          observeEvents: ['commandStartedEvent']
+        }
+      },
+      {
+        database: {
+          id: 'database0',
+          client: 'client0',
+          databaseName: 'database0'
+        }
+      },
+      {
+        collection: {
+          id: 'collection0',
+          database: 'database0',
+          collectionName: 'collection0'
+        }
+      }
+    ];
+  }
+
   constructor(description: string) {
     this._description = description;
+    this._createEntities = [];
   }
 
   description(description: string): this {
@@ -400,14 +426,6 @@ export class UnifiedTestSuiteBuilder {
     return this;
   }
 
-  /**
-   * sets the database name for the tests
-   */
-  databaseName(name: string): this {
-    this._databaseName = name;
-    return this;
-  }
-
   runOnRequirement(requirement: RunOnRequirement): this;
   runOnRequirement(requirement: RunOnRequirement[]): this;
   runOnRequirement(requirement: RunOnRequirement | RunOnRequirement[]): this {
@@ -423,34 +441,22 @@ export class UnifiedTestSuiteBuilder {
   }
 
   toJSON(): UnifiedSuite {
-    const databaseName =
-      this._databaseName !== ''
-        ? this._databaseName
-        : this._description
-            .split(' ')
-            .filter(s => s.length > 0)
-            .join('_');
     return {
       description: this._description,
       schemaVersion: this._schemaVersion,
       runOnRequirements: this._runOnRequirement,
-      createEntities: this._createEntities.map(entity => {
-        if ('database' in entity) {
-          return {
-            database: { ...entity.database, databaseName }
-          };
-        }
-
-        return entity;
-      }),
-      initialData: this._initialData.map(data => {
-        return {
-          ...data,
-          databaseName
-        };
-      }),
+      createEntities: this._createEntities,
+      initialData: this._initialData,
       tests: this._tests
     };
+  }
+
+  run(): void {
+    return runUnifiedSuite([this.toJSON()]);
+  }
+
+  toMocha() {
+    return describe(this._description, () => runUnifiedSuite([this.toJSON()]));
   }
 
   clone(): UnifiedSuite {

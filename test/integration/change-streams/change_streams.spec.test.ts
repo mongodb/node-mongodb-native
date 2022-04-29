@@ -1,18 +1,17 @@
-'use strict';
+import { expect } from 'chai';
+import * as path from 'path';
 
-const path = require('path');
-const { expect } = require('chai');
-const { loadSpecTests } = require('../../spec');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
-const camelCase = require('lodash.camelcase');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
-const { delay, setupDatabase } = require('../shared');
+import { Document, MongoClient } from '../../../src';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { loadSpecTests } from '../../spec';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
+import { delay, setupDatabase } from '../shared';
 
 describe('Change Streams Spec - Unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('change-streams', 'unified')));
 });
 
-// TODO: NODE-3819: Unskip flaky MacOS tests.
+// TODO(NODE-3819): Unskip flaky MacOS tests.
 const maybeDescribe = process.platform === 'darwin' ? describe.skip : describe;
 maybeDescribe('Change Stream Spec - v1', function () {
   let globalClient;
@@ -32,7 +31,7 @@ maybeDescribe('Change Stream Spec - v1', function () {
   after(function () {
     const gc = globalClient;
     globalClient = undefined;
-    return new Promise(r => gc.close(() => r()));
+    return new Promise<void>(r => gc.close(() => r()));
   });
 
   loadSpecTests(path.join('change-streams', 'legacy')).forEach(suite => {
@@ -99,7 +98,7 @@ maybeDescribe('Change Stream Spec - v1', function () {
 
   function generateMetadata(test) {
     const topology = test.topology;
-    const requires = {};
+    const requires: MongoDBMetadataUI['requires'] = {};
     const versionLimits = [];
     if (test.minServerVersion) {
       versionLimits.push(`>=${test.minServerVersion}`);
@@ -245,7 +244,7 @@ maybeDescribe('Change Stream Spec - v1', function () {
       .reduce((p, op) => p.then(op), delay(200));
   }
 
-  function makeChangeStreamCloseFn(changeStream) {
+  function makeChangeStreamCloseFn(changeStream): (error?: any, value?: any) => Promise<unknown> {
     return function close(error, value) {
       return new Promise((resolve, reject) => {
         changeStream.close(err => {
@@ -259,33 +258,44 @@ maybeDescribe('Change Stream Spec - v1', function () {
   }
 
   function normalizeAPMEvent(raw) {
-    return Object.keys(raw).reduce((agg, key) => {
-      agg[camelCase(key)] = raw[key];
-      return agg;
-    }, {});
+    const rawKeys = Object.keys(raw);
+    rawKeys.sort();
+    expect(rawKeys, 'test runner only supports these keys, is there a new one?').to.deep.equal([
+      'command',
+      'command_name',
+      'database_name'
+    ]);
+    return {
+      command: raw.command,
+      commandName: raw.command_name,
+      databaseName: raw.database_name
+    };
   }
 
-  function makeOperation(client, op) {
-    const target = client.db(op.database).collection(op.collection);
-    const command = op.name;
-    const args = [];
-    if (op.arguments) {
-      if (op.arguments.document) {
-        args.push(op.arguments.document);
-      }
-      if (op.arguments.filter) {
-        args.push(op.arguments.filter);
-      }
-      if (op.arguments.update) {
-        args.push(op.arguments.update);
-      }
-      if (op.arguments.replacement) {
-        args.push(op.arguments.replacement);
-      }
-      if (op.arguments.to) {
-        args.push(op.arguments.to);
-      }
+  function makeOperation(client: MongoClient, op: Document) {
+    const collection = client.db(op.database).collection(op.collection);
+    switch (op.name) {
+      case 'insertOne':
+        expect(op.arguments).to.have.property('document').that.is.an('object');
+        return () => collection.insertOne(op.arguments.document);
+      case 'updateOne':
+        expect(op.arguments).to.have.property('filter').that.is.an('object');
+        expect(op.arguments).to.have.property('update').that.is.an('object');
+        return () => collection.updateOne(op.arguments.filter, op.arguments.update);
+      case 'replaceOne':
+        expect(op.arguments).to.have.property('filter').that.is.an('object');
+        expect(op.arguments).to.have.property('replacement').that.is.an('object');
+        return () => collection.replaceOne(op.arguments.filter, op.arguments.replacement);
+      case 'deleteOne':
+        expect(op.arguments).to.have.property('filter').that.is.an('object');
+        return () => collection.deleteOne(op.arguments.filter);
+      case 'rename':
+        expect(op.arguments).to.have.property('to').that.is.a('string');
+        return () => collection.rename(op.arguments.to);
+      case 'drop':
+        return () => collection.drop();
+      default:
+        throw new Error(`runner does not support ${op.name}`);
     }
-    return () => target[command].apply(target, args);
   }
 });
