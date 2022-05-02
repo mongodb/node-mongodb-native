@@ -1165,6 +1165,17 @@ tasks:
           SSL: ssl
           TOPOLOGY: server
       - func: run tls tests
+  - name: test-tls-support-6.0
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
   - name: test-tls-support-5.0
     tags:
       - tls-support
@@ -1264,6 +1275,78 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws ECS auth test
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with regular aws credentials
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with assume role credentials
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws EC2 credentials
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials as environment variables
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials and session token as environment variables
+  - name: aws-6.0-auth-test-run-aws-ECS-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
           AUTH: auth
           ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: server
@@ -1882,6 +1965,7 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
@@ -1936,6 +2020,7 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
@@ -1986,6 +2071,7 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
@@ -2029,6 +2115,12 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-latest-auth-test-run-aws-ECS-auth-test
+      - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+      - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+      - aws-6.0-auth-test-run-aws-ECS-auth-test
       - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
