@@ -124,7 +124,12 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
 
       if (encryptedFields) {
         // Create the required index for FLE2 support.
-        const createIndexOp = new CreateIndexOperation(db, name, { __safeContent__: 1 }, {});
+        const createIndexOp = new CreateIndexOperation(
+          db,
+          name,
+          { __safeContent__: 1 },
+          { unique: true }
+        );
         await new Promise<void>((resolve, reject) => {
           createIndexOp.execute(server, session, err => (err ? reject(err) : resolve()));
         });
