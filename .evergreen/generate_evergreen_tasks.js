@@ -3,7 +3,7 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '5.0';
-const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6'];
+const MONGODB_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
 const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
 NODE_VERSIONS.sort()
 const LOWEST_LTS = NODE_VERSIONS[0];
