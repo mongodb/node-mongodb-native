@@ -27,10 +27,12 @@ describe('Bulk', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
-  describe('BulkOperationBase', () => {
+  // eslint-disable-next-line no-restricted-properties
+  describe.only('BulkOperationBase', () => {
     describe('#raw', function () {
+      let client;
       beforeEach(async function () {
-        const client = this.configuration.newClient();
+        client = this.configuration.newClient();
         await client.connect();
       });
       afterEach(async function () {
@@ -59,17 +61,19 @@ describe('Bulk', function () {
     });
   });
 
-  describe('Db.collection', function () {
+  // eslint-disable-next-line no-restricted-properties
+  describe.only('Db.collection', function () {
     describe('#insertMany', function () {
+      let client;
       beforeEach(async function () {
-        const client = this.configuration.newClient();
+        client = this.configuration.newClient();
         await client.connect();
       });
       afterEach(async function () {
         await client.close();
       });
       context('when passed an invalid or sparse list', function () {
-        it('insertmany should throw a MongoInvalidArgument error when called with a valid operation', async function () {
+        it('insertMany should throw a MongoInvalidArgument error when called with a valid operation', async function () {
           try {
             const docs = [];
             docs[1] = {}; // works for docs[0] = {}
@@ -81,11 +85,12 @@ describe('Bulk', function () {
         });
       });
       context('when passed a valid document list', function () {
-        it('insertmany should not throw a MongoInvalidArgument error when called with a valid operation', async function () {
+        it('insertMany should not throw a MongoInvalidArgument error when called with a valid operation', async function () {
           try {
             const docs = [];
             docs[0] = {}; // works for docs[0] = {}
-            await client.db('test').collection('test').insertMany(docs);
+            let result = await client.db('test').collection('test').insertMany(docs);
+            expect(result).to.be.true;
           } catch (error) {
             expect(error).not.to.exist;
           }
