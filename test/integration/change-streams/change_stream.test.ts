@@ -1745,11 +1745,23 @@ describe('Change Streams', function () {
     })
     .createEntities([
       { client: { id: 'client0' } },
-      { database: { id: 'database0', client: 'client0', databaseName: 'changeStreamDocShape' } },
-      { collection: { id: 'collection0', database: 'database0', collectionName: 'collection0' } },
 
       // transaction test
       { session: { id: 'session0', client: 'client0' } },
+      {
+        database: {
+          id: 'changeStreamDocShape',
+          client: 'client0',
+          databaseName: 'changeStreamDocShape'
+        }
+      },
+      {
+        collection: {
+          id: 'collection0',
+          database: 'changeStreamDocShape',
+          collectionName: 'collection0'
+        }
+      },
 
       // rename test
       { database: { id: 'admin', databaseName: 'admin', client: 'client0' } },
@@ -1839,15 +1851,15 @@ describe('Change Streams', function () {
     .test(
       TestBuilder.it('change stream event inside transaction')
         .operation({
-          object: 'database0',
-          name: 'createCollection',
-          arguments: { collection: 'collection0' },
+          object: 'changeStreamDocShape',
+          name: 'runCommand',
+          arguments: { command: { dropDatabase: 1 } },
           ignoreResultAndError: true
         })
         .operation({
-          object: 'database0',
-          name: 'runCommand',
-          arguments: { command: { dropDatabase: 1 } },
+          object: 'changeStreamDocShape',
+          name: 'createCollection',
+          arguments: { collection: 'collection0' },
           ignoreResultAndError: true
         })
         .operation({
