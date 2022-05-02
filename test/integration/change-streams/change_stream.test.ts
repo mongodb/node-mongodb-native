@@ -1840,6 +1840,12 @@ describe('Change Streams', function () {
       TestBuilder.it('change stream event inside transaction')
         .operation({
           object: 'database0',
+          name: 'createCollection',
+          arguments: { collection: 'collection0' },
+          ignoreResultAndError: true
+        })
+        .operation({
+          object: 'database0',
           name: 'runCommand',
           arguments: { command: { dropDatabase: 1 } },
           ignoreResultAndError: true
