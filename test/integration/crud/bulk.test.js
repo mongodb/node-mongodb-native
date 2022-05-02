@@ -27,8 +27,7 @@ describe('Bulk', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
-  // eslint-disable-next-line no-restricted-properties
-  describe.only('BulkOperationBase', () => {
+  describe('BulkOperationBase', () => {
     describe('#raw', function () {
       let client;
       beforeEach(async function () {
@@ -61,8 +60,7 @@ describe('Bulk', function () {
     });
   });
 
-  // eslint-disable-next-line no-restricted-properties
-  describe.only('Db.collection', function () {
+  describe('Db.collection', function () {
     describe('#insertMany', function () {
       let client;
       beforeEach(async function () {
@@ -76,9 +74,9 @@ describe('Bulk', function () {
         it('insertMany should throw a MongoInvalidArgument error when called with a valid operation', async function () {
           try {
             const docs = [];
-            docs[1] = {}; // works for docs[0] = {}
+            docs[1] = { color: 'red' };
             await client.db('test').collection('test').insertMany(docs);
-            expect.fail('Failure to throw error');
+            expect.fail('Expected insertMany to throw error, failed to throw error');
           } catch (error) {
             expect(error).to.be.instanceOf(MongoInvalidArgumentError);
           }
@@ -87,10 +85,11 @@ describe('Bulk', function () {
       context('when passed a valid document list', function () {
         it('insertMany should not throw a MongoInvalidArgument error when called with a valid operation', async function () {
           try {
-            const docs = [];
-            docs[0] = {}; // works for docs[0] = {}
-            let result = await client.db('test').collection('test').insertMany(docs);
-            expect(result).to.be.true;
+            let result = await client
+              .db('test')
+              .collection('test')
+              .insertMany([{ color: 'blue' }]);
+            expect(result).to.exist;
           } catch (error) {
             expect(error).not.to.exist;
           }
