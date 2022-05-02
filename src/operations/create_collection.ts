@@ -110,9 +110,9 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
 
       if (encryptedFields) {
         // Create auxilliary collections for FLE2 support.
-        const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
-        const eccCollection = encryptedFields.eccCollection || `enxcol_.${name}.ecc`;
-        const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
+        const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
+        const eccCollection = encryptedFields.eccCollection ?? `enxcol_.${name}.ecc`;
+        const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
 
         for (const collectionName of [escCollection, eccCollection, ecocCollection]) {
           const createOp = new CreateCollectionOperation(db, collectionName);
