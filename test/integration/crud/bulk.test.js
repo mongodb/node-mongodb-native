@@ -27,7 +27,8 @@ describe('Bulk', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
-  describe('BulkOperationBase', () => {
+  // eslint-disable-next-line no-restricted-properties
+  describe.only('BulkOperationBase', () => {
     describe('#raw', function () {
       let client;
       beforeEach(async function () {
@@ -39,12 +40,10 @@ describe('Bulk', function () {
       });
       context('when called with an undefined operation', function () {
         it('should throw a MongoInvalidArgument error ', async function () {
-          try {
-            client.db('test').collection('test').initializeUnorderedBulkOp().raw(undefined);
-            expect.fail('Failure to throw error');
-          } catch (error) {
-            expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-          }
+          const bulkOp = client.db('test').collection('test').initializeUnorderedBulkOp();
+          expect(() => bulkOp.raw(undefined)).to.throw(MongoInvalidArgumentError);
+          expect(() => bulkOp.raw(true)).to.throw(MongoInvalidArgumentError);
+          expect(() => bulkOp.raw(3)).to.throw(MongoInvalidArgumentError);
         });
       });
 

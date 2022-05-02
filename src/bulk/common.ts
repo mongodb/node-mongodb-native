@@ -1133,8 +1133,8 @@ export abstract class BulkOperationBase {
 
   /** Specifies a raw operation to perform in the bulk write. */
   raw(op: AnyBulkWriteOperation): this {
-    if (!op) {
-      throw new MongoInvalidArgumentError('Cannot call .raw() with an undefined operation');
+    if (op == null || typeof op !== 'object') {
+      throw new MongoInvalidArgumentError('Operation must be an object with an operation key');
     }
     if ('insertOne' in op) {
       const forceServerObjectId = shouldForceServerObjectId(this);
