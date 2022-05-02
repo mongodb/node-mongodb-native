@@ -197,7 +197,7 @@ operations.set('commitTransaction', async ({ entities, operation }) => {
 
 operations.set('createChangeStream', async ({ entities, operation }) => {
   const watchable = entities.get(operation.object);
-  if (!('watch' in watchable)) {
+  if (watchable == null || !('watch' in watchable)) {
     throw new Error(`Entity ${operation.object} must be watchable`);
   }
 
@@ -216,7 +216,7 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
 operations.set('createCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
   const { collection, ...opts } = operation.arguments;
-  await db.createCollection(collection, opts);
+  return await db.createCollection(collection, opts);
 });
 
 operations.set('createFindCursor', async ({ entities, operation }) => {

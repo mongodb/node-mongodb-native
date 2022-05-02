@@ -299,6 +299,10 @@ export class TestBuilder {
   private _expectEvents?: ExpectedEventsForClient[] = [];
   private _outcome?: CollectionData[] = [];
 
+  static it(title: string) {
+    return new TestBuilder(title);
+  }
+
   constructor(description: string) {
     this._description = description;
   }
