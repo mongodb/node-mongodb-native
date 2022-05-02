@@ -6,6 +6,7 @@ import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
 import { aws4 } from '../../deps';
 import {
+  MongoAWSError,
   MongoCompatibilityError,
   MongoMissingCredentialsError,
   MongoRuntimeError
@@ -281,6 +282,10 @@ function request(uri: string, _options: RequestOptions | undefined, callback: Ca
         callback(new MongoRuntimeError(`Invalid JSON response: "${data}"`));
       }
     });
+  });
+
+  req.on('timeout', () => {
+    req.destroy(new MongoAWSError(`AWS request to ${uri} timed out after ${options.timeout} ms`));
   });
 
   req.on('error', err => callback(err));

@@ -348,6 +348,23 @@ export class MongoKerberosError extends MongoRuntimeError {
 }
 
 /**
+ * A error generated when the user attempts to authenticate
+ * via AWS, but fails
+ *
+ * @public
+ * @category Error
+ */
+export class MongoAWSError extends MongoRuntimeError {
+  constructor(message: string) {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoAWSError';
+  }
+}
+
+/**
  * An error generated when a ChangeStream operation fails to execute.
  *
  * @public
