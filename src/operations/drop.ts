@@ -79,7 +79,10 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
           try {
             await dropOp.executeWithoutEncryptedFieldsCheck(server, session);
           } catch (err) {
-            if ((err instanceof MongoServerError && err.code !== MONGODB_ERROR_CODES.NamespaceNotFound)) {
+            if (
+              err instanceof MongoServerError &&
+              err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
+            ) {
               throw err;
             }
           }
