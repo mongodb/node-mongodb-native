@@ -219,9 +219,7 @@ describe('Server Operation Count Tests', function () {
       expect(server.s.operationCount).to.equal(0);
       const killCursorsSpy = sinon.spy(server, 'killCursors');
 
-      await cursor.close().catch(err => err);
-      // TODO(NODE-4217): update test to check for error existence
-      // expect(error).to.exist;
+      await cursor.close();
 
       expect(killCursorsSpy.called).to.be.true;
       expect(server.s.operationCount).to.equal(0);
@@ -291,9 +289,7 @@ describe('Server Operation Count Tests', function () {
           });
           const killCursorsSpy = sinon.spy(server, 'killCursors');
 
-          await cursor.close().catch(err => err);
-          // TODO(NODE-4217): update test to check for error existence
-          // expect(error).to.exist;
+          await cursor.close();
 
           expect(killCursorsSpy.called).to.be.true;
           expect(server.s.operationCount).to.equal(0);
