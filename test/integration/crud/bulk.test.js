@@ -27,8 +27,7 @@ describe('Bulk', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
-  // eslint-disable-next-line no-restricted-properties
-  describe.only('BulkOperationBase', () => {
+  describe('BulkOperationBase', () => {
     describe('#raw', function () {
       let client;
       beforeEach(async function () {
