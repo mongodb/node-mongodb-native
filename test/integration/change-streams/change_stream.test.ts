@@ -1741,7 +1741,8 @@ describe('Change Streams', function () {
   UnifiedTestSuiteBuilder.describe('document shapes')
     .runOnRequirement({
       minServerVersion: '4.0.0',
-      topologies: ['replicaset', 'load-balanced', 'sharded', 'sharded-replicaset']
+      auth: true,
+      topologies: ['replicaset']
     })
     .createEntities([
       { client: { id: 'client0' } },
