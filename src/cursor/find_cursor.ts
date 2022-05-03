@@ -412,8 +412,15 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @remarks
    * {@link https://docs.mongodb.com/manual/reference/command/find/#find-cmd-allowdiskuse | find command allowDiskUse documentation}
    */
-  allowDiskUse(): this {
+  allowDiskUse(allow = true): this {
     assertUninitialized(this);
+
+    // As of 6.0 the default is true. This allows users to get back to the old behaviour.
+    if (!allow) {
+      this[kBuiltOptions].allowDiskUse = false;
+      return this;
+    }
+
     if (!this[kBuiltOptions].sort) {
       throw new MongoInvalidArgumentError('Option "allowDiskUse" requires a sort specification');
     }
