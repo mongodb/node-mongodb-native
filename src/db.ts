@@ -724,7 +724,7 @@ export class Db {
    */
   watch<
     TSchema extends Document = Document,
-    TChange extends ChangeStreamDocument<TSchema> = ChangeStreamDocument<TSchema>
+    TChange extends Document = ChangeStreamDocument<TSchema>
   >(pipeline: Document[] = [], options: ChangeStreamOptions = {}): ChangeStream<TSchema, TChange> {
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {

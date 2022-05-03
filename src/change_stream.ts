@@ -355,7 +355,7 @@ export interface UpdateDescription<TSchema extends Document = Document> {
 /** @public */
 export type ChangeStreamEvents<
   TSchema extends Document = Document,
-  TChange extends ChangeStreamDocument<TSchema> = ChangeStreamDocument<TSchema>
+  TChange extends Document = ChangeStreamDocument<TSchema>
 > = {
   resumeTokenChanged(token: ResumeToken): void;
   init(response: any): void;
@@ -372,7 +372,7 @@ export type ChangeStreamEvents<
  */
 export class ChangeStream<
   TSchema extends Document = Document,
-  TChange extends ChangeStreamDocument<TSchema> = ChangeStreamDocument<TSchema>
+  TChange extends Document = ChangeStreamDocument<TSchema>
 > extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>> {
   pipeline: Document[];
   options: ChangeStreamOptions;
@@ -822,7 +822,7 @@ export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
 /** @internal */
 export class ChangeStreamCursor<
   TSchema extends Document = Document,
-  TChange extends ChangeStreamDocument<TSchema> = ChangeStreamDocument<TSchema>
+  TChange extends Document = ChangeStreamDocument<TSchema>
 > extends AbstractCursor<TChange, ChangeStreamEvents> {
   _resumeToken: ResumeToken;
   startAtOperationTime?: OperationTime;

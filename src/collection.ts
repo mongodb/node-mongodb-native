@@ -1422,10 +1422,10 @@ export class Collection<TSchema extends Document = Document> {
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    */
-  watch<
-    TLocal extends Document = TSchema,
-    TChange extends ChangeStreamDocument<TLocal> = ChangeStreamDocument<TLocal>
-  >(pipeline: Document[] = [], options: ChangeStreamOptions = {}): ChangeStream<TLocal, TChange> {
+  watch<TLocal extends Document = TSchema, TChange extends Document = ChangeStreamDocument<TLocal>>(
+    pipeline: Document[] = [],
+    options: ChangeStreamOptions = {}
+  ): ChangeStream<TLocal, TChange> {
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
       options = pipeline;
