@@ -1,0 +1,75 @@
+description: aggregate-allowdiskuse
+
+schemaVersion: '1.0'
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: 'Aggregate does not send allowDiskUse when value is not specified'
+    operations:
+      - object: *collection0
+        name: aggregate
+        arguments:
+          pipeline: &pipeline [ { $match: {} } ]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline
+                allowDiskUse: { $$exists: false }
+              commandName: aggregate
+              databaseName: *database0Name
+
+  - description: 'Aggregate sends allowDiskUse false when false is specified'
+    operations:
+      - object: *collection0
+        name: aggregate
+        arguments:
+          pipeline: *pipeline
+          allowDiskUse: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline
+                allowDiskUse: false
+              commandName: aggregate
+              databaseName: *database0Name
+
+  - description: 'Aggregate sends allowDiskUse true when true is specified'
+    operations:
+      - object: *collection0
+        name: aggregate
+        arguments:
+          pipeline: *pipeline
+          allowDiskUse: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0Name
+                pipeline: *pipeline
+                allowDiskUse: true
+              commandName: aggregate
+              databaseName: *database0Name
