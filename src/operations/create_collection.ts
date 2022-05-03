@@ -41,6 +41,17 @@ export interface TimeSeriesCollectionOptions extends Document {
   granularity?: 'seconds' | 'minutes' | 'hours' | string;
 }
 
+/** @public
+ * Configuration options for clustered collections
+ * @see https://www.mongodb.com/docs/v5.3/core/clustered-collections/
+ */
+export interface ClusteredCollectionOptions extends Document {
+  name?: string;
+  key?: Document;
+  unique?: boolean;
+  v?: string;
+}
+
 /** @public */
 export interface CreateCollectionOptions extends CommandOperationOptions {
   /** Returns an error if the collection does not exist */
@@ -73,7 +84,9 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   pkFactory?: PkFactory;
   /** A document specifying configuration options for timeseries collections. */
   timeseries?: TimeSeriesCollectionOptions;
-  /** The number of seconds after which a document in a timeseries collection expires. */
+  /** A document specifying configuration options for clustered collections. */
+  clusteredIndex?: ClusteredCollectionOptions;
+  /** The number of seconds after which a document in a timeseries or clustered collection expires. */
   expireAfterSeconds?: number;
 }
 
