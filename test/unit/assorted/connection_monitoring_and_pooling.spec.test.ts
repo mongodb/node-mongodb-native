@@ -30,7 +30,7 @@ describe('Connection Monitoring and Pooling Spec Tests', function () {
 
   const suites: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
-  for (const test of suites) {
+  for (const test of suites.filter(test => test.style === 'unit')) {
     it(test.description, async function () {
       await runCmapTest(test, threadContext);
     });
