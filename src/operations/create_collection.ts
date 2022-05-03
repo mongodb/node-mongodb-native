@@ -47,8 +47,8 @@ export interface TimeSeriesCollectionOptions extends Document {
  */
 export interface ClusteredCollectionOptions extends Document {
   name?: string;
-  key?: Document;
-  unique?: boolean;
+  key: Document;
+  unique: boolean;
   v?: string;
 }
 
