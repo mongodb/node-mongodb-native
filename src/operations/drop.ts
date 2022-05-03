@@ -58,7 +58,8 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
       } catch (err) {
         if (
           !encryptedFields ||
-          (err instanceof MongoServerError && err.code !== MONGODB_ERROR_CODES.NamespaceNotFound)
+          !(err instanceof MongoServerError) ||
+          err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
         ) {
           throw err;
         }
@@ -80,7 +81,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
             await dropOp.executeWithoutEncryptedFieldsCheck(server, session);
           } catch (err) {
             if (
-              err instanceof MongoServerError &&
+              !(err instanceof MongoServerError) ||
               err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
             ) {
               throw err;
