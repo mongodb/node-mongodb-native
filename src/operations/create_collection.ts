@@ -118,6 +118,10 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
           const createOp = new CreateCollectionOperation(db, collectionName);
           await createOp.executeWithoutEncryptedFieldsCheck(server, session);
         }
+
+        if (!options.encryptedFields) {
+          this.options = { ...this.options, encryptedFields };
+        }
       }
 
       const coll = await this.executeWithoutEncryptedFieldsCheck(server, session);
