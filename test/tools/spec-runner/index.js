@@ -11,6 +11,7 @@ const resolveConnectionString = require('./utils').resolveConnectionString;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
 const ClientSideEncryptionFilter = require('../runner/filters/client_encryption_filter');
+const { MONGODB_ERROR_CODES } = require('../../../src/error');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -99,9 +100,14 @@ function gatherTestSuites(specPath) {
     .readdirSync(specPath)
     .filter(x => x.indexOf('.json') !== -1)
     .map(x =>
-      Object.assign(EJSON.parse(fs.readFileSync(path.join(specPath, x)), { relaxed: true }), {
-        name: path.basename(x, '.json')
-      })
+      Object.assign(
+        EJSON.parse(fs.readFileSync(path.join(specPath, x)), {
+          relaxed: !x.includes('fle2-CreateCollection')
+        }),
+        {
+          name: path.basename(x, '.json')
+        }
+      )
     );
 }
 
@@ -597,6 +603,18 @@ function maybeSession(operation, context) {
   );
 }
 
+function withoutCommandMonitoring(client, fn) {
+  const listeners = client.rawListeners('commandStarted');
+  client.removeAllListeners('commandStarted');
+  return Promise.resolve()
+    .then(() => fn())
+    .finally(() => {
+      for (const listener of listeners) {
+        client.on('commandStarted', listener);
+      }
+    });
+}
+
 const kOperations = new Map([
   [
     'recordPrimary',
@@ -636,16 +654,22 @@ const kOperations = new Map([
     'createCollection',
     (operation, db, context /*, options */) => {
       const collectionName = operation.arguments.collection;
+      const encryptedFields = operation.arguments.encryptedFields;
       const session = maybeSession(operation, context);
-      return db.createCollection(collectionName, { session });
+      return db.createCollection(collectionName, { session, encryptedFields });
     }
   ],
   [
     'dropCollection',
     (operation, db, context /*, options */) => {
       const collectionName = operation.arguments.collection;
+      const encryptedFields = operation.arguments.encryptedFields;
       const session = maybeSession(operation, context);
-      return db.dropCollection(collectionName, { session });
+      return db.dropCollection(collectionName, { session, encryptedFields }).catch(err => {
+        if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+          throw err;
+        }
+      });
     }
   ],
   [
@@ -665,6 +689,74 @@ const kOperations = new Map([
       const options = { session: maybeSession(operation, context) };
       if (args.out) options.out = args.out;
       return collection.mapReduce(map, reduce, options);
+    }
+  ],
+  [
+    'assertCollectionExists',
+    (operation, testRunnerContext, context /*, options */) => {
+      const collectionName = operation.arguments.collection;
+      const session = maybeSession(operation, context);
+      const db = context.client.db(operation.arguments.database);
+      return withoutCommandMonitoring(context.client, () =>
+        db
+          .listCollections({ session })
+          .toArray()
+          .then(results => results.map(({ name }) => name))
+          .then(collections => expect(collections).to.include(collectionName))
+      );
+    }
+  ],
+  [
+    'assertCollectionNotExists',
+    (operation, testRunnerContext, context /*, options */) => {
+      const collectionName = operation.arguments.collection;
+      const session = maybeSession(operation, context);
+      const db = context.client.db(operation.arguments.database);
+      return withoutCommandMonitoring(context.client, () =>
+        db
+          .listCollections({ session })
+          .toArray()
+          .then(results => results.map(({ name }) => name))
+          .then(collections => expect(collections).to.not.include(collectionName))
+      );
+    }
+  ],
+  [
+    'assertIndexExists',
+    (operation, testRunnerContext, context /*, options */) => {
+      const collectionName = operation.arguments.collection;
+      const indexName = operation.arguments.index;
+      const session = maybeSession(operation, context);
+      const db = context.client.db(operation.arguments.database);
+      return withoutCommandMonitoring(context.client, () =>
+        db
+          .collection(collectionName)
+          .listIndexes({ session })
+          .toArray()
+          .then(results => results.map(({ name }) => name))
+          .then(indexes => expect(indexes).to.include(indexName))
+      );
+    }
+  ],
+  [
+    'assertIndexNotExists',
+    (operation, testRunnerContext, context /*, options */) => {
+      const collectionName = operation.arguments.collection;
+      const indexName = operation.arguments.index;
+      const session = maybeSession(operation, context);
+      const db = context.client.db(operation.arguments.database);
+      return withoutCommandMonitoring(context.client, () =>
+        db
+          .collection(collectionName)
+          .listIndexes({ session })
+          .toArray()
+          .then(results => results.map(({ name }) => name))
+          .then(indexes => expect(indexes).to.not.include(indexName))
+      ).catch(err => {
+        if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+          throw err;
+        }
+      });
     }
   ]
 ]);
@@ -774,6 +866,9 @@ function testOperation(operation, obj, context, options) {
       const cursor = obj[operationName].apply(obj, args);
       opPromise = cursor.toArray();
     } else {
+      if (!obj[operationName]) {
+        throw new Error(`Unknown operation "${operationName}"`);
+      }
       // wrap this in a `promiseTry` because some operations might throw
       opPromise = promiseTry(() => obj[operationName].apply(obj, args));
     }

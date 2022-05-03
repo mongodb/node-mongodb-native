@@ -6,6 +6,7 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
+import { CreateIndexOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
@@ -75,6 +76,8 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   timeseries?: TimeSeriesCollectionOptions;
   /** The number of seconds after which a document in a timeseries collection expires. */
   expireAfterSeconds?: number;
+  /** @experimental */
+  encryptedFields?: Document;
 }
 
 /** @internal */
@@ -96,31 +99,79 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     session: ClientSession | undefined,
     callback: Callback<Collection>
   ): void {
-    const db = this.db;
-    const name = this.name;
-    const options = this.options;
+    (async () => {
+      const db = this.db;
+      const name = this.name;
+      const options = this.options;
 
-    const done: Callback = err => {
-      if (err) {
-        return callback(err);
+      const encryptedFields: Document | undefined =
+        options.encryptedFields ??
+        db.s.client.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
+
+      if (encryptedFields) {
+        // Create auxilliary collections for FLE2 support.
+        const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
+        const eccCollection = encryptedFields.eccCollection ?? `enxcol_.${name}.ecc`;
+        const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
+
+        for (const collectionName of [escCollection, eccCollection, ecocCollection]) {
+          const createOp = new CreateCollectionOperation(db, collectionName);
+          await createOp.executeWithoutEncryptedFieldsCheck(server, session);
+        }
+
+        if (!options.encryptedFields) {
+          this.options = { ...this.options, encryptedFields };
+        }
       }
 
-      callback(undefined, new Collection(db, name, options));
-    };
+      const coll = await this.executeWithoutEncryptedFieldsCheck(server, session);
 
-    const cmd: Document = { create: name };
-    for (const n in options) {
-      if (
-        (options as any)[n] != null &&
-        typeof (options as any)[n] !== 'function' &&
-        !ILLEGAL_COMMAND_FIELDS.has(n)
-      ) {
-        cmd[n] = (options as any)[n];
+      if (encryptedFields) {
+        // Create the required index for FLE2 support.
+        const createIndexOp = new CreateIndexOperation(db, name, { __safeContent__: 1 }, {});
+        await new Promise<void>((resolve, reject) => {
+          createIndexOp.execute(server, session, err => (err ? reject(err) : resolve()));
+        });
       }
-    }
 
-    // otherwise just execute the command
-    super.executeCommand(server, session, cmd, done);
+      return coll;
+    })().then(
+      coll => callback(undefined, coll),
+      err => callback(err)
+    );
+  }
+
+  private executeWithoutEncryptedFieldsCheck(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<Collection> {
+    return new Promise<Collection>((resolve, reject) => {
+      const db = this.db;
+      const name = this.name;
+      const options = this.options;
+
+      const done: Callback = err => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve(new Collection(db, name, options));
+      };
+
+      const cmd: Document = { create: name };
+      for (const n in options) {
+        if (
+          (options as any)[n] != null &&
+          typeof (options as any)[n] !== 'function' &&
+          !ILLEGAL_COMMAND_FIELDS.has(n)
+        ) {
+          cmd[n] = (options as any)[n];
+        }
+      }
+
+      // otherwise just execute the command
+      super.executeCommand(server, session, cmd, done);
+    });
   }
 }
 
