@@ -294,4 +294,46 @@ describe('Find Cursor', function () {
       })
     });
   });
+
+  context('#allowDiskUse', function () {
+    it(
+      'should set allowDiskUse to true by default',
+      withClientV2(function (client, done) {
+        const commands = [];
+        client.on('commandStarted', filterForCommands(['find'], commands));
+
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({}, { sort: 'foo' });
+        cursor.allowDiskUse();
+        this.defer(() => cursor.close());
+
+        cursor.toArray(err => {
+          expect(err).to.not.exist;
+          expect(commands).to.have.length(1);
+          expect(commands[0].command.allowDiskUse).to.equal(true);
+          done();
+        });
+      })
+    );
+
+    it(
+      'should set allowDiskUse to false if specified',
+      withClientV2(function (client, done) {
+        const commands = [];
+        client.on('commandStarted', filterForCommands(['find'], commands));
+
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({}, { sort: 'foo' });
+        cursor.allowDiskUse(false);
+        this.defer(() => cursor.close());
+
+        cursor.toArray(err => {
+          expect(err).to.not.exist;
+          expect(commands).to.have.length(1);
+          expect(commands[0].command.allowDiskUse).to.equal(false);
+          done();
+        });
+      })
+    );
+  });
 });
