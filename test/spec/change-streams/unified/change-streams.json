@@ -1,8 +1,9 @@
 {
   "description": "change-streams",
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.7",
   "runOnRequirements": [
     {
+      "minServerVersion": "3.6",
       "topologies": [
         "replicaset",
         "sharded-replicaset"
@@ -15,7 +16,17 @@
         "id": "client0",
         "observeEvents": [
           "commandStartedEvent"
-        ]
+        ],
+        "ignoreCommandMonitoringEvents": [
+          "killCursors"
+        ],
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "globalClient",
+        "useMultipleMongoses": false
       }
     },
     {
@@ -30,6 +41,62 @@
         "id": "collection0",
         "database": "database0",
         "collectionName": "collection0"
+      }
+    },
+    {
+      "database": {
+        "id": "database1",
+        "client": "client0",
+        "databaseName": "database1"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection1",
+        "database": "database1",
+        "collectionName": "collection1"
+      }
+    },
+    {
+      "database": {
+        "id": "globalDatabase0",
+        "client": "globalClient",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "globalCollection0",
+        "database": "globalDatabase0",
+        "collectionName": "collection0"
+      }
+    },
+    {
+      "database": {
+        "id": "globalDatabase1",
+        "client": "globalClient",
+        "databaseName": "database1"
+      }
+    },
+    {
+      "collection": {
+        "id": "globalCollection1",
+        "database": "globalDatabase1",
+        "collectionName": "collection1"
+      }
+    },
+    {
+      "collection": {
+        "id": "globalDb1Collection0",
+        "database": "globalDatabase1",
+        "collectionName": "collection0"
+      }
+    },
+    {
+      "collection": {
+        "id": "globalDb0Collection1",
+        "database": "globalDatabase0",
+        "collectionName": "collection1"
       }
     }
   ],
@@ -167,7 +234,6 @@
       "description": "Test with document comment - pre 4.4",
       "runOnRequirements": [
         {
-          "minServerVersion": "3.6.0",
           "maxServerVersion": "4.2.99"
         }
       ],
@@ -211,11 +277,6 @@
     },
     {
       "description": "Test with string comment",
-      "runOnRequirements": [
-        {
-          "minServerVersion": "3.6.0"
-        }
-      ],
       "operations": [
         {
           "name": "createChangeStream",
@@ -343,7 +404,6 @@
       "description": "Test that comment is not set on getMore - pre 4.4",
       "runOnRequirements": [
         {
-          "minServerVersion": "3.6.0",
           "maxServerVersion": "4.3.99",
           "topologies": [
             "replicaset"
@@ -420,6 +480,1295 @@
                   }
                 },
                 "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "to field is set in a rename change event",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0.1"
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "collection1"
+          }
+        },
+        {
+          "name": "rename",
+          "object": "collection0",
+          "arguments": {
+            "to": "collection1"
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "rename",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "to": {
+              "db": "database0",
+              "coll": "collection1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Test unknown operationType MUST NOT err",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "operationType": "addedInFutureMongoDBVersion",
+                  "ns": 1
+                }
+              }
+            ]
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "addedInFutureMongoDBVersion",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Test newField added in response MUST NOT err",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "operationType": 1,
+                  "ns": 1,
+                  "newField": "newFieldValue"
+                }
+              }
+            ]
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "newField": "newFieldValue"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Test new structure in ns document MUST NOT err",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "operationType": "insert",
+                  "ns.viewOn": "db.coll"
+                }
+              }
+            ]
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "viewOn": "db.coll"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Test modified structure in ns document MUST NOT err",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "operationType": "insert",
+                  "ns": {
+                    "db": "$ns.db",
+                    "coll": "$ns.coll",
+                    "viewOn": "db.coll"
+                  }
+                }
+              }
+            ]
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0",
+              "viewOn": "db.coll"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Test server error on projecting out _id",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2"
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 0
+                }
+              }
+            ]
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectError": {
+            "errorCode": 280,
+            "errorCodeName": "ChangeStreamFatalError",
+            "errorLabelsContain": [
+              "NonResumableChangeStreamError"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "description": "Test projection in change stream returns expected fields",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "optype": "$operationType",
+                  "ns": 1,
+                  "newField": "value"
+                }
+              }
+            ]
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "optype": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "newField": "value"
+          }
+        }
+      ]
+    },
+    {
+      "description": "$changeStream must be the first stage in a change stream pipeline sent to the server",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "The server returns change stream responses in the specified server response format",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Executing a watch helper on a Collection results in notifications for changes to the specified collection",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalDb0Collection1",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalDb1Collection0",
+          "arguments": {
+            "document": {
+              "y": 2
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "z": 3
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "z": 3,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Change Stream should allow valid aggregate pipeline stages",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "fullDocument.z": 3
+                }
+              }
+            ]
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "y": 2
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "z": 3
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "z": 3,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    },
+                    {
+                      "$match": {
+                        "fullDocument.z": 3
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Executing a watch helper on a Database results in notifications for changes to all collections in the specified database.",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.8.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "database0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalDb0Collection1",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalDb1Collection0",
+          "arguments": {
+            "document": {
+              "y": 2
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "z": 3
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection1"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "z": 3,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1,
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Executing a watch helper on a MongoClient results in notifications for changes to all collections in all databases in the cluster.",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.8.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "client0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalDb0Collection1",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalDb1Collection0",
+          "arguments": {
+            "document": {
+              "y": 2
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "z": 3
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection1"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database1",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "y": 2,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "z": 3,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1,
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "allChangesForCluster": true
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Test insert, update, replace, and delete event types",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "updateOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "filter": {
+              "x": 1
+            },
+            "update": {
+              "$set": {
+                "x": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "replaceOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "filter": {
+              "x": 2
+            },
+            "replacement": {
+              "x": 3
+            }
+          }
+        },
+        {
+          "name": "deleteOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "filter": {
+              "x": 3
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "updateDescription": {
+              "updatedFields": {
+                "x": 2
+              },
+              "removedFields": [],
+              "truncatedArrays": {
+                "$$unsetOrMatches": {
+                  "$$exists": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "replace",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 3,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "delete",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Test rename and invalidate event types",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0.1",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "collection1"
+          }
+        },
+        {
+          "name": "rename",
+          "object": "globalCollection0",
+          "arguments": {
+            "to": "collection1"
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "rename",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "to": {
+              "db": "database0",
+              "coll": "collection1"
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "invalidate"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Test drop and invalidate event types",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0.1",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "collection0"
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "drop",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "invalidate"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Test consecutive resume",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.1.7",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "batchSize": 1
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 2
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 3
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 2,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 3,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {
+                    "batchSize": 1
+                  },
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
                 "databaseName": "database0"
               }
             }
