@@ -444,6 +444,12 @@ operations.set('updateOne', async ({ entities, operation }) => {
   return collection.updateOne(filter, update, options);
 });
 
+operations.set('rename', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { to, ...options } = operation.arguments;
+  return collection.rename(to, options);
+});
+
 export async function executeOperationAndCheck(
   operation: OperationDescription,
   entities: EntitiesMap,

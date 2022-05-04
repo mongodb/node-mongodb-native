@@ -56,7 +56,8 @@ export const OperationNames = [
   'estimatedDocumentCount',
   'runCommand',
   'updateMany',
-  'updateOne'
+  'updateOne',
+  'rename'
 ] as const;
 export type OperationName = typeof OperationNames[number];
 
