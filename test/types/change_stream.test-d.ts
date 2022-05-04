@@ -134,9 +134,13 @@ declare const collection: Collection<Schema>;
 const pipelineChangeStream = collection.watch<
   Schema,
   ChangeStreamInsertDocument<Schema> & { comment: string }
->([{ $addFields: { comment: 'big changes' } }, { $match: { operationType: 'insert' } }]);
+>([
+  { $addFields: { comment: 'big changes' } },
+  { $match: { operationType: 'insert' } },
+  { $redact: { ns: 0 } }
+]);
 
-pipelineChangeStream.addListener('change', change => {
+pipelineChangeStream.on('change', change => {
   expectType<string>(change.comment);
   // No need to narrow in code because the generics did that for us!
   expectType<Schema>(change.fullDocument);
@@ -147,4 +151,8 @@ collection
   .watch<Document>()
   .on('change', change => expectType<ChangeStreamDocument<Document>>(change));
 collection.watch<Document, Document>().on('change', change => expectType<Document>(change));
+collection.watch<{ a: number }, Document>().on('change', change => expectType<Document>(change));
 expectError(collection.watch<Document, number>());
+collection
+  .watch<{ a: number }, { b: boolean }>()
+  .on('change', change => expectType<{ b: boolean }>(change));
