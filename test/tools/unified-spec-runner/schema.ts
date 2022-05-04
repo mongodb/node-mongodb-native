@@ -190,6 +190,7 @@ export interface ExpectedEventsForClient {
   client: string;
   eventType?: string;
   events: (ExpectedCommandEvent | ExpectedCmapEvent)[];
+  ignoreExtraEvents?: boolean;
 }
 export interface ExpectedCommandEvent {
   commandStartedEvent?: {
