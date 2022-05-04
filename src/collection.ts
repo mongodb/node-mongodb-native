@@ -2,7 +2,7 @@ import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { UnorderedBulkOperation } from './bulk/unordered';
-import { ChangeStream, ChangeStreamOptions } from './change_stream';
+import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
 import type { Db } from './db';
@@ -1418,21 +1418,52 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this collection.
    *
-   * @since 3.0.0
+   * @remarks
+   * watch() accepts two generic arguments for distinct usecases:
+   * - The first is to override the schema that may be defined for this specific collection
+   * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
+   * @example
+   * By just providing the first argument I can type the change to be `ChangeStreamDocument<{ _id: number }>`
+   * ```ts
+   * collection.watch<{ _id: number }>()
+   *   .on('change', change => console.log(change._id.toFixed(4)));
+   * ```
+   *
+   * @example
+   * Passing a second argument provides a way to reflect the type changes caused by an advanced pipeline.
+   * Here, we are using a pipeline to have MongoDB filter for insert changes only and add a comment.
+   * No need start from scratch on the ChangeStreamInsertDocument type!
+   * By using an intersection we can save time and ensure defaults remain the same type!
+   * ```ts
+   * collection
+   *   .watch<Schema, ChangeStreamInsertDocument<Schema> & { comment: string }>([
+   *     { $addFields: { comment: 'big changes' } },
+   *     { $match: { operationType: 'insert' } }
+   *   ])
+   *   .on('change', change => {
+   *     change.comment.startsWith('big');
+   *     change.operationType === 'insert';
+   *     // No need to narrow in code because the generics did that for us!
+   *     expectType<Schema>(change.fullDocument);
+   *   });
+   * ```
+   *
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
+   * @typeParam TLocal - Type of the data being detected by the change stream
+   * @typeParam TChange - Type of the whole change stream document emitted
    */
-  watch<TLocal extends Document = TSchema>(
+  watch<TLocal extends Document = TSchema, TChange extends Document = ChangeStreamDocument<TLocal>>(
     pipeline: Document[] = [],
     options: ChangeStreamOptions = {}
-  ): ChangeStream<TLocal> {
+  ): ChangeStream<TLocal, TChange> {
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
       options = pipeline;
       pipeline = [];
     }
 
-    return new ChangeStream<TLocal>(this, pipeline, resolveOptions(this, options));
+    return new ChangeStream<TLocal, TChange>(this, pipeline, resolveOptions(this, options));
   }
 
   /**

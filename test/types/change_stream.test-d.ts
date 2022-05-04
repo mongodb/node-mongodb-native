@@ -1,9 +1,165 @@
-import { expectType } from 'tsd';
+import { expectError, expectType } from 'tsd';
 
-import type { ChangeStreamOptions } from '../../src';
+import type {
+  ChangeStreamDeleteDocument,
+  ChangeStreamDocument,
+  ChangeStreamDocumentCommon,
+  ChangeStreamDocumentKey,
+  ChangeStreamDropDatabaseDocument,
+  ChangeStreamDropDocument,
+  ChangeStreamInsertDocument,
+  ChangeStreamInvalidateDocument,
+  ChangeStreamNameSpace,
+  ChangeStreamOptions,
+  ChangeStreamRenameDocument,
+  ChangeStreamReplaceDocument,
+  ChangeStreamUpdateDocument,
+  Collection,
+  Document,
+  ResumeToken,
+  ServerSessionId,
+  Timestamp,
+  UpdateDescription
+} from '../../src';
 
 declare const changeStreamOptions: ChangeStreamOptions;
+type ChangeStreamOperationType =
+  | 'insert'
+  | 'update'
+  | 'replace'
+  | 'delete'
+  | 'invalidate'
+  | 'drop'
+  | 'dropDatabase'
+  | 'rename';
 
 // The change stream spec says that we cannot throw an error for invalid values to `fullDocument`
-// for future compatability.  This means we must leave `fullDocument` as type string.
+// for future compatibility.  This means we must leave `fullDocument` as type string.
 expectType<string | undefined>(changeStreamOptions.fullDocument);
+
+type Schema = { _id: number; a: number };
+declare const change: ChangeStreamDocument<Schema>;
+
+expectType<unknown>(change._id);
+expectType<ChangeStreamOperationType>(change.operationType);
+
+// The following are always defined ChangeStreamDocumentCommon
+expectType<ChangeStreamDocument extends ChangeStreamDocumentCommon ? true : false>(true);
+expectType<ResumeToken>(change._id);
+expectType<Timestamp | undefined>(change.clusterTime);
+expectType<number | undefined>(change.txnNumber); // Could be a Long if promoteLongs is off
+expectType<ServerSessionId | undefined>(change.lsid);
+
+type CrudChangeDoc =
+  | ChangeStreamInsertDocument<Schema> //  C
+  | ChangeStreamReplaceDocument<Schema> // R
+  | ChangeStreamUpdateDocument<Schema> //  U
+  | ChangeStreamDeleteDocument<Schema>; // D
+declare const crudChange: CrudChangeDoc;
+
+// ChangeStreamDocumentKey
+expectType<CrudChangeDoc extends ChangeStreamDocumentKey<Schema> ? true : false>(true);
+expectType<number>(crudChange.documentKey._id); // _id will get typed
+expectType<any>(crudChange.documentKey.blah); // shard keys could be anything
+
+// ChangeStreamFullNameSpace
+expectType<ChangeStreamNameSpace>(crudChange.ns);
+expectType<{ db: string; coll: string }>(crudChange.ns);
+
+switch (change.operationType) {
+  case 'insert': {
+    expectType<ChangeStreamInsertDocument<Schema>>(change);
+    expectType<'insert'>(change.operationType);
+    expectType<number>(change.documentKey._id);
+    expectType<any>(change.documentKey.blah);
+    expectType<Schema>(change.fullDocument);
+    break;
+  }
+  case 'update': {
+    expectType<ChangeStreamUpdateDocument<Schema>>(change);
+    expectType<'update'>(change.operationType);
+    expectType<Schema | undefined>(change.fullDocument); // Update only attaches fullDocument if configured
+    expectType<UpdateDescription<Schema>>(change.updateDescription);
+    expectType<Partial<Schema> | undefined>(change.updateDescription.updatedFields);
+    expectType<string[] | undefined>(change.updateDescription.removedFields);
+    expectType<Array<{ field: string; newSize: number }> | undefined>(
+      change.updateDescription.truncatedArrays
+    );
+    break;
+  }
+  case 'replace': {
+    expectType<ChangeStreamReplaceDocument<Schema>>(change);
+    expectType<'replace'>(change.operationType);
+    expectType<Schema>(change.fullDocument);
+    break;
+  }
+  case 'delete': {
+    expectType<ChangeStreamDeleteDocument<Schema>>(change);
+    expectType<'delete'>(change.operationType);
+    break;
+  }
+  case 'drop': {
+    expectType<ChangeStreamDropDocument>(change);
+    expectType<'drop'>(change.operationType);
+    expectType<{ db: string; coll: string }>(change.ns);
+    break;
+  }
+  case 'rename': {
+    expectType<ChangeStreamRenameDocument>(change);
+    expectType<'rename'>(change.operationType);
+    expectType<{ db: string; coll: string }>(change.ns);
+    expectType<{ db: string; coll: string }>(change.to);
+    break;
+  }
+  case 'dropDatabase': {
+    expectType<ChangeStreamDropDatabaseDocument>(change);
+    expectType<'dropDatabase'>(change.operationType);
+    expectError(change.ns.coll);
+    break;
+  }
+  case 'invalidate': {
+    expectType<ChangeStreamInvalidateDocument>(change);
+    expectType<'invalidate'>(change.operationType);
+    break;
+  }
+  default: {
+    expectType<never>(change);
+  }
+}
+
+// New fields can be added with $addFields, but you have to use TChange to type it
+expectError(change.randomKeyAlwaysAccessibleBecauseOfPipelineFlexibilty);
+
+declare const collection: Collection<Schema>;
+const pipelineChangeStream = collection.watch<
+  Schema,
+  ChangeStreamInsertDocument<Schema> & { comment: string }
+>([{ $addFields: { comment: 'big changes' } }, { $match: { operationType: 'insert' } }]);
+
+pipelineChangeStream.on('change', change => {
+  expectType<string>(change.comment);
+  // No need to narrow in code because the generics did that for us!
+  expectType<Schema>(change.fullDocument);
+});
+
+collection.watch().on('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+
+// Just overriding the schema provides a typed changestream OF that schema
+collection
+  .watch<Document>()
+  .on('change', change => expectType<ChangeStreamDocument<Document>>(change));
+
+// both schema and Tchange can be made as flexible as possible (Document)
+collection.watch<Document, Document>().on('change', change => expectType<Document>(change));
+
+// first argument does not stop you from making second more generic
+collection.watch<{ a: number }, Document>().on('change', change => expectType<Document>(change));
+
+// Arguments must be objects
+expectError(collection.watch<Document, number>());
+expectError(collection.watch<number, number>());
+
+// First argument no longer relates to second
+collection
+  .watch<{ a: number }, { b: boolean }>()
+  .on('change', change => expectType<{ b: boolean }>(change));

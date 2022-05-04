@@ -1,6 +1,6 @@
 import { Admin } from './admin';
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
-import { ChangeStream, ChangeStreamOptions } from './change_stream';
+import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
 import { Collection, CollectionOptions } from './collection';
 import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
@@ -719,20 +719,27 @@ export class Db {
    * replacements, deletions, and invalidations) in this database. Will ignore all
    * changes to system collections.
    *
+   * @remarks
+   * watch() accepts two generic arguments for distinct usecases:
+   * - The first is to provide the schema that may be defined for all the collections within this database
+   * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
+   *
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
+   * @typeParam TSchema - Type of the data being detected by the change stream
+   * @typeParam TChange - Type of the whole change stream document emitted
    */
-  watch<TSchema extends Document = Document>(
-    pipeline: Document[] = [],
-    options: ChangeStreamOptions = {}
-  ): ChangeStream<TSchema> {
+  watch<
+    TSchema extends Document = Document,
+    TChange extends Document = ChangeStreamDocument<TSchema>
+  >(pipeline: Document[] = [], options: ChangeStreamOptions = {}): ChangeStream<TSchema, TChange> {
     // Allow optionally not specifying a pipeline
     if (!Array.isArray(pipeline)) {
       options = pipeline;
       pipeline = [];
     }
 
-    return new ChangeStream<TSchema>(this, pipeline, resolveOptions(this, options));
+    return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
 
   /** Return the db logger */

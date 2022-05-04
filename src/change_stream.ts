@@ -19,13 +19,13 @@ import {
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
-import { InferIdType, Nullable, TODO_NODE_3286, TypedEventEmitter } from './mongo_types';
+import { InferIdType, TODO_NODE_3286, TypedEventEmitter } from './mongo_types';
 import { AggregateOperation, AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import { executeOperation, ExecutionResult } from './operations/execute_operation';
 import type { ReadPreference } from './read_preference';
 import type { Topology } from './sdam/topology';
-import type { ClientSession } from './sessions';
+import type { ClientSession, ServerSessionId } from './sessions';
 import {
   calculateDurationInMs,
   Callback,
@@ -95,16 +95,16 @@ export interface ResumeOptions {
 }
 
 /**
- * Represents the logical starting point for a new or resuming {@link https://docs.mongodb.com/manual/changeStreams/#std-label-change-stream-resume| Change Stream} on the server.
+ * Represents the logical starting point for a new ChangeStream or resuming a ChangeStream on the server.
+ * @see https://www.mongodb.com/docs/manual/changeStreams/#std-label-change-stream-resume
  * @public
  */
 export type ResumeToken = unknown;
 
 /**
- * Represents a specific point in time on a server. Can be retrieved by using {@link Db#command}
+ * Represents a specific point in time on a server. Can be retrieved by using `db.command()`
  * @public
- * @remarks
- * See {@link https://docs.mongodb.com/manual/reference/method/db.runCommand/#response| Run Command Response}
+ * @see https://docs.mongodb.com/manual/reference/method/db.runCommand/#response
  */
 export type OperationTime = Timestamp;
 
@@ -130,81 +130,199 @@ export type ChangeStreamAggregateRawResult<TChange> = {
  * @public
  */
 export interface ChangeStreamOptions extends AggregateOptions {
-  /** Allowed values: 'updateLookup'. When set to 'updateLookup', the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred. */
+  /**
+   * Allowed values: 'updateLookup'. When set to 'updateLookup',
+   * the change stream will include both a delta describing the changes to the document,
+   * as well as a copy of the entire document that was changed from some time after the change occurred.
+   */
   fullDocument?: string;
   /** The maximum amount of time for the server to wait on new documents to satisfy a change stream query. */
   maxAwaitTimeMS?: number;
-  /** Allows you to start a changeStream after a specified event. See {@link https://docs.mongodb.com/manual/changeStreams/#resumeafter-for-change-streams|ChangeStream documentation}. */
+  /**
+   * Allows you to start a changeStream after a specified event.
+   * @see https://docs.mongodb.com/manual/changeStreams/#resumeafter-for-change-streams
+   */
   resumeAfter?: ResumeToken;
-  /** Similar to resumeAfter, but will allow you to start after an invalidated event. See {@link https://docs.mongodb.com/manual/changeStreams/#startafter-for-change-streams|ChangeStream documentation}. */
+  /**
+   * Similar to resumeAfter, but will allow you to start after an invalidated event.
+   * @see https://docs.mongodb.com/manual/changeStreams/#startafter-for-change-streams
+   */
   startAfter?: ResumeToken;
   /** Will start the changeStream after the specified operationTime. */
   startAtOperationTime?: OperationTime;
-  /** The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}. */
+  /**
+   * The number of documents to return per batch.
+   * @see https://docs.mongodb.com/manual/reference/command/aggregate
+   */
   batchSize?: number;
 }
 
 /** @public */
-export interface ChangeStreamDocument<TSchema extends Document = Document> {
+export interface ChangeStreamNameSpace {
+  db: string;
+  coll: string;
+}
+
+/** @public */
+export interface ChangeStreamDocumentKey<TSchema extends Document = Document> {
+  /**
+   * For unsharded collections this contains a single field `_id`.
+   * For sharded collections, this will contain all the components of the shard key
+   */
+  documentKey: { _id: InferIdType<TSchema>; [shardKey: string]: any };
+}
+
+/** @public */
+export interface ChangeStreamDocumentCommon {
   /**
    * The id functions as an opaque token for use when resuming an interrupted
    * change stream.
    */
-  _id: InferIdType<TSchema>;
-
+  _id: ResumeToken;
   /**
-   * Describes the type of operation represented in this change notification.
+   * The timestamp from the oplog entry associated with the event.
+   * For events that happened as part of a multi-document transaction, the associated change stream
+   * notifications will have the same clusterTime value, namely the time when the transaction was committed.
+   * On a sharded cluster, events that occur on different shards can have the same clusterTime but be
+   * associated with different transactions or even not be associated with any transaction.
+   * To identify events for a single transaction, you can use the combination of lsid and txnNumber in the change stream event document.
    */
-  operationType:
-    | 'insert'
-    | 'update'
-    | 'replace'
-    | 'delete'
-    | 'invalidate'
-    | 'drop'
-    | 'dropDatabase'
-    | 'rename';
+  clusterTime?: Timestamp;
 
   /**
-   * Contains two fields: “db” and “coll” containing the database and
-   * collection name in which the change happened.
+   * The transaction number.
+   * Only present if the operation is part of a multi-document transaction.
+   *
+   * **NOTE:** txnNumber can be a Long if promoteLongs is set to false
    */
-  ns: { db: string; coll: string };
+  txnNumber?: number;
 
   /**
-   * Only present for ops of type ‘insert’, ‘update’, ‘replace’, and
-   * ‘delete’.
-   *
-   * For unsharded collections this contains a single field, _id, with the
-   * value of the _id of the document updated.  For sharded collections,
-   * this will contain all the components of the shard key in order,
-   * followed by the _id if the _id isn’t part of the shard key.
+   * The identifier for the session associated with the transaction.
+   * Only present if the operation is part of a multi-document transaction.
    */
-  documentKey?: { _id: InferIdType<TSchema> };
+  lsid?: ServerSessionId;
+}
 
-  /**
-   * Only present for ops of type ‘update’.
-   *
-   * Contains a description of updated and removed fields in this
-   * operation.
-   */
-  updateDescription?: UpdateDescription<TSchema>;
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#insert-event
+ */
+export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentKey<TSchema> {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'insert';
+  /** This key will contain the document being inserted */
+  fullDocument: TSchema;
+  /** Namespace the insert event occured on */
+  ns: ChangeStreamNameSpace;
+}
 
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#update-event
+ */
+export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentKey<TSchema> {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'update';
   /**
-   * Always present for operations of type ‘insert’ and ‘replace’. Also
-   * present for operations of type ‘update’ if the user has specified ‘updateLookup’
-   * in the ‘fullDocument’ arguments to the ‘$changeStream’ stage.
-   *
-   * For operations of type ‘insert’ and ‘replace’, this key will contain the
-   * document being inserted, or the new version of the document that is replacing
-   * the existing document, respectively.
-   *
-   * For operations of type ‘update’, this key will contain a copy of the full
-   * version of the document from some point after the update occurred. If the
-   * document was deleted since the updated happened, it will be null.
+   * This is only set if `fullDocument` is set to `'updateLookup'`
+   * The fullDocument document represents the most current majority-committed version of the updated document.
+   * The fullDocument document may vary from the document at the time of the update operation depending on the
+   * number of interleaving majority-committed operations that occur between the update operation and the document lookup.
    */
   fullDocument?: TSchema;
+  /** Contains a description of updated and removed fields in this operation */
+  updateDescription: UpdateDescription<TSchema>;
+  /** Namespace the update event occured on */
+  ns: ChangeStreamNameSpace;
 }
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#replace-event
+ */
+export interface ChangeStreamReplaceDocument<TSchema extends Document = Document>
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentKey<TSchema> {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'replace';
+  /** The fullDocument of a replace event represents the document after the insert of the replacement document */
+  fullDocument: TSchema;
+  /** Namespace the replace event occured on */
+  ns: ChangeStreamNameSpace;
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#delete-event
+ */
+export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentKey<TSchema> {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'delete';
+  /** Namespace the delete event occured on */
+  ns: ChangeStreamNameSpace;
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#drop-event
+ */
+export interface ChangeStreamDropDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'drop';
+  /** Namespace the drop event occured on */
+  ns: ChangeStreamNameSpace;
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#rename-event
+ */
+export interface ChangeStreamRenameDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'rename';
+  /** The new name for the `ns.coll` collection */
+  to: { db: string; coll: string };
+  /** The "from" namespace that the rename occured on */
+  ns: ChangeStreamNameSpace;
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#dropdatabase-event
+ */
+export interface ChangeStreamDropDatabaseDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'dropDatabase';
+  /** The database dropped */
+  ns: { db: string };
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ */
+export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'invalidate';
+}
+
+/** @public */
+export type ChangeStreamDocument<TSchema extends Document = Document> =
+  | ChangeStreamInsertDocument<TSchema>
+  | ChangeStreamUpdateDocument<TSchema>
+  | ChangeStreamReplaceDocument<TSchema>
+  | ChangeStreamDeleteDocument<TSchema>
+  | ChangeStreamDropDocument
+  | ChangeStreamRenameDocument
+  | ChangeStreamDropDatabaseDocument
+  | ChangeStreamInvalidateDocument;
 
 /** @public */
 export interface UpdateDescription<TSchema extends Document = Document> {
@@ -212,42 +330,60 @@ export interface UpdateDescription<TSchema extends Document = Document> {
    * A document containing key:value pairs of names of the fields that were
    * changed, and the new value for those fields.
    */
-  updatedFields: Partial<TSchema>;
+  updatedFields?: Partial<TSchema>;
 
   /**
    * An array of field names that were removed from the document.
    */
-  removedFields: string[];
+  removedFields?: string[];
+
+  /**
+   * An array of documents which record array truncations performed with pipeline-based updates using one or more of the following stages:
+   * - $addFields
+   * - $set
+   * - $replaceRoot
+   * - $replaceWith
+   */
+  truncatedArrays?: Array<{
+    /** The name of the truncated field. */
+    field: string;
+    /** The number of elements in the truncated array. */
+    newSize: number;
+  }>;
 }
 
 /** @public */
-export type ChangeStreamEvents<TSchema extends Document = Document> = {
+export type ChangeStreamEvents<
+  TSchema extends Document = Document,
+  TChange extends Document = ChangeStreamDocument<TSchema>
+> = {
   resumeTokenChanged(token: ResumeToken): void;
-  init(response: TSchema): void;
-  more(response?: TSchema | undefined): void;
+  init(response: any): void;
+  more(response?: any): void;
   response(): void;
   end(): void;
   error(error: Error): void;
-  change(change: ChangeStreamDocument<TSchema>): void;
+  change(change: TChange): void;
 } & AbstractCursorEvents;
 
 /**
  * Creates a new Change Stream instance. Normally created using {@link Collection#watch|Collection.watch()}.
  * @public
  */
-export class ChangeStream<TSchema extends Document = Document> extends TypedEventEmitter<
-  ChangeStreamEvents<TSchema>
-> {
+export class ChangeStream<
+  TSchema extends Document = Document,
+  TChange extends Document = ChangeStreamDocument<TSchema>
+> extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>> {
   pipeline: Document[];
   options: ChangeStreamOptions;
   parent: MongoClient | Db | Collection;
   namespace: MongoDBNamespace;
   type: symbol;
   /** @internal */
-  cursor?: ChangeStreamCursor<TSchema>;
+  cursor: ChangeStreamCursor<TSchema, TChange> | undefined;
   streamOptions?: CursorStreamOptions;
   /** @internal */
-  [kResumeQueue]: Denque<Callback<ChangeStreamCursor<TSchema>>>;
+  [kResumeQueue]: Denque<Callback<ChangeStreamCursor<TSchema, TChange>>>;
   /** @internal */
   [kCursorStream]?: Readable;
   /** @internal */
@@ -278,7 +414,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
    * Emitted each time the change stream stores a new resume token.
    * @event
    */
-  static readonly RESUME_TOKEN_CHANGED = 'resumeTokenChanged' as const;
+  static readonly RESUME_TOKEN_CHANGED = RESUME_TOKEN_CHANGED;
 
   /**
    * @internal
@@ -360,11 +496,9 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
   }
 
   /** Get the next available document from the Change Stream. */
-  next(): Promise<ChangeStreamDocument<TSchema>>;
-  next(callback: Callback<ChangeStreamDocument<TSchema>>): void;
-  next(
-    callback?: Callback<ChangeStreamDocument<TSchema>>
-  ): Promise<ChangeStreamDocument<TSchema>> | void {
+  next(): Promise<TChange>;
+  next(callback: Callback<TChange>): void;
+  next(callback?: Callback<TChange>): Promise<TChange> | void {
     this._setIsIterator();
     return maybePromise(callback, cb => {
       this._getCursor((err, cursor) => {
@@ -375,7 +509,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
             this._processError(error, cb);
             return;
           }
-          this._processNewChange(change, cb);
+          this._processNewChange(change ?? null, cb);
         });
       });
     });
@@ -451,10 +585,13 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     this[kMode] = 'iterator';
   }
 
-  /** @internal */
+  /**
+   * Create a new change stream cursor based on self's configuration
+   * @internal
+   */
   private _createChangeStreamCursor(
     options: ChangeStreamOptions | ResumeOptions
-  ): ChangeStreamCursor<TSchema> {
+  ): ChangeStreamCursor<TSchema, TChange> {
     const changeStreamStageOptions = filterOptions(options, CHANGE_STREAM_OPTIONS);
     if (this.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
       changeStreamStageOptions.allChangesForCluster = true;
@@ -463,7 +600,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
 
     const cursorOptions: ChangeStreamCursorOptions = filterOptions(options, CURSOR_OPTIONS);
 
-    const changeStreamCursor = new ChangeStreamCursor<TSchema>(
+    const changeStreamCursor = new ChangeStreamCursor<TSchema, TChange>(
       getTopology(this.parent),
       this.namespace,
       pipeline,
@@ -521,7 +658,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
   }
 
   /** @internal */
-  private _streamEvents(cursor: ChangeStreamCursor<TSchema>): void {
+  private _streamEvents(cursor: ChangeStreamCursor<TSchema, TChange>): void {
     this._setIsEmitter();
     const stream = this[kCursorStream] ?? cursor.stream();
     this[kCursorStream] = stream;
@@ -541,10 +678,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
   }
 
   /** @internal */
-  private _processNewChange(
-    change: Nullable<ChangeStreamDocument<TSchema>>,
-    callback?: Callback<ChangeStreamDocument<TSchema>>
-  ) {
+  private _processNewChange(change: TChange | null, callback?: Callback<TChange>) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
@@ -585,7 +719,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     }
 
     // if the resume succeeds, continue with the new cursor
-    const resumeWithCursor = (newCursor: ChangeStreamCursor<TSchema>) => {
+    const resumeWithCursor = (newCursor: ChangeStreamCursor<TSchema, TChange>) => {
       this.cursor = newCursor;
       this._processResumeQueue();
     };
@@ -633,11 +767,8 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
     return this._closeWithError(error, callback);
   }
 
-  /**
-   * Safely provides a cursor across resume attempts
-   * @internal
-   */
-  private _getCursor(callback: Callback<ChangeStreamCursor<TSchema>>) {
+  /** @internal */
+  private _getCursor(callback: Callback<ChangeStreamCursor<TSchema, TChange>>) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
@@ -660,12 +791,12 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
    *
    * @param err - error getting a new cursor
    */
-  private _processResumeQueue(err?: Error) {
+  private _processResumeQueue(error?: Error) {
     while (this[kResumeQueue].length) {
       const request = this[kResumeQueue].pop();
       if (!request) break; // Should never occur but TS can't use the length check in the while condition
 
-      if (!err) {
+      if (!error) {
         if (this[kClosed]) {
           // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
           request(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
@@ -676,7 +807,7 @@ export class ChangeStream<TSchema extends Document = Document> extends TypedEven
           return;
         }
       }
-      request(err, this.cursor);
+      request(error, this.cursor ?? undefined);
     }
   }
 }
@@ -689,10 +820,10 @@ export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
 }
 
 /** @internal */
-export class ChangeStreamCursor<TSchema extends Document = Document> extends AbstractCursor<
-  ChangeStreamDocument<TSchema>,
-  ChangeStreamEvents
-> {
+export class ChangeStreamCursor<
+  TSchema extends Document = Document,
+  TChange extends Document = ChangeStreamDocument<TSchema>
+> extends AbstractCursor<TChange, ChangeStreamEvents> {
   _resumeToken: ResumeToken;
   startAtOperationTime?: OperationTime;
   hasReceived?: boolean;
@@ -762,11 +893,10 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
     this.hasReceived = true;
   }
 
-  /** TODO(NODE-4059): Use TChange */
-  _processBatch(response: ChangeStreamAggregateRawResult<any>): void {
+  _processBatch(response: ChangeStreamAggregateRawResult<TChange>): void {
     const cursor = response.cursor;
     if (cursor.postBatchResumeToken) {
-      this.postBatchResumeToken = cursor.postBatchResumeToken;
+      this.postBatchResumeToken = response.cursor.postBatchResumeToken;
 
       const batch =
         'firstBatch' in response.cursor ? response.cursor.firstBatch : response.cursor.nextBatch;
@@ -776,7 +906,7 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
     }
   }
 
-  clone(): AbstractCursor<ChangeStreamDocument<TSchema>> {
+  clone(): AbstractCursor<TChange> {
     return new ChangeStreamCursor(this.topology, this.namespace, this.pipeline, {
       ...this.cursorOptions
     });
@@ -789,8 +919,7 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
       session
     });
 
-    /* TODO(NODE4059): Use TChange instead of any */
-    executeOperation<TODO_NODE_3286, ChangeStreamAggregateRawResult<any>>(
+    executeOperation<TODO_NODE_3286, ChangeStreamAggregateRawResult<TChange>>(
       session,
       aggregateOperation,
       (err, response) => {
@@ -825,8 +954,7 @@ export class ChangeStreamCursor<TSchema extends Document = Document> extends Abs
         return callback(err);
       }
 
-      // TODO(NODE-4059): Use TChange
-      this._processBatch(response as TODO_NODE_3286 as ChangeStreamAggregateRawResult<any>);
+      this._processBatch(response as TODO_NODE_3286 as ChangeStreamAggregateRawResult<TChange>);
 
       this.emit(ChangeStream.MORE, response);
       this.emit(ChangeStream.RESPONSE);
