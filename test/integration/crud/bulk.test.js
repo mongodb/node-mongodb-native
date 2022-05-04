@@ -47,14 +47,9 @@ describe('Bulk', function () {
 
         it('should throw an error with the specifc message: "Operation must be an object with an operation key"', async function () {
           const bulkOp = client.db('test').collection('test').initializeUnorderedBulkOp();
-          try {
-            bulkOp.raw(undefined);
-            expect.fail(
-              'Expected passing argument of "undefined" to .raw to throw error, failed to throw error'
-            );
-          } catch (error) {
-            expect(error.message).to.equal('Operation must be an object with an operation key');
-          }
+          expect(() => bulkOp.raw(undefined))
+            .to.throw(MongoInvalidArgumentError)
+            .to.match(/Operation must be an object with an operation key/);
         });
       });
 
@@ -81,7 +76,7 @@ describe('Bulk', function () {
         await client.close();
       });
       context('when passed an invalid docs argument', function () {
-        it('insertMany should throw a MongoInvalidArgument error when called with a invalid operation', async function () {
+        it('insertMany should throw a MongoInvalidArgument error when called with an invalid operation', async function () {
           try {
             const docs = [];
             docs[1] = { color: 'red' };
@@ -89,6 +84,9 @@ describe('Bulk', function () {
             expect.fail('Expected insertMany to throw error, failed to throw error');
           } catch (error) {
             expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+            expect(error.message).to.equal(
+              'Collection.insertMany() cannot be called with an array that has null/undefined values'
+            );
           }
         });
       });

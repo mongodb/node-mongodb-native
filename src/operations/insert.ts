@@ -139,7 +139,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
       if (err || res == null) {
         if (err && err.message === 'Operation must be an object with an operation key') {
           err = new MongoInvalidArgumentError(
-            'Argument "docs" is a sparse array containing element(s) that are null or undefined'
+            'Collection.insertMany() cannot be called with an array that has null/undefined values'
           );
         }
         return callback(err);
