@@ -2,15 +2,15 @@ const semver = require('semver');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
-const LATEST_EFFECTIVE_VERSION = '5.0';
-const MONGODB_VERSIONS = ['latest', '5.0', '4.4', '4.2', '4.0', '3.6'];
+const LATEST_EFFECTIVE_VERSION = '6.0';
+const MONGODB_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
 const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
 NODE_VERSIONS.sort()
 const LOWEST_LTS = NODE_VERSIONS[0];
 
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
-const AWS_AUTH_VERSIONS = ['latest', '5.0', '4.4'];
-const TLS_VERSIONS = ['latest', '5.0', '4.4', '4.2'];
+const AWS_AUTH_VERSIONS = ['latest', '6.0', '5.0', '4.4'];
+const TLS_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2'];
 
 const DEFAULT_OS = 'ubuntu1804-large';
 

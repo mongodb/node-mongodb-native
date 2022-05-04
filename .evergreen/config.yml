@@ -839,6 +839,45 @@ tasks:
           AUTH: auth
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-6.0-server
+    tags:
+      - '6.0'
+      - server
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          TOPOLOGY: server
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-6.0-replica_set
+    tags:
+      - '6.0'
+      - replica_set
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          TOPOLOGY: replica_set
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-6.0-sharded_cluster
+    tags:
+      - '6.0'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-5.0-server
     tags:
       - '5.0'
@@ -1126,6 +1165,17 @@ tasks:
           SSL: ssl
           TOPOLOGY: server
       - func: run tls tests
+  - name: test-tls-support-6.0
+    tags:
+      - tls-support
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          SSL: ssl
+          TOPOLOGY: server
+      - func: run tls tests
   - name: test-tls-support-5.0
     tags:
       - tls-support
@@ -1225,6 +1275,78 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws ECS auth test
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with regular aws credentials
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with assume role credentials
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws EC2 credentials
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials as environment variables
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run aws auth test with aws credentials and session token as environment variables
+  - name: aws-6.0-auth-test-run-aws-ECS-auth-test
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
           AUTH: auth
           ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: server
@@ -1507,6 +1629,48 @@ tasks:
           AUTH: noauth
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-6.0-server-noauth
+    tags:
+      - '6.0'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-6.0-replica_set-noauth
+    tags:
+      - '6.0'
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-6.0-sharded_cluster-noauth
+    tags:
+      - '6.0'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-5.0-server-noauth
     tags:
       - '5.0'
@@ -1775,6 +1939,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
       - test-5.0-server
       - test-5.0-replica_set
       - test-5.0-sharded_cluster
@@ -1798,6 +1965,7 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
@@ -1825,6 +1993,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
       - test-5.0-server
       - test-5.0-replica_set
       - test-5.0-sharded_cluster
@@ -1849,6 +2020,7 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
@@ -1876,6 +2048,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
       - test-5.0-server
       - test-5.0-replica_set
       - test-5.0-sharded_cluster
@@ -1896,6 +2071,7 @@ buildvariants:
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
+      - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
@@ -1939,6 +2115,12 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-latest-auth-test-run-aws-ECS-auth-test
+      - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
+      - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
+      - aws-6.0-auth-test-run-aws-ECS-auth-test
       - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
@@ -1974,6 +2156,9 @@ buildvariants:
       - test-latest-server-noauth
       - test-latest-replica_set-noauth
       - test-latest-sharded_cluster-noauth
+      - test-6.0-server-noauth
+      - test-6.0-replica_set-noauth
+      - test-6.0-sharded_cluster-noauth
       - test-5.0-server-noauth
       - test-5.0-replica_set-noauth
       - test-5.0-sharded_cluster-noauth
