@@ -15,6 +15,7 @@ import type {
   ChangeStreamReplaceDocument,
   ChangeStreamUpdateDocument,
   Collection,
+  Document,
   ResumeToken,
   ServerSessionId,
   Timestamp,
@@ -140,3 +141,10 @@ pipelineChangeStream.addListener('change', change => {
   // No need to narrow in code because the generics did that for us!
   expectType<Schema>(change.fullDocument);
 });
+
+collection.watch().on('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+collection
+  .watch<Document>()
+  .on('change', change => expectType<ChangeStreamDocument<Document>>(change));
+collection.watch<Document, Document>().on('change', change => expectType<Document>(change));
+expectError(collection.watch<Document, number>());
