@@ -296,9 +296,9 @@ describe('Find Cursor', function () {
   });
 
   context('#allowDiskUse', function () {
-    it(
-      'should set allowDiskUse to true by default',
-      withClientV2(function (client, done) {
+    it('should set allowDiskUse to true by default', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withClientV2(function (client, done) {
         const commands = [];
         client.on('commandStarted', filterForCommands(['find'], commands));
 
@@ -314,11 +314,11 @@ describe('Find Cursor', function () {
           done();
         });
       })
-    );
+    });
 
-    it(
-      'should set allowDiskUse to false if specified',
-      withClientV2(function (client, done) {
+    it('should set allowDiskUse to false if specified', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withClientV2(function (client, done) {
         const commands = [];
         client.on('commandStarted', filterForCommands(['find'], commands));
 
@@ -334,6 +334,6 @@ describe('Find Cursor', function () {
           done();
         });
       })
-    );
+    });
   });
 });
