@@ -134,11 +134,7 @@ declare const collection: Collection<Schema>;
 const pipelineChangeStream = collection.watch<
   Schema,
   ChangeStreamInsertDocument<Schema> & { comment: string }
->([
-  { $addFields: { comment: 'big changes' } },
-  { $match: { operationType: 'insert' } },
-  { $redact: { ns: 0 } }
-]);
+>([{ $addFields: { comment: 'big changes' } }, { $match: { operationType: 'insert' } }]);
 
 pipelineChangeStream.on('change', change => {
   expectType<string>(change.comment);
@@ -153,6 +149,4 @@ collection
 collection.watch<Document, Document>().on('change', change => expectType<Document>(change));
 collection.watch<{ a: number }, Document>().on('change', change => expectType<Document>(change));
 expectError(collection.watch<Document, number>());
-collection
-  .watch<{ a: number }, { b: boolean }>()
-  .on('change', change => expectType<{ b: boolean }>(change));
+collection.watch<{ a: number }, { b: boolean }>().on;

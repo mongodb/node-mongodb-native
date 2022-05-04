@@ -590,8 +590,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * replacements, deletions, and invalidations) in this cluster. Will ignore all
    * changes to system collections, as well as the local, admin, and config databases.
    *
+   * @remarks
+   * watch() accepts two generic arguments for distinct usecases:
+   * - The first is to provide the schema that may be defined for all the data within the current cluster
+   * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
+   *
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
+   * @typeParam TSchema - Type of the data being detected by the change stream
+   * @typeParam TChange - Type of the whole change stream document returned, typically set if a pipeline is provided the changes the default shape of the change document
    */
   watch<
     TSchema extends Document = Document,
