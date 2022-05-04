@@ -95,6 +95,8 @@ export interface IndexDescription
   collation?: CollationOptions;
   name?: string;
   key: Document;
+  /* Specifies that this index is clustered. This is not a valid option to provide to 'createIndexes', but can appear in the options returned for an index via 'listIndexes'. */
+  clustered?: boolean;
 }
 
 /** @public */
