@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.6.0-alpha.0](https://github.com/mongodb/node-mongodb-native/compare/v4.5.0...v4.6.0-alpha.0) (2022-05-04)
+
+
+### Features
+
+* **NODE-2992:** consider server load during server selection ([#3219](https://github.com/mongodb/node-mongodb-native/issues/3219)) ([35eeba3](https://github.com/mongodb/node-mongodb-native/commit/35eeba318444155370c75d4989164b78ef5a9f64))
+* **NODE-4059:** ChangeStreamDocument not fully typed to specification ([#3191](https://github.com/mongodb/node-mongodb-native/issues/3191)) ([8b24212](https://github.com/mongodb/node-mongodb-native/commit/8b2421283b97249bd733d8c756c44dc6540df469))
+* **NODE-4136:** revise FLE shared library typings for spec changes ([#3206](https://github.com/mongodb/node-mongodb-native/issues/3206)) ([6e2e27f](https://github.com/mongodb/node-mongodb-native/commit/6e2e27fc5028a325a0b45f3a4f27bf7f9fe4ccfd))
+* **NODE-4202:** add FLE 2 behavior for create/drop collection ([#3218](https://github.com/mongodb/node-mongodb-native/issues/3218)) ([6d3947b](https://github.com/mongodb/node-mongodb-native/commit/6d3947bf701c6953f6e4dc1ae8003d6d305bb3b1))
+
+
+### Bug Fixes
+
+* **NODE-3688:** make handshake errors retryable ([#3165](https://github.com/mongodb/node-mongodb-native/issues/3165)) ([3f8765a](https://github.com/mongodb/node-mongodb-native/commit/3f8765a347af5e48e49d6e7f77c8cdc593e8d41c))
+* **NODE-3833:** return early on end if gridfs upload stream is already ended ([#3223](https://github.com/mongodb/node-mongodb-native/issues/3223)) ([c27e844](https://github.com/mongodb/node-mongodb-native/commit/c27e844850be69bc2ce8ad3a5a93b3f62b4190ae))
+* **NODE-3928:** don't throw error in Response constructor ([#3199](https://github.com/mongodb/node-mongodb-native/issues/3199)) ([441fc63](https://github.com/mongodb/node-mongodb-native/commit/441fc63e8b97a8e2d06019759e8994d5f2f85b89))
+* **NODE-4031:** options parsing for array options ([#3193](https://github.com/mongodb/node-mongodb-native/issues/3193)) ([4b2e3d1](https://github.com/mongodb/node-mongodb-native/commit/4b2e3d1c89fc66a2d1a288a09d4fa2b431fab14c))
+* **NODE-4133:** array field NestedPaths return type ([#3184](https://github.com/mongodb/node-mongodb-native/issues/3184)) ([c46c984](https://github.com/mongodb/node-mongodb-native/commit/c46c984f42bceca671b6d186a814881e0700b662))
+* **NODE-4156:** remove comment from commands pre-4.4 ([#3195](https://github.com/mongodb/node-mongodb-native/issues/3195)) ([4e6dccd](https://github.com/mongodb/node-mongodb-native/commit/4e6dccd99af98e849751a11d181cda5fb8e762b0))
+* **NODE-4188:** default localThresholdMS to 15ms ([#3207](https://github.com/mongodb/node-mongodb-native/issues/3207)) ([5e730ff](https://github.com/mongodb/node-mongodb-native/commit/5e730ff0310edbbb656f38fe0ad7adadac8b32cd))
+* **NODE-4208:** add aws http request timeout handler ([#3225](https://github.com/mongodb/node-mongodb-native/issues/3225)) ([829d7be](https://github.com/mongodb/node-mongodb-native/commit/829d7bed8cd0d53d966367c8507837980530cf01))
+
 ## [4.5.0](https://github.com/mongodb/node-mongodb-native/compare/v4.4.1...v4.5.0) (2022-04-04)
 
 
