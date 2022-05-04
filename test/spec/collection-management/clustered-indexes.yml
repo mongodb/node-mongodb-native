@@ -1,0 +1,94 @@
+description: "clustered-indexes"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "5.3"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name ts-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: "createCollection with clusteredIndex"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          clusteredIndex:
+            key: { _id: 1 }
+            unique: true
+            name: &index0Name "test index"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+
+  - description: "listCollections includes clusteredIndex"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          clusteredIndex:
+            key: { _id: 1 }
+            unique: true
+            name: &index0Name "test index"
+      - name: listCollections
+        object: *database0
+        arguments:
+          filter: { name: { $eq: *collection0Name } }
+        expectResult:
+          - name: *collection0Name
+            options:
+              clusteredIndex:
+                key: { _id: 1 }
+                unique: true
+                name: *index0Name
+                v: { $$type: [ int, long ] }
+
+  - description: "listIndexes returns the index"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          clusteredIndex:
+            key: { _id: 1 }
+            unique: true
+            name: *index0Name
+      - name: listIndexes
+        object: *collection0
+        expectResult:
+          - key: { _id: 1 }
+            name: *index0Name
+            clustered: true
+            unique: true
+            v: { $$type: [ int, long ] }
