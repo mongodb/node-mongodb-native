@@ -4,7 +4,7 @@ import { loadSpecTests } from '../../spec';
 import { CmapTest, runCmapTest, ThreadContext } from '../../tools/cmap_spec_runner';
 import * as mock from '../../tools/mongodb-mock/index';
 
-describe('Connection Monitoring and Pooling Spec Tests', function () {
+describe('Connection Monitoring and Pooling Spec Tests (Unit)', function () {
   let hostAddress: HostAddress, threadContext: ThreadContext;
   after(() => mock.cleanup());
   before(async () => {

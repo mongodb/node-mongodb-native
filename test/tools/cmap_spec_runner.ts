@@ -4,7 +4,7 @@ import { promisify } from 'util';
 
 import { Connection, HostAddress } from '../../src';
 import { ConnectionPool } from '../../src/cmap/connection_pool';
-import { sleep } from './utils';
+import { FailPoint, sleep } from './utils';
 
 type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
@@ -43,7 +43,7 @@ const CMAP_TEST_KEYS: Array<keyof CmapTest> = [
 export type CmapTest = {
   name?: string; // filename path added by the spec loader
   version: number;
-  style: 'unit';
+  style: 'unit' | 'integration';
   description: string;
   poolOptions?: CmapPoolOptions;
   operations: CmapOperation[];
@@ -54,6 +54,12 @@ export type CmapTest = {
   };
   events?: CmapEvent[];
   ignore?: string[];
+  // integration specific params
+  runOn?: {
+    minServerVersion?: string;
+    maxServerVersion?: string;
+  }[];
+  failPoint?: FailPoint;
 };
 
 const ALL_POOL_EVENTS = new Set([
