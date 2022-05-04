@@ -28,7 +28,8 @@ describe('Bulk', function () {
     return setupDatabase(this.configuration);
   });
   describe('BulkOperationBase', () => {
-    describe('#raw', function () {
+    // eslint-disable-next-line no-restricted-properties
+    describe.only('#raw', function () {
       let client;
       beforeEach(async function () {
         client = this.configuration.newClient();
@@ -44,6 +45,18 @@ describe('Bulk', function () {
           expect(() => bulkOp.raw(true)).to.throw(MongoInvalidArgumentError);
           expect(() => bulkOp.raw(3)).to.throw(MongoInvalidArgumentError);
         });
+
+        it('should throw an error with the specifc message: "Operation must be an object with an operation key"', async function () {
+          const bulkOp = client.db('test').collection('test').initializeUnorderedBulkOp();
+          try {
+            bulkOp.raw(undefined);
+            expect.fail(
+              'Expected passing argument of "undefined" to .raw to throw error, failed to throw error'
+            );
+          } catch (error) {
+            expect(error.message).to.equal('Operation must be an object with an operation key');
+          }
+        });
       });
 
       context('when called with a valid operation', function () {
@@ -58,6 +71,8 @@ describe('Bulk', function () {
     });
   });
 
+  //write test to check if error thrown at raw op hasnt changed
+
   describe('Db.collection', function () {
     describe('#insertMany', function () {
       let client;
@@ -68,8 +83,8 @@ describe('Bulk', function () {
       afterEach(async function () {
         await client.close();
       });
-      context('when passed an invalid or sparse list', function () {
-        it('insertMany should throw a MongoInvalidArgument error when called with a valid operation', async function () {
+      context('when passed an invalid docs argument', function () {
+        it('insertMany should throw a MongoInvalidArgument error when called with a invalid operation', async function () {
           try {
             const docs = [];
             docs[1] = { color: 'red' };

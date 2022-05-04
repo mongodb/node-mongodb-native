@@ -136,7 +136,14 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     );
 
     bulkWriteOperation.execute(server, session, (err, res) => {
-      if (err || res == null) return callback(err);
+      if (err || res == null) {
+        if (err && err.message === 'Operation must be an object with an operation key') {
+          err = new MongoInvalidArgumentError(
+            'Argument "docs" is a sparse array containing element(s) that are null or undefined'
+          );
+        }
+        return callback(err);
+      }
       callback(undefined, {
         acknowledged: writeConcern?.w !== 0 ?? true,
         insertedCount: res.insertedCount,
