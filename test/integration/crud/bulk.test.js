@@ -28,8 +28,7 @@ describe('Bulk', function () {
     return setupDatabase(this.configuration);
   });
   describe('BulkOperationBase', () => {
-    // eslint-disable-next-line no-restricted-properties
-    describe.only('#raw', function () {
+    describe('#raw', function () {
       let client;
       beforeEach(async function () {
         client = this.configuration.newClient();
@@ -70,8 +69,6 @@ describe('Bulk', function () {
       });
     });
   });
-
-  //write test to check if error thrown at raw op hasnt changed
 
   describe('Db.collection', function () {
     describe('#insertMany', function () {
