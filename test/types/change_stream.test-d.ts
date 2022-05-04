@@ -143,10 +143,23 @@ pipelineChangeStream.on('change', change => {
 });
 
 collection.watch().on('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+
+// Just overriding the schema provides a typed changestream OF that schema
 collection
   .watch<Document>()
   .on('change', change => expectType<ChangeStreamDocument<Document>>(change));
+
+// both schema and Tchange can be made as flexible as possible (Document)
 collection.watch<Document, Document>().on('change', change => expectType<Document>(change));
+
+// first argument does not stop you from making second more generic
 collection.watch<{ a: number }, Document>().on('change', change => expectType<Document>(change));
+
+// Arguments must be objects
 expectError(collection.watch<Document, number>());
-collection.watch<{ a: number }, { b: boolean }>().on;
+expectError(collection.watch<number, number>());
+
+// First argument no longer relates to second
+collection
+  .watch<{ a: number }, { b: boolean }>()
+  .on('change', change => expectType<{ b: boolean }>(change));
