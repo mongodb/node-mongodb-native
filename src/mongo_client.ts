@@ -598,7 +598,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    * @typeParam TSchema - Type of the data being detected by the change stream
-   * @typeParam TChange - Type of the whole change stream document returned, typically set if a pipeline is provided the changes the default shape of the change document
+   * @typeParam TChange - Type of the whole change stream document emitted
    */
   watch<
     TSchema extends Document = Document,
