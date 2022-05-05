@@ -28,7 +28,7 @@ describe('Bulk', function () {
     return setupDatabase(this.configuration);
   });
   describe('BulkOperationBase', () => {
-    describe('#raw', function () {
+    describe('#raw()', function () {
       let client;
       beforeEach(async function () {
         client = this.configuration.newClient();
@@ -65,8 +65,8 @@ describe('Bulk', function () {
     });
   });
 
-  describe('Db.collection', function () {
-    describe('#insertMany', function () {
+  describe('Collection', function () {
+    describe('#insertMany()', function () {
       let client;
       beforeEach(async function () {
         client = this.configuration.newClient();
