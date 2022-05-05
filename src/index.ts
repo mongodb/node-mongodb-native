@@ -348,6 +348,7 @@ export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
 export type { CountDocumentsOptions } from './operations/count_documents';
 export type {
+  ClusteredCollectionOptions,
   CreateCollectionOptions,
   TimeSeriesCollectionOptions
 } from './operations/create_collection';
