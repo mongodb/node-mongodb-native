@@ -7,7 +7,12 @@ const {
   ignoreNsNotFound,
   assert: test
 } = require('../shared');
-const { Long, MongoBatchReExecutionError, MongoDriverError } = require('../../../src');
+const {
+  Long,
+  MongoBatchReExecutionError,
+  MongoDriverError,
+  MongoInvalidArgumentError
+} = require('../../../src');
 const crypto = require('crypto');
 const chai = require('chai');
 
@@ -21,6 +26,84 @@ describe('Bulk', function () {
   let client;
   before(function () {
     return setupDatabase(this.configuration);
+  });
+  describe('BulkOperationBase', () => {
+    describe('#raw()', function () {
+      let client;
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+      afterEach(async function () {
+        await client.close();
+      });
+      context('when called with an undefined operation', function () {
+        it('should throw a MongoInvalidArgument error ', async function () {
+          const bulkOp = client.db('test').collection('test').initializeUnorderedBulkOp();
+          expect(() => bulkOp.raw(undefined)).to.throw(MongoInvalidArgumentError);
+          expect(() => bulkOp.raw(true)).to.throw(MongoInvalidArgumentError);
+          expect(() => bulkOp.raw(3)).to.throw(MongoInvalidArgumentError);
+        });
+
+        it('should throw an error with the specifc message: "Operation must be an object with an operation key"', async function () {
+          const bulkOp = client.db('test').collection('test').initializeUnorderedBulkOp();
+          expect(() => bulkOp.raw(undefined))
+            .to.throw(MongoInvalidArgumentError)
+            .to.match(/Operation must be an object with an operation key/);
+        });
+      });
+
+      context('when called with a valid operation', function () {
+        it('should not throw a MongoInvalidArgument error', async function () {
+          try {
+            client.db('test').collection('test').initializeUnorderedBulkOp().raw({ insertOne: {} });
+          } catch (error) {
+            expect(error).not.to.exist;
+          }
+        });
+      });
+    });
+  });
+
+  describe('Collection', function () {
+    describe('#insertMany()', function () {
+      let client;
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+      afterEach(async function () {
+        await client.close();
+      });
+      context('when passed an invalid docs argument', function () {
+        it('should throw a MongoInvalidArgument error', async function () {
+          try {
+            const docs = [];
+            docs[1] = { color: 'red' };
+            await client.db('test').collection('test').insertMany(docs);
+            expect.fail('Expected insertMany to throw error, failed to throw error');
+          } catch (error) {
+            expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+            expect(error.message).to.equal(
+              'Collection.insertMany() cannot be called with an array that has null/undefined values'
+            );
+          }
+        });
+      });
+      context('when passed a valid document list', function () {
+        it('insertMany should not throw a MongoInvalidArgument error when called with a valid operation', async function () {
+          try {
+            let result = await client
+              .db('test')
+              .collection('test')
+              .insertMany([{ color: 'blue' }]);
+            expect(result).to.exist;
+          } catch (error) {
+            expect(error).not.to.exist;
+          }
+        });
+      });
+    });
   });
 
   context('promise tests', () => {
