@@ -84,7 +84,7 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   pkFactory?: PkFactory;
   /** A document specifying configuration options for timeseries collections. */
   timeseries?: TimeSeriesCollectionOptions;
-  /** A document specifying configuration options for clustered collections. */
+  /** A document specifying configuration options for clustered collections. For MongoDB 5.3 and above. */
   clusteredIndex?: ClusteredCollectionOptions;
   /** The number of seconds after which a document in a timeseries or clustered collection expires. */
   expireAfterSeconds?: number;
