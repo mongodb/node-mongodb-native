@@ -335,5 +335,17 @@ describe('Find Cursor', function () {
         });
       })
     });
+
+    it('throws if the query does not have sort specified', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withClientV2(function (client, done) {
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({});
+        expect(() => cursor.allowDiskUse(false)).to.throw(
+          'Option "allowDiskUse" requires a sort specification'
+        );
+        done();
+      })
+    });
   });
 });
