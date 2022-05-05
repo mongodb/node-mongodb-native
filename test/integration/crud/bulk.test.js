@@ -76,7 +76,7 @@ describe('Bulk', function () {
         await client.close();
       });
       context('when passed an invalid docs argument', function () {
-        it('insertMany should throw a MongoInvalidArgument error when called with an invalid operation', async function () {
+        it('should throw a MongoInvalidArgument error', async function () {
           try {
             const docs = [];
             docs[1] = { color: 'red' };
