@@ -43,6 +43,7 @@ export interface TimeSeriesCollectionOptions extends Document {
 
 /** @public
  * Configuration options for clustered collections
+ * TODO: NODE-4230 replace with normal manual link once it is on there.
  * @see https://www.mongodb.com/docs/v5.3/core/clustered-collections/
  */
 export interface ClusteredCollectionOptions extends Document {
