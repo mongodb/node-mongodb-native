@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { promisify } from 'util';
 
 import { Connection, HostAddress } from '../../src';
-import { ConnectionPool } from '../../src/cmap/connection_pool';
+import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
 import { FailPoint, sleep } from './utils';
 
 type CmapOperation =
@@ -38,7 +38,9 @@ const CMAP_TEST_KEYS: Array<keyof CmapTest> = [
   'operations',
   'error',
   'events',
-  'ignore'
+  'ignore',
+  'runOn',
+  'failPoint'
 ];
 export type CmapTest = {
   name?: string; // filename path added by the spec loader
@@ -162,6 +164,8 @@ const compareInputToSpec = (input, expected) => {
 
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   checkOut: async function (op) {
+    console.log('TEST DEBUG: awaiting checkout', op);
+
     const connection: Connection = await promisify(ConnectionPool.prototype.checkOut).call(
       threadContext.pool
     );
@@ -185,7 +189,12 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
     return threadContext.pool.clear();
   },
   close: async function () {
+    console.log('TEST DEBUG: awaiting close');
     return await promisify(ConnectionPool.prototype.close).call(threadContext.pool);
+  },
+  ready: function () {
+    // This is a no-op until pool pausing is implemented
+    return;
   },
   wait: async function (options) {
     const ms = options.ms;
@@ -209,6 +218,7 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
     await threadObj.finish();
   },
   waitForEvent: function (options): Promise<void> {
+    console.log('TEST DEBUG: waiting for event', options);
     const event = options.event;
     const count = options.count;
     return new Promise(resolve => {
@@ -232,10 +242,17 @@ export class ThreadContext {
   poolEvents = [];
   poolEventsEventEmitter = new EventEmitter();
 
+  #poolOptions: Partial<ConnectionPoolOptions>;
   #hostAddress: HostAddress;
   #supportedOperations: ReturnType<typeof getTestOpDefinitions>;
 
-  constructor(hostAddress) {
+  /**
+   *
+   * @param hostAddress - The address of the server to connect to
+   * @param poolOptions - Allows the test to pass in extra options to the pool not specified by the spec test definition, such as the environment-dependent "loadBalanced"
+   */
+  constructor(hostAddress: HostAddress, poolOptions: Partial<ConnectionPoolOptions> = {}) {
+    this.#poolOptions = poolOptions;
     this.#hostAddress = hostAddress;
     this.#supportedOperations = getTestOpDefinitions(this);
   }
@@ -251,7 +268,11 @@ export class ThreadContext {
   }
 
   createPool(options) {
-    this.pool = new ConnectionPool({ ...options, hostAddress: this.#hostAddress });
+    this.pool = new ConnectionPool({
+      ...this.#poolOptions,
+      ...options,
+      hostAddress: this.#hostAddress
+    });
     ALL_POOL_EVENTS.forEach(ev => {
       this.pool.on(ev, x => {
         this.poolEvents.push(x);
@@ -309,6 +330,8 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
 
     const threadKey = op.name === 'checkOut' ? op.thread || MAIN_THREAD_KEY : MAIN_THREAD_KEY;
     const thread = threadContext.getThread(threadKey);
+
+    console.log('TEST DEBUG: Queuing', { threadKey, op });
 
     thread.queue(op);
   }
