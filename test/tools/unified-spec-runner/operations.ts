@@ -245,7 +245,13 @@ operations.set('deleteOne', async ({ entities, operation }) => {
 operations.set('dropCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
   const { collection, ...opts } = operation.arguments;
-  return await db.dropCollection(collection, opts);
+  try {
+    await db.dropCollection(collection, opts);
+  } catch (err) {
+    if (!/ns not found/.test(err.message)) {
+      throw err;
+    }
+  }
 });
 
 operations.set('endSession', async ({ entities, operation }) => {

@@ -156,10 +156,14 @@ export async function runUnifiedTest(
     const topologyType = ctx.configuration.topologyType;
     if (topologyType === TopologyType.Sharded || topologyType === TopologyType.LoadBalanced) {
       for (const [, collection] of entities.mapOf('collection')) {
-        await utilClient.db(ns(collection.namespace).db).command({
-          distinct: collection.collectionName,
-          key: '_id'
-        });
+        try {
+          await utilClient.db(ns(collection.namespace).db).command({
+            distinct: collection.collectionName,
+            key: '_id'
+          });
+        } catch {
+          // ignore errors
+        }
       }
     }
 
