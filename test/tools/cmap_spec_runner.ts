@@ -257,6 +257,10 @@ export class ThreadContext {
     this.#supportedOperations = getTestOpDefinitions(this);
   }
 
+  get isLoadBalanced() {
+    return !!this.#poolOptions.loadBalanced;
+  }
+
   getThread(name) {
     let thread = this.threads.get(name);
     if (!thread) {
@@ -275,6 +279,7 @@ export class ThreadContext {
     });
     ALL_POOL_EVENTS.forEach(ev => {
       this.pool.on(ev, x => {
+        console.log('TEST DEBUG: getting event', ev);
         this.poolEvents.push(x);
         this.poolEventsEventEmitter.emit('poolEvent');
       });
@@ -346,8 +351,20 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
 
   if (expectedError) {
     expect(actualError).to.exist;
-    const { type: errorType, ...errorPropsToCheck } = expectedError;
+    const { type: errorType, message: errorMessage, ...errorPropsToCheck } = expectedError;
     expect(actualError).to.have.property('name', `Mongo${errorType}`);
+    if (errorMessage) {
+      if (
+        errorMessage === 'Timed out while checking out a connection from connection pool' &&
+        threadContext.isLoadBalanced
+      ) {
+        expect(actualError.message).to.match(
+          /^Timed out while checking out a connection from connection pool:/
+        );
+      } else {
+        expect(actualError).to.have.property('message', errorMessage);
+      }
+    }
     compareInputToSpec(actualError, errorPropsToCheck);
   } else {
     expect(actualError).to.not.exist;
