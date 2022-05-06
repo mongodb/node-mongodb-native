@@ -229,6 +229,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kProcessingWaitQueue] = false;
 
     process.nextTick(() => {
+      console.log('DEBUG: emitting pool created event');
       this.emit(ConnectionPool.CONNECTION_POOL_CREATED, new ConnectionPoolCreatedEvent(this));
       ensureMinPoolSize(this);
     });
@@ -283,6 +284,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * explicitly destroyed by the new owner.
    */
   checkOut(callback: Callback<Connection>): void {
+    console.log('DEBUG: check out called');
     this.emit(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -505,12 +507,23 @@ function ensureMinPoolSize(pool: ConnectionPool) {
 }
 
 function connectionIsStale(pool: ConnectionPool, connection: Connection) {
+  console.log('DEBUG: checking stale connection');
   const serviceId = connection.serviceId;
   if (pool.loadBalanced && serviceId) {
     const sid = serviceId.toHexString();
     const generation = pool.serviceGenerations.get(sid);
+    console.log('DEBUG: connection stale lb check', {
+      sid,
+      generation,
+      connectionGeneration: connection.generation
+    });
     return connection.generation !== generation;
   }
+
+  console.log('DEBUG: connection stale non-lb check', {
+    generation: pool[kGeneration],
+    connectionGeneration: connection.generation
+  });
 
   return connection.generation !== pool[kGeneration];
 }
