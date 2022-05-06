@@ -324,6 +324,10 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
   mainThread.start();
 
   threadContext.createPool(poolOptions);
+  // yield control back to the event loop so that the ConnectionPoolCreatedEvent
+  // has a chance to be fired before any synchronously-emitted events from
+  // the queued operations
+  await sleep();
 
   for (const idx in operations) {
     const op = operations[idx];
