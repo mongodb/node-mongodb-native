@@ -40,6 +40,7 @@ export interface OperationDescription extends BSONSerializeOptions {
   socketTimeoutOverride?: boolean;
   agreedCompressor?: CompressorName;
   zlibCompressionLevel?: number;
+  zstdCompressionLevel?: number;
   $clusterTime?: Document;
 }
 

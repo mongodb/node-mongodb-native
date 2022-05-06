@@ -25,6 +25,7 @@
     "email": "dbx-node@mongodb.com"
   },
   "dependencies": {
+    "@mongodb-js/zstd": "^0.0.4",
     "bson": "^4.6.3",
     "denque": "^2.0.1",
     "mongodb-connection-string-url": "^2.5.2",

@@ -48,6 +48,7 @@ else
 fi
 
 npm install mongodb-client-encryption@">=2.2.0-alpha.0"
+npm install @mongodb-js/zstd
 
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}

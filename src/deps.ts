@@ -44,6 +44,30 @@ export interface KerberosClient {
   unwrap: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
 }
 
+type ZStandardLib = {
+  /**
+   * Compress using zstd.
+   * @param buf - Buffer to be compressed.
+   */
+  compress(buf: Buffer, level?: number): Promise<Buffer>;
+
+  /**
+   * Decompress using zstd.
+   */
+  decompress(buf: Buffer): Promise<Buffer>;
+};
+
+export let ZStandard: ZStandardLib | { kModuleError: MongoMissingDependencyError } =
+  makeErrorModule(
+    new MongoMissingDependencyError(
+      'Optional module `@mongodb-js/zstd` not found. Please install it to enable zstd compression'
+    )
+  );
+
+try {
+  ZStandard = require('@mongodb-js/zstd');
+} catch {} // eslint-disable-line
+
 type SnappyLib = {
   [PKG_VERSION]: { major: number; minor: number; patch: number };
 

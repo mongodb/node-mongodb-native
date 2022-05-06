@@ -70,7 +70,7 @@ expectAssignable<((host: string, cert: PeerCertificate) => Error | undefined) | 
 // compression options have simpler specification:
 // old way: {compression: { compressors: ['zlib', 'snappy'] }}
 expectType<PropExists<MongoClientOptions, 'compression'>>(false);
-expectType<('none' | 'snappy' | 'zlib')[] | string | undefined>(options.compressors);
+expectType<('none' | 'snappy' | 'zlib' | 'zstd')[] | string | undefined>(options.compressors);
 
 // Removed cursor API
 const cursor = new MongoClient('').db().aggregate();
