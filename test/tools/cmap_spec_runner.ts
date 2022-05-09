@@ -164,8 +164,6 @@ const compareInputToSpec = (input, expected) => {
 
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   checkOut: async function (op) {
-    console.log('TEST DEBUG: awaiting checkout', op);
-
     const connection: Connection = await promisify(ConnectionPool.prototype.checkOut).call(
       threadContext.pool
     );
@@ -189,7 +187,6 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
     return threadContext.pool.clear();
   },
   close: async function () {
-    console.log('TEST DEBUG: awaiting close');
     return await promisify(ConnectionPool.prototype.close).call(threadContext.pool);
   },
   ready: function () {
@@ -218,7 +215,6 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
     await threadObj.finish();
   },
   waitForEvent: function (options): Promise<void> {
-    console.log('TEST DEBUG: waiting for event', options);
     const event = options.event;
     const count = options.count;
     return new Promise(resolve => {
@@ -279,7 +275,6 @@ export class ThreadContext {
     });
     ALL_POOL_EVENTS.forEach(ev => {
       this.pool.on(ev, x => {
-        console.log('TEST DEBUG: getting event', ev);
         this.poolEvents.push(x);
         this.poolEventsEventEmitter.emit('poolEvent');
       });
@@ -339,8 +334,6 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
 
     const threadKey = op.name === 'checkOut' ? op.thread || MAIN_THREAD_KEY : MAIN_THREAD_KEY;
     const thread = threadContext.getThread(threadKey);
-
-    console.log('TEST DEBUG: Queuing', { threadKey, op });
 
     thread.queue(op);
   }

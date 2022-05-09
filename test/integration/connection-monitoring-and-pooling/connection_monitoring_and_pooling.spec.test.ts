@@ -4,6 +4,13 @@ import { loadSpecTests } from '../../spec';
 import { CmapTest, runCmapTest, ThreadContext } from '../../tools/cmap_spec_runner';
 import { isAnyRequirementSatisfied } from '../../tools/unified-spec-runner/unified-utils';
 
+// These tests rely on a simple "pool.clear()" command, which is not sufficient
+// to properly clear the pool in LB mode, since it requires a serviceId to be passed in
+const LB_SKIP_TESTS = [
+  'must destroy checked in connection if it is stale',
+  'must destroy and must not check out a stale connection if found while iterating available connections'
+];
+
 describe.only('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
   const suites: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
@@ -18,6 +25,10 @@ describe.only('Connection Monitoring and Pooling Spec Tests (Integration)', func
       beforeEach(async function () {
         let utilClient: MongoClient;
         if (this.configuration.isLoadBalanced) {
+          if (LB_SKIP_TESTS.some(testDescription => testDescription === test.description)) {
+            this.currentTest.skipReason = 'cannot run against a load balanced environment';
+            this.skip();
+          }
           // The util client can always point at the single mongos LB frontend.
           utilClient = this.configuration.newClient(this.configuration.singleMongosLoadBalancerUri);
         } else {
