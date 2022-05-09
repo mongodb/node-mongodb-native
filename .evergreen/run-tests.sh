@@ -47,7 +47,7 @@ else
   source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 fi
 
-npm install mongodb-client-encryption@">=2.0.0-beta.4"
+npm install mongodb-client-encryption@">=2.2.0-alpha.0"
 
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}
