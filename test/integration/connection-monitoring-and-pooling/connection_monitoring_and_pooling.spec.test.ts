@@ -11,12 +11,11 @@ const LB_SKIP_TESTS = [
   'must destroy and must not check out a stale connection if found while iterating available connections'
 ];
 
-describe.only('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
+describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
   const suites: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
   for (const test of suites.filter(test => {
-    // return true;
-    // return test.description === 'must throw error if checkOut is called on a closed pool';
+    // TODO(NODE-2993): unskip integration tests for maxConnecting
     return test.style === 'unit';
   })) {
     describe(test.description, function () {
