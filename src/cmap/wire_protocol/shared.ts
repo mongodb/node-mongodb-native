@@ -56,7 +56,11 @@ export function applyCommonQueryOptions(
   return queryOptions;
 }
 
-export function isSharded(topologyOrServer: Topology | Server | Connection): boolean {
+export function isSharded(topologyOrServer?: Topology | Server | Connection): boolean {
+  if (topologyOrServer == null) {
+    return false;
+  }
+
   if (topologyOrServer.description && topologyOrServer.description.type === ServerType.Mongos) {
     return true;
   }

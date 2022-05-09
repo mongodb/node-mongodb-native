@@ -7,13 +7,7 @@ import type { OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import {
-  Callback,
-  getTopology,
-  maxWireVersion,
-  MongoDBNamespace,
-  parseIndexOptions
-} from '../utils';
+import { Callback, maxWireVersion, MongoDBNamespace, parseIndexOptions } from '../utils';
 import {
   CollationOptions,
   CommandOperation,
@@ -424,7 +418,7 @@ export class ListIndexesCursor extends AbstractCursor {
   options?: ListIndexesOptions;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
-    super(getTopology(collection), collection.s.namespace, options);
+    super(collection.s.db.s.client, collection.s.namespace, options);
     this.parent = collection;
     this.options = options;
   }
@@ -444,7 +438,7 @@ export class ListIndexesCursor extends AbstractCursor {
       session
     });
 
-    executeOperation(this.parent, operation, (err, response) => {
+    executeOperation(this.parent.s.db.s.client, operation, (err, response) => {
       if (err || response == null) return callback(err);
 
       // TODO: NODE-2882

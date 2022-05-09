@@ -62,6 +62,7 @@ function createTopology(
   // Events can be emitted before initialization is complete so we have to
   // save the reference to the topology on the client ASAP if the event handlers need to access it
   mongoClient.topology = topology;
+  topology.client = mongoClient;
 
   topology.once(Topology.OPEN, () => mongoClient.emit('open', mongoClient));
 

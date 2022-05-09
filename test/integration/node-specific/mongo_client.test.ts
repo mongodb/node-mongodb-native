@@ -1,28 +1,21 @@
-'use strict';
-const { expect } = require('chai');
+import { expect } from 'chai';
+import { once } from 'events';
+import * as sinon from 'sinon';
 
-const sinon = require('sinon');
+import { MongoClient, MongoServerSelectionError, ReadPreference } from '../../../src';
+import { Connection } from '../../../src/cmap/connection';
+import { Db } from '../../../src/db';
+import { Topology } from '../../../src/sdam/topology';
+import { getTopology, isHello } from '../../../src/utils';
+import { setupDatabase } from '../shared';
 
-const { setupDatabase, assert: test } = require('../shared');
-const { format: f } = require('util');
-
-const { MongoClient, ReadPreference } = require('../../../src');
-const { Db } = require('../../../src/db');
-const { Connection } = require('../../../src/cmap/connection');
-const { getTopology, isHello } = require('../../../src/utils');
-
-describe('MongoClient integration', function () {
+describe('class MongoClient', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
 
-  it('Should correctly pass through extra db options', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
+  it('should correctly pass through extra db options', {
+    metadata: { requires: { topology: ['single'] } },
     test: function (done) {
       const configuration = this.configuration;
       const client = configuration.newClient(
@@ -46,17 +39,24 @@ describe('MongoClient integration', function () {
 
         const db = client.db(configuration.db);
 
-        test.equal(1, db.writeConcern.w);
-        test.equal(1000, db.writeConcern.wtimeout);
-        test.equal(true, db.writeConcern.fsync);
-        test.equal(true, db.writeConcern.j);
+        expect(db).to.have.property('writeConcern');
+        expect(db.writeConcern).to.have.property('w', 1);
+        expect(db.writeConcern).to.have.property('wtimeout', 1000);
+        expect(db.writeConcern).to.have.property('fsync', true);
+        expect(db.writeConcern).to.have.property('j', true);
 
-        test.equal('nearest', db.s.readPreference.mode);
-        test.deepEqual([{ loc: 'ny' }], db.s.readPreference.tags);
+        expect(db).to.have.property('s');
+        expect(db.s).to.have.property('readPreference');
+        expect(db.s.readPreference).to.have.property('mode', 'nearest');
+        expect(db.s.readPreference)
+          .to.have.property('tags')
+          .that.deep.equals([{ loc: 'ny' }]);
 
-        test.equal(true, db.s.options.forceServerObjectId);
-        test.equal(1, db.s.pkFactory.createPk());
-        test.equal(true, db.bsonOptions.serializeFunctions);
+        expect(db.s).to.have.nested.property('options.forceServerObjectId');
+        expect(db.s.options).to.have.property('forceServerObjectId', true);
+        expect(db.s).to.have.nested.property('pkFactory.createPk').that.is.a('function');
+        expect(db.s.pkFactory.createPk()).to.equal(1);
+        expect(db).to.have.nested.property('bsonOptions.serializeFunctions');
 
         client.close(done);
       });
@@ -86,7 +86,7 @@ describe('MongoClient integration', function () {
       });
 
       client.connect(function (err) {
-        test.ok(err != null);
+        expect(err).to.exist;
 
         done();
       });
@@ -97,7 +97,7 @@ describe('MongoClient integration', function () {
     metadata: { requires: { topology: ['single'], os: '!win32' } },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient('mongodb://%2Ftmp%2Fmongodb-27017.sock/test');
       client.connect(function (err) {
         expect(err).to.not.exist;
@@ -106,24 +106,14 @@ describe('MongoClient integration', function () {
     }
   });
 
-  it('should fail dure to garbage connection string', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
+  it('should fail to connect due to unknown host in connection string', async function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient('mongodb://iLoveJavascript:36363/ddddd', {
+      serverSelectionTimeoutMS: 10
+    });
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient('mongodb://unknownhost:36363/ddddd', {
-        serverSelectionTimeoutMS: 10
-      });
-
-      client.connect(function (err) {
-        test.ok(err != null);
-        done();
-      });
-    }
+    const error = await client.connect().catch(error => error);
+    expect(error).to.be.instanceOf(MongoServerSelectionError);
   });
 
   it('Should correctly pass through appname', {
@@ -142,7 +132,9 @@ describe('MongoClient integration', function () {
 
       client.connect(function (err, client) {
         expect(err).to.not.exist;
-        test.equal('hello world', client.topology.clientMetadata.application.name);
+        expect(client)
+          .to.have.nested.property('topology.clientMetadata.application.name')
+          .to.equal('hello world');
 
         client.close(done);
       });
@@ -163,7 +155,9 @@ describe('MongoClient integration', function () {
       const client = configuration.newClient(url, { appname: 'hello world' });
       client.connect(err => {
         expect(err).to.not.exist;
-        test.equal('hello world', client.topology.clientMetadata.application.name);
+        expect(client)
+          .to.have.nested.property('topology.clientMetadata.application.name')
+          .to.equal('hello world');
 
         client.close(done);
       });
@@ -198,12 +192,7 @@ describe('MongoClient integration', function () {
     }
   });
 
-  //////////////////////////////////////////////////////////////////////////////////////////
-  //
-  // new MongoClient connection tests
-  //
-  //////////////////////////////////////////////////////////////////////////////////////////
-  it('Should open a new MongoClient connection', {
+  it('should open a new MongoClient connection', {
     metadata: {
       requires: {
         topology: ['single']
@@ -221,7 +210,7 @@ describe('MongoClient integration', function () {
           .collection('new_mongo_client_collection')
           .insertOne({ a: 1 }, function (err, r) {
             expect(err).to.not.exist;
-            test.ok(r);
+            expect(r).to.be.an('object');
 
             mongoclient.close(done);
           });
@@ -229,19 +218,16 @@ describe('MongoClient integration', function () {
     }
   });
 
-  it('Should correctly connect with MongoClient `connect` using Promise', function () {
+  it('should correctly connect with MongoClient `connect` using Promise', function () {
     const configuration = this.configuration;
     let url = configuration.url();
-    url =
-      url.indexOf('?') !== -1
-        ? f('%s&%s', url, 'maxPoolSize=100')
-        : f('%s?%s', url, 'maxPoolSize=100');
+    url = url.indexOf('?') !== -1 ? `${url}&maxPoolSize=100` : `${url}?maxPoolSize=100`;
 
     const client = configuration.newClient(url);
     return client.connect().then(() => client.close());
   });
 
-  it('Should open a new MongoClient connection using promise', {
+  it('should open a new MongoClient connection using promise', {
     metadata: {
       requires: {
         topology: ['single']
@@ -257,7 +243,7 @@ describe('MongoClient integration', function () {
           .collection('new_mongo_client_collection')
           .insertOne({ a: 1 })
           .then(function (r) {
-            test.ok(r);
+            expect(r).to.exist;
 
             mongoclient.close(done);
           });
@@ -277,7 +263,9 @@ describe('MongoClient integration', function () {
       })
       .catch(_err => (err = _err))
       .then(() => client.close())
-      .catch(() => {})
+      .catch(() => {
+        // ignore
+      })
       .then(() => {
         if (err) {
           throw err;
@@ -295,11 +283,12 @@ describe('MongoClient integration', function () {
     metadata: { requires: { topology: 'single' } },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       MongoClient.connect(
         configuration.url(),
         {
           maxPoolSize: 4,
+          // @ts-expect-error: unexpected option test
           notlegal: {},
           validateOptions: true
         },
@@ -318,12 +307,13 @@ describe('MongoClient integration', function () {
     metadata: { requires: { topology: 'single' } },
 
     test() {
-      MongoClient.connect(this.configuration.url(), {
+      const options = {
         maxPoolSize: 4,
         notlegal: {},
         validateOptions: true
-      })
-        .then(() => expect().fail())
+      };
+      MongoClient.connect(this.configuration.url(), options)
+        .then(() => expect.fail())
         .catch(err => {
           expect(err)
             .property('message')
@@ -341,11 +331,12 @@ describe('MongoClient integration', function () {
       });
       client.connect(err => {
         expect(err).to.not.exist;
-        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function () {
-          const args = Array.prototype.slice.call(arguments);
+        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function (...args) {
           const ns = args[0];
           const command = args[1];
           const options = args[2] || {};
+
+          // @ts-expect-error: exhaustAllowed is a protocol option
           if (ns.toString() === 'admin.$cmd' && isHello(command) && options.exhaustAllowed) {
             expect(options).property('socketTimeoutMS').to.equal(0);
             stub.restore();
@@ -366,11 +357,12 @@ describe('MongoClient integration', function () {
       });
       client.connect(err => {
         expect(err).to.not.exist;
-        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function () {
-          const args = Array.prototype.slice.call(arguments);
+        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function (...args) {
           const ns = args[0];
           const command = args[1];
           const options = args[2] || {};
+
+          // @ts-expect-error: exhaustAllowed is a protocol option
           if (ns.toString() === 'admin.$cmd' && isHello(command) && options.exhaustAllowed) {
             expect(options).property('socketTimeoutMS').to.equal(510);
             stub.restore();
@@ -381,4 +373,150 @@ describe('MongoClient integration', function () {
       });
     }
   });
+
+  describe('#connect()', () => {
+    it(
+      'should create topology and send ping when auth is enabled',
+      { requires: { auth: 'enabled' } },
+      async function () {
+        const client = this.configuration.newClient(this.configuration.url(), {
+          monitorCommands: true
+        });
+
+        const commandToBeStarted = once(client, 'commandStarted');
+
+        await client.connect();
+
+        const [pingOnConnect] = await commandToBeStarted;
+
+        expect(pingOnConnect).to.have.property('commandName', 'ping');
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+        await client.close();
+      }
+    );
+
+    it(
+      'should permit operations to be run after connect is called',
+      { requires: { auth: 'enabled' } },
+      async function () {
+        const client = this.configuration.newClient(this.configuration.url(), {
+          monitorCommands: true
+        });
+
+        const pingCommandToBeStarted = once(client, 'commandStarted');
+        await client.connect();
+        const [pingOnConnect] = await pingCommandToBeStarted;
+
+        const findCommandToBeStarted = once(client, 'commandStarted');
+        await client.db('test').collection('test').findOne();
+        const [findCommandStarted] = await findCommandToBeStarted;
+
+        expect(pingOnConnect).to.have.property('commandName', 'ping');
+        expect(findCommandStarted).to.have.property('commandName', 'find');
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+        await client.close();
+      }
+    );
+  });
+
+  it(
+    'should automatically connect upon first operation (find)',
+    { requires: { auth: 'enabled' } },
+    async function () {
+      const client = this.configuration.newClient(this.configuration.url(), {
+        monitorCommands: true
+      });
+
+      const findCommandToBeStarted = once(client, 'commandStarted');
+      await client.db().collection('test').findOne();
+      const [findCommandStarted] = await findCommandToBeStarted;
+
+      expect(findCommandStarted).to.have.property('commandName', 'find');
+      expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+      expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+
+      // Assertion is redundant but it shows that no initial ping is run
+      expect(findCommandStarted.commandName).to.not.equal('ping');
+
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+      await client.close();
+    }
+  );
+
+  it(
+    'should automatically connect upon first operation (insertOne)',
+    { requires: { auth: 'enabled' } },
+    async function () {
+      const client = this.configuration.newClient(this.configuration.url(), {
+        monitorCommands: true
+      });
+
+      const insertOneCommandToBeStarted = once(client, 'commandStarted');
+      await client.db().collection('test').insertOne({ a: 1 });
+      const [insertCommandStarted] = await insertOneCommandToBeStarted;
+
+      expect(insertCommandStarted).to.have.property('commandName', 'insert');
+      expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+      expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+
+      // Assertion is redundant but it shows that no initial ping is run
+      expect(insertCommandStarted.commandName).to.not.equal('ping');
+
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+      await client.close();
+    }
+  );
+
+  it(
+    'should pass connection errors to the user through the first operation',
+    { requires: { auth: 'enabled' } },
+    async function () {
+      const client = this.configuration.newClient(
+        'mongodb://iLoveJavascript?serverSelectionTimeoutMS=100',
+        { monitorCommands: true }
+      );
+
+      const result = await client
+        .db('test')
+        .collection('test')
+        .findOne()
+        .catch(error => error);
+
+      expect(result).to.be.instanceOf(MongoServerSelectionError);
+      expect(client).to.be.instanceOf(MongoClient);
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+      await client.close();
+    }
+  );
+
+  it(
+    'should permit client to be reconnected if closed',
+    { requires: { auth: 'enabled' } },
+    async function () {
+      const client = this.configuration.newClient(this.configuration.url(), {
+        monitorCommands: true
+      });
+
+      await client.db('test').collection('test').findOne();
+
+      expect(client).to.be.instanceOf(MongoClient);
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+      await client.close();
+
+      expect(client).to.have.property('topology', undefined);
+
+      await client.db('test').collection('test').findOne();
+
+      expect(client).to.be.instanceOf(MongoClient);
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+      await client.close();
+    }
+  );
 });

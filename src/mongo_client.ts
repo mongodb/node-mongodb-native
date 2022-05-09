@@ -268,11 +268,12 @@ export interface MongoClientPrivate {
   sessions: Set<ClientSession>;
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
-  readonly options?: MongoOptions;
+  readonly options: MongoOptions;
   readonly readConcern?: ReadConcern;
   readonly writeConcern?: WriteConcern;
   readonly readPreference: ReadPreference;
   readonly logger: Logger;
+  readonly isMongoClient: true;
 }
 
 /** @public */
@@ -366,6 +367,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       },
       get logger() {
         return client[kOptions].logger;
+      },
+      get isMongoClient(): true {
+        return true;
       }
     };
   }

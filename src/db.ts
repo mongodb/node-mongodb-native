@@ -258,7 +258,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_3286,
       callback
     ) as TODO_NODE_3286;
@@ -286,7 +286,11 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(this, new RunCommandOperation(this, command, options ?? {}), callback);
+    return executeOperation(
+      this.s.client,
+      new RunCommandOperation(this, command, options ?? {}),
+      callback
+    );
   }
 
   /**
@@ -310,7 +314,7 @@ export class Db {
     }
 
     return new AggregationCursor(
-      getTopology(this),
+      this.s.client,
       this.s.namespace,
       pipeline,
       resolveOptions(this, options)
@@ -355,7 +359,7 @@ export class Db {
   ): Promise<Document> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     return executeOperation(
-      this,
+      this.s.client,
       new DbStatsOperation(this, resolveOptions(this, options)),
       callback
     );
@@ -434,7 +438,7 @@ export class Db {
     options.new_collection = true;
 
     return executeOperation(
-      this,
+      this.s.client,
       new RenameOperation(
         this.collection<TSchema>(fromCollection) as TODO_NODE_3286,
         toCollection,
@@ -463,7 +467,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new DropCollectionOperation(this, name, resolveOptions(this, options)),
       callback
     );
@@ -486,7 +490,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new DropDatabaseOperation(this, resolveOptions(this, options)),
       callback
     );
@@ -509,7 +513,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new CollectionsOperation(this, resolveOptions(this, options)),
       callback
     );
@@ -545,7 +549,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options)),
       callback
     );
@@ -591,7 +595,7 @@ export class Db {
     }
 
     return executeOperation(
-      this,
+      this.s.client,
       new AddUserOperation(this, username, password, resolveOptions(this, options)),
       callback
     );
@@ -616,7 +620,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new RemoveUserOperation(this, username, resolveOptions(this, options)),
       callback
     );
@@ -648,7 +652,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new SetProfilingLevelOperation(this, level, resolveOptions(this, options)),
       callback
     );
@@ -671,7 +675,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new ProfilingLevelOperation(this, resolveOptions(this, options)),
       callback
     );
@@ -700,7 +704,7 @@ export class Db {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.client,
       new IndexInformationOperation(this, name, resolveOptions(this, options)),
       callback
     );
