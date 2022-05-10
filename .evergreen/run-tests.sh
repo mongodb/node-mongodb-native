@@ -15,6 +15,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 AUTH=${AUTH:-noauth}
 MONGODB_URI=${MONGODB_URI:-}
 TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:integration-coverage}
+COMPRESSOR=${COMPRESSOR:-}
 if [[ -z "${NO_EXIT}" ]]; then
   TEST_NPM_SCRIPT="$TEST_NPM_SCRIPT -- --exit"
 fi
@@ -33,6 +34,14 @@ if [[ -z "${SKIP_DEPS}" ]]; then
   source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
 else
   source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+fi
+
+if [ "$COMPRESSOR" != "" ]; then
+  if [[ "$MONGODB_URI" == *"?"* ]]; then
+    export MONGODB_URI="${MONGODB_URI}&compressors=${COMPRESSOR}"
+  else
+    export MONGODB_URI="${MONGODB_URI}/?compressors=${COMPRESSOR}"
+  fi
 fi
 
 # only run FLE tets on hosts we explicitly choose to test on

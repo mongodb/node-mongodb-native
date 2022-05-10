@@ -84,6 +84,7 @@ functions:
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
           REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
           LOAD_BALANCER=${LOAD_BALANCER} \
+          COMPRESSOR=${COMPRESSOR} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
@@ -213,6 +214,25 @@ functions:
           SKIP_DEPS=${SKIP_DEPS|1} \
           NO_EXIT=${NO_EXIT|1} \
           LOAD_BALANCER="${LOAD_BALANCER}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+  run-compression-tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 300
+        script: |
+          ${PREPARE_SHELL}
+
+          MONGODB_URI="${MONGODB_URI}" \
+          AUTH=${AUTH} \
+          SSL=${SSL} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} \
+          TOPOLOGY="${TOPOLOGY}" \
+          COMPRESSOR="${COMPRESSOR}" \
+          SKIP_DEPS=${SKIP_DEPS|1} \
+          NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run lint checks:
     - command: subprocess.exec
@@ -1118,6 +1138,19 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+  - name: test-zstd-compression
+    tags:
+      - latest
+      - zstd
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: standalone
+          AUTH: auth
+          COMPRESSOR: zstd
+      - func: run-compression-tests
   - name: test-auth-kerberos
     tags:
       - auth
@@ -1960,6 +1993,7 @@ buildvariants:
       - test-latest-server-v1-api
       - test-atlas-connectivity
       - test-atlas-data-lake
+      - test-zstd-compression
       - test-auth-kerberos
       - test-auth-ldap
       - test-socks5
@@ -2015,6 +2049,7 @@ buildvariants:
       - test-atlas-connectivity
       - test-atlas-data-lake
       - test-load-balancer
+      - test-zstd-compression
       - test-auth-kerberos
       - test-auth-ldap
       - test-socks5
@@ -2068,6 +2103,7 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
+      - test-zstd-compression
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
