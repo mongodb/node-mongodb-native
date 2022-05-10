@@ -931,7 +931,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         },
         succeed: false,
         errorValidator: err => {
-          // TODO(NODE-4162): aws region test should only check if an error is thrown
           expect(err).to.be.an.instanceOf(Error);
         }
       },
