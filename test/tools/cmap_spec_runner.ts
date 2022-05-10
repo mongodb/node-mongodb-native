@@ -3,8 +3,8 @@ import { EventEmitter } from 'events';
 import { promisify } from 'util';
 
 import { Connection, HostAddress } from '../../src';
-import { ConnectionPool } from '../../src/cmap/connection_pool';
-import { sleep } from './utils';
+import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
+import { FailPoint, sleep } from './utils';
 
 type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
@@ -38,12 +38,14 @@ const CMAP_TEST_KEYS: Array<keyof CmapTest> = [
   'operations',
   'error',
   'events',
-  'ignore'
+  'ignore',
+  'runOn',
+  'failPoint'
 ];
 export type CmapTest = {
   name?: string; // filename path added by the spec loader
   version: number;
-  style: 'unit';
+  style: 'unit' | 'integration';
   description: string;
   poolOptions?: CmapPoolOptions;
   operations: CmapOperation[];
@@ -54,6 +56,12 @@ export type CmapTest = {
   };
   events?: CmapEvent[];
   ignore?: string[];
+  // integration specific params
+  runOn?: {
+    minServerVersion?: string;
+    maxServerVersion?: string;
+  }[];
+  failPoint?: FailPoint;
 };
 
 const ALL_POOL_EVENTS = new Set([
@@ -181,6 +189,10 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   close: async function () {
     return await promisify(ConnectionPool.prototype.close).call(threadContext.pool);
   },
+  ready: function () {
+    // This is a no-op until pool pausing is implemented
+    return;
+  },
   wait: async function (options) {
     const ms = options.ms;
     return sleep(ms);
@@ -226,12 +238,23 @@ export class ThreadContext {
   poolEvents = [];
   poolEventsEventEmitter = new EventEmitter();
 
+  #poolOptions: Partial<ConnectionPoolOptions>;
   #hostAddress: HostAddress;
   #supportedOperations: ReturnType<typeof getTestOpDefinitions>;
 
-  constructor(hostAddress) {
+  /**
+   *
+   * @param hostAddress - The address of the server to connect to
+   * @param poolOptions - Allows the test to pass in extra options to the pool not specified by the spec test definition, such as the environment-dependent "loadBalanced"
+   */
+  constructor(hostAddress: HostAddress, poolOptions: Partial<ConnectionPoolOptions> = {}) {
+    this.#poolOptions = poolOptions;
     this.#hostAddress = hostAddress;
     this.#supportedOperations = getTestOpDefinitions(this);
+  }
+
+  get isLoadBalanced() {
+    return !!this.#poolOptions.loadBalanced;
   }
 
   getThread(name) {
@@ -245,7 +268,11 @@ export class ThreadContext {
   }
 
   createPool(options) {
-    this.pool = new ConnectionPool({ ...options, hostAddress: this.#hostAddress });
+    this.pool = new ConnectionPool({
+      ...this.#poolOptions,
+      ...options,
+      hostAddress: this.#hostAddress
+    });
     ALL_POOL_EVENTS.forEach(ev => {
       this.pool.on(ev, x => {
         this.poolEvents.push(x);
@@ -297,6 +324,10 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
   mainThread.start();
 
   threadContext.createPool(poolOptions);
+  // yield control back to the event loop so that the ConnectionPoolCreatedEvent
+  // has a chance to be fired before any synchronously-emitted events from
+  // the queued operations
+  await sleep();
 
   for (const idx in operations) {
     const op = operations[idx];
@@ -313,8 +344,20 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
 
   if (expectedError) {
     expect(actualError).to.exist;
-    const { type: errorType, ...errorPropsToCheck } = expectedError;
+    const { type: errorType, message: errorMessage, ...errorPropsToCheck } = expectedError;
     expect(actualError).to.have.property('name', `Mongo${errorType}`);
+    if (errorMessage) {
+      if (
+        errorMessage === 'Timed out while checking out a connection from connection pool' &&
+        threadContext.isLoadBalanced
+      ) {
+        expect(actualError.message).to.match(
+          /^Timed out while checking out a connection from connection pool:/
+        );
+      } else {
+        expect(actualError).to.have.property('message', errorMessage);
+      }
+    }
     compareInputToSpec(actualError, errorPropsToCheck);
   } else {
     expect(actualError).to.not.exist;

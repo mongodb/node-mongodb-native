@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "style": "integration",
+  "description": "threads blocked by maxConnecting check out minPoolSize connections",
+  "runOn": [
+    {
+      "minServerVersion": "4.4.0"
+    }
+  ],
+  "failPoint": {
+    "configureFailPoint": "failCommand",
+    "mode": "alwaysOn",
+    "data": {
+      "failCommands": [
+        "isMaster",
+        "hello"
+      ],
+      "closeConnection": false,
+      "blockConnection": true,
+      "blockTimeMS": 500
+    }
+  },
+  "poolOptions": {
+    "minPoolSize": 2,
+    "maxPoolSize": 3,
+    "waitQueueTimeoutMS": 5000
+  },
+  "operations": [
+    {
+      "name": "ready"
+    },
+    {
+      "name": "start",
+      "target": "thread1"
+    },
+    {
+      "name": "start",
+      "target": "thread2"
+    },
+    {
+      "name": "wait",
+      "ms": 200
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread1"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCreated",
+      "count": 2
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread2"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCheckedOut",
+      "count": 2
+    }
+  ],
+  "events": [
+    {
+      "type": "ConnectionCreated",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCreated",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedOut",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedOut",
+      "address": 42
+    }
+  ],
+  "ignore": [
+    "ConnectionPoolReady",
+    "ConnectionClosed",
+    "ConnectionReady",
+    "ConnectionPoolCreated",
+    "ConnectionCheckOutStarted"
+  ]
+}

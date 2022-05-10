@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "style": "integration",
+  "description": "waiting on maxConnecting is limited by WaitQueueTimeoutMS",
+  "runOn": [
+    {
+      "minServerVersion": "4.4.0"
+    }
+  ],
+  "failPoint": {
+    "configureFailPoint": "failCommand",
+    "mode": {
+      "times": 50
+    },
+    "data": {
+      "failCommands": [
+        "isMaster",
+        "hello"
+      ],
+      "closeConnection": false,
+      "blockConnection": true,
+      "blockTimeMS": 750
+    }
+  },
+  "poolOptions": {
+    "maxPoolSize": 10,
+    "waitQueueTimeoutMS": 50
+  },
+  "operations": [
+    {
+      "name": "start",
+      "target": "thread1"
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread1"
+    },
+    {
+      "name": "start",
+      "target": "thread2"
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread2"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCreated",
+      "count": 2
+    },
+    {
+      "name": "start",
+      "target": "thread3"
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread3"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCheckOutFailed",
+      "count": 1
+    },
+    {
+      "name": "waitForThread",
+      "target": "thread3"
+    }
+  ],
+  "error": {
+    "type": "WaitQueueTimeoutError",
+    "message": "Timed out while checking out a connection from connection pool"
+  },
+  "events": [
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutFailed",
+      "reason": "timeout",
+      "address": 42
+    }
+  ],
+  "ignore": [
+    "ConnectionCreated",
+    "ConnectionCheckedIn",
+    "ConnectionCheckedOut",
+    "ConnectionClosed",
+    "ConnectionPoolCreated"
+  ]
+}
