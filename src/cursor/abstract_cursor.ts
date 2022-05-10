@@ -258,7 +258,7 @@ export abstract class AbstractCursor<
     };
   }
 
-  stream(options?: CursorStreamOptions): Readable {
+  stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
     if (options?.transform) {
       const transform = options.transform;
       const readable = makeCursorStream(this);

@@ -385,7 +385,7 @@ export class ChangeStream<
   /** @internal */
   [kResumeQueue]: Denque<Callback<ChangeStreamCursor<TSchema, TChange>>>;
   /** @internal */
-  [kCursorStream]?: Readable;
+  [kCursorStream]?: Readable & AsyncIterable<TChange>;
   /** @internal */
   [kClosed]: boolean;
   /** @internal */
@@ -473,7 +473,7 @@ export class ChangeStream<
   }
 
   /** @internal */
-  get cursorStream(): Readable | undefined {
+  get cursorStream(): (Readable & AsyncIterable<TChange>) | undefined {
     return this[kCursorStream];
   }
 
@@ -542,7 +542,7 @@ export class ChangeStream<
    * Return a modified Readable stream including a possible transform method.
    * @throws MongoDriverError if this.cursor is undefined
    */
-  stream(options?: CursorStreamOptions): Readable {
+  stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
     this.streamOptions = options;
     if (!this.cursor) throw new MongoChangeStreamError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
