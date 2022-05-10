@@ -153,7 +153,7 @@ TASKS.push(
           func: 'bootstrap mongo-orchestration',
           vars: {
             VERSION: 'latest',
-            TOPOLOGY: 'standalone',
+            TOPOLOGY: 'server',
             AUTH: 'auth',
             COMPRESSOR: 'zstd'
           }

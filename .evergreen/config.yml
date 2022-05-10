@@ -1147,7 +1147,7 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: standalone
+          TOPOLOGY: server
           AUTH: auth
           COMPRESSOR: zstd
       - func: run-compression-tests
