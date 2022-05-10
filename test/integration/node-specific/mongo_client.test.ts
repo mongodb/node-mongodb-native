@@ -2,7 +2,12 @@ import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
 
-import { MongoClient, MongoServerSelectionError, ReadPreference } from '../../../src';
+import {
+  MongoClient,
+  MongoNotConnectedError,
+  MongoServerSelectionError,
+  ReadPreference
+} from '../../../src';
 import { Connection } from '../../../src/cmap/connection';
 import { Db } from '../../../src/db';
 import { Topology } from '../../../src/sdam/topology';
@@ -374,30 +379,25 @@ describe('class MongoClient', function () {
     }
   });
 
-  describe('#connect()', () => {
+  context('#connect()', () => {
     it(
-      'should create topology and send ping when auth is enabled',
+      'create topology and send ping when auth is enabled',
       { requires: { auth: 'enabled' } },
       async function () {
         const client = this.configuration.newClient(this.configuration.url(), {
           monitorCommands: true
         });
-
         const commandToBeStarted = once(client, 'commandStarted');
-
         await client.connect();
-
         const [pingOnConnect] = await commandToBeStarted;
-
         expect(pingOnConnect).to.have.property('commandName', 'ping');
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
         await client.close();
       }
     );
 
     it(
-      'should permit operations to be run after connect is called',
+      'permit operations to be run after connect is called',
       { requires: { auth: 'enabled' } },
       async function () {
         const client = this.configuration.newClient(this.configuration.url(), {
@@ -419,104 +419,172 @@ describe('class MongoClient', function () {
         await client.close();
       }
     );
+
+    it(
+      'automatically connect upon first operation (find)',
+      { requires: { auth: 'enabled' } },
+      async function () {
+        const client = this.configuration.newClient(this.configuration.url(), {
+          monitorCommands: true
+        });
+
+        const findCommandToBeStarted = once(client, 'commandStarted');
+        await client.db().collection('test').findOne();
+        const [findCommandStarted] = await findCommandToBeStarted;
+
+        expect(findCommandStarted).to.have.property('commandName', 'find');
+        expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+        expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+
+        // Assertion is redundant but it shows that no initial ping is run
+        expect(findCommandStarted.commandName).to.not.equal('ping');
+
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+        await client.close();
+      }
+    );
+
+    it(
+      'automatically connect upon first operation (insertOne)',
+      { requires: { auth: 'enabled' } },
+      async function () {
+        const client = this.configuration.newClient(this.configuration.url(), {
+          monitorCommands: true
+        });
+
+        const insertOneCommandToBeStarted = once(client, 'commandStarted');
+        await client.db().collection('test').insertOne({ a: 1 });
+        const [insertCommandStarted] = await insertOneCommandToBeStarted;
+
+        expect(insertCommandStarted).to.have.property('commandName', 'insert');
+        expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+        expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
+
+        // Assertion is redundant but it shows that no initial ping is run
+        expect(insertCommandStarted.commandName).to.not.equal('ping');
+
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+        await client.close();
+      }
+    );
+
+    it(
+      'pass connection errors to the user through the first operation',
+      { requires: { auth: 'enabled' } },
+      async function () {
+        const client = this.configuration.newClient(
+          'mongodb://iLoveJavascript?serverSelectionTimeoutMS=100',
+          { monitorCommands: true }
+        );
+
+        const result = await client
+          .db('test')
+          .collection('test')
+          .findOne()
+          .catch(error => error);
+
+        expect(result).to.be.instanceOf(MongoServerSelectionError);
+        expect(client).to.be.instanceOf(MongoClient);
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+        await client.close();
+      }
+    );
+
+    it(
+      'client.close will not permit operations to auto reconnect',
+      { requires: { auth: 'enabled' } },
+      async function () {
+        const client = this.configuration.newClient(this.configuration.url(), {
+          monitorCommands: true
+        });
+
+        await client.db('test').collection('test').findOne();
+
+        expect(client).to.be.instanceOf(MongoClient);
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+        await client.close();
+
+        expect(client).to.have.property('topology', undefined);
+
+        const result = await client
+          .db('test')
+          .collection('test')
+          .findOne()
+          .catch(error => error);
+
+        expect(client).to.have.property('topology', undefined);
+        expect(result).to.be.instanceOf(MongoNotConnectedError);
+
+        await client.close();
+      }
+    );
+
+    it(
+      'client.close will not permit operations to auto reconnect permanently',
+      { requires: { auth: 'enabled' } },
+      async function () {
+        const client = this.configuration.newClient(this.configuration.url(), {
+          monitorCommands: true
+        });
+
+        expect(client.s).to.have.property('hasBeenClosed', false);
+
+        await client.db('test').collection('test').findOne();
+
+        expect(client).to.be.instanceOf(MongoClient);
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+
+        await client.close();
+
+        expect(client).to.have.property('topology', undefined);
+
+        const firstResult = await client
+          .db('test')
+          .collection('test')
+          .findOne()
+          .catch(error => error);
+
+        expect(client).to.have.property('topology', undefined);
+        expect(firstResult).to.be.instanceOf(MongoNotConnectedError);
+
+        const postCloseHasBeenClosedDescriptor = {
+          value: true,
+          enumerable: true,
+          configurable: false,
+          writable: false
+        };
+
+        expect(client.s).to.have.ownPropertyDescriptor(
+          'hasBeenClosed',
+          postCloseHasBeenClosedDescriptor
+        );
+
+        await client.connect(); // explicitly connect again
+        expect(client.s).to.have.ownPropertyDescriptor(
+          'hasBeenClosed',
+          postCloseHasBeenClosedDescriptor
+        );
+
+        await client.close();
+
+        const secondResult = await client
+          .db('test')
+          .collection('test')
+          .findOne()
+          .catch(error => error);
+
+        expect(client).to.have.property('topology', undefined);
+        expect(secondResult).to.be.instanceOf(MongoNotConnectedError);
+
+        expect(client.s).to.have.ownPropertyDescriptor(
+          'hasBeenClosed',
+          postCloseHasBeenClosedDescriptor
+        );
+      }
+    );
   });
-
-  it(
-    'should automatically connect upon first operation (find)',
-    { requires: { auth: 'enabled' } },
-    async function () {
-      const client = this.configuration.newClient(this.configuration.url(), {
-        monitorCommands: true
-      });
-
-      const findCommandToBeStarted = once(client, 'commandStarted');
-      await client.db().collection('test').findOne();
-      const [findCommandStarted] = await findCommandToBeStarted;
-
-      expect(findCommandStarted).to.have.property('commandName', 'find');
-      expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-      expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-
-      // Assertion is redundant but it shows that no initial ping is run
-      expect(findCommandStarted.commandName).to.not.equal('ping');
-
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-      await client.close();
-    }
-  );
-
-  it(
-    'should automatically connect upon first operation (insertOne)',
-    { requires: { auth: 'enabled' } },
-    async function () {
-      const client = this.configuration.newClient(this.configuration.url(), {
-        monitorCommands: true
-      });
-
-      const insertOneCommandToBeStarted = once(client, 'commandStarted');
-      await client.db().collection('test').insertOne({ a: 1 });
-      const [insertCommandStarted] = await insertOneCommandToBeStarted;
-
-      expect(insertCommandStarted).to.have.property('commandName', 'insert');
-      expect(client.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-      expect(client.s.options).to.not.have.property(Symbol.for('@@mdb.skipPingOnConnect'));
-
-      // Assertion is redundant but it shows that no initial ping is run
-      expect(insertCommandStarted.commandName).to.not.equal('ping');
-
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-      await client.close();
-    }
-  );
-
-  it(
-    'should pass connection errors to the user through the first operation',
-    { requires: { auth: 'enabled' } },
-    async function () {
-      const client = this.configuration.newClient(
-        'mongodb://iLoveJavascript?serverSelectionTimeoutMS=100',
-        { monitorCommands: true }
-      );
-
-      const result = await client
-        .db('test')
-        .collection('test')
-        .findOne()
-        .catch(error => error);
-
-      expect(result).to.be.instanceOf(MongoServerSelectionError);
-      expect(client).to.be.instanceOf(MongoClient);
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-      await client.close();
-    }
-  );
-
-  it(
-    'should permit client to be reconnected if closed',
-    { requires: { auth: 'enabled' } },
-    async function () {
-      const client = this.configuration.newClient(this.configuration.url(), {
-        monitorCommands: true
-      });
-
-      await client.db('test').collection('test').findOne();
-
-      expect(client).to.be.instanceOf(MongoClient);
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-      await client.close();
-
-      expect(client).to.have.property('topology', undefined);
-
-      await client.db('test').collection('test').findOne();
-
-      expect(client).to.be.instanceOf(MongoClient);
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-      await client.close();
-    }
-  );
 });

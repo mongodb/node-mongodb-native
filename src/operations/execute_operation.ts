@@ -7,6 +7,7 @@ import {
   MongoError,
   MongoExpiredSessionError,
   MongoNetworkError,
+  MongoNotConnectedError,
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
@@ -83,6 +84,9 @@ export function executeOperation<
     const topology = client.topology;
 
     if (topology == null) {
+      if (client.s.hasBeenClosed) {
+        return callback(new MongoNotConnectedError('client was closed'));
+      }
       client.s.options[Symbol.for('@@mdb.skipPingOnConnect')] = true;
       return client.connect(error => {
         delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
