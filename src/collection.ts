@@ -1506,13 +1506,25 @@ export class Collection<TSchema extends Document = Document> {
     );
   }
 
-  /** Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order. */
+  /**
+   * Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order.
+   * @deprecated Please use collection.bulkWrite() instead
+   */
   initializeUnorderedBulkOp(options?: BulkWriteOptions): UnorderedBulkOperation {
+    emitWarningOnce(
+      'initializeUnorderedBulkOp is deprecated and will be removed in the next major version, please use collection.bulkWrite() instead'
+    );
     return new UnorderedBulkOperation(this as TODO_NODE_3286, resolveOptions(this, options));
   }
 
-  /** Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types. */
+  /**
+   * Initiate an In order bulk write operation. Operations will be serially executed in the order they are added, creating a new operation for each switch in types.
+   * @deprecated Please use collection.bulkWrite() instead
+   */
   initializeOrderedBulkOp(options?: BulkWriteOptions): OrderedBulkOperation {
+    emitWarningOnce(
+      'initializeOrderedBulkOp is deprecated and will be removed in the next major version, please use collection.bulkWrite() instead'
+    );
     return new OrderedBulkOperation(this as TODO_NODE_3286, resolveOptions(this, options));
   }
 

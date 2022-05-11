@@ -28,7 +28,6 @@ import {
   AnyOptions,
   Callback,
   DEFAULT_PK_FACTORY,
-  emitWarning,
   emitWarningOnce,
   HostAddress,
   isRecord,
@@ -533,7 +532,7 @@ function setOption(
 
   if (deprecated) {
     const deprecatedMsg = typeof deprecated === 'string' ? `: ${deprecated}` : '';
-    emitWarning(`${key} is a deprecated option${deprecatedMsg}`);
+    emitWarningOnce(`${key} is a deprecated option${deprecatedMsg}`);
   }
 
   switch (type) {
@@ -834,7 +833,7 @@ export const OPTIONS = {
       if (value instanceof Logger) {
         return value;
       }
-      emitWarning('Alternative loggers might not be supported');
+      emitWarningOnce('Alternative loggers might not be supported');
       // TODO: make Logger an interface that others can implement, make usage consistent in driver
       // DRIVERS-1204
       return;

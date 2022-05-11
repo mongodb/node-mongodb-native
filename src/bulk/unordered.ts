@@ -7,7 +7,11 @@ import type { UpdateStatement } from '../operations/update';
 import type { Callback } from '../utils';
 import { Batch, BatchType, BulkOperationBase, BulkWriteOptions, BulkWriteResult } from './common';
 
-/** @public */
+/**
+ * @public
+ *
+ * @deprecated Please use collection.bulkWrite() instead
+ */
 export class UnorderedBulkOperation extends BulkOperationBase {
   constructor(collection: Collection, options: BulkWriteOptions) {
     super(collection, options, false);

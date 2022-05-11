@@ -6,7 +6,11 @@ import type { DeleteStatement } from '../operations/delete';
 import type { UpdateStatement } from '../operations/update';
 import { Batch, BatchType, BulkOperationBase, BulkWriteOptions } from './common';
 
-/** @public */
+/**
+ * @public
+ *
+ * @deprecated Please use collection.bulkWrite() instead
+ */
 export class OrderedBulkOperation extends BulkOperationBase {
   constructor(collection: Collection, options: BulkWriteOptions) {
     super(collection, options, true);

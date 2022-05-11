@@ -7,7 +7,7 @@ import type {
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
+import { Callback, emittedWarnings } from '../utils';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
@@ -36,11 +36,17 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
     const operations = this.operations;
     const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
 
+    // Prevent warnings from being emitted for bulkWrite users
+    const oldHas = emittedWarnings.has;
+    emittedWarnings.has = () => true;
+
     // Create the bulk operation
     const bulk: BulkOperationBase =
       options.ordered === false
         ? coll.initializeUnorderedBulkOp(options)
         : coll.initializeOrderedBulkOp(options);
+
+    emittedWarnings.has = oldHas;
 
     // for each op go through and add to the bulk
     try {

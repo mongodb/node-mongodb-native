@@ -1297,11 +1297,15 @@ export const DEFAULT_PK_FACTORY = {
 export const MONGODB_WARNING_CODE = 'MONGODB DRIVER' as const;
 
 /** @internal */
-export function emitWarning(message: string): void {
+function emitWarning(message: string): void {
   return process.emitWarning(message, { code: MONGODB_WARNING_CODE } as any);
 }
 
-const emittedWarnings = new Set();
+/**
+ * This is exported so downstream users can override which warnings are emitted
+ * @internal
+ */
+export const emittedWarnings = new Set();
 /**
  * Will emit a warning once for the duration of the application.
  * Uses the message to identify if it has already been emitted

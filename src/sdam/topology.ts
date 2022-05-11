@@ -41,7 +41,7 @@ import {
   Callback,
   ClientMetadata,
   eachAsync,
-  emitWarning,
+  emitWarningOnce,
   EventEmitterWithState,
   HostAddress,
   makeStateMachine,
@@ -777,7 +777,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    * @deprecated This function is deprecated and will be removed in the next major version.
    */
   unref(): void {
-    emitWarning('`unref` is a noop and will be removed in the next major version');
+    emitWarningOnce('`unref` is a noop and will be removed in the next major version');
   }
 
   // NOTE: There are many places in code where we explicitly check the last hello
