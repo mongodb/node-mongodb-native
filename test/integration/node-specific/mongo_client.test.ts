@@ -379,14 +379,22 @@ describe('class MongoClient', function () {
     }
   });
 
-  context('#connect()', () => {
+  context('explict #connect()', () => {
+    let client: MongoClient;
+    beforeEach(function () {
+      client = this.configuration.newClient(this.configuration.url(), {
+        monitorCommands: true
+      });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
     it(
       'create topology and send ping when auth is enabled',
       { requires: { auth: 'enabled' } },
       async function () {
-        const client = this.configuration.newClient(this.configuration.url(), {
-          monitorCommands: true
-        });
         const commandToBeStarted = once(client, 'commandStarted');
         await client.connect();
         const [pingOnConnect] = await commandToBeStarted;
@@ -400,10 +408,6 @@ describe('class MongoClient', function () {
       'permit operations to be run after connect is called',
       { requires: { auth: 'enabled' } },
       async function () {
-        const client = this.configuration.newClient(this.configuration.url(), {
-          monitorCommands: true
-        });
-
         const pingCommandToBeStarted = once(client, 'commandStarted');
         await client.connect();
         const [pingOnConnect] = await pingCommandToBeStarted;
@@ -415,8 +419,6 @@ describe('class MongoClient', function () {
         expect(pingOnConnect).to.have.property('commandName', 'ping');
         expect(findCommandStarted).to.have.property('commandName', 'find');
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-        await client.close();
       }
     );
 
@@ -424,10 +426,6 @@ describe('class MongoClient', function () {
       'automatically connect upon first operation (find)',
       { requires: { auth: 'enabled' } },
       async function () {
-        const client = this.configuration.newClient(this.configuration.url(), {
-          monitorCommands: true
-        });
-
         const findCommandToBeStarted = once(client, 'commandStarted');
         await client.db().collection('test').findOne();
         const [findCommandStarted] = await findCommandToBeStarted;
@@ -440,8 +438,6 @@ describe('class MongoClient', function () {
         expect(findCommandStarted.commandName).to.not.equal('ping');
 
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-        await client.close();
       }
     );
 
@@ -449,10 +445,6 @@ describe('class MongoClient', function () {
       'automatically connect upon first operation (insertOne)',
       { requires: { auth: 'enabled' } },
       async function () {
-        const client = this.configuration.newClient(this.configuration.url(), {
-          monitorCommands: true
-        });
-
         const insertOneCommandToBeStarted = once(client, 'commandStarted');
         await client.db().collection('test').insertOne({ a: 1 });
         const [insertCommandStarted] = await insertOneCommandToBeStarted;
@@ -465,8 +457,6 @@ describe('class MongoClient', function () {
         expect(insertCommandStarted.commandName).to.not.equal('ping');
 
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-        await client.close();
       }
     );
 
@@ -488,8 +478,6 @@ describe('class MongoClient', function () {
         expect(result).to.be.instanceOf(MongoServerSelectionError);
         expect(client).to.be.instanceOf(MongoClient);
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-
-        await client.close();
       }
     );
 
@@ -497,10 +485,6 @@ describe('class MongoClient', function () {
       'client.close will not permit operations to auto reconnect',
       { requires: { auth: 'enabled' } },
       async function () {
-        const client = this.configuration.newClient(this.configuration.url(), {
-          monitorCommands: true
-        });
-
         await client.db('test').collection('test').findOne();
 
         expect(client).to.be.instanceOf(MongoClient);
@@ -527,10 +511,6 @@ describe('class MongoClient', function () {
       'client.close will not permit operations to auto reconnect permanently',
       { requires: { auth: 'enabled' } },
       async function () {
-        const client = this.configuration.newClient(this.configuration.url(), {
-          monitorCommands: true
-        });
-
         expect(client.s).to.have.property('hasBeenClosed', false);
 
         await client.db('test').collection('test').findOne();
