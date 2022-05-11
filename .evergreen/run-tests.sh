@@ -58,6 +58,7 @@ fi
 
 npm install mongodb-client-encryption@">=2.2.0-alpha.0"
 npm install @mongodb-js/zstd
+npm install snappy
 
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}
@@ -66,5 +67,6 @@ export MONGODB_API_VERSION=${MONGODB_API_VERSION}
 export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
 export TEST_CSFLE=${TEST_CSFLE}
+export COMPRESSOR=${COMPRESSOR}
 # Do not add quotes, due to the way NO_EXIT is handled
 npm run ${TEST_NPM_SCRIPT}

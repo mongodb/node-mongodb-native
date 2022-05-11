@@ -145,23 +145,6 @@ TASKS.push(
       ]
     },
     {
-      name: 'test-zstd-compression',
-      tags: ['latest', 'zstd'],
-      commands: [
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            VERSION: 'latest',
-            TOPOLOGY: 'server',
-            AUTH: 'auth',
-            COMPRESSOR: 'zstd'
-          }
-        },
-        { func: 'run-compression-tests' }
-      ]
-    },
-    {
       name: 'test-auth-kerberos',
       tags: ['auth', 'kerberos'],
       commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
@@ -205,6 +188,26 @@ TASKS.push(
     }
   ]
 );
+
+['zstd', 'snappy'].forEach(compressor => {
+  TASKS.push({
+    name: `test-${compressor}-compression`,
+    tags: ['latest', compressor],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION: 'latest',
+          TOPOLOGY: 'server',
+          AUTH: 'auth',
+          COMPRESSOR: compressor
+        }
+      },
+      { func: 'run-compression-tests' }
+    ]
+  });
+});
 
 TLS_VERSIONS.forEach(VERSION => {
   TASKS.push({

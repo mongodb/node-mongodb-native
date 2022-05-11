@@ -1138,19 +1138,6 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
-  - name: test-zstd-compression
-    tags:
-      - latest
-      - zstd
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: server
-          AUTH: auth
-          COMPRESSOR: zstd
-      - func: run-compression-tests
   - name: test-auth-kerberos
     tags:
       - auth
@@ -1187,6 +1174,32 @@ tasks:
       - func: run socks5 tests
         vars:
           SSL: ssl
+  - name: test-zstd-compression
+    tags:
+      - latest
+      - zstd
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          AUTH: auth
+          COMPRESSOR: zstd
+      - func: run-compression-tests
+  - name: test-snappy-compression
+    tags:
+      - latest
+      - snappy
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          AUTH: auth
+          COMPRESSOR: snappy
+      - func: run-compression-tests
   - name: test-tls-support-latest
     tags:
       - tls-support
@@ -1993,11 +2006,12 @@ buildvariants:
       - test-latest-server-v1-api
       - test-atlas-connectivity
       - test-atlas-data-lake
-      - test-zstd-compression
       - test-auth-kerberos
       - test-auth-ldap
       - test-socks5
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2049,11 +2063,12 @@ buildvariants:
       - test-atlas-connectivity
       - test-atlas-data-lake
       - test-load-balancer
-      - test-zstd-compression
       - test-auth-kerberos
       - test-auth-ldap
       - test-socks5
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2103,9 +2118,10 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
-      - test-zstd-compression
       - test-socks5
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0

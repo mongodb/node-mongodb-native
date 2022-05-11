@@ -33,6 +33,8 @@ export const uncompressibleCommands = new Set([
   'copydb'
 ]);
 
+const MAX_COMPRESSOR_ID = 3;
+
 // Facilitate compressing a message using an agreed compressor
 export function compress(
   self: { options: OperationDescription & zlib.ZlibOptions },
@@ -66,9 +68,10 @@ export function compress(
       if ('kModuleError' in ZStandard) {
         return callback(ZStandard['kModuleError']);
       }
-      ZStandard.compress(dataToBeCompressed, self.options.zstdCompressionLevel)
-        .then(buffer => callback(undefined, buffer))
-        .catch(error => callback(error));
+      ZStandard.compress(dataToBeCompressed, self.options.zstdCompressionLevel).then(
+        buffer => callback(undefined, buffer),
+        error => callback(error)
+      );
       break;
     default:
       throw new MongoInvalidArgumentError(
@@ -83,7 +86,7 @@ export function decompress(
   compressedData: Buffer,
   callback: Callback<Buffer>
 ): void {
-  if (compressorID < 0 || compressorID > Math.max(3)) {
+  if (compressorID < 0 || compressorID > MAX_COMPRESSOR_ID) {
     throw new MongoDecompressionError(
       `Server sent message compressed using an unsupported compressor. (Received compressor ID ${compressorID})`
     );
@@ -109,9 +112,10 @@ export function decompress(
         return callback(ZStandard['kModuleError']);
       }
 
-      ZStandard.decompress(compressedData)
-        .then(buffer => callback(undefined, buffer))
-        .catch(error => callback(error));
+      ZStandard.decompress(compressedData).then(
+        buffer => callback(undefined, buffer),
+        error => callback(error)
+      );
       break;
     }
     case Compressor.zlib:
