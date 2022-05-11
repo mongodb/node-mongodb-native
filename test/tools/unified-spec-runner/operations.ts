@@ -245,6 +245,8 @@ operations.set('deleteOne', async ({ entities, operation }) => {
 operations.set('dropCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
   const { collection, ...opts } = operation.arguments;
+
+  // TODO(NODE-4243): dropCollection should suppress namespace not found errors
   try {
     await db.dropCollection(collection, opts);
   } catch (err) {
