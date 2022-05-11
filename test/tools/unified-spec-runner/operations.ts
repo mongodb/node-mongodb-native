@@ -245,7 +245,15 @@ operations.set('deleteOne', async ({ entities, operation }) => {
 operations.set('dropCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
   const { collection, ...opts } = operation.arguments;
-  return await db.dropCollection(collection, opts);
+
+  // TODO(NODE-4243): dropCollection should suppress namespace not found errors
+  try {
+    return await db.dropCollection(collection, opts);
+  } catch (err) {
+    if (!/ns not found/.test(err.message)) {
+      throw err;
+    }
+  }
 });
 
 operations.set('endSession', async ({ entities, operation }) => {
@@ -442,6 +450,12 @@ operations.set('updateOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...options } = operation.arguments;
   return collection.updateOne(filter, update, options);
+});
+
+operations.set('rename', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { to, ...options } = operation.arguments;
+  return collection.rename(to, options);
 });
 
 export async function executeOperationAndCheck(

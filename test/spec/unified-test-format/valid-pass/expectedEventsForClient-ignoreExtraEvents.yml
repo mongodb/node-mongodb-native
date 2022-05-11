@@ -1,0 +1,78 @@
+description: expectedEventsForClient-ignoreExtraEvents
+
+schemaVersion: '1.7'
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0Name
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents: []
+
+tests:
+  - description: ignoreExtraEvents can be set to false
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &insertDocument1 { _id: 1 }
+    expectEvents:
+      - client: *client0
+        ignoreExtraEvents: false
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *insertDocument1
+              commandName: insert
+
+  - description: ignoreExtraEvents can be set to true
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &insertDocument2 { _id: 2 }
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 3 }
+    expectEvents:
+      - client: *client0
+        ignoreExtraEvents: true
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *insertDocument2
+              commandName: insert
+
+  - description: ignoreExtraEvents defaults to false if unset
+    operations:
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: &insertDocument4 { _id: 4 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection0Name
+                documents:
+                  - *insertDocument4
+              commandName: insert

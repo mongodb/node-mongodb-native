@@ -1,0 +1,24 @@
+{
+  "description": "expectedEventsForClient-ignoreExtraEvents-type",
+  "schemaVersion": "1.7",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [],
+          "ignoreExtraEvents": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2347 @@
+{
+  "description": "change-streams-resume-allowlist",
+  "schemaVersion": "1.7",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "3.6",
+      "topologies": [
+        "replicaset",
+        "sharded-replicaset",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "ignoreCommandMonitoringEvents": [
+          "killCursors"
+        ],
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "globalClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    },
+    {
+      "database": {
+        "id": "globalDatabase0",
+        "client": "globalClient",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "globalCollection0",
+        "database": "globalDatabase0",
+        "collectionName": "collection0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "change stream resumes after a network error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after HostUnreachable",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 6,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after HostNotFound",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 7,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after NetworkTimeout",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 89,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after ShutdownInProgress",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 91,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after PrimarySteppedDown",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 189,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after ExceededTimeLimit",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 262,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after SocketException",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 9001,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after NotWritablePrimary",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 10107,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after InterruptedAtShutdown",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 11600,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after InterruptedDueToReplStateChange",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 11602,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after NotPrimaryNoSecondaryOk",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 13435,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after NotPrimaryOrSecondary",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 13436,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after StaleShardVersion",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 63,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after StaleEpoch",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 150,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after RetryChangeStream",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 234,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after FailedToSatisfyReadPreference",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2",
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 133,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream resumes after CursorNotFound",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "globalClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "errorCode": 43,
+                "closeConnection": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "globalCollection0",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "_id": {
+              "$$exists": true
+            },
+            "documentKey": {
+              "$$exists": true
+            },
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "fullDocument": {
+              "x": 1,
+              "_id": {
+                "$$exists": true
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {}
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$exists": true
+                  },
+                  "collection": "collection0"
+                },
+                "commandName": "getMore",
+                "databaseName": "database0"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "cursor": {},
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "resumeAfter": {
+                          "$$unsetOrMatches": {
+                            "$$exists": true
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "commandName": "aggregate",
+                "databaseName": "database0"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

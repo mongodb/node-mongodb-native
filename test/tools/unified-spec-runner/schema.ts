@@ -56,7 +56,8 @@ export const OperationNames = [
   'estimatedDocumentCount',
   'runCommand',
   'updateMany',
-  'updateOne'
+  'updateOne',
+  'rename'
 ] as const;
 export type OperationName = typeof OperationNames[number];
 
@@ -190,6 +191,7 @@ export interface ExpectedEventsForClient {
   client: string;
   eventType?: string;
   events: (ExpectedCommandEvent | ExpectedCmapEvent)[];
+  ignoreExtraEvents?: boolean;
 }
 export interface ExpectedCommandEvent {
   commandStartedEvent?: {

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
-import { satisfies as semverSatisfies } from 'semver';
+import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
+import { MONGODB_ERROR_CODES } from '../../../src/error';
 import type { MongoClient } from '../../../src/mongo_client';
 import { ReadPreference } from '../../../src/read_preference';
 import { TopologyType } from '../../../src/sdam/common';
@@ -156,10 +157,24 @@ export async function runUnifiedTest(
     const topologyType = ctx.configuration.topologyType;
     if (topologyType === TopologyType.Sharded || topologyType === TopologyType.LoadBalanced) {
       for (const [, collection] of entities.mapOf('collection')) {
-        await utilClient.db(ns(collection.namespace).db).command({
-          distinct: collection.collectionName,
-          key: '_id'
-        });
+        try {
+          // TODO(NODE-4238): create / cleanup entities for each test suite
+          await utilClient.db(ns(collection.namespace).db).command({
+            distinct: collection.collectionName,
+            key: '_id'
+          });
+        } catch (err) {
+          // https://jira.mongodb.org/browse/SERVER-60533
+          // distinct throws namespace not found errors on servers 5.2.2 and under.
+          // For now, we skip these errors to be addressed in NODE-4238.
+          if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+            throw err;
+          }
+          const serverVersion = ctx.configuration.version;
+          if (semverGte(serverVersion, '5.2.2')) {
+            throw err;
+          }
+        }
       }
     }
 
@@ -184,16 +199,16 @@ export async function runUnifiedTest(
     }
 
     if (test.expectEvents) {
-      for (const expectedEventList of test.expectEvents) {
-        const clientId = expectedEventList.client;
-        const eventType = expectedEventList.eventType;
+      for (const expectedEventsForClient of test.expectEvents) {
+        const clientId = expectedEventsForClient.client;
+        const eventType = expectedEventsForClient.eventType;
         // If no event type is provided it defaults to 'command', so just
         // check for 'cmap' here for now.
         const actualEvents =
           eventType === 'cmap' ? clientCmapEvents.get(clientId) : clientCommandEvents.get(clientId);
 
         expect(actualEvents, `No client entity found with id ${clientId}`).to.exist;
-        matchesEvents(expectedEventList.events, actualEvents, entities);
+        matchesEvents(expectedEventsForClient, actualEvents, entities);
       }
     }
 
