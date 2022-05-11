@@ -21,6 +21,10 @@ createEntities:
       id: &collection1 collection1
       database: *database0
       collectionName: &collection1Name coll1
+  - collection:
+      id: &collection0View collection0View
+      database: *database0
+      collectionName: &collection0ViewName coll0view
 
 initialData:
   - collectionName: *collection0Name
@@ -31,129 +35,7 @@ initialData:
       - { _id: 3, x: 33 }
 
 tests:
-  - description: "estimatedDocumentCount uses $collStats on 4.9.0 or greater"
-    runOnRequirements:
-      - minServerVersion: "4.9.0"
-    operations:
-      - name: estimatedDocumentCount
-        object: *collection0
-        expectResult: 3
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                aggregate: *collection0Name
-                pipeline: &pipeline
-                  - $collStats: { count: {} }
-                  - $group: { _id: 1, n: { $sum: $count }}
-              commandName: aggregate
-              databaseName: *database0Name
-
-  - description: "estimatedDocumentCount with maxTimeMS on 4.9.0 or greater"
-    runOnRequirements:
-      - minServerVersion: "4.9.0"
-    operations:
-      - name: estimatedDocumentCount
-        object: *collection0
-        arguments:
-          maxTimeMS: 6000
-        expectResult: 3
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                aggregate: *collection0Name
-                pipeline: &pipeline
-                  - $collStats: { count: {} }
-                  - $group: { _id: 1, n: { $sum: $count }}
-                maxTimeMS: 6000
-              commandName: aggregate
-              databaseName: *database0Name
-
-  - description: "estimatedDocumentCount on non-existent collection on 4.9.0 or greater"
-    runOnRequirements:
-      - minServerVersion: "4.9.0"
-    operations:
-      - name: estimatedDocumentCount
-        object: *collection1
-        expectResult: 0
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                aggregate: *collection1Name
-                pipeline: &pipeline
-                  - $collStats: { count: {} }
-                  - $group: { _id: 1, n: { $sum: $count }}
-              commandName: aggregate
-              databaseName: *database0Name
-
-  - description: "estimatedDocumentCount errors correctly on 4.9.0 or greater--command error"
-    runOnRequirements:
-      - minServerVersion: "4.9.0"
-    operations:
-      - name: failPoint
-        object: testRunner
-        arguments:
-          client: *client0
-          failPoint:
-            configureFailPoint: failCommand
-            mode: { times: 1 }
-            data:
-              failCommands: [ aggregate ]
-              errorCode: 8 # UnknownError
-      - name: estimatedDocumentCount
-        object: *collection0
-        expectError:
-          errorCode: 8 # UnknownError
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                aggregate: *collection0Name
-                pipeline: &pipeline
-                  - $collStats: { count: {} }
-                  - $group: { _id: 1, n: { $sum: $count }}
-              commandName: aggregate
-              databaseName: *database0Name
-
-  - description: "estimatedDocumentCount errors correctly on 4.9.0 or greater--socket error"
-    runOnRequirements:
-      - minServerVersion: "4.9.0"
-    operations:
-      - name: failPoint
-        object: testRunner
-        arguments:
-          client: *client0
-          failPoint:
-            configureFailPoint: failCommand
-            mode: { times: 1 }
-            data:
-              failCommands: [ aggregate ]
-              closeConnection: true
-      - name: estimatedDocumentCount
-        object: *collection0
-        expectError:
-          isError: true
-    expectEvents:
-      - client: *client0
-        events:
-          - commandStartedEvent:
-              command:
-                aggregate: *collection0Name
-                pipeline: &pipeline
-                  - $collStats: { count: {} }
-                  - $group: { _id: 1, n: { $sum: $count }}
-              commandName: aggregate
-              databaseName: *database0Name
-
-  - description: "estimatedDocumentCount uses count on less than 4.9.0"
-    runOnRequirements:
-      - maxServerVersion: "4.8.99"
+  - description: "estimatedDocumentCount always uses count"
     operations:
       - name: estimatedDocumentCount
         object: *collection0
@@ -167,9 +49,7 @@ tests:
               commandName: count
               databaseName: *database0Name
 
-  - description: "estimatedDocumentCount with maxTimeMS on less than 4.9.0"
-    runOnRequirements:
-      - maxServerVersion: "4.8.99"
+  - description: "estimatedDocumentCount with maxTimeMS"
     operations:
       - name: estimatedDocumentCount
         object: *collection0
@@ -186,9 +66,7 @@ tests:
               commandName: count
               databaseName: *database0Name
 
-  - description: "estimatedDocumentCount on non-existent collection on less than 4.9.0"
-    runOnRequirements:
-      - maxServerVersion: "4.8.99"
+  - description: "estimatedDocumentCount on non-existent collection"
     operations:
       - name: estimatedDocumentCount
         object: *collection1
@@ -202,13 +80,11 @@ tests:
               commandName: count
               databaseName: *database0Name
 
-  - description: "estimatedDocumentCount errors correctly on less than 4.9.0--command error"
+  - description: "estimatedDocumentCount errors correctly--command error"
     runOnRequirements:
       - minServerVersion: "4.0.0"
-        maxServerVersion: "4.8.99"
         topologies: [ single, replicaset ]
       - minServerVersion: "4.2.0"
-        maxServerVersion: "4.8.99"
         topologies: [ sharded ]
     operations:
       - name: failPoint
@@ -234,13 +110,11 @@ tests:
               commandName: count
               databaseName: *database0Name
 
-  - description: "estimatedDocumentCount errors correctly on less than 4.9.0--socket error"
+  - description: "estimatedDocumentCount errors correctly--socket error"
     runOnRequirements:
       - minServerVersion: "4.0.0"
-        maxServerVersion: "4.8.99"
         topologies: [ single, replicaset ]
       - minServerVersion: "4.2.0"
-        maxServerVersion: "4.8.99"
         topologies: [ sharded ]
     operations:
       - name: failPoint
@@ -263,5 +137,45 @@ tests:
           - commandStartedEvent:
               command:
                 count: *collection0Name
+              commandName: count
+              databaseName: *database0Name
+
+  - description: "estimatedDocumentCount works correctly on views"
+    # viewOn option was added to the create command in 3.4
+    runOnRequirements:
+      - minServerVersion: "3.4.0"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0ViewName
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection0ViewName
+          viewOn: *collection0Name
+          pipeline: &pipeline
+            - { $match: { _id: { $gt: 1 } } }
+      - name: estimatedDocumentCount
+        object: *collection0View
+        expectResult: 2
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                drop: *collection0ViewName
+              commandName: drop
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                create: *collection0ViewName
+                viewOn: *collection0Name
+                pipeline: *pipeline
+              commandName: create
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                count: *collection0ViewName
               commandName: count
               databaseName: *database0Name

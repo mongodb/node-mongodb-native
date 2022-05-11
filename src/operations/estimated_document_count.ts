@@ -36,9 +36,8 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     if (maxWireVersion(server) < 12) {
       return this.executeLegacy(server, session, callback);
     }
-    const pipeline = [{ $collStats: { count: {} } }, { $group: { _id: 1, n: { $sum: '$count' } } }];
 
-    const cmd: Document = { aggregate: this.collectionName, pipeline, cursor: {} };
+    const cmd: Document = { count: this.collectionName };
 
     if (typeof this.options.maxTimeMS === 'number') {
       cmd.maxTimeMS = this.options.maxTimeMS;
@@ -50,7 +49,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
         return;
       }
 
-      callback(undefined, response?.cursor?.firstBatch[0]?.n || 0);
+      callback(undefined, response?.n || 0);
     });
   }
 

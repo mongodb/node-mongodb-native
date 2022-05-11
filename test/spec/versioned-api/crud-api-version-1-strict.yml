@@ -229,6 +229,11 @@ tests:
                 <<: *expectedApiVersion
 
   - description: "estimatedDocumentCount appends declared API version"
+    # See: https://jira.mongodb.org/browse/SERVER-63850
+    runOnRequirements:
+      - minServerVersion: "5.0.9"
+        maxServerVersion: "5.0.99"
+      - minServerVersion: "5.3.2"
     operations:
       - name: estimatedDocumentCount
         object: *collection
@@ -238,10 +243,7 @@ tests:
         events:
           - commandStartedEvent:
               command:
-                aggregate: *collectionName
-                pipeline: &pipeline
-                  - $collStats: { count: {} }
-                  - $group: { _id: 1, n: { $sum: $count }}
+                count: *collectionName
                 <<: *expectedApiVersion
 
   - description: "find and getMore append API version"
