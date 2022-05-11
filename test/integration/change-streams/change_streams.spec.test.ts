@@ -34,7 +34,7 @@ describe('Change Streams Spec - Unified', function () {
 });
 
 // TODO(NODE-3819): Unskip flaky MacOS tests.
-const maybeDescribe = describe.skip;
+const maybeDescribe = process.platform === 'darwin' ? describe.skip : describe;
 maybeDescribe('Change Stream Spec - v1', function () {
   let globalClient;
   let ctx;

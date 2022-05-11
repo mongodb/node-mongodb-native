@@ -305,19 +305,26 @@ function validEmptyCmapEvent(
   });
 }
 
-function compareEvents(
-  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
+function failOnMismatchedCount(
   actual: CommandEvent[] | CmapEvent[],
+  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[]
+) {
+  const actualNames = actual.map(a => a.constructor.name);
+  const expectedNames = expected.map(e => Object.keys(e)[0]);
+  expect.fail(
+    `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
+      actualNames
+    )}`
+  );
+}
+
+function compareEvents(
+  actual: CommandEvent[] | CmapEvent[],
+  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
   entities: EntitiesMap
 ) {
   if (actual.length !== expected.length) {
-    const actualNames = actual.map(a => a.constructor.name);
-    const expectedNames = expected.map(e => Object.keys(e)[0]);
-    expect.fail(
-      `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
-        actualNames
-      )}`
-    );
+    failOnMismatchedCount(actual, expected);
   }
   for (const [index, actualEvent] of actual.entries()) {
     const expectedEvent = expected[index];
@@ -362,30 +369,18 @@ export function matchesEvents(
 
   if (ignoreExtraEvents) {
     if (actual.length < expected.length) {
-      const actualNames = actual.map(a => a.constructor.name);
-      const expectedNames = expected.map(e => Object.keys(e)[0]);
-      expect.fail(
-        `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
-          actualNames
-        )}`
-      );
+      failOnMismatchedCount(actual, expected);
     }
 
     const slicedActualEvents = actual.slice(0, expected.length);
 
-    compareEvents(expected, slicedActualEvents, entities);
+    compareEvents(slicedActualEvents, expected, entities);
   } else {
     if (actual.length !== expected.length) {
-      const actualNames = actual.map(a => a.constructor.name);
-      const expectedNames = expected.map(e => Object.keys(e)[0]);
-      expect.fail(
-        `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
-          actualNames
-        )}`
-      );
+      failOnMismatchedCount(actual, expected);
     }
 
-    compareEvents(expected, actual, entities);
+    compareEvents(actual, expected, entities);
   }
 }
 
