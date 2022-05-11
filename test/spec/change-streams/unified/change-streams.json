@@ -1775,6 +1775,47 @@
           ]
         }
       ]
+    },
+    {
+      "description": "the wallTime field is present for change stream events",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "6.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "a": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "insert",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "wallTime": {
+              "$$exists": true
+            }
+          }
+        }
+      ]
     }
   ]
 }

@@ -1,3 +1,4 @@
+import type { UUID } from 'bson';
 import Denque = require('denque');
 import type { Readable } from 'stream';
 import { setTimeout } from 'timers';
@@ -52,7 +53,8 @@ const CHANGE_STREAM_OPTIONS = [
   'startAfter',
   'startAtOperationTime',
   'fullDocument',
-  'fullDocumentBeforeChange'
+  'fullDocumentBeforeChange',
+  'showExpandedEvents'
 ] as const;
 
 const CHANGE_DOMAIN_TYPES = {
@@ -176,6 +178,20 @@ export interface ChangeStreamOptions extends AggregateOptions {
    * @see https://docs.mongodb.com/manual/reference/command/aggregate
    */
   batchSize?: number;
+
+  /**
+   * When enabled, configures the change stream to include extra change events.
+   *
+   * - createIndex
+   * - dropIndex
+   * - collMod
+   * - create
+   * - shardCollection
+   * - reshardCollection
+   * - refineCollectionShardKey
+   * - chunkMigrated
+   */
+  showExpandedEvents?: boolean;
 }
 
 /** @public */
@@ -238,6 +254,15 @@ export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
   fullDocument: TSchema;
   /** Namespace the insert event occured on */
   ns: ChangeStreamNameSpace;
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
 }
 
 /**
@@ -268,6 +293,15 @@ export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
    * pre-image is unavailable, this will be explicitly set to null.
    */
   fullDocumentBeforeChange?: TSchema;
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
 }
 
 /**
@@ -312,6 +346,15 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
    * pre-image is unavailable, this will be explicitly set to null.
    */
   fullDocumentBeforeChange?: TSchema;
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
 }
 
 /**
@@ -323,6 +366,15 @@ export interface ChangeStreamDropDocument extends ChangeStreamDocumentCommon {
   operationType: 'drop';
   /** Namespace the drop event occured on */
   ns: ChangeStreamNameSpace;
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
 }
 
 /**
@@ -336,6 +388,14 @@ export interface ChangeStreamRenameDocument extends ChangeStreamDocumentCommon {
   to: { db: string; coll: string };
   /** The "from" namespace that the rename occured on */
   ns: ChangeStreamNameSpace;
+  /**
+   * An description of the operation.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  operationDescription?: Document;
 }
 
 /**
@@ -358,6 +418,180 @@ export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentComm
   operationType: 'invalidate';
 }
 
+/**
+ * Only present when the `showExpandedEvents` flag is enabled.
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ */
+export interface ChangeStreamCreateIndexDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'createIndexes';
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
+
+  /**
+   * An description of the operation.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  operationDescription?: Document;
+}
+
+/**
+ * Only present when the `showExpandedEvents` flag is enabled.
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ */
+export interface ChangeStreamDropIndexDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'dropIndexes';
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
+
+  /**
+   * An description of the operation.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  operationDescription?: Document;
+}
+
+/**
+ * Only present when the `showExpandedEvents` flag is enabled.
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ */
+export interface ChangeStreamCollModDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'modify';
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ */
+export interface ChangeStreamCreateDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'create';
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ */
+export interface ChangeStreamShardCollectionDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'shardCollection';
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
+
+  /**
+   * An description of the operation.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  operationDescription?: Document;
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ */
+export interface ChangeStreamReshardCollectionDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'reshardCollection';
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: UUID;
+
+  /**
+   * An description of the operation.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  operationDescription?: Document;
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ */
+export interface ChangeStreamRefineCollectionShardKeyDocument extends ChangeStreamDocumentCommon {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'refineCollectionShardKey';
+
+  /**
+   * The UUID of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID?: UUID;
+
+  /**
+   * An description of the operation.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  operationDescription?: Document;
+}
+
 /** @public */
 export type ChangeStreamDocument<TSchema extends Document = Document> =
   | ChangeStreamInsertDocument<TSchema>
@@ -367,7 +601,14 @@ export type ChangeStreamDocument<TSchema extends Document = Document> =
   | ChangeStreamDropDocument
   | ChangeStreamRenameDocument
   | ChangeStreamDropDatabaseDocument
-  | ChangeStreamInvalidateDocument;
+  | ChangeStreamInvalidateDocument
+  | ChangeStreamCreateIndexDocument
+  | ChangeStreamCreateDocument
+  | ChangeStreamCollModDocument
+  | ChangeStreamDropIndexDocument
+  | ChangeStreamShardCollectionDocument
+  | ChangeStreamReshardCollectionDocument
+  | ChangeStreamRefineCollectionShardKeyDocument;
 
 /** @public */
 export interface UpdateDescription<TSchema extends Document = Document> {
