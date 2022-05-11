@@ -279,11 +279,13 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
       if (isAwaitable && hello.topologyVersion) {
-        monitor.emit(
-          Server.SERVER_HEARTBEAT_STARTED,
-          new ServerHeartbeatStartedEvent(monitor.address)
-        );
-        start = now();
+        setTimeout(function () {
+          monitor.emit(
+            Server.SERVER_HEARTBEAT_STARTED,
+            new ServerHeartbeatStartedEvent(monitor.address)
+          );
+          start = now();
+        }, 0);
       } else {
         monitor[kRTTPinger]?.close();
         monitor[kRTTPinger] = undefined;
