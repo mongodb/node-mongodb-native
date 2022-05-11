@@ -248,7 +248,7 @@ operations.set('dropCollection', async ({ entities, operation }) => {
 
   // TODO(NODE-4243): dropCollection should suppress namespace not found errors
   try {
-    await db.dropCollection(collection, opts);
+    return await db.dropCollection(collection, opts);
   } catch (err) {
     if (!/ns not found/.test(err.message)) {
       throw err;

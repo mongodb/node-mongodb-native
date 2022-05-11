@@ -7,6 +7,7 @@ import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 import { delay, setupDatabase } from '../shared';
 
+// TODO(NODE-4126): Fix change stream resumabilty in iterator mode
 const skippedResumabilityTests = [
   'change stream resumes after HostUnreachable',
   'change stream resumes after HostNotFound',
