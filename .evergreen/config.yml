@@ -1183,7 +1183,7 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
           AUTH: auth
           COMPRESSOR: zstd
       - func: run-compression-tests
@@ -1196,7 +1196,7 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
           AUTH: auth
           COMPRESSOR: snappy
       - func: run-compression-tests
