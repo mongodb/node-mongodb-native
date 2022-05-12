@@ -651,7 +651,7 @@ export abstract class AbstractCursor<
           return this[kInit](callback);
         });
       } else if (this[kClient].topology?.hasSessionSupport()) {
-        this[kSession] = this[kClient].startSession({ owner: this, explicit: false });
+        this[kSession] = this[kClient].topology?.startSession({ owner: this, explicit: false });
       }
     }
 
