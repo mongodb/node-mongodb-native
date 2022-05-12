@@ -36,6 +36,7 @@ export class StreamDescription {
   __nodejs_mock_server__?: boolean;
 
   zlibCompressionLevel?: number;
+  zstdCompressionLevel?: number;
 
   constructor(address: string, options?: StreamDescriptionOptions) {
     this.address = address;

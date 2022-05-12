@@ -1210,6 +1210,10 @@ export const OPTIONS = {
     default: 0,
     type: 'int'
   },
+  zstdCompressionLevel: {
+    default: 3,
+    type: 'int'
+  },
   // Custom types for modifying core behavior
   connectionType: { type: 'any' },
   srvPoller: { type: 'any' },
