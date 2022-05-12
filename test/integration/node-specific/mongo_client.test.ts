@@ -400,7 +400,6 @@ describe('class MongoClient', function () {
         const [pingOnConnect] = await commandToBeStarted;
         expect(pingOnConnect).to.have.property('commandName', 'ping');
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-        await client.close();
       }
     );
 
