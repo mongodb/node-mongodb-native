@@ -598,13 +598,12 @@ export class ChangeStream<
     }
     const pipeline = [{ $changeStream: changeStreamStageOptions }, ...this.pipeline];
 
-    const cursorOptions: ChangeStreamCursorOptions = filterOptions(options, CURSOR_OPTIONS);
-
+    // const cursorOptions: ChangeStreamCursorOptions = filterOptions(options, CURSOR_OPTIONS);
     const changeStreamCursor = new ChangeStreamCursor<TSchema, TChange>(
       getTopology(this.parent),
       this.namespace,
       pipeline,
-      cursorOptions
+      options
     );
 
     for (const event of CHANGE_STREAM_EVENTS) {
