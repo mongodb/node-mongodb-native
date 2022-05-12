@@ -457,20 +457,30 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   /**
-   * Runs a provided lambda within a transaction, retrying either the commit operation
+   * Runs a provided callback within a transaction, retrying either the commitTransaction operation
    * or entire transaction as needed (and when the error permits) to better ensure that
    * the transaction can complete successfully.
    *
-   * IMPORTANT: This method requires the user to return a Promise, all lambdas that do not
-   * return a Promise will result in undefined behavior.
+   * **IMPORTANT:** This method requires the user to return a Promise, and `await` all operations.
+   * Any callbacks that do not return a Promise will result in undefined behavior.
    *
-   * @param fn - A lambda to run within a transaction
-   * @param options - Optional settings for the transaction
+   * @remarks
+   * This function:
+   * - Will return the command response from the final commitTransaction if every operation is successful (can be used as a truthy object)
+   * - Will return `undefined` if the transaction is explicitly aborted with `await session.abortTransaction()`
+   * - Will throw if one of the operations throws or `throw` statement is used inside the `withTransaction` callback
+   *
+   * Checkout a descriptive example here:
+   * @see https://www.mongodb.com/developer/quickstart/node-transactions/
+   *
+   * @param fn - callback to run within a transaction
+   * @param options - optional settings for the transaction
+   * @returns A raw command response or undefined
    */
   withTransaction<T = void>(
     fn: WithTransactionCallback<T>,
     options?: TransactionOptions
-  ): ReturnType<typeof fn> {
+  ): Promise<Document | undefined> {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }

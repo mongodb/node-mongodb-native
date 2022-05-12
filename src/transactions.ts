@@ -68,7 +68,7 @@ export interface TransactionOptions extends CommandOperationOptions {
   writeConcern?: WriteConcern;
   /** A default read preference for commands in this transaction */
   readPreference?: ReadPreference;
-
+  /** Specifies the maximum amount of time to allow a commit action on a transaction to run in milliseconds */
   maxCommitTimeMS?: number;
 }
 

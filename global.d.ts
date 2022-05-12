@@ -36,6 +36,14 @@ declare global {
   }
 
   namespace Mocha {
+    interface SuiteFunction {
+      (title: string, metadata: MongoDBMetadataUI, fn: (this: Suite) => void): Mocha.Suite;
+    }
+
+    interface PendingSuiteFunction {
+      (title: string, metadata: MongoDBMetadataUI, fn: (this: Suite) => void): Mocha.Suite;
+    }
+
     interface TestFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;

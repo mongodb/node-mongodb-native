@@ -1,21 +1,25 @@
-'use strict';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
-const { Topology } = require('../../../src/sdam/topology');
-const { ClientSession } = require('../../../src/sessions');
-const { MongoNetworkError } = require('../../../src/error');
+import { Collection, MongoClient, ServerSessionPool } from '../../../src';
+import { MongoNetworkError } from '../../../src/error';
+import { ClientSession } from '../../../src/sessions';
 
 describe('Transactions', function () {
   describe('withTransaction', function () {
-    let session, sessionPool;
-    beforeEach(() => {
-      const topology = new Topology('localhost:27017');
+    let session: ClientSession;
+    let sessionPool: ServerSessionPool;
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      const topology = (await client.connect()).topology;
       sessionPool = topology.s.sessionPool;
-      session = new ClientSession(topology, sessionPool);
+      session = new ClientSession(topology, sessionPool, {});
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       sessionPool.endAllPooledSessions();
+      await client.close();
     });
 
     it('should provide a useful error if a Promise is not returned', {
@@ -27,6 +31,7 @@ describe('Transactions', function () {
           return false;
         }
 
+        // @ts-expect-error: Testing that a non promise returning function is handled correctly
         expect(() => session.withTransaction(fnThatDoesntReturnPromise)).to.throw(
           /must return a Promise/
         );
@@ -37,8 +42,7 @@ describe('Transactions', function () {
 
     it('should return readable error if promise rejected with no reason', {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.0.2' },
-        serverless: 'forbid'
+        requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.2.0', serverless: 'forbid' }
       },
       test: function (done) {
         function fnThatReturnsBadPromise() {
@@ -54,6 +58,73 @@ describe('Transactions', function () {
           });
       }
     });
+
+    describe(
+      'return value semantics',
+      { requires: { mongodb: '>=4.2.0', topology: '!single' } },
+      () => {
+        let client: MongoClient;
+        let collection: Collection<{ a: number }>;
+
+        beforeEach(async function () {
+          client = this.configuration.newClient();
+          await client.connect();
+          collection = await client
+            .db('withTransactionReturnType')
+            .createCollection('withTransactionReturnType');
+        });
+
+        afterEach(async function () {
+          await collection.drop();
+          await client.close();
+        });
+
+        it('should return undefined when transaction is aborted explicitly', async () => {
+          const session = client.startSession();
+
+          const withTransactionResult = await session
+            .withTransaction(async session => {
+              await collection.insertOne({ a: 1 }, { session });
+              await collection.findOne({ a: 1 }, { session });
+              await session.abortTransaction();
+            })
+            .finally(async () => await session.endSession());
+
+          expect(withTransactionResult).to.be.undefined;
+        });
+
+        it('should return raw command when transaction is successfully committed', async () => {
+          const session = client.startSession();
+
+          const withTransactionResult = await session
+            .withTransaction(async session => {
+              await collection.insertOne({ a: 1 }, { session });
+              await collection.findOne({ a: 1 }, { session });
+            })
+            .finally(async () => await session.endSession());
+
+          expect(withTransactionResult).to.exist;
+          expect(withTransactionResult).to.be.an('object');
+          expect(withTransactionResult).to.have.property('ok', 1);
+        });
+
+        it('should throw when transaction is aborted due to an error', async () => {
+          const session = client.startSession();
+
+          const withTransactionResult = await session
+            .withTransaction(async session => {
+              await collection.insertOne({ a: 1 }, { session });
+              await collection.findOne({ a: 1 }, { session });
+              throw new Error("I don't wanna transact anymore!");
+            })
+            .catch(error => error)
+            .finally(async () => await session.endSession());
+
+          expect(withTransactionResult).to.be.instanceOf(Error);
+          expect(withTransactionResult.message).to.equal("I don't wanna transact anymore!");
+        });
+      }
+    );
   });
 
   describe('startTransaction', function () {
@@ -137,7 +208,9 @@ describe('Transactions', function () {
 
                     coll.insertOne({ b: 2 }, { session }, err => {
                       expect(err).to.exist.and.to.be.an.instanceof(MongoNetworkError);
-                      expect(err.hasErrorLabel('TransientTransactionError')).to.be.true;
+                      if (err instanceof MongoNetworkError) {
+                        expect(err.hasErrorLabel('TransientTransactionError')).to.be.true;
+                      }
 
                       session.abortTransaction(() => session.endSession(() => client.close(done)));
                     });
