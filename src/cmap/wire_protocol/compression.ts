@@ -34,6 +34,7 @@ export const uncompressibleCommands = new Set([
 ]);
 
 const MAX_COMPRESSOR_ID = 3;
+const ZSTD_COMPRESSION_LEVEL = 3;
 
 // Facilitate compressing a message using an agreed compressor
 export function compress(
@@ -68,7 +69,7 @@ export function compress(
       if ('kModuleError' in ZStandard) {
         return callback(ZStandard['kModuleError']);
       }
-      ZStandard.compress(dataToBeCompressed, self.options.zstdCompressionLevel).then(
+      ZStandard.compress(dataToBeCompressed, ZSTD_COMPRESSION_LEVEL).then(
         buffer => callback(undefined, buffer),
         error => callback(error)
       );

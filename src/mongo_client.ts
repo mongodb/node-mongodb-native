@@ -127,32 +127,6 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   compressors?: CompressorName[] | string;
   /** An integer that specifies the compression level if using zlib for network compression. */
   zlibCompressionLevel?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
-  /** An integer specifying zstd compression level. */
-  zstdCompressionLevel?:
-    | 0
-    | 1
-    | 2
-    | 3
-    | 4
-    | 5
-    | 6
-    | 7
-    | 8
-    | 9
-    | 10
-    | 11
-    | 12
-    | 13
-    | 14
-    | 15
-    | 16
-    | 17
-    | 18
-    | 19
-    | 20
-    | 21
-    | 22
-    | undefined;
   /** The maximum number of hosts to connect to when using an srv connection string, a setting of `0` means unlimited hosts */
   srvMaxHosts?: number;
   /**
@@ -698,7 +672,6 @@ export interface MongoOptions
         | 'tlsInsecure'
         | 'waitQueueTimeoutMS'
         | 'zlibCompressionLevel'
-        | 'zstdCompressionLevel'
       >
     >,
     SupportedNodeConnectionOptions {

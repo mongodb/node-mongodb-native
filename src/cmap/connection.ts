@@ -795,10 +795,6 @@ function write(
     if (conn[kDescription].zlibCompressionLevel) {
       operationDescription.zlibCompressionLevel = conn[kDescription].zlibCompressionLevel;
     }
-
-    if (conn[kDescription].zstdCompressionLevel) {
-      operationDescription.zstdCompressionLevel = conn[kDescription].zstdCompressionLevel;
-    }
   }
 
   if (typeof options.socketTimeoutMS === 'number') {
