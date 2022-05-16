@@ -41,6 +41,8 @@ const kConnections = Symbol('connections');
 /** @internal */
 const kPending = Symbol('pending');
 /** @internal */
+const kCheckedOut = Symbol('checkedOut');
+/** @internal */
 const kMinPoolSizeTimer = Symbol('minPoolSizeTimer');
 /** @internal */
 const kGeneration = Symbol('generation');
@@ -56,8 +58,6 @@ const kWaitQueue = Symbol('waitQueue');
 const kCancelled = Symbol('cancelled');
 /** @internal */
 const kMetrics = Symbol('metrics');
-/** @internal */
-const kCheckedOut = Symbol('checkedOut');
 /** @internal */
 const kProcessingWaitQueue = Symbol('processingWaitQueue');
 
@@ -575,10 +575,8 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     connection.markAvailable();
     pool.emit(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(pool, connection));
 
-    // if a callback has been provided, check out the connection immediately
+    // if a callback has been provided, hand off the connection immediately
     if (typeof callback === 'function') {
-      pool[kCheckedOut]++;
-      pool[kPending]--;
       callback(undefined, connection);
       return;
     }
@@ -651,6 +649,7 @@ function processWaitQueue(pool: ConnectionPool) {
       if (!waitQueueMember || waitQueueMember[kCancelled]) {
         if (!err && connection) {
           pool[kConnections].push(connection);
+          pool[kPending]--;
         }
 
         pool[kProcessingWaitQueue] = false;
@@ -663,6 +662,8 @@ function processWaitQueue(pool: ConnectionPool) {
           new ConnectionCheckOutFailedEvent(pool, err)
         );
       } else if (connection) {
+        pool[kCheckedOut]++;
+        pool[kPending]--;
         pool.emit(
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(pool, connection)
