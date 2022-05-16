@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import type { MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, maxWireVersion } from '../utils';
+import type { Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -33,10 +33,6 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     session: ClientSession | undefined,
     callback: Callback<number>
   ): void {
-    if (maxWireVersion(server) < 12) {
-      return this.executeLegacy(server, session, callback);
-    }
-
     const cmd: Document = { count: this.collectionName };
 
     if (typeof this.options.maxTimeMS === 'number') {
@@ -50,27 +46,6 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
       }
 
       callback(undefined, response?.n || 0);
-    });
-  }
-
-  executeLegacy(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<number>
-  ): void {
-    const cmd: Document = { count: this.collectionName };
-
-    if (typeof this.options.maxTimeMS === 'number') {
-      cmd.maxTimeMS = this.options.maxTimeMS;
-    }
-
-    super.executeCommand(server, session, cmd, (err, response) => {
-      if (err) {
-        callback(err);
-        return;
-      }
-
-      callback(undefined, response.n || 0);
     });
   }
 }

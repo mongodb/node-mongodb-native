@@ -1044,7 +1044,9 @@ export class Collection<TSchema extends Document = Document> {
 
   /**
    * Gets an estimate of the count of documents in a collection using collection metadata.
+   * This will always run a count command on all server versions.
    *
+   * @see {@link https://www.mongodb.com/docs/manual/reference/command/count/#behavior|Count: Behavior}
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
