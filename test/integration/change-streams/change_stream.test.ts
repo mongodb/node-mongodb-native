@@ -4,7 +4,6 @@ import * as crypto from 'crypto';
 import { once } from 'events';
 import * as sinon from 'sinon';
 import { PassThrough, Transform } from 'stream';
-import { promisify } from 'util';
 
 import {
   ChangeStream,
@@ -1994,7 +1993,7 @@ describe('Change Streams', function () {
     )
     .run();
 
-  describe.only('BSON Options', function () {
+  describe('BSON Options', function () {
     let client: MongoClient;
     let db: Db;
     let collection: Collection;
@@ -2052,12 +2051,10 @@ describe('Change Streams', function () {
 
       const change = await willBeChange;
       const test = typeof change.fullDocument.a;
-      console.log(typeof test, test, 'KOBBY-2');
       expect(typeof change.fullDocument.a).to.equal('number');
-      // expect(change).to.have.nested.property('fullDocument.a').that.is.instanceOf('number');
     });
 
-    it.only('Should filter invalid options on aggregate command', async function () {
+    it('Should filter invalid options on aggregate command', async function () {
       const started = [];
 
       client.on('commandStarted', filterForCommands(['aggregate'], started));
