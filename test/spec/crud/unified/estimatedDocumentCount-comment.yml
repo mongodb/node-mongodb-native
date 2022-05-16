@@ -1,0 +1,95 @@
+description: "estimatedDocumentCount-comment"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name edc-comment-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  - description: "estimatedDocumentCount with document comment"
+    runOnRequirements:
+      # https://jira.mongodb.org/browse/SERVER-63315
+      # Server supports count with comment of any type for comment starting from 4.4.14.
+      - minServerVersion: "4.4.14"
+    operations:
+      - name: estimatedDocumentCount
+        object: *collection0
+        arguments:
+          comment: &documentComment { key: "value"}
+        expectResult: 3
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                count: *collection0Name
+                comment: *documentComment
+              commandName: count
+              databaseName: *database0Name
+
+  - description: "estimatedDocumentCount with string comment"
+    runOnRequirements:
+      - minServerVersion: "4.4.0"
+    operations:
+      - name: estimatedDocumentCount
+        object: *collection0
+        arguments:
+          comment: &stringComment "comment"
+        expectResult: 3
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                count: *collection0Name
+                comment: *stringComment
+              commandName: count
+              databaseName: *database0Name
+
+  - description: "estimatedDocumentCount with document comment - pre 4.4.14, server error"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.4.13"
+        # Server does not raise an error if topology is sharded.
+        # https://jira.mongodb.org/browse/SERVER-65954
+        topologies: [ single, replicaset ]
+    operations:
+      - name: estimatedDocumentCount
+        object: *collection0
+        arguments:
+          # Even though according to the docs count command does not support any
+          # comment for server version less than 4.4, no error is raised by such
+          # servers. Therefore, we have only one test with a document comment
+          # to test server errors.
+          # https://jira.mongodb.org/browse/SERVER-63315
+          # Server supports count with comment of any type for comment starting from 4.4.14.
+          comment: *documentComment
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                count: *collection0Name
+                comment: *documentComment
+              commandName: count
+              databaseName: *database0Name
