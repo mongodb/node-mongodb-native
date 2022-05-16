@@ -2,8 +2,10 @@ import { expect } from 'chai';
 import { EventEmitter } from 'events';
 import { promisify } from 'util';
 
-import { Connection, HostAddress } from '../../src';
+import { Connection, HostAddress, MongoClient } from '../../src';
 import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
+import { shuffle } from '../../src/utils';
+import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { FailPoint, sleep } from './utils';
 
 type CmapOperation =
@@ -308,7 +310,7 @@ export class ThreadContext {
   }
 }
 
-export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
+async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   expect(CMAP_TEST_KEYS).to.include.members(Object.keys(test));
 
   const poolOptions = test.poolOptions || {};
@@ -373,5 +375,97 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
     const { type: eventType, ...eventPropsToCheck } = expected;
     expect(actual.constructor.name).to.equal(`${eventType}Event`);
     compareInputToSpec(actual, eventPropsToCheck);
+  }
+}
+
+export type SkipDescription = {
+  description: string;
+  skipIfCondition: 'loadBalanced';
+  skipReason: string;
+};
+
+export function runCmapTestSuite(tests: CmapTest[], testsToSkip?: SkipDescription[]) {
+  for (const test of tests) {
+    describe(test.name, function () {
+      let hostAddress: HostAddress, threadContext: ThreadContext, client: MongoClient;
+
+      beforeEach(async function () {
+        let utilClient: MongoClient;
+
+        const skipDescription = testsToSkip?.find(
+          ({ description }) => description === test.description
+        );
+        if (skipDescription) {
+          const matchesLoadBalanceSkip =
+            skipDescription.skipIfCondition === 'loadBalanced' && this.configuration.isLoadBalanced;
+          if (matchesLoadBalanceSkip) {
+            (this.currentTest as Mocha.Test & { skipReason?: string }).skipReason =
+              skipDescription.skipReason;
+            this.skip();
+          }
+        }
+
+        if (this.configuration.isLoadBalanced) {
+          // The util client can always point at the single mongos LB frontend.
+          utilClient = this.configuration.newClient(this.configuration.singleMongosLoadBalancerUri);
+        } else {
+          utilClient = this.configuration.newClient();
+        }
+
+        await utilClient.connect();
+
+        const allRequirements = test.runOn || [];
+
+        const someRequirementMet =
+          !allRequirements.length ||
+          (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
+
+        if (!someRequirementMet) {
+          await utilClient.close();
+          this.skip();
+          // NOTE: the rest of the code below won't execute after the skip is invoked
+        }
+
+        try {
+          const serverMap = utilClient.topology.s.description.servers;
+          const hosts = shuffle(serverMap.keys());
+          const selectedHostUri = hosts[0];
+          hostAddress = serverMap.get(selectedHostUri).hostAddress;
+          threadContext = new ThreadContext(
+            hostAddress,
+            this.configuration.isLoadBalanced ? { loadBalanced: true } : {}
+          );
+
+          if (test.failPoint) {
+            client = this.configuration.newClient(
+              `mongodb://${hostAddress}/${
+                this.configuration.isLoadBalanced ? '?loadBalanced=true' : '?directConnection=true'
+              }`
+            );
+            await client.connect();
+            await client.db('admin').command(test.failPoint);
+          }
+        } finally {
+          await utilClient.close();
+        }
+      });
+
+      afterEach(async function () {
+        await threadContext?.tearDown();
+        if (!client) {
+          return;
+        }
+        if (test.failPoint) {
+          await client
+            .db('admin')
+            .command({ configureFailPoint: test.failPoint.configureFailPoint, mode: 'off' });
+        }
+        await client.close();
+      });
+
+      it(test.description, async function () {
+        await runCmapTest(test, threadContext);
+      });
+    });
   }
 }
