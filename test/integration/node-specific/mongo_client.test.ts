@@ -12,6 +12,7 @@ import { Connection } from '../../../src/cmap/connection';
 import { Db } from '../../../src/db';
 import { Topology } from '../../../src/sdam/topology';
 import { getTopology, isHello } from '../../../src/utils';
+import { runLater } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('class MongoClient', function () {
@@ -392,7 +393,7 @@ describe('class MongoClient', function () {
     });
 
     it(
-      'create topology and send ping when auth is enabled',
+      'creates topology and send ping when auth is enabled',
       { requires: { auth: 'enabled' } },
       async function () {
         const commandToBeStarted = once(client, 'commandStarted');
@@ -404,7 +405,24 @@ describe('class MongoClient', function () {
     );
 
     it(
-      'permit operations to be run after connect is called',
+      'does not send ping when authentication is disabled',
+      { requires: { auth: 'disabled' } },
+      async function () {
+        const commandToBeStarted = once(client, 'commandStarted');
+        await client.connect();
+        const delayedFind = runLater(async () => {
+          await client.db().collection('test').findOne();
+        }, 300);
+        const [findOneOperation] = await commandToBeStarted;
+        // Proves that the first command started event that is emitted is a find and not a ping
+        expect(findOneOperation).to.have.property('commandName', 'find');
+        await delayedFind;
+        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+      }
+    );
+
+    it(
+      'permits operations to be run after connect is called',
       { requires: { auth: 'enabled' } },
       async function () {
         const pingCommandToBeStarted = once(client, 'commandStarted');
@@ -420,9 +438,22 @@ describe('class MongoClient', function () {
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       }
     );
+  });
+
+  context('implicit #connect()', () => {
+    let client: MongoClient;
+    beforeEach(function () {
+      client = this.configuration.newClient(this.configuration.url(), {
+        monitorCommands: true
+      });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
 
     it(
-      'automatically connect upon first operation (find)',
+      'automatically connects upon first operation (find)',
       { requires: { auth: 'enabled' } },
       async function () {
         const findCommandToBeStarted = once(client, 'commandStarted');
@@ -441,7 +472,7 @@ describe('class MongoClient', function () {
     );
 
     it(
-      'automatically connect upon first operation (insertOne)',
+      'automatically connects upon first operation (insertOne)',
       { requires: { auth: 'enabled' } },
       async function () {
         const insertOneCommandToBeStarted = once(client, 'commandStarted');
@@ -460,7 +491,7 @@ describe('class MongoClient', function () {
     );
 
     it(
-      'pass connection errors to the user through the first operation',
+      'passes connection errors to the user through the first operation',
       { requires: { auth: 'enabled' } },
       async function () {
         const client = this.configuration.newClient(
@@ -542,7 +573,12 @@ describe('class MongoClient', function () {
           postCloseHasBeenClosedDescriptor
         );
 
+        const pingCommandToBeStarted = once(client, 'commandStarted');
         await client.connect(); // explicitly connect again
+        const [pingOnConnect] = await pingCommandToBeStarted;
+
+        expect(pingOnConnect).to.have.property('commandName', 'ping');
+
         expect(client.s).to.have.ownPropertyDescriptor(
           'hasBeenClosed',
           postCloseHasBeenClosedDescriptor

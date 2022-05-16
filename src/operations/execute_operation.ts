@@ -85,7 +85,9 @@ export function executeOperation<
 
     if (topology == null) {
       if (client.s.hasBeenClosed) {
-        return callback(new MongoNotConnectedError('client was closed'));
+        return callback(
+          new MongoNotConnectedError('Client must be connected before running operations')
+        );
       }
       client.s.options[Symbol.for('@@mdb.skipPingOnConnect')] = true;
       return client.connect(error => {
