@@ -32,6 +32,7 @@
       "options": 42,
       "totalConnectionCount": 0,
       "availableConnectionCount": 0,
+      "pendingConnectionCount": 0,
       "currentCheckedOutCount": 0
     },
     {
@@ -60,6 +61,7 @@
       "address": 42,
       "currentCheckedOutCount": 0,
       "availableConnectionCount": 3,
+      "pendingConnectionCount": 0,
       "totalConnectionCount": 3
     }
   ],

@@ -290,6 +290,7 @@ export class ThreadContext {
         if (this.#injectPoolStats) {
           x.totalConnectionCount = this.pool.totalConnectionCount;
           x.availableConnectionCount = this.pool.availableConnectionCount;
+          x.pendingConnectionCount = this.pool.pendingConnectionCount;
           x.currentCheckedOutCount = this.pool.currentCheckedOutCount;
         }
         this.poolEvents.push(x);
