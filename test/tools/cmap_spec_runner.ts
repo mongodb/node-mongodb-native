@@ -141,7 +141,8 @@ const compareInputToSpec = (input, expected, message) => {
   // the spec uses 42 and "42" as special keywords to express that the value does not matter
   // however, "42" does not appear in the spec tests, so only the numeric value is checked here
   if (expected === 42) {
-    expect(input, message).to.be.ok; // not null or undefined
+    expect(input, message).not.to.be.undefined;
+    expect(input, message).not.to.be.null;
     return;
   }
 
@@ -285,15 +286,15 @@ export class ThreadContext {
       ...options,
       hostAddress: this.#hostAddress
     });
-    ALL_POOL_EVENTS.forEach(ev => {
-      this.pool.on(ev, x => {
+    ALL_POOL_EVENTS.forEach(eventName => {
+      this.pool.on(eventName, event => {
         if (this.#injectPoolStats) {
-          x.totalConnectionCount = this.pool.totalConnectionCount;
-          x.availableConnectionCount = this.pool.availableConnectionCount;
-          x.pendingConnectionCount = this.pool.pendingConnectionCount;
-          x.currentCheckedOutCount = this.pool.currentCheckedOutCount;
+          event.totalConnectionCount = this.pool.totalConnectionCount;
+          event.availableConnectionCount = this.pool.availableConnectionCount;
+          event.pendingConnectionCount = this.pool.pendingConnectionCount;
+          event.currentCheckedOutCount = this.pool.currentCheckedOutCount;
         }
-        this.poolEvents.push(x);
+        this.poolEvents.push(event);
         this.poolEventsEventEmitter.emit('poolEvent');
       });
     });
@@ -418,8 +419,7 @@ export function runCmapTestSuite(
           const matchesLoadBalanceSkip =
             skipDescription.skipIfCondition === 'loadBalanced' && this.configuration.isLoadBalanced;
           if (matchesLoadBalanceSkip) {
-            (this.currentTest as Mocha.Test & { skipReason?: string }).skipReason =
-              skipDescription.skipReason;
+            (this.currentTest as Mocha.Runnable).skipReason = skipDescription.skipReason;
             this.skip();
           }
         }
