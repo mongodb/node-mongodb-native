@@ -137,31 +137,35 @@ class Thread {
  * Implements the spec test match function, see:
  * [CMAP Spec Test README](https://github.com/mongodb/specifications/tree/master/source/connection-monitoring-and-pooling/tests#spec-test-match-function)
  */
-const compareInputToSpec = (input, expected) => {
+const compareInputToSpec = (input, expected, message) => {
   // the spec uses 42 and "42" as special keywords to express that the value does not matter
   // however, "42" does not appear in the spec tests, so only the numeric value is checked here
   if (expected === 42) {
-    expect(input).to.be.ok; // not null or undefined
+    expect(input, message).to.be.ok; // not null or undefined
     return;
   }
 
   if (Array.isArray(expected)) {
-    expect(input).to.be.an('array');
+    expect(input, message).to.be.an('array');
     for (const [index, expectedValue] of input.entries()) {
-      compareInputToSpec(input[index], expectedValue);
+      compareInputToSpec(input[index], expectedValue, `${message} at index ${index}`);
     }
     return;
   }
 
   if (expected && typeof expected === 'object') {
     for (const [expectedPropName, expectedValue] of Object.entries(expected)) {
-      expect(input).to.have.property(expectedPropName);
-      compareInputToSpec(input[expectedPropName], expectedValue);
+      expect(input, message).to.have.property(expectedPropName);
+      compareInputToSpec(
+        input[expectedPropName],
+        expectedValue,
+        `${message} property ${expectedPropName}`
+      );
     }
     return;
   }
 
-  expect(input).to.equal(expected);
+  expect(input, message).to.equal(expected);
 };
 
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
@@ -243,16 +247,22 @@ export class ThreadContext {
   #poolOptions: Partial<ConnectionPoolOptions>;
   #hostAddress: HostAddress;
   #supportedOperations: ReturnType<typeof getTestOpDefinitions>;
+  #injectPoolStats = false;
 
   /**
    *
    * @param hostAddress - The address of the server to connect to
    * @param poolOptions - Allows the test to pass in extra options to the pool not specified by the spec test definition, such as the environment-dependent "loadBalanced"
    */
-  constructor(hostAddress: HostAddress, poolOptions: Partial<ConnectionPoolOptions> = {}) {
+  constructor(
+    hostAddress: HostAddress,
+    poolOptions: Partial<ConnectionPoolOptions> = {},
+    contextOptions: { injectPoolStats: boolean }
+  ) {
     this.#poolOptions = poolOptions;
     this.#hostAddress = hostAddress;
     this.#supportedOperations = getTestOpDefinitions(this);
+    this.#injectPoolStats = contextOptions.injectPoolStats;
   }
 
   get isLoadBalanced() {
@@ -277,6 +287,11 @@ export class ThreadContext {
     });
     ALL_POOL_EVENTS.forEach(ev => {
       this.pool.on(ev, x => {
+        if (this.#injectPoolStats) {
+          x.totalConnectionCount = this.pool.totalConnectionCount;
+          x.availableConnectionCount = this.pool.availableConnectionCount;
+          x.currentCheckedOutCount = this.pool.currentCheckedOutCount;
+        }
         this.poolEvents.push(x);
         this.poolEventsEventEmitter.emit('poolEvent');
       });
@@ -360,7 +375,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
         expect(actualError).to.have.property('message', errorMessage);
       }
     }
-    compareInputToSpec(actualError, errorPropsToCheck);
+    compareInputToSpec(actualError, errorPropsToCheck, `failed while checking ${errorType}`);
   } else {
     expect(actualError).to.not.exist;
   }
@@ -374,7 +389,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     const actual = actualEvents.shift();
     const { type: eventType, ...eventPropsToCheck } = expected;
     expect(actual.constructor.name).to.equal(`${eventType}Event`);
-    compareInputToSpec(actual, eventPropsToCheck);
+    compareInputToSpec(actual, eventPropsToCheck, `failed while checking ${eventType} event`);
   }
 }
 
@@ -384,7 +399,10 @@ export type SkipDescription = {
   skipReason: string;
 };
 
-export function runCmapTestSuite(tests: CmapTest[], testsToSkip?: SkipDescription[]) {
+export function runCmapTestSuite(
+  tests: CmapTest[],
+  options?: { testsToSkip?: SkipDescription[]; injectPoolStats?: boolean }
+) {
   for (const test of tests) {
     describe(test.name, function () {
       let hostAddress: HostAddress, threadContext: ThreadContext, client: MongoClient;
@@ -392,7 +410,7 @@ export function runCmapTestSuite(tests: CmapTest[], testsToSkip?: SkipDescriptio
       beforeEach(async function () {
         let utilClient: MongoClient;
 
-        const skipDescription = testsToSkip?.find(
+        const skipDescription = options?.testsToSkip?.find(
           ({ description }) => description === test.description
         );
         if (skipDescription) {
@@ -433,7 +451,8 @@ export function runCmapTestSuite(tests: CmapTest[], testsToSkip?: SkipDescriptio
           hostAddress = serverMap.get(selectedHostUri).hostAddress;
           threadContext = new ThreadContext(
             hostAddress,
-            this.configuration.isLoadBalanced ? { loadBalanced: true } : {}
+            this.configuration.isLoadBalanced ? { loadBalanced: true } : {},
+            { injectPoolStats: !!options?.injectPoolStats }
           );
 
           if (test.failPoint) {

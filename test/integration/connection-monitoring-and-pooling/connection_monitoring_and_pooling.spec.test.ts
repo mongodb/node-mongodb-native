@@ -18,6 +18,6 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration)', function 
   runCmapTestSuite(
     // TODO(NODE-2993): unskip integration tests for maxConnecting
     tests.filter(({ style }) => style === 'unit'),
-    LB_SKIP_TESTS
+    { testsToSkip: LB_SKIP_TESTS }
   );
 });
