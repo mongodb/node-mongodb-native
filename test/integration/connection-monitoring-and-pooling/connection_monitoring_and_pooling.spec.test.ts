@@ -18,7 +18,7 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration)', function 
     // TODO(NODE-2993): unskip integration tests for maxConnecting
     return test.style === 'unit';
   })) {
-    describe(test.description, function () {
+    describe(test.name, function () {
       let hostAddress: HostAddress, threadContext: ThreadContext, client: MongoClient;
 
       beforeEach(async function () {
@@ -85,7 +85,7 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration)', function 
         await client.close();
       });
 
-      it('should pass', async function () {
+      it(test.description, async function () {
         await runCmapTest(test, threadContext);
       });
     });
