@@ -13,7 +13,9 @@ describe('compression', function () {
         it('compresses the data', function (done) {
           compress(options, buffer, (error, data) => {
             expect(error).to.not.exist;
-            expect(data).to.not.deep.equal(buffer);
+            const zstdMagicNumber = data.reverse().toString('hex').substring(16, 26);
+            // Zstd magic number first set of bytes is is 0xFD2FB528
+            expect(zstdMagicNumber).to.equal('00fd2fb528');
             done();
           });
         });
@@ -25,7 +27,9 @@ describe('compression', function () {
         it('compresses the data', function (done) {
           compress(options, buffer, (error, data) => {
             expect(error).to.not.exist;
-            expect(data).to.not.deep.equal(buffer);
+            const zstdMagicNumber = data.reverse().toString('hex').substring(16, 26);
+            // Zstd magic number first set of bytes is is 0xFD2FB528
+            expect(zstdMagicNumber).to.equal('00fd2fb528');
             done();
           });
         });
