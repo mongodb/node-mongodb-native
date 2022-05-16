@@ -2050,7 +2050,6 @@ describe('Change Streams', function () {
       expect(result).to.exist;
 
       const change = await willBeChange;
-      const test = typeof change.fullDocument.a;
       expect(typeof change.fullDocument.a).to.equal('number');
     });
 
@@ -2067,7 +2066,7 @@ describe('Change Streams', function () {
       const result = await collection.insertOne({ a: Long.fromNumber(0) });
       expect(result).to.exist;
 
-      const change = await willBeChange;
+      await willBeChange;
       expect(started[0].command).not.to.haveOwnProperty('sdfsdf');
     });
 
@@ -2084,7 +2083,7 @@ describe('Change Streams', function () {
       const result = await collection.insertOne({ a: Long.fromNumber(0) });
       expect(result).to.exist;
 
-      const change = await willBeChange;
+      await willBeChange;
       expect(started[0].command).not.to.haveOwnProperty('sdfsdf');
     });
   });
