@@ -10,9 +10,16 @@ import {
   MinKey,
   ObjectId
 } from 'bson';
-import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
+import { expectAssignable, expectError, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
-import { Collection, Filter, MongoClient, WithId } from '../../../../src';
+import {
+  Collection,
+  Filter,
+  MongoClient,
+  PushOperator,
+  UpdateFilter,
+  WithId
+} from '../../../../src';
 
 /**
  * test the Filter type using collection.find<T>() method
@@ -403,3 +410,27 @@ nonSpecifiedCollection.find({
     hello: 'world'
   }
 });
+
+export class ExampleNODE4258 {
+  constructor(public _id: string, public names: string[]) {}
+}
+
+const fooCollection = client.db().collection<ExampleNODE4258>('a');
+
+expectAssignable<PushOperator<ExampleNODE4258>>({ names: 'a' });
+expectAssignable<PushOperator<ExampleNODE4258>>({ names: { $each: ['a', 'b'] } });
+expectNotAssignable<PushOperator<ExampleNODE4258>>(undefined);
+
+expectNotType<Parameters<typeof fooCollection['findOneAndUpdate']>[1]>({ $push: undefined });
+expectNotType<UpdateFilter<ExampleNODE4258>>({ $push: undefined });
+
+expectAssignable<Parameters<typeof fooCollection['findOneAndUpdate']>[1]>({
+  $push: { names: 'Bob' }
+});
+expectAssignable<UpdateFilter<ExampleNODE4258>>({ $push: { names: 'Bob' } });
+
+await fooCollection.findOneAndUpdate(
+  { _id: 'fooId' },
+  { $push: { names: 'Bob' } },
+  { returnDocument: 'after' }
+);
