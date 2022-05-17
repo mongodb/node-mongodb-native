@@ -512,12 +512,11 @@ describe('class MongoClient', function () {
     );
 
     it(
-      'client.close will not permit operations to auto reconnect',
+      'does not permit auto reconnect after client.close',
       { requires: { auth: 'enabled' } },
       async function () {
         await client.db('test').collection('test').findOne();
 
-        expect(client).to.be.instanceOf(MongoClient);
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
 
         await client.close();
@@ -538,7 +537,7 @@ describe('class MongoClient', function () {
     );
 
     it(
-      'client.close will not permit operations to auto reconnect permanently',
+      'does not auto reconnect after client.close',
       { requires: { auth: 'enabled' } },
       async function () {
         expect(client.s).to.have.property('hasBeenClosed', false);
