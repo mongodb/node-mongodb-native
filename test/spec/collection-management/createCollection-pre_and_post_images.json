@@ -1,9 +1,10 @@
 {
   "description": "createCollection-pre_and_post_images",
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
-      "minServerVersion": "6.0"
+      "minServerVersion": "6.0",
+      "serverless": "forbid"
     }
   ],
   "createEntities": [
