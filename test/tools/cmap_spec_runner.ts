@@ -2,8 +2,10 @@ import { expect } from 'chai';
 import { EventEmitter } from 'events';
 import { promisify } from 'util';
 
-import { Connection, HostAddress } from '../../src';
+import { Connection, HostAddress, MongoClient } from '../../src';
 import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
+import { shuffle } from '../../src/utils';
+import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { FailPoint, sleep } from './utils';
 
 type CmapOperation =
@@ -135,31 +137,36 @@ class Thread {
  * Implements the spec test match function, see:
  * [CMAP Spec Test README](https://github.com/mongodb/specifications/tree/master/source/connection-monitoring-and-pooling/tests#spec-test-match-function)
  */
-const compareInputToSpec = (input, expected) => {
+const compareInputToSpec = (input, expected, message) => {
   // the spec uses 42 and "42" as special keywords to express that the value does not matter
   // however, "42" does not appear in the spec tests, so only the numeric value is checked here
   if (expected === 42) {
-    expect(input).to.be.ok; // not null or undefined
+    expect(input, message).not.to.be.undefined;
+    expect(input, message).not.to.be.null;
     return;
   }
 
   if (Array.isArray(expected)) {
-    expect(input).to.be.an('array');
+    expect(input, message).to.be.an('array');
     for (const [index, expectedValue] of input.entries()) {
-      compareInputToSpec(input[index], expectedValue);
+      compareInputToSpec(input[index], expectedValue, `${message} at index ${index}`);
     }
     return;
   }
 
   if (expected && typeof expected === 'object') {
     for (const [expectedPropName, expectedValue] of Object.entries(expected)) {
-      expect(input).to.have.property(expectedPropName);
-      compareInputToSpec(input[expectedPropName], expectedValue);
+      expect(input, message).to.have.property(expectedPropName);
+      compareInputToSpec(
+        input[expectedPropName],
+        expectedValue,
+        `${message} property ${expectedPropName}`
+      );
     }
     return;
   }
 
-  expect(input).to.equal(expected);
+  expect(input, message).to.equal(expected);
 };
 
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
@@ -241,16 +248,22 @@ export class ThreadContext {
   #poolOptions: Partial<ConnectionPoolOptions>;
   #hostAddress: HostAddress;
   #supportedOperations: ReturnType<typeof getTestOpDefinitions>;
+  #injectPoolStats = false;
 
   /**
    *
    * @param hostAddress - The address of the server to connect to
    * @param poolOptions - Allows the test to pass in extra options to the pool not specified by the spec test definition, such as the environment-dependent "loadBalanced"
    */
-  constructor(hostAddress: HostAddress, poolOptions: Partial<ConnectionPoolOptions> = {}) {
+  constructor(
+    hostAddress: HostAddress,
+    poolOptions: Partial<ConnectionPoolOptions> = {},
+    contextOptions: { injectPoolStats: boolean }
+  ) {
     this.#poolOptions = poolOptions;
     this.#hostAddress = hostAddress;
     this.#supportedOperations = getTestOpDefinitions(this);
+    this.#injectPoolStats = contextOptions.injectPoolStats;
   }
 
   get isLoadBalanced() {
@@ -273,9 +286,15 @@ export class ThreadContext {
       ...options,
       hostAddress: this.#hostAddress
     });
-    ALL_POOL_EVENTS.forEach(ev => {
-      this.pool.on(ev, x => {
-        this.poolEvents.push(x);
+    ALL_POOL_EVENTS.forEach(eventName => {
+      this.pool.on(eventName, event => {
+        if (this.#injectPoolStats) {
+          event.totalConnectionCount = this.pool.totalConnectionCount;
+          event.availableConnectionCount = this.pool.availableConnectionCount;
+          event.pendingConnectionCount = this.pool.pendingConnectionCount;
+          event.currentCheckedOutCount = this.pool.currentCheckedOutCount;
+        }
+        this.poolEvents.push(event);
         this.poolEventsEventEmitter.emit('poolEvent');
       });
     });
@@ -308,7 +327,7 @@ export class ThreadContext {
   }
 }
 
-export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
+async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   expect(CMAP_TEST_KEYS).to.include.members(Object.keys(test));
 
   const poolOptions = test.poolOptions || {};
@@ -358,7 +377,7 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
         expect(actualError).to.have.property('message', errorMessage);
       }
     }
-    compareInputToSpec(actualError, errorPropsToCheck);
+    compareInputToSpec(actualError, errorPropsToCheck, `failed while checking ${errorType}`);
   } else {
     expect(actualError).to.not.exist;
   }
@@ -372,6 +391,101 @@ export async function runCmapTest(test: CmapTest, threadContext: ThreadContext) 
     const actual = actualEvents.shift();
     const { type: eventType, ...eventPropsToCheck } = expected;
     expect(actual.constructor.name).to.equal(`${eventType}Event`);
-    compareInputToSpec(actual, eventPropsToCheck);
+    compareInputToSpec(actual, eventPropsToCheck, `failed while checking ${eventType} event`);
+  }
+}
+
+export type SkipDescription = {
+  description: string;
+  skipIfCondition: 'loadBalanced';
+  skipReason: string;
+};
+
+export function runCmapTestSuite(
+  tests: CmapTest[],
+  options?: { testsToSkip?: SkipDescription[]; injectPoolStats?: boolean }
+) {
+  for (const test of tests) {
+    describe(test.name, function () {
+      let hostAddress: HostAddress, threadContext: ThreadContext, client: MongoClient;
+
+      beforeEach(async function () {
+        let utilClient: MongoClient;
+
+        const skipDescription = options?.testsToSkip?.find(
+          ({ description }) => description === test.description
+        );
+        if (skipDescription) {
+          const matchesLoadBalanceSkip =
+            skipDescription.skipIfCondition === 'loadBalanced' && this.configuration.isLoadBalanced;
+          if (matchesLoadBalanceSkip) {
+            (this.currentTest as Mocha.Runnable).skipReason = skipDescription.skipReason;
+            this.skip();
+          }
+        }
+
+        if (this.configuration.isLoadBalanced) {
+          // The util client can always point at the single mongos LB frontend.
+          utilClient = this.configuration.newClient(this.configuration.singleMongosLoadBalancerUri);
+        } else {
+          utilClient = this.configuration.newClient();
+        }
+
+        await utilClient.connect();
+
+        const allRequirements = test.runOn || [];
+
+        const someRequirementMet =
+          !allRequirements.length ||
+          (await isAnyRequirementSatisfied(this.currentTest.ctx, allRequirements, utilClient));
+
+        if (!someRequirementMet) {
+          await utilClient.close();
+          this.skip();
+          // NOTE: the rest of the code below won't execute after the skip is invoked
+        }
+
+        try {
+          const serverMap = utilClient.topology.s.description.servers;
+          const hosts = shuffle(serverMap.keys());
+          const selectedHostUri = hosts[0];
+          hostAddress = serverMap.get(selectedHostUri).hostAddress;
+          threadContext = new ThreadContext(
+            hostAddress,
+            this.configuration.isLoadBalanced ? { loadBalanced: true } : {},
+            { injectPoolStats: !!options?.injectPoolStats }
+          );
+
+          if (test.failPoint) {
+            client = this.configuration.newClient(
+              `mongodb://${hostAddress}/${
+                this.configuration.isLoadBalanced ? '?loadBalanced=true' : '?directConnection=true'
+              }`
+            );
+            await client.connect();
+            await client.db('admin').command(test.failPoint);
+          }
+        } finally {
+          await utilClient.close();
+        }
+      });
+
+      afterEach(async function () {
+        await threadContext?.tearDown();
+        if (!client) {
+          return;
+        }
+        if (test.failPoint) {
+          await client
+            .db('admin')
+            .command({ configureFailPoint: test.failPoint.configureFailPoint, mode: 'off' });
+        }
+        await client.close();
+      });
+
+      it(test.description, async function () {
+        await runCmapTest(test, threadContext);
+      });
+    });
   }
 }

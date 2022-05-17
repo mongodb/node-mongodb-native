@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "style": "unit",
+  "description": "must correctly update pool stats when checking in a connection",
+  "poolOptions": {
+    "minPoolSize": 3
+  },
+  "operations": [
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCreated",
+      "count": 3
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionReady",
+      "count": 3
+    },
+    {
+      "name": "checkOut",
+      "label": "conn"
+    },
+    {
+      "name": "checkIn",
+      "connection": "conn"
+    }
+  ],
+  "events": [
+    {
+      "type": "ConnectionPoolCreated",
+      "address": 42,
+      "options": 42,
+      "totalConnectionCount": 0,
+      "availableConnectionCount": 0,
+      "pendingConnectionCount": 0,
+      "currentCheckedOutCount": 0
+    },
+    {
+      "type": "ConnectionCreated",
+      "connectionId": 42,
+      "address": 42
+    },
+    {
+      "type": "ConnectionCreated",
+      "connectionId": 42,
+      "address": 42
+    },
+    {
+      "type": "ConnectionCreated",
+      "connectionId": 42,
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedOut",
+      "connectionId": 42,
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedIn",
+      "connectionId": 42,
+      "address": 42,
+      "currentCheckedOutCount": 0,
+      "availableConnectionCount": 3,
+      "pendingConnectionCount": 0,
+      "totalConnectionCount": 3
+    }
+  ],
+  "ignore": [
+    "ConnectionReady",
+    "ConnectionClosed",
+    "ConnectionCheckOutStarted"
+  ]
+}

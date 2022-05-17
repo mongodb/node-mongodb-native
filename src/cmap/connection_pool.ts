@@ -39,7 +39,9 @@ const kLogger = Symbol('logger');
 /** @internal */
 const kConnections = Symbol('connections');
 /** @internal */
-const kPermits = Symbol('permits');
+const kPending = Symbol('pending');
+/** @internal */
+const kCheckedOut = Symbol('checkedOut');
 /** @internal */
 const kMinPoolSizeTimer = Symbol('minPoolSizeTimer');
 /** @internal */
@@ -56,8 +58,6 @@ const kWaitQueue = Symbol('waitQueue');
 const kCancelled = Symbol('cancelled');
 /** @internal */
 const kMetrics = Symbol('metrics');
-/** @internal */
-const kCheckedOut = Symbol('checkedOut');
 /** @internal */
 const kProcessingWaitQueue = Symbol('processingWaitQueue');
 
@@ -112,11 +112,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   [kLogger]: Logger;
   /** @internal */
   [kConnections]: Denque<Connection>;
-  /**
-   * An integer expressing how many total connections are permitted
-   * @internal
-   */
-  [kPermits]: number;
+  /** @internal */
+  [kPending]: number;
+  /** @internal */
+  [kCheckedOut]: number;
   /** @internal */
   [kMinPoolSizeTimer]?: NodeJS.Timeout;
   /**
@@ -136,8 +135,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   [kWaitQueue]: Denque<WaitQueueMember>;
   /** @internal */
   [kMetrics]: ConnectionPoolMetrics;
-  /** @internal */
-  [kCheckedOut]: number;
   /** @internal */
   [kProcessingWaitQueue]: boolean;
 
@@ -216,7 +213,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
-    this[kPermits] = this.options.maxPoolSize;
+    this[kPending] = 0;
+    this[kCheckedOut] = 0;
     this[kMinPoolSizeTimer] = undefined;
     this[kGeneration] = 0;
     this[kServiceGenerations] = new Map();
@@ -225,7 +223,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kCancellationToken].setMaxListeners(Infinity);
     this[kWaitQueue] = new Denque();
     this[kMetrics] = new ConnectionPoolMetrics();
-    this[kCheckedOut] = 0;
     this[kProcessingWaitQueue] = false;
 
     process.nextTick(() => {
@@ -244,14 +241,24 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return this[kGeneration];
   }
 
-  /** An integer expressing how many total connections (active + in use) the pool currently has */
+  /** An integer expressing how many total connections (available + pending + in use) the pool currently has */
   get totalConnectionCount(): number {
-    return this[kConnections].length + (this.options.maxPoolSize - this[kPermits]);
+    return (
+      this.availableConnectionCount + this.pendingConnectionCount + this.currentCheckedOutCount
+    );
   }
 
   /** An integer expressing how many connections are currently available in the pool. */
   get availableConnectionCount(): number {
     return this[kConnections].length;
+  }
+
+  get pendingConnectionCount(): number {
+    return this[kPending];
+  }
+
+  get currentCheckedOutCount(): number {
+    return this[kCheckedOut];
   }
 
   get waitQueueSize(): number {
@@ -264,10 +271,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   get serviceGenerations(): Map<string, number> {
     return this[kServiceGenerations];
-  }
-
-  get currentCheckedOutCount(): number {
-    return this[kCheckedOut];
   }
 
   /**
@@ -319,7 +322,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }, waitQueueTimeoutMS);
     }
 
-    this[kCheckedOut] = this[kCheckedOut] + 1;
     this[kWaitQueue].push(waitQueueMember);
     process.nextTick(processWaitQueue, this);
   }
@@ -339,7 +341,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this[kConnections].unshift(connection);
     }
 
-    this[kCheckedOut] = this[kCheckedOut] - 1;
+    this[kCheckedOut]--;
     this.emit(ConnectionPool.CONNECTION_CHECKED_IN, new ConnectionCheckedInEvent(this, connection));
 
     if (willDestroy) {
@@ -527,10 +529,10 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     cancellationToken: pool[kCancellationToken]
   };
 
-  pool[kPermits]--;
+  pool[kPending]++;
   connect(connectOptions, (err, connection) => {
     if (err || !connection) {
-      pool[kPermits]++;
+      pool[kPending]--;
       pool[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
       if (typeof callback === 'function') {
         callback(err);
@@ -541,6 +543,7 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
 
     // The pool might have closed since we started trying to create a connection
     if (pool.closed) {
+      pool[kPending]--;
       connection.destroy({ force: true });
       return;
     }
@@ -572,7 +575,7 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     connection.markAvailable();
     pool.emit(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(pool, connection));
 
-    // if a callback has been provided, check out the connection immediately
+    // if a callback has been provided, hand off the connection immediately
     if (typeof callback === 'function') {
       callback(undefined, connection);
       return;
@@ -580,15 +583,13 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
 
     // otherwise add it to the pool for later acquisition, and try to process the wait queue
     pool[kConnections].push(connection);
+    pool[kPending]--;
     process.nextTick(processWaitQueue, pool);
   });
 }
 
 function destroyConnection(pool: ConnectionPool, connection: Connection, reason: string) {
   pool.emit(ConnectionPool.CONNECTION_CLOSED, new ConnectionClosedEvent(pool, connection, reason));
-
-  // allow more connections to be created
-  pool[kPermits]++;
 
   // destroy the connection
   process.nextTick(() => connection.destroy());
@@ -624,6 +625,7 @@ function processWaitQueue(pool: ConnectionPool) {
     const isStale = connectionIsStale(pool, connection);
     const isIdle = connectionIsIdle(pool, connection);
     if (!isStale && !isIdle && !connection.closed) {
+      pool[kCheckedOut]++;
       pool.emit(
         ConnectionPool.CONNECTION_CHECKED_OUT,
         new ConnectionCheckedOutEvent(pool, connection)
@@ -647,6 +649,7 @@ function processWaitQueue(pool: ConnectionPool) {
       if (!waitQueueMember || waitQueueMember[kCancelled]) {
         if (!err && connection) {
           pool[kConnections].push(connection);
+          pool[kPending]--;
         }
 
         pool[kProcessingWaitQueue] = false;
@@ -659,6 +662,8 @@ function processWaitQueue(pool: ConnectionPool) {
           new ConnectionCheckOutFailedEvent(pool, err)
         );
       } else if (connection) {
+        pool[kCheckedOut]++;
+        pool[kPending]--;
         pool.emit(
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(pool, connection)
