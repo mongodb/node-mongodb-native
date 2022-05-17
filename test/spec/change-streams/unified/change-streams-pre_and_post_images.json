@@ -1,0 +1,826 @@
+{
+  "description": "change-streams-pre_and_post_images",
+  "schemaVersion": "1.0",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "6.0.0",
+      "topologies": [
+        "replicaset",
+        "sharded-replicaset",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "ignoreCommandMonitoringEvents": [
+          "collMod",
+          "insert",
+          "update",
+          "getMore",
+          "killCursors"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "change-stream-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "change-stream-tests",
+      "documents": [
+        {
+          "_id": 1
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "fullDocument:whenAvailable with changeStreamPreAndPostImages enabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocument": "whenAvailable"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "$$type": "object"
+            },
+            "fullDocument": {
+              "_id": 1,
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocument": "whenAvailable"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocument:whenAvailable with changeStreamPreAndPostImages disabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocument": "whenAvailable"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "$$type": "object"
+            },
+            "fullDocument": null
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocument": "whenAvailable"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocument:required with changeStreamPreAndPostImages enabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocument": "required"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "$$type": "object"
+            },
+            "fullDocument": {
+              "_id": 1,
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocument": "required"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocument:required with changeStreamPreAndPostImages disabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocument": "required"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocument": "required"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocumentBeforeChange:whenAvailable with changeStreamPreAndPostImages enabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocumentBeforeChange": "whenAvailable"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "$$type": "object"
+            },
+            "fullDocumentBeforeChange": {
+              "_id": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocumentBeforeChange": "whenAvailable"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocumentBeforeChange:whenAvailable with changeStreamPreAndPostImages disabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocumentBeforeChange": "whenAvailable"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "$$type": "object"
+            },
+            "fullDocumentBeforeChange": null
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocumentBeforeChange": "whenAvailable"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocumentBeforeChange:required with changeStreamPreAndPostImages enabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocumentBeforeChange": "required"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "$$type": "object"
+            },
+            "fullDocumentBeforeChange": {
+              "_id": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocumentBeforeChange": "required"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocumentBeforeChange:required with changeStreamPreAndPostImages disabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocumentBeforeChange": "required"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocumentBeforeChange": "required"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocumentBeforeChange:off with changeStreamPreAndPostImages enabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": true
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocumentBeforeChange": "off"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "$$type": "object"
+            },
+            "fullDocumentBeforeChange": {
+              "$$exists": false
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocumentBeforeChange": "off"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "fullDocumentBeforeChange:off with changeStreamPreAndPostImages disabled",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "collMod",
+            "command": {
+              "collMod": "test",
+              "changeStreamPreAndPostImages": {
+                "enabled": false
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "fullDocumentBeforeChange": "off"
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "$$type": "object"
+            },
+            "fullDocumentBeforeChange": {
+              "$$exists": false
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "test",
+                  "pipeline": [
+                    {
+                      "$changeStream": {
+                        "fullDocumentBeforeChange": "off"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
