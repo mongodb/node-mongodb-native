@@ -1999,9 +1999,7 @@ describe('Change Streams', function () {
     let collection: Collection;
     let cs: ChangeStream;
     beforeEach(async function () {
-      client = await this.configuration
-        .newClient({ maxPoolSize: 1, monitorCommands: true })
-        .connect();
+      client = await this.configuration.newClient({ monitorCommands: true }).connect();
       db = client.db('db');
       collection = db.collection('collection');
     });
@@ -2012,79 +2010,95 @@ describe('Change Streams', function () {
       db = undefined;
       collection = undefined;
     });
-    it('Should remain type long', async function () {
-      cs = collection.watch([], { promoteLongs: false });
 
-      const willBeChange = once(cs, 'change').then(args => args[0]);
-      await once(cs.cursor, 'init');
+    context('promoteLongs', () => {
+      context('when set to true', () => {
+        it('does not convert Longs to numbers', async function () {
+          cs = collection.watch([], { promoteLongs: true });
 
-      const result = await collection.insertOne({ a: Long.fromNumber(0) });
-      expect(result).to.exist;
+          const willBeChange = once(cs, 'change').then(args => args[0]);
+          await once(cs.cursor, 'init');
 
-      const change = await willBeChange;
-      expect(change).to.have.nested.property('fullDocument.a').that.is.instanceOf(Long);
+          const result = await collection.insertOne({ a: Long.fromNumber(0) });
+          expect(result).to.exist;
+
+          const change = await willBeChange;
+
+          expect(typeof change.fullDocument.a).to.equal('number');
+        });
+      });
+
+      context('when set to false', () => {
+        it('converts Long values to native numbers', async function () {
+          cs = collection.watch([], { promoteLongs: false });
+
+          const willBeChange = once(cs, 'change').then(args => args[0]);
+          await once(cs.cursor, 'init');
+
+          const result = await collection.insertOne({ a: Long.fromNumber(0) });
+          expect(result).to.exist;
+
+          const change = await willBeChange;
+          expect(change).to.have.nested.property('fullDocument.a').that.is.instanceOf(Long);
+        });
+      });
+
+      context('when omitted', () => {
+        it('defaults to true', async function () {
+          cs = collection.watch([]);
+
+          const willBeChange = once(cs, 'change').then(args => args[0]);
+          await once(cs.cursor, 'init');
+
+          const result = await collection.insertOne({ a: Long.fromNumber(0) });
+          expect(result).to.exist;
+
+          const change = await willBeChange;
+          expect(typeof change.fullDocument.a).to.equal('number');
+        });
+      });
     });
 
-    it('Should convert to number if promotelongs is true', async function () {
-      cs = collection.watch([], { promoteLongs: true });
+    context('invalid options', function () {
+      it('does not send invalid options on the aggregate command', {
+        metadata: { requires: { topology: '!single' } },
+        test: async function () {
+          const started = [];
 
-      const willBeChange = once(cs, 'change').then(args => args[0]);
-      await once(cs.cursor, 'init');
+          client.on('commandStarted', filterForCommands(['aggregate'], started));
+          const doc = { invalidBSONOption: true };
+          cs = collection.watch([], doc);
 
-      const result = await collection.insertOne({ a: Long.fromNumber(0) });
-      expect(result).to.exist;
+          const willBeChange = once(cs, 'change').then(args => args[0]);
+          await once(cs.cursor, 'init');
 
-      const change = await willBeChange;
+          const result = await collection.insertOne({ a: Long.fromNumber(0) });
+          expect(result).to.exist;
 
-      expect(typeof change.fullDocument.a).to.equal('number');
-      expect.fail('TEst 2 failing');
-    });
+          await willBeChange;
+          expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
+        }
+      });
 
-    it('Should convert to number if no options passed', async function () {
-      cs = collection.watch([]);
+      it('does not send invalid options on the getMore command', {
+        metadata: { requires: { topology: '!single' } },
+        test: async function () {
+          const started = [];
 
-      const willBeChange = once(cs, 'change').then(args => args[0]);
-      await once(cs.cursor, 'init');
+          client.on('commandStarted', filterForCommands(['aggregate'], started));
+          const doc = { invalidBSONOption: true };
+          cs = collection.watch([], doc);
 
-      const result = await collection.insertOne({ a: Long.fromNumber(0) });
-      expect(result).to.exist;
+          const willBeChange = once(cs, 'change').then(args => args[0]);
+          await once(cs.cursor, 'init');
 
-      const change = await willBeChange;
-      expect(typeof change.fullDocument.a).to.equal('number');
-    });
+          const result = await collection.insertOne({ a: Long.fromNumber(0) });
+          expect(result).to.exist;
 
-    it('Should filter invalid options on aggregate command', async function () {
-      const started = [];
-
-      client.on('commandStarted', filterForCommands(['aggregate'], started));
-      const doc = { sdfsdf: true };
-      cs = collection.watch([], doc);
-
-      const willBeChange = once(cs, 'change').then(args => args[0]);
-      await once(cs.cursor, 'init');
-
-      const result = await collection.insertOne({ a: Long.fromNumber(0) });
-      expect(result).to.exist;
-
-      await willBeChange;
-      expect(started[0].command).not.to.haveOwnProperty('sdfsdf');
-    });
-
-    it('Should filter invalid options on getMore command', async function () {
-      const started = [];
-
-      client.on('commandStarted', filterForCommands(['aggregate'], started));
-      const doc = { sdfsdf: true };
-      cs = collection.watch([], doc);
-
-      const willBeChange = once(cs, 'change').then(args => args[0]);
-      await once(cs.cursor, 'init');
-
-      const result = await collection.insertOne({ a: Long.fromNumber(0) });
-      expect(result).to.exist;
-
-      await willBeChange;
-      expect(started[0].command).not.to.haveOwnProperty('sdfsdf');
+          await willBeChange;
+          expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
+        }
+      });
     });
   });
 });
