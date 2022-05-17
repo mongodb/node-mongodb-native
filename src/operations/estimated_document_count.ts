@@ -1,6 +1,5 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
-import type { MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
@@ -40,7 +39,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     }
 
     super.executeCommand(server, session, cmd, (err, response) => {
-      if (err && (err as MongoServerError).code !== 26) {
+      if (err) {
         callback(err);
         return;
       }
