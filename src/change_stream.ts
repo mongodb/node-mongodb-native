@@ -264,6 +264,14 @@ export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
   updateDescription: UpdateDescription<TSchema>;
   /** Namespace the update event occured on */
   ns: ChangeStreamNameSpace;
+  /**
+   * Contains the pre-image of the modified or deleted document if the
+   * pre-image is available for the change event and either 'required' or
+   * 'whenAvailable' was specified for the 'fullDocumentBeforeChange' option
+   * when creating the change stream. If 'whenAvailable' was specified but the
+   * pre-image is unavailable, this will be explicitly set to null.
+   */
+  fullDocumentBeforeChange?: Document;
 }
 
 /**
@@ -279,6 +287,14 @@ export interface ChangeStreamReplaceDocument<TSchema extends Document = Document
   fullDocument: TSchema;
   /** Namespace the replace event occured on */
   ns: ChangeStreamNameSpace;
+  /**
+   * Contains the pre-image of the modified or deleted document if the
+   * pre-image is available for the change event and either 'required' or
+   * 'whenAvailable' was specified for the 'fullDocumentBeforeChange' option
+   * when creating the change stream. If 'whenAvailable' was specified but the
+   * pre-image is unavailable, this will be explicitly set to null.
+   */
+  fullDocumentBeforeChange?: Document;
 }
 
 /**
@@ -292,6 +308,14 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
   operationType: 'delete';
   /** Namespace the delete event occured on */
   ns: ChangeStreamNameSpace;
+  /**
+   * Contains the pre-image of the modified or deleted document if the
+   * pre-image is available for the change event and either 'required' or
+   * 'whenAvailable' was specified for the 'fullDocumentBeforeChange' option
+   * when creating the change stream. If 'whenAvailable' was specified but the
+   * pre-image is unavailable, this will be explicitly set to null.
+   */
+  fullDocumentBeforeChange?: Document;
 }
 
 /**
