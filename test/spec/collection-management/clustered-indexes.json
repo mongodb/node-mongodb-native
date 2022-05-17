@@ -1,9 +1,10 @@
 {
   "description": "clustered-indexes",
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
-      "minServerVersion": "5.3"
+      "minServerVersion": "5.3",
+      "serverless": "forbid"
     }
   ],
   "createEntities": [
