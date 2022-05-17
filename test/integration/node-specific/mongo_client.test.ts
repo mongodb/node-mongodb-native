@@ -558,7 +558,7 @@ describe('class MongoClient', function () {
       expect(result).to.have.property('ok', 1);
     });
 
-    it('prevents automatic reconnect on a closed previously connected client', async () => {
+    it('prevents automatic reconnect on a closed previously explicitly connected client', async () => {
       await client.connect();
       expect(client.s).to.have.ownPropertyDescriptor('hasBeenClosed', INIT_HAS_BEEN_CLOSED);
       await client.close();
@@ -567,7 +567,7 @@ describe('class MongoClient', function () {
       expect(error).to.be.instanceOf(MongoNotConnectedError);
     });
 
-    it('allows explicit reconnect on a previously closed but reconnected client', async () => {
+    it('allows explicit reconnect on a closed previously explicitly connected client', async () => {
       await client.connect();
       expect(client.s).to.have.ownPropertyDescriptor('hasBeenClosed', INIT_HAS_BEEN_CLOSED);
       await client.close();
@@ -578,7 +578,7 @@ describe('class MongoClient', function () {
       expect(result).to.have.property('ok', 1);
     });
 
-    it('prevents auto reconnect on closed non-connected client', async () => {
+    it('prevents auto reconnect on closed previously implicitly connected client', async () => {
       expect(client.s).to.have.ownPropertyDescriptor('hasBeenClosed', INIT_HAS_BEEN_CLOSED);
       const result = await db.command({ ping: 1 }).catch(error => error); // auto connect
       expect(result).to.not.be.instanceOf(MongoNotConnectedError);
@@ -589,7 +589,7 @@ describe('class MongoClient', function () {
       expect(error).to.be.instanceOf(MongoNotConnectedError);
     });
 
-    it('allows explicit reconnect on closed non-connected client', async () => {
+    it('allows explicit reconnect on closed previously implicitly connected client', async () => {
       expect(client.s).to.have.ownPropertyDescriptor('hasBeenClosed', INIT_HAS_BEEN_CLOSED);
       const result = await db.command({ ping: 1 }).catch(error => error); // auto connect
       expect(result).to.not.be.instanceOf(MongoNotConnectedError);
@@ -602,7 +602,7 @@ describe('class MongoClient', function () {
       expect(result2).to.have.property('ok', 1);
     });
 
-    it('prevents auto reconnect on closed explicitly connected client', async () => {
+    it('prevents auto reconnect on closed explicitly connected client after an operation', async () => {
       expect(client.s).to.have.ownPropertyDescriptor('hasBeenClosed', INIT_HAS_BEEN_CLOSED);
       await client.connect();
       const result = await db.command({ ping: 1 }).catch(error => error);
@@ -614,7 +614,7 @@ describe('class MongoClient', function () {
       expect(error).to.be.instanceOf(MongoNotConnectedError);
     });
 
-    it('allows explicit reconnect on closed previously connected client', async () => {
+    it('allows explicit reconnect on closed explicitly connected client after an operation', async () => {
       expect(client.s).to.have.ownPropertyDescriptor('hasBeenClosed', INIT_HAS_BEEN_CLOSED);
       await client.connect();
       const result = await db.command({ ping: 1 }).catch(error => error);
