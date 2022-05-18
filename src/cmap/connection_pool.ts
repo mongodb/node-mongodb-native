@@ -107,7 +107,7 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   closed: boolean;
-  options: Readonly<ConnectionPoolOptions>;
+  options: Readonly<ConnectionPoolOptions & { maxConnecting: number }>;
   /** @internal */
   [kLogger]: Logger;
   /** @internal */
@@ -199,6 +199,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       connectionType: Connection,
       maxPoolSize: options.maxPoolSize ?? 100,
       minPoolSize: options.minPoolSize ?? 0,
+      maxConnecting: 2,
       maxIdleTimeMS: options.maxIdleTimeMS ?? 0,
       waitQueueTimeoutMS: options.waitQueueTimeoutMS ?? 0,
       autoEncrypter: options.autoEncrypter,
@@ -494,12 +495,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 }
 
 function ensureMinPoolSize(pool: ConnectionPool) {
-  if (pool.closed || pool.options.minPoolSize === 0) {
+  const minPoolSize = pool.options.minPoolSize;
+  if (pool.closed || minPoolSize === 0) {
     return;
   }
 
-  const minPoolSize = pool.options.minPoolSize;
-  for (let i = pool.totalConnectionCount; i < minPoolSize; ++i) {
+  if (
+    pool.totalConnectionCount < minPoolSize &&
+    pool.pendingConnectionCount < pool.options.maxConnecting
+  ) {
     createConnection(pool);
   }
 
