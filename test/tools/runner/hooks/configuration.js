@@ -140,7 +140,8 @@ const testConfigBeforeHook = async function () {
     kerberos: process.env.KRB5_PRINCIPAL != null,
     ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
     ocsp: process.env.OCSP_TLS_SHOULD_SUCCEED != null && process.env.CA_FILE != null,
-    socks5: MONGODB_URI.includes('proxyHost=')
+    socks5: MONGODB_URI.includes('proxyHost='),
+    compressor: process.env.COMPRESSOR
   };
 
   console.error(inspect(currentEnv, { colors: true }));

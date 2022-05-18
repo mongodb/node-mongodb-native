@@ -189,6 +189,26 @@ TASKS.push(
   ]
 );
 
+['zstd', 'snappy'].forEach(compressor => {
+  TASKS.push({
+    name: `test-${compressor}-compression`,
+    tags: ['latest', compressor],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION: 'latest',
+          TOPOLOGY: 'replica_set',
+          AUTH: 'auth',
+          COMPRESSOR: compressor
+        }
+      },
+      { func: 'run-compression-tests' }
+    ]
+  });
+});
+
 TLS_VERSIONS.forEach(VERSION => {
   TASKS.push({
     name: `test-tls-support-${VERSION}`,
