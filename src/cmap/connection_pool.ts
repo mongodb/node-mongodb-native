@@ -504,6 +504,9 @@ function ensureMinPoolSize(pool: ConnectionPool) {
     pool.totalConnectionCount < minPoolSize &&
     pool.pendingConnectionCount < pool.options.maxConnecting
   ) {
+    // NOTE: ensureMinPoolSize should not try to get all the pending
+    // connection permits because that potentially delays the availability of
+    // the connection to a checkout request
     createConnection(pool);
   }
 
@@ -646,8 +649,12 @@ function processWaitQueue(pool: ConnectionPool) {
     }
   }
 
-  const maxPoolSize = pool.options.maxPoolSize;
-  if (pool.waitQueueSize && (maxPoolSize <= 0 || pool.totalConnectionCount < maxPoolSize)) {
+  const { maxPoolSize, maxConnecting } = pool.options;
+  if (
+    pool.waitQueueSize &&
+    pool.pendingConnectionCount < maxConnecting &&
+    (maxPoolSize <= 0 || pool.totalConnectionCount < maxPoolSize)
+  ) {
     createConnection(pool, (err, connection) => {
       const waitQueueMember = pool[kWaitQueue].shift();
       if (!waitQueueMember || waitQueueMember[kCancelled]) {
