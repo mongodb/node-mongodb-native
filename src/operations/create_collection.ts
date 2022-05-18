@@ -95,7 +95,7 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
    * If set, enables pre-update and post-update document events to be included for any
    * change streams that listen on this collection.
    */
-  changeStreamPreAndPostImages?: { enabled: true };
+  changeStreamPreAndPostImages?: { enabled: boolean };
 }
 
 /** @internal */
