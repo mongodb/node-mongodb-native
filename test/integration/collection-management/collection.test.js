@@ -564,9 +564,7 @@ describe('Collection', function () {
       it(test.title, function (done) {
         const close = e => client.close(() => done(e));
         let thenFunction;
-        if (
-          test.title === 'should correctly perform estimatedDocumentCount'
-        ) {
+        if (test.title === 'should correctly perform estimatedDocumentCount') {
           thenFunction = () => collection.estimatedDocumentCount();
         } else if (test.title === 'should correctly perform countDocuments on non-matching query') {
           thenFunction = () => collection.countDocuments({ a: 'b' });
