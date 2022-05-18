@@ -419,7 +419,7 @@ export function runCmapTestSuite(
           const matchesLoadBalanceSkip =
             skipDescription.skipIfCondition === 'loadBalanced' && this.configuration.isLoadBalanced;
           if (matchesLoadBalanceSkip) {
-            (this.currentTest as Mocha.Runnable).skipReason = skipDescription.skipReason;
+            this.currentTest.skipReason = skipDescription.skipReason;
             this.skip();
           }
         }
