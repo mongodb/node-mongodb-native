@@ -2013,48 +2013,57 @@ describe('Change Streams', function () {
 
     context('promoteLongs', () => {
       context('when set to true', () => {
-        it('does not convert Longs to numbers', async function () {
-          cs = collection.watch([], { promoteLongs: true });
+        it('does not convert Longs to numbers', {
+          metadata: { requires: { topology: '!single' } },
+          test: async function () {
+            cs = collection.watch([], { promoteLongs: true });
 
-          const willBeChange = once(cs, 'change').then(args => args[0]);
-          await once(cs.cursor, 'init');
+            const willBeChange = once(cs, 'change').then(args => args[0]);
+            await once(cs.cursor, 'init');
 
-          const result = await collection.insertOne({ a: Long.fromNumber(0) });
-          expect(result).to.exist;
+            const result = await collection.insertOne({ a: Long.fromNumber(0) });
+            expect(result).to.exist;
 
-          const change = await willBeChange;
+            const change = await willBeChange;
 
-          expect(typeof change.fullDocument.a).to.equal('number');
+            expect(typeof change.fullDocument.a).to.equal('number');
+          }
         });
       });
 
       context('when set to false', () => {
-        it('converts Long values to native numbers', async function () {
-          cs = collection.watch([], { promoteLongs: false });
+        it('converts Long values to native numbers', {
+          metadata: { requires: { topology: '!single' } },
+          test: async function () {
+            cs = collection.watch([], { promoteLongs: false });
 
-          const willBeChange = once(cs, 'change').then(args => args[0]);
-          await once(cs.cursor, 'init');
+            const willBeChange = once(cs, 'change').then(args => args[0]);
+            await once(cs.cursor, 'init');
 
-          const result = await collection.insertOne({ a: Long.fromNumber(0) });
-          expect(result).to.exist;
+            const result = await collection.insertOne({ a: Long.fromNumber(0) });
+            expect(result).to.exist;
 
-          const change = await willBeChange;
-          expect(change).to.have.nested.property('fullDocument.a').that.is.instanceOf(Long);
+            const change = await willBeChange;
+            expect(change).to.have.nested.property('fullDocument.a').that.is.instanceOf(Long);
+          }
         });
       });
 
       context('when omitted', () => {
-        it('defaults to true', async function () {
-          cs = collection.watch([]);
+        it('defaults to true', {
+          metadata: { requires: { topology: '!single' } },
+          test: async function () {
+            cs = collection.watch([]);
 
-          const willBeChange = once(cs, 'change').then(args => args[0]);
-          await once(cs.cursor, 'init');
+            const willBeChange = once(cs, 'change').then(args => args[0]);
+            await once(cs.cursor, 'init');
 
-          const result = await collection.insertOne({ a: Long.fromNumber(0) });
-          expect(result).to.exist;
+            const result = await collection.insertOne({ a: Long.fromNumber(0) });
+            expect(result).to.exist;
 
-          const change = await willBeChange;
-          expect(typeof change.fullDocument.a).to.equal('number');
+            const change = await willBeChange;
+            expect(typeof change.fullDocument.a).to.equal('number');
+          }
         });
       });
     });
