@@ -73,7 +73,7 @@ declare global {
        * An optional string the test author can attach to print out why a test is skipped
        *
        * @example
-       * ```
+       * ```ts
        * it.skip('my test', () => {
        *   //...
        * }).skipReason = 'TODO(NODE-XXXX): Feature implementation impending!';
@@ -81,13 +81,13 @@ declare global {
        *
        * The reporter (`test/tools/reporter/mongodb_reporter.js`) will print out the skipReason
        * indented directly below the test name.
-       * ```
+       * ```txt
        * - my test
        *   - TODO(NODE-XXXX): Feature implementation impending!
        * ```
        *
        * You can also skip a set of tests via beforeEach:
-       * ```
+       * ```ts
        * beforeEach(() => {
        *   if ('some condition') {
        *     this.currentTest.skipReason = 'requires <run condition> to run';

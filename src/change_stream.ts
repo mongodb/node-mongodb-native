@@ -600,8 +600,24 @@ export class ChangeStream<
 
     const cursorOptions: ChangeStreamCursorOptions = filterOptions(options, CURSOR_OPTIONS);
 
+    const client: MongoClient | null =
+      this.type === CHANGE_DOMAIN_TYPES.CLUSTER
+        ? (this.parent as MongoClient)
+        : this.type === CHANGE_DOMAIN_TYPES.DATABASE
+        ? (this.parent as Db).s.client
+        : this.type === CHANGE_DOMAIN_TYPES.COLLECTION
+        ? (this.parent as Collection).s.db.s.client
+        : null;
+
+    if (client == null) {
+      // This should never happen because of the assertion in the constructor
+      throw new MongoRuntimeError(
+        `Changestream type should only be one of cluster, database, collection. Found ${this.type.toString()}`
+      );
+    }
+
     const changeStreamCursor = new ChangeStreamCursor<TSchema, TChange>(
-      getTopology(this.parent),
+      client,
       this.namespace,
       pipeline,
       cursorOptions
@@ -835,12 +851,12 @@ export class ChangeStreamCursor<
   pipeline: Document[];
 
   constructor(
-    topology: Topology,
+    client: MongoClient,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
     options: ChangeStreamCursorOptions = {}
   ) {
-    super(topology, namespace, options);
+    super(client, namespace, options);
 
     this.pipeline = pipeline;
     this.options = options;
@@ -907,7 +923,7 @@ export class ChangeStreamCursor<
   }
 
   clone(): AbstractCursor<TChange> {
-    return new ChangeStreamCursor(this.topology, this.namespace, this.pipeline, {
+    return new ChangeStreamCursor(this.client, this.namespace, this.pipeline, {
       ...this.cursorOptions
     });
   }
@@ -920,7 +936,7 @@ export class ChangeStreamCursor<
     });
 
     executeOperation<TODO_NODE_3286, ChangeStreamAggregateRawResult<TChange>>(
-      session,
+      session.client,
       aggregateOperation,
       (err, response) => {
         if (err || response == null) {
