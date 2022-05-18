@@ -271,7 +271,7 @@ export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
    * when creating the change stream. If 'whenAvailable' was specified but the
    * pre-image is unavailable, this will be explicitly set to null.
    */
-  fullDocumentBeforeChange?: Document;
+  fullDocumentBeforeChange?: TSchema;
 }
 
 /**
@@ -294,7 +294,7 @@ export interface ChangeStreamReplaceDocument<TSchema extends Document = Document
    * when creating the change stream. If 'whenAvailable' was specified but the
    * pre-image is unavailable, this will be explicitly set to null.
    */
-  fullDocumentBeforeChange?: Document;
+  fullDocumentBeforeChange?: TSchema;
 }
 
 /**
@@ -315,7 +315,7 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
    * when creating the change stream. If 'whenAvailable' was specified but the
    * pre-image is unavailable, this will be explicitly set to null.
    */
-  fullDocumentBeforeChange?: Document;
+  fullDocumentBeforeChange?: TSchema;
 }
 
 /**
