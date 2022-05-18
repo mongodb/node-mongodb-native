@@ -13,9 +13,6 @@ tests:
       -
         command_started_event:
           command:
-            aggregate: *collection_name
-            pipeline:
-            - $collStats: { count: {} }
-            - $group: { _id: 1, n: { $sum: $count }}
-            command_name: aggregate
-            database_name: *database_name
+            count: *collection_name
+          command_name: count
+          database_name: *database_name
