@@ -1,0 +1,111 @@
+{
+  "description": "modifyCollection-pre_and_post_images",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "6.0",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "papi-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "modifyCollection to changeStreamPreAndPostImages enabled",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test",
+            "changeStreamPreAndPostImages": {
+              "enabled": false
+            }
+          }
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "papi-tests",
+            "collectionName": "test"
+          }
+        },
+        {
+          "name": "modifyCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test",
+            "changeStreamPreAndPostImages": {
+              "enabled": true
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test"
+                },
+                "databaseName": "papi-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "changeStreamPreAndPostImages": {
+                    "enabled": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "collMod": "test",
+                  "changeStreamPreAndPostImages": {
+                    "enabled": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

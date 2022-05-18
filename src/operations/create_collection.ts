@@ -91,6 +91,11 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   expireAfterSeconds?: number;
   /** @experimental */
   encryptedFields?: Document;
+  /**
+   * If set, enables pre-update and post-update document events to be included for any
+   * change streams that listen on this collection.
+   */
+  changeStreamPreAndPostImages?: { enabled: boolean };
 }
 
 /** @internal */
