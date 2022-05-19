@@ -1993,7 +1993,7 @@ describe('Change Streams', function () {
     )
     .run();
 
-  describe.only('BSON Options', function () {
+  describe('BSON Options', function () {
     let client: MongoClient;
     let db: Db;
     let collection: Collection;
@@ -2004,7 +2004,7 @@ describe('Change Streams', function () {
       collection = await db.createCollection('collection');
     });
     afterEach(async function () {
-      db.dropCollection('collection');
+      await db.dropCollection('collection');
       await cs.close();
       await client.close();
       client = undefined;
