@@ -1,0 +1,84 @@
+version: 1
+style: integration
+description: threads blocked by maxConnecting check out returned connections
+runOn:
+  -
+    # required for blockConnection in fail point
+    minServerVersion: "4.4.0"
+failPoint:
+  configureFailPoint: failCommand
+  # high amount to ensure not interfered with by monitor checks.
+  mode: { times: 50 }
+  data:
+    failCommands: ["isMaster","hello"]
+    closeConnection: false
+    blockConnection: true
+    blockTimeMS: 750
+poolOptions:
+  maxPoolSize: 10
+  waitQueueTimeoutMS: 5000
+operations:
+  # check out a connection and hold on to it.
+  - name: checkOut
+    label: conn0
+  # then start three threads that all attempt to check out. Two threads
+  # will fill maxConnecting, and the other should be waiting either for
+  # the other two to finish or for the main thread to check its connection
+  # back in.
+  - name: start
+    target: thread1
+  - name: checkOut
+    thread: thread1
+  - name: start
+    target: thread2
+  - name: checkOut
+    thread: thread2
+  - name: start
+    target: thread3
+  - name: checkOut
+    thread: thread3
+  # wait for all three to start checking out and a little longer
+  # for the establishments to begin.
+  - name: waitForEvent
+    event: ConnectionCheckOutStarted
+    count: 4
+  - name: wait
+    ms: 100
+  # check original connection back in, so the thread that isn't
+  # currently establishing will become unblocked. Then wait for
+  # all threads to complete.
+  - name: checkIn
+    connection: conn0
+  - name: waitForEvent
+    event: ConnectionCheckedOut
+    count: 4
+events:
+  # main thread checking out a Connection and holding it
+  - type: ConnectionCreated
+    address: 42
+    connectionId: 1
+  - type: ConnectionCheckedOut
+    address: 42
+  # two threads creating their Connections
+  - type: ConnectionCreated
+    address: 42
+  - type: ConnectionCreated
+    address: 42
+  # main thread checking its Connection back in
+  - type: ConnectionCheckedIn
+    connectionId: 1
+    address: 42
+  # remaining thread checking out the returned Connection
+  - type: ConnectionCheckedOut
+    connectionId: 1
+    address: 42
+  # first two threads finishing Connection establishment
+  - type: ConnectionCheckedOut
+    address: 42
+  - type: ConnectionCheckedOut
+    address: 42
+ignore:
+  - ConnectionClosed
+  - ConnectionReady
+  - ConnectionPoolCreated
+  - ConnectionCheckOutStarted

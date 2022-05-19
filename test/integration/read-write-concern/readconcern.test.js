@@ -234,7 +234,7 @@ describe('ReadConcern', function () {
                   done();
                 });
               } else if (test.commandName === 'count') {
-                collection.estimatedDocumentCount({ a: 1 }, err => {
+                collection.estimatedDocumentCount(err => {
                   expect(err).to.not.exist;
                   validateTestResults(started, succeeded, test.commandName, test.readConcern.level);
                   done();

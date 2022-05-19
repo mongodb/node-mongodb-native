@@ -1,12 +1,12 @@
 import type { Document } from '../bson';
 import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
+import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, CountOptions } from '../operations/count';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { FindOperation, FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
-import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { formatSort, Sort, SortDirection } from '../sort';
 import { Callback, emitWarningOnce, mergeOptions, MongoDBNamespace } from '../utils';
@@ -40,12 +40,12 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   constructor(
-    topology: Topology,
+    client: MongoClient,
     namespace: MongoDBNamespace,
     filter: Document | undefined,
     options: FindOptions = {}
   ) {
-    super(topology, namespace, options);
+    super(client, namespace, options);
 
     this[kFilter] = filter || {};
     this[kBuiltOptions] = options;
@@ -58,7 +58,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   clone(): FindCursor<TSchema> {
     const clonedOptions = mergeOptions({}, this[kBuiltOptions]);
     delete clonedOptions.session;
-    return new FindCursor(this.topology, this.namespace, this[kFilter], {
+    return new FindCursor(this.client, this.namespace, this[kFilter], {
       ...clonedOptions
     });
   }
@@ -75,7 +75,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       session
     });
 
-    executeOperation(this, findOperation, (err, response) => {
+    executeOperation(this.client, findOperation, (err, response) => {
       if (err || response == null) return callback(err);
 
       // TODO: We only need this for legacy queries that do not support `limit`, maybe
@@ -143,7 +143,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     options = options ?? {};
 
     return executeOperation(
-      this,
+      this.client,
       new CountOperation(this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
@@ -165,7 +165,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (verbosity == null) verbosity = true;
 
     return executeOperation(
-      this,
+      this.client,
       new FindOperation(undefined, this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
@@ -412,11 +412,19 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @remarks
    * {@link https://docs.mongodb.com/manual/reference/command/find/#find-cmd-allowdiskuse | find command allowDiskUse documentation}
    */
-  allowDiskUse(): this {
+  allowDiskUse(allow = true): this {
     assertUninitialized(this);
+
     if (!this[kBuiltOptions].sort) {
       throw new MongoInvalidArgumentError('Option "allowDiskUse" requires a sort specification');
     }
+
+    // As of 6.0 the default is true. This allows users to get back to the old behaviour.
+    if (!allow) {
+      this[kBuiltOptions].allowDiskUse = false;
+      return this;
+    }
+
     this[kBuiltOptions].allowDiskUse = true;
     return this;
   }

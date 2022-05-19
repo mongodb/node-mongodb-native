@@ -1,0 +1,177 @@
+{
+  "description": "clustered-indexes",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "5.3",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "ts-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "ts-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "createCollection with clusteredIndex",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test",
+            "clusteredIndex": {
+              "key": {
+                "_id": 1
+              },
+              "unique": true,
+              "name": "test index"
+            }
+          }
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "ts-tests",
+            "collectionName": "test"
+          }
+        }
+      ]
+    },
+    {
+      "description": "listCollections includes clusteredIndex",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test",
+            "clusteredIndex": {
+              "key": {
+                "_id": 1
+              },
+              "unique": true,
+              "name": "test index"
+            }
+          }
+        },
+        {
+          "name": "listCollections",
+          "object": "database0",
+          "arguments": {
+            "filter": {
+              "name": {
+                "$eq": "test"
+              }
+            }
+          },
+          "expectResult": [
+            {
+              "name": "test",
+              "options": {
+                "clusteredIndex": {
+                  "key": {
+                    "_id": 1
+                  },
+                  "unique": true,
+                  "name": "test index",
+                  "v": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "listIndexes returns the index",
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test",
+            "clusteredIndex": {
+              "key": {
+                "_id": 1
+              },
+              "unique": true,
+              "name": "test index"
+            }
+          }
+        },
+        {
+          "name": "listIndexes",
+          "object": "collection0",
+          "expectResult": [
+            {
+              "key": {
+                "_id": 1
+              },
+              "name": "test index",
+              "clustered": true,
+              "unique": true,
+              "v": {
+                "$$type": [
+                  "int",
+                  "long"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

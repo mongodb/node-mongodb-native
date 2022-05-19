@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.6.0](https://github.com/mongodb/node-mongodb-native/compare/v4.6.0-alpha.0...v4.6.0) (2022-05-11)
+
+
+### Features
+
+* **NODE-4185:** Allow opting out of disk use on cursor builder ([#3230](https://github.com/mongodb/node-mongodb-native/issues/3230)) ([d216725](https://github.com/mongodb/node-mongodb-native/commit/d216725fd7557811170abea2ed06856e5940395b))
+* **NODE-4189:** Add support for clustered collections ([#3229](https://github.com/mongodb/node-mongodb-native/issues/3229)) ([79a917b](https://github.com/mongodb/node-mongodb-native/commit/79a917b3d6426f681f0ba55243d29c92a7254dcc))
+
+
+### Bug Fixes
+
+* **NODE-3565:** Improve error message for insertMany with partially empty array ([#3221](https://github.com/mongodb/node-mongodb-native/issues/3221)) ([0ef2516](https://github.com/mongodb/node-mongodb-native/commit/0ef251655271b1a9200d5f23344092e9513c5379))
+* **NODE-4232:** stream() also returns generic AsyncIterable ([ed4ba58](https://github.com/mongodb/node-mongodb-native/commit/ed4ba587b991a8979d73af5ba6f3ff2690a21f85))
+
 ## [4.6.0-alpha.0](https://github.com/mongodb/node-mongodb-native/compare/v4.5.0...v4.6.0-alpha.0) (2022-05-04)
 
 

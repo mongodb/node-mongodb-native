@@ -655,19 +655,19 @@ function executeCommands(
   try {
     if (isInsertBatch(batch)) {
       executeOperation(
-        bulkOperation.s.collection,
+        bulkOperation.s.collection.s.db.s.client,
         new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
         resultHandler
       );
     } else if (isUpdateBatch(batch)) {
       executeOperation(
-        bulkOperation.s.collection,
+        bulkOperation.s.collection.s.db.s.client,
         new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
         resultHandler
       );
     } else if (isDeleteBatch(batch)) {
       executeOperation(
-        bulkOperation.s.collection,
+        bulkOperation.s.collection.s.db.s.client,
         new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
         resultHandler
       );
@@ -1133,6 +1133,9 @@ export abstract class BulkOperationBase {
 
   /** Specifies a raw operation to perform in the bulk write. */
   raw(op: AnyBulkWriteOperation): this {
+    if (op == null || typeof op !== 'object') {
+      throw new MongoInvalidArgumentError('Operation must be an object with an operation key');
+    }
     if ('insertOne' in op) {
       const forceServerObjectId = shouldForceServerObjectId(this);
       if (op.insertOne && op.insertOne.document == null) {
@@ -1285,7 +1288,7 @@ export abstract class BulkOperationBase {
     const finalOptions = { ...this.s.options, ...options };
     const operation = new BulkWriteShimOperation(this, finalOptions);
 
-    return executeOperation(this.s.collection, operation, callback);
+    return executeOperation(this.s.collection.s.db.s.client, operation, callback);
   }
 
   /**

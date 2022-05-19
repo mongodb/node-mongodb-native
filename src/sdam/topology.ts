@@ -27,7 +27,7 @@ import {
   MongoServerSelectionError,
   MongoTopologyClosedError
 } from '../error';
-import type { MongoOptions, ServerApi } from '../mongo_client';
+import type { MongoClient, MongoOptions, ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import {
@@ -202,6 +202,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   hello?: Document;
   /** @internal */
   _type?: string;
+
+  client!: MongoClient;
 
   /** @event */
   static readonly SERVER_OPENING = SERVER_OPENING;
@@ -626,7 +628,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   /** Start a logical session */
   startSession(options: ClientSessionOptions, clientOptions?: MongoOptions): ClientSession {
-    const session = new ClientSession(this, this.s.sessionPool, options, clientOptions);
+    const session = new ClientSession(this.client, this.s.sessionPool, options, clientOptions);
     session.once('ended', () => {
       this.s.sessions.delete(session);
     });

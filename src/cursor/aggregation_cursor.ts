@@ -1,8 +1,8 @@
 import type { Document } from '../bson';
 import type { ExplainVerbosityLike } from '../explain';
+import type { MongoClient } from '../mongo_client';
 import { AggregateOperation, AggregateOptions } from '../operations/aggregate';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
-import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';
@@ -33,12 +33,12 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   constructor(
-    topology: Topology,
+    client: MongoClient,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
     options: AggregateOptions = {}
   ) {
-    super(topology, namespace, options);
+    super(client, namespace, options);
 
     this[kPipeline] = pipeline;
     this[kOptions] = options;
@@ -51,7 +51,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   clone(): AggregationCursor<TSchema> {
     const clonedOptions = mergeOptions({}, this[kOptions]);
     delete clonedOptions.session;
-    return new AggregationCursor(this.topology, this.namespace, this[kPipeline], {
+    return new AggregationCursor(this.client, this.namespace, this[kPipeline], {
       ...clonedOptions
     });
   }
@@ -68,7 +68,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
       session
     });
 
-    executeOperation(this, aggregateOperation, (err, response) => {
+    executeOperation(this.client, aggregateOperation, (err, response) => {
       if (err || response == null) return callback(err);
 
       // TODO: NODE-2882
@@ -88,7 +88,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (verbosity == null) verbosity = true;
 
     return executeOperation(
-      this,
+      this.client,
       new AggregateOperation(this.namespace, this[kPipeline], {
         ...this[kOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,

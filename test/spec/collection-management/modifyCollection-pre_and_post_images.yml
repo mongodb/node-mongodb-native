@@ -1,0 +1,58 @@
+description: "modifyCollection-pre_and_post_images"
+
+schemaVersion: "1.4"
+
+runOnRequirements:
+  - minServerVersion: "6.0"
+    serverless: forbid
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name papi-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+
+tests:
+  - description: "modifyCollection to changeStreamPreAndPostImages enabled"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          changeStreamPreAndPostImages: { enabled: false }
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+      - name: modifyCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          changeStreamPreAndPostImages: { enabled: true }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                drop: *collection0Name
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                create: *collection0Name
+                changeStreamPreAndPostImages: { enabled: false }
+          - commandStartedEvent:
+              command:
+                collMod: *collection0Name
+                changeStreamPreAndPostImages: { enabled: true }

@@ -294,4 +294,58 @@ describe('Find Cursor', function () {
       })
     });
   });
+
+  context('#allowDiskUse', function () {
+    it('should set allowDiskUse to true by default', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withClientV2(function (client, done) {
+        const commands = [];
+        client.on('commandStarted', filterForCommands(['find'], commands));
+
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({}, { sort: 'foo' });
+        cursor.allowDiskUse();
+        this.defer(() => cursor.close());
+
+        cursor.toArray(err => {
+          expect(err).to.not.exist;
+          expect(commands).to.have.length(1);
+          expect(commands[0].command.allowDiskUse).to.equal(true);
+          done();
+        });
+      })
+    });
+
+    it('should set allowDiskUse to false if specified', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withClientV2(function (client, done) {
+        const commands = [];
+        client.on('commandStarted', filterForCommands(['find'], commands));
+
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({}, { sort: 'foo' });
+        cursor.allowDiskUse(false);
+        this.defer(() => cursor.close());
+
+        cursor.toArray(err => {
+          expect(err).to.not.exist;
+          expect(commands).to.have.length(1);
+          expect(commands[0].command.allowDiskUse).to.equal(false);
+          done();
+        });
+      })
+    });
+
+    it('throws if the query does not have sort specified', {
+      metadata: { requires: { mongodb: '>=4.4' } },
+      test: withClientV2(function (client, done) {
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({});
+        expect(() => cursor.allowDiskUse(false)).to.throw(
+          'Option "allowDiskUse" requires a sort specification'
+        );
+        done();
+      })
+    });
+  });
 });

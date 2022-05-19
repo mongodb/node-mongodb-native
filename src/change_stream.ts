@@ -50,7 +50,8 @@ const CHANGE_STREAM_OPTIONS = [
   'resumeAfter',
   'startAfter',
   'startAtOperationTime',
-  'fullDocument'
+  'fullDocument',
+  'fullDocumentBeforeChange'
 ] as const;
 
 const CURSOR_OPTIONS = [
@@ -131,11 +132,35 @@ export type ChangeStreamAggregateRawResult<TChange> = {
  */
 export interface ChangeStreamOptions extends AggregateOptions {
   /**
-   * Allowed values: 'updateLookup'. When set to 'updateLookup',
-   * the change stream will include both a delta describing the changes to the document,
-   * as well as a copy of the entire document that was changed from some time after the change occurred.
+   * Allowed values: 'updateLookup', 'whenAvailable', 'required'.
+   *
+   * When set to 'updateLookup', the change notification for partial updates
+   * will include both a delta describing the changes to the document as well
+   * as a copy of the entire document that was changed from some time after
+   * the change occurred.
+   *
+   * When set to 'whenAvailable', configures the change stream to return the
+   * post-image of the modified document for replace and update change events
+   * if the post-image for this event is available.
+   *
+   * When set to 'required', the same behavior as 'whenAvailable' except that
+   * an error is raised if the post-image is not available.
    */
   fullDocument?: string;
+
+  /**
+   * Allowed values: 'whenAvailable', 'required', 'off'.
+   *
+   * The default is to not send a value, which is equivalent to 'off'.
+   *
+   * When set to 'whenAvailable', configures the change stream to return the
+   * pre-image of the modified document for replace, update, and delete change
+   * events if it is available.
+   *
+   * When set to 'required', the same behavior as 'whenAvailable' except that
+   * an error is raised if the pre-image is not available.
+   */
+  fullDocumentBeforeChange?: string;
   /** The maximum amount of time for the server to wait on new documents to satisfy a change stream query. */
   maxAwaitTimeMS?: number;
   /**
@@ -230,15 +255,23 @@ export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
   operationType: 'update';
   /**
    * This is only set if `fullDocument` is set to `'updateLookup'`
-   * The fullDocument document represents the most current majority-committed version of the updated document.
-   * The fullDocument document may vary from the document at the time of the update operation depending on the
-   * number of interleaving majority-committed operations that occur between the update operation and the document lookup.
+   * Contains the point-in-time post-image of the modified document if the
+   * post-image is available and either 'required' or 'whenAvailable' was
+   * specified for the 'fullDocument' option when creating the change stream.
    */
   fullDocument?: TSchema;
   /** Contains a description of updated and removed fields in this operation */
   updateDescription: UpdateDescription<TSchema>;
   /** Namespace the update event occured on */
   ns: ChangeStreamNameSpace;
+  /**
+   * Contains the pre-image of the modified or deleted document if the
+   * pre-image is available for the change event and either 'required' or
+   * 'whenAvailable' was specified for the 'fullDocumentBeforeChange' option
+   * when creating the change stream. If 'whenAvailable' was specified but the
+   * pre-image is unavailable, this will be explicitly set to null.
+   */
+  fullDocumentBeforeChange?: TSchema;
 }
 
 /**
@@ -254,6 +287,14 @@ export interface ChangeStreamReplaceDocument<TSchema extends Document = Document
   fullDocument: TSchema;
   /** Namespace the replace event occured on */
   ns: ChangeStreamNameSpace;
+  /**
+   * Contains the pre-image of the modified or deleted document if the
+   * pre-image is available for the change event and either 'required' or
+   * 'whenAvailable' was specified for the 'fullDocumentBeforeChange' option
+   * when creating the change stream. If 'whenAvailable' was specified but the
+   * pre-image is unavailable, this will be explicitly set to null.
+   */
+  fullDocumentBeforeChange?: TSchema;
 }
 
 /**
@@ -267,6 +308,14 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
   operationType: 'delete';
   /** Namespace the delete event occured on */
   ns: ChangeStreamNameSpace;
+  /**
+   * Contains the pre-image of the modified or deleted document if the
+   * pre-image is available for the change event and either 'required' or
+   * 'whenAvailable' was specified for the 'fullDocumentBeforeChange' option
+   * when creating the change stream. If 'whenAvailable' was specified but the
+   * pre-image is unavailable, this will be explicitly set to null.
+   */
+  fullDocumentBeforeChange?: TSchema;
 }
 
 /**
@@ -385,7 +434,7 @@ export class ChangeStream<
   /** @internal */
   [kResumeQueue]: Denque<Callback<ChangeStreamCursor<TSchema, TChange>>>;
   /** @internal */
-  [kCursorStream]?: Readable;
+  [kCursorStream]?: Readable & AsyncIterable<TChange>;
   /** @internal */
   [kClosed]: boolean;
   /** @internal */
@@ -473,7 +522,7 @@ export class ChangeStream<
   }
 
   /** @internal */
-  get cursorStream(): Readable | undefined {
+  get cursorStream(): (Readable & AsyncIterable<TChange>) | undefined {
     return this[kCursorStream];
   }
 
@@ -542,7 +591,7 @@ export class ChangeStream<
    * Return a modified Readable stream including a possible transform method.
    * @throws MongoDriverError if this.cursor is undefined
    */
-  stream(options?: CursorStreamOptions): Readable {
+  stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
     this.streamOptions = options;
     if (!this.cursor) throw new MongoChangeStreamError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
@@ -598,8 +647,24 @@ export class ChangeStream<
     }
     const pipeline = [{ $changeStream: changeStreamStageOptions }, ...this.pipeline];
 
+    const client: MongoClient | null =
+      this.type === CHANGE_DOMAIN_TYPES.CLUSTER
+        ? (this.parent as MongoClient)
+        : this.type === CHANGE_DOMAIN_TYPES.DATABASE
+        ? (this.parent as Db).s.client
+        : this.type === CHANGE_DOMAIN_TYPES.COLLECTION
+        ? (this.parent as Collection).s.db.s.client
+        : null;
+
+    if (client == null) {
+      // This should never happen because of the assertion in the constructor
+      throw new MongoRuntimeError(
+        `Changestream type should only be one of cluster, database, collection. Found ${this.type.toString()}`
+      );
+    }
+
     const changeStreamCursor = new ChangeStreamCursor<TSchema, TChange>(
-      getTopology(this.parent),
+      client,
       this.namespace,
       pipeline,
       options
@@ -833,12 +898,12 @@ export class ChangeStreamCursor<
   pipeline: Document[];
 
   constructor(
-    topology: Topology,
+    client: MongoClient,
     namespace: MongoDBNamespace,
     pipeline: Document[] = [],
     options: ChangeStreamCursorOptions = {}
   ) {
-    super(topology, namespace, options);
+    super(client, namespace, options);
 
     this.pipeline = pipeline;
     this.options = options;
@@ -905,7 +970,7 @@ export class ChangeStreamCursor<
   }
 
   clone(): AbstractCursor<TChange> {
-    return new ChangeStreamCursor(this.topology, this.namespace, this.pipeline, {
+    return new ChangeStreamCursor(this.client, this.namespace, this.pipeline, {
       ...this.cursorOptions
     });
   }
@@ -918,7 +983,7 @@ export class ChangeStreamCursor<
     });
 
     executeOperation<TODO_NODE_3286, ChangeStreamAggregateRawResult<TChange>>(
-      session,
+      session.client,
       aggregateOperation,
       (err, response) => {
         if (err || response == null) {

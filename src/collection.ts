@@ -93,7 +93,6 @@ import {
   checkCollectionName,
   DEFAULT_PK_FACTORY,
   emitWarningOnce,
-  getTopology,
   MongoDBNamespace,
   normalizeHintField,
   resolveOptions
@@ -296,7 +295,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new InsertOneOperation(
         this as TODO_NODE_3286,
         doc,
@@ -338,7 +337,7 @@ export class Collection<TSchema extends Document = Document> {
     options = options ? Object.assign({}, options) : { ordered: true };
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new InsertManyOperation(
         this as TODO_NODE_3286,
         docs,
@@ -406,7 +405,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new BulkWriteOperation(
         this as TODO_NODE_3286,
         operations as TODO_NODE_3286,
@@ -453,7 +452,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new UpdateOneOperation(
         this as TODO_NODE_3286,
         filter,
@@ -501,7 +500,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new ReplaceOneOperation(
         this as TODO_NODE_3286,
         filter,
@@ -549,7 +548,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new UpdateManyOperation(
         this as TODO_NODE_3286,
         filter,
@@ -583,7 +582,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new DeleteOneOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options)),
       callback
     );
@@ -623,7 +622,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new DeleteManyOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options)),
       callback
     );
@@ -652,7 +651,7 @@ export class Collection<TSchema extends Document = Document> {
 
     // Intentionally, we do not inherit options from parent for this operation.
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new RenameOperation(this as TODO_NODE_3286, newName, {
         ...options,
         readPreference: ReadPreference.PRIMARY
@@ -679,7 +678,7 @@ export class Collection<TSchema extends Document = Document> {
     options = options ?? {};
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new DropCollectionOperation(this.s.db, this.collectionName, options),
       callback
     );
@@ -759,7 +758,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return new FindCursor<WithId<TSchema>>(
-      getTopology(this),
+      this.s.db.s.client,
       this.s.namespace,
       filter,
       resolveOptions(this as TODO_NODE_3286, options)
@@ -783,7 +782,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new OptionsOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -806,7 +805,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new IsCappedOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -857,7 +856,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new CreateIndexOperation(
         this as TODO_NODE_3286,
         this.collectionName,
@@ -918,7 +917,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new CreateIndexesOperation(
         this as TODO_NODE_3286,
         this.collectionName,
@@ -952,7 +951,7 @@ export class Collection<TSchema extends Document = Document> {
     options.readPreference = ReadPreference.primary;
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new DropIndexOperation(this as TODO_NODE_3286, indexName, options),
       callback
     );
@@ -975,7 +974,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new DropIndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -1013,7 +1012,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new IndexExistsOperation(this as TODO_NODE_3286, indexes, resolveOptions(this, options)),
       callback
     );
@@ -1036,7 +1035,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new IndexInformationOperation(this.s.db, this.collectionName, resolveOptions(this, options)),
       callback
     );
@@ -1044,7 +1043,15 @@ export class Collection<TSchema extends Document = Document> {
 
   /**
    * Gets an estimate of the count of documents in a collection using collection metadata.
+   * This will always run a count command on all server versions.
    *
+   * due to an oversight in versions 5.0.0-5.0.8 of MongoDB, the count command,
+   * which estimatedDocumentCount uses in its implementation, was not included in v1 of
+   * the Stable API, and so users of the Stable API with estimatedDocumentCount are
+   * recommended to upgrade their server version to 5.0.9+ or set apiStrict: false to avoid
+   * encountering errors.
+   *
+   * @see {@link https://www.mongodb.com/docs/manual/reference/command/count/#behavior|Count: Behavior}
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
@@ -1058,7 +1065,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<number> | void {
     if (typeof options === 'function') (callback = options), (options = {});
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new EstimatedDocumentCountOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -1118,7 +1125,7 @@ export class Collection<TSchema extends Document = Document> {
 
     filter ??= {};
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new CountDocumentsOperation(
         this as TODO_NODE_3286,
         filter as Document,
@@ -1193,7 +1200,7 @@ export class Collection<TSchema extends Document = Document> {
 
     filter ??= {};
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new DistinctOperation(
         this as TODO_NODE_3286,
         key as TODO_NODE_3286,
@@ -1221,7 +1228,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new IndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options)),
       callback
     );
@@ -1245,7 +1252,7 @@ export class Collection<TSchema extends Document = Document> {
     options = options ?? {};
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new CollStatsOperation(this as TODO_NODE_3286, options),
       callback
     );
@@ -1277,7 +1284,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new FindOneAndDeleteOperation(
         this as TODO_NODE_3286,
         filter,
@@ -1324,7 +1331,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new FindOneAndReplaceOperation(
         this as TODO_NODE_3286,
         filter,
@@ -1372,7 +1379,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new FindOneAndUpdateOperation(
         this as TODO_NODE_3286,
         filter,
@@ -1408,7 +1415,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return new AggregationCursor(
-      getTopology(this),
+      this.s.db.s.client,
       this.s.namespace,
       pipeline,
       resolveOptions(this, options)
@@ -1526,7 +1533,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new MapReduceOperation(
         this as TODO_NODE_3286,
         map,
@@ -1667,7 +1674,7 @@ export class Collection<TSchema extends Document = Document> {
 
     filter ??= {};
     return executeOperation(
-      this,
+      this.s.db.s.client,
       new CountOperation(
         MongoDBNamespace.fromString(this.namespace),
         filter,

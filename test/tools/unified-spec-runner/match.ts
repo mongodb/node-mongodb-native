@@ -29,7 +29,12 @@ import {
 } from '../../../src/cmap/connection_pool_events';
 import { ejson } from '../utils';
 import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
-import { ExpectedCmapEvent, ExpectedCommandEvent, ExpectedError } from './schema';
+import {
+  ExpectedCmapEvent,
+  ExpectedCommandEvent,
+  ExpectedError,
+  ExpectedEventsForClient
+} from './schema';
 
 export interface ExistsOperator {
   $$exists: boolean;
@@ -300,21 +305,27 @@ function validEmptyCmapEvent(
   });
 }
 
-export function matchesEvents(
-  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
+function failOnMismatchedCount(
   actual: CommandEvent[] | CmapEvent[],
-  entities: EntitiesMap
-): void {
-  if (actual.length !== expected.length) {
-    const actualNames = actual.map(a => a.constructor.name);
-    const expectedNames = expected.map(e => Object.keys(e)[0]);
-    expect.fail(
-      `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
-        actualNames
-      )}`
-    );
-  }
+  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[]
+) {
+  const actualNames = actual.map(a => a.constructor.name);
+  const expectedNames = expected.map(e => Object.keys(e)[0]);
+  expect.fail(
+    `Expected event count mismatch, expected ${inspect(expectedNames)} but got ${inspect(
+      actualNames
+    )}`
+  );
+}
 
+function compareEvents(
+  actual: CommandEvent[] | CmapEvent[],
+  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
+  entities: EntitiesMap
+) {
+  if (actual.length !== expected.length) {
+    failOnMismatchedCount(actual, expected);
+  }
   for (const [index, actualEvent] of actual.entries()) {
     const expectedEvent = expected[index];
 
@@ -346,6 +357,30 @@ export function matchesEvents(
     } else if (!validEmptyCmapEvent(expectedEvent, actualEvent)) {
       expect.fail(`Events must be one of the known types, got ${inspect(actualEvent)}`);
     }
+  }
+}
+
+export function matchesEvents(
+  { events: expected, ignoreExtraEvents }: ExpectedEventsForClient,
+  actual: CommandEvent[] | CmapEvent[],
+  entities: EntitiesMap
+): void {
+  ignoreExtraEvents = ignoreExtraEvents ?? false;
+
+  if (ignoreExtraEvents) {
+    if (actual.length < expected.length) {
+      failOnMismatchedCount(actual, expected);
+    }
+
+    const slicedActualEvents = actual.slice(0, expected.length);
+
+    compareEvents(slicedActualEvents, expected, entities);
+  } else {
+    if (actual.length !== expected.length) {
+      failOnMismatchedCount(actual, expected);
+    }
+
+    compareEvents(actual, expected, entities);
   }
 }
 

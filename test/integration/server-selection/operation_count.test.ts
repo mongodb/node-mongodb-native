@@ -141,11 +141,11 @@ describe('Server Operation Count Tests', function () {
 
       const getMoreSpy = sinon.spy(server, 'getMore');
 
-      const operations = Array.from({ length: 10 }, () => cursor.next());
+      const operation = cursor.next();
 
-      expect(server.s.operationCount).to.equal(10);
+      expect(server.s.operationCount).to.equal(1);
 
-      await Promise.all(operations);
+      await operation;
 
       expect(getMoreSpy.called).to.be.true;
       expect(server.s.operationCount).to.equal(0);

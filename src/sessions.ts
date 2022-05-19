@@ -19,7 +19,7 @@ import {
   MongoTransactionError,
   MongoWriteConcernError
 } from './error';
-import type { MongoOptions } from './mongo_client';
+import type { MongoClient, MongoOptions } from './mongo_client';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
@@ -97,7 +97,7 @@ export interface EndSessionOptions {
  */
 export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /** @internal */
-  topology: Topology;
+  client: MongoClient;
   /** @internal */
   sessionPool: ServerSessionPool;
   hasEnded: boolean;
@@ -124,22 +124,22 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /**
    * Create a client session.
    * @internal
-   * @param topology - The current client's topology (Internal Class)
+   * @param client - The current client
    * @param sessionPool - The server session pool (Internal Class)
    * @param options - Optional settings
    * @param clientOptions - Optional settings provided when creating a MongoClient
    */
   constructor(
-    topology: Topology,
+    client: MongoClient,
     sessionPool: ServerSessionPool,
     options: ClientSessionOptions,
     clientOptions?: MongoOptions
   ) {
     super();
 
-    if (topology == null) {
+    if (client == null) {
       // TODO(NODE-3483)
-      throw new MongoRuntimeError('ClientSession requires a topology');
+      throw new MongoRuntimeError('ClientSession requires a MongoClient');
     }
 
     if (sessionPool == null || !(sessionPool instanceof ServerSessionPool)) {
@@ -158,7 +158,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       }
     }
 
-    this.topology = topology;
+    this.client = client;
     this.sessionPool = sessionPool;
     this.hasEnded = false;
     this.clientOptions = clientOptions;
@@ -205,7 +205,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   get loadBalanced(): boolean {
-    return this.topology.description.type === TopologyType.LoadBalanced;
+    return this.client.topology?.description.type === TopologyType.LoadBalanced;
   }
 
   /** @internal */
@@ -394,9 +394,9 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       this.unpin();
     }
 
-    const topologyMaxWireVersion = maxWireVersion(this.topology);
+    const topologyMaxWireVersion = maxWireVersion(this.client.topology);
     if (
-      isSharded(this.topology) &&
+      isSharded(this.client.topology) &&
       topologyMaxWireVersion != null &&
       topologyMaxWireVersion < minWireVersionForShardedTransactions
     ) {
@@ -457,20 +457,30 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   /**
-   * Runs a provided lambda within a transaction, retrying either the commit operation
+   * Runs a provided callback within a transaction, retrying either the commitTransaction operation
    * or entire transaction as needed (and when the error permits) to better ensure that
    * the transaction can complete successfully.
    *
-   * IMPORTANT: This method requires the user to return a Promise, all lambdas that do not
-   * return a Promise will result in undefined behavior.
+   * **IMPORTANT:** This method requires the user to return a Promise, and `await` all operations.
+   * Any callbacks that do not return a Promise will result in undefined behavior.
    *
-   * @param fn - A lambda to run within a transaction
-   * @param options - Optional settings for the transaction
+   * @remarks
+   * This function:
+   * - Will return the command response from the final commitTransaction if every operation is successful (can be used as a truthy object)
+   * - Will return `undefined` if the transaction is explicitly aborted with `await session.abortTransaction()`
+   * - Will throw if one of the operations throws or `throw` statement is used inside the `withTransaction` callback
+   *
+   * Checkout a descriptive example here:
+   * @see https://www.mongodb.com/developer/quickstart/node-transactions/
+   *
+   * @param fn - callback to run within a transaction
+   * @param options - optional settings for the transaction
+   * @returns A raw command response or undefined
    */
   withTransaction<T = void>(
     fn: WithTransactionCallback<T>,
     options?: TransactionOptions
-  ): ReturnType<typeof fn> {
+  ): Promise<Document | undefined> {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }
@@ -518,10 +528,11 @@ export function maybeClearPinnedConnection(
     return;
   }
 
+  const topology = session.client.topology;
   // NOTE: the spec talks about what to do on a network error only, but the tests seem to
   //       to validate that we don't unpin on _all_ errors?
-  if (conn) {
-    const servers = Array.from(session.topology.s.servers.values());
+  if (conn && topology != null) {
+    const servers = Array.from(topology.s.servers.values());
     const loadBalancer = servers[0];
 
     if (options?.error == null || options?.force) {
@@ -760,7 +771,7 @@ function endTransaction(
 
   // send the command
   executeOperation(
-    session,
+    session.client,
     new RunAdminCommandOperation(undefined, command, {
       session,
       readPreference: ReadPreference.primary,
@@ -784,7 +795,7 @@ function endTransaction(
         }
 
         return executeOperation(
-          session,
+          session.client,
           new RunAdminCommandOperation(undefined, command, {
             session,
             readPreference: ReadPreference.primary,

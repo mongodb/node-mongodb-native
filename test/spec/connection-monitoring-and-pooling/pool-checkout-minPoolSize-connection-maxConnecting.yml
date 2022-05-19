@@ -1,0 +1,63 @@
+version: 1
+style: integration
+description: threads blocked by maxConnecting check out minPoolSize connections
+runOn:
+  -
+    # required for blockConnection in fail point
+    minServerVersion: "4.4.0"
+failPoint:
+  configureFailPoint: failCommand
+  mode: "alwaysOn"
+  data:
+    failCommands: ["isMaster","hello"]
+    closeConnection: false
+    blockConnection: true
+    blockTimeMS: 500
+poolOptions:
+  # allows both thread1 and the background thread to start opening connections concurrently
+  minPoolSize: 2
+  # gives opportunity for the checkout in thread2 to open a new connection, which it must not do nonetheless
+  maxPoolSize: 3
+  waitQueueTimeoutMS: 5000
+operations:
+  - name: ready
+  # thread1 exists to hold on one of the two permits to open a connection (the other one is initially held by the background thread),
+  # so that thread2 would be blocked acquiring a permit, which opens an opportunity for it to grab the connection newly opened
+  # by the background thread instead of opening a third connection.
+  - name: start
+    target: thread1
+  - name: start
+    target: thread2
+  # Ideally, thread1 should be holding for its permit to open a connection till the end of the test, but we cannot express that.
+  # This delay emulates the above requirement:
+  # - it is long enough to make sure that the background thread opens a connection before thread1 releases its permit;
+  # - it is short enough to allow thread2 to become blocked acquiring a permit to open a connection, and then grab the connection
+  #   opened by the background thread, before the background thread releases its permit.
+  - name: wait
+    ms: 200
+  - name: checkOut
+    thread: thread1
+  - name: waitForEvent
+    event: ConnectionCreated
+    count: 2
+  - name: checkOut
+    thread: thread2
+  - name: waitForEvent
+    event: ConnectionCheckedOut
+    count: 2
+events:
+  # exactly 2 connections must be created and checked out
+  - type: ConnectionCreated
+    address: 42
+  - type: ConnectionCreated
+    address: 42
+  - type: ConnectionCheckedOut
+    address: 42
+  - type: ConnectionCheckedOut
+    address: 42
+ignore:
+  - ConnectionPoolReady
+  - ConnectionClosed
+  - ConnectionReady
+  - ConnectionPoolCreated
+  - ConnectionCheckOutStarted

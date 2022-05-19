@@ -268,11 +268,13 @@ export interface MongoClientPrivate {
   sessions: Set<ClientSession>;
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
-  readonly options?: MongoOptions;
+  hasBeenClosed: boolean;
+  readonly options: MongoOptions;
   readonly readConcern?: ReadConcern;
   readonly writeConcern?: WriteConcern;
   readonly readPreference: ReadPreference;
   readonly logger: Logger;
+  readonly isMongoClient: true;
 }
 
 /** @public */
@@ -351,6 +353,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       sessions: new Set(),
       bsonOptions: resolveBSONOptions(this[kOptions]),
       namespace: ns('admin'),
+      hasBeenClosed: false,
 
       get options() {
         return client[kOptions];
@@ -366,6 +369,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       },
       get logger() {
         return client[kOptions].logger;
+      },
+      get isMongoClient(): true {
+        return true;
       }
     };
   }
@@ -446,6 +452,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     forceOrCallback?: boolean | Callback<void>,
     callback?: Callback<void>
   ): Promise<void> | void {
+    // There's no way to set hasBeenClosed back to false
+    Object.defineProperty(this.s, 'hasBeenClosed', {
+      value: true,
+      enumerable: true,
+      configurable: false,
+      writable: false
+    });
+
     if (typeof forceOrCallback === 'function') {
       callback = forceOrCallback;
     }

@@ -84,6 +84,7 @@ functions:
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
           REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
           LOAD_BALANCER=${LOAD_BALANCER} \
+          COMPRESSOR=${COMPRESSOR} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
@@ -213,6 +214,25 @@ functions:
           SKIP_DEPS=${SKIP_DEPS|1} \
           NO_EXIT=${NO_EXIT|1} \
           LOAD_BALANCER="${LOAD_BALANCER}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+  run-compression-tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 300
+        script: |
+          ${PREPARE_SHELL}
+
+          MONGODB_URI="${MONGODB_URI}" \
+          AUTH=${AUTH} \
+          SSL=${SSL} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} \
+          TOPOLOGY="${TOPOLOGY}" \
+          COMPRESSOR="${COMPRESSOR}" \
+          SKIP_DEPS=${SKIP_DEPS|1} \
+          NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run lint checks:
     - command: subprocess.exec
@@ -1154,6 +1174,32 @@ tasks:
       - func: run socks5 tests
         vars:
           SSL: ssl
+  - name: test-zstd-compression
+    tags:
+      - latest
+      - zstd
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+          AUTH: auth
+          COMPRESSOR: zstd
+      - func: run-compression-tests
+  - name: test-snappy-compression
+    tags:
+      - latest
+      - snappy
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+          AUTH: auth
+          COMPRESSOR: snappy
+      - func: run-compression-tests
   - name: test-tls-support-latest
     tags:
       - tls-support
@@ -1964,6 +2010,8 @@ buildvariants:
       - test-auth-ldap
       - test-socks5
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2019,6 +2067,8 @@ buildvariants:
       - test-auth-ldap
       - test-socks5
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2070,6 +2120,8 @@ buildvariants:
       - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0

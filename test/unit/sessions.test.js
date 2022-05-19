@@ -163,7 +163,7 @@ describe('Sessions - unit', function () {
       it('should throw errors with invalid parameters', function () {
         expect(() => {
           new ClientSession();
-        }).to.throw(/ClientSession requires a topology/);
+        }).to.throw(/ClientSession requires a MongoClient/);
 
         expect(() => {
           new ClientSession({});

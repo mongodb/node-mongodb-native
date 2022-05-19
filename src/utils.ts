@@ -348,7 +348,7 @@ export type TopologyProvider =
  */
 export function getTopology(provider: TopologyProvider): Topology {
   // MongoClient or ClientSession or AbstractCursor
-  if (`topology` in provider && provider.topology) {
+  if ('topology' in provider && provider.topology) {
     return provider.topology;
   } else if ('s' in provider && 'client' in provider.s && provider.s.client.topology) {
     return provider.s.client.topology;

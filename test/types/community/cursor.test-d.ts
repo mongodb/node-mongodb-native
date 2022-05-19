@@ -30,9 +30,15 @@ const cursor = collection
   .sort({})
   .map(result => ({ foo: result.age }));
 
+const cursorStream = cursor.stream();
 expectType<FindCursor<{ foo: number }>>(cursor);
-expectType<Readable>(cursor.stream());
+expectType<Readable & AsyncIterable<{ foo: number }>>(cursorStream);
 expectType<FindCursor<Document>>(cursor.project({}));
+(async () => {
+  for await (const doc of cursorStream) {
+    expectType<{ foo: number }>(doc);
+  }
+})();
 
 collection.find().project({});
 collection.find().project({ notExistingField: 1 });
