@@ -654,47 +654,48 @@ function processWaitQueue(pool: ConnectionPool) {
   }
 
   const { maxPoolSize, maxConnecting } = pool.options;
-  if (
+  while (
     pool.waitQueueSize &&
     pool.pendingConnectionCount < maxConnecting &&
+    pool.availableConnectionCount <= 0 &&
     (maxPoolSize <= 0 || pool.totalConnectionCount < maxPoolSize)
   ) {
+    const waitQueueMember = pool[kWaitQueue].shift();
+    if (!waitQueueMember || waitQueueMember[kCancelled]) {
+      continue;
+    }
     createConnection(pool, (err, connection) => {
-      const waitQueueMember = pool[kWaitQueue].shift();
-      if (!waitQueueMember || waitQueueMember[kCancelled]) {
+      if (waitQueueMember[kCancelled]) {
         if (!err && connection) {
           pool[kConnections].push(connection);
           pool[kPending]--;
         }
 
-        pool[kProcessingWaitQueue] = false;
-        return;
-      }
+        // return;
+      } else {
+        if (err) {
+          pool.emit(
+            ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+            new ConnectionCheckOutFailedEvent(pool, err)
+          );
+        } else if (connection) {
+          pool[kCheckedOut]++;
+          pool[kPending]--;
+          pool.emit(
+            ConnectionPool.CONNECTION_CHECKED_OUT,
+            new ConnectionCheckedOutEvent(pool, connection)
+          );
+        }
 
-      if (err) {
-        pool.emit(
-          ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-          new ConnectionCheckOutFailedEvent(pool, err)
-        );
-      } else if (connection) {
-        pool[kCheckedOut]++;
-        pool[kPending]--;
-        pool.emit(
-          ConnectionPool.CONNECTION_CHECKED_OUT,
-          new ConnectionCheckedOutEvent(pool, connection)
-        );
+        if (waitQueueMember.timer) {
+          clearTimeout(waitQueueMember.timer);
+        }
+        waitQueueMember.callback(err, connection);
       }
-
-      if (waitQueueMember.timer) {
-        clearTimeout(waitQueueMember.timer);
-      }
-      waitQueueMember.callback(err, connection);
-      pool[kProcessingWaitQueue] = false;
-      process.nextTick(() => processWaitQueue(pool));
+      process.nextTick(processWaitQueue, pool);
     });
-  } else {
-    pool[kProcessingWaitQueue] = false;
   }
+  pool[kProcessingWaitQueue] = false;
 }
 
 /**

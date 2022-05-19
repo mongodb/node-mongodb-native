@@ -386,7 +386,11 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     ev => !ignoreEvents.includes(getEventType(ev))
   );
 
-  expect(actualEvents).to.have.lengthOf(expectedEvents.length);
+  expect(actualEvents).to.have.lengthOf(
+    expectedEvents.length,
+    `Received: ${JSON.stringify(actualEvents)}`
+  );
+
   for (const expected of expectedEvents) {
     const actual = actualEvents.shift();
     const { type: eventType, ...eventPropsToCheck } = expected;
@@ -397,7 +401,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
 
 export type SkipDescription = {
   description: string;
-  skipIfCondition: 'loadBalanced';
+  skipIfCondition: 'loadBalanced' | 'always';
   skipReason: string;
 };
 
@@ -416,9 +420,11 @@ export function runCmapTestSuite(
           ({ description }) => description === test.description
         );
         if (skipDescription) {
+          const alwaysSkip = skipDescription.skipIfCondition === 'always';
           const matchesLoadBalanceSkip =
             skipDescription.skipIfCondition === 'loadBalanced' && this.configuration.isLoadBalanced;
-          if (matchesLoadBalanceSkip) {
+
+          if (alwaysSkip || matchesLoadBalanceSkip) {
             this.currentTest.skipReason = skipDescription.skipReason;
             this.skip();
           }
