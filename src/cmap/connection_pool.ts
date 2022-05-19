@@ -545,7 +545,7 @@ function createConnection(pool: ConnectionPool, callback: Callback<Connection>) 
   // This is our version of a "virtual" no-I/O connection as the spec requires
   pool.emit(
     ConnectionPool.CONNECTION_CREATED,
-    new ConnectionCreatedEvent(pool, { id: connectOptions.id } as Connection)
+    new ConnectionCreatedEvent(pool, { id: connectOptions.id })
   );
 
   connect(connectOptions, (err, connection) => {
