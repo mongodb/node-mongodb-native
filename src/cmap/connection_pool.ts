@@ -508,9 +508,9 @@ function ensureMinPoolSize(pool: ConnectionPool) {
     // connection permits because that potentially delays the availability of
     // the connection to a checkout request
     createConnection(pool, (err, connection) => {
+      pool[kPending]--;
       if (!err && connection) {
         pool[kConnections].push(connection);
-        pool[kPending]--;
         process.nextTick(processWaitQueue, pool);
       }
       pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 10);
@@ -533,7 +533,7 @@ function connectionIsIdle(pool: ConnectionPool, connection: Connection) {
   return !!(pool.options.maxIdleTimeMS && connection.idleTime > pool.options.maxIdleTimeMS);
 }
 
-function createConnection(pool: ConnectionPool, callback?: Callback<Connection>) {
+function createConnection(pool: ConnectionPool, callback: Callback<Connection>) {
   const connectOptions: ConnectionOptions = {
     ...pool.options,
     id: pool[kConnectionCounter].next().value,
@@ -550,12 +550,8 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
 
   connect(connectOptions, (err, connection) => {
     if (err || !connection) {
-      pool[kPending]--;
       pool[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
-      if (typeof callback === 'function') {
-        callback(err);
-      }
-
+      callback(err);
       return;
     }
 
@@ -591,16 +587,8 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     connection.markAvailable();
     pool.emit(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(pool, connection));
 
-    // if a callback has been provided, hand off the connection immediately
-    if (typeof callback === 'function') {
-      callback(undefined, connection);
-      return;
-    }
-
-    // otherwise add it to the pool for later acquisition, and try to process the wait queue
-    // pool[kConnections].push(connection);
-    // pool[kPending]--;
-    // process.nextTick(processWaitQueue, pool);
+    callback(undefined, connection);
+    return;
   });
 }
 
@@ -660,20 +648,19 @@ function processWaitQueue(pool: ConnectionPool) {
 
   const { maxPoolSize, maxConnecting } = pool.options;
   while (
-    pool.waitQueueSize &&
+    pool.waitQueueSize > 0 &&
     pool.pendingConnectionCount < maxConnecting &&
-    pool.availableConnectionCount <= 0 &&
-    (maxPoolSize <= 0 || pool.totalConnectionCount < maxPoolSize)
+    (maxPoolSize === 0 || pool.totalConnectionCount < maxPoolSize)
   ) {
     const waitQueueMember = pool[kWaitQueue].shift();
     if (!waitQueueMember || waitQueueMember[kCancelled]) {
       continue;
     }
     createConnection(pool, (err, connection) => {
+      pool[kPending]--;
       if (waitQueueMember[kCancelled]) {
         if (!err && connection) {
           pool[kConnections].push(connection);
-          pool[kPending]--;
         }
       } else {
         if (err) {
@@ -683,7 +670,6 @@ function processWaitQueue(pool: ConnectionPool) {
           );
         } else if (connection) {
           pool[kCheckedOut]++;
-          pool[kPending]--;
           pool.emit(
             ConnectionPool.CONNECTION_CHECKED_OUT,
             new ConnectionCheckedOutEvent(pool, connection)
