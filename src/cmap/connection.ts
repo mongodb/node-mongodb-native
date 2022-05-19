@@ -293,6 +293,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kHello] = response;
   }
 
+  // Set the whether the message stream is for a monitoring connection using the
+  // streaming protocol.
+  set isStreamingProtocol(value: boolean) {
+    this[kMessageStream].isStreamingProtocol = value;
+  }
+
+  get isStreamingProtocol(): boolean {
+    return this[kMessageStream].isStreamingProtocol;
+  }
+
   get serviceId(): ObjectId | undefined {
     return this.hello?.serviceId;
   }

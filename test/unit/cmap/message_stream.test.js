@@ -19,6 +19,34 @@ function bufferToStream(buffer) {
 }
 
 describe('Message Stream', function () {
+  context('when the stream uses the streaming protocol', function () {
+    const data = Buffer.from(
+      '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
+        '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
+        '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
+        '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
+      'hex'
+    );
+
+    it('only reads the last message in the buffer', function (done) {
+      const inputStream = bufferToStream(data);
+      const messageStream = new MessageStream();
+      messageStream.isStreamingProtocol = true;
+
+      messageStream.once('message', msg => {
+        msg.parse();
+        expect(msg)
+          .to.have.property('documents')
+          .that.deep.equals([{ [LEGACY_HELLO_COMMAND]: 1 }]);
+        // Make sure there is nothing left in the buffer.
+        expect(messageStream.buffer.length).to.equal(0);
+        done();
+      });
+
+      inputStream.pipe(messageStream);
+    });
+  });
+
   describe('reading', function () {
     [
       {

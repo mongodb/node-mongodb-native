@@ -53,11 +53,17 @@ export class MessageStream extends Duplex {
   maxBsonMessageSize: number;
   /** @internal */
   [kBuffer]: BufferPool;
+  /** @internal */
+  isStreamingProtocol = false;
 
   constructor(options: MessageStreamOptions = {}) {
     super(options);
     this.maxBsonMessageSize = options.maxBsonMessageSize || kDefaultMaxBsonMessageSize;
     this[kBuffer] = new BufferPool();
+  }
+
+  get buffer(): BufferPool {
+    return this[kBuffer];
   }
 
   override _write(chunk: Buffer, _: unknown, callback: Callback<Buffer>): void {
@@ -165,12 +171,20 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
   let ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
   if (messageHeader.opCode !== OP_COMPRESSED) {
     const messageBody = message.slice(MESSAGE_HEADER_SIZE);
-    stream.emit('message', new ResponseType(message, messageHeader, messageBody));
 
-    if (buffer.length >= 4) {
+    // If we are a monitoring message stream using the streaming protocol and
+    // there is more in the buffer that can be read, skip processing since we
+    // want the last hello command response that is in the buffer.
+    if (stream.isStreamingProtocol && buffer.length >= 4) {
       processIncomingData(stream, callback);
     } else {
-      callback();
+      stream.emit('message', new ResponseType(message, messageHeader, messageBody));
+
+      if (buffer.length >= 4) {
+        processIncomingData(stream, callback);
+      } else {
+        callback();
+      }
     }
 
     return;
@@ -198,12 +212,19 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
       return;
     }
 
-    stream.emit('message', new ResponseType(message, messageHeader, messageBody));
-
-    if (buffer.length >= 4) {
+    // If we are a monitoring message stream using the streaming protocol and
+    // there is more in the buffer that can be read, skip processing since we
+    // want the last hello command response that is in the buffer.
+    if (stream.isStreamingProtocol && buffer.length >= 4) {
       processIncomingData(stream, callback);
     } else {
-      callback();
+      stream.emit('message', new ResponseType(message, messageHeader, messageBody));
+
+      if (buffer.length >= 4) {
+        processIncomingData(stream, callback);
+      } else {
+        callback();
+      }
     }
   });
 }
