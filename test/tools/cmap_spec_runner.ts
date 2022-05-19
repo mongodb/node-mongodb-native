@@ -116,12 +116,14 @@ class Thread {
     await sleep();
   }
 
-  queue(op: CmapOperation) {
+  queue(op: CmapOperation, thread?: Thread) {
     if (this.#killed || this.#error) {
       return;
     }
 
-    this.#promise = this.#promise.then(() => this._runOperation(op)).catch(e => (this.#error = e));
+    const functionToQueue = () => (!thread ? this._runOperation(op) : thread.queue(op));
+
+    this.#promise = this.#promise.then(functionToQueue).catch(e => (this.#error = e));
   }
 
   async finish() {
@@ -352,9 +354,12 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     const op = operations[idx];
 
     const threadKey = op.name === 'checkOut' ? op.thread || MAIN_THREAD_KEY : MAIN_THREAD_KEY;
-    const thread = threadContext.getThread(threadKey);
-
-    thread.queue(op);
+    if (threadKey === MAIN_THREAD_KEY) {
+      mainThread.queue(op);
+    } else {
+      const thread = threadContext.getThread(threadKey);
+      mainThread.queue(op, thread);
+    }
   }
 
   await mainThread.finish().catch(e => {
@@ -386,10 +391,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     ev => !ignoreEvents.includes(getEventType(ev))
   );
 
-  expect(actualEvents).to.have.lengthOf(
-    expectedEvents.length,
-    `Received: ${JSON.stringify(actualEvents)}`
-  );
+  expect(actualEvents).to.have.lengthOf(expectedEvents.length);
 
   for (const expected of expectedEvents) {
     const actual = actualEvents.shift();
