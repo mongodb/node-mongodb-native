@@ -537,6 +537,12 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
   };
 
   pool[kPending]++;
+  // This is our version of a "virtual" no-I/O connection as the spec requires
+  pool.emit(
+    ConnectionPool.CONNECTION_CREATED,
+    new ConnectionCreatedEvent(pool, { id: connectOptions.id } as Connection)
+  );
+
   connect(connectOptions, (err, connection) => {
     if (err || !connection) {
       pool[kPending]--;
@@ -559,8 +565,6 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     for (const event of [...APM_EVENTS, Connection.CLUSTER_TIME_RECEIVED]) {
       connection.on(event, (e: any) => pool.emit(event, e));
     }
-
-    pool.emit(ConnectionPool.CONNECTION_CREATED, new ConnectionCreatedEvent(pool, connection));
 
     if (pool.loadBalanced) {
       connection.on(Connection.PINNED, pinType => pool[kMetrics].markPinned(pinType));
