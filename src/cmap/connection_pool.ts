@@ -515,6 +515,8 @@ function ensureMinPoolSize(pool: ConnectionPool) {
       }
       pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 10);
     });
+  } else {
+    pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 100);
   }
 }
 
