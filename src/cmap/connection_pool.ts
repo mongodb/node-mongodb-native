@@ -507,10 +507,15 @@ function ensureMinPoolSize(pool: ConnectionPool) {
     // NOTE: ensureMinPoolSize should not try to get all the pending
     // connection permits because that potentially delays the availability of
     // the connection to a checkout request
-    createConnection(pool);
+    createConnection(pool, (err, connection) => {
+      if (!err && connection) {
+        pool[kConnections].push(connection);
+        pool[kPending]--;
+        process.nextTick(processWaitQueue, pool);
+      }
+      pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 10);
+    });
   }
-
-  pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 10);
 }
 
 function connectionIsStale(pool: ConnectionPool, connection: Connection) {
@@ -593,9 +598,9 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     }
 
     // otherwise add it to the pool for later acquisition, and try to process the wait queue
-    pool[kConnections].push(connection);
-    pool[kPending]--;
-    process.nextTick(processWaitQueue, pool);
+    // pool[kConnections].push(connection);
+    // pool[kPending]--;
+    // process.nextTick(processWaitQueue, pool);
   });
 }
 
@@ -670,8 +675,6 @@ function processWaitQueue(pool: ConnectionPool) {
           pool[kConnections].push(connection);
           pool[kPending]--;
         }
-
-        // return;
       } else {
         if (err) {
           pool.emit(
