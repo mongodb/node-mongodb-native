@@ -5,6 +5,7 @@ const { MessageStream } = require('../../../src/cmap/message_stream');
 const { Msg } = require('../../../src/cmap/commands');
 const expect = require('chai').expect;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { generateOpMsgBuffer } = require('../../tools/utils');
 
 function bufferToStream(buffer) {
   const stream = new Readable();
@@ -18,26 +19,27 @@ function bufferToStream(buffer) {
   return stream;
 }
 
-describe('Message Stream', function () {
+describe('MessageStream', function () {
   context('when the stream uses the streaming protocol', function () {
-    const data = Buffer.from(
-      '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
-        '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
-        '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
-        '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
-      'hex'
-    );
+    const response = { isWritablePrimary: true };
+    let firstHello;
+    let secondHello;
+    let thirdHello;
+
+    beforeEach(function () {
+      firstHello = generateOpMsgBuffer(response);
+      secondHello = generateOpMsgBuffer(response);
+      thirdHello = generateOpMsgBuffer(response);
+    });
 
     it('only reads the last message in the buffer', function (done) {
-      const inputStream = bufferToStream(data);
+      const inputStream = bufferToStream(Buffer.concat([firstHello, secondHello, thirdHello]));
       const messageStream = new MessageStream();
       messageStream.isStreamingProtocol = true;
 
       messageStream.once('message', msg => {
         msg.parse();
-        expect(msg)
-          .to.have.property('documents')
-          .that.deep.equals([{ [LEGACY_HELLO_COMMAND]: 1 }]);
+        expect(msg).to.have.property('documents').that.deep.equals([response]);
         // Make sure there is nothing left in the buffer.
         expect(messageStream.buffer.length).to.equal(0);
         done();
@@ -47,116 +49,73 @@ describe('Message Stream', function () {
     });
   });
 
-  describe('reading', function () {
-    [
-      {
-        description: 'valid OP_REPLY',
-        data: Buffer.from(
-          '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
-          'hex'
-        ),
-        documents: [{ [LEGACY_HELLO_COMMAND]: 1 }]
-      },
-      {
-        description: 'valid multiple OP_REPLY',
-        expectedMessageCount: 4,
-        data: Buffer.from(
-          '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
-            '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
-            '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000' +
-            '370000000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
-          'hex'
-        ),
-        documents: [{ [LEGACY_HELLO_COMMAND]: 1 }]
-      },
-      {
-        description: 'valid OP_REPLY (partial)',
-        data: [
-          Buffer.from('37', 'hex'),
-          Buffer.from('0000', 'hex'),
-          Buffer.from(
-            '000100000001000000010000000000000000000000000000000000000001000000130000001069736d6173746572000100000000',
-            'hex'
-          )
-        ],
-        documents: [{ [LEGACY_HELLO_COMMAND]: 1 }]
-      },
+  context('when the stream is not using the streaming protocol', function () {
+    context('when the messages are valid', function () {
+      const response = { isWritablePrimary: true };
+      let firstHello;
+      let secondHello;
+      let thirdHello;
+      let messageCount = 0;
 
-      {
-        description: 'valid OP_MSG',
-        data: Buffer.from(
-          '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000',
-          'hex'
-        ),
-        documents: [{ $db: 'admin', [LEGACY_HELLO_COMMAND]: 1 }]
-      },
-      {
-        description: 'valid multiple OP_MSG',
-        expectedMessageCount: 4,
-        data: Buffer.from(
-          '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000' +
-            '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000' +
-            '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000' +
-            '370000000100000000000000dd0700000000000000220000001069736d6173746572000100000002246462000600000061646d696e0000',
-          'hex'
-        ),
-        documents: [{ $db: 'admin', [LEGACY_HELLO_COMMAND]: 1 }]
-      },
+      beforeEach(function () {
+        firstHello = generateOpMsgBuffer(response);
+        secondHello = generateOpMsgBuffer(response);
+        thirdHello = generateOpMsgBuffer(response);
+      });
 
-      {
-        description: 'Invalid message size (negative)',
-        data: Buffer.from('ffffffff', 'hex'),
-        error: 'Invalid message size: -1'
-      },
-      {
-        description: 'Invalid message size (exceeds maximum)',
-        data: Buffer.from('01000004', 'hex'),
-        error: 'Invalid message size: 67108865, max allowed: 67108864'
-      }
-    ].forEach(test => {
-      it(test.description, function (done) {
-        const error = test.error;
-        const expectedMessageCount = test.expectedMessageCount || 1;
-        const inputStream = bufferToStream(test.data);
+      it('reads all messages in the buffer', function (done) {
+        const inputStream = bufferToStream(Buffer.concat([firstHello, secondHello, thirdHello]));
         const messageStream = new MessageStream();
 
-        let messageCount = 0;
         messageStream.on('message', msg => {
           messageCount++;
-          if (error) {
-            done(new Error(`expected error: ${error}`));
-            return;
-          }
-
           msg.parse();
-
-          if (test.documents) {
-            expect(msg).to.have.property('documents').that.deep.equals(test.documents);
-          }
-
-          if (messageCount === expectedMessageCount) {
+          expect(msg).to.have.property('documents').that.deep.equals([response]);
+          // Test will not complete until 3 messages processed.
+          if (messageCount === 3) {
             done();
           }
-        });
-
-        messageStream.on('error', err => {
-          if (error == null) {
-            done(err);
-            return;
-          }
-
-          expect(err).to.have.property('message').that.equals(error);
-
-          done();
         });
 
         inputStream.pipe(messageStream);
       });
     });
+
+    context('when the messages are invalid', function () {
+      context('when the message size is negative', function () {
+        it('emits an error', function (done) {
+          const inputStream = bufferToStream(Buffer.from('ffffffff', 'hex'));
+          const messageStream = new MessageStream();
+
+          messageStream.on('error', err => {
+            expect(err).to.have.property('message').that.equals('Invalid message size: -1');
+            done();
+          });
+
+          inputStream.pipe(messageStream);
+        });
+      });
+
+      context('when the message size exceeds the bson maximum', function () {
+        it('emits an error', function (done) {
+          const inputStream = bufferToStream(Buffer.from('01000004', 'hex'));
+          const messageStream = new MessageStream();
+
+          messageStream.on('error', err => {
+            expect(err)
+              .to.have.property('message')
+              .that.equals('Invalid message size: 67108865, max allowed: 67108864');
+            done();
+          });
+
+          inputStream.pipe(messageStream);
+        });
+      });
+    });
   });
 
-  describe('writing', function () {
-    it('should write a message to the stream', function (done) {
+  context('when writing to the message stream', function () {
+    it('pushes the message', function (done) {
       const readableStream = new Readable({ read() {} });
       const writeableStream = new Writable({
         write: (chunk, _, callback) => {
