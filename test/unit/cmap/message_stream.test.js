@@ -1,6 +1,7 @@
 'use strict';
-const Readable = require('stream').Readable;
-const Writable = require('stream').Writable;
+const { once } = require('events');
+const { Readable, Writable } = require('stream');
+
 const { MessageStream } = require('../../../src/cmap/message_stream');
 const { Msg } = require('../../../src/cmap/commands');
 const expect = require('chai').expect;
@@ -32,20 +33,18 @@ describe('MessageStream', function () {
       thirdHello = generateOpMsgBuffer(response);
     });
 
-    it('only reads the last message in the buffer', function (done) {
+    it('only reads the last message in the buffer', async function () {
       const inputStream = bufferToStream(Buffer.concat([firstHello, secondHello, thirdHello]));
       const messageStream = new MessageStream();
       messageStream.isStreamingProtocol = true;
 
-      messageStream.once('message', msg => {
-        msg.parse();
-        expect(msg).to.have.property('documents').that.deep.equals([response]);
-        // Make sure there is nothing left in the buffer.
-        expect(messageStream.buffer.length).to.equal(0);
-        done();
-      });
-
       inputStream.pipe(messageStream);
+      const messages = await once(messageStream, 'message');
+      const msg = messages[0];
+      msg.parse();
+      expect(msg).to.have.property('documents').that.deep.equals([response]);
+      // Make sure there is nothing left in the buffer.
+      expect(messageStream.buffer.length).to.equal(0);
     });
   });
 
