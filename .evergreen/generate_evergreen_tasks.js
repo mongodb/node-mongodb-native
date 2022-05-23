@@ -512,7 +512,7 @@ oneOffFuncAsTasks.push({
       func: 'bootstrap mongo-orchestration',
       vars: {
         VERSION: 'latest',
-        TOPOLOGY: 'server'
+        TOPOLOGY: 'replica_set'
       }
     },
     { func: 'bootstrap kms servers' },
