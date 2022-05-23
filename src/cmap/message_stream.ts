@@ -180,7 +180,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
       }
     }
     return false;
-  }
+  };
 
   let ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
   if (messageHeader.opCode !== OP_COMPRESSED) {
