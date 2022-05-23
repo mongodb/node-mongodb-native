@@ -258,7 +258,9 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
 >;
 
 /** @public */
-export type MatchKeysAndValues<TSchema> = Readonly<Partial<TSchema>> & Record<string, any>;
+export type MatchKeysAndValues<TSchema> = Readonly<{
+  [Property in Join<NestedPaths<TSchema>, '.'>]?: PropertyType<TSchema, Property>;
+}>;
 
 /** @public */
 export type AddToSetOperators<Type> = {
