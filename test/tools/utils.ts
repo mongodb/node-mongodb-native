@@ -1,7 +1,10 @@
 import { EJSON } from 'bson';
+import * as BSON from 'bson';
 import { expect } from 'chai';
 import { inspect, promisify } from 'util';
 
+import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
+import { Document } from '../../src/index';
 import { Logger } from '../../src/logger';
 import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
@@ -341,6 +344,24 @@ export class TestBuilder {
 
     return test;
   }
+}
+
+export function generateOpMsgBuffer(document: Document): Buffer {
+  const header = Buffer.alloc(4 * 4 + 4);
+
+  const typeBuffer = Buffer.alloc(1);
+  typeBuffer[0] = 0;
+
+  const docBuffer = BSON.serialize(document);
+
+  const totalLength = header.length + typeBuffer.length + docBuffer.length;
+
+  header.writeInt32LE(totalLength, 0);
+  header.writeInt32LE(0, 4);
+  header.writeInt32LE(0, 8);
+  header.writeInt32LE(OP_MSG, 12);
+  header.writeUInt32LE(0, 16);
+  return Buffer.concat([header, typeBuffer, docBuffer]);
 }
 
 export class UnifiedTestSuiteBuilder {

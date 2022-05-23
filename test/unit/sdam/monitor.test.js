@@ -115,7 +115,10 @@ describe('monitoring', function () {
       monitor = new Monitor(server, {});
 
       monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
-      monitor.on('serverHeartbeatSucceeded', () => done());
+      monitor.on('serverHeartbeatSucceeded', () => {
+        expect(monitor.connection.isMonitoringConnection).to.be.true;
+        done();
+      });
       monitor.connect();
     });
 
