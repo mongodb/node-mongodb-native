@@ -168,6 +168,20 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
     opCode: message.readInt32LE(12)
   };
 
+  const streamingProtocolHasAnotherHello = () => {
+    if (stream.isStreamingProtocol) {
+      // Can we read the next message size?
+      if (buffer.length >= 4) {
+        const sizeOfMessage = buffer.peek(4).readInt32LE();
+        if (sizeOfMessage < buffer.length) {
+          return true;
+        }
+        return false;
+      }
+    }
+    return false;
+  }
+
   let ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
   if (messageHeader.opCode !== OP_COMPRESSED) {
     const messageBody = message.slice(MESSAGE_HEADER_SIZE);
@@ -175,7 +189,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
     // If we are a monitoring message stream using the streaming protocol and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
-    if (stream.isStreamingProtocol && buffer.length >= 4) {
+    if (streamingProtocolHasAnotherHello()) {
       processIncomingData(stream, callback);
     } else {
       stream.emit('message', new ResponseType(message, messageHeader, messageBody));
@@ -215,7 +229,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
     // If we are a monitoring message stream using the streaming protocol and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
-    if (stream.isStreamingProtocol && buffer.length >= 4) {
+    if (streamingProtocolHasAnotherHello()) {
       processIncomingData(stream, callback);
     } else {
       stream.emit('message', new ResponseType(message, messageHeader, messageBody));
