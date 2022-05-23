@@ -59,7 +59,7 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
   connectionId: number | '<monitor>';
 
   /** @internal */
-  constructor(pool: ConnectionPool, connection: Connection) {
+  constructor(pool: ConnectionPool, connection: { id: number | '<monitor>' }) {
     super(pool);
     this.connectionId = connection.id;
   }

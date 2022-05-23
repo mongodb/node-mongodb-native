@@ -107,7 +107,7 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   closed: boolean;
-  options: Readonly<ConnectionPoolOptions>;
+  options: Readonly<ConnectionPoolOptions & { maxConnecting: number }>;
   /** @internal */
   [kLogger]: Logger;
   /** @internal */
@@ -199,6 +199,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       connectionType: Connection,
       maxPoolSize: options.maxPoolSize ?? 100,
       minPoolSize: options.minPoolSize ?? 0,
+      maxConnecting: 2,
       maxIdleTimeMS: options.maxIdleTimeMS ?? 0,
       waitQueueTimeoutMS: options.waitQueueTimeoutMS ?? 0,
       autoEncrypter: options.autoEncrypter,
@@ -494,16 +495,29 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 }
 
 function ensureMinPoolSize(pool: ConnectionPool) {
-  if (pool.closed || pool.options.minPoolSize === 0) {
+  const minPoolSize = pool.options.minPoolSize;
+  if (pool.closed || minPoolSize === 0) {
     return;
   }
 
-  const minPoolSize = pool.options.minPoolSize;
-  for (let i = pool.totalConnectionCount; i < minPoolSize; ++i) {
-    createConnection(pool);
+  if (
+    pool.totalConnectionCount < minPoolSize &&
+    pool.pendingConnectionCount < pool.options.maxConnecting
+  ) {
+    // NOTE: ensureMinPoolSize should not try to get all the pending
+    // connection permits because that potentially delays the availability of
+    // the connection to a checkout request
+    createConnection(pool, (err, connection) => {
+      pool[kPending]--;
+      if (!err && connection) {
+        pool[kConnections].push(connection);
+        process.nextTick(processWaitQueue, pool);
+      }
+      pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 10);
+    });
+  } else {
+    pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 100);
   }
-
-  pool[kMinPoolSizeTimer] = setTimeout(() => ensureMinPoolSize(pool), 10);
 }
 
 function connectionIsStale(pool: ConnectionPool, connection: Connection) {
@@ -521,7 +535,7 @@ function connectionIsIdle(pool: ConnectionPool, connection: Connection) {
   return !!(pool.options.maxIdleTimeMS && connection.idleTime > pool.options.maxIdleTimeMS);
 }
 
-function createConnection(pool: ConnectionPool, callback?: Callback<Connection>) {
+function createConnection(pool: ConnectionPool, callback: Callback<Connection>) {
   const connectOptions: ConnectionOptions = {
     ...pool.options,
     id: pool[kConnectionCounter].next().value,
@@ -530,14 +544,16 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
   };
 
   pool[kPending]++;
+  // This is our version of a "virtual" no-I/O connection as the spec requires
+  pool.emit(
+    ConnectionPool.CONNECTION_CREATED,
+    new ConnectionCreatedEvent(pool, { id: connectOptions.id })
+  );
+
   connect(connectOptions, (err, connection) => {
     if (err || !connection) {
-      pool[kPending]--;
       pool[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
-      if (typeof callback === 'function') {
-        callback(err);
-      }
-
+      callback(err);
       return;
     }
 
@@ -552,8 +568,6 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     for (const event of [...APM_EVENTS, Connection.CLUSTER_TIME_RECEIVED]) {
       connection.on(event, (e: any) => pool.emit(event, e));
     }
-
-    pool.emit(ConnectionPool.CONNECTION_CREATED, new ConnectionCreatedEvent(pool, connection));
 
     if (pool.loadBalanced) {
       connection.on(Connection.PINNED, pinType => pool[kMetrics].markPinned(pinType));
@@ -575,16 +589,8 @@ function createConnection(pool: ConnectionPool, callback?: Callback<Connection>)
     connection.markAvailable();
     pool.emit(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(pool, connection));
 
-    // if a callback has been provided, hand off the connection immediately
-    if (typeof callback === 'function') {
-      callback(undefined, connection);
-      return;
-    }
-
-    // otherwise add it to the pool for later acquisition, and try to process the wait queue
-    pool[kConnections].push(connection);
-    pool[kPending]--;
-    process.nextTick(processWaitQueue, pool);
+    callback(undefined, connection);
+    return;
   });
 }
 
@@ -642,44 +648,45 @@ function processWaitQueue(pool: ConnectionPool) {
     }
   }
 
-  const maxPoolSize = pool.options.maxPoolSize;
-  if (pool.waitQueueSize && (maxPoolSize <= 0 || pool.totalConnectionCount < maxPoolSize)) {
+  const { maxPoolSize, maxConnecting } = pool.options;
+  while (
+    pool.waitQueueSize > 0 &&
+    pool.pendingConnectionCount < maxConnecting &&
+    (maxPoolSize === 0 || pool.totalConnectionCount < maxPoolSize)
+  ) {
+    const waitQueueMember = pool[kWaitQueue].shift();
+    if (!waitQueueMember || waitQueueMember[kCancelled]) {
+      continue;
+    }
     createConnection(pool, (err, connection) => {
-      const waitQueueMember = pool[kWaitQueue].shift();
-      if (!waitQueueMember || waitQueueMember[kCancelled]) {
+      pool[kPending]--;
+      if (waitQueueMember[kCancelled]) {
         if (!err && connection) {
           pool[kConnections].push(connection);
-          pool[kPending]--;
+        }
+      } else {
+        if (err) {
+          pool.emit(
+            ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+            new ConnectionCheckOutFailedEvent(pool, err)
+          );
+        } else if (connection) {
+          pool[kCheckedOut]++;
+          pool.emit(
+            ConnectionPool.CONNECTION_CHECKED_OUT,
+            new ConnectionCheckedOutEvent(pool, connection)
+          );
         }
 
-        pool[kProcessingWaitQueue] = false;
-        return;
+        if (waitQueueMember.timer) {
+          clearTimeout(waitQueueMember.timer);
+        }
+        waitQueueMember.callback(err, connection);
       }
-
-      if (err) {
-        pool.emit(
-          ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-          new ConnectionCheckOutFailedEvent(pool, err)
-        );
-      } else if (connection) {
-        pool[kCheckedOut]++;
-        pool[kPending]--;
-        pool.emit(
-          ConnectionPool.CONNECTION_CHECKED_OUT,
-          new ConnectionCheckedOutEvent(pool, connection)
-        );
-      }
-
-      if (waitQueueMember.timer) {
-        clearTimeout(waitQueueMember.timer);
-      }
-      waitQueueMember.callback(err, connection);
-      pool[kProcessingWaitQueue] = false;
-      process.nextTick(() => processWaitQueue(pool));
+      process.nextTick(processWaitQueue, pool);
     });
-  } else {
-    pool[kProcessingWaitQueue] = false;
   }
+  pool[kProcessingWaitQueue] = false;
 }
 
 /**
