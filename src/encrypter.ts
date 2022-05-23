@@ -124,9 +124,15 @@ export class Encrypter {
 
   static checkForMongoCrypt(): void {
     let mongodbClientEncryption = undefined;
+    // Ensure you always wrap an optional require in the try block NODE-3199
     try {
-      // Ensure you always wrap an optional require in the try block NODE-3199
-      mongodbClientEncryption = require('mongodb-client-encryption');
+      // Note (NODE-4254): This is to get around the circular dependency between
+      // mongodb-client-encryption and the driver in the test scenarios.
+      if (process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE) {
+        mongodbClientEncryption = require(process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE);
+      } else {
+        mongodbClientEncryption = require('mongodb-client-encryption');
+      }
     } catch (err) {
       throw new MongoMissingDependencyError(
         'Auto-encryption requested, but the module is not installed. ' +
