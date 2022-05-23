@@ -54,7 +54,7 @@ export class MessageStream extends Duplex {
   /** @internal */
   [kBuffer]: BufferPool;
   /** @internal */
-  isStreamingProtocol = false;
+  isMonitoringConnection = false;
 
   constructor(options: MessageStreamOptions = {}) {
     super(options);
@@ -168,15 +168,14 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
     opCode: message.readInt32LE(12)
   };
 
-  const streamingProtocolHasAnotherHello = () => {
-    if (stream.isStreamingProtocol) {
+  const monitorHasAnotherHello = () => {
+    if (stream.isMonitoringConnection) {
       // Can we read the next message size?
       if (buffer.length >= 4) {
         const sizeOfMessage = buffer.peek(4).readInt32LE();
         if (sizeOfMessage < buffer.length) {
           return true;
         }
-        return false;
       }
     }
     return false;
@@ -186,10 +185,10 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
   if (messageHeader.opCode !== OP_COMPRESSED) {
     const messageBody = message.slice(MESSAGE_HEADER_SIZE);
 
-    // If we are a monitoring message stream using the streaming protocol and
+    // If we are a monitoring connection message stream and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
-    if (streamingProtocolHasAnotherHello()) {
+    if (monitorHasAnotherHello()) {
       processIncomingData(stream, callback);
     } else {
       stream.emit('message', new ResponseType(message, messageHeader, messageBody));
@@ -226,10 +225,10 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
       return;
     }
 
-    // If we are a monitoring message stream using the streaming protocol and
+    // If we are a monitoring connection message stream and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
-    if (streamingProtocolHasAnotherHello()) {
+    if (monitorHasAnotherHello()) {
       processIncomingData(stream, callback);
     } else {
       stream.emit('message', new ResponseType(message, messageHeader, messageBody));

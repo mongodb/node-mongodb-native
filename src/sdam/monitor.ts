@@ -88,6 +88,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   [kMonitorId]?: InterruptibleAsyncInterval;
   [kRTTPinger]?: RTTPinger;
 
+  get connection(): Connection | undefined {
+    return this[kConnection];
+  }
+
   constructor(server: Server, options: MonitorOptions) {
     super();
 
@@ -279,10 +283,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
       if (isAwaitable && hello.topologyVersion) {
-        // Tell the connection that we are using the streaming protocol so that the
-        // connection's message stream will only read the last hello on the buffer.
-        connection.isStreamingProtocol = true;
-
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address)
@@ -314,6 +314,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     }
 
     if (conn) {
+      // Tell the connection that we are using the streaming protocol so that the
+      // connection's message stream will only read the last hello on the buffer.
+      conn.isMonitoringConnection = true;
+
       if (isInCloseState(monitor)) {
         conn.destroy({ force: true });
         return;

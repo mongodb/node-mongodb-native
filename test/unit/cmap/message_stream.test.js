@@ -21,7 +21,7 @@ function bufferToStream(buffer) {
 }
 
 describe('MessageStream', function () {
-  context('when the stream uses the streaming protocol', function () {
+  context('when the stream is for a monitoring connection', function () {
     const response = { isWritablePrimary: true };
     let firstHello;
     let secondHello;
@@ -39,7 +39,7 @@ describe('MessageStream', function () {
     it('only reads the last message in the buffer', async function () {
       const inputStream = bufferToStream(Buffer.concat([firstHello, secondHello, thirdHello]));
       const messageStream = new MessageStream();
-      messageStream.isStreamingProtocol = true;
+      messageStream.isMonitoringConnection = true;
 
       inputStream.pipe(messageStream);
       const messages = await once(messageStream, 'message');
@@ -55,7 +55,7 @@ describe('MessageStream', function () {
         Buffer.concat([firstHello, secondHello, thirdHello, partial])
       );
       const messageStream = new MessageStream();
-      messageStream.isStreamingProtocol = true;
+      messageStream.isMonitoringConnection = true;
 
       inputStream.pipe(messageStream);
       const messages = await once(messageStream, 'message');
@@ -67,7 +67,7 @@ describe('MessageStream', function () {
     });
   });
 
-  context('when the stream is not using the streaming protocol', function () {
+  context('when the stream is not for a monitoring connection', function () {
     context('when the messages are valid', function () {
       const response = { isWritablePrimary: true };
       let firstHello;
