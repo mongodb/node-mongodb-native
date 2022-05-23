@@ -116,12 +116,14 @@ class Thread {
     await sleep();
   }
 
-  queue(op: CmapOperation) {
+  queue(op: CmapOperation, thread?: Thread) {
     if (this.#killed || this.#error) {
       return;
     }
 
-    this.#promise = this.#promise.then(() => this._runOperation(op)).catch(e => (this.#error = e));
+    const functionToQueue = () => (!thread ? this._runOperation(op) : thread.queue(op));
+
+    this.#promise = this.#promise.then(functionToQueue).catch(e => (this.#error = e));
   }
 
   async finish() {
@@ -352,9 +354,12 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     const op = operations[idx];
 
     const threadKey = op.name === 'checkOut' ? op.thread || MAIN_THREAD_KEY : MAIN_THREAD_KEY;
-    const thread = threadContext.getThread(threadKey);
-
-    thread.queue(op);
+    if (threadKey === MAIN_THREAD_KEY) {
+      mainThread.queue(op);
+    } else {
+      const thread = threadContext.getThread(threadKey);
+      mainThread.queue(op, thread);
+    }
   }
 
   await mainThread.finish().catch(e => {
@@ -387,6 +392,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   );
 
   expect(actualEvents).to.have.lengthOf(expectedEvents.length);
+
   for (const expected of expectedEvents) {
     const actual = actualEvents.shift();
     const { type: eventType, ...eventPropsToCheck } = expected;
@@ -397,7 +403,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
 
 export type SkipDescription = {
   description: string;
-  skipIfCondition: 'loadBalanced';
+  skipIfCondition: 'loadBalanced' | 'always';
   skipReason: string;
 };
 
@@ -416,10 +422,12 @@ export function runCmapTestSuite(
           ({ description }) => description === test.description
         );
         if (skipDescription) {
+          const alwaysSkip = skipDescription.skipIfCondition === 'always';
           const matchesLoadBalanceSkip =
             skipDescription.skipIfCondition === 'loadBalanced' && this.configuration.isLoadBalanced;
-          if (matchesLoadBalanceSkip) {
-            (this.currentTest as Mocha.Runnable).skipReason = skipDescription.skipReason;
+
+          if (alwaysSkip || matchesLoadBalanceSkip) {
+            this.currentTest.skipReason = skipDescription.skipReason;
             this.skip();
           }
         }

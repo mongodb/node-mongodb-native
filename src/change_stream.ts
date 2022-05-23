@@ -647,8 +647,6 @@ export class ChangeStream<
     }
     const pipeline = [{ $changeStream: changeStreamStageOptions }, ...this.pipeline];
 
-    const cursorOptions: ChangeStreamCursorOptions = filterOptions(options, CURSOR_OPTIONS);
-
     const client: MongoClient | null =
       this.type === CHANGE_DOMAIN_TYPES.CLUSTER
         ? (this.parent as MongoClient)
@@ -669,7 +667,7 @@ export class ChangeStream<
       client,
       this.namespace,
       pipeline,
-      cursorOptions
+      options
     );
 
     for (const event of CHANGE_STREAM_EVENTS) {

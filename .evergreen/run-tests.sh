@@ -15,6 +15,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 AUTH=${AUTH:-noauth}
 MONGODB_URI=${MONGODB_URI:-}
 TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:integration-coverage}
+COMPRESSOR=${COMPRESSOR:-}
 if [[ -z "${NO_EXIT}" ]]; then
   TEST_NPM_SCRIPT="$TEST_NPM_SCRIPT -- --exit"
 fi
@@ -35,6 +36,14 @@ else
   source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 fi
 
+if [ "$COMPRESSOR" != "" ]; then
+  if [[ "$MONGODB_URI" == *"?"* ]]; then
+    export MONGODB_URI="${MONGODB_URI}&compressors=${COMPRESSOR}"
+  else
+    export MONGODB_URI="${MONGODB_URI}/?compressors=${COMPRESSOR}"
+  fi
+fi
+
 # only run FLE tets on hosts we explicitly choose to test on
 if [[ -z "${CLIENT_ENCRYPTION}" ]]; then
   unset AWS_ACCESS_KEY_ID;
@@ -48,6 +57,8 @@ else
 fi
 
 npm install mongodb-client-encryption@">=2.2.0-alpha.0"
+npm install @mongodb-js/zstd
+npm install snappy
 
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}
@@ -56,5 +67,6 @@ export MONGODB_API_VERSION=${MONGODB_API_VERSION}
 export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
 export TEST_CSFLE=${TEST_CSFLE}
+export COMPRESSOR=${COMPRESSOR}
 # Do not add quotes, due to the way NO_EXIT is handled
 npm run ${TEST_NPM_SCRIPT}

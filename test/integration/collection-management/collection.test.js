@@ -535,81 +535,81 @@ describe('Collection', function () {
     });
   });
 
-  describe('(countDocuments)', function () {
+  describe('#estimatedDocumentCount', function () {
     let client;
     let db;
     let collection;
-    beforeEach(function () {
+
+    beforeEach(async function () {
       client = configuration.newClient({ w: 1 });
 
-      return client.connect().then(client => {
-        db = client.db(configuration.db);
-        collection = db.collection('test_coll');
-      });
-    });
-    afterEach(function () {
-      return client.close();
+      await client.connect();
+      db = client.db(configuration.db);
+      collection = db.collection('test_coll');
+      await collection.insertOne({ a: 'c' });
     });
 
-    const nonMatchQueryTests = [
-      {
-        title: 'should correctly perform estimatedDocumentCount on non-matching query'
-      },
-      {
-        title: 'should correctly perform countDocuments on non-matching query'
-      }
-    ];
-
-    nonMatchQueryTests.forEach(test => {
-      it(test.title, function (done) {
-        const close = e => client.close(() => done(e));
-        let thenFunction;
-        if (
-          test.title === 'should correctly perform estimatedDocumentCount on non-matching query'
-        ) {
-          thenFunction = () => collection.estimatedDocumentCount({ a: 'b' });
-        } else if (test.title === 'should correctly perform countDocuments on non-matching query') {
-          thenFunction = () => collection.countDocuments({ a: 'b' });
-        }
-        Promise.resolve()
-          .then(thenFunction)
-          .then(count => expect(count).to.equal(0))
-          .then(() => close())
-          .catch(e => close(e));
-      });
+    afterEach(async function () {
+      await collection.drop();
+      await client.close();
     });
 
-    it('countDocuments should return Promise that resolves when no callback passed', function (done) {
-      const docsPromise = collection.countDocuments();
-      const close = e => client.close(() => done(e));
+    it('returns the total documents in the collection', async function () {
+      const result = await collection.estimatedDocumentCount();
+      expect(result).to.equal(1);
+    });
+  });
 
-      expect(docsPromise).to.exist.and.to.be.an.instanceof(Promise);
+  describe('#countDocuments', function () {
+    let client;
+    let db;
+    let collection;
 
-      docsPromise
-        .then(result => expect(result).to.equal(0))
-        .then(() => close())
-        .catch(e => close(e));
+    beforeEach(async function () {
+      client = configuration.newClient({ w: 1 });
+      await client.connect();
+      db = client.db(configuration.db);
+      collection = db.collection('test_coll');
+      await collection.insertOne({ a: 'c' });
     });
 
-    it('countDocuments should not return a promise if callback given', function (done) {
-      const close = e => client.close(() => done(e));
+    afterEach(async function () {
+      await collection.drop();
+      await client.close();
+    });
 
-      const notPromise = collection.countDocuments({ a: 1 }, () => {
-        expect(notPromise).to.be.undefined;
-        close();
+    context('when passing a non-matching query', function () {
+      it('returns 0', async function () {
+        const result = await collection.countDocuments({ a: 'b' });
+        expect(result).to.equal(0);
       });
     });
 
-    it('countDocuments should correctly call the given callback', function (done) {
-      const docs = [{ a: 1 }, { a: 2 }];
-      const close = e => client.close(() => done(e));
+    context('when no callback passed', function () {
+      it('returns a promise', function () {
+        const docsPromise = collection.countDocuments();
+        expect(docsPromise).to.exist.and.to.be.an.instanceof(Promise);
+        return docsPromise.then(result => expect(result).to.equal(1));
+      });
+    });
 
-      collection.insertMany(docs).then(() =>
-        collection.countDocuments({ a: 1 }, (err, data) => {
-          expect(data).to.equal(1);
-          close(err);
-        })
-      );
+    context('when a callback is passed', function () {
+      it('does not return a promise', function (done) {
+        const notPromise = collection.countDocuments({ a: 1 }, () => {
+          expect(notPromise).to.be.undefined;
+          done();
+        });
+      });
+
+      it('calls the callback', function (done) {
+        const docs = [{ a: 1 }, { a: 2 }];
+        collection.insertMany(docs).then(() =>
+          collection.countDocuments({ a: 1 }, (err, data) => {
+            expect(data).to.equal(1);
+            done(err);
+          })
+        );
+      });
     });
   });
 

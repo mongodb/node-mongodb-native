@@ -293,6 +293,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kHello] = response;
   }
 
+  // Set the whether the message stream is for a monitoring connection.
+  set isMonitoringConnection(value: boolean) {
+    this[kMessageStream].isMonitoringConnection = value;
+  }
+
+  get isMonitoringConnection(): boolean {
+    return this[kMessageStream].isMonitoringConnection;
+  }
+
   get serviceId(): ObjectId | undefined {
     return this.hello?.serviceId;
   }

@@ -101,6 +101,7 @@ functions:
           ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
           REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
           LOAD_BALANCER=${LOAD_BALANCER} \
+          COMPRESSOR=${COMPRESSOR} \
           bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
     # run-orchestration generates expansion file with the MONGODB_URI for the cluster
     - command: expansions.update
@@ -237,6 +238,26 @@ functions:
           SKIP_DEPS=${SKIP_DEPS|1} \
           NO_EXIT=${NO_EXIT|1} \
           LOAD_BALANCER="${LOAD_BALANCER}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+
+  "run-compression-tests":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 300
+        script: |
+          ${PREPARE_SHELL}
+
+          MONGODB_URI="${MONGODB_URI}" \
+          AUTH=${AUTH} \
+          SSL=${SSL} \
+          MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} \
+          TOPOLOGY="${TOPOLOGY}" \
+          COMPRESSOR="${COMPRESSOR}" \
+          SKIP_DEPS=${SKIP_DEPS|1} \
+          NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "run lint checks":

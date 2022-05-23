@@ -33,16 +33,16 @@
       "address": 42,
       "currentCheckedOutCount": 0,
       "availableConnectionCount": 0,
-      "pendingConnectionCount": 3,
-      "totalConnectionCount": 3
+      "pendingConnectionCount": 1,
+      "totalConnectionCount": 1
     },
     {
       "type": "ConnectionCreated",
       "connectionId": 42,
       "address": 42,
       "availableConnectionCount": 1,
-      "pendingConnectionCount": 2,
-      "totalConnectionCount": 3
+      "pendingConnectionCount": 1,
+      "totalConnectionCount": 2
     },
     {
       "type": "ConnectionCreated",
