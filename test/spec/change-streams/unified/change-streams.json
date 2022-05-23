@@ -1777,10 +1777,10 @@
       ]
     },
     {
-      "description": "the wallTime field is present for change stream events",
+      "description": "Test wallTime field is set in a change event",
       "runOnRequirements": [
         {
-          "minServerVersion": "6.0"
+          "minServerVersion": "6.0.0"
         }
       ],
       "operations": [
@@ -1797,6 +1797,7 @@
           "object": "collection0",
           "arguments": {
             "document": {
+              "_id": 1,
               "a": 1
             }
           }
