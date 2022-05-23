@@ -260,7 +260,24 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
 /** @public */
 export type MatchKeysAndValues<TSchema> = Readonly<{
   [Property in Join<NestedPaths<TSchema>, '.'>]?: PropertyType<TSchema, Property>;
-}>;
+}> &
+  // Positional array update operator
+  Partial<
+    Record<
+      `${KeysOfAType<
+        {
+          [Property in Join<NestedPaths<TSchema>, '.'>]?: PropertyType<TSchema, Property>;
+        },
+        // Make sure the values for the keys are arrays
+        any[]
+      >}.$${`[${string}]` | ''}${
+        // Subsequent nested path - could be narrowed
+        `.${string}` | ''
+      }`,
+      // Value for updated field - could be narrowed
+      any
+    >
+  >;
 
 /** @public */
 export type AddToSetOperators<Type> = {
