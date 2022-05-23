@@ -196,6 +196,8 @@ expectAssignable<UpdateFilter<TestModel>>({ $set: { longField: Long.fromString('
 expectAssignable<UpdateFilter<TestModel>>({ $set: { stringField: 'a' } });
 expectError(buildUpdateFilter({ $set: { stringField: 123 } }));
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceField.field2': '2' } });
+expectError(buildUpdateFilter({ $set: { 'subInterfaceField.field2': 2 } }));
+expectError(buildUpdateFilter({ $set: { 'unknown.field': null } }));
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$': -10 } });
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$[bla]': 40 } });
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$[]': 1000.2 } });
@@ -210,6 +212,8 @@ expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { longField: Long.from
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { stringField: 'a' } });
 expectError(buildUpdateFilter({ $setOnInsert: { stringField: 123 } }));
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceField.field1': '2' } });
+expectError(buildUpdateFilter({ $setOnInsert: { 'subInterfaceField.field2': 2 } }));
+expectError(buildUpdateFilter({ $setOnInsert: { 'unknown.field': null } }));
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceArray.$': -10 } });
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceArray.$[bla]': 40 } });
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceArray.$[]': 1000.2 } });
