@@ -23,6 +23,7 @@ function bufferToStream(buffer) {
 describe('MessageStream', function () {
   context('when the stream is for a monitoring connection', function () {
     const response = { isWritablePrimary: true };
+    const lastResponse = { ok: 1 };
     let firstHello;
     let secondHello;
     let thirdHello;
@@ -31,7 +32,7 @@ describe('MessageStream', function () {
     beforeEach(function () {
       firstHello = generateOpMsgBuffer(response);
       secondHello = generateOpMsgBuffer(response);
-      thirdHello = generateOpMsgBuffer(response);
+      thirdHello = generateOpMsgBuffer(lastResponse);
       partial = Buffer.alloc(5);
       partial.writeInt32LE(100, 0);
     });
@@ -45,7 +46,7 @@ describe('MessageStream', function () {
       const messages = await once(messageStream, 'message');
       const msg = messages[0];
       msg.parse();
-      expect(msg).to.have.property('documents').that.deep.equals([response]);
+      expect(msg).to.have.property('documents').that.deep.equals([lastResponse]);
       // Make sure there is nothing left in the buffer.
       expect(messageStream.buffer.length).to.equal(0);
     });
@@ -61,7 +62,7 @@ describe('MessageStream', function () {
       const messages = await once(messageStream, 'message');
       const msg = messages[0];
       msg.parse();
-      expect(msg).to.have.property('documents').that.deep.equals([response]);
+      expect(msg).to.have.property('documents').that.deep.equals([lastResponse]);
       // Make sure the buffer wasn't read to the end.
       expect(messageStream.buffer.length).to.equal(5);
     });

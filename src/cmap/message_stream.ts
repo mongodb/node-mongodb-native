@@ -173,7 +173,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
       // Can we read the next message size?
       if (buffer.length >= 4) {
         const sizeOfMessage = buffer.peek(4).readInt32LE();
-        if (sizeOfMessage < buffer.length) {
+        if (sizeOfMessage <= buffer.length) {
           return true;
         }
       }
