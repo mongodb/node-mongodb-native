@@ -1,3 +1,4 @@
+# This test requires libmongocrypt 1.5.0-alpha2.
 runOn:
   - minServerVersion: "6.0.0"
     # FLE 2 Encrypted collections are not supported on standalone.
@@ -821,6 +822,13 @@ tests:
               encryptedFields: *encrypted_fields5
             command_name: create
             database_name: *database_name
+        # libmongocrypt requests listCollections to get a schema for the "createIndexes" command.
+        - command_started_event:
+            command:
+              listCollections: 1
+              filter: { name: "encryptedCollection" }
+            command_name: listCollections
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -1028,6 +1036,13 @@ tests:
               encryptedFields: *encrypted_fields6
             command_name: create
             database_name: *database_name
+        # libmongocrypt requests listCollections to get a schema for the "createIndexes" command.
+        - command_started_event:
+            command:
+              listCollections: 1
+              filter: { name: "encryptedCollection" }
+            command_name: listCollections
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -1200,6 +1215,13 @@ tests:
               create: "encryptedCollection"
               encryptedFields: *encrypted_fields7
             command_name: create
+            database_name: *database_name
+        # libmongocrypt requests listCollections to get a schema for the "createIndexes" command.
+        - command_started_event:
+            command:
+              listCollections: 1
+              filter: { name: "encryptedCollection" }
+            command_name: listCollections
             database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
