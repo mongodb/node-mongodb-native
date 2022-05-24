@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const { expect } = require('chai');
 const { Connection } = require('../../../src/cmap/connection');
 const { ScramSHA256 } = require('../../../src/cmap/auth/scram');
-const { setupDatabase, withClient } = require('../shared');
+const { setupDatabase } = require('../shared');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 describe('SCRAM_SHA_256', function () {
@@ -29,35 +29,35 @@ describe('SCRAM_SHA_256', function () {
     return setupDatabase(this.configuration);
   });
 
-  before(function () {
-    return withClient(this.configuration.newClient(), client => {
-      test.oldDbName = this.configuration.db;
-      this.configuration.db = 'admin';
-      const db = client.db(this.configuration.db);
+  before(async function () {
+    const client = this.configuration.newClient();
+    test.oldDbName = this.configuration.db;
+    this.configuration.db = 'admin';
+    const db = client.db(this.configuration.db);
 
-      const createUserCommands = users.map(user => ({
-        createUser: user.username,
-        pwd: user.password,
-        roles: ['root'],
-        mechanisms: user.mechanisms
-      }));
+    const createUserCommands = users.map(user => ({
+      createUser: user.username,
+      pwd: user.password,
+      roles: ['root'],
+      mechanisms: user.mechanisms
+    }));
 
-      return Promise.all(createUserCommands.map(cmd => db.command(cmd)));
-    });
+    await Promise.all(createUserCommands.map(cmd => db.command(cmd)));
+    await client.close();
   });
 
-  after(function () {
-    return withClient(this.configuration.newClient(), client => {
-      const db = client.db(this.configuration.db);
-      this.configuration.db = test.oldDbName;
+  after(async function () {
+    const client = this.configuration.newClient();
+    const db = client.db(this.configuration.db);
+    this.configuration.db = test.oldDbName;
 
-      return Promise.all(users.map(user => db.removeUser(user.username)));
-    });
+    await Promise.all(users.map(user => db.removeUser(user.username)));
+    await client.close();
   });
 
   it('should shorten SCRAM conversations if the server supports it', {
     metadata: { requires: { mongodb: '>=4.4', topology: ['single'] } },
-    test: function () {
+    test: async function () {
       const options = {
         auth: {
           username: userMap.both.username,
@@ -79,15 +79,16 @@ describe('SCRAM_SHA_256', function () {
         auth.apply(this, [authContext, _callback]);
       });
 
-      return withClient(this.configuration.newClient({}, options), () => {
-        expect(runCommandSpy.callCount).to.equal(1);
-      });
+      const client = this.configuration.newClient({}, options);
+      await client.db().command({ ping: 1 });
+      expect(runCommandSpy.callCount).to.equal(1);
+      await client.close();
     }
   });
 
   it('should send speculativeAuthenticate on initial handshake on MongoDB 4.4+', {
     metadata: { requires: { mongodb: '>=4.4', topology: ['single'] } },
-    test: function () {
+    test: async function () {
       const options = {
         auth: {
           username: userMap.both.username,
@@ -97,16 +98,17 @@ describe('SCRAM_SHA_256', function () {
       };
 
       const commandSpy = test.sandbox.spy(Connection.prototype, 'command');
-      return withClient(this.configuration.newClient({}, options), () => {
-        const calls = commandSpy
-          .getCalls()
-          .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
-          .filter(c => c.args[1][LEGACY_HELLO_COMMAND]); // only consider handshakes
+      const client = this.configuration.newClient({}, options);
+      await client.db().command({ ping: 1 });
+      const calls = commandSpy
+        .getCalls()
+        .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
+        .filter(c => c.args[1][LEGACY_HELLO_COMMAND]); // only consider handshakes
 
-        expect(calls).to.have.length(1);
-        const handshakeDoc = calls[0].args[1];
-        expect(handshakeDoc).to.have.property('speculativeAuthenticate');
-      });
+      expect(calls).to.have.length(1);
+      const handshakeDoc = calls[0].args[1];
+      expect(handshakeDoc).to.have.property('speculativeAuthenticate');
+      await client.close();
     }
   });
 });

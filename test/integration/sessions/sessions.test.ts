@@ -10,7 +10,7 @@ import type {
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { MongoCompatibilityError, MongoServerError } from '../../../src/error';
 import type { TestConfiguration } from '../../tools/runner/config';
-import { setupDatabase, withMonitoredClient } from '../shared';
+import { setupDatabase } from '../shared';
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND];
 let hasInitialPingOccurred = false;
@@ -50,7 +50,16 @@ const test: {
   }
 };
 
-describe('Sessions', function () {
+describe('Sessions Spec', function () {
+  let client: MongoClient;
+  beforeEach(async function () {
+    client = this.configuration.newClient({ monitorCommands: true });
+  });
+
+  afterEach(async function () {
+    await client.close();
+  });
+
   describe('Sessions - functional - old format', function () {
     before(function () {
       return setupDatabase(this.configuration);
@@ -185,46 +194,43 @@ describe('Sessions', function () {
     });
 
     context('unacknowledged writes', () => {
-      it('should not include session for unacknowledged writes', {
-        metadata: { requires: { topology: 'single', mongodb: '>=3.6.0' } },
-        test: withMonitoredClient(
-          'insert',
-          { clientOptions: { writeConcern: { w: 0 } } },
-          function (client, events, done) {
-            client
-              .db('test')
-              .collection('foo')
-              .insertOne({ foo: 'bar' }, err => {
-                expect(err).to.not.exist;
-                const event = events[0];
-                expect(event).nested.property('command.writeConcern.w').to.equal(0);
-                expect(event).to.not.have.nested.property('command.lsid');
-                done();
-              });
+      it('should not include session for unacknowledged writes', async function () {
+        const events = [];
+        client.on('commandStarted', event => {
+          if (event.commandName === 'insert') {
+            events.push(event);
           }
-        )
+        });
+        await client
+          .db('test')
+          .collection('foo')
+          .insertOne({ foo: 'bar' }, { writeConcern: { w: 0 } });
+        const event = events[0];
+        expect(event).nested.property('command.writeConcern.w').to.equal(0);
+        expect(event).to.not.have.nested.property('command.lsid');
       });
       it('should throw error with explicit session', {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
-        test: withMonitoredClient(
-          'insert',
-          { clientOptions: { writeConcern: { w: 0 } } },
-          function (client, events, done) {
-            const session = client.startSession({ causalConsistency: true });
-            client
-              .db('test')
-              .collection('foo')
-              .insertOne({ foo: 'bar' }, { session }, err => {
-                expect(err).to.exist;
-                expect(err.message).to.equal(
-                  'Cannot have explicit session with unacknowledged writes'
-                );
-                session.endSession(() => {
-                  client.close(done);
-                });
-              });
-          }
-        )
+        test: async function () {
+          const events = [];
+          client.on('commandStarted', event => {
+            if (event.commandName === 'insert') {
+              events.push(event);
+            }
+          });
+
+          const session = client.startSession({ causalConsistency: true });
+
+          const error = await client
+            .db('test')
+            .collection('foo')
+            .insertOne({ foo: 'bar' }, { writeConcern: { w: 0 }, session })
+            .catch(error => error);
+
+          expect(error.message).to.equal('Cannot have explicit session with unacknowledged writes');
+
+          await session.endSession();
+        }
       });
     });
   });

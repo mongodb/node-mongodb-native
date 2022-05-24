@@ -102,7 +102,7 @@ const testConfigBeforeHook = async function () {
     ...getEnvironmentalOptions()
   });
 
-  await client.connect();
+  await client.db('test').command({ ping: 1 });
 
   const context = await initializeFilters(client);
 
@@ -115,10 +115,17 @@ const testConfigBeforeHook = async function () {
     context.multiMongosLoadBalancerUri = MULTI_MONGOS_LB_URI;
   }
 
+  context.parameters = await client
+    .db()
+    .admin()
+    .command({ getParameter: '*' })
+    .catch(error => ({ noReply: error }));
+
   this.configuration = new TestConfiguration(
     loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI,
     context
   );
+
   await client.close();
 
   const currentEnv = {

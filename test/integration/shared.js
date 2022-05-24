@@ -98,90 +98,6 @@ function setupDatabase(configuration, dbsToClean) {
     );
 }
 
-/** @typedef {(client: MongoClient) => Promise | (client: MongoClient, done: Function) => void} withClientCallback */
-/**
- * Safely perform a test with provided MongoClient, ensuring client won't leak.
- *
- * @param {string|MongoClient} [client] if not provided, `withClient` must be bound to test function `this`
- * @param {withClientCallback} callback the test function
- */
-function withClient(client, callback) {
-  let connectionString;
-  if (arguments.length === 1) {
-    callback = client;
-    client = undefined;
-  } else {
-    if (typeof client === 'string') {
-      connectionString = client;
-      client = undefined;
-    }
-  }
-
-  if (callback.length === 2) {
-    const cb = callback;
-    callback = client => new Promise(resolve => cb(client, resolve));
-  }
-
-  function cleanup(err) {
-    return new Promise((resolve, reject) => {
-      try {
-        client.close(closeErr => {
-          const finalErr = err || closeErr;
-          if (finalErr) {
-            return reject(finalErr);
-          }
-          return resolve();
-        });
-      } catch (e) {
-        return reject(err || e);
-      }
-    });
-  }
-
-  function lambda() {
-    if (!client) {
-      client = this.configuration.newClient(connectionString);
-    }
-    return client.connect().then(callback).finally(cleanup);
-  }
-
-  if (this && this.configuration) {
-    return lambda.call(this);
-  }
-  return lambda;
-}
-
-/** @typedef {(client: MongoClient, events: Array, done: Function) => void} withMonitoredClientCallback */
-/**
- * Perform a test with a monitored MongoClient that will filter for certain commands.
- *
- * @param {string|Array|Function} commands commands to filter for
- * @param {object} [options] options to pass on to configuration.newClient
- * @param {object} [options.queryOptions] connection string options
- * @param {object} [options.clientOptions] MongoClient options
- * @param {withMonitoredClientCallback} callback the test function
- */
-function withMonitoredClient(commands, options, callback) {
-  if (arguments.length === 2) {
-    callback = options;
-    options = {};
-  }
-  if (!Object.prototype.hasOwnProperty.call(callback, 'prototype')) {
-    throw new Error('withMonitoredClient callback can not be arrow function');
-  }
-  return function () {
-    const monitoredClient = this.configuration.newClient(
-      Object.assign({}, options.queryOptions),
-      Object.assign({ monitorCommands: true }, options.clientOptions)
-    );
-    const events = [];
-    monitoredClient.on('commandStarted', filterForCommands(commands, events));
-    return withClient(monitoredClient, (client, done) =>
-      callback.bind(this)(client, events, done)
-    )();
-  };
-}
-
 /**
  * Safely perform a test with an arbitrary cursor.
  *
@@ -269,31 +185,6 @@ class APMEventCollector {
   }
 }
 
-/**
- * @param {(client: MongoClient, done: Mocha.Done) => void} callback
- */
-function withClientV2(callback) {
-  return async function testFunction() {
-    const client = this.configuration.newClient({ monitorCommands: true });
-
-    try {
-      await client.connect();
-      await new Promise((resolve, reject) => {
-        try {
-          callback.call(this, client, error => {
-            if (error) return reject(error);
-            resolve();
-          });
-        } catch (err) {
-          return reject(err);
-        }
-      });
-    } finally {
-      await client.close();
-    }
-  };
-}
-
 module.exports = {
   assert,
   delay,
@@ -302,9 +193,6 @@ module.exports = {
   filterOutCommands,
   ignoreNsNotFound,
   setupDatabase,
-  withClient,
-  withClientV2,
-  withMonitoredClient,
   withCursor,
   APMEventCollector
 };

@@ -3,7 +3,8 @@ var test = require('./shared').assert;
 const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
-const { setTimeout, setInterval } = require('timers');
+const { setInterval } = require('timers');
+const { sleep } = require('../tools/utils');
 
 describe('ObjectId', function () {
   before(function () {
@@ -18,13 +19,15 @@ describe('ObjectId', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var number_of_tests_done = 0;
+      var db = client.db(configuration.db);
+      var number_of_tests_done = 0;
 
-        var collection = db.collection('test_object_id_generation.data');
-        // Insert test documents (creates collections and test fetch by query)
-        collection.insert({ name: 'Fred', age: 42 }, { writeConcern: { w: 1 } }, function (err, r) {
+      var collection = db.collection('test_object_id_generation.data');
+      // Insert test documents (creates collections and test fetch by query)
+      collection.insertMany(
+        [{ name: 'Fred', age: 42 }],
+        { writeConcern: { w: 1 } },
+        function (err, r) {
           expect(r).property('insertedCount').to.equal(1);
 
           const id = r.insertedIds[0];
@@ -35,54 +38,54 @@ describe('ObjectId', function () {
             expect(id.toHexString()).to.equal(document._id.toHexString());
             number_of_tests_done++;
           });
-        });
+        }
+      );
 
-        // Insert another test document and collect using ObjectId
-        collection.insert({ name: 'Pat', age: 21 }, { writeConcern: { w: 1 } }, function (err, r) {
+      // Insert another test document and collect using ObjectId
+      collection.insert({ name: 'Pat', age: 21 }, { writeConcern: { w: 1 } }, function (err, r) {
+        expect(r).property('insertedCount').to.equal(1);
+
+        const id = r.insertedIds[0];
+        expect(id.toHexString().length).to.equal(24);
+
+        // Locate the first document inserted
+        collection.findOne(id, function (err, document) {
+          expect(err).to.not.exist;
+          expect(id.toHexString()).to.equal(document._id.toHexString());
+          number_of_tests_done++;
+        });
+      });
+
+      // Manually created id
+      var objectId = new ObjectId(null);
+      // Insert a manually created document with generated oid
+      collection.insert(
+        { _id: objectId, name: 'Donald', age: 95 },
+        { writeConcern: { w: 1 } },
+        function (err, r) {
+          expect(err).to.not.exist;
           expect(r).property('insertedCount').to.equal(1);
 
           const id = r.insertedIds[0];
           expect(id.toHexString().length).to.equal(24);
+          expect(id.toHexString()).to.equal(objectId.toHexString());
 
           // Locate the first document inserted
           collection.findOne(id, function (err, document) {
             expect(err).to.not.exist;
             expect(id.toHexString()).to.equal(document._id.toHexString());
+            expect(objectId.toHexString()).to.equal(document._id.toHexString());
             number_of_tests_done++;
           });
-        });
+        }
+      );
 
-        // Manually created id
-        var objectId = new ObjectId(null);
-        // Insert a manually created document with generated oid
-        collection.insert(
-          { _id: objectId, name: 'Donald', age: 95 },
-          { writeConcern: { w: 1 } },
-          function (err, r) {
-            expect(err).to.not.exist;
-            expect(r).property('insertedCount').to.equal(1);
-
-            const id = r.insertedIds[0];
-            expect(id.toHexString().length).to.equal(24);
-            expect(id.toHexString()).to.equal(objectId.toHexString());
-
-            // Locate the first document inserted
-            collection.findOne(id, function (err, document) {
-              expect(err).to.not.exist;
-              expect(id.toHexString()).to.equal(document._id.toHexString());
-              expect(objectId.toHexString()).to.equal(document._id.toHexString());
-              number_of_tests_done++;
-            });
-          }
-        );
-
-        var intervalId = setInterval(function () {
-          if (number_of_tests_done === 3) {
-            clearInterval(intervalId);
-            client.close(done);
-          }
-        }, 100);
-      });
+      var intervalId = setInterval(function () {
+        if (number_of_tests_done === 3) {
+          clearInterval(intervalId);
+          client.close(done);
+        }
+      }, 100);
     }
   });
 
@@ -122,25 +125,23 @@ describe('ObjectId', function () {
     test: function (done) {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('test_non_oid_id');
-        var date = new Date();
-        date.setUTCDate(12);
-        date.setUTCFullYear(2009);
-        date.setUTCMonth(11 - 1);
-        date.setUTCHours(12);
-        date.setUTCMinutes(0);
-        date.setUTCSeconds(30);
+      var db = client.db(configuration.db);
+      var collection = db.collection('test_non_oid_id');
+      var date = new Date();
+      date.setUTCDate(12);
+      date.setUTCFullYear(2009);
+      date.setUTCMonth(11 - 1);
+      date.setUTCHours(12);
+      date.setUTCMinutes(0);
+      date.setUTCSeconds(30);
 
-        collection.insert({ _id: date }, { writeConcern: { w: 1 } }, function (err) {
-          expect(err).to.not.exist;
-          collection.find({ _id: date }).toArray(function (err, items) {
-            test.equal('' + date, '' + items[0]._id);
+      collection.insert({ _id: date }, { writeConcern: { w: 1 } }, function (err) {
+        expect(err).to.not.exist;
+        collection.find({ _id: date }).toArray(function (err, items) {
+          test.equal('' + date, '' + items[0]._id);
 
-            // Let's close the db
-            client.close(done);
-          });
+          // Let's close the db
+          client.close(done);
         });
       });
     }
@@ -189,50 +190,42 @@ describe('ObjectId', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-
-        var db = client.db(configuration.db);
-        var collection = db.collection('shouldCorrectlyInsertWithObjectId');
-        collection.insert({}, { writeConcern: { w: 1 } }, function (err) {
-          expect(err).to.not.exist;
-          const firstCompareDate = new Date();
-
-          setTimeout(function () {
-            collection.insert({}, { writeConcern: { w: 1 } }, function (err) {
-              expect(err).to.not.exist;
-              const secondCompareDate = new Date();
-
-              collection.find().toArray(function (err, items) {
-                expect(err).to.not.exist;
-
-                // Date 1
-                var date1 = new Date();
-                date1.setTime(items[0]._id.generationTime * 1000);
-                // Date 2
-                var date2 = new Date();
-                date2.setTime(items[1]._id.generationTime * 1000);
-
-                // Compare
-                test.equal(firstCompareDate.getFullYear(), date1.getFullYear());
-                test.equal(firstCompareDate.getDate(), date1.getDate());
-                test.equal(firstCompareDate.getMonth(), date1.getMonth());
-                test.equal(firstCompareDate.getHours(), date1.getHours());
-
-                test.equal(secondCompareDate.getFullYear(), date2.getFullYear());
-                test.equal(secondCompareDate.getDate(), date2.getDate());
-                test.equal(secondCompareDate.getMonth(), date2.getMonth());
-                test.equal(secondCompareDate.getHours(), date2.getHours());
-                // Let's close the db
-                client.close(done);
-              });
-            });
-          }, 2000);
-        });
+    test: async function () {
+      const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        maxPoolSize: 1
       });
+
+      const db = client.db(this.configuration.db);
+      const collection = db.collection('shouldCorrectlyInsertWithObjectId');
+      await collection.insertMany([{}], { writeConcern: { w: 1 } });
+      const firstCompareDate = new Date();
+
+      await sleep(200);
+
+      await collection.insertMany([{}], { writeConcern: { w: 1 } });
+      const secondCompareDate = new Date();
+
+      const items = await collection.find().toArray();
+      // Date 1
+      const date1 = new Date();
+      date1.setTime(items[0]._id.generationTime * 1000);
+      // Date 2
+      const date2 = new Date();
+      date2.setTime(items[1]._id.generationTime * 1000);
+
+      // Compare
+      test.equal(firstCompareDate.getFullYear(), date1.getFullYear());
+      test.equal(firstCompareDate.getDate(), date1.getDate());
+      test.equal(firstCompareDate.getMonth(), date1.getMonth());
+      test.equal(firstCompareDate.getHours(), date1.getHours());
+
+      test.equal(secondCompareDate.getFullYear(), date2.getFullYear());
+      test.equal(secondCompareDate.getDate(), date2.getDate());
+      test.equal(secondCompareDate.getMonth(), date2.getMonth());
+      test.equal(secondCompareDate.getHours(), date2.getHours());
+
+      // Let's close the db
+      await client.close();
     }
   });
 });

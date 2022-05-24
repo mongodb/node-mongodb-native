@@ -1,12 +1,6 @@
 'use strict';
-const {
-  assert: test,
-  filterForCommands,
-  setupDatabase,
-  withClient,
-  withMonitoredClient
-} = require('../shared');
-const { runLater, getSymbolFrom } = require('../../tools/utils');
+const { assert: test, filterForCommands, setupDatabase } = require('../shared');
+const { runLater, sleep } = require('../../tools/utils');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -18,6 +12,7 @@ const { setTimeout } = require('timers');
 const { ReadPreference } = require('../../../src/read_preference');
 const { ServerType } = require('../../../src/sdam/common');
 const { formatSort } = require('../../../src/sort');
+const { getSymbolFrom } = require('../../tools/utils');
 
 describe('Cursor', function () {
   before(function () {
@@ -26,6 +21,14 @@ describe('Cursor', function () {
       'cursor_session_tests',
       'cursor_session_tests2'
     ]);
+  });
+
+  let client;
+  beforeEach(async function () {
+    client = this.configuration.newClient({ maxPoolSize: 1, monitorCommands: true });
+  });
+  afterEach(async function () {
+    await client.close();
   });
 
   it('cursorShouldBeAbleToResetOnToArrayRunningQueryAgain', {
@@ -37,7 +40,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -84,7 +86,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -123,7 +124,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -159,7 +159,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -191,7 +190,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -311,7 +309,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -395,7 +392,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -442,7 +438,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -491,7 +486,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -541,7 +535,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -591,7 +584,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -627,7 +619,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -666,7 +657,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -702,7 +692,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -773,7 +762,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -826,7 +814,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -885,7 +872,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -957,7 +943,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1023,7 +1008,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1078,7 +1062,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1140,7 +1123,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1204,7 +1186,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1235,7 +1216,6 @@ describe('Cursor', function () {
       var COUNT = 1000;
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1316,7 +1296,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1399,7 +1378,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1436,7 +1414,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1473,7 +1450,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1514,7 +1490,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1564,7 +1539,6 @@ describe('Cursor', function () {
     }
 
     const configuration = this.configuration;
-    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
     client.connect((err, client) => {
       expect(err).to.not.exist;
 
@@ -1610,7 +1584,6 @@ describe('Cursor', function () {
       var count = 0;
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1690,7 +1663,6 @@ describe('Cursor', function () {
         doneCalled = 0;
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1738,7 +1710,6 @@ describe('Cursor', function () {
 
   it('removes session wheen cloning a find cursor', function (done) {
     const configuration = this.configuration;
-    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
     client.connect((err, client) => {
       expect(err).to.not.exist;
 
@@ -1771,7 +1742,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
 
@@ -1807,7 +1777,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1865,7 +1834,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1929,7 +1897,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -1985,7 +1952,6 @@ describe('Cursor', function () {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2045,7 +2011,6 @@ describe('Cursor', function () {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2179,7 +2144,6 @@ describe('Cursor', function () {
       // http://www.mongodb.org/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2393,7 +2357,6 @@ describe('Cursor', function () {
       };
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2441,7 +2404,6 @@ describe('Cursor', function () {
       var doc = { name: 'camera', _keywords: ['compact', 'ii2gd', 'led', 'red', 'aet'] };
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2474,7 +2436,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2498,7 +2459,14 @@ describe('Cursor', function () {
 
   it('should allow setting the cursors readConcern through a builder', {
     metadata: { requires: { mongodb: '>=3.2' } },
-    test: withMonitoredClient(['find'], function (client, events, done) {
+    test: function (done) {
+      const client = this.configuration.newClient({ monitorCommands: true });
+      const events = [];
+      client.on('commandStarted', event => {
+        if (event.commandName === 'find') {
+          events.push(event);
+        }
+      });
       const db = client.db(this.configuration.db);
       const cursor = db.collection('foo').find().withReadConcern('local');
       expect(cursor).property('readConcern').to.have.property('level').equal('local');
@@ -2509,9 +2477,9 @@ describe('Cursor', function () {
         expect(events).to.have.length(1);
         const findCommand = events[0];
         expect(findCommand).nested.property('command.readConcern').to.eql({ level: 'local' });
-        done();
+        client.close(done);
       });
-    })
+    }
   });
 
   it('shouldNotFailDueToStackOverflowEach', {
@@ -2523,7 +2491,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2572,149 +2539,104 @@ describe('Cursor', function () {
     }
   });
 
-  it('shouldNotFailDueToStackOverflowToArray', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should not fail due to stack overflow toArray', async function () {
+    const configuration = this.configuration;
+    const db = client.db(configuration.db);
+    const collection = await db.createCollection('shouldNotFailDueToStackOverflowToArray');
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+    var docs = Array.from({ length: 30000 }, (_, i) => ({ a: i }));
+    var allDocs = [];
+    var left = 0;
 
-        const db = client.db(configuration.db);
-        db.createCollection('shouldNotFailDueToStackOverflowToArray', (err, collection) => {
-          expect(err).to.not.exist;
-
-          var docs = [];
-          for (var i = 0; i < 30000; i++) docs.push({ a: i });
-          var allDocs = [];
-          var left = 0;
-
-          while (docs.length > 0) {
-            allDocs.push(docs.splice(0, 1000));
-          }
-          // Get all batches we must insert
-          left = allDocs.length;
-          var totalI = 0;
-          var timeout = 0;
-
-          // Execute inserts
-          for (i = 0; i < left; i++) {
-            setTimeout(function () {
-              collection.insert(
-                allDocs.shift(),
-                configuration.writeConcernMax(),
-                function (err, d) {
-                  expect(err).to.not.exist;
-
-                  left = left - 1;
-                  totalI = totalI + d.length;
-
-                  if (left === 0) {
-                    collection.find({}).toArray((err, items) => {
-                      expect(err).to.not.exist;
-
-                      test.equal(30000, items.length);
-                      done();
-                    });
-                  }
-                }
-              );
-            }, timeout);
-            timeout = timeout + 100;
-          }
-        });
-      });
+    while (docs.length > 0) {
+      allDocs.push(docs.splice(0, 1000));
     }
+    // Get all batches we must insert
+    left = allDocs.length;
+    var totalI = 0;
+    var timeout = 0;
+
+    // Execute inserts
+    for (let i = 0; i < left; i++) {
+      await sleep(timeout);
+
+      const d = await collection.insert(allDocs.shift());
+      left = left - 1;
+      totalI = totalI + d.length;
+
+      if (left === 0) {
+        const items = await collection.find({}).toArray();
+        expect(items).to.have.a.lengthOf(3000);
+      }
+      timeout = timeout + 100;
+    }
+
+    await client.close();
   });
 
-  it('shouldCorrectlySkipAndLimit', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should correctly skip and limit', function (done) {
+    const configuration = this.configuration;
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      var collection = db.collection('shouldCorrectlySkipAndLimit');
+      var docs = [];
+      for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
+
+      collection.insert(docs, configuration.writeConcernMax(), err => {
         expect(err).to.not.exist;
-        this.defer(() => client.close());
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('shouldCorrectlySkipAndLimit');
-        var docs = [];
-        for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
+        collection
+          .find({}, { OrderNumber: 1 })
+          .skip(10)
+          .limit(10)
+          .toArray((err, items) => {
+            expect(err).to.not.exist;
+            test.equal(10, items[0].OrderNumber);
 
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
-
-          collection
-            .find({}, { OrderNumber: 1 })
-            .skip(10)
-            .limit(10)
-            .toArray((err, items) => {
-              expect(err).to.not.exist;
-              test.equal(10, items[0].OrderNumber);
-
-              collection
-                .find({}, { OrderNumber: 1 })
-                .skip(10)
-                .limit(10)
-                .count((err, count) => {
-                  expect(err).to.not.exist;
-                  test.equal(10, count);
-                  done();
-                });
-            });
-        });
+            collection
+              .find({}, { OrderNumber: 1 })
+              .skip(10)
+              .limit(10)
+              .count()
+              .then(count => {
+                test.equal(10, count);
+                client.close(done);
+              });
+          });
       });
-    }
+    });
   });
 
-  it('shouldFailToTailANormalCollection', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('shouldFailToTailANormalCollection', function (done) {
+    const configuration = this.configuration;
+    client.connect((err, client) => {
+      expect(err).to.not.exist;
+      this.defer(() => client.close());
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      var collection = db.collection('shouldFailToTailANormalCollection');
+      var docs = [];
+      for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
+
+      collection.insert(docs, configuration.writeConcernMax(), err => {
         expect(err).to.not.exist;
-        this.defer(() => client.close());
 
-        const db = client.db(configuration.db);
-        var collection = db.collection('shouldFailToTailANormalCollection');
-        var docs = [];
-        for (var i = 0; i < 100; i++) docs.push({ a: i, OrderNumber: i });
+        const cursor = collection.find({}, { tailable: true });
+        cursor.forEach(
+          () => {},
+          err => {
+            test.ok(err instanceof Error);
+            test.ok(typeof err.code === 'number');
 
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
-
-          const cursor = collection.find({}, { tailable: true });
-          cursor.forEach(
-            () => {},
-            err => {
-              test.ok(err instanceof Error);
-              test.ok(typeof err.code === 'number');
-
-              // Close cursor b/c we did not exhaust cursor
-              cursor.close();
-              done();
-            }
-          );
-        });
+            // Close cursor b/c we did not exhaust cursor
+            cursor.close();
+            done();
+          }
+        );
       });
-    }
+    });
   });
 
   it('shouldCorrectlyUseFindAndCursorCount', {
@@ -2726,7 +2648,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
@@ -2778,7 +2699,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
@@ -2841,7 +2761,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2891,7 +2810,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2927,7 +2845,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2962,7 +2879,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -2993,7 +2909,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3049,7 +2964,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3094,7 +3008,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3146,7 +3059,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3194,7 +3106,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3245,7 +3156,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3299,7 +3209,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3341,7 +3250,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3429,7 +3337,6 @@ describe('Cursor', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3478,7 +3385,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3531,7 +3437,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3586,7 +3491,6 @@ describe('Cursor', function () {
         docs[i] = { a: i, createdAt: new Date(d) };
       }
 
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect((err, client) => {
         expect(err).to.not.exist;
         this.defer(() => client.close());
@@ -3670,7 +3574,6 @@ describe('Cursor', function () {
       var started = [];
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.on('commandStarted', function (event) {
         if (event.commandName === 'count') started.push(event);
       });
@@ -3725,7 +3628,6 @@ describe('Cursor', function () {
       }
 
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
 
       let cleanup = () => {};
       let caughtError = undefined;
@@ -4216,7 +4118,14 @@ describe('Cursor', function () {
 
   context('sort', function () {
     const findSort = (input, output) =>
-      withMonitoredClient('find', function (client, events, done) {
+      function (done) {
+        const client = this.configuration.newClient({ monitorCommands: true });
+        const events = [];
+        client.on('commandStarted', event => {
+          if (event.commandName === 'find') {
+            events.push(event);
+          }
+        });
         const db = client.db('test');
         const collection = db.collection('test_sort_dos');
         const cursor = collection.find({}, { sort: input });
@@ -4224,12 +4133,19 @@ describe('Cursor', function () {
           expect(err).to.not.exist;
           expect(events[0].command.sort).to.be.instanceOf(Map);
           expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-          cursor.close(done);
+          client.close(done);
         });
-      });
+      };
 
     const cursorSort = (input, output) =>
-      withMonitoredClient('find', function (client, events, done) {
+      function (done) {
+        const client = this.configuration.newClient({ monitorCommands: true });
+        const events = [];
+        client.on('commandStarted', event => {
+          if (event.commandName === 'find') {
+            events.push(event);
+          }
+        });
         const db = client.db('test');
         const collection = db.collection('test_sort_dos');
         const cursor = collection.find({}).sort(input);
@@ -4237,9 +4153,9 @@ describe('Cursor', function () {
           expect(err).to.not.exist;
           expect(events[0].command.sort).to.be.instanceOf(Map);
           expect(Array.from(events[0].command.sort)).to.deep.equal(Array.from(output));
-          cursor.close(done);
+          client.close(done);
         });
-      });
+      };
 
     it('should use find options object', findSort({ alpha: 1 }, new Map([['alpha', 1]])));
     it('should use find options string', findSort('alpha', new Map([['alpha', 1]])));
@@ -4329,30 +4245,34 @@ describe('Cursor', function () {
 
     it('should use allowDiskUse option on sort', {
       metadata: { requires: { mongodb: '>=4.4' } },
-      test: withMonitoredClient('find', function (client, events, done) {
+      test: async function () {
+        const events = [];
+        client.on('commandStarted', event => {
+          if (event.commandName === 'find') {
+            events.push(event);
+          }
+        });
         const db = client.db('test');
         const collection = db.collection('test_sort_allow_disk_use');
         const cursor = collection.find({}).sort(['alpha', 1]).allowDiskUse();
-        cursor.next(err => {
-          expect(err).to.not.exist;
-          const { command } = events.shift();
-          expect(command.sort).to.deep.equal(new Map([['alpha', 1]]));
-          expect(command.allowDiskUse).to.be.true;
-          cursor.close(done);
-        });
-      })
+        await cursor.next();
+        const { command } = events.shift();
+        expect(command.sort).to.deep.equal(new Map([['alpha', 1]]));
+        expect(command.allowDiskUse).to.be.true;
+      }
     });
 
     it('should error if allowDiskUse option used without sort', {
       metadata: { requires: { mongodb: '>=4.4' } },
-      test: withClient(function (client, done) {
+      test: async function () {
+        const client = this.configuration.newClient();
         const db = client.db('test');
         const collection = db.collection('test_sort_allow_disk_use');
         expect(() => collection.find({}).allowDiskUse()).to.throw(
           /Option "allowDiskUse" requires a sort specification/
         );
-        done();
-      })
+        await client.close();
+      }
     });
   });
 });

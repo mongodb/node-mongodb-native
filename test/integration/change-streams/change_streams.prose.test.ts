@@ -91,7 +91,6 @@ describe('Change Stream prose tests', function () {
     const configuration = this.configuration;
     const client = configuration.newClient();
 
-    await client.connect();
     const db = client.db('integration_tests');
     try {
       await db.createCollection('test');
@@ -113,7 +112,7 @@ describe('Change Stream prose tests', function () {
     test: function (done) {
       const configuration = this.configuration;
 
-      const OPERATION_TIME = new Timestamp(4, 1501511802);
+      const OPERATION_TIME = new Timestamp({ i: 4, t: 1501511802 });
 
       const makeHello = server => ({
         __nodejs_mock_server__: true,
@@ -230,7 +229,6 @@ describe('Change Stream prose tests', function () {
         .then(_server => (server = _server))
         .then(() => server.setMessageHandler(primaryServerHandler))
         .then(() => (client = configuration.newClient(`mongodb://${server.uri()}`, connectOptions)))
-        .then(() => client.connect())
         .then(() => {
           client.on('commandStarted', e => {
             if (e.commandName === 'aggregate') {
@@ -310,39 +308,36 @@ describe('Change Stream prose tests', function () {
         };
       }
 
-      init() {
-        return mock.createServer().then(server => {
-          this.server = server;
-          this.server.setMessageHandler(request => {
-            const doc = request.document;
+      async init() {
+        const server = await mock.createServer();
+        this.server = server;
+        this.server.setMessageHandler(request => {
+          const doc = request.document;
 
-            const opname = Object.keys(doc)[0];
-            let response = { ok: 0 };
-            if (this.cmdList.has(opname) && this[opname]) {
-              response = this[opname](doc);
+          const opname = Object.keys(doc)[0];
+          let response = { ok: 0 };
+          if (this.cmdList.has(opname) && this[opname]) {
+            response = this[opname](doc);
+          }
+          request.reply(this.applyOpTime(response));
+        });
+        this.client = this.config.newClient(this.mongodbURI, { monitorCommands: true });
+        this.apm = { started: [], succeeded: [], failed: [] };
+
+        (
+          [
+            ['commandStarted', this.apm.started],
+            ['commandSucceeded', this.apm.succeeded],
+            ['commandFailed', this.apm.failed]
+          ] as const
+        ).forEach(opts => {
+          const eventName = opts[0];
+          const target = opts[1];
+
+          this.client.on(eventName, e => {
+            if (e.commandName === 'aggregate' || e.commandName === 'getMore') {
+              target.push(e);
             }
-            request.reply(this.applyOpTime(response));
-          });
-
-          this.client = this.config.newClient(this.mongodbURI, { monitorCommands: true });
-          return this.client.connect().then(() => {
-            this.apm = { started: [], succeeded: [], failed: [] };
-            (
-              [
-                ['commandStarted', this.apm.started],
-                ['commandSucceeded', this.apm.succeeded],
-                ['commandFailed', this.apm.failed]
-              ] as const
-            ).forEach(opts => {
-              const eventName = opts[0];
-              const target = opts[1];
-
-              this.client.on(eventName, e => {
-                if (e.commandName === 'aggregate' || e.commandName === 'getMore') {
-                  target.push(e);
-                }
-              });
-            });
           });
         });
       }

@@ -37,8 +37,6 @@ describe('Causal Consistency - prose tests', function () {
     test.client.on('commandSucceeded', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.succeeded.push(event);
     });
-
-    return test.client.connect();
   });
 
   afterEach(() => {

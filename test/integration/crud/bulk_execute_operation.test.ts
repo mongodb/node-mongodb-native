@@ -2,15 +2,21 @@ import { expect } from 'chai';
 
 describe('Bulk executeOperation', () => {
   let client;
-  beforeEach(async function () {
-    client = await this.configuration.newClient({ monitorCommands: true }).connect();
+
+  beforeEach(function () {
+    client = this.configuration.newClient({ monitorCommands: true });
   });
+
   afterEach(async () => {
     await client?.close();
   });
 
   it('should use the same session for every operation', async () => {
     const collection = client.db().collection('bulk_execute_operation');
+
+    // TODO(NODE-4263): Legacy bulk operations require connecting invocation
+    await client.db().command({ ping: 1 });
+
     const batch = collection.initializeOrderedBulkOp();
 
     const events = [];

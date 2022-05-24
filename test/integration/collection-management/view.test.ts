@@ -10,7 +10,6 @@ describe('Views', function () {
   beforeEach(async function () {
     const configuration = this.configuration;
     client = this.configuration.newClient();
-    await client.connect();
     db = client.db(configuration.db);
   });
 

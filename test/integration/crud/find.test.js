@@ -1,5 +1,5 @@
 'use strict';
-const { assert: test, setupDatabase, withMonitoredClient } = require('../shared');
+const { assert: test, setupDatabase } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { setTimeout } = require('timers');
@@ -1112,26 +1112,22 @@ describe('Find', function () {
     }
   });
 
-  it(
-    'should support a timeout option for find operations',
-    withMonitoredClient(['find'], function (client, events, done) {
-      const db = client.db(this.configuration.db);
-      db.createCollection('cursor_timeout_false_0', (err, collection) => {
-        expect(err).to.not.exist;
-        const cursor = collection.find({}, { timeout: false });
-        cursor.toArray(err => {
-          expect(err).to.not.exist;
-          expect(events[0]).nested.property('command.noCursorTimeout').to.equal(true);
-          done();
-        });
-      });
-    })
-  );
+  it('should support a timeout option for find operations', async function () {
+    const client = this.configuration.newClient({ monitorCommands: true });
+    const events = [];
+    client.on('commandStarted', event => {
+      if (event.commandName === 'find') {
+        events.push(event);
+      }
+    });
+    const db = client.db(this.configuration.db);
+    const collection = await db.createCollection('cursor_timeout_false_0');
+    await collection.find({}, { timeout: false }).toArray();
+    expect(events[0]).nested.property('command.noCursorTimeout').to.equal(true);
+    await client.close();
+  });
 
-  /**
-   * Test findOneAndUpdate a document with strict mode enabled
-   */
-  it('shouldCorrectlyfindOneAndUpdateDocumentWithDBStrict', {
+  it('should correctly findOneAndUpdate document with DB strict', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
