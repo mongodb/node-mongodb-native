@@ -102,8 +102,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -111,8 +111,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -120,8 +120,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -129,8 +129,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -138,8 +138,8 @@
             "command": {
               "create": "encryptedCollection.esc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -147,8 +147,8 @@
             "command": {
               "create": "encryptedCollection.ecc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -156,17 +156,34 @@
             "command": {
               "create": "encryptedCollection.ecoc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "create": "encryptedCollection"
+              "create": "encryptedCollection",
+              "encryptedFields": {
+                "escCollection": "encryptedCollection.esc",
+                "eccCollection": "encryptedCollection.ecc",
+                "ecocCollection": "encryptedCollection.ecoc",
+                "fields": [
+                  {
+                    "path": "firstName",
+                    "bsonType": "string",
+                    "keyId": {
+                      "$binary": {
+                        "subType": "04",
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                      }
+                    }
+                  }
+                ]
+              }
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -182,8 +199,8 @@
                 }
               ]
             },
-            "commandName": "createIndexes",
-            "databaseName": "default"
+            "command_name": "createIndexes",
+            "database_name": "default"
           }
         }
       ]
@@ -282,8 +299,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -291,8 +308,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -300,8 +317,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -309,8 +326,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -318,8 +335,8 @@
             "command": {
               "create": "enxcol_.encryptedCollection.esc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -327,8 +344,8 @@
             "command": {
               "create": "enxcol_.encryptedCollection.ecc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -336,17 +353,37 @@
             "command": {
               "create": "enxcol_.encryptedCollection.ecoc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "create": "encryptedCollection"
+              "create": "encryptedCollection",
+              "encryptedFields": {
+                "fields": [
+                  {
+                    "path": "firstName",
+                    "bsonType": "string",
+                    "keyId": {
+                      "$binary": {
+                        "subType": "04",
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                      }
+                    },
+                    "queries": {
+                      "queryType": "equality",
+                      "contention": {
+                        "$numberLong": "0"
+                      }
+                    }
+                  }
+                ]
+              }
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -362,8 +399,8 @@
                 }
               ]
             },
-            "commandName": "createIndexes",
-            "databaseName": "default"
+            "command_name": "createIndexes",
+            "database_name": "default"
           }
         }
       ]
@@ -502,8 +539,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -511,8 +548,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -520,8 +557,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -529,8 +566,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -538,8 +575,8 @@
             "command": {
               "create": "enxcol_.encryptedCollection.esc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -547,8 +584,8 @@
             "command": {
               "create": "enxcol_.encryptedCollection.ecc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -556,17 +593,37 @@
             "command": {
               "create": "enxcol_.encryptedCollection.ecoc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "create": "encryptedCollection"
+              "create": "encryptedCollection",
+              "encryptedFields": {
+                "fields": [
+                  {
+                    "path": "firstName",
+                    "bsonType": "string",
+                    "keyId": {
+                      "$binary": {
+                        "subType": "04",
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                      }
+                    },
+                    "queries": {
+                      "queryType": "equality",
+                      "contention": {
+                        "$numberLong": "0"
+                      }
+                    }
+                  }
+                ]
+              }
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -582,8 +639,8 @@
                 }
               ]
             },
-            "commandName": "createIndexes",
-            "databaseName": "default"
+            "command_name": "createIndexes",
+            "database_name": "default"
           }
         },
         {
@@ -591,8 +648,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -600,8 +657,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -609,8 +666,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -618,8 +675,8 @@
             "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         }
       ]
@@ -732,8 +789,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -741,8 +798,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -750,8 +807,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -759,8 +816,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -768,8 +825,8 @@
             "command": {
               "create": "encryptedCollection.esc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -777,8 +834,8 @@
             "command": {
               "create": "encryptedCollection.ecc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -786,17 +843,34 @@
             "command": {
               "create": "encryptedCollection.ecoc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "create": "encryptedCollection"
+              "create": "encryptedCollection",
+              "encryptedFields": {
+                "escCollection": "encryptedCollection.esc",
+                "eccCollection": "encryptedCollection.ecc",
+                "ecocCollection": "encryptedCollection.ecoc",
+                "fields": [
+                  {
+                    "path": "firstName",
+                    "bsonType": "string",
+                    "keyId": {
+                      "$binary": {
+                        "subType": "04",
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                      }
+                    }
+                  }
+                ]
+              }
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -812,8 +886,8 @@
                 }
               ]
             },
-            "commandName": "createIndexes",
-            "databaseName": "default"
+            "command_name": "createIndexes",
+            "database_name": "default"
           }
         }
       ]
@@ -879,8 +953,8 @@
                 "name": "plaintextCollection"
               }
             },
-            "commandName": "listCollections",
-            "databaseName": "default"
+            "command_name": "listCollections",
+            "database_name": "default"
           }
         },
         {
@@ -888,8 +962,8 @@
             "command": {
               "drop": "plaintextCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -897,8 +971,8 @@
             "command": {
               "create": "plaintextCollection"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         }
       ]
@@ -994,8 +1068,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1003,8 +1077,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1012,8 +1086,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1021,8 +1095,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1030,8 +1104,8 @@
             "command": {
               "create": "encryptedCollection.esc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1039,8 +1113,8 @@
             "command": {
               "create": "encryptedCollection.ecc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1048,17 +1122,34 @@
             "command": {
               "create": "encryptedCollection.ecoc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "create": "encryptedCollection"
+              "create": "encryptedCollection",
+              "encryptedFields": {
+                "escCollection": "encryptedCollection.esc",
+                "eccCollection": "encryptedCollection.ecc",
+                "ecocCollection": "encryptedCollection.ecoc",
+                "fields": [
+                  {
+                    "path": "firstName",
+                    "bsonType": "string",
+                    "keyId": {
+                      "$binary": {
+                        "subType": "04",
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                      }
+                    }
+                  }
+                ]
+              }
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1074,8 +1165,8 @@
                 }
               ]
             },
-            "commandName": "createIndexes",
-            "databaseName": "default"
+            "command_name": "createIndexes",
+            "database_name": "default"
           }
         }
       ]
@@ -1186,8 +1277,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1195,8 +1286,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1204,8 +1295,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1213,8 +1304,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1222,8 +1313,8 @@
             "command": {
               "create": "encryptedCollection.esc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1231,8 +1322,8 @@
             "command": {
               "create": "encryptedCollection.ecc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1240,17 +1331,34 @@
             "command": {
               "create": "encryptedCollection.ecoc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "create": "encryptedCollection"
+              "create": "encryptedCollection",
+              "encryptedFields": {
+                "escCollection": "encryptedCollection.esc",
+                "eccCollection": "encryptedCollection.ecc",
+                "ecocCollection": "encryptedCollection.ecoc",
+                "fields": [
+                  {
+                    "path": "firstName",
+                    "bsonType": "string",
+                    "keyId": {
+                      "$binary": {
+                        "subType": "04",
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                      }
+                    }
+                  }
+                ]
+              }
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1266,8 +1374,8 @@
                 }
               ]
             },
-            "commandName": "createIndexes",
-            "databaseName": "default"
+            "command_name": "createIndexes",
+            "database_name": "default"
           }
         }
       ]
@@ -1315,8 +1423,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1324,8 +1432,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1333,8 +1441,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1342,8 +1450,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         }
       ]
@@ -1511,8 +1619,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1520,8 +1628,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1529,8 +1637,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1538,8 +1646,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1547,8 +1655,8 @@
             "command": {
               "create": "encryptedCollection.esc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1556,8 +1664,8 @@
             "command": {
               "create": "encryptedCollection.ecc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1565,17 +1673,34 @@
             "command": {
               "create": "encryptedCollection.ecoc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "create": "encryptedCollection"
+              "create": "encryptedCollection",
+              "encryptedFields": {
+                "escCollection": "encryptedCollection.esc",
+                "eccCollection": "encryptedCollection.ecc",
+                "ecocCollection": "encryptedCollection.ecoc",
+                "fields": [
+                  {
+                    "path": "firstName",
+                    "bsonType": "string",
+                    "keyId": {
+                      "$binary": {
+                        "subType": "04",
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                      }
+                    }
+                  }
+                ]
+              }
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1591,8 +1716,8 @@
                 }
               ]
             },
-            "commandName": "createIndexes",
-            "databaseName": "default"
+            "command_name": "createIndexes",
+            "database_name": "default"
           }
         },
         {
@@ -1600,8 +1725,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1609,8 +1734,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1618,8 +1743,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1627,8 +1752,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         }
       ]
@@ -1779,8 +1904,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1788,8 +1913,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1797,8 +1922,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1806,8 +1931,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1815,8 +1940,8 @@
             "command": {
               "create": "encryptedCollection.esc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1824,8 +1949,8 @@
             "command": {
               "create": "encryptedCollection.ecc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1833,17 +1958,34 @@
             "command": {
               "create": "encryptedCollection.ecoc"
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "create": "encryptedCollection"
+              "create": "encryptedCollection",
+              "encryptedFields": {
+                "escCollection": "encryptedCollection.esc",
+                "eccCollection": "encryptedCollection.ecc",
+                "ecocCollection": "encryptedCollection.ecoc",
+                "fields": [
+                  {
+                    "path": "firstName",
+                    "bsonType": "string",
+                    "keyId": {
+                      "$binary": {
+                        "subType": "04",
+                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                      }
+                    }
+                  }
+                ]
+              }
             },
-            "commandName": "create",
-            "databaseName": "default"
+            "command_name": "create",
+            "database_name": "default"
           }
         },
         {
@@ -1859,8 +2001,8 @@
                 }
               ]
             },
-            "commandName": "createIndexes",
-            "databaseName": "default"
+            "command_name": "createIndexes",
+            "database_name": "default"
           }
         },
         {
@@ -1871,8 +2013,8 @@
                 "name": "encryptedCollection"
               }
             },
-            "commandName": "listCollections",
-            "databaseName": "default"
+            "command_name": "listCollections",
+            "database_name": "default"
           }
         },
         {
@@ -1880,8 +2022,8 @@
             "command": {
               "drop": "encryptedCollection"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1889,8 +2031,8 @@
             "command": {
               "drop": "encryptedCollection.esc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1898,8 +2040,8 @@
             "command": {
               "drop": "encryptedCollection.ecc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         },
         {
@@ -1907,8 +2049,8 @@
             "command": {
               "drop": "encryptedCollection.ecoc"
             },
-            "commandName": "drop",
-            "databaseName": "default"
+            "command_name": "drop",
+            "database_name": "default"
           }
         }
       ]
