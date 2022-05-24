@@ -511,7 +511,7 @@ oneOffFuncAsTasks.push({
     {
       func: 'bootstrap mongo-orchestration',
       vars: {
-        VERSION: 'latest',
+        VERSION: '6.0',
         TOPOLOGY: 'replica_set'
       }
     },
