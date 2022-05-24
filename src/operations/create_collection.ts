@@ -127,7 +127,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
         db.s.client.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
 
       if (encryptedFields) {
-        // Create auxilliary collections for FLE2 support.
+        // Create auxilliary collections for queryable encryption support.
         const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
         const eccCollection = encryptedFields.eccCollection ?? `enxcol_.${name}.ecc`;
         const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
@@ -145,7 +145,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
       const coll = await this.executeWithoutEncryptedFieldsCheck(server, session);
 
       if (encryptedFields) {
-        // Create the required index for FLE2 support.
+        // Create the required index for queryable encryption support.
         const createIndexOp = new CreateIndexOperation(db, name, { __safeContent__: 1 }, {});
         await new Promise<void>((resolve, reject) => {
           createIndexOp.execute(server, session, err => (err ? reject(err) : resolve()));
