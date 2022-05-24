@@ -1,7 +1,7 @@
 tests:
     -
         description: "Valid connection pool options are parsed correctly"
-        uri: "mongodb://example.com/?maxIdleTimeMS=50000&maxPoolSize=5&minPoolSize=3"
+        uri: "mongodb://example.com/?maxIdleTimeMS=50000&maxPoolSize=5&minPoolSize=3&maxConnecting=1"
         valid: true
         warning: false
         hosts: ~
@@ -10,6 +10,7 @@ tests:
             maxIdleTimeMS: 50000
             maxPoolSize: 5
             minPoolSize: 3
+            maxConnecting: 1
     -
         description: "Non-numeric maxIdleTimeMS causes a warning"
         uri: "mongodb://example.com/?maxIdleTimeMS=invalid"
@@ -45,4 +46,23 @@ tests:
       hosts: ~
       auth: ~
       options:
-          minPoolSize: 0
+          minPoolSize: 0 
+
+    -
+      description: "maxConnecting=0 causes a warning"
+      uri: "mongodb://example.com/?maxConnecting=0"
+      valid: true
+      warning: true
+      hosts: ~
+      auth: ~
+      options: {}
+
+    -
+      description: "maxConnecting<0 causes a warning"
+      uri: "mongodb://example.com/?maxConnecting=-1"
+      valid: true
+      warning: true
+      hosts: ~
+      auth: ~
+      options: {}
+      
