@@ -13,7 +13,7 @@ tests:
         kmsProviders:
           aws: {} # Credentials filled in from environment.
         encryptedFieldsMap:
-          default.encryptedCollection: {
+          default.encryptedCollection: &encrypted_fields0 {
                 "escCollection": "encryptedCollection.esc",
                 "eccCollection": "encryptedCollection.ecc",
                 "ecocCollection": "encryptedCollection.ecoc",
@@ -67,48 +67,52 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         # events from createCollection ... begin
         # State collections are created first.
         - command_started_event:
             command:
               create: "encryptedCollection.esc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecoc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         # Data collection is created after.
         - command_started_event:
             command:
               create: "encryptedCollection"
-            commandName: create
-            databaseName: *database_name
+              encryptedFields: *encrypted_fields0
+            command_name: create
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -116,8 +120,8 @@ tests:
               indexes:
                 - name: __safeContent___1
                   key: { __safeContent__: 1 }
-            commandName: createIndexes
-            databaseName: *database_name
+            command_name: createIndexes
+            database_name: *database_name
         # events from createCollection ... end
   - description: "default state collection names are applied"
     clientOptions:
@@ -125,7 +129,7 @@ tests:
         kmsProviders:
           aws: {} # Credentials filled in from environment.
         encryptedFieldsMap:
-          default.encryptedCollection: {
+          default.encryptedCollection: &encrypted_fields1 {
                 "fields": [
                     {
                         "path": "firstName",
@@ -182,48 +186,52 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "enxcol_.encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "enxcol_.encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "enxcol_.encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         # events from createCollection ... begin
         # State collections are created first.
         - command_started_event:
             command:
               create: "enxcol_.encryptedCollection.esc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "enxcol_.encryptedCollection.ecc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "enxcol_.encryptedCollection.ecoc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         # Data collection is created after.
         - command_started_event:
             command:
               create: "encryptedCollection"
-            commandName: create
-            databaseName: *database_name
+              encryptedFields: *encrypted_fields1
+            command_name: create
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -231,8 +239,8 @@ tests:
               indexes:
                 - name: __safeContent___1
                   key: { __safeContent__: 1 }
-            commandName: createIndexes
-            databaseName: *database_name
+            command_name: createIndexes
+            database_name: *database_name
         # events from createCollection ... end
   - description: "drop removes all state collections"
     clientOptions:
@@ -240,7 +248,7 @@ tests:
         kmsProviders:
           aws: {} # Credentials filled in from environment.
         encryptedFieldsMap:
-          default.encryptedCollection: {
+          default.encryptedCollection: &encrypted_fields2 {
                 "fields": [
                     {
                         "path": "firstName",
@@ -322,48 +330,52 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "enxcol_.encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "enxcol_.encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "enxcol_.encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         # events from createCollection ... begin
         # State collections are created first.
         - command_started_event:
             command:
               create: "enxcol_.encryptedCollection.esc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "enxcol_.encryptedCollection.ecc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "enxcol_.encryptedCollection.ecoc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         # Data collection is created after.
         - command_started_event:
             command:
               create: "encryptedCollection"
-            commandName: create
-            databaseName: *database_name
+              encryptedFields: *encrypted_fields2
+            command_name: create
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -371,30 +383,30 @@ tests:
               indexes:
                 - name: __safeContent___1
                   key: { __safeContent__: 1 }
-            commandName: createIndexes
-            databaseName: *database_name
+            command_name: createIndexes
+            database_name: *database_name
         # events from createCollection ... end
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "enxcol_.encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "enxcol_.encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "enxcol_.encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
   - description: "encryptedFieldsMap with cyclic entries does not loop"
     clientOptions:
@@ -404,7 +416,7 @@ tests:
         encryptedFieldsMap:
           # encryptedCollection has encryptedCollection.esc as the escCollection.
           # encryptedCollection.esc has encryptedCollection as the escCollection.
-          default.encryptedCollection: {
+          default.encryptedCollection: &encrypted_fields3 {
                 "escCollection": "encryptedCollection.esc",
                 "eccCollection": "encryptedCollection.ecc",
                 "ecocCollection": "encryptedCollection.ecoc",
@@ -468,48 +480,52 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         # events from createCollection ... begin
         # State collections are created first.
         - command_started_event:
             command:
               create: "encryptedCollection.esc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecoc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         # Data collection is created after.
         - command_started_event:
             command:
               create: "encryptedCollection"
-            commandName: create
-            databaseName: *database_name
+              encryptedFields: *encrypted_fields3
+            command_name: create
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -517,8 +533,8 @@ tests:
               indexes:
                 - name: __safeContent___1
                   key: { __safeContent__: 1 }
-            commandName: createIndexes
-            databaseName: *database_name
+            command_name: createIndexes
+            database_name: *database_name
         # events from createCollection ... end
   - description: "CreateCollection without encryptedFields."
     clientOptions:
@@ -561,26 +577,26 @@ tests:
             command:
               listCollections: 1
               filter: { name: "plaintextCollection" }
-            commandName: listCollections
-            databaseName: *database_name
+            command_name: listCollections
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "plaintextCollection"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         - command_started_event:
             command:
               create: "plaintextCollection"
-            commandName: create
-            databaseName: *database_name
+            command_name: create
+            database_name: *database_name
   - description: "CreateCollection from encryptedFieldsMap."
     clientOptions:
       autoEncryptOpts:
         kmsProviders:
           aws: {} # Credentials filled in from environment.
         encryptedFieldsMap:
-          default.encryptedCollection: {
+          default.encryptedCollection: &encrypted_fields4 {
                 "escCollection": "encryptedCollection.esc",
                 "eccCollection": "encryptedCollection.ecc",
                 "ecocCollection": "encryptedCollection.ecoc",
@@ -633,48 +649,52 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         # events from createCollection ... begin
         # State collections are created first.
         - command_started_event:
             command:
               create: "encryptedCollection.esc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecoc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         # Data collection is created after.
         - command_started_event:
             command:
               create: "encryptedCollection"
-            commandName: create
-            databaseName: *database_name
+              encryptedFields: *encrypted_fields4
+            command_name: create
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -682,8 +702,8 @@ tests:
               indexes:
                 - name: __safeContent___1
                   key: { __safeContent__: 1 }
-            commandName: createIndexes
-            databaseName: *database_name
+            command_name: createIndexes
+            database_name: *database_name
         # events from createCollection ... end
   - description: "CreateCollection from encryptedFields."
     clientOptions:
@@ -712,7 +732,7 @@ tests:
         object: database
         arguments:
           collection: "encryptedCollection"
-          encryptedFields: {
+          encryptedFields: &encrypted_fields5 {
                 "escCollection": "encryptedCollection.esc",
                 "eccCollection": "encryptedCollection.ecc",
                 "ecocCollection": "encryptedCollection.ecoc",
@@ -755,48 +775,52 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         # events from createCollection ... begin
         # State collections are created first.
         - command_started_event:
             command:
               create: "encryptedCollection.esc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecoc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         # Data collection is created after.
         - command_started_event:
             command:
               create: "encryptedCollection"
-            commandName: create
-            databaseName: *database_name
+              encryptedFields: *encrypted_fields5
+            command_name: create
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -804,8 +828,8 @@ tests:
               indexes:
                 - name: __safeContent___1
                   key: { __safeContent__: 1 }
-            commandName: createIndexes
-            databaseName: *database_name
+            command_name: createIndexes
+            database_name: *database_name
         # events from createCollection ... end
 
   - description: "DropCollection from encryptedFieldsMap"
@@ -835,24 +859,24 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
   - description: "DropCollection from encryptedFields"
     clientOptions:
@@ -924,7 +948,7 @@ tests:
         object: database
         arguments:
           collection: "encryptedCollection"
-          encryptedFields: {
+          encryptedFields: &encrypted_fields6 {
                 "escCollection": "encryptedCollection.esc",
                 "eccCollection": "encryptedCollection.ecc",
                 "ecocCollection": "encryptedCollection.ecoc",
@@ -960,46 +984,50 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         # events from createCollection ... begin
         - command_started_event:
             command:
               create: "encryptedCollection.esc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecoc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection"
-            commandName: create
-            databaseName: *database_name
+              encryptedFields: *encrypted_fields6
+            command_name: create
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -1007,30 +1035,30 @@ tests:
               indexes:
                 - name: __safeContent___1
                   key: { __safeContent__: 1 }
-            commandName: createIndexes
-            databaseName: *database_name
+            command_name: createIndexes
+            database_name: *database_name
         # events from createCollection ... end
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
 
   - description: "DropCollection from remote encryptedFields"
@@ -1062,7 +1090,7 @@ tests:
         object: database
         arguments:
           collection: "encryptedCollection"
-          encryptedFields: {
+          encryptedFields: &encrypted_fields7 {
                 "escCollection": "encryptedCollection.esc",
                 "eccCollection": "encryptedCollection.ecc",
                 "ecocCollection": "encryptedCollection.ecoc",
@@ -1129,46 +1157,50 @@ tests:
         # events from dropCollection ... begin
         - command_started_event:
             command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
-        - command_started_event:
-            command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end
         # events from createCollection ... begin
         - command_started_event:
             command:
               create: "encryptedCollection.esc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection.ecoc"
-            commandName: create
-            databaseName: *database_name
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
         - command_started_event:
             command:
               create: "encryptedCollection"
-            commandName: create
-            databaseName: *database_name
+              encryptedFields: *encrypted_fields7
+            command_name: create
+            database_name: *database_name
         # Index on __safeContents__ is then created.
         - command_started_event:
             command:
@@ -1176,34 +1208,34 @@ tests:
               indexes:
                 - name: __safeContent___1
                   key: { __safeContent__: 1 }
-            commandName: createIndexes
-            databaseName: *database_name
+            command_name: createIndexes
+            database_name: *database_name
         # events from createCollection ... end
         # events from dropCollection ... begin
         - command_started_event:
             command:
               listCollections: 1
               filter: { name: "encryptedCollection" }
-            commandName: listCollections
-            databaseName: *database_name
-        - command_started_event:
-            command:
-              drop: "encryptedCollection"
-            commandName: drop
-            databaseName: *database_name
+            command_name: listCollections
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.esc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
         - command_started_event:
             command:
               drop: "encryptedCollection.ecoc"
-            commandName: drop
-            databaseName: *database_name
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
         # events from dropCollection ... end

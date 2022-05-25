@@ -133,7 +133,12 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
         const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
 
         for (const collectionName of [escCollection, eccCollection, ecocCollection]) {
-          const createOp = new CreateCollectionOperation(db, collectionName);
+          const createOp = new CreateCollectionOperation(db, collectionName, {
+            clusteredIndex: {
+              key: { _id: 1 },
+              unique: true
+            }
+          });
           await createOp.executeWithoutEncryptedFieldsCheck(server, session);
         }
 
