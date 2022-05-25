@@ -173,6 +173,11 @@ export function resultCheck(
     const expectedEntries = Object.entries(expected);
 
     if (Array.isArray(expected)) {
+      if (!Array.isArray(actual)) {
+        expect.fail(
+          `expected value at ${path.join('.')} to be an array, but received ${inspect(actual)}`
+        );
+      }
       for (const [index, value] of expectedEntries) {
         path.push(`[${index}]`); // record what key we're at
         checkNestedDocuments(index, value);
