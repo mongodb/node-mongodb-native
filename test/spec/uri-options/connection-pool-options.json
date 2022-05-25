@@ -2,7 +2,7 @@
   "tests": [
     {
       "description": "Valid connection pool options are parsed correctly",
-      "uri": "mongodb://example.com/?maxIdleTimeMS=50000&maxPoolSize=5&minPoolSize=3",
+      "uri": "mongodb://example.com/?maxIdleTimeMS=50000&maxPoolSize=5&minPoolSize=3&maxConnecting=1",
       "valid": true,
       "warning": false,
       "hosts": null,
@@ -10,7 +10,8 @@
       "options": {
         "maxIdleTimeMS": 50000,
         "maxPoolSize": 5,
-        "minPoolSize": 3
+        "minPoolSize": 3,
+        "maxConnecting": 1
       }
     },
     {
@@ -52,6 +53,24 @@
       "options": {
         "minPoolSize": 0
       }
+    },
+    {
+      "description": "maxConnecting=0 causes a warning",
+      "uri": "mongodb://example.com/?maxConnecting=0",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "maxConnecting<0 causes a warning",
+      "uri": "mongodb://example.com/?maxConnecting=-1",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": {}
     }
   ]
 }

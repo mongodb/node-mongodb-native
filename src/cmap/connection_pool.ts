@@ -67,6 +67,8 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
   maxPoolSize: number;
   /** The minimum number of connections that MUST exist at any moment in a single connection pool. */
   minPoolSize: number;
+  /** The maximum number of connections that may be in the process of being established concurrently by the connection pool. */
+  maxConnecting: number;
   /** The maximum amount of time a connection should remain idle in the connection pool before being marked idle. */
   maxIdleTimeMS: number;
   /** The maximum amount of time operation execution should wait for a connection to become available. The default is 0 which means there is no limit. */
@@ -107,7 +109,7 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   closed: boolean;
-  options: Readonly<ConnectionPoolOptions & { maxConnecting: number }>;
+  options: Readonly<ConnectionPoolOptions>;
   /** @internal */
   [kLogger]: Logger;
   /** @internal */
@@ -199,7 +201,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       connectionType: Connection,
       maxPoolSize: options.maxPoolSize ?? 100,
       minPoolSize: options.minPoolSize ?? 0,
-      maxConnecting: 2,
+      maxConnecting: options.maxConnecting ?? 2,
       maxIdleTimeMS: options.maxIdleTimeMS ?? 0,
       waitQueueTimeoutMS: options.waitQueueTimeoutMS ?? 0,
       autoEncrypter: options.autoEncrypter,

@@ -19,6 +19,7 @@ type CmapOperation =
 type CmapPoolOptions = {
   maxPoolSize?: number;
   minPoolSize?: number;
+  maxConnecting?: number;
   maxIdleTimeMS?: number;
   waitQueueTimeoutMS?: number;
 };
