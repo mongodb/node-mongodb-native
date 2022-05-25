@@ -4,13 +4,9 @@ import * as sinon from 'sinon';
 
 import { ChangeStreamCursor } from '../../src/change_stream';
 import { MongoClient } from '../../src/mongo_client';
-import { Server } from '../../src/sdam/server';
-import { ServerDescription } from '../../src/sdam/server_description';
-import { Topology } from '../../src/sdam/topology';
 import { MongoDBNamespace } from '../../src/utils';
-import { getSymbolFrom } from '../tools/utils';
 
-describe.only('class ChangeStreamCursor', function () {
+describe('class ChangeStreamCursor', function () {
   afterEach(() => sinon.restore());
   describe('get resumeOptions()', function () {
     context('non-resume related options', function () {
