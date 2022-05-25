@@ -141,7 +141,7 @@ export function resultCheck(
   path: string[] = [],
   isRootDocument = true
 ): void {
-  function checkNestedDocuments(key: string, value: any) {
+  function checkNestedDocuments(key: string, value: any, checkExtraKeys: boolean) {
     if (key === 'sort') {
       // TODO: This is a workaround that works because all sorts in the specs
       // are objects with one key; ideally we'd want to adjust the spec definitions
@@ -153,9 +153,9 @@ export function resultCheck(
       const expectedSortKey = Object.keys(value)[0];
       expect(actual[key]).to.have.all.keys(expectedSortKey);
       const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
-      resultCheck(objFromActual, value, entities, path, isRootDocument);
+      resultCheck(objFromActual, value, entities, path, checkExtraKeys);
     } else {
-      resultCheck(actual[key], value, entities, path, isRootDocument);
+      resultCheck(actual[key], value, entities, path, checkExtraKeys);
     }
   }
 
@@ -180,15 +180,13 @@ export function resultCheck(
       }
       for (const [index, value] of expectedEntries) {
         path.push(`[${index}]`);
-        checkNestedDocuments(index, value);
+        checkNestedDocuments(index, value, false);
         path.pop();
       }
     } else {
       for (const [key, value] of expectedEntries) {
         path.push(`.${key}`);
-        isRootDocument = false;
-        checkNestedDocuments(key, value);
-        isRootDocument = true;
+        checkNestedDocuments(key, value, true);
         path.pop();
       }
 
