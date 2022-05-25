@@ -859,11 +859,11 @@ export const OPTIONS = {
   maxConnecting: {
     default: 2,
     transform({ name, values: [value] }): number {
-      const maxStalenessSeconds = getUint(name, value);
-      if (maxStalenessSeconds === 0) {
+      const maxConnecting = getUint(name, value);
+      if (maxConnecting === 0) {
         throw new MongoInvalidArgumentError('maxConnecting must be > 0 if specified');
       }
-      return maxStalenessSeconds;
+      return maxConnecting;
     }
   },
   maxIdleTimeMS: {
