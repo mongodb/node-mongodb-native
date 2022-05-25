@@ -139,7 +139,7 @@ export function resultCheck(
   expected: Document | number | string | boolean,
   entities: EntitiesMap,
   path: string[] = [],
-  depth = 0
+  isRootDocument = true
 ): void {
   function checkNestedDocuments(key: string, value: any) {
     if (key === 'sort') {
@@ -153,9 +153,9 @@ export function resultCheck(
       const expectedSortKey = Object.keys(value)[0];
       expect(actual[key]).to.have.all.keys(expectedSortKey);
       const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
-      resultCheck(objFromActual, value, entities, path, depth);
+      resultCheck(objFromActual, value, entities, path, false);
     } else {
-      resultCheck(actual[key], value, entities, path, depth);
+      resultCheck(actual[key], value, entities, path, false);
     }
   }
 
@@ -166,7 +166,7 @@ export function resultCheck(
     if (isSpecialOperator(expected)) {
       // Special operation check is a base condition
       // specialCheck may recurse depending upon the check ($$unsetOrMatches)
-      specialCheck(actual, expected, entities, path, depth);
+      specialCheck(actual, expected, entities, path, false);
       return;
     }
 
@@ -179,20 +179,16 @@ export function resultCheck(
         );
       }
       for (const [index, value] of expectedEntries) {
-        path.push(`[${index}]`); // record what key we're at
+        path.push(`[${index}]`);
         checkNestedDocuments(index, value);
-        path.pop(); // if the recursion was successful we can drop the tested key
+        path.pop();
       }
     } else {
       for (const [key, value] of expectedEntries) {
-        path.push(`.${key}`); // record what key we're at
-        depth += 1;
+        path.push(`.${key}`);
         checkNestedDocuments(key, value);
-        depth -= 1;
-        path.pop(); // if the recursion was successful we can drop the tested key
+        path.pop();
       }
-
-      const isRootDocument = depth === 0;
 
       if (!isRootDocument) {
         expect(actual, `Expected actual to exist at ${path.join('')}`).to.exist;
@@ -241,14 +237,12 @@ export function specialCheck(
   expected: SpecialOperator,
   entities: EntitiesMap,
   path: string[] = [],
-  depth = 0
+  isRootDocument: boolean
 ): boolean {
   if (isUnsetOrMatchesOperator(expected)) {
-    // $$unsetOrMatches
     if (actual === null || actual === undefined) return;
-    else {
-      resultCheck(actual, expected.$$unsetOrMatches, entities, path, depth);
-    }
+
+    resultCheck(actual, expected.$$unsetOrMatches, entities, path, isRootDocument);
   } else if (isMatchesEntityOperator(expected)) {
     // $$matchesEntity
     const entity = entities.get(expected.$$matchesEntity);
