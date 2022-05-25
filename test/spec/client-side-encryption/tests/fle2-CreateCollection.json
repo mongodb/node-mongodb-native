@@ -1472,6 +1472,18 @@
         {
           "command_started_event": {
             "command": {
+              "listCollections": 1,
+              "filter": {
+                "name": "encryptedCollection"
+              }
+            },
+            "command_name": "listCollections",
+            "database_name": "default"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
               "createIndexes": "encryptedCollection",
               "indexes": [
                 {
@@ -1832,6 +1844,18 @@
         {
           "command_started_event": {
             "command": {
+              "listCollections": 1,
+              "filter": {
+                "name": "encryptedCollection"
+              }
+            },
+            "command_name": "listCollections",
+            "database_name": "default"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
               "createIndexes": "encryptedCollection",
               "indexes": [
                 {
@@ -2129,6 +2153,18 @@
               }
             },
             "command_name": "create",
+            "database_name": "default"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "listCollections": 1,
+              "filter": {
+                "name": "encryptedCollection"
+              }
+            },
+            "command_name": "listCollections",
             "database_name": "default"
           }
         },
