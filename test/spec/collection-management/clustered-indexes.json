@@ -10,14 +10,17 @@
   "createEntities": [
     {
       "client": {
-        "id": "client0"
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
       }
     },
     {
       "database": {
         "id": "database0",
         "client": "client0",
-        "databaseName": "ts-tests"
+        "databaseName": "ci-tests"
       }
     },
     {
@@ -31,7 +34,7 @@
   "initialData": [
     {
       "collectionName": "test",
-      "databaseName": "ts-tests",
+      "databaseName": "ci-tests",
       "documents": []
     }
   ],
@@ -64,9 +67,39 @@
           "name": "assertCollectionExists",
           "object": "testRunner",
           "arguments": {
-            "databaseName": "ts-tests",
+            "databaseName": "ci-tests",
             "collectionName": "test"
           }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test"
+                },
+                "databaseName": "ci-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "clusteredIndex": {
+                    "key": {
+                      "_id": 1
+                    },
+                    "unique": true,
+                    "name": "test index"
+                  }
+                },
+                "databaseName": "ci-tests"
+              }
+            }
+          ]
         }
       ]
     },
@@ -125,6 +158,49 @@
             }
           ]
         }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test"
+                },
+                "databaseName": "ci-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "clusteredIndex": {
+                    "key": {
+                      "_id": 1
+                    },
+                    "unique": true,
+                    "name": "test index"
+                  }
+                },
+                "databaseName": "ci-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listCollections": 1,
+                  "filter": {
+                    "name": {
+                      "$eq": "test"
+                    }
+                  }
+                },
+                "databaseName": "ci-tests"
+              }
+            }
+          ]
+        }
       ]
     },
     {
@@ -167,6 +243,44 @@
                   "int",
                   "long"
                 ]
+              }
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test"
+                },
+                "databaseName": "ci-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "clusteredIndex": {
+                    "key": {
+                      "_id": 1
+                    },
+                    "unique": true,
+                    "name": "test index"
+                  }
+                },
+                "databaseName": "ci-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "listIndexes": "test"
+                },
+                "databaseName": "ci-tests"
               }
             }
           ]
