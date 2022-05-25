@@ -930,19 +930,22 @@ export class ChangeStreamCursor<
       ...this.options
     };
 
-    if (this.resumeToken || this.startAtOperationTime) {
-      for (const key of ['resumeAfter', 'startAfter', 'startAtOperationTime'] as const) {
-        delete options[key];
-      }
+    for (const key of ['resumeAfter', 'startAfter', 'startAtOperationTime'] as const) {
+      delete options[key];
+    }
 
-      if (this.resumeToken) {
-        const resumeKey =
-          this.options.startAfter && !this.hasReceived ? 'startAfter' : 'resumeAfter';
-
-        options[resumeKey] = this.resumeToken;
-      } else if (this.startAtOperationTime && maxWireVersion(this.server) >= 7) {
-        options.startAtOperationTime = this.startAtOperationTime;
+    if (this.resumeToken != null) {
+      if (this.options.startAfter && !this.hasReceived) {
+        options.startAfter = this.resumeToken;
+      } else {
+        options.resumeAfter = this.resumeToken;
       }
+    } else if (
+      this.resumeToken == null &&
+      this.startAtOperationTime != null &&
+      maxWireVersion(this.server) >= 7
+    ) {
+      options.startAtOperationTime = this.startAtOperationTime;
     }
 
     return options;
