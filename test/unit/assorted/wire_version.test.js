@@ -7,7 +7,7 @@ const { isHello } = require('../../../src/utils');
 
 const minCompatErrMsg = `minimum wire version ${
   Number.MAX_SAFE_INTEGER - 1
-}, but this version of the Node.js Driver requires at most 14`;
+}, but this version of the Node.js Driver requires at most 17`;
 const maxCompatErrMsg = `reports maximum wire version 1, but this version of the Node.js Driver requires at least 6`;
 
 describe('Wire Protocol Version', () => {
@@ -36,7 +36,7 @@ describe('Wire Protocol Version', () => {
     await mock.cleanup();
   });
 
-  describe('minimum is greater than 14', () => {
+  describe('minimum is greater than max supported', () => {
     it('should raise a compatibility error', async function () {
       setWireProtocolMessageHandler(Number.MAX_SAFE_INTEGER - 1, Number.MAX_SAFE_INTEGER);
 
@@ -54,7 +54,7 @@ describe('Wire Protocol Version', () => {
     });
   });
 
-  describe('maximum is less than 2', () => {
+  describe('maximum is less than min supported', () => {
     it('should raise a compatibility error', async function () {
       setWireProtocolMessageHandler(1, 1);
 
