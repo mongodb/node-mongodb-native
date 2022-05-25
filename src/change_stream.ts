@@ -76,6 +76,7 @@ const NO_CURSOR_ERROR = 'ChangeStream has no cursor';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
 /**
+ * @public
  * @deprecated
  *
  * Please use the ChangeStreamCursorOptions instead.
