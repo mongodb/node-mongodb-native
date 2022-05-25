@@ -153,9 +153,9 @@ export function resultCheck(
       const expectedSortKey = Object.keys(value)[0];
       expect(actual[key]).to.have.all.keys(expectedSortKey);
       const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
-      resultCheck(objFromActual, value, entities, path, false);
+      resultCheck(objFromActual, value, entities, path, isRootDocument);
     } else {
-      resultCheck(actual[key], value, entities, path, false);
+      resultCheck(actual[key], value, entities, path, isRootDocument);
     }
   }
 
@@ -166,7 +166,7 @@ export function resultCheck(
     if (isSpecialOperator(expected)) {
       // Special operation check is a base condition
       // specialCheck may recurse depending upon the check ($$unsetOrMatches)
-      specialCheck(actual, expected, entities, path, false);
+      specialCheck(actual, expected, entities, path, isRootDocument);
       return;
     }
 
@@ -186,7 +186,9 @@ export function resultCheck(
     } else {
       for (const [key, value] of expectedEntries) {
         path.push(`.${key}`);
+        isRootDocument = false;
         checkNestedDocuments(key, value);
+        isRootDocument = true;
         path.pop();
       }
 
@@ -200,7 +202,7 @@ export function resultCheck(
 
         if (extraKeys.length > 0) {
           expect.fail(
-            `object has more keys than expected.  \n\tactual: [${actualKeys}] \n\texpected: [${expected}]`
+            `object has more keys than expected.  \n\tactual: [${actualKeys}] \n\texpected: [${expectedKeys}]`
           );
         }
       }
