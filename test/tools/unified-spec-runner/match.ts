@@ -134,12 +134,25 @@ TYPE_MAP.set(
   actual => (typeof actual === 'number' && Number.isInteger(actual)) || Long.isLong(actual)
 );
 
+/**
+ * resultCheck
+ *
+ * @param actual - the actual result
+ * @param expected - the expected result
+ * @param entities - the EntitiesMap associated with the test
+ * @param path - an array of strings representing the 'path' in the document down to the current
+ *              value.  For example, given `{ a: { b: { c: 4 } } }`, when evaluating `{ c: 4 }`, the path
+ *              will look like: `['a', 'b']`.  Used to print useful error messages when assertions fail.
+ * @param checkExtraKeys - a boolean value that determines how keys present on the `actual` object but
+ *              not on the `expected` object are treated.  When set to `true`, any extra keys on the
+ *              `actual` object will throw an error
+ */
 export function resultCheck(
   actual: Document,
   expected: Document | number | string | boolean,
   entities: EntitiesMap,
   path: string[] = [],
-  isRootDocument = true
+  checkExtraKeys = false
 ): void {
   function checkNestedDocuments(key: string, value: any, checkExtraKeys: boolean) {
     if (key === 'sort') {
@@ -166,7 +179,7 @@ export function resultCheck(
     if (isSpecialOperator(expected)) {
       // Special operation check is a base condition
       // specialCheck may recurse depending upon the check ($$unsetOrMatches)
-      specialCheck(actual, expected, entities, path, isRootDocument);
+      specialCheck(actual, expected, entities, path, checkExtraKeys);
       return;
     }
 
@@ -190,7 +203,7 @@ export function resultCheck(
         path.pop();
       }
 
-      if (!isRootDocument) {
+      if (checkExtraKeys) {
         expect(actual, `Expected actual to exist at ${path.join('')}`).to.exist;
         const actualKeys = Object.keys(actual);
         const expectedKeys = Object.keys(expected);
@@ -237,12 +250,12 @@ export function specialCheck(
   expected: SpecialOperator,
   entities: EntitiesMap,
   path: string[] = [],
-  isRootDocument: boolean
+  checkExtraKeys: boolean
 ): boolean {
   if (isUnsetOrMatchesOperator(expected)) {
     if (actual === null || actual === undefined) return;
 
-    resultCheck(actual, expected.$$unsetOrMatches, entities, path, isRootDocument);
+    resultCheck(actual, expected.$$unsetOrMatches, entities, path, checkExtraKeys);
   } else if (isMatchesEntityOperator(expected)) {
     // $$matchesEntity
     const entity = entities.get(expected.$$matchesEntity);
