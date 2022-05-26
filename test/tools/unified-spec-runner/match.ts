@@ -134,13 +134,44 @@ TYPE_MAP.set(
   actual => (typeof actual === 'number' && Number.isInteger(actual)) || Long.isLong(actual)
 );
 
+/**
+ * resultCheck
+ *
+ * @param actual - the actual result
+ * @param expected - the expected result
+ * @param entities - the EntitiesMap associated with the test
+ * @param path - an array of strings representing the 'path' in the document down to the current
+ *              value.  For example, given `{ a: { b: { c: 4 } } }`, when evaluating `{ c: 4 }`, the path
+ *              will look like: `['a', 'b']`.  Used to print useful error messages when assertions fail.
+ * @param checkExtraKeys - a boolean value that determines how keys present on the `actual` object but
+ *              not on the `expected` object are treated.  When set to `true`, any extra keys on the
+ *              `actual` object will throw an error
+ */
 export function resultCheck(
   actual: Document,
   expected: Document | number | string | boolean,
   entities: EntitiesMap,
   path: string[] = [],
-  depth = 0
+  checkExtraKeys = false
 ): void {
+  function checkNestedDocuments(key: string, value: any, checkExtraKeys: boolean) {
+    if (key === 'sort') {
+      // TODO: This is a workaround that works because all sorts in the specs
+      // are objects with one key; ideally we'd want to adjust the spec definitions
+      // to indicate whether order matters for any given key and set general
+      // expectations accordingly (see NODE-3235)
+      expect(Object.keys(value)).to.have.lengthOf(1);
+      expect(actual[key]).to.be.instanceOf(Map);
+      expect(actual[key].size).to.equal(1);
+      const expectedSortKey = Object.keys(value)[0];
+      expect(actual[key]).to.have.all.keys(expectedSortKey);
+      const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
+      resultCheck(objFromActual, value, entities, path, checkExtraKeys);
+    } else {
+      resultCheck(actual[key], value, entities, path, checkExtraKeys);
+    }
+  }
+
   if (typeof expected === 'object' && expected) {
     // Expected is an object
     // either its a special operator or just an object to check equality against
@@ -148,69 +179,69 @@ export function resultCheck(
     if (isSpecialOperator(expected)) {
       // Special operation check is a base condition
       // specialCheck may recurse depending upon the check ($$unsetOrMatches)
-      specialCheck(actual, expected, entities, path, depth);
+      specialCheck(actual, expected, entities, path, checkExtraKeys);
       return;
-    } else {
-      // Just a plain object, however this object can contain special operations
-      // So we need to recurse over each key,value
-      const expectedEntries = Object.entries(expected);
+    }
 
-      if (depth > 1) {
+    const expectedEntries = Object.entries(expected);
+
+    if (Array.isArray(expected)) {
+      if (!Array.isArray(actual)) {
+        expect.fail(
+          `expected value at ${path.join('.')} to be an array, but received ${inspect(actual)}`
+        );
+      }
+      for (const [index, value] of expectedEntries) {
+        path.push(`[${index}]`);
+        checkNestedDocuments(index, value, false);
+        path.pop();
+      }
+    } else {
+      for (const [key, value] of expectedEntries) {
+        path.push(`.${key}`);
+        checkNestedDocuments(key, value, true);
+        path.pop();
+      }
+
+      if (checkExtraKeys) {
         expect(actual, `Expected actual to exist at ${path.join('')}`).to.exist;
         const actualKeys = Object.keys(actual);
         const expectedKeys = Object.keys(expected);
         // Don't check for full key set equality because some of the actual keys
         // might be e.g. $$unsetOrMatches, which can be omitted.
-        expect(
-          actualKeys.filter(key => !expectedKeys.includes(key)),
-          `[${Object.keys(actual)}] has more than the expected keys: [${Object.keys(expected)}]`
-        ).to.have.lengthOf(0);
-      }
+        const extraKeys = actualKeys.filter(key => !expectedKeys.includes(key));
 
-      for (const [key, value] of expectedEntries) {
-        path.push(Array.isArray(expected) ? `[${key}]` : `.${key}`); // record what key we're at
-        depth += 1;
-        if (key === 'sort') {
-          // TODO: This is a workaround that works because all sorts in the specs
-          // are objects with one key; ideally we'd want to adjust the spec definitions
-          // to indicate whether order matters for any given key and set general
-          // expectations accordingly (see NODE-3235)
-          expect(Object.keys(value)).to.have.lengthOf(1);
-          expect(actual[key]).to.be.instanceOf(Map);
-          expect(actual[key].size).to.equal(1);
-          const expectedSortKey = Object.keys(value)[0];
-          expect(actual[key]).to.have.all.keys(expectedSortKey);
-          const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
-          resultCheck(objFromActual, value, entities, path, depth);
-        } else {
-          resultCheck(actual[key], value, entities, path, depth);
+        if (extraKeys.length > 0) {
+          expect.fail(
+            `object has more keys than expected.  \n\tactual: [${actualKeys}] \n\texpected: [${expectedKeys}]`
+          );
         }
-        depth -= 1;
-        path.pop(); // if the recursion was successful we can drop the tested key
       }
     }
+
+    return;
+  }
+
+  // Here's our recursion base case
+  // expected is: number | Long | string | boolean | null
+  if (Long.isLong(actual) && typeof expected === 'number') {
+    // Long requires special equality check
+    expect(actual.equals(expected)).to.be.true;
+  } else if (Long.isLong(expected) && typeof actual === 'number') {
+    // Long requires special equality check
+    expect(expected.equals(actual)).to.be.true;
+  } else if (Number.isNaN(actual) && Number.isNaN(expected)) {
+    // in JS, NaN isn't equal to NaN but we want to not fail if we have two NaN
+  } else if (
+    typeof expected === 'number' &&
+    typeof actual === 'number' &&
+    expected === 0 &&
+    actual === 0
+  ) {
+    // case to handle +0 and -0
+    expect(Object.is(expected, actual)).to.be.true;
   } else {
-    // Here's our recursion base case
-    // expected is: number | Long | string | boolean | null
-    if (Long.isLong(actual) && typeof expected === 'number') {
-      // Long requires special equality check
-      expect(actual.equals(expected)).to.be.true;
-    } else if (Long.isLong(expected) && typeof actual === 'number') {
-      // Long requires special equality check
-      expect(expected.equals(actual)).to.be.true;
-    } else if (Number.isNaN(actual) && Number.isNaN(expected)) {
-      // in JS, NaN isn't equal to NaN but we want to not fail if we have two NaN
-    } else if (
-      typeof expected === 'number' &&
-      typeof actual === 'number' &&
-      expected === 0 &&
-      actual === 0
-    ) {
-      // case to handle +0 and -0
-      expect(Object.is(expected, actual)).to.be.true;
-    } else {
-      expect(actual).to.equal(expected);
-    }
+    expect(actual).to.equal(expected);
   }
 }
 
@@ -219,16 +250,12 @@ export function specialCheck(
   expected: SpecialOperator,
   entities: EntitiesMap,
   path: string[] = [],
-  depth = 0
+  checkExtraKeys: boolean
 ): boolean {
   if (isUnsetOrMatchesOperator(expected)) {
-    // $$unsetOrMatches
     if (actual === null || actual === undefined) return;
-    else {
-      depth += 1;
-      resultCheck(actual, expected.$$unsetOrMatches, entities, path, depth);
-      depth -= 1;
-    }
+
+    resultCheck(actual, expected.$$unsetOrMatches, entities, path, checkExtraKeys);
   } else if (isMatchesEntityOperator(expected)) {
     // $$matchesEntity
     const entity = entities.get(expected.$$matchesEntity);
@@ -318,6 +345,60 @@ function failOnMismatchedCount(
   );
 }
 
+function compareCommandStartedEvents(
+  actual: CommandStartedEvent,
+  expected: ExpectedCommandEvent['commandStartedEvent'],
+  entities: EntitiesMap,
+  prefix: string
+) {
+  if (expected.command) {
+    resultCheck(actual.command, expected.command, entities, [`${prefix}.command`]);
+  }
+  if (expected.commandName) {
+    expect(
+      expected.commandName,
+      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+    ).to.equal(actual.commandName);
+  }
+  if (expected.databaseName) {
+    expect(
+      expected.databaseName,
+      `expected ${prefix}.databaseName to equal ${expected.databaseName} but received ${actual.databaseName}`
+    ).to.equal(actual.databaseName);
+  }
+}
+
+function compareCommandSucceededEvents(
+  actual: CommandSucceededEvent,
+  expected: ExpectedCommandEvent['commandSucceededEvent'],
+  entities: EntitiesMap,
+  prefix: string
+) {
+  if (expected.reply) {
+    resultCheck(actual.reply, expected.reply, entities, [prefix]);
+  }
+  if (expected.commandName) {
+    expect(
+      expected.commandName,
+      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+    ).to.equal(actual.commandName);
+  }
+}
+
+function compareCommandFailedEvents(
+  actual: CommandFailedEvent,
+  expected: ExpectedCommandEvent['commandFailedEvent'],
+  entities: EntitiesMap,
+  prefix: string
+) {
+  if (expected.commandName) {
+    expect(
+      expected.commandName,
+      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+    ).to.equal(actual.commandName);
+  }
+}
+
 function compareEvents(
   actual: CommandEvent[] | CmapEvent[],
   expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
@@ -328,22 +409,31 @@ function compareEvents(
   }
   for (const [index, actualEvent] of actual.entries()) {
     const expectedEvent = expected[index];
+    const rootPrefix = `events[${index}]`;
 
     if (expectedEvent.commandStartedEvent) {
-      expect(actualEvent).to.be.instanceOf(CommandStartedEvent);
-      resultCheck(actualEvent, expectedEvent.commandStartedEvent, entities, [
-        `events[${index}].commandStartedEvent`
-      ]);
+      const path = `${rootPrefix}.commandStartedEvent`;
+      if (!(actualEvent instanceof CommandStartedEvent)) {
+        expect.fail(`expected ${path} to be instanceof CommandStartedEvent`);
+      }
+      compareCommandStartedEvents(actualEvent, expectedEvent.commandStartedEvent, entities, path);
     } else if (expectedEvent.commandSucceededEvent) {
-      expect(actualEvent).to.be.instanceOf(CommandSucceededEvent);
-      resultCheck(actualEvent, expectedEvent.commandSucceededEvent, entities, [
-        `events[${index}].commandSucceededEvent`
-      ]);
+      const path = `${rootPrefix}.commandSucceededEvent`;
+      if (!(actualEvent instanceof CommandSucceededEvent)) {
+        expect.fail(`expected ${path} to be instanceof CommandSucceededEvent`);
+      }
+      compareCommandSucceededEvents(
+        actualEvent,
+        expectedEvent.commandSucceededEvent,
+        entities,
+        path
+      );
     } else if (expectedEvent.commandFailedEvent) {
-      expect(actualEvent).to.be.instanceOf(CommandFailedEvent);
-      expect(actualEvent)
-        .to.have.property('commandName')
-        .that.equals(expectedEvent.commandFailedEvent.commandName);
+      const path = `${rootPrefix}.commandFailedEvent`;
+      if (!(actualEvent instanceof CommandFailedEvent)) {
+        expect.fail(`expected ${path} to be instanceof CommandFailedEvent`);
+      }
+      compareCommandFailedEvents(actualEvent, expectedEvent.commandFailedEvent, entities, path);
     } else if (expectedEvent.connectionClosedEvent) {
       expect(actualEvent).to.be.instanceOf(ConnectionClosedEvent);
       if (expectedEvent.connectionClosedEvent.hasServiceId) {
@@ -354,8 +444,10 @@ function compareEvents(
       if (expectedEvent.poolClearedEvent.hasServiceId) {
         expect(actualEvent).property('serviceId').to.exist;
       }
-    } else if (!validEmptyCmapEvent(expectedEvent, actualEvent)) {
-      expect.fail(`Events must be one of the known types, got ${inspect(actualEvent)}`);
+    } else if (validEmptyCmapEvent(expectedEvent, actualEvent)) {
+      return;
+    } else {
+      expect.fail(`Encountered unexpected event - ${inspect(actualEvent)}`);
     }
   }
 }
