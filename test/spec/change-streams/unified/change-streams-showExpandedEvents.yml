@@ -281,7 +281,6 @@ tests:
         arguments:
           pipeline: []
           showExpandedEvents: true
-          showSystemEvents: true
         saveResultAsEntity: &changeStream0 changeStream0
       - name: runCommand
         object: *adminDb

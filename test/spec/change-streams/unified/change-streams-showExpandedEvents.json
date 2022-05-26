@@ -478,8 +478,7 @@
           "object": "shardedCollection",
           "arguments": {
             "pipeline": [],
-            "showExpandedEvents": true,
-            "showSystemEvents": true
+            "showExpandedEvents": true
           },
           "saveResultAsEntity": "changeStream0"
         },
