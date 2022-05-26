@@ -26,7 +26,7 @@ describe('class ChangeStreamCursor', function () {
       });
     });
     context('when there is a cached resumeToken', function () {
-      context('when startAfter is set', function () {
+      context('when the cursor was started with startAfter', function () {
         let cursor: ChangeStreamCursor;
         beforeEach(function () {
           cursor = new ChangeStreamCursor(
@@ -37,42 +37,69 @@ describe('class ChangeStreamCursor', function () {
           );
           cursor.resumeToken = 'resume token';
         });
-        it('sets the startAfter option to the cached resumeToken', function () {
-          expect(cursor.resumeOptions).to.haveOwnProperty('startAfter', 'resume token');
-        });
-        it('does NOT set the resumeAfter option', function () {
-          expect(cursor.resumeOptions).not.to.haveOwnProperty('resumeAfter');
-        });
+        context('when the cursor has not yet returned a document', function () {
+          beforeEach(function () {
+            cursor.hasReceived = false;
+          });
 
-        context('when the startAtOperationTime option is NOT set', function () {
-          it('does not set the startAtOperationTime option', function () {
-            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
+          it('sets the startAfter option to the cached resumeToken', function () {
+            expect(cursor.resumeOptions).to.haveOwnProperty('startAfter', 'resume token');
+          });
+
+          it('does NOT set the resumeAfter option', function () {
+            expect(cursor.resumeOptions).not.to.haveOwnProperty('resumeAfter');
+          });
+
+          context('when the startAtOperationTime option is NOT set', function () {
+            it('does NOT set the startAtOperationTime option', function () {
+              expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
+            });
+          });
+
+          context('when the startAtOperationTime option is set', function () {
+            it('does NOT set the startAtOperationTime option', function () {
+              cursor.startAtOperationTime = new Timestamp(Long.ZERO);
+              expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
+            });
           });
         });
 
-        context('when the startAtOperationTime option is set', function () {
-          it('does not set the startAtOperationTime option', function () {
-            const cursor = new ChangeStreamCursor(
-              new MongoClient('mongodb://localhost:27027'),
-              new MongoDBNamespace('db', 'collection'),
-              [],
-              { startAfter: 'start after', startAtOperationTime: new Timestamp(Long.ZERO) }
-            );
-            cursor.resumeToken = 'resume token';
+        context('when the cursor has returned a document', function () {
+          beforeEach(function () {
+            cursor.hasReceived = true;
+          });
 
-            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
+          it('does NOT set the startAfter option', function () {
+            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAfter');
+          });
+
+          it('sets the resumeAFter option to the cached resumeToken', function () {
+            expect(cursor.resumeOptions).to.haveOwnProperty('resumeAfter', 'resume token');
+          });
+
+          context('when the startAtOperationTime option is NOT set', function () {
+            it('does NOT set the startAtOperationTime option', function () {
+              expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
+            });
+          });
+
+          context('when the startAtOperationTime option is set', function () {
+            it('does NOT set the startAtOperationTime option', function () {
+              cursor.startAtOperationTime = new Timestamp(Long.ZERO);
+              expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
+            });
           });
         });
       });
 
-      context('when resumeAfter is set', function () {
+      context('when the cursor was not initialized with startAfter set', function () {
         let cursor: ChangeStreamCursor;
         beforeEach(function () {
           cursor = new ChangeStreamCursor(
             new MongoClient('mongodb://localhost:27027'),
             new MongoDBNamespace('db', 'collection'),
             [],
-            { resumeAfter: 'resume after' }
+            {}
           );
           cursor.resumeToken = 'resume token';
         });
@@ -84,31 +111,20 @@ describe('class ChangeStreamCursor', function () {
           expect(cursor.resumeOptions).not.to.haveOwnProperty('startAfter');
         });
 
-        context(
-          'when the startAtOperationTime option is NOT set on the aggregation pipeline',
-          function () {
-            it('does not set the startAtOperationTime option', function () {
-              expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
-            });
-          }
-        );
+        context('when the startAtOperationTime option is NOT set', function () {
+          it('does NOT set the startAtOperationTime option', function () {
+            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
+          });
+        });
 
-        context(
-          'when the startAtOperationTime option is set on the aggregation pipeline',
-          function () {
-            it('does not set the startAtOperationTime option', function () {
-              const cursor = new ChangeStreamCursor(
-                new MongoClient('mongodb://localhost:27027'),
-                new MongoDBNamespace('db', 'collection'),
-                [],
-                { resumeAfter: 'resume after', startAtOperationTime: new Timestamp(Long.ZERO) }
-              );
-              cursor.resumeToken = 'resume token';
+        context('when the startAtOperationTime option is set', function () {
+          it('does NOT set the startAtOperationTime option', function () {
+            cursor.startAtOperationTime = new Timestamp(Long.ZERO);
+            cursor.resumeToken = 'resume token';
 
-              expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
-            });
-          }
-        );
+            expect(cursor.resumeOptions).not.to.haveOwnProperty('startAtOperationTime');
+          });
+        });
       });
     });
 
@@ -175,7 +191,7 @@ describe('class ChangeStreamCursor', function () {
         });
       });
 
-      context('when the cursor does not have a saved operation time', function () {
+      context('when the cursor does NOT have a saved operation time', function () {
         context('when the maxWireVersion >= 7', function () {
           let cursor: ChangeStreamCursor;
 
