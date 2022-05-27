@@ -941,11 +941,7 @@ export class ChangeStreamCursor<
       } else {
         options.resumeAfter = this.resumeToken;
       }
-    } else if (
-      this.resumeToken == null &&
-      this.startAtOperationTime != null &&
-      maxWireVersion(this.server) >= 7
-    ) {
+    } else if (this.startAtOperationTime != null && maxWireVersion(this.server) >= 7) {
       options.startAtOperationTime = this.startAtOperationTime;
     }
 
