@@ -488,7 +488,7 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
   });
 
   it('should invalidate change stream on collection rename using event listeners', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>3.6' } },
+    metadata: { requires: { topology: 'replicaset' } },
     async test() {
       const willBeChange = once(changeStream, 'change');
       await once(changeStream.cursor, 'init');
@@ -516,7 +516,7 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
   });
 
   it('should invalidate change stream on database drop using iterator form', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>3.6' } },
+    metadata: { requires: { topology: 'replicaset' } },
     async test() {
       const db = client.db('droppableDb');
       const collection = db.collection('invalidateCallback');
@@ -1104,7 +1104,7 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
 
   describe('Change Stream Resume Error Tests', function () {
     it('should continue emitting change events after a resumable error', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>3.6' } },
+      metadata: { requires: { topology: 'replicaset' } },
       async test() {
         const changes = on(changeStream, 'change');
         await once(changeStream.cursor, 'init');
@@ -1129,7 +1129,7 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
     });
 
     it('should continue iterating changes after a resumable error', {
-      metadata: { requires: { topology: 'replicaset', mongodb: '>3.6' } },
+      metadata: { requires: { topology: 'replicaset' } },
       async test() {
         await initIteratorMode(changeStream);
         await collection.insertOne({ a: 42 });
