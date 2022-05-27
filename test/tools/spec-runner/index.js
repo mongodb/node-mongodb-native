@@ -86,6 +86,14 @@ function translateClientOptions(options) {
         }
 
         options.autoEncryption.kmsProviders = kmsProviders;
+
+        if (options.autoEncryption.encryptedFieldsMap) {
+          const map = options.autoEncryption.encryptedFieldsMap;
+          if (map['default.encryptedCollection']) {
+            /* eslint no-console: 0 */
+            console.log(map['default.encryptedCollection'].fields[0]);
+          }
+        }
       }
 
       delete options.autoEncryptOpts;
@@ -202,29 +210,31 @@ function generateTopologyTests(testSuites, testContext, filter) {
       if (!shouldRun) this.skip();
     };
 
-    describe(testSuite.name, function () {
-      beforeEach(beforeEachFilter);
-      beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-      afterEach(() => testContext.cleanupAfterSuite());
-      for (const spec of testSuite.tests) {
-        const mochaTest = it(spec.description, async function () {
-          if (spec.failPoint) {
-            await testContext.enableFailPoint(spec.failPoint);
-          }
+    if (testSuite.name === 'fle2-CreateCollection') {
+      describe(testSuite.name, function () {
+        beforeEach(beforeEachFilter);
+        beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+        afterEach(() => testContext.cleanupAfterSuite());
+        for (const spec of testSuite.tests) {
+          const mochaTest = it(spec.description, async function () {
+            if (spec.failPoint) {
+              await testContext.enableFailPoint(spec.failPoint);
+            }
 
-          // run the actual test
-          await runTestSuiteTest(this.configuration, spec, testContext);
+            // run the actual test
+            await runTestSuiteTest(this.configuration, spec, testContext);
 
-          if (spec.failPoint) {
-            await testContext.disableFailPoint(spec.failPoint);
-          }
+            if (spec.failPoint) {
+              await testContext.disableFailPoint(spec.failPoint);
+            }
 
-          await validateOutcome(spec, testContext);
-        });
-        // Make the spec test available to the beforeEach filter
-        mochaTest.spec = spec;
-      }
-    });
+            await validateOutcome(spec, testContext);
+          });
+          // Make the spec test available to the beforeEach filter
+          mochaTest.spec = spec;
+        }
+      });
+    }
   }
 }
 
