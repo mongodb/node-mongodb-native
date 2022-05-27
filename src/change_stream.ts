@@ -852,7 +852,7 @@ export class ChangeStream<
    * Drain the resume queue when a new has become available
    * @internal
    *
-   * @param err - error getting a new cursor
+   * @param error - error getting a new cursor
    */
   private _processResumeQueue(error?: Error) {
     while (this[kResumeQueue].length) {

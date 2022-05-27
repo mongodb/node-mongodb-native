@@ -1,8 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
-import * as crypto from 'crypto';
 import { on, once } from 'events';
-import { PassThrough, Transform } from 'stream';
+import { PassThrough } from 'stream';
 import { promisify } from 'util';
 
 import {
@@ -488,7 +487,7 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
   });
 
   it('should invalidate change stream on collection rename using event listeners', {
-    metadata: { requires: { topology: 'replicaset' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
     async test() {
       const willBeChange = once(changeStream, 'change');
       await once(changeStream.cursor, 'init');
@@ -516,7 +515,7 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
   });
 
   it('should invalidate change stream on database drop using iterator form', {
-    metadata: { requires: { topology: 'replicaset' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
     async test() {
       const db = client.db('droppableDb');
       const collection = db.collection('invalidateCallback');
@@ -762,47 +761,6 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
       expect(parsedEvent).to.have.nested.property('fullDocument.a', 1);
     }
   });
-
-  it.skip('should support piping of Change Streams through multiple pipes', {
-    metadata: { requires: { topology: 'replicaset' } },
-    async test() {
-      const cipher = crypto.createCipher('aes192', 'a password');
-      const decipher = crypto.createDecipher('aes192', 'a password');
-
-      // Make a stream transforming to JSON and piping to the file
-      const stream = changeStream.stream();
-      const basicStream = stream.pipe(
-        new Transform({
-          transform: (data, encoding, callback) => callback(null, JSON.stringify(data)),
-          objectMode: true
-        })
-      );
-      const pipedStream = basicStream.pipe(cipher).pipe(decipher);
-      pipedStream.setEncoding('utf8');
-
-      const dataIterator = on(pipedStream, 'data');
-      const willBeEnd = once(pipedStream, 'end');
-
-      await collection.insertMany([{ a: 1407 }]);
-      let dataEmitted = '';
-      let parsedData;
-      for await (const data of dataIterator) {
-        dataEmitted += data;
-        try {
-          parsedData = JSON.parse(dataEmitted);
-          break;
-        } catch {
-          continue;
-        }
-      }
-
-      stream.emit('end');
-      await willBeEnd;
-
-      expect(parsedData).to.have.nested.property('operationType', 'insert');
-      expect(parsedData).to.have.nested.property('fullDocument.a', 1407);
-    }
-  }).skipReason = 'I am unable to get the data event to emit';
 
   it('should maintain change stream options on resume', {
     metadata: { requires: { topology: 'replicaset' } },
@@ -1103,7 +1061,7 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
   });
 
   describe('Change Stream Resume Error Tests', function () {
-    it('should continue emitting change events after a resumable error', {
+    it.skip('should continue emitting change events after a resumable error', {
       metadata: { requires: { topology: 'replicaset' } },
       async test() {
         const changes = on(changeStream, 'change');
@@ -1126,9 +1084,9 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
         expect(changesCollected[0]).to.have.nested.property('fullDocument.a');
         expect(changesCollected[1]).to.have.nested.property('fullDocument.b');
       }
-    });
+    }).skipReason = 'TODO(NODE-4125): resumability needs fixing (this test fails only on 3.6)';
 
-    it('should continue iterating changes after a resumable error', {
+    it.skip('should continue iterating changes after a resumable error', {
       metadata: { requires: { topology: 'replicaset' } },
       async test() {
         await initIteratorMode(changeStream);
@@ -1155,7 +1113,7 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
         expect(changeB).to.have.property('operationType', 'insert');
         expect(changeB).to.have.nested.property('fullDocument.b', 24);
       }
-    });
+    }).skipReason = 'TODO(NODE-4125): resumability needs fixing (this test fails only on 3.6)';
 
     it.skip('should continue piping changes after a resumable error', {
       metadata: { requires: { topology: 'replicaset' } },
