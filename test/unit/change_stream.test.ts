@@ -6,7 +6,7 @@ import { ChangeStreamCursor } from '../../src/change_stream';
 import { MongoClient } from '../../src/mongo_client';
 import { MongoDBNamespace } from '../../src/utils';
 
-describe('class ChangeStreamCursor', function () {
+describe('ChangeStreamCursor', function () {
   afterEach(function () {
     sinon.restore();
   });
