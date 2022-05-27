@@ -6,30 +6,30 @@ import { ChangeStreamCursor } from '../../src/change_stream';
 import { MongoClient } from '../../src/mongo_client';
 import { MongoDBNamespace } from '../../src/utils';
 
-describe('ChangeStreamCursor', function () {
+describe.only('ChangeStreamCursor', function () {
   afterEach(function () {
     sinon.restore();
   });
 
   describe('get resumeOptions()', function () {
-    context('non-resume related options', function () {
-      it('copies all options from the original cursor', function () {
+    context('when no resume related options are present on the cursor', function () {});
+
+    context('when there is a cached resumeToken', function () {
+      it('copies all non-resume related options from the original cursor', function () {
         const cursor = new ChangeStreamCursor(
           new MongoClient('mongodb://localhost:27027'),
           new MongoDBNamespace('db', 'collection'),
           [],
           { promoteBuffers: true, promoteLongs: false, maxAwaitTimeMS: 5000 }
         );
+        cursor.resumeToken = 'resume token';
 
-        expect(cursor.resumeOptions).to.deep.equal({
-          promoteBuffers: true,
-          promoteLongs: false,
-          maxAwaitTimeMS: 5000
-        });
+        const options = cursor.resumeOptions;
+        expect(options).to.haveOwnProperty('promoteBuffers', true);
+        expect(options).to.haveOwnProperty('promoteLongs', false);
+        expect(options).to.haveOwnProperty('maxAwaitTimeMS', 5000);
       });
-    });
 
-    context('when there is a cached resumeToken', function () {
       context('when the cursor was started with startAfter', function () {
         let cursor: ChangeStreamCursor;
 
@@ -137,6 +137,28 @@ describe('ChangeStreamCursor', function () {
 
     context('when there is no cached resumeToken', function () {
       context('when the cursor has a saved operation time', function () {
+        it('copies all non-resume related options from the original cursor', function () {
+          const cursor = new ChangeStreamCursor(
+            new MongoClient('mongodb://localhost:27027'),
+            new MongoDBNamespace('db', 'collection'),
+            [],
+            {
+              startAfter: 'start after',
+              resumeAfter: 'resume after',
+              startAtOperationTime: new Timestamp(Long.ZERO),
+              promoteBuffers: true,
+              promoteLongs: false,
+              maxAwaitTimeMS: 5000
+            }
+          );
+          cursor.resumeToken = null;
+
+          const options = cursor.resumeOptions;
+          expect(options).to.haveOwnProperty('promoteBuffers', true);
+          expect(options).to.haveOwnProperty('promoteLongs', false);
+          expect(options).to.haveOwnProperty('maxAwaitTimeMS', 5000);
+        });
+
         context('when the maxWireVersion >= 7', function () {
           let cursor: ChangeStreamCursor;
           beforeEach(function () {
@@ -199,6 +221,27 @@ describe('ChangeStreamCursor', function () {
       });
 
       context('when the cursor does NOT have a saved operation time', function () {
+        it('copies all non-resume related options from the original cursor', function () {
+          const cursor = new ChangeStreamCursor(
+            new MongoClient('mongodb://localhost:27027'),
+            new MongoDBNamespace('db', 'collection'),
+            [],
+            {
+              startAfter: 'start after',
+              resumeAfter: 'resume after',
+              promoteBuffers: true,
+              promoteLongs: false,
+              maxAwaitTimeMS: 5000
+            }
+          );
+          cursor.resumeToken = null;
+
+          const options = cursor.resumeOptions;
+          expect(options).to.haveOwnProperty('promoteBuffers', true);
+          expect(options).to.haveOwnProperty('promoteLongs', false);
+          expect(options).to.haveOwnProperty('maxAwaitTimeMS', 5000);
+        });
+
         context('when the maxWireVersion >= 7', function () {
           let cursor: ChangeStreamCursor;
           beforeEach(function () {
