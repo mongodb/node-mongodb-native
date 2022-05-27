@@ -1,0 +1,64 @@
+runOn:
+  - minServerVersion: "6.0.0"
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topology: [ "replicaset", "sharded" ]
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+data: [
+  &doc0 {
+    "_id": 1,
+    "encryptedUnindexed": {
+      "$binary": {
+          "base64": "BqvN76sSNJh2EjQSNFZ4kBICTQaVZPWgXp41I7mPV1rLFTtw1tXzjcdSEyxpKKqujlko5TeizkB9hHQ009dVY1+fgIiDcefh+eQrm3CkhQ==",
+          "subType": "06"
+      }
+    }
+  }
+]
+key_vault_data: [ {'_id': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'keyMaterial': {'$binary': {'base64': 'HBk9BWihXExNDvTp1lUxOuxuZK2Pe2ZdVdlsxPEBkiO1bS4mG5NNDsQ7zVxJAH8BtdOYp72Ku4Y3nwc0BUpIKsvAKX4eYXtlhv5zUQxWdeNFhg9qK7qb8nqhnnLeT0f25jFSqzWJoT379hfwDeu0bebJHr35QrJ8myZdPMTEDYF08QYQ48ShRBli0S+QzBHHAQiM2iJNr4svg2WR8JSeWQ==', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1648914851981'}}, 'updateDate': {'$date': {'$numberLong': '1648914851981'}}, 'status': {'$numberInt': '0'}, 'masterKey': {'provider': 'local'}}]
+tests:
+  - description: "FLE2 decrypt of existing data succeeds"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: find
+        arguments:
+          filter: { _id: 1 }
+        result:
+          [{ "_id": 1, "encryptedUnindexed": "value123" }]
+    expectations:
+      - command_started_event:
+          command:
+            listCollections: 1
+            filter:
+              name: *collection_name
+          command_name: listCollections
+      - command_started_event:
+          command:
+            find: *collection_name
+            filter: { "_id": 1 }
+          command_name: find
+      - command_started_event:
+          command:
+            find: datakeys
+            filter: {
+                  "$or": [
+                      {
+                          "_id": {
+                              "$in": [
+                                  {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}
+                              ]
+                          }
+                      },
+                      {
+                          "keyAltNames": {
+                              "$in": []
+                          }
+                      }
+                  ]
+              }
+            $db: keyvault
+            readConcern: { level: "majority" }
+          command_name: find

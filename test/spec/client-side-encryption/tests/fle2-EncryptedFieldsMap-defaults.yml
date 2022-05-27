@@ -1,0 +1,57 @@
+runOn:
+  - minServerVersion: "6.0.0"
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topology: [ "replicaset", "sharded" ]
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+data: []
+key_vault_data: []
+tests:
+  - description: "default state collections are applied to encryptionInformation"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+        encryptedFieldsMap: &efm {
+          "default.default": {
+            "fields": []
+          }
+        }
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 {
+            _id: 1,
+            # Include a FLE2FindEncryptedPayload for 'encryptionInformation' to be appended.
+            foo: {
+              "$binary": {
+                "base64": "BYkAAAAFZAAgAAAAAE8KGPgq7h3n9nH5lfHcia8wtOTLwGkZNLBesb6PULqbBXMAIAAAAACq0558QyD3c3jkR5k0Zc9UpQK8ByhXhtn2d1xVQnuJ3AVjACAAAAAA1003zUWGwD4zVZ0KeihnZOthS3V6CEHUfnJZcIYHefISY20AAAAAAAAAAAAA",
+                "subType": "06"
+              }
+            }
+          }
+    expectations:
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - *doc0
+            encryptionInformation: {
+                "type": {
+                    "$numberInt": "1"
+                },
+                "schema": {
+                    "default.default": {
+                        "fields": [],
+                        "escCollection": "enxcol_.default.esc",
+                        "eccCollection": "enxcol_.default.ecc",
+                        "ecocCollection": "enxcol_.default.ecoc"
+                    }
+                }
+              }
+            ordered: true
+          command_name: insert
+    outcome:
+      collection:
+        data:
+          - *doc0

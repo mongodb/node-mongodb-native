@@ -9,8 +9,14 @@ Client Side Encryption Tests
 Introduction
 ============
 
-This document describes the format of the driver spec tests included in the JSON
-and YAML files included in this directory.
+This document describes the format of the driver spec tests included in the
+JSON and YAML files included in this directory. The
+``timeoutMS.yml``/``timeoutMS.json`` files in this directory contain tests
+for the ``timeoutMS`` option and its application to the client-side
+encryption feature. Drivers MUST only run these tests after implementing the
+`Client Side Operations Timeout
+<../client-side-operations-timeout/client-side-operations-timeout.rst>`__
+specification.
 
 Additional prose tests, that are not represented in the spec tests, are described
 and MUST be implemented by all drivers.
@@ -22,6 +28,8 @@ The spec tests format is an extension of `transactions spec tests <https://githu
 
 - A ``json_schema`` to set on the collection used for operations.
 
+- An ``encrypted_fields`` to set on the collection used for operations.
+
 - A ``key_vault_data`` of data that should be inserted in the key vault collection before each test.
 
 - Introduction ``autoEncryptOpts`` to `clientOptions`
@@ -30,7 +38,8 @@ The spec tests format is an extension of `transactions spec tests <https://githu
 
 - Addition of `$$type` to command_started_event and outcome.
 
-The semantics of `$$type` is that any actual value matching the BSON type indicated by the BSON type string is considered a match.
+The semantics of `$$type` is that any actual value matching one of the types indicated by either a BSON type string
+or an array of BSON type strings is considered a match.
 
 For example, the following matches a command_started_event for an insert of a document where `random` must be of type ``binData``::
 
@@ -42,8 +51,18 @@ For example, the following matches a command_started_event for an insert of a do
         ordered: true
       command_name: insert
 
+The following matches a command_started_event for an insert of a document where ``random`` must be of type
+``binData`` or ``string``::
 
-The values of `$$type` correspond to `these documented string representations of BSON types <https://docs.mongodb.com/manual/reference/bson-types/>`_.
+  - command_started_event:
+      command:
+        insert: *collection_name
+        documents:
+          - { random: { $$type: ["binData", "string"] } }
+        ordered: true
+      command_name: insert
+
+The values of `$$type` correspond to `these documented string representations of BSON types <https://www.mongodb.com/docs/manual/reference/bson-types/>`_.
 
 
 Each YAML file has the following keys:
@@ -60,6 +79,8 @@ Each YAML file has the following keys:
 
 - ``json_schema`` A JSON Schema that should be set on the collection (using ``createCollection``) before each test run.
 
+- ``encrypted_fields`` An encryptedFields option that should be set on the collection (using ``createCollection``) before each test run.
+
 - ``key_vault_data`` The data that should exist in the key vault collection under test before each test run.
 
 - ``tests``: An array of tests that are to be run independently of each other.
@@ -68,6 +89,10 @@ Each YAML file has the following keys:
   - ``description``: |txn|
 
   - ``skipReason``: |txn|
+
+  - ``useMultipleMongoses``: |txn|
+
+  - ``failPoint``: |txn|
 
   - ``clientOptions``: Optional, parameters to pass to MongoClient().
 
@@ -85,11 +110,15 @@ Each YAML file has the following keys:
 
           - ``key`` A 96 byte local key.
 
+        - ``kmip`` The KMIP KMS provider credentials. An empty object. Drivers MUST fill in KMIP credentials (`endpoint`, and TLS options).
+
       - ``schemaMap``: Optional, a map from namespaces to local JSON schemas.
 
       - ``keyVaultNamespace``: Optional, a namespace to the key vault collection. Defaults to "keyvault.datakeys".
 
       - ``bypassAutoEncryption``: Optional, a boolean to indicate whether or not auto encryption should be bypassed. Defaults to ``false``.
+
+      - ``encryptedFieldsMap`` An optional document. The document maps collection namespace to ``EncryptedFields`` documents.
 
   - ``operations``: Array of documents, each describing an operation to be
     executed. Each document has the following fields:
@@ -104,7 +133,10 @@ Each YAML file has the following keys:
 
     - ``arguments``: |txn|
 
-    - ``result``: |txn|
+    - ``result``: Same as the Transactions spec test format with one addition: if the operation is expected to return
+      an error, the ``result`` document may contain an ``isTimeoutError`` boolean field. If ``true``, the test runner
+      MUST assert that the error represents a timeout due to the use of the ``timeoutMS`` option. If ``false``, the
+      test runner MUST assert that the error does not represent a timeout.
 
   - ``expectations``: |txn|
 
@@ -117,9 +149,14 @@ Use as integration tests
 
 Do the following before running spec tests:
 
+- If available for the platform under test, obtain a csfle_ binary and place it
+  in a location accessible to the tests. Refer to: `Using csfle`_
 - Start the mongocryptd process.
 - Start a mongod process with **server version 4.1.9 or later**.
 - Place credentials to an AWS IAM user (access key ID + secret access key) somewhere in the environment outside of tracked code. (If testing on evergreen, project variables are a good place).
+- Start a KMIP test server on port 5698 by running `drivers-evergreen-tools/.evergreen/csfle/kms_kmip_server.py <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/csfle/kms_kmip_server.py>`_.
+
+.. _csfle: ../client-side-encryption.rst#csfle
 
 Load each YAML (or JSON) file using a Canonical Extended JSON parser.
 
@@ -134,7 +171,7 @@ Then for each element in ``tests``:
 #. Create a MongoClient.
 
 #. Create a collection object from the MongoClient, using the ``database_name``
-   and ``collection_name`` fields from the YAML file. Drop the collection 
+   and ``collection_name`` fields from the YAML file. Drop the collection
    with writeConcern "majority". If a ``json_schema`` is defined in the test,
    use the ``createCollection`` command to explicitly create the collection:
 
@@ -142,13 +179,94 @@ Then for each element in ``tests``:
 
       {"create": <collection>, "validator": {"$jsonSchema": <json_schema>}}
 
+   If ``encrypted_fields`` is defined in the test, the required collections and index described in `FLE 2 CreateCollection() and Collection.Drop() <https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.rst#fle-2-createcollection-and-collection-drop>`_  must be created:
+   - Use the ``dropCollection`` helper with ``encrypted_fields`` as an option and writeConcern "majority".
+   - Use the ``createCollection`` helper with ``encrypted_fields`` as an option.
+
 #. If the YAML file contains a ``data`` array, insert the documents in ``data``
    into the test collection, using writeConcern "majority".
 
 #. Create a **new** MongoClient using ``clientOptions``.
 
-   #. If ``autoEncryptOpts`` includes ``aws``, ``azure``, and/or ``gcp`` as a KMS provider, pass in credentials from the environment.
-   #. If ``autoEncryptOpts`` does not include ``keyVaultNamespace``, default it to ``keyvault.datakeys``.
+   #. If ``autoEncryptOpts`` includes ``aws``, ``awsTemporary``, ``awsTemporaryNoSessionToken``,
+      ``azure``, ``gcp``, and/or ``kmip`` as a KMS provider, pass in credentials from the environment.
+
+      - ``awsTemporary``, and ``awsTemporaryNoSessionToken`` require temporary
+        AWS credentials. These can be retrieved using the csfle `set-temp-creds.sh
+        <https://github.com/mongodb-labs/drivers-evergreen-tools/tree/master/.evergreen/csfle>`_
+        script.
+
+      - ``aws``, ``awsTemporary``, and ``awsTemporaryNoSessionToken`` are
+        mutually exclusive.
+
+        ``aws`` should be substituted with:
+
+        .. code:: javascript
+
+           "aws": {
+                "accessKeyId": <set from environment>,
+                "secretAccessKey": <set from environment>
+           }
+
+        ``awsTemporary`` should be substituted with:
+
+        .. code:: javascript
+
+           "aws": {
+                "accessKeyId": <set from environment>,
+                "secretAccessKey": <set from environment>
+                "sessionToken": <set from environment>
+           }
+
+        ``awsTemporaryNoSessionToken`` should be substituted with:
+
+        .. code:: javascript
+
+           "aws": {
+               "accessKeyId": <set from environment>,
+               "secretAccessKey": <set from environment>
+           }
+
+        ``gcp`` should be substituted with:
+
+        .. code:: javascript
+
+           "gcp": {
+               "email": <set from environment>,
+               "privateKey": <set from environment>,
+           }
+
+        ``azure`` should be substituted with:
+
+        .. code:: javascript
+
+           "azure": {
+               "tenantId": <set from environment>,
+               "clientId": <set from environment>,
+               "clientSecret": <set from environment>,
+           }
+
+        ``local`` should be substituted with:
+
+        .. code:: javascript
+
+           "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
+
+        ``kmip`` should be substituted with:
+
+        .. code:: javascript
+
+           "kmip": { "endpoint": "localhost:5698" }
+
+        Configure KMIP TLS connections to use the following options:
+
+        - ``tlsCAFile`` (or equivalent) set to `drivers-evergreen-tools/.evergreen/x509gen/ca.pem <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/ca.pem>`_. This MAY be configured system-wide.
+        - ``tlsCertificateKeyFile`` (or equivalent) set to `drivers-evergreen-tools/.evergreen/x509gen/client.pem <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/client.pem>`_.
+
+        The method of passing TLS options for KMIP TLS connections is driver dependent.
+
+   #. If ``autoEncryptOpts`` does not include ``keyVaultNamespace``, default it
+      to ``keyvault.datakeys``.
 
 #. For each element in ``operations``:
 
@@ -194,12 +312,49 @@ Then for each element in ``tests``:
 #. For each element in ``outcome``:
 
    - If ``name`` is "collection", create a new MongoClient *without encryption*
-     and verify that the test collection contains exactly the documents in the 
+     and verify that the test collection contains exactly the documents in the
      ``data`` array. Ensure this find reads the latest data by using
      **primary read preference** with **local read concern** even when the
      MongoClient is configured with another read preference or read concern.
 
 The spec test MUST be run with *and* without auth.
+
+
+Using ``csfle``
+===============
+
+On platforms where csfle_ is available, drivers should prefer to test with the
+csfle library instead of spawning mongocryptd, although having some tests
+dedicated to mongocryptd is recommended. Note that some tests assert on
+mongocryptd-related behaviors (e.g. the ``mongocryptdBypassSpawn`` test).
+
+Drivers under test should load the csfle_ library using either the ``csflePath``
+public API option (as part of the AutoEncryption ``extraOptions``), or by
+setting a special search path instead.
+
+Some tests will require *not* using csfle_. For such tests, one should ensure
+that csfle will not be loaded. Refer to the client-side-encryption documentation
+for information on "disabling" csfle and setting csfle search paths.
+
+.. note::
+
+   At time of writing, csfle_ does not properly handle the ``explain``
+   command and will fail to parse it. This will cause the ``explain`` test case
+   to fail if ``csfle`` is in use instead of ``mongocryptd``.
+
+.. note::
+
+   The ``csfle`` dynamic library can be obtained using the mongodl_ Python
+   script from drivers-evergreen-tools_:
+
+   .. code-block:: shell
+
+      $ python3 mongodl.py --component=csfle --version=5.3.1 --out=./csfle/
+
+.. _mongodl: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/mongodl.py
+.. _drivers-evergreen-tools: https://github.com/mongodb-labs/drivers-evergreen-tools/
+
+
 
 Prose Tests
 ===========
@@ -242,12 +397,20 @@ First, perform the setup.
             "clientId": <set from environment>,
             "clientSecret": <set from environment>,
          },
-            "gcp": {
+         "gcp": {
             "email": <set from environment>,
             "privateKey": <set from environment>,
          }
-         "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
+         "local": { "key": <base64 decoding of LOCAL_MASTERKEY> },
+         "kmip": { "endpoint": "localhost:5698" }
       }
+
+   Configure KMIP TLS connections to use the following options:
+
+   - ``tlsCAFile`` (or equivalent) set to `drivers-evergreen-tools/.evergreen/x509gen/ca.pem <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/ca.pem>`_. This MAY be configured system-wide.
+   - ``tlsCertificateKeyFile`` (or equivalent) set to `drivers-evergreen-tools/.evergreen/x509gen/client.pem <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/client.pem>`_.
+
+   The method of passing TLS options for KMIP TLS connections is driver dependent.
 
    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
 
@@ -272,7 +435,7 @@ First, perform the setup.
 
    Configure ``client_encryption`` with the ``keyVaultClient`` of the previously created ``client``.
 
-For each KMS provider (``aws``, ``azure``, ``gcp``, and ``local``), referred to as ``provider_name``, run the following test.
+For each KMS provider (``aws``, ``azure``, ``gcp``, ``local``, and ``kmip``), referred to as ``provider_name``, run the following test.
 
 #. Call ``client_encryption.createDataKey()``.
 
@@ -307,6 +470,12 @@ For each KMS provider (``aws``, ``azure``, ``gcp``, and ``local``), referred to 
           "keyRing": "key-ring-csfle",
           "keyName": "key-name-csfle"
         }
+
+     For "kmip":
+
+     .. code:: javascript
+
+        {}
 
      For "local", do not set a masterKey document.
    - Expect a BSON binary with subtype 4 to be returned, referred to as ``datakey_id``.
@@ -455,14 +624,14 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
 
 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <../corpus/corpus-schema.json>`_.
 
-3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_, `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_, `corpus/corpus-key-azure.json <../corpus/corpus-key-azure.json>`_, and `corpus/corpus-key-gcp.json <../corpus/corpus-key-gcp.json>`_.
+3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_, `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_, `corpus/corpus-key-azure.json <../corpus/corpus-key-azure.json>`_, `corpus/corpus-key-gcp.json <../corpus/corpus-key-gcp.json>`_, and `corpus/corpus-key-kmip.json <../corpus/corpus-key-kmip.json>`_.
 
 4. Create the following:
 
    - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
    - A ``ClientEncryption`` object (referred to as ``client_encryption``)
 
-   Configure both objects with ``aws``, ``azure``, ``gcp``, and ``local`` KMS providers as follows:
+   Configure both objects with ``aws``, ``azure``, ``gcp``, ``local``, and ``kmip`` KMS providers as follows:
 
    .. code:: javascript
 
@@ -470,8 +639,16 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
           "aws": { <AWS credentials> },
           "azure": { <Azure credentials> },
           "gcp": { <GCP credentials> },
-          "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
+          "local": { "key": <base64 decoding of LOCAL_MASTERKEY> },
+          "kmip": { "endpoint": "localhost:5698" } }
       }
+
+   Configure KMIP TLS connections to use the following options:
+
+   - ``tlsCAFile`` (or equivalent) set to `drivers-evergreen-tools/.evergreen/x509gen/ca.pem <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/ca.pem>`_. This MAY be configured system-wide.
+   - ``tlsCertificateKeyFile`` (or equivalent) set to `drivers-evergreen-tools/.evergreen/x509gen/client.pem <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/client.pem>`_.
+
+   The method of passing TLS options for KMIP TLS connections is driver dependent.
 
    Where LOCAL_MASTERKEY is the following base64:
 
@@ -483,8 +660,8 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
 
 5. Load `corpus/corpus.json <../corpus/corpus.json>`_ to a variable named ``corpus``. The corpus contains subdocuments with the following fields:
 
-   - ``kms`` is either ``aws``, ``azure``, ``gcp``, or ``local``
-   - ``type`` is a BSON type string `names coming from here <https://docs.mongodb.com/manual/reference/operator/query/type/>`_)
+   - ``kms`` is ``aws``, ``azure``, ``gcp``, ``local``, or ``kmip``
+   - ``type`` is a BSON type string `names coming from here <https://www.mongodb.com/docs/manual/reference/operator/query/type/>`_)
    - ``algo`` is either ``rand`` or ``det`` for random or deterministic encryption
    - ``method`` is either ``auto``, for automatic encryption or ``explicit`` for  explicit encryption
    - ``identifier`` is either ``id`` or ``altname`` for the key identifier
@@ -494,7 +671,7 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
    Create a new BSON document, named ``corpus_copied``.
    Iterate over each field of ``corpus``.
 
-   - If the field name is ``_id``, ``altname_aws``, ``altname_local``, ``altname_azure``, or ``altname_gcp``, copy the field to ``corpus_copied``.
+   - If the field name is ``_id``, ``altname_aws``, ``altname_local``, ``altname_azure``, ``altname_gcp``, or ``altname_kmip`` copy the field to ``corpus_copied``.
    - If ``method`` is ``auto``, copy the field to ``corpus_copied``.
    - If ``method`` is ``explicit``, use ``client_encryption`` to explicitly encrypt the value.
 
@@ -505,6 +682,7 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
        - If ``kms`` is ``aws`` set the key_id to the UUID with base64 value ``AWSAAAAAAAAAAAAAAAAAAA==``.
        - If ``kms`` is ``azure`` set the key_id to the UUID with base64 value ``AZUREAAAAAAAAAAAAAAAAA==``.
        - If ``kms`` is ``gcp`` set the key_id to the UUID with base64 value ``GCPAAAAAAAAAAAAAAAAAAA==``.
+       - If ``kms`` is ``kmip`` set the key_id to the UUID with base64 value ``KMIPAAAAAAAAAAAAAAAAAA==``.
 
      - If ``identifier`` is ``altname``
 
@@ -512,6 +690,7 @@ The corpus test exhaustively enumerates all ways to encrypt all BSON value types
        - If ``kms`` is ``aws`` set the key_alt_name to "aws".
        - If ``kms`` is ``azure`` set the key_alt_name to "azure".
        - If ``kms`` is ``gcp`` set the key_alt_name to "gcp".
+       - If ``kms`` is ``kmip`` set the key_alt_name to "kmip".
 
      If ``allowed`` is true, copy the field and encrypted value to ``corpus_copied``.
      If ``allowed`` is false. verify that an exception is thrown. Copy the unencrypted value to to ``corpus_copied``.
@@ -560,10 +739,13 @@ Configure with KMS providers as follows:
             "clientSecret": <set from environment>,
             "identityPlatformEndpoint": "login.microsoftonline.com:443"
          },
-            "gcp": {
+         "gcp": {
             "email": <set from environment>,
             "privateKey": <set from environment>,
             "endpoint": "oauth2.googleapis.com:443"
+         },
+         "kmip" {
+            "endpoint": "localhost:5698"
          }
    }
 
@@ -580,14 +762,24 @@ Configure with KMS providers as follows:
             "tenantId": <set from environment>,
             "clientId": <set from environment>,
             "clientSecret": <set from environment>,
-            "identityPlatformEndpoint": "example.com:443"
+            "identityPlatformEndpoint": "doesnotexist.invalid:443"
          },
-            "gcp": {
+         "gcp": {
             "email": <set from environment>,
             "privateKey": <set from environment>,
-            "endpoint": "example.com:443"
+            "endpoint": "doesnotexist.invalid:443"
+         },
+         "kmip": {
+            "endpoint": "doesnotexist.local:5698"
          }
    }
+
+Configure KMIP TLS connections to use the following options:
+
+- ``tlsCAFile`` (or equivalent) set to `drivers-evergreen-tools/.evergreen/x509gen/ca.pem <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/ca.pem>`_. This MAY be configured system-wide.
+- ``tlsCertificateKeyFile`` (or equivalent) set to `drivers-evergreen-tools/.evergreen/x509gen/client.pem <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/client.pem>`_.
+
+The method of passing TLS options for KMIP TLS connections is driver dependent.
 
 Test cases
 ``````````
@@ -649,7 +841,7 @@ Test cases
         endpoint: "kms.us-east-2.amazonaws.com"
       }
 
-   Expect this to fail with an exception with a message containing the string: "us-east-1"
+   Expect this to fail with an exception.
 
 6. Call `client_encryption.createDataKey()` with "aws" as the provider and the following masterKey:
 
@@ -658,10 +850,10 @@ Test cases
       {
         region: "us-east-1",
         key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
-        endpoint: "example.com"
+        endpoint: "doesnotexist.invalid"
       }
 
-   Expect this to fail with an exception with a message containing the string: "parse error"
+   Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
 
 7. Call `client_encryption.createDataKey()` with "azure" as the provider and the following masterKey:
 
@@ -674,7 +866,7 @@ Test cases
 
    Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
 
-   Call ``client_encryption_invalid.createDataKey()`` with the same masterKey. Expect this to fail with an exception with a message containing the string: "parse error".
+   Call ``client_encryption_invalid.createDataKey()`` with the same masterKey. Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
 
 8. Call `client_encryption.createDataKey()` with "gcp" as the provider and the following masterKey:
 
@@ -690,7 +882,7 @@ Test cases
 
    Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
 
-   Call ``client_encryption_invalid.createDataKey()`` with the same masterKey. Expect this to fail with an exception with a message containing the string: "parse error".
+   Call ``client_encryption_invalid.createDataKey()`` with the same masterKey. Expect this to fail with a network exception indicating failure to resolve "doesnotexist.invalid".
 
 9. Call `client_encryption.createDataKey()` with "gcp" as the provider and the following masterKey:
 
@@ -701,13 +893,57 @@ Test cases
         "location": "global",
         "keyRing": "key-ring-csfle",
         "keyName": "key-name-csfle",
-        "endpoint": "example.com:443"
+        "endpoint": "doesnotexist.invalid:443"
       }
 
    Expect this to fail with an exception with a message containing the string: "Invalid KMS response".
 
+10. Call `client_encryption.createDataKey()` with "kmip" as the provider and the following masterKey:
+
+    .. code:: javascript
+
+       {
+         "keyId": "1"
+       }
+
+    Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
+
+    Call ``client_encryption_invalid.createDataKey()`` with the same masterKey. Expect this to fail with a network exception indicating failure to resolve "doesnotexist.local".
+
+11. Call ``client_encryption.createDataKey()`` with "kmip" as the provider and the following masterKey:
+
+    .. code:: javascript
+
+       {
+         "keyId": "1",
+         "endpoint": "localhost:5698"
+       }
+
+    Expect this to succeed. Use the returned UUID of the key to explicitly encrypt and decrypt the string "test" to validate it works.
+
+12. Call ``client_encryption.createDataKey()`` with "kmip" as the provider and the following masterKey:
+
+    .. code:: javascript
+
+       {
+         "keyId": "1",
+         "endpoint": "doesnotexist.local:5698"
+       }
+
+    Expect this to fail with a network exception indicating failure to resolve "doesnotexist.local".
+
 Bypass spawning mongocryptd
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+   IMPORTANT: If csfle_ is visible to the operating system's library search
+   mechanism, the expected server error generated by these
+   ``mongocryptdBypassSpawn`` tests will not appear because libmongocrypt will
+   load the csfle library instead of consulting mongocryptd. For these tests, it
+   is required that libmongocrypt *not* load csfle. Refer to the
+   client-side-encryption document for more information on "disabling" csfle.
+
 
 Via mongocryptdBypassSpawn
 ``````````````````````````
@@ -767,6 +1003,742 @@ The following tests that setting ``bypassAutoEncryption=true`` really does bypas
 
    Drivers MAY pass a different value to ``--port`` if they expect their testing infrastructure to be using port 27021. Pass a port that should be free.
 
-#. Use ``client_encrypted`` to insert the document ``{"unencrypted": "test"}`` into ``db.coll``. Expect this to succeed. 
+#. Use ``client_encrypted`` to insert the document ``{"unencrypted": "test"}`` into ``db.coll``. Expect this to succeed.
 
-#. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or whatever was passed via ``--port``) with serverSelectionTimeoutMS=1000. Run an ``isMaster`` command and ensure it fails with a server selection timeout.
+#. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or whatever was passed via ``--port``) with serverSelectionTimeoutMS=1000. Run a handshake command and ensure it fails with a server selection timeout.
+
+Deadlock tests
+~~~~~~~~~~~~~~
+
+.. _Connection Monitoring and Pooling: /source/connection-monitoring-and-pooling/connection-monitoring-and-pooling.rst
+
+The following tests only apply to drivers that have implemented a connection pool (see the `Connection Monitoring and Pooling`_ specification).
+
+There are multiple parameterized test cases. Before each test case, perform the setup.
+
+Setup
+`````
+
+Create a ``MongoClient`` for setup operations named ``client_test``.
+
+Create a ``MongoClient`` for key vault operations with ``maxPoolSize=1`` named ``client_keyvault``. Capture command started events.
+
+Using ``client_test``, drop the collections ``keyvault.datakeys`` and ``db.coll``.
+
+Insert the document `external/external-key.json <../external/external-key.json>`_ into ``keyvault.datakeys`` with majority write concern.
+
+Create a collection ``db.coll`` configured with a JSON schema `external/external-schema.json <../external/external-schema.json>`_ as the validator, like so:
+
+.. code:: typescript
+
+   {"create": "coll", "validator": {"$jsonSchema": <json_schema>}}
+
+Create a ``ClientEncryption`` object, named ``client_encryption`` configured with:
+- ``keyVaultClient``=``client_test``
+- ``keyVaultNamespace``="keyvault.datakeys"
+- ``kmsProviders``=``{ "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }``
+
+Use ``client_encryption`` to encrypt the value "string0" with ``algorithm``="AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic" and ``keyAltName``="local". Store the result in a variable named ``ciphertext``.
+
+Proceed to run the test case.
+
+Each test case configures a ``MongoClient`` with automatic encryption (named ``client_encrypted``).
+
+Each test must assert the number of unique ``MongoClient``s created. This can be accomplished by capturing ``TopologyOpeningEvent``, or by checking command started events for a client identifier (not possible in all drivers).
+
+Running a test case
+```````````````````
+- Create a ``MongoClient`` named ``client_encrypted`` configured as follows:
+   - Set ``AutoEncryptionOpts``:
+      - ``keyVaultNamespace="keyvault.datakeys"``
+      - ``kmsProviders``=``{ "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }``
+      - Append ``TestCase.AutoEncryptionOpts`` (defined below)
+   - Capture command started events.
+   - Set ``maxPoolSize=TestCase.MaxPoolSize``
+- If the testcase sets ``AutoEncryptionOpts.bypassAutoEncryption=true``:
+   - Use ``client_test`` to insert ``{ "_id": 0, "encrypted": <ciphertext> }`` into ``db.coll``.
+- Otherwise:
+   - Use ``client_encrypted`` to insert ``{ "_id": 0, "encrypted": "string0" }``.
+- Use ``client_encrypted`` to run a ``findOne`` operation on ``db.coll``, with the filter ``{ "_id": 0 }``.
+- Expect the result to be ``{ "_id": 0, "encrypted": "string0" }``.
+- Check captured events against ``TestCase.Expectations``.
+- Check the number of unique ``MongoClient``s created is equal to ``TestCase.ExpectedNumberOfClients``.
+
+Case 1
+``````
+- MaxPoolSize: 1
+- AutoEncryptionOpts:
+   - bypassAutoEncryption=false
+   - keyVaultClient=unset
+- Expectations:
+   - Expect ``client_encrypted`` to have captured four ``CommandStartedEvent``:
+      - a listCollections to "db".
+      - a find on "keyvault".
+      - an insert on "db".
+      - a find on "db"
+- ExpectedNumberOfClients: 2
+
+Case 2
+``````
+- MaxPoolSize: 1
+- AutoEncryptionOpts:
+   - bypassAutoEncryption=false
+   - keyVaultClient=client_keyvault
+- Expectations:
+   - Expect ``client_encrypted`` to have captured three ``CommandStartedEvent``:
+      - a listCollections to "db".
+      - an insert on "db".
+      - a find on "db"
+   - Expect ``client_keyvault`` to have captured one ``CommandStartedEvent``:
+      - a find on "keyvault".
+- ExpectedNumberOfClients: 2
+
+Case 3
+``````
+- MaxPoolSize: 1
+- AutoEncryptionOpts:
+   - bypassAutoEncryption=true
+   - keyVaultClient=unset
+- Expectations:
+   - Expect ``client_encrypted`` to have captured three ``CommandStartedEvent``:
+      - a find on "db"
+      - a find on "keyvault".
+- ExpectedNumberOfClients: 2
+
+Case 4
+``````
+- MaxPoolSize: 1
+- AutoEncryptionOpts:
+   - bypassAutoEncryption=true
+   - keyVaultClient=client_keyvault
+- Expectations:
+   - Expect ``client_encrypted`` to have captured two ``CommandStartedEvent``:
+      - a find on "db"
+   - Expect ``client_keyvault`` to have captured one ``CommandStartedEvent``:
+      - a find on "keyvault".
+- ExpectedNumberOfClients: 1
+
+Case 5
+``````
+Drivers that do not support an unlimited maximum pool size MUST skip this test.
+
+- MaxPoolSize: 0
+- AutoEncryptionOpts:
+   - bypassAutoEncryption=false
+   - keyVaultClient=unset
+- Expectations:
+   - Expect ``client_encrypted`` to have captured five ``CommandStartedEvent``:
+      - a listCollections to "db".
+      - a listCollections to "keyvault".
+      - a find on "keyvault".
+      - an insert on "db".
+      - a find on "db"
+- ExpectedNumberOfClients: 1
+
+Case 6
+``````
+Drivers that do not support an unlimited maximum pool size MUST skip this test.
+
+- MaxPoolSize: 0
+- AutoEncryptionOpts:
+   - bypassAutoEncryption=false
+   - keyVaultClient=client_keyvault
+- Expectations:
+   - Expect ``client_encrypted`` to have captured three ``CommandStartedEvent``:
+      - a listCollections to "db".
+      - an insert on "db".
+      - a find on "db"
+   - Expect ``client_keyvault`` to have captured one ``CommandStartedEvent``:
+      - a find on "keyvault".
+- ExpectedNumberOfClients: 1
+
+Case 7
+``````
+Drivers that do not support an unlimited maximum pool size MUST skip this test.
+
+- MaxPoolSize: 0
+- AutoEncryptionOpts:
+   - bypassAutoEncryption=true
+   - keyVaultClient=unset
+- Expectations:
+   - Expect ``client_encrypted`` to have captured three ``CommandStartedEvent``:
+      - a find on "db"
+      - a find on "keyvault".
+- ExpectedNumberOfClients: 1
+
+Case 8
+``````
+Drivers that do not support an unlimited maximum pool size MUST skip this test.
+
+- MaxPoolSize: 0
+- AutoEncryptionOpts:
+   - bypassAutoEncryption=true
+   - keyVaultClient=client_keyvault
+- Expectations:
+   - Expect ``client_encrypted`` to have captured two ``CommandStartedEvent``:
+      - a find on "db"
+   - Expect ``client_keyvault`` to have captured one ``CommandStartedEvent``:
+      - a find on "keyvault".
+- ExpectedNumberOfClients: 1
+
+KMS TLS Tests
+~~~~~~~~~~~~~
+
+.. _ca.pem: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/ca.pem
+.. _expired.pem: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/expired.pem
+.. _wrong-host.pem: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/wrong-host.pem
+.. _server.pem: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/server.pem
+.. _client.pem: https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/x509gen/client.pem
+
+The following tests that connections to KMS servers with TLS verify peer certificates.
+
+The two tests below make use of mock KMS servers which can be run on Evergreen using `the mock KMS server script <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/csfle/kms_http_server.py>`_.
+Drivers can set up their local Python enviroment for the mock KMS server by running `the virtualenv activation script <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/csfle/activate_venv.sh>`_.
+
+To start two mock KMS servers, one on port 9000 with `ca.pem`_ as a CA file and `expired.pem`_ as a cert file, and one on port 9001 with `ca.pem`_ as a CA file and `wrong-host.pem`_ as a cert file,
+run the following commands from the ``.evergreen/csfle`` directory:
+
+.. code::
+
+   . ./activate_venv.sh
+   python -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 9000 &
+   python -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 9001 &
+
+Setup
+`````
+
+For both tests, do the following:
+
+#. Start a ``mongod`` process with **server version 4.1.9 or later**.
+
+#. Create a ``MongoClient`` for key vault operations.
+
+#. Create a ``ClientEncryption`` object (referred to as ``client_encryption``) with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
+
+Invalid KMS Certificate
+```````````````````````
+
+#. Start a mock KMS server on port 9000 with `ca.pem`_ as a CA file and `expired.pem`_ as a cert file.
+
+#. Call ``client_encryption.createDataKey()`` with "aws" as the provider and the following masterKey:
+
+   .. code:: javascript
+
+      {
+         "region": "us-east-1",
+         "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+         "endpoint": "127.0.0.1:9000",
+      }
+
+   Expect this to fail with an exception with a message referencing an expired certificate. This message will be language dependent.
+   In Python, this message is "certificate verify failed: certificate has expired". In Go, this message is
+   "certificate has expired or is not yet valid". If the language of implementation has a single, generic error message for
+   all certificate validation errors, drivers may inspect other fields of the error to verify its meaning.
+
+Invalid Hostname in KMS Certificate
+```````````````````````````````````
+
+#. Start a mock KMS server on port 9001 with `ca.pem`_ as a CA file and `wrong-host.pem`_ as a cert file.
+
+#. Call ``client_encryption.createDataKey()`` with "aws" as the provider and the following masterKey:
+
+   .. code:: javascript
+
+      {
+         "region": "us-east-1",
+         "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+         "endpoint": "127.0.0.1:9001",
+      }
+
+   Expect this to fail with an exception with a message referencing an incorrect or unexpected host. This message will be language dependent.
+   In Python, this message is "certificate verify failed: IP address mismatch, certificate is not valid for '127.0.0.1'". In Go, this message
+   is "cannot validate certificate for 127.0.0.1 because it doesn't contain any IP SANs". If the language of implementation has a single, generic
+   error message for all certificate validation errors, drivers may inspect other fields of the error to verify its meaning.
+
+KMS TLS Options Tests
+~~~~~~~~~~~~~~~~~~~~~
+
+Setup
+`````
+
+Start a ``mongod`` process with **server version 4.1.9 or later**.
+
+Four mock KMS server processes must be running:
+
+1. The mock `KMS HTTP server <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/csfle/kms_http_server.py>`_.
+
+   Run on port 9000 with `ca.pem`_ as a CA file and `expired.pem`_ as a cert file.
+
+   Example:
+
+   .. code::
+
+      python -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 9000
+
+2. The mock `KMS HTTP server <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/csfle/kms_http_server.py>`_.
+
+   Run on port 9001 with `ca.pem`_ as a CA file and `wrong-host.pem`_ as a cert file.
+
+   Example:
+
+   .. code::
+
+      python -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 9001
+
+3. The mock `KMS HTTP server <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/csfle/kms_http_server.py>`_.
+
+   Run on port 9002 with `ca.pem`_ as a CA file and `server.pem`_ as a cert file.
+
+   Run with the ``--require_client_cert`` option.
+
+   Example:
+
+   .. code::
+
+      python -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 9002 --require_client_cert
+
+
+4. The mock `KMS KMIP server <https://github.com/mongodb-labs/drivers-evergreen-tools/blob/master/.evergreen/csfle/kms_kmip_server.py>`_.
+
+Create the following four ``ClientEncryption`` objects.
+
+Configure each with ``keyVaultNamespace`` set to ``keyvault.datakeys``, and a default MongoClient as the ``keyVaultClient``.
+
+1. Create a ``ClientEncryption`` object named ``client_encryption_no_client_cert`` with the following KMS providers:
+
+   .. code:: javascript
+
+      {
+            "aws": {
+               "accessKeyId": <set from environment>,
+               "secretAccessKey": <set from environment>
+            },
+            "azure": {
+               "tenantId": <set from environment>,
+               "clientId": <set from environment>,
+               "clientSecret": <set from environment>,
+               "identityPlatformEndpoint": "127.0.0.1:9002"
+            },
+            "gcp": {
+               "email": <set from environment>,
+               "privateKey": <set from environment>,
+               "endpoint": "127.0.0.1:9002"
+            },
+            "kmip" {
+               "endpoint": "127.0.0.1:5698"
+            }
+      }
+
+   Add TLS options for the ``aws``, ``azure``, ``gcp``, and
+   ``kmip`` providers to use the following options:
+
+   - ``tlsCAFile`` (or equivalent) set to `ca.pem`_. This MAY be configured system-wide.
+
+2. Create a ``ClientEncryption`` object named ``client_encryption_with_tls`` with the following KMS providers:
+
+   .. code:: javascript
+
+      {
+            "aws": {
+               "accessKeyId": <set from environment>,
+               "secretAccessKey": <set from environment>
+            },
+            "azure": {
+               "tenantId": <set from environment>,
+               "clientId": <set from environment>,
+               "clientSecret": <set from environment>,
+               "identityPlatformEndpoint": "127.0.0.1:9002"
+            },
+            "gcp": {
+               "email": <set from environment>,
+               "privateKey": <set from environment>,
+               "endpoint": "127.0.0.1:9002"
+            },
+            "kmip" {
+               "endpoint": "127.0.0.1:5698"
+            }
+      }
+
+   Add TLS options for the ``aws``, ``azure``, ``gcp``, and
+   ``kmip`` providers to use the following options:
+
+   - ``tlsCAFile`` (or equivalent) set to `ca.pem`_. This MAY be configured system-wide.
+   - ``tlsCertificateKeyFile`` (or equivalent) set to `client.pem`_
+
+3. Create a ``ClientEncryption`` object named ``client_encryption_expired`` with the following KMS providers:
+
+   .. code:: javascript
+
+      {
+            "aws": {
+               "accessKeyId": <set from environment>,
+               "secretAccessKey": <set from environment>
+            },
+            "azure": {
+               "tenantId": <set from environment>,
+               "clientId": <set from environment>,
+               "clientSecret": <set from environment>,
+               "identityPlatformEndpoint": "127.0.0.1:9000"
+            },
+            "gcp": {
+               "email": <set from environment>,
+               "privateKey": <set from environment>,
+               "endpoint": "127.0.0.1:9000"
+            },
+            "kmip" {
+               "endpoint": "127.0.0.1:9000"
+            }
+      }
+
+   Add TLS options for the ``aws``, ``azure``, ``gcp``, and
+   ``kmip`` providers to use the following options:
+
+   - ``tlsCAFile`` (or equivalent) set to `ca.pem`_. This MAY be configured system-wide.
+
+4. Create a ``ClientEncryption`` object named ``client_encryption_invalid_hostname`` with the following KMS providers:
+
+   .. code:: javascript
+
+      {
+            "aws": {
+               "accessKeyId": <set from environment>,
+               "secretAccessKey": <set from environment>
+            },
+            "azure": {
+               "tenantId": <set from environment>,
+               "clientId": <set from environment>,
+               "clientSecret": <set from environment>,
+               "identityPlatformEndpoint": "127.0.0.1:9001"
+            },
+            "gcp": {
+               "email": <set from environment>,
+               "privateKey": <set from environment>,
+               "endpoint": "127.0.0.1:9001"
+            },
+            "kmip" {
+               "endpoint": "127.0.0.1:9001"
+            }
+      }
+
+   Add TLS options for the ``aws``, ``azure``, ``gcp``, and
+   ``kmip`` providers to use the following options:
+
+   - ``tlsCAFile`` (or equivalent) set to `ca.pem`_. This MAY be configured system-wide.
+
+Case 1: AWS
+```````````
+
+Call `client_encryption_no_client_cert.createDataKey()` with "aws" as the provider and the
+following masterKey:
+
+.. code:: javascript
+
+   {
+      region: "us-east-1",
+      key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
+      endpoint: "127.0.0.1:9002"
+   }
+
+Expect an error indicating TLS handshake failed.
+
+Call `client_encryption_with_tls.createDataKey()` with "aws" as the provider and the
+following masterKey:
+
+.. code:: javascript
+
+   {
+      region: "us-east-1",
+      key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
+      endpoint: "127.0.0.1:9002"
+   }
+
+Expect an error from libmongocrypt with a message containing the string: "parse
+error". This implies TLS handshake succeeded.
+
+Call `client_encryption_expired.createDataKey()` with "aws" as the provider and the
+following masterKey:
+
+.. code:: javascript
+
+   {
+      region: "us-east-1",
+      key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
+      endpoint: "127.0.0.1:9000"
+   }
+
+Expect an error indicating TLS handshake failed due to an expired certificate.
+
+Call `client_encryption_invalid_hostname.createDataKey()` with "aws" as the provider and the
+following masterKey:
+
+.. code:: javascript
+
+   {
+      region: "us-east-1",
+      key: "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
+      endpoint: "127.0.0.1:9001"
+   }
+
+Expect an error indicating TLS handshake failed due to an invalid hostname.
+
+Case 2: Azure
+`````````````
+
+Call `client_encryption_no_client_cert.createDataKey()` with "azure" as the provider and the
+following masterKey:
+
+.. code:: javascript
+
+   { 'keyVaultEndpoint': 'doesnotexist.local', 'keyName': 'foo' }
+
+Expect an error indicating TLS handshake failed.
+
+Call `client_encryption_with_tls.createDataKey()` with "azure" as the provider
+and the same masterKey.
+
+Expect an error from libmongocrypt with a message containing the string: "HTTP
+status=404". This implies TLS handshake succeeded.
+
+Call `client_encryption_expired.createDataKey()` with "azure" as the provider and
+the same masterKey.
+
+Expect an error indicating TLS handshake failed due to an expired certificate.
+
+Call `client_encryption_invalid_hostname.createDataKey()` with "azure" as the provider and
+the same masterKey.
+
+Expect an error indicating TLS handshake failed due to an invalid hostname.
+
+Case 3: GCP
+```````````
+
+Call `client_encryption_no_client_cert.createDataKey()` with "gcp" as the provider and the
+following masterKey:
+
+.. code:: javascript
+
+   { 'projectId': 'foo', 'location': 'bar', 'keyRing': 'baz', 'keyName': 'foo' }
+
+Expect an error indicating TLS handshake failed.
+
+Call `client_encryption_with_tls.createDataKey()` with "gcp" as the provider and
+the same masterKey.
+
+Expect an error from libmongocrypt with a message containing the string: "HTTP
+status=404". This implies TLS handshake succeeded.
+
+Call `client_encryption_expired.createDataKey()` with "gcp" as the provider and
+the same masterKey.
+
+Expect an error indicating TLS handshake failed due to an expired certificate.
+
+Call `client_encryption_invalid_hostname.createDataKey()` with "gcp" as the provider and
+the same masterKey.
+
+Expect an error indicating TLS handshake failed due to an invalid hostname.
+
+Case 4: KMIP
+````````````
+
+Call `client_encryption_no_client_cert.createDataKey()` with "kmip" as the provider and the
+following masterKey:
+
+.. code:: javascript
+
+   { }
+
+Expect an error indicating TLS handshake failed.
+
+Call `client_encryption_with_tls.createDataKey()` with "kmip" as the provider
+and the same masterKey.
+
+Expect success.
+
+Call `client_encryption_expired.createDataKey()` with "kmip" as the provider and
+the same masterKey.
+
+Expect an error indicating TLS handshake failed due to an expired certificate.
+
+Call `client_encryption_invalid_hostname.createDataKey()` with "kmip" as the provider and
+the same masterKey.
+
+Expect an error indicating TLS handshake failed due to an invalid hostname.
+
+Explicit Encryption
+~~~~~~~~~~~~~~~~~~~
+
+The Explicit Encryption tests require MongoDB server 6.0+. The tests must not run against a standalone.
+
+Before running each of the following test cases, perform the following Test Setup.
+
+Test Setup
+``````````
+
+Load the file `encryptedFields.json <https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/etc/data/encryptedFields.json>`_ as ``encryptedFields``.
+
+Load the file `key1-document.json <https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/etc/data/keys/key1-document.json>`_ as ``key1Document``.
+
+Read the ``"_id"`` field of ``key1Document`` as ``key1ID``.
+
+Drop and create the collection ``db.explicit_encryption`` using ``encryptedFields`` as an option. See `FLE 2 CreateCollection() and Collection.Drop() <https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.rst#fle-2-createcollection-and-collection-drop>`_.
+
+Drop and create the collection ``keyvault.datakeys``.
+
+Create a MongoClient named ``keyVaultClient``.
+
+Create a ClientEncryption object named ``clientEncryption`` with these options:
+
+.. code:: typescript
+
+   ClientEncryptionOpts {
+      keyVaultClient: <keyVaultClient>;
+      keyVaultNamespace: "keyvault.datakeys";
+      kmsProviders: { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+   }
+
+Create a MongoClient named ``encryptedClient`` with these ``AutoEncryptionOpts``:
+
+.. code:: typescript
+
+   AutoEncryptionOpts {
+      keyVaultNamespace: "keyvault.datakeys";
+      kmsProviders: { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+      bypassQueryAnalysis: true
+   }
+
+
+Case 1: can insert encrypted indexed and find
+`````````````````````````````````````````````
+
+Use ``clientEncryption`` to encrypt the value "encrypted indexed value" with these ``EncryptOpts``:
+
+.. code:: typescript
+
+   class EncryptOpts {
+      keyId : <key1ID>
+      algorithm: "Indexed",
+   }
+
+Store the result in ``insertPayload``.
+
+Use ``encryptedClient`` to insert the document ``{ "encryptedIndexed": <insertPayload> }`` into ``db.explicit_encryption``.
+
+Use ``clientEncryption`` to encrypt the value "encrypted indexed value" with these ``EncryptOpts``:
+
+.. code:: typescript
+
+   class EncryptOpts {
+      keyId : <key1ID>
+      algorithm: "Indexed",
+      queryType: Equality
+   }
+
+Store the result in ``findPayload``.
+
+Use ``encryptedClient`` to run a "find" operation on the ``db.explicit_encryption`` collection with the filter ``{ "encryptedIndexed": <findPayload> }``.
+
+Assert one document is returned containing the field ``{ "encryptedIndexed": "encrypted indexed value" }``.
+
+Case 2: can insert encrypted indexed and find with non-zero contention
+```````````````````````````````````````````````````````````````````````
+
+Use ``clientEncryption`` to encrypt the value "encrypted indexed value" with these ``EncryptOpts``:
+
+.. code:: typescript
+
+   class EncryptOpts {
+      keyId : <key1ID>
+      algorithm: "Indexed",
+      contentionFactor: 10
+   }
+
+Store the result in ``insertPayload``.
+
+Use ``encryptedClient`` to insert the document ``{ "encryptedIndexed": <insertPayload> }`` into ``db.explicit_encryption``.
+
+Repeat the above steps 10 times to insert 10 total documents. The ``insertPayload`` must be regenerated each iteration.
+
+Use ``clientEncryption`` to encrypt the value "encrypted indexed value" with these ``EncryptOpts``:
+
+.. code:: typescript
+
+   class EncryptOpts {
+      keyId : <key1ID>
+      algorithm: "Indexed",
+      queryType: Equality
+   }
+
+Store the result in ``findPayload``.
+
+Use ``encryptedClient`` to run a "find" operation on the ``db.explicit_encryption`` collection with the filter ``{ "encryptedIndexed": <findPayload> }``.
+
+Assert less than 10 documents are returned. 0 documents may be returned. Assert each returned document contains the field ``{ "encryptedIndexed": "encrypted indexed value" }``.
+
+Use ``clientEncryption`` to encrypt the value "encrypted indexed value" with these ``EncryptOpts``:
+
+.. code:: typescript
+
+   class EncryptOpts {
+      keyId : <key1ID>
+      algorithm: "Indexed",
+      queryType: Equality,
+      contentionFactor: 10
+   }
+
+Store the result in ``findPayload2``.
+
+Use ``encryptedClient`` to run a "find" operation on the ``db.explicit_encryption`` collection with the filter ``{ "encryptedIndexed": <findPayload2> }``.
+
+Assert 10 documents are returned. Assert each returned document contains the field ``{ "encryptedIndexed": "encrypted indexed value" }``.
+
+Case 3: can insert encrypted unindexed
+``````````````````````````````````````
+
+Use ``clientEncryption`` to encrypt the value "encrypted unindexed value" with these ``EncryptOpts``:
+
+.. code:: typescript
+
+   class EncryptOpts {
+      keyId : <key1ID>
+      algorithm: "Unindexed"
+   }
+
+Store the result in ``insertPayload``.
+
+Use ``encryptedClient`` to insert the document ``{ "_id": 1, "encryptedUnindexed": <insertPayload> }`` into ``db.explicit_encryption``.
+
+Use ``encryptedClient`` to run a "find" operation on the ``db.explicit_encryption`` collection with the filter ``{ "_id": 1 }``.
+
+Assert one document is returned containing the field ``{ "encryptedUnindexed": "encrypted unindexed value" }``.
+
+Case 4: can roundtrip encrypted indexed
+```````````````````````````````````````
+
+Use ``clientEncryption`` to encrypt the value "encrypted indexed value" with these ``EncryptOpts``:
+
+.. code:: typescript
+
+   class EncryptOpts {
+      keyId : <key1ID>
+      algorithm: "Indexed",
+   }
+
+Store the result in ``payload``.
+
+Use ``clientEncryption`` to decrypt ``payload``. Assert the returned value equals "encrypted indexed value".
+
+Case 5: can roundtrip encrypted unindexed
+`````````````````````````````````````````
+
+Use ``clientEncryption`` to encrypt the value "encrypted unindexed value" with these ``EncryptOpts``:
+
+.. code:: typescript
+
+   class EncryptOpts {
+      keyId : <key1ID>
+      algorithm: "Unindexed",
+   }
+
+Store the result in ``payload``.
+
+Use ``clientEncryption`` to decrypt ``payload``. Assert the returned value equals "encrypted unindexed value".
