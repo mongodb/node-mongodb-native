@@ -182,14 +182,13 @@ export interface ChangeStreamOptions extends AggregateOptions {
   /**
    * When enabled, configures the change stream to include extra change events.
    *
-   * - createIndex
-   * - dropIndex
-   * - collMod
+   * - createIndexes
+   * - dropIndexes
+   * - modify
    * - create
    * - shardCollection
    * - reshardCollection
    * - refineCollectionShardKey
-   * - chunkMigrated
    */
   showExpandedEvents?: boolean;
 }
