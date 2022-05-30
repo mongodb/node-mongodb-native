@@ -1,6 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
+const { setTimeout } = require('timers');
 
 // helpers for using chai.expect in the assert style
 const assert = {

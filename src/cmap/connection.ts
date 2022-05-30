@@ -1,3 +1,5 @@
+import { setTimeout } from 'timers';
+
 import { BSONSerializeOptions, Document, Long, ObjectId, pluckBSONSerializeOptions } from '../bson';
 import {
   CLOSE,

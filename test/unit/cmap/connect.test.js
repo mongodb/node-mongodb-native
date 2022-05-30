@@ -3,6 +3,7 @@
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const EventEmitter = require('events');
+const { setTimeout } = require('timers');
 
 const { connect } = require('../../../src/cmap/connect');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');

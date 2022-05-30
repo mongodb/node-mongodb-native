@@ -1,4 +1,6 @@
 import Denque = require('denque');
+import { setTimeout } from 'timers';
+
 import type { BSONSerializeOptions, Document } from '../bson';
 import { deserialize, serialize } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';

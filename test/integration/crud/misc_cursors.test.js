@@ -14,6 +14,7 @@ const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
+const { setTimeout } = require('timers');
 const { ReadPreference } = require('../../../src/read_preference');
 const { ServerType } = require('../../../src/sdam/common');
 const { formatSort } = require('../../../src/sort');

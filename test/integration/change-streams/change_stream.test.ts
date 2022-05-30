@@ -2,6 +2,7 @@ import { strict as assert } from 'assert';
 import { expect } from 'chai';
 import { on, once } from 'events';
 import { PassThrough } from 'stream';
+import { setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import {

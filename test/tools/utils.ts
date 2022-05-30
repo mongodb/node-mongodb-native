@@ -1,6 +1,7 @@
 import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
+import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
 import { OP_MSG } from '../../src/cmap/wire_protocol/constants';

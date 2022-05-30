@@ -1,4 +1,5 @@
 'use strict';
+const { setTimeout } = require('timers');
 const mock = require('../../tools/mongodb-mock/index');
 const { ServerType } = require('../../../src/sdam/common');
 const { Topology } = require('../../../src/sdam/topology');

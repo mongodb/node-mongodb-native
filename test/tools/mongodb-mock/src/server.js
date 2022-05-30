@@ -8,6 +8,7 @@ const compressorIDs = require('./utils').compressorIDs;
 const Request = require('./request');
 const { Query } = require('./protocol');
 const EventEmitter = require('events');
+const { setTimeout } = require('timers');
 const { HostAddress } = require('../../../../src/utils');
 
 /*

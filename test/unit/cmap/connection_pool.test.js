@@ -6,6 +6,7 @@ const mock = require('../../tools/mongodb-mock/index');
 const cmapEvents = require('../../../src/cmap/connection_pool_events');
 const sinon = require('sinon');
 const { expect } = require('chai');
+const { setImmediate } = require('timers');
 const { ns, isHello } = require('../../../src/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 

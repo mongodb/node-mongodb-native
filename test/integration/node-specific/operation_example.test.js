@@ -1,5 +1,6 @@
 'use strict';
 const { assert: test, setupDatabase } = require('../shared');
+const { setTimeout } = require('timers');
 const { format: f } = require('util');
 const { Topology } = require('../../../src/sdam/topology');
 const { Code, ObjectId, ReturnDocument } = require('../../../src');
