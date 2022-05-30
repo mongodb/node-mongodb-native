@@ -10,6 +10,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { MongoRuntimeError } = require('../../src/error');
 const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { createTimerSandbox } = require('./timer_sandbox');
 
 describe('driver utils', function () {
   context('eachAsync()', function () {
@@ -44,9 +45,10 @@ describe('driver utils', function () {
   });
 
   describe('#makeInterruptibleAsyncInterval', function () {
-    let clock, executor, fnSpy;
+    let timerSandbox, clock, executor, fnSpy;
 
     beforeEach(function () {
+      timerSandbox = createTimerSandbox();
       clock = sinon.useFakeTimers();
       fnSpy = sinon.spy(cb => {
         cb();
@@ -58,6 +60,7 @@ describe('driver utils', function () {
         executor.stop();
       }
       clock.restore();
+      timerSandbox.restore();
     });
 
     context('when the immediate option is provided', function () {

@@ -11,6 +11,7 @@ import { MongoNetworkTimeoutError } from '../../../src/error';
 import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import { getSymbolFrom } from '../../tools/utils';
+import { createTimerSandbox } from '../timer_sandbox';
 
 const connectionOptionsDefaults = {
   id: 0,
@@ -139,6 +140,7 @@ describe('new Connection()', function () {
   describe('onTimeout()', () => {
     let connection: sinon.SinonSpiedInstance<Connection>;
     let clock: sinon.SinonFakeTimers;
+    let timerSandbox: sinon.SinonFakeTimers;
     let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
     let messageStream: MessageStream;
     let kDelayedTimeoutId: symbol;
@@ -164,6 +166,7 @@ describe('new Connection()', function () {
     }
 
     beforeEach(() => {
+      timerSandbox = createTimerSandbox();
       clock = sinon.useFakeTimers();
 
       NodeJSTimeoutClass = setTimeout(() => null, 1).constructor;
@@ -177,6 +180,7 @@ describe('new Connection()', function () {
     });
 
     afterEach(() => {
+      timerSandbox.restore();
       clock.restore();
     });
 
