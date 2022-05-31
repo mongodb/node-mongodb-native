@@ -786,7 +786,7 @@ export class ChangeStream<
       this.close(() => this._processResumeQueue(err));
     };
 
-    if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
+    if (cursor && isResumableError(error, cursor.maxWireVersion)) {
       this.cursor = undefined;
 
       // stop listening to all events from old cursor

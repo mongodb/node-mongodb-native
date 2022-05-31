@@ -43,6 +43,8 @@ export class ChangeStreamCursor<
   postBatchResumeToken?: ResumeToken;
   pipeline: Document[];
 
+  maxWireVersion: number;
+
   constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
@@ -61,6 +63,8 @@ export class ChangeStreamCursor<
     } else if (options.resumeAfter) {
       this.resumeToken = options.resumeAfter;
     }
+
+    this.maxWireVersion = maxWireVersion(this.server);
   }
 
   set resumeToken(token: ResumeToken) {
@@ -129,6 +133,8 @@ export class ChangeStreamCursor<
       session
     });
 
+    this.maxWireVersion = maxWireVersion(this.server);
+
     executeOperation<TODO_NODE_3286, ChangeStreamAggregateRawResult<TChange>>(
       session.client,
       aggregateOperation,
@@ -142,7 +148,7 @@ export class ChangeStreamCursor<
           this.startAtOperationTime == null &&
           this.resumeAfter == null &&
           this.startAfter == null &&
-          maxWireVersion(server) >= 7
+          this.maxWireVersion >= 7
         ) {
           this.startAtOperationTime = response.operationTime;
         }
@@ -159,6 +165,7 @@ export class ChangeStreamCursor<
   }
 
   override _getMore(batchSize: number, callback: Callback): void {
+    this.maxWireVersion = maxWireVersion(this.server);
     super._getMore(batchSize, (err, response) => {
       if (err) {
         return callback(err);
