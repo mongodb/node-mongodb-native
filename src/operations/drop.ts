@@ -51,9 +51,6 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
         encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
       }
 
-      // Spec tests expect the main collection to be dropped first.
-      const result = await this.executeWithoutEncryptedFieldsCheck(server, session);
-
       if (encryptedFields) {
         const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
         const eccCollection = encryptedFields.eccCollection || `enxcol_.${name}.ecc`;
@@ -74,7 +71,8 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
           }
         }
       }
-      return result;
+
+      return await this.executeWithoutEncryptedFieldsCheck(server, session);
     })().then(
       result => callback(undefined, result),
       err => callback(err)
