@@ -1,0 +1,108 @@
+{
+  "description": "unacknowledgedBulkWrite",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "command-monitoring-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "test",
+        "collectionOptions": {
+          "writeConcern": {
+            "w": 0
+          }
+        }
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "command-monitoring-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "A successful unordered bulk write with an unacknowledged write concern",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": "unorderedBulkWriteInsertW0",
+                    "x": 44
+                  }
+                }
+              }
+            ],
+            "ordered": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": "unorderedBulkWriteInsertW0",
+                      "x": 44
+                    }
+                  ],
+                  "ordered": false,
+                  "writeConcern": {
+                    "w": 0
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

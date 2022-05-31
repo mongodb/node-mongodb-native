@@ -1,0 +1,79 @@
+description: "deleteOne"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client client
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName command-monitoring-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName test
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  - description: "A successful deleteOne"
+    operations:
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: { _id: { $gt: 1 } }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collectionName
+                deletes:
+                  - { q: { _id: { $gt: 1 }}, limit: 1 }
+                ordered: true
+              commandName: delete
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply: { ok: 1, n: 1 }
+              commandName: delete
+
+  - description: "A successful deleteOne with write errors"
+    operations:
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: { _id: { $unsupported: 1 } }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collectionName
+                deletes:
+                  - { q: { _id: { $unsupported: 1 }}, limit: 1 }
+                ordered: true
+              commandName: delete
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                n: 0
+                # The legacy version of this test included an assertion that writeErrors contained a single document
+                # with index=0, a "code" value, and a non-empty "errmsg". However, writeErrors can contain extra fields
+                # beyond these, and the unified format currently does not permit allowing extra fields in sub-documents,
+                # so those assertions are not present here.
+                writeErrors: { $$type: array }
+              commandName: delete

@@ -1,0 +1,154 @@
+{
+  "description": "bulkWrite",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "command-monitoring-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "command-monitoring-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "A successful mixed bulk write",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 4,
+                    "x": 44
+                  }
+                }
+              },
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 3
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 333
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 4,
+                      "x": 44
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 1
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": 3
+                      },
+                      "u": {
+                        "$set": {
+                          "x": 333
+                        }
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      },
+                      "multi": {
+                        "$$unsetOrMatches": false
+                      }
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "update",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 1
+                },
+                "commandName": "update"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

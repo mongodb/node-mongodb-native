@@ -1,0 +1,77 @@
+description: "insertOne"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client client
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName command-monitoring-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName test
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  - description: "A successful insertOne"
+    operations:
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 2, x: 22 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 2, x: 22 }
+                ordered: true
+              commandName: insert
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply: { ok: 1, n: 1 }
+              commandName: insert
+
+  - description: "A successful insertOne with write errors"
+    operations:
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 1, x: 11 }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 1, x: 11 }
+                ordered: true
+              commandName: insert
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                n: 0
+                # The legacy version of this test included an assertion that writeErrors contained a single document
+                # with index=0, a "code" value, and a non-empty "errmsg". However, writeErrors can contain extra fields
+                # beyond these, and the unified format currently does not permit allowing extra fields in sub-documents,
+                # so those assertions are not present here.
+                writeErrors: { $$type: array }
+              commandName: insert

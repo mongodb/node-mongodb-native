@@ -1,0 +1,83 @@
+{
+  "description": "command",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "command-monitoring-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "command-monitoring-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "A successful command",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "command": {
+              "ping": 1
+            },
+            "commandName": "ping"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1
+                },
+                "commandName": "ping",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

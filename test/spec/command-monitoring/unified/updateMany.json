@@ -1,0 +1,188 @@
+{
+  "description": "updateMany",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "command-monitoring-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "command-monitoring-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "A successful updateMany",
+      "operations": [
+        {
+          "name": "updateMany",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "u": {
+                        "$inc": {
+                          "x": 1
+                        }
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      },
+                      "multi": true
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "update",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 2
+                },
+                "commandName": "update"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "A successful updateMany with write errors",
+      "operations": [
+        {
+          "name": "updateMany",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            },
+            "update": {
+              "$unsupported": {
+                "x": 1
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "update": "test",
+                  "updates": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "u": {
+                        "$unsupported": {
+                          "x": 1
+                        }
+                      },
+                      "upsert": {
+                        "$$unsetOrMatches": false
+                      },
+                      "multi": true
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "update",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 0,
+                  "writeErrors": {
+                    "$$type": "array"
+                  }
+                },
+                "commandName": "update"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
