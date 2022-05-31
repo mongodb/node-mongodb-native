@@ -12,8 +12,6 @@ describe('ChangeStreamCursor', function () {
   });
 
   describe('get resumeOptions()', function () {
-    context('when no resume related options are present on the cursor', function () {});
-
     context('when there is a cached resumeToken', function () {
       it('copies all non-resume related options from the original cursor', function () {
         const cursor = new ChangeStreamCursor(
