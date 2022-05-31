@@ -77,9 +77,7 @@ const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
 /**
  * @public
- * @deprecated
- *
- * Please use the ChangeStreamCursorOptions instead.
+ * @deprecated Please use the ChangeStreamCursorOptions type instead.
  */
 export interface ResumeOptions {
   startAtOperationTime?: Timestamp;
