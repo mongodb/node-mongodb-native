@@ -671,36 +671,6 @@ export class ChangeStream<
     return changeStreamCursor;
   }
 
-  /**
-   * This method performs a basic server selection loop, satisfying the requirements of
-   * ChangeStream resumability until the new SDAM layer can be used.
-   * @internal
-   */
-  private _waitForTopologyConnected(
-    topology: Topology,
-    options: TopologyWaitOptions,
-    callback: Callback
-  ) {
-    setTimeout(() => {
-      if (options && options.start == null) {
-        options.start = now();
-      }
-
-      const start = options.start || now();
-      const timeout = options.timeout || SELECTION_TIMEOUT;
-      if (topology.isConnected()) {
-        return callback();
-      }
-
-      if (calculateDurationInMs(start) > timeout) {
-        // TODO(NODE-3497): Replace with MongoNetworkTimeoutError
-        return callback(new MongoRuntimeError('Timed out waiting for connection'));
-      }
-
-      this._waitForTopologyConnected(topology, options, callback);
-    }, 500); // this is an arbitrary wait time to allow SDAM to transition
-  }
-
   /** @internal */
   private _closeWithError(error: AnyError, callback?: Callback): void {
     if (!callback) {
@@ -796,7 +766,7 @@ export class ChangeStream<
       cursor.close();
 
       const topology = getTopology(this.parent);
-      this._waitForTopologyConnected(topology, { readPreference: cursor.readPreference }, err => {
+      topology.selectServer(cursor.readPreference, {}, err => {
         // if the topology can't reconnect, close the stream
         if (err) return unresumableError(err);
 
