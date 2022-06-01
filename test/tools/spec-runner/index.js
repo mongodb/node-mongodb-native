@@ -86,14 +86,6 @@ function translateClientOptions(options) {
         }
 
         options.autoEncryption.kmsProviders = kmsProviders;
-
-        if (options.autoEncryption.encryptedFieldsMap) {
-          const map = options.autoEncryption.encryptedFieldsMap;
-          if (map['default.encryptedCollection']) {
-            /* eslint no-console: 0 */
-            console.log(map['default.encryptedCollection'].fields[0]);
-          }
-        }
       }
 
       delete options.autoEncryptOpts;
