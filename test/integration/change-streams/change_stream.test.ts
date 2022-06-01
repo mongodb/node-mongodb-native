@@ -786,8 +786,21 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
       const changeStream = coll.watch([], changeStreamOptions);
 
       await initIteratorMode(changeStream);
-      await changeStream.tryNext();
 
+      await client.db('admin').command({
+        configureFailPoint: 'failGetMoreAfterCursorCheckout',
+        mode: { times: 1 },
+        data: {
+          errorCode: 89,
+          closeConnection: false
+        }
+      });
+
+      const next = changeStream.next().catch(e => e);
+      await coll.insertOne({ foo: 'bar' });
+      const event = await next;
+
+      expect(event).to.have.property('operationType', 'insert');
       expect(changeStream.cursor.resumeOptions).to.containSubset(changeStreamOptions);
 
       await changeStream.close();
