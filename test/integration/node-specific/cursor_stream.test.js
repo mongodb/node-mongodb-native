@@ -2,6 +2,7 @@
 var expect = require('chai').expect;
 const { setupDatabase } = require('../shared');
 const { Binary } = require('../../../src');
+const { setTimeout, setImmediate } = require('timers');
 
 describe('Cursor Streams', function () {
   before(function () {

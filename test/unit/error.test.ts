@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { setTimeout } from 'timers';
 
 import {
   PoolClosedError as MongoPoolClosedError,

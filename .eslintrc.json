@@ -38,6 +38,21 @@
         "property": "only"
       }
     ],
+    "no-restricted-globals": [
+      "error",
+      {
+        "name": "setTimeout",
+        "message": "Use `import { setTimeout } from 'timers';` instead"
+      },
+      {
+        "name": "setImmediate",
+        "message": "Use `import { setImmediate } from 'timers';` instead"
+      },
+      {
+        "name": "setInterval",
+        "message": "Use `import { setInterval } from 'timers';` instead"
+      }
+    ],
     "prettier/prettier": "error",
     "tsdoc/syntax": "warn",
     "no-console": "error",

@@ -10,6 +10,7 @@ import { HostAddress, isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import type { MockServer } from '../../tools/mongodb-mock/src/server';
 import { processTick } from '../../tools/utils';
+import { createTimerSandbox } from '../timer_sandbox';
 
 /*
     The SRV Prose Tests make use of the following REAL DNS records.
@@ -215,17 +216,20 @@ describe('Polling Srv Records for Mongos Discovery', () => {
     let lookupStub: sinon.SinonStub;
     let client: MongoClient;
     let clock: sinon.SinonFakeTimers;
+    let timerSandbox: sinon.SinonSandbox;
     const initialRecords = Object.freeze([
       { name: 'localhost.test.mock.test.build.10gen.cc', port: 2017 },
       { name: 'localhost.test.mock.test.build.10gen.cc', port: 2018 }
     ]);
 
     beforeEach(() => {
+      timerSandbox = createTimerSandbox();
       clock = sinon.useFakeTimers();
     });
 
     afterEach(() => {
       if (clock) {
+        timerSandbox.restore();
         clock.restore();
         clock = undefined;
       }

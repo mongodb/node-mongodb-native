@@ -1,5 +1,6 @@
 'use strict';
 const { expect } = require('chai');
+const { setTimeout } = require('timers');
 const { resolveConnectionString } = require('./utils');
 const { ns } = require('../../../src/utils');
 const { extractAuthFromConnectionString } = require('../utils');

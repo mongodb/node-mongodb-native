@@ -1,5 +1,6 @@
 import Denque = require('denque');
 import type { Readable } from 'stream';
+import { setTimeout } from 'timers';
 
 import type { Document, Long, Timestamp } from './bson';
 import { Collection } from './collection';

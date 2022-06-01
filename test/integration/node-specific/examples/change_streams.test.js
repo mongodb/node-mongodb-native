@@ -1,6 +1,7 @@
 /* eslint no-unused-vars: 0 */
 'use strict';
 
+const { setTimeout } = require('timers');
 const setupDatabase = require('../../shared').setupDatabase;
 const expect = require('chai').expect;
 

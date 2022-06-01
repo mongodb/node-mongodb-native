@@ -1,4 +1,6 @@
 import Denque = require('denque');
+import { setTimeout } from 'timers';
+
 import type { ObjectId } from '../bson';
 import {
   APM_EVENTS,
