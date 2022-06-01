@@ -5,9 +5,11 @@ import {
   AnyError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
+  MONGODB_ERROR_CODES,
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoRuntimeError,
+  MongoServerError,
   MongoTailableCursorError
 } from '../error';
 import type { MongoClient } from '../mongo_client';
@@ -851,7 +853,7 @@ export function assertUninitialized(cursor: AbstractCursor): void {
 /**
  * @internal
  */
-export class ReadableCursorStream extends Readable {
+class ReadableCursorStream extends Readable {
   private _cursor: AbstractCursor;
 
   private _initialized = false;
@@ -894,21 +896,12 @@ export class ReadableCursorStream extends Readable {
       this._needToClose = err ? !this._cursor.closed : result != null;
 
       if (err) {
-        // NOTE: This is questionable, but we have a test backing the behavior. It seems the
-        //       desired behavior is that a stream ends cleanly when a user explicitly closes
-        //       a client during iteration. Alternatively, we could do the "right" thing and
-        //       propagate the error message by removing this special case.
-        if (err.message.match(/server is closed/)) {
-          this._cursor.close();
-          return this.push(null);
-        }
-
         // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
         //       to be "operation interrupted", where a cursor has been closed but there is an
         //       active getMore in-flight. This used to check if the cursor was killed but once
         //       that changed to happen in cleanup legitimate errors would not destroy the
         //       stream. There are change streams test specifically test these cases.
-        if (err.message.match(/interrupted/)) {
+        if (err instanceof MongoServerError && err.code === MONGODB_ERROR_CODES.CursorKilled) {
           return this.push(null);
         }
 

@@ -19,18 +19,8 @@ import { InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
-import type { Topology } from './sdam/topology';
 import type { ServerSessionId } from './sessions';
-import {
-  calculateDurationInMs,
-  Callback,
-  filterOptions,
-  getTopology,
-  maxWireVersion,
-  maybePromise,
-  MongoDBNamespace,
-  now
-} from './utils';
+import { Callback, filterOptions, getTopology, maybePromise, MongoDBNamespace } from './utils';
 
 /** @internal */
 const kResumeQueue = Symbol('resumeQueue');
@@ -54,14 +44,6 @@ const CHANGE_DOMAIN_TYPES = {
   DATABASE: Symbol('Database'),
   CLUSTER: Symbol('Cluster')
 };
-
-interface TopologyWaitOptions {
-  start?: number;
-  timeout?: number;
-  readPreference?: ReadPreference;
-}
-
-const SELECTION_TIMEOUT = 30000;
 
 const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE];
 
@@ -687,6 +669,7 @@ export class ChangeStream<
     this[kCursorStream] = stream;
     stream.on('data', change => this._processNewChange(change));
     stream.on('error', error => this._processError(error));
+    stream.on('end', () => this._processNewChange(null));
   }
 
   /** @internal */
