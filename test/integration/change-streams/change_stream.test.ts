@@ -14,13 +14,21 @@ import {
   MongoChangeStreamError,
   MongoClient,
   MongoNetworkError,
+  MongoNotConnectedError,
+  MongoRuntimeError,
   MongoServerError,
   ReadPreference,
   ResumeToken
 } from '../../../src';
 import { isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
-import { getSymbolFrom, sleep, TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
+import {
+  FailPoint,
+  getSymbolFrom,
+  sleep,
+  TestBuilder,
+  UnifiedTestSuiteBuilder
+} from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
 
 const initIteratorMode = async (cs: ChangeStream) => {
@@ -1061,6 +1069,46 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
   });
 
   describe('Change Stream Resume Error Tests', function () {
+    it('throws MongoNotConnectedError if client is closed during iteration', {
+      metadata: { requires: { topology: 'replicaset' } },
+      async test() {
+        const cs = client.db('foo').collection('bar').watch();
+        const changes = once(cs, 'change').catch(e => e);
+        await once(cs.cursor, 'init');
+
+        await client.close();
+
+        const error = await changes;
+
+        expect(error).to.be.instanceOf(MongoNotConnectedError);
+      }
+    });
+
+    it('does throws a MongoRuntimeError if the cursor is closed while getMores are pending', {
+      metadata: { requires: { topology: 'replicaset' } },
+      async test() {
+        const failPoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            blockTimeMS: 2000,
+            failCommands: ['getMore']
+          }
+        };
+        await client.db('admin').command(failPoint);
+        const cs = client.db('foo').collection('bar').watch();
+        const changes = once(cs, 'change').catch(e => e);
+        await once(cs.cursor, 'init');
+
+        await cs.cursor.close();
+
+        const error = await changes;
+
+        expect(error).to.be.instanceOf(MongoRuntimeError);
+        expect(error).to.match(/ChangeStream is closed/);
+      }
+    });
+
     it.skip('should continue emitting change events after a resumable error', {
       metadata: { requires: { topology: 'replicaset' } },
       async test() {
