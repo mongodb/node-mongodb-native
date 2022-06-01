@@ -4,7 +4,7 @@ import * as chalk from 'chalk';
 import { Socket } from 'net';
 
 import { MongoClient } from '../../../../src/mongo_client';
-import { ServerSession, ServerSessionPool } from '../../../../src/sessions';
+import { ServerSessionPool } from '../../../../src/sessions';
 
 class LeakChecker {
   static originalAcquire: typeof ServerSessionPool.prototype.acquire;
