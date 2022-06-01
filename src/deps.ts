@@ -343,6 +343,8 @@ export interface AutoEncryptionOptions {
      * to the mongocryptd-specific `extraOptions` options.
      *
      * Specifying a path prevents mongocryptd from being used as a fallback.
+     *
+     * Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
      */
     cryptSharedLibPath?: string;
     /**
@@ -350,6 +352,8 @@ export interface AutoEncryptionOptions {
      * shared library could not be loaded.
      *
      * This is always true when `cryptSharedLibPath` is specified.
+     *
+     * Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
      */
     cryptSharedLibRequired?: boolean;
     /**
