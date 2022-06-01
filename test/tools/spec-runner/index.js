@@ -210,31 +210,29 @@ function generateTopologyTests(testSuites, testContext, filter) {
       if (!shouldRun) this.skip();
     };
 
-    if (testSuite.name === 'fle2-CreateCollection') {
-      describe(testSuite.name, function () {
-        beforeEach(beforeEachFilter);
-        beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-        afterEach(() => testContext.cleanupAfterSuite());
-        for (const spec of testSuite.tests) {
-          const mochaTest = it(spec.description, async function () {
-            if (spec.failPoint) {
-              await testContext.enableFailPoint(spec.failPoint);
-            }
+    describe(testSuite.name, function () {
+      beforeEach(beforeEachFilter);
+      beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+      afterEach(() => testContext.cleanupAfterSuite());
+      for (const spec of testSuite.tests) {
+        const mochaTest = it(spec.description, async function () {
+          if (spec.failPoint) {
+            await testContext.enableFailPoint(spec.failPoint);
+          }
 
-            // run the actual test
-            await runTestSuiteTest(this.configuration, spec, testContext);
+          // run the actual test
+          await runTestSuiteTest(this.configuration, spec, testContext);
 
-            if (spec.failPoint) {
-              await testContext.disableFailPoint(spec.failPoint);
-            }
+          if (spec.failPoint) {
+            await testContext.disableFailPoint(spec.failPoint);
+          }
 
-            await validateOutcome(spec, testContext);
-          });
-          // Make the spec test available to the beforeEach filter
-          mochaTest.spec = spec;
-        }
-      });
-    }
+          await validateOutcome(spec, testContext);
+        });
+        // Make the spec test available to the beforeEach filter
+        mochaTest.spec = spec;
+      }
+    });
   }
 }
 
