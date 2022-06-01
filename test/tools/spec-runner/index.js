@@ -102,7 +102,7 @@ function gatherTestSuites(specPath) {
     .map(x =>
       Object.assign(
         EJSON.parse(fs.readFileSync(path.join(specPath, x)), {
-          relaxed: !x.includes('fle2-CreateCollection')
+          relaxed: !x.includes('fle2')
         }),
         {
           name: path.basename(x, '.json')
