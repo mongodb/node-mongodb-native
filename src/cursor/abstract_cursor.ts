@@ -716,6 +716,16 @@ function nextDocument<T>(cursor: AbstractCursor): T | null {
   return null;
 }
 
+/**
+ * @param cursor - the cursor on which to call `next`
+ * @param blocking - a boolean indicating whether or not the cursor should `block` until data
+ *     is available.  Generally, this flag is set to `false` because if the getMore returns no documents,
+ *     the cursor has been exhausted.  In certain scenarios (ChangeStreams, tailable await cursors and
+ *     `tryNext`, for example) blocking is necessary because a getMore returning no documents does
+ *     not indicate the end of the cursor.
+ * @param callback - called when
+ * @returns
+ */
 export function next<T>(
   cursor: AbstractCursor<T>,
   blocking: boolean,
