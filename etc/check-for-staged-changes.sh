@@ -1,8 +1,8 @@
 #! /bin/bash
 
-git diff-index --cached HEAD --exit-code | grep "docs" --silent
+git diff-index --cached HEAD --exit-code | grep -v "docs" --silent
 
 if [[ "$?" == 0 ]]; then
-    echo "You have staged changes.  Please clean your branch before releasing."
+    echo "The release commit only allows staged files from the docs/ directory.  Please unstage any other changes."
     exit 1
 fi
