@@ -382,5 +382,6 @@ export interface AutoEncrypter {
   teardown(force: boolean, callback: Callback): void;
   encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
   decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
+  /** @experimental */
   readonly cryptSharedLibVersionInfo: { version: bigint; versionStr: string } | null;
 }
