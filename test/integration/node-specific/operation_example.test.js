@@ -4732,13 +4732,15 @@ describe('Operation Examples', function () {
           var cursor = collection.find({});
           // Fetch the first object off the cursor
           cursor.next(function (err, item) {
-            test.equal(0, item.a);
+            expect(err).to.not.exist;
+            expect(item).to.have.property('a', 0);
             // Rewind the cursor, resetting it to point to the start of the query
             cursor.rewind();
 
             // Grab the first object again
             cursor.next(function (err, item) {
-              test.equal(0, item.a);
+              expect(err).to.not.exist;
+              expect(item).to.have.property('a', 0);
 
               client.close(done);
             });

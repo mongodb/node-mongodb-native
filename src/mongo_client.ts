@@ -13,17 +13,17 @@ import type { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
-import { MongoInvalidArgumentError, MongoNotConnectedError } from './error';
+import { MongoInvalidArgumentError } from './error';
 import type { Logger, LoggerLevel } from './logger';
 import { TypedEventEmitter } from './mongo_types';
 import { connect } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
-import type { ReadPreference, ReadPreferenceMode } from './read_preference';
+import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
 import type { SrvPoller } from './sdam/srv_polling';
 import type { Topology, TopologyEvents } from './sdam/topology';
-import type { ClientSession, ClientSessionOptions } from './sessions';
+import { ClientSession, ClientSessionOptions, ServerSession, ServerSessionPool } from './sessions';
 import {
   Callback,
   ClientMetadata,
@@ -267,10 +267,10 @@ export type WithSessionCallback = (session: ClientSession) => Promise<any>;
 /** @internal */
 export interface MongoClientPrivate {
   url: string;
-  sessions: Set<ClientSession>;
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
   hasBeenClosed: boolean;
+  readonly sessionPool: ServerSessionPool;
   readonly options: MongoOptions;
   readonly readConcern?: ReadConcern;
   readonly writeConcern?: WriteConcern;
@@ -352,10 +352,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     // The internal state
     this.s = {
       url,
-      sessions: new Set(),
       bsonOptions: resolveBSONOptions(this[kOptions]),
       namespace: ns('admin'),
       hasBeenClosed: false,
+      sessionPool: new ServerSessionPool(this),
 
       get options() {
         return client[kOptions];
@@ -470,23 +470,40 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     return maybePromise(callback, callback => {
       if (this.topology == null) {
+        // Do not connect just to end sessions
         return callback();
       }
 
-      // clear out references to old topology
-      const topology = this.topology;
-      this.topology = undefined;
+      const endSessions = [...this.s.sessionPool.activeSessions, ...this.s.sessionPool.sessions];
 
-      topology.close({ force }, error => {
-        if (error) return callback(error);
-        const { encrypter } = this[kOptions];
-        if (encrypter) {
-          return encrypter.close(this, force, error => {
+      this.endSessions(endSessions)
+        .then(() => {
+          return this.topology?.destroy({ force });
+        })
+        .then(
+          () => {
+            if (this.topology == null) {
+              return callback();
+            }
+            // clear out references to old topology
+            const topology = this.topology;
+            this.topology = undefined;
+
+            topology.close({ force }, error => {
+              if (error) return callback(error);
+              const { encrypter } = this[kOptions];
+              if (encrypter) {
+                return encrypter.close(this, force, error => {
+                  callback(error);
+                });
+              }
+              callback();
+            });
+          },
+          error => {
             callback(error);
-          });
-        }
-        callback();
-      });
+          }
+        );
     });
   }
 
@@ -553,12 +570,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   startSession(): ClientSession;
   startSession(options: ClientSessionOptions): ClientSession;
   startSession(options?: ClientSessionOptions): ClientSession {
-    options = Object.assign({ explicit: true }, options);
-    if (!this.topology) {
-      throw new MongoNotConnectedError('MongoClient must be connected to start a session');
-    }
-
-    return this.topology.startSession(options, this.s.options);
+    return new ClientSession(
+      this,
+      this.s.sessionPool,
+      { explicit: true, ...options },
+      this[kOptions]
+    );
   }
 
   /**
@@ -632,6 +649,23 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** Return the mongo client logger */
   getLogger(): Logger {
     return this.s.logger;
+  }
+
+  /** @internal */
+  async endSessions(sessions: Iterable<ServerSession>) {
+    if (this.topology == null) {
+      return;
+    }
+
+    const endSessions = Array.from(sessions, ({ id }) => id);
+
+    if (endSessions.length <= 0) {
+      return;
+    }
+
+    await this.db('admin')
+      .command({ endSessions }, { readPreference: ReadPreference.primaryPreferred })
+      .catch(() => null);
   }
 }
 

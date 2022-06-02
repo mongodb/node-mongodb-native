@@ -27,7 +27,6 @@ import { PromiseProvider } from './promise_provider';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { _advanceClusterTime, ClusterTime, TopologyType } from './sdam/common';
-import type { Topology } from './sdam/topology';
 import { isTransactionCommand, Transaction, TransactionOptions, TxnState } from './transactions';
 import {
   calculateDurationInMs,
@@ -269,9 +268,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
         if (serverSession != null) {
           // release the server session back to the pool
           this.sessionPool.release(serverSession);
-          // Make sure a new serverSession never makes it on to the ClientSession
+          // Make sure a new serverSession never makes it on to this ClientSession
           Object.defineProperty(this, kServerSession, {
-            value: ServerSession.clone(serverSession)
+            value: ServerSession.clone(serverSession),
+            writable: false
           });
         }
 
@@ -878,37 +878,22 @@ export class ServerSession {
  * @internal
  */
 export class ServerSessionPool {
-  topology: Topology;
+  client: MongoClient;
   sessions: ServerSession[];
+  /**
+   * We keep a reference to the sessions that are acquired from the pool
+   * so we can end them at client.close time. Bookkeeping for testing mainly (non-spec).
+   */
+  activeSessions: Set<ServerSession>;
 
-  constructor(topology: Topology) {
-    if (topology == null) {
+  constructor(client: MongoClient) {
+    if (client == null) {
       throw new MongoRuntimeError('ServerSessionPool requires a topology');
     }
 
-    this.topology = topology;
+    this.client = client;
     this.sessions = [];
-  }
-
-  /** Ends all sessions in the session pool */
-  endAllPooledSessions(callback?: Callback<void>): void {
-    if (this.sessions.length) {
-      this.topology.endSessions(
-        this.sessions.map((session: ServerSession) => session.id),
-        () => {
-          this.sessions = [];
-          if (typeof callback === 'function') {
-            callback();
-          }
-        }
-      );
-
-      return;
-    }
-
-    if (typeof callback === 'function') {
-      callback();
-    }
+    this.activeSessions = new Set();
   }
 
   /**
@@ -918,16 +903,29 @@ export class ServerSessionPool {
    * pool and returned. If no non-stale session is found, a new ServerSession is created.
    */
   acquire(): ServerSession {
-    const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes || 10;
+    const sessionTimeoutMinutes = this.client.topology?.logicalSessionTimeoutMinutes ?? 10;
 
+    let session: ServerSession | undefined = undefined;
+
+    // Try to obtain from session pool
     while (this.sessions.length) {
-      const session = this.sessions.shift();
-      if (session && (this.topology.loadBalanced || !session.hasTimedOut(sessionTimeoutMinutes))) {
-        return session;
+      const potentialSession = this.sessions.shift();
+      const sessionExists = potentialSession != null;
+      const isLoadBalancedMode = Boolean(this.client.topology?.loadBalanced);
+      const hasTimedOut = Boolean(potentialSession?.hasTimedOut(sessionTimeoutMinutes));
+      if (sessionExists && (isLoadBalancedMode || !hasTimedOut)) {
+        session = potentialSession;
+        break;
       }
     }
 
-    return new ServerSession();
+    // If nothing valid came from the pool make a new one
+    if (session == null) {
+      session = new ServerSession();
+    }
+
+    this.activeSessions.add(session);
+    return session;
   }
 
   /**
@@ -938,9 +936,11 @@ export class ServerSessionPool {
    * @param session - The session to release to the pool
    */
   release(session: ServerSession): void {
-    const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
+    this.activeSessions.delete(session);
 
-    if (this.topology.loadBalanced && !sessionTimeoutMinutes) {
+    const sessionTimeoutMinutes = this.client.topology?.logicalSessionTimeoutMinutes ?? 10;
+
+    if (this.client.topology?.loadBalanced && !sessionTimeoutMinutes) {
       this.sessions.unshift(session);
     }
 

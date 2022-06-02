@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
 import { expect } from 'chai';
 import * as chalk from 'chalk';
 import { Socket } from 'net';
@@ -5,97 +6,150 @@ import { Socket } from 'net';
 import { MongoClient } from '../../../../src/mongo_client';
 import { ServerSessionPool } from '../../../../src/sessions';
 
-const originalAcquire = ServerSessionPool.prototype.acquire;
-const originalRelease = ServerSessionPool.prototype.release;
+class LeakChecker {
+  static originalAcquire: typeof ServerSessionPool.prototype.acquire;
+  static originalRelease: typeof ServerSessionPool.prototype.release;
+  static kAcquiredCount: symbol;
 
-let activeCount = 0;
-let acquireCount = 0;
-ServerSessionPool.prototype.acquire = function (...args) {
-  acquireCount += 1;
-  const result = originalAcquire.call(this, ...args);
-  activeCount = this.activeSessions?.size ?? 0;
-  return result;
-};
+  static originalConnect: typeof MongoClient.prototype.connect;
+  static originalClose: typeof MongoClient.prototype.close;
+  static kConnectCount: symbol;
 
-let releaseCount = 0;
-ServerSessionPool.prototype.release = function (...args) {
-  releaseCount += 1;
-  const result = originalRelease.call(this, ...args);
-  activeCount = this.activeSessions?.size ?? 0;
-  return result;
-};
+  static {
+    LeakChecker.originalAcquire = ServerSessionPool.prototype.acquire;
+    LeakChecker.originalRelease = ServerSessionPool.prototype.release;
+    LeakChecker.kAcquiredCount = Symbol('acquiredCount');
 
-const sessionLeakCheckBeforeEach: Mocha.Func = async function sessionLeakCheckBeforeEach() {
-  if (this.currentTest?.metadata?.sessions?.skipLeakTests) {
-    return;
+    LeakChecker.originalConnect = MongoClient.prototype.connect;
+    LeakChecker.originalClose = MongoClient.prototype.close;
+    LeakChecker.kConnectCount = Symbol('connectedCount');
   }
 
-  // Reset beforeEach test
-  activeCount = 0;
-  acquireCount = 0;
-  releaseCount = 0;
-};
+  clients: Set<MongoClient>;
+  sessionPools: Set<ServerSessionPool>;
 
-const sessionLeakCheckAfterEach: Mocha.Func = async function sessionLeakCheckAfterEach() {
-  if (this.currentTest?.state === 'failed' || this.currentTest?.metadata?.sessions?.skipLeakTests) {
-    return;
+  constructor(public titlePath: string) {
+    this.clients = new Set<MongoClient>();
+    this.sessionPools = new Set<ServerSessionPool>();
   }
 
-  const title = this.currentTest.fullTitle();
-  try {
-    expect(
-      acquireCount,
-      `"${title}" failed to release all sessions, ${activeCount} active`
-    ).to.equal(releaseCount);
-  } catch (error) {
-    // @ts-expect-error: internal mocha api
-    this.test.error(error);
-  }
-};
+  setupSessionLeakChecker() {
+    const leakChecker = this;
+    ServerSessionPool.prototype.acquire = function (...args) {
+      leakChecker.sessionPools.add(this);
 
-const originalConnect = MongoClient.prototype.connect;
-const originalClose = MongoClient.prototype.close;
-
-let connectCount = 0;
-let closeCount = 0;
-
-MongoClient.prototype.connect = function (...args) {
-  const lastArg = args[args.length - 1];
-  const lastArgIsCallback = typeof lastArg === 'function';
-  if (lastArgIsCallback) {
-    const argsWithoutCallback = args.slice(0, args.length - 1);
-    return originalConnect.call(this, ...argsWithoutCallback, (error, client) => {
-      if (error == null) {
-        connectCount += 1; // only increment on successful connects
+      if (!(LeakChecker.kAcquiredCount in this)) {
+        this[LeakChecker.kAcquiredCount] = 1;
+      } else {
+        this[LeakChecker.kAcquiredCount] += 1;
       }
-      return lastArg(error, client);
-    });
-  } else {
-    return originalConnect.call(this, ...args).then(client => {
-      connectCount += 1; // only increment on successful connects
-      return client;
-    });
+
+      const result = LeakChecker.originalAcquire.call(this, ...args);
+      return result;
+    };
+
+    ServerSessionPool.prototype.release = function (...args) {
+      if (!(LeakChecker.kAcquiredCount in this)) {
+        throw new Error('releasing before acquiring even once??');
+      } else {
+        this[LeakChecker.kAcquiredCount] -= 1;
+      }
+
+      const result = LeakChecker.originalRelease.call(this, ...args);
+      return result;
+    };
   }
-};
 
-MongoClient.prototype.close = function (...args) {
-  closeCount += 1;
-  return originalClose.call(this, ...args);
-};
+  setupClientLeakChecker() {
+    const leakChecker = this;
+    MongoClient.prototype.connect = function (...args) {
+      leakChecker.clients.add(this);
+      if (!(LeakChecker.kConnectCount in this)) {
+        this[LeakChecker.kConnectCount] = 0;
+      }
 
-const clientLeakCheckBeforeEach: Mocha.AsyncFunc = async function clientLeakCheckBeforeEach() {
-  // Reset beforeEach test
-  connectCount = 0;
-  closeCount = 0;
-};
+      const lastArg = args[args.length - 1];
+      const lastArgIsCallback = typeof lastArg === 'function';
+      if (lastArgIsCallback) {
+        const argsWithoutCallback = args.slice(0, args.length - 1);
+        return LeakChecker.originalConnect.call(this, ...argsWithoutCallback, (error, client) => {
+          if (error == null) {
+            this[LeakChecker.kConnectCount] += 1; // only increment on successful connects
+          }
+          return lastArg(error, client);
+        });
+      } else {
+        return LeakChecker.originalConnect.call(this, ...args).then(client => {
+          this[LeakChecker.kConnectCount] += 1; // only increment on successful connects
+          return client;
+        });
+      }
+    };
 
-const clientLeakCheckAfterEach: Mocha.AsyncFunc = async function clientLeakCheckAfterEach() {
+    MongoClient.prototype.close = function (...args) {
+      if (!(LeakChecker.kConnectCount in this)) {
+        // interesting, was never connected, possible but weird
+        this[LeakChecker.kConnectCount] = 0;
+      }
+
+      this[LeakChecker.kConnectCount] -= 1;
+      return LeakChecker.originalClose.call(this, ...args);
+    };
+  }
+
+  setup() {
+    this.setupSessionLeakChecker();
+    this.setupClientLeakChecker();
+  }
+
+  reset() {
+    for (const sessionPool of this.sessionPools) {
+      delete sessionPool[LeakChecker.kAcquiredCount];
+    }
+    ServerSessionPool.prototype.acquire = LeakChecker.originalAcquire;
+    ServerSessionPool.prototype.release = LeakChecker.originalRelease;
+    this.sessionPools.clear();
+
+    for (const client of this.clients) {
+      delete client[LeakChecker.kConnectCount];
+    }
+    MongoClient.prototype.connect = LeakChecker.originalConnect;
+    MongoClient.prototype.close = LeakChecker.originalClose;
+    this.clients.clear();
+  }
+
+  assert() {
+    for (const pool of this.sessionPools) {
+      expect(pool[LeakChecker.kAcquiredCount], 'ServerSessionPool acquired count').to.equal(0);
+    }
+    for (const client of this.clients) {
+      expect(client[LeakChecker.kConnectCount], 'MongoClient connect count').to.be.lessThanOrEqual(
+        0
+      );
+    }
+  }
+}
+
+let currentLeakChecker: LeakChecker | null;
+
+const leakCheckerBeforeEach = async function () {
+  currentLeakChecker = new LeakChecker(this.currentTest.fullTitle());
+  currentLeakChecker.setup();
+};
+const leakCheckerAfterEach = async function () {
+  let thrownError: Error | undefined;
   try {
-    const msg = `connected ${connectCount} times but closed only ${closeCount} times`;
-    expect(connectCount, msg).to.be.lessThanOrEqual(closeCount);
+    currentLeakChecker.assert();
   } catch (error) {
-    // @ts-expect-error: internal mocha api
-    this.test.error(error);
+    thrownError = error;
+  }
+
+  currentLeakChecker?.reset();
+  currentLeakChecker = null;
+
+  if (thrownError instanceof Error) {
+    this.test.error(thrownError);
+    // throw thrownError;
   }
 };
 
@@ -119,7 +173,7 @@ const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheck
 
 module.exports = {
   mochaHooks: {
-    beforeEach: [sessionLeakCheckBeforeEach, clientLeakCheckBeforeEach, socketLeakCheckAfterEach],
-    afterEach: [sessionLeakCheckAfterEach, clientLeakCheckAfterEach]
+    beforeEach: [leakCheckerBeforeEach, socketLeakCheckAfterEach],
+    afterEach: [leakCheckerAfterEach]
   }
 };

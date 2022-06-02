@@ -1089,8 +1089,7 @@ describe('GridFS Stream', function () {
           expect(err).to.not.exist;
           const names = indexes.map(i => i.name);
           expect(names).to.eql(['_id_', 'filename_1_uploadDate_1']);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     });

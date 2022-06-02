@@ -147,13 +147,13 @@ describe('Sessions Spec', function () {
                   if (shouldReject) {
                     expect.fail('this should have rejected');
                   }
-                  expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+                  expect(client.s.sessionPool.sessions).to.have.length(1);
                 },
                 () => {
                   if (shouldResolve) {
                     expect.fail('this should have resolved');
                   }
-                  expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+                  expect(client.s.sessionPool.sessions).to.have.length(1);
                 }
               )
               .then(() => {
@@ -175,7 +175,7 @@ describe('Sessions Spec', function () {
           await client.db('test').collection('foo').find({}, { session }).toArray();
         });
 
-        expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+        expect(client.s.sessionPool.sessions).to.have.length(1);
         expect(sessionWasEnded).to.be.true;
       });
     });
@@ -215,7 +215,9 @@ describe('Sessions Spec', function () {
                 expect(err.message).to.equal(
                   'Cannot have explicit session with unacknowledged writes'
                 );
-                client.close(done);
+                session.endSession(() => {
+                  client.close(done);
+                });
               });
           }
         )
