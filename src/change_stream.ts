@@ -510,8 +510,16 @@ export class ChangeStream<
     this._setIsIterator();
     return maybePromise(callback, cb => {
       this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        cursor.hasNext(cb);
+        if (err || !cursor) return cb(err);
+        cursor.hasNext((error, hasNext) => {
+          if (error) {
+            this[kResumeQueue].push(() => this.next(cb));
+            this._processError(error, cb);
+            return;
+          }
+
+          cb(undefined, hasNext);
+        });
       });
     });
   }
