@@ -298,12 +298,12 @@ export function specialCheck(
     if (expected.$$exists) {
       expect(
         actualExists,
-        ejson`expected value at path ${path.join} to exist, but received ${actual}`
+        ejson`expected value at path ${path.join('')} to exist, but received ${actual}`
       ).to.be.true;
     } else {
       expect(
         actualExists,
-        ejson`expected value at path ${path.join} NOT to exist, but received ${actual}`
+        ejson`expected value at path ${path.join('')} NOT to exist, but received ${actual}`
       ).to.be.false;
     }
   } else {

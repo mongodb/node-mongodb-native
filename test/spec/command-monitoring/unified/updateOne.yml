@@ -1,0 +1,118 @@
+description: "updateOne"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client client
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName command-monitoring-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName test
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  - description: "A successful updateOne"
+    operations:
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: { _id: { $gt: 1 } }
+          update: { $inc: { x: 1 } }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collectionName
+                updates:
+                  - q: { _id: { $gt: 1 } }
+                    u: { $inc: { x: 1 } }
+                    upsert: { $$unsetOrMatches: false }
+                    multi: { $$unsetOrMatches: false }
+                ordered: true
+              commandName: update
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply: { ok: 1, n: 1 }
+              commandName: update
+
+  - description: "A successful updateOne with upsert where the upserted id is not an ObjectId"
+    operations:
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: { _id: 4 }
+          update: { $inc: { x: 1 } }
+          upsert: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collectionName
+                updates:
+                  - q: { _id: 4 }
+                    u: { $inc: { x: 1 } }
+                    upsert: true
+                    multi: { $$unsetOrMatches: false }
+                ordered: true
+              commandName: update
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                n: 1
+                upserted:
+                  - index: 0
+                    _id: 4
+              commandName: update
+
+  - description: "A successful updateOne with write errors"
+    operations:
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: { _id: { $gt: 1 } }
+          update: { $unsupported: { x: 1 } }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                update: *collectionName
+                updates:
+                  - q: { _id: { $gt: 1 } }
+                    u: { $unsupported: { x: 1 } }
+                    upsert: { $$unsetOrMatches: false }
+                    multi: { $$unsetOrMatches: false }
+                ordered: true
+              commandName: update
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                n: 0
+                # The legacy version of this test included an assertion that writeErrors contained a single document
+                # with index=0, a "code" value, and a non-empty "errmsg". However, writeErrors can contain extra fields
+                # beyond these, and the unified format currently does not permit allowing extra fields in sub-documents,
+                # so those assertions are not present here.
+                writeErrors: { $$type: array }
+              commandName: update

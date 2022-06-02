@@ -1,0 +1,162 @@
+{
+  "description": "deleteOne",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "command-monitoring-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "command-monitoring-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "A successful deleteOne",
+      "operations": [
+        {
+          "name": "deleteOne",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "test",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$gt": 1
+                        }
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "delete",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 1
+                },
+                "commandName": "delete"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "A successful deleteOne with write errors",
+      "operations": [
+        {
+          "name": "deleteOne",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$unsupported": 1
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "delete": "test",
+                  "deletes": [
+                    {
+                      "q": {
+                        "_id": {
+                          "$unsupported": 1
+                        }
+                      },
+                      "limit": 1
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "delete",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 0,
+                  "writeErrors": {
+                    "$$type": "array"
+                  }
+                },
+                "commandName": "delete"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

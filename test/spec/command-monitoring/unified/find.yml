@@ -1,0 +1,254 @@
+description: "find"
+
+schemaVersion: "1.1"
+
+createEntities:
+  - client:
+      id: &client client
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName command-monitoring-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName test
+
+_yamlAnchors:
+  namespace: &namespace "command-monitoring-tests.test"
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+      - { _id: 4, x: 44 }
+      - { _id: 5, x: 55 }
+
+tests:
+  - description: "A successful find with no options"
+    operations:
+      - name: find
+        object: *collection
+        arguments:
+          filter: { _id: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: { _id: 1 }
+              commandName: find
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                cursor:
+                  id: 0
+                  ns: *namespace
+                  firstBatch:
+                    -  { _id: 1, x: 11 }
+              commandName: find
+
+  - description: "A successful find with options"
+    operations:
+      - name: find
+        object: *collection
+        arguments:
+          filter: { _id: { $gt: 1 } }
+          sort: { x: -1 }
+          projection: { _id: 0, x: 1 }
+          skip: 2
+          comment: "test"
+          hint: { _id: 1 }
+          max: { _id: 6 }
+          maxTimeMS: 6000
+          min: { _id: 0 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: { _id: { $gt: 1 } }
+                sort: { x: -1 }
+                projection: { _id: 0, x: 1 }
+                skip: 2
+                comment: "test"
+                hint: { _id: 1 }
+                max: { _id: 6 }
+                maxTimeMS: 6000
+                min: { _id: 0 }
+              commandName: find
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                cursor:
+                  id: 0
+                  ns: *namespace
+                  firstBatch:
+                    - { x: 33 }
+                    - { x: 22 }
+              commandName: find
+
+  - description: "A successful find with showRecordId and returnKey"
+    operations:
+      - name: find
+        object: *collection
+        arguments:
+          filter: { }
+          sort: { _id: 1 }
+          showRecordId: true
+          returnKey: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                showRecordId: true
+                returnKey: true
+              commandName: find
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                cursor:
+                  id: 0
+                  ns: *namespace
+                  firstBatch:
+                    - { _id: 1 }
+                    - { _id: 2 }
+                    - { _id: 3 }
+                    - { _id: 4 }
+                    - { _id: 5 }
+              commandName: find
+
+  - description: "A successful find with a getMore"
+    operations:
+      - name: find
+        object: *collection
+        arguments:
+          filter: { _id: { $gte: 1 }}
+          sort: { _id: 1 }
+          batchSize: 3
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: { _id: { $gte: 1 }}
+                sort: { _id: 1 }
+                batchSize: 3
+              commandName: find
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                cursor:
+                  id: { $$type: [ int, long ] }
+                  ns: *namespace
+                  firstBatch:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collectionName
+                batchSize: 3
+              commandName: getMore
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                cursor:
+                  id: 0
+                  ns: *namespace
+                  nextBatch:
+                    - { _id: 4, x: 44 }
+                    - { _id: 5, x: 55 }
+              commandName: getMore
+
+  - description: "A successful find event with a getmore and the server kills the cursor (<= 4.4)"
+    runOnRequirements:
+      - minServerVersion: "3.1"
+        maxServerVersion: "4.4.99"
+        topologies: [ single, replicaset ]
+    operations:
+      - name: find
+        object: *collection
+        arguments:
+          filter: { _id: { $gte: 1 } }
+          sort: { _id: 1 }
+          batchSize: 3
+          limit: 4
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: { _id: { $gte: 1 } }
+                sort: { _id: 1 }
+                batchSize: 3
+                limit: 4
+              commandName: find
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                cursor:
+                  id: { $$type: [ int, long ] }
+                  ns: *namespace
+                  firstBatch:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collectionName
+                batchSize: 1
+              commandName: getMore
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                cursor:
+                  id: 0
+                  ns: *namespace
+                  nextBatch:
+                    - { _id: 4, x: 44 }
+              commandName: getMore
+
+  - description: "A failed find event"
+    operations:
+      - name: find
+        object: *collection
+        arguments:
+          filter: { $or: true }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: { $or: true }
+              commandName: find
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: find
