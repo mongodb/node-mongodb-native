@@ -149,7 +149,6 @@ const leakCheckerAfterEach = async function () {
 
   if (thrownError instanceof Error) {
     this.test.error(thrownError);
-    // throw thrownError;
   }
 };
 
