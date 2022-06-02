@@ -536,6 +536,24 @@ export class ChangeStream<
     });
   }
 
+  /**
+   * Try to get the next available document from the Change Stream's cursor
+   * or `null` if an empty batch is returned.
+   *
+   * Note: `tryNext` is NOT resumable.  Any resumable errors will break the change stream.
+   */
+  tryNext(): Promise<Document | null>;
+  tryNext(callback: Callback<Document | null>): void;
+  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
+    this._setIsIterator();
+    return maybePromise(callback, cb => {
+      this._getCursor((err, cursor) => {
+        if (err || !cursor) return cb(err); // failed to resume, raise an error
+        return cursor.tryNext(cb);
+      });
+    });
+  }
+
   /** Is the cursor closed */
   get closed(): boolean {
     return this[kClosed] || (this.cursor?.closed ?? false);
@@ -567,21 +585,6 @@ export class ChangeStream<
     this.streamOptions = options;
     if (!this.cursor) throw new MongoChangeStreamError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
-  }
-
-  /**
-   * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
-   */
-  tryNext(): Promise<Document | null>;
-  tryNext(callback: Callback<Document | null>): void;
-  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
-    this._setIsIterator();
-    return maybePromise(callback, cb => {
-      this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        return cursor.tryNext(cb);
-      });
-    });
   }
 
   /** @internal */
