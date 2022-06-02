@@ -63,15 +63,14 @@ tests:
         object: *collection
         arguments:
           filter: { _id: { $gt: 1 } }
-          sort: { _id: 1 }
+          sort: { x: -1 }
+          projection: { _id: 0, x: 1 }
           skip: 2
           comment: "test"
           hint: { _id: 1 }
           max: { _id: 6 }
           maxTimeMS: 6000
           min: { _id: 0 }
-          returnKey: false
-          showRecordId: false
     expectEvents:
       - client: *client
         events:
@@ -79,15 +78,14 @@ tests:
               command:
                 find: *collectionName
                 filter: { _id: { $gt: 1 } }
-                sort: { _id: 1 }
+                sort: { x: -1 }
+                projection: { _id: 0, x: 1 }
                 skip: 2
                 comment: "test"
                 hint: { _id: 1 }
                 max: { _id: 6 }
                 maxTimeMS: 6000
                 min: { _id: 0 }
-                returnKey: false
-                showRecordId: false
               commandName: find
               databaseName: *databaseName
           - commandSucceededEvent:
@@ -97,8 +95,41 @@ tests:
                   id: 0
                   ns: *namespace
                   firstBatch:
-                    - { _id: 4, x: 44 }
-                    - { _id: 5, x: 55 }
+                    - { x: 33 }
+                    - { x: 22 }
+              commandName: find
+
+  - description: "A successful find with showRecordId and returnKey"
+    operations:
+      - name: find
+        object: *collection
+        arguments:
+          filter: { }
+          sort: { _id: 1 }
+          showRecordId: true
+          returnKey: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                showRecordId: true
+                returnKey: true
+              commandName: find
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                cursor:
+                  id: 0
+                  ns: *namespace
+                  firstBatch:
+                    - { _id: 1 }
+                    - { _id: 2 }
+                    - { _id: 3 }
+                    - { _id: 4 }
+                    - { _id: 5 }
               commandName: find
 
   - description: "A successful find with a getMore"

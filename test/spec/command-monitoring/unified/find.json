@@ -123,7 +123,11 @@
               }
             },
             "sort": {
-              "_id": 1
+              "x": -1
+            },
+            "projection": {
+              "_id": 0,
+              "x": 1
             },
             "skip": 2,
             "comment": "test",
@@ -136,9 +140,7 @@
             "maxTimeMS": 6000,
             "min": {
               "_id": 0
-            },
-            "returnKey": false,
-            "showRecordId": false
+            }
           }
         }
       ],
@@ -156,7 +158,11 @@
                     }
                   },
                   "sort": {
-                    "_id": 1
+                    "x": -1
+                  },
+                  "projection": {
+                    "_id": 0,
+                    "x": 1
                   },
                   "skip": 2,
                   "comment": "test",
@@ -169,9 +175,7 @@
                   "maxTimeMS": 6000,
                   "min": {
                     "_id": 0
-                  },
-                  "returnKey": false,
-                  "showRecordId": false
+                  }
                 },
                 "commandName": "find",
                 "databaseName": "command-monitoring-tests"
@@ -186,12 +190,74 @@
                     "ns": "command-monitoring-tests.test",
                     "firstBatch": [
                       {
-                        "_id": 4,
-                        "x": 44
+                        "x": 33
                       },
                       {
-                        "_id": 5,
-                        "x": 55
+                        "x": 22
+                      }
+                    ]
+                  }
+                },
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "A successful find with showRecordId and returnKey",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "sort": {
+              "_id": 1
+            },
+            "showRecordId": true,
+            "returnKey": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "test",
+                  "showRecordId": true,
+                  "returnKey": true
+                },
+                "commandName": "find",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "cursor": {
+                    "id": 0,
+                    "ns": "command-monitoring-tests.test",
+                    "firstBatch": [
+                      {
+                        "_id": 1
+                      },
+                      {
+                        "_id": 2
+                      },
+                      {
+                        "_id": 3
+                      },
+                      {
+                        "_id": 4
+                      },
+                      {
+                        "_id": 5
                       }
                     ]
                   }
