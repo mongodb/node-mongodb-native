@@ -153,20 +153,26 @@ const leakCheckerAfterEach = async function () {
 };
 
 const TRACE_SOCKETS = process.env.TRACE_SOCKETS === 'true' ? true : false;
+
+const filterHandlesForSockets = function (handle: any): handle is Socket {
+  // Stdio are instanceof Socket so look for fd to be null
+  return handle.fd == null && handle instanceof Socket && handle.destroyed !== true;
+};
+
 const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheckAfterEach() {
   if (!TRACE_SOCKETS) return;
 
+  const indent = '  '.repeat(this.currentTest.titlePath().length + 1);
+
   const handles: any[] = (process as any)._getActiveHandles();
-  for (const handle of handles) {
-    if (handle.fd == null && handle instanceof Socket && handle.destroyed !== true) {
-      console.log(
-        chalk.yellow(
-          `${'  '.repeat(this.currentTest.titlePath().length + 1)}⚡︎ Socket remains open ${
-            handle.localAddress
-          }:${handle.localPort} -> ${handle.remoteAddress}:${handle.remotePort}`
-        )
-      );
-    }
+  const sockets: Socket[] = handles.filter(handle => filterHandlesForSockets(handle));
+
+  for (const socket of sockets) {
+    console.log(
+      chalk.yellow(
+        `${indent}⚡︎ Socket remains open ${socket.localAddress}:${socket.localPort} -> ${socket.remoteAddress}:${socket.remotePort}`
+      )
+    );
   }
 };
 
