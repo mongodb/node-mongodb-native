@@ -768,7 +768,10 @@ export class ChangeStream<
         const newCursor = this._createChangeStreamCursor(cursor.resumeOptions);
 
         // attempt to continue in emitter mode
-        if (!callback) return resumeWithCursor(newCursor);
+        if (!callback) {
+          // TODO: verify that this doesn't break functionality
+          this.cursor = newCursor;
+        }
 
         // attempt to continue in iterator mode
         newCursor.hasNext(err => {
