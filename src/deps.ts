@@ -324,7 +324,7 @@ export interface AutoEncryptionOptions {
     /** Command line arguments to use when auto-spawning a mongocryptd */
     mongocryptdSpawnArgs?: string[];
     /**
-     * Full path to a CSFLE shared library to be used (instead of mongocryptd).
+     * Full path to a MongoDB Crypt shared library to be used (instead of mongocryptd).
      *
      * This needs to be the path to the file itself, not a directory.
      * It can be an absolute or relative path. If the path is relative and
@@ -332,32 +332,36 @@ export interface AutoEncryptionOptions {
      * containing the mongodb-client-encryption native addon file. Otherwise,
      * the path will be interpreted relative to the current working directory.
      *
-     * Currently, loading different CSFLE shared library files from different
+     * Currently, loading different MongoDB Crypt shared library files from different
      * MongoClients in the same process is not supported.
      *
-     * If this option is provided and no CSFLE shared library could be loaded
+     * If this option is provided and no MongoDB Crypt shared library could be loaded
      * from the specified location, creating the MongoClient will fail.
      *
-     * If this option is not provided and `csfleRequired` is not specified,
+     * If this option is not provided and `cryptSharedLibRequired` is not specified,
      * the AutoEncrypter will attempt to spawn and/or use mongocryptd according
      * to the mongocryptd-specific `extraOptions` options.
      *
      * Specifying a path prevents mongocryptd from being used as a fallback.
-     */
-    csflePath?: string;
-    /**
-     * If specified, never use mongocryptd and instead fail when the CSFLE shared library
-     * could not be loaded.
      *
-     * This is always true when `csflePath` is specified.
+     * @experimental Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
      */
-    csfleRequired?: boolean;
+    cryptSharedLibPath?: string;
     /**
-     * Search paths for a CSFLE shared library to be used (instead of mongocryptd)
+     * If specified, never use mongocryptd and instead fail when the MongoDB Crypt
+     * shared library could not be loaded.
+     *
+     * This is always true when `cryptSharedLibPath` is specified.
+     *
+     * @experimental Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
+     */
+    cryptSharedLibRequired?: boolean;
+    /**
+     * Search paths for a MongoDB Crypt shared library to be used (instead of mongocryptd)
      * Only for driver testing!
      * @internal
      */
-    csfleSearchPaths?: string[];
+    cryptSharedLibSearchPaths?: string[];
   };
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
@@ -378,5 +382,6 @@ export interface AutoEncrypter {
   teardown(force: boolean, callback: Callback): void;
   encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
   decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
-  readonly csfleVersionInfo: { version: bigint; versionStr: string } | null;
+  /** @experimental */
+  readonly cryptSharedLibVersionInfo: { version: bigint; versionStr: string } | null;
 }
