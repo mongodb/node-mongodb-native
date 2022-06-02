@@ -16,13 +16,12 @@ class LeakChecker {
   static kConnectCount: symbol;
 
   static {
-    LeakChecker.originalAcquire = ServerSessionPool.prototype.acquire;
-    LeakChecker.originalRelease = ServerSessionPool.prototype.release;
-    LeakChecker.kAcquiredCount = Symbol('acquiredCount');
-
-    LeakChecker.originalConnect = MongoClient.prototype.connect;
-    LeakChecker.originalClose = MongoClient.prototype.close;
-    LeakChecker.kConnectCount = Symbol('connectedCount');
+    this.originalAcquire = ServerSessionPool.prototype.acquire;
+    this.originalRelease = ServerSessionPool.prototype.release;
+    this.kAcquiredCount = Symbol('acquiredCount');
+    this.originalConnect = MongoClient.prototype.connect;
+    this.originalClose = MongoClient.prototype.close;
+    this.kConnectCount = Symbol('connectedCount');
   }
 
   clients: Set<MongoClient>;
@@ -38,14 +37,10 @@ class LeakChecker {
     ServerSessionPool.prototype.acquire = function (...args) {
       leakChecker.sessionPools.add(this);
 
-      if (!(LeakChecker.kAcquiredCount in this)) {
-        this[LeakChecker.kAcquiredCount] = 1;
-      } else {
-        this[LeakChecker.kAcquiredCount] += 1;
-      }
+      this[LeakChecker.kAcquiredCount] ??= 0;
+      this[LeakChecker.kAcquiredCount] += 1;
 
-      const result = LeakChecker.originalAcquire.call(this, ...args);
-      return result;
+      return LeakChecker.originalAcquire.call(this, ...args);
     };
 
     ServerSessionPool.prototype.release = function (...args) {
@@ -55,8 +50,7 @@ class LeakChecker {
         this[LeakChecker.kAcquiredCount] -= 1;
       }
 
-      const result = LeakChecker.originalRelease.call(this, ...args);
-      return result;
+      return LeakChecker.originalRelease.call(this, ...args);
     };
   }
 
@@ -64,9 +58,7 @@ class LeakChecker {
     const leakChecker = this;
     MongoClient.prototype.connect = function (...args) {
       leakChecker.clients.add(this);
-      if (!(LeakChecker.kConnectCount in this)) {
-        this[LeakChecker.kConnectCount] = 0;
-      }
+      this[LeakChecker.kConnectCount] ??= 0;
 
       const lastArg = args[args.length - 1];
       const lastArgIsCallback = typeof lastArg === 'function';
@@ -87,11 +79,7 @@ class LeakChecker {
     };
 
     MongoClient.prototype.close = function (...args) {
-      if (!(LeakChecker.kConnectCount in this)) {
-        // interesting, was never connected, possible but weird
-        this[LeakChecker.kConnectCount] = 0;
-      }
-
+      this[LeakChecker.kConnectCount] ??= 0; // prevents NaN, its fine to call close on a client that never called connect
       this[LeakChecker.kConnectCount] -= 1;
       return LeakChecker.originalClose.call(this, ...args);
     };

@@ -61,7 +61,7 @@ const SKIPPED_TESTS = new Set([
   ...(isAuthEnabled
     ? skippedAuthTests.concat(skippedMaxWireVersionTest)
     : [skippedMaxWireVersionTest]),
-  // TODO(NODE-XXXX): Fix FLE 2 tests
+  // TODO(NODE-4288): Fix FLE 2 tests
   'default state collection names are applied',
   'drop removes all state collections',
   'CreateCollection from encryptedFields.',
