@@ -3,7 +3,7 @@ const { assert: test, setupDatabase } = require('../shared');
 const { setTimeout } = require('timers');
 const { format: f } = require('util');
 const { Topology } = require('../../../src/sdam/topology');
-const { Code, ObjectId, ReturnDocument } = require('../../../src');
+const { Code, ObjectId, ReturnDocument, MongoClient } = require('../../../src');
 
 const chai = require('chai');
 const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
@@ -4029,41 +4029,6 @@ describe('Operation Examples', function () {
             });
           });
         });
-      });
-      // END
-    }
-  });
-
-  /**
-   * Simple replicaset connection setup, requires a running replicaset on the correct ports
-   *
-   * @example-class Db
-   * @example-method open
-   */
-  it('Should correctly connect with default replicasetNoOption', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-
-      // Replica configuration
-      var client = new Topology(configuration.options.hostAddresses, {
-        replicaSet: configuration.replicasetName
-      });
-
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect(function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        client.close(done);
       });
       // END
     }

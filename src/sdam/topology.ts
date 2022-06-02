@@ -1,9 +1,6 @@
 import Denque = require('denque');
-<<<<<<< Updated upstream
 import { setTimeout } from 'timers';
-=======
 import { promisify } from 'util';
->>>>>>> Stashed changes
 
 import type { BSONSerializeOptions, Document } from '../bson';
 import { deserialize, serialize } from '../bson';
@@ -479,26 +476,38 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     if (typeof options === 'boolean') {
       options = { force: options };
     }
-
     options = options ?? {};
+
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
-      return callback?.();
+      return;
     }
 
-    stateTransition(this, STATE_CLOSING);
+    const destroyedServers = Array.from(this.s.servers.values(), server => {
+      return promisify(destroyServer)(server, this, options);
+    });
 
-    drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
-    drainTimerQueue(this.s.connectionTimers);
+    Promise.all(destroyedServers)
+      .then(() => {
+        this.s.servers.clear();
 
-    if (this.s.srvPoller) {
-      this.s.srvPoller.stop();
-      this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
-    }
+        stateTransition(this, STATE_CLOSING);
 
-    this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
+        drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
+        drainTimerQueue(this.s.connectionTimers);
 
-    stateTransition(this, STATE_CLOSED);
-    return callback?.();
+        if (this.s.srvPoller) {
+          this.s.srvPoller.stop();
+          this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
+        }
+
+        this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
+
+        stateTransition(this, STATE_CLOSED);
+
+        // emit an event for close
+        this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
+      })
+      .finally(() => callback?.());
   }
 
   /**
@@ -726,19 +735,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   set clusterTime(clusterTime: ClusterTime | undefined) {
     this.s.clusterTime = clusterTime;
-  }
-
-  async destroy(options: DestroyOptions) {
-    await Promise.all(
-      Array.from(this.s.servers.values(), server => promisify(destroyServer)(server, this, options))
-    );
-
-    this.s.servers.clear();
-
-    // emit an event for close
-    this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
-
-    stateTransition(this, STATE_CLOSED);
   }
 }
 

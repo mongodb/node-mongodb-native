@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
 import { expect } from 'chai';
 import * as chalk from 'chalk';
+import * as net from 'net';
 import { Socket } from 'net';
 
 import { MongoClient } from '../../../../src/mongo_client';
@@ -154,6 +155,60 @@ const leakCheckerAfterEach = async function () {
 };
 
 const TRACE_SOCKETS = process.env.TRACE_SOCKETS === 'true' ? true : false;
+const kSocketId = Symbol('socketId');
+
+const socketLeakCheckBeforeAll = function socketLeakCheckBeforeAll() {
+  if (!TRACE_SOCKETS) return;
+
+  function* generateId(minLength = 1, maxLength = 100_000, characters = null) {
+    characters ??= Array.from({ length: 91 - 65 }, (_, i) => String.fromCharCode(i + 65));
+    const generateString = (index, characters) => {
+      let string = '';
+      let modulo = 0;
+
+      while (index > -1) {
+        modulo = index % characters.length;
+        string = characters[modulo] + string;
+        index = (index - modulo) / characters.length - 1;
+      }
+
+      return string;
+    };
+
+    const getIndexOffset = (characterCount, offset) => {
+      let indexOffset = 0;
+      for (let i = 0; i < offset; i++) {
+        indexOffset += Math.pow(characterCount, i);
+      }
+      return indexOffset;
+    };
+
+    const min = getIndexOffset(characters.length, minLength);
+    const max = getIndexOffset(characters.length, maxLength);
+
+    let index = min - 1;
+
+    while (index > -1) {
+      if (max === index) {
+        break;
+      }
+      const string = generateString(index, characters);
+      yield string;
+      index++;
+    }
+  }
+
+  const idGenerator = generateId();
+
+  const orig = net.createConnection;
+  // @ts-expect-error: you should not do this
+  net.createConnection = options => {
+    const socket = orig(options);
+    socket[kSocketId] = idGenerator.next().value;
+    return socket;
+  };
+};
+
 const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheckAfterEach() {
   if (!TRACE_SOCKETS) return;
 
@@ -162,9 +217,11 @@ const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheck
     if (handle.fd == null && handle instanceof Socket && handle.destroyed !== true) {
       console.log(
         chalk.yellow(
-          `${'  '.repeat(this.currentTest.titlePath().length + 1)}⚡︎ Socket remains open ${
-            handle.localAddress
-          }:${handle.localPort} -> ${handle.remoteAddress}:${handle.remotePort}`
+          `${'  '.repeat(this.currentTest.titlePath().length + 1)}⚡︎ Socket ${
+            handle[kSocketId]
+          } remains open ${handle.localAddress}:${handle.localPort} -> ${handle.remoteAddress}:${
+            handle.remotePort
+          }`
         )
       );
     }
@@ -173,6 +230,7 @@ const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheck
 
 module.exports = {
   mochaHooks: {
+    beforeAll: [socketLeakCheckBeforeAll],
     beforeEach: [leakCheckerBeforeEach, socketLeakCheckAfterEach],
     afterEach: [leakCheckerAfterEach]
   }

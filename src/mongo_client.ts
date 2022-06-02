@@ -478,31 +478,30 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
       this.endSessions(endSessions)
         .then(() => {
-          return this.topology?.destroy({ force });
-        })
-        .then(
-          () => {
-            if (this.topology == null) {
-              return callback();
-            }
-            // clear out references to old topology
-            const topology = this.topology;
-            this.topology = undefined;
+          if (this.topology == null) {
+            return callback();
+          }
+          // clear out references to old topology
+          const topology = this.topology;
+          this.topology = undefined;
 
+          return new Promise<void>((resolve, reject) => {
             topology.close({ force }, error => {
-              if (error) return callback(error);
+              if (error) return reject(error);
               const { encrypter } = this[kOptions];
               if (encrypter) {
                 return encrypter.close(this, force, error => {
-                  callback(error);
+                  if (error) return reject(error);
+                  resolve();
                 });
               }
-              callback();
+              resolve();
             });
-          },
-          error => {
-            callback(error);
-          }
+          });
+        })
+        .then(
+          () => callback(),
+          error => callback(error)
         );
     });
   }
