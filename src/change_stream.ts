@@ -918,15 +918,6 @@ export class ChangeStream<
       this._processResumeQueue();
     };
 
-    // otherwise, raise an error and close the change stream
-    const unresumableError = (err: AnyError) => {
-      if (!callback) {
-        this.emit(ChangeStream.ERROR, err);
-      }
-
-      this.close(() => this._processResumeQueue(err));
-    };
-
     if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
       this.cursor = undefined;
 
@@ -939,7 +930,7 @@ export class ChangeStream<
       const topology = getTopology(this.parent);
       this._waitForTopologyConnected(topology, { readPreference: cursor.readPreference }, err => {
         // if the topology can't reconnect, close the stream
-        if (err) return unresumableError(err);
+        if (err) return this._closeWithError(err);
 
         // create a new cursor, preserving the old cursor's options
         const newCursor = this._createChangeStreamCursor(cursor.resumeOptions);
@@ -950,7 +941,7 @@ export class ChangeStream<
         // attempt to continue in iterator mode
         newCursor.hasNext(err => {
           // if there's an error immediately after resuming, close the stream
-          if (err) return unresumableError(err);
+          if (err) return this._closeWithError(err);
           resumeWithCursor(newCursor);
         });
       });
