@@ -474,9 +474,21 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         return callback();
       }
 
-      const endSessions = [...this.s.sessionPool.activeSessions, ...this.s.sessionPool.sessions];
+      const activeSessions = Array.from(this.s.sessionPool.activeSessions);
+      for (const activeSession of activeSessions) {
+        this.s.sessionPool.release(activeSession);
+      }
 
-      this.endSessions(endSessions)
+      const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
+
+      const endSessionsIfAny =
+        endSessions.length <= 0
+          ? Promise.resolve()
+          : this.db('admin')
+              .command({ endSessions }, { readPreference: ReadPreference.primaryPreferred })
+              .catch(() => null);
+
+      endSessionsIfAny
         .then(() => {
           if (this.topology == null) {
             return callback();
@@ -648,23 +660,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** Return the mongo client logger */
   getLogger(): Logger {
     return this.s.logger;
-  }
-
-  /** @internal */
-  async endSessions(sessions: Iterable<ServerSession>) {
-    if (this.topology == null) {
-      return;
-    }
-
-    const endSessions = Array.from(sessions, ({ id }) => id);
-
-    if (endSessions.length <= 0) {
-      return;
-    }
-
-    await this.db('admin')
-      .command({ endSessions }, { readPreference: ReadPreference.primaryPreferred })
-      .catch(() => null);
   }
 }
 

@@ -43,6 +43,8 @@ describe('examples(causal-consistency):', function () {
       const results = await collection.find({}, { session }).toArray();
 
       expect(results).to.exist;
+
+      await session.endSession();
     }
   });
 });
