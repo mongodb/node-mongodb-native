@@ -328,7 +328,7 @@ operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) =>
     return await cursor.next();
   }
 
-  return changeStream.cursor.next();
+  return changeStream.next();
 });
 
 operations.set('listCollections', async ({ entities, operation }) => {
