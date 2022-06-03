@@ -409,7 +409,7 @@ export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentComm
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
  */
 export interface ChangeStreamCreateIndexDocument
   extends ChangeStreamDocumentCommon,
@@ -422,7 +422,7 @@ export interface ChangeStreamCreateIndexDocument
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
  */
 export interface ChangeStreamDropIndexDocument
   extends ChangeStreamDocumentCommon,
@@ -435,7 +435,7 @@ export interface ChangeStreamDropIndexDocument
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
  */
 export interface ChangeStreamCollModDocument
   extends ChangeStreamDocumentCommon,
@@ -446,7 +446,7 @@ export interface ChangeStreamCollModDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
  */
 export interface ChangeStreamCreateDocument
   extends ChangeStreamDocumentCommon,
@@ -457,7 +457,7 @@ export interface ChangeStreamCreateDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
  */
 export interface ChangeStreamShardCollectionDocument
   extends ChangeStreamDocumentCommon,
@@ -469,7 +469,7 @@ export interface ChangeStreamShardCollectionDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
  */
 export interface ChangeStreamReshardCollectionDocument
   extends ChangeStreamDocumentCommon,
@@ -481,7 +481,7 @@ export interface ChangeStreamReshardCollectionDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/#invalidate-event
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
  */
 export interface ChangeStreamRefineCollectionShardKeyDocument
   extends ChangeStreamDocumentCommon,
