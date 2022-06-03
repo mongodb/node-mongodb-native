@@ -1,12 +1,16 @@
 import { expectError, expectType } from 'tsd';
 
 import type {
+  ChangeStreamCollModDocument,
+  ChangeStreamCreateDocument,
+  ChangeStreamCreateIndexDocument,
   ChangeStreamDeleteDocument,
   ChangeStreamDocument,
   ChangeStreamDocumentCommon,
   ChangeStreamDocumentKey,
   ChangeStreamDropDatabaseDocument,
   ChangeStreamDropDocument,
+  ChangeStreamDropIndexDocument,
   ChangeStreamInsertDocument,
   ChangeStreamInvalidateDocument,
   ChangeStreamNameSpace,
@@ -21,6 +25,11 @@ import type {
   Timestamp,
   UpdateDescription
 } from '../../src';
+import type {
+  ChangeStreamRefineCollectionShardKeyDocument,
+  ChangeStreamReshardCollectionDocument,
+  ChangeStreamShardCollectionDocument
+} from '../../src/change_stream';
 
 declare const changeStreamOptions: ChangeStreamOptions;
 type ChangeStreamOperationType =
@@ -31,7 +40,14 @@ type ChangeStreamOperationType =
   | 'invalidate'
   | 'drop'
   | 'dropDatabase'
-  | 'rename';
+  | 'rename'
+  | 'create'
+  | 'modify'
+  | 'createIndexes'
+  | 'dropIndexes'
+  | 'shardCollection'
+  | 'reshardCollection'
+  | 'refineCollectionShardKey';
 
 // The change stream spec says that we cannot throw an error for invalid values to `fullDocument`
 // for future compatibility.  This means we must leave `fullDocument` as type string.
@@ -120,6 +136,41 @@ switch (change.operationType) {
   case 'invalidate': {
     expectType<ChangeStreamInvalidateDocument>(change);
     expectType<'invalidate'>(change.operationType);
+    break;
+  }
+  case 'create': {
+    expectType<ChangeStreamCreateDocument>(change);
+    expectType<'create'>(change.operationType);
+    break;
+  }
+  case 'modify': {
+    expectType<ChangeStreamCollModDocument>(change);
+    expectType<'modify'>(change.operationType);
+    break;
+  }
+  case 'createIndexes': {
+    expectType<ChangeStreamCreateIndexDocument>(change);
+    expectType<'createIndexes'>(change.operationType);
+    break;
+  }
+  case 'dropIndexes': {
+    expectType<ChangeStreamDropIndexDocument>(change);
+    expectType<'dropIndexes'>(change.operationType);
+    break;
+  }
+  case 'shardCollection': {
+    expectType<ChangeStreamShardCollectionDocument>(change);
+    expectType<'shardCollection'>(change.operationType);
+    break;
+  }
+  case 'reshardCollection': {
+    expectType<ChangeStreamReshardCollectionDocument>(change);
+    expectType<'reshardCollection'>(change.operationType);
+    break;
+  }
+  case 'refineCollectionShardKey': {
+    expectType<ChangeStreamRefineCollectionShardKeyDocument>(change);
+    expectType<'refineCollectionShardKey'>(change.operationType);
     break;
   }
   default: {
