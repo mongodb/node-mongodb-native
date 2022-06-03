@@ -2,10 +2,10 @@
 import { expect } from 'chai';
 import * as chalk from 'chalk';
 import * as net from 'net';
-import { Socket } from 'net';
 
 import { MongoClient } from '../../../../src/mongo_client';
 import { ServerSessionPool } from '../../../../src/sessions';
+import { HostAddress } from '../../../../src/utils';
 
 class LeakChecker {
   static originalAcquire: typeof ServerSessionPool.prototype.acquire;
@@ -17,13 +17,12 @@ class LeakChecker {
   static kConnectCount: symbol;
 
   static {
-    LeakChecker.originalAcquire = ServerSessionPool.prototype.acquire;
-    LeakChecker.originalRelease = ServerSessionPool.prototype.release;
-    LeakChecker.kAcquiredCount = Symbol('acquiredCount');
-
-    LeakChecker.originalConnect = MongoClient.prototype.connect;
-    LeakChecker.originalClose = MongoClient.prototype.close;
-    LeakChecker.kConnectCount = Symbol('connectedCount');
+    this.originalAcquire = ServerSessionPool.prototype.acquire;
+    this.originalRelease = ServerSessionPool.prototype.release;
+    this.kAcquiredCount = Symbol('acquiredCount');
+    this.originalConnect = MongoClient.prototype.connect;
+    this.originalClose = MongoClient.prototype.close;
+    this.kConnectCount = Symbol('connectedCount');
   }
 
   clients: Set<MongoClient>;
@@ -39,14 +38,10 @@ class LeakChecker {
     ServerSessionPool.prototype.acquire = function (...args) {
       leakChecker.sessionPools.add(this);
 
-      if (!(LeakChecker.kAcquiredCount in this)) {
-        this[LeakChecker.kAcquiredCount] = 1;
-      } else {
-        this[LeakChecker.kAcquiredCount] += 1;
-      }
+      this[LeakChecker.kAcquiredCount] ??= 0;
+      this[LeakChecker.kAcquiredCount] += 1;
 
-      const result = LeakChecker.originalAcquire.call(this, ...args);
-      return result;
+      return LeakChecker.originalAcquire.call(this, ...args);
     };
 
     ServerSessionPool.prototype.release = function (...args) {
@@ -56,8 +51,7 @@ class LeakChecker {
         this[LeakChecker.kAcquiredCount] -= 1;
       }
 
-      const result = LeakChecker.originalRelease.call(this, ...args);
-      return result;
+      return LeakChecker.originalRelease.call(this, ...args);
     };
   }
 
@@ -65,9 +59,7 @@ class LeakChecker {
     const leakChecker = this;
     MongoClient.prototype.connect = function (...args) {
       leakChecker.clients.add(this);
-      if (!(LeakChecker.kConnectCount in this)) {
-        this[LeakChecker.kConnectCount] = 0;
-      }
+      this[LeakChecker.kConnectCount] ??= 0;
 
       const lastArg = args[args.length - 1];
       const lastArgIsCallback = typeof lastArg === 'function';
@@ -88,11 +80,7 @@ class LeakChecker {
     };
 
     MongoClient.prototype.close = function (...args) {
-      if (!(LeakChecker.kConnectCount in this)) {
-        // interesting, was never connected, possible but weird
-        this[LeakChecker.kConnectCount] = 0;
-      }
-
+      this[LeakChecker.kConnectCount] ??= 0; // prevents NaN, its fine to call close on a client that never called connect
       this[LeakChecker.kConnectCount] -= 1;
       return LeakChecker.originalClose.call(this, ...args);
     };
@@ -137,6 +125,7 @@ const leakCheckerBeforeEach = async function () {
   currentLeakChecker = new LeakChecker(this.currentTest.fullTitle());
   currentLeakChecker.setup();
 };
+
 const leakCheckerAfterEach = async function () {
   let thrownError: Error | undefined;
   try {
@@ -150,88 +139,45 @@ const leakCheckerAfterEach = async function () {
 
   if (thrownError instanceof Error) {
     this.test.error(thrownError);
-    // throw thrownError;
   }
 };
 
 const TRACE_SOCKETS = process.env.TRACE_SOCKETS === 'true' ? true : false;
 const kSocketId = Symbol('socketId');
+const originalCreateConnection = net.createConnection;
+let socketCounter = 0n;
 
 const socketLeakCheckBeforeAll = function socketLeakCheckBeforeAll() {
-  if (!TRACE_SOCKETS) return;
-
-  function* generateId(minLength = 1, maxLength = 100_000, characters = null) {
-    characters ??= Array.from({ length: 91 - 65 }, (_, i) => String.fromCharCode(i + 65));
-    const generateString = (index, characters) => {
-      let string = '';
-      let modulo = 0;
-
-      while (index > -1) {
-        modulo = index % characters.length;
-        string = characters[modulo] + string;
-        index = (index - modulo) / characters.length - 1;
-      }
-
-      return string;
-    };
-
-    const getIndexOffset = (characterCount, offset) => {
-      let indexOffset = 0;
-      for (let i = 0; i < offset; i++) {
-        indexOffset += Math.pow(characterCount, i);
-      }
-      return indexOffset;
-    };
-
-    const min = getIndexOffset(characters.length, minLength);
-    const max = getIndexOffset(characters.length, maxLength);
-
-    let index = min - 1;
-
-    while (index > -1) {
-      if (max === index) {
-        break;
-      }
-      const string = generateString(index, characters);
-      yield string;
-      index++;
-    }
-  }
-
-  const idGenerator = generateId();
-
-  const orig = net.createConnection;
-  // @ts-expect-error: you should not do this
+  // @ts-expect-error: Typescript says this is readonly, but it is not at runtime
   net.createConnection = options => {
-    const socket = orig(options);
-    socket[kSocketId] = idGenerator.next().value;
+    const socket = originalCreateConnection(options);
+    socket[kSocketId] = socketCounter.toString().padStart(5, '0');
+    socketCounter++;
     return socket;
   };
 };
 
+const filterHandlesForSockets = function (handle: any): handle is net.Socket {
+  // Stdio are instanceof Socket so look for fd to be null
+  return handle?.fd == null && handle instanceof net.Socket && handle?.destroyed !== true;
+};
+
 const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheckAfterEach() {
-  if (!TRACE_SOCKETS) return;
+  const indent = '  '.repeat(this.currentTest.titlePath().length + 1);
 
-  const handles: any[] = (process as any)._getActiveHandles();
-  for (const handle of handles) {
-    if (handle.fd == null && handle instanceof Socket && handle.destroyed !== true) {
-      console.log(
-        chalk.yellow(
-          `${'  '.repeat(this.currentTest.titlePath().length + 1)}⚡︎ Socket ${
-            handle[kSocketId]
-          } remains open ${handle.localAddress}:${handle.localPort} -> ${handle.remoteAddress}:${
-            handle.remotePort
-          }`
-        )
-      );
-    }
+  const handles = (process as any)._getActiveHandles();
+  const sockets: net.Socket[] = handles.filter(handle => filterHandlesForSockets(handle));
+
+  for (const socket of sockets) {
+    console.log(
+      chalk.yellow(
+        `${indent}⚡︎ socket ${socket[kSocketId]} not destroyed [${socket.localAddress}:${socket.localPort} → ${socket.remoteAddress}:${socket.remotePort}]`
+      )
+    );
   }
 };
 
-module.exports = {
-  mochaHooks: {
-    beforeAll: [socketLeakCheckBeforeAll],
-    beforeEach: [leakCheckerBeforeEach, socketLeakCheckAfterEach],
-    afterEach: [leakCheckerAfterEach]
-  }
-};
+const beforeAll = TRACE_SOCKETS ? [socketLeakCheckBeforeAll] : [];
+const beforeEach = [leakCheckerBeforeEach];
+const afterEach = [leakCheckerAfterEach, ...(TRACE_SOCKETS ? [socketLeakCheckAfterEach] : [])];
+module.exports = { mochaHooks: { beforeAll, beforeEach, afterEach } };
