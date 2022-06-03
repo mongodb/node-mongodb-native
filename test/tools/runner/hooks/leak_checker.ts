@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
 import { expect } from 'chai';
 import * as chalk from 'chalk';
-import { Socket } from 'net';
+import * as net from 'net';
 
 import { MongoClient } from '../../../../src/mongo_client';
 import { ServerSessionPool } from '../../../../src/sessions';
+import { HostAddress } from '../../../../src/utils';
 
 class LeakChecker {
   static originalAcquire: typeof ServerSessionPool.prototype.acquire;
@@ -124,6 +125,7 @@ const leakCheckerBeforeEach = async function () {
   currentLeakChecker = new LeakChecker(this.currentTest.fullTitle());
   currentLeakChecker.setup();
 };
+
 const leakCheckerAfterEach = async function () {
   let thrownError: Error | undefined;
   try {
@@ -141,32 +143,41 @@ const leakCheckerAfterEach = async function () {
 };
 
 const TRACE_SOCKETS = process.env.TRACE_SOCKETS === 'true' ? true : false;
+const kSocketId = Symbol('socketId');
+const originalCreateConnection = net.createConnection;
+let socketCounter = 0n;
 
-const filterHandlesForSockets = function (handle: any): handle is Socket {
+const socketLeakCheckBeforeAll = function socketLeakCheckBeforeAll() {
+  // @ts-expect-error: Typescript says this is readonly, but it is not at runtime
+  net.createConnection = options => {
+    const socket = originalCreateConnection(options);
+    socket[kSocketId] = socketCounter.toString().padStart(5, '0');
+    socketCounter++;
+    return socket;
+  };
+};
+
+const filterHandlesForSockets = function (handle: any): handle is net.Socket {
   // Stdio are instanceof Socket so look for fd to be null
-  return handle.fd == null && handle instanceof Socket && handle.destroyed !== true;
+  return handle?.fd == null && handle instanceof net.Socket && handle?.destroyed !== true;
 };
 
 const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheckAfterEach() {
-  if (!TRACE_SOCKETS) return;
-
   const indent = '  '.repeat(this.currentTest.titlePath().length + 1);
 
-  const handles: any[] = (process as any)._getActiveHandles();
-  const sockets: Socket[] = handles.filter(handle => filterHandlesForSockets(handle));
+  const handles = (process as any)._getActiveHandles();
+  const sockets: net.Socket[] = handles.filter(handle => filterHandlesForSockets(handle));
 
   for (const socket of sockets) {
     console.log(
       chalk.yellow(
-        `${indent}⚡︎ Socket remains open ${socket.localAddress}:${socket.localPort} -> ${socket.remoteAddress}:${socket.remotePort}`
+        `${indent}⚡︎ socket ${socket[kSocketId]} not destroyed [${socket.localAddress}:${socket.localPort} → ${socket.remoteAddress}:${socket.remotePort}]`
       )
     );
   }
 };
 
-module.exports = {
-  mochaHooks: {
-    beforeEach: [leakCheckerBeforeEach, socketLeakCheckAfterEach],
-    afterEach: [leakCheckerAfterEach]
-  }
-};
+const beforeAll = TRACE_SOCKETS ? [socketLeakCheckBeforeAll] : [];
+const beforeEach = [leakCheckerBeforeEach];
+const afterEach = [leakCheckerAfterEach, ...(TRACE_SOCKETS ? [socketLeakCheckAfterEach] : [])];
+module.exports = { mochaHooks: { beforeAll, beforeEach, afterEach } };
