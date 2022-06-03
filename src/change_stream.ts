@@ -242,11 +242,12 @@ export interface ChangeStreamDocumentCommon {
 /** @public */
 export interface ChangeStreamDocumentCollectionUUID {
   /**
-   * The UUID of the collection that the operation was performed on.
+   * The UUID (Binary subtype 4) of the collection that the operation was performed on.
    *
    * Only present when the `showExpandedEvents` flag is enabled.
    *
-   * **NOTE:** collectionUUID will only be a UUID when the promoteBuffers flag is to true.
+   * **NOTE:** collectionUUID will be converted to a NodeJS Buffer if the promoteBuffers
+   *    flag is enabled.
    *
    * @since 6.1.0
    */
