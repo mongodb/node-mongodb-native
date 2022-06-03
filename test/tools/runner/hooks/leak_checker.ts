@@ -5,7 +5,6 @@ import * as net from 'net';
 
 import { MongoClient } from '../../../../src/mongo_client';
 import { ServerSessionPool } from '../../../../src/sessions';
-import { HostAddress } from '../../../../src/utils';
 
 class LeakChecker {
   static originalAcquire: typeof ServerSessionPool.prototype.acquire;
