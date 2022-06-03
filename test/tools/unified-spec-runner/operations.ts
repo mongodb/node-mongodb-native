@@ -309,26 +309,15 @@ operations.set('insertMany', async ({ entities, operation }) => {
 });
 
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
-  function getChangeStream(): UnifiedChangeStream | null {
-    try {
-      const changeStream = entities.getEntity('stream', operation.object);
-      return changeStream;
-    } catch (e) {
-      return null;
-    }
+  const cursorOrStream =
+    entities.getEntity('stream', operation.object, false) ??
+    entities.getEntity('cursor', operation.object, false);
+
+  if (cursorOrStream == null) {
+    throw new Error(`Unable to get entity - expect stream or cursor but received ${operation}`);
   }
 
-  const changeStream = getChangeStream();
-  if (changeStream == null) {
-    // iterateUntilDocumentOrError is used for changes streams and regular cursors.
-    // we have no other way to distinguish which scenario we are testing when we run an
-    // iterateUntilDocumentOrError operation, so we first try to get the changeStream and
-    // if that fails, we know we need to get a cursor
-    const cursor = entities.getEntity('cursor', operation.object);
-    return await cursor.next();
-  }
-
-  return changeStream.next();
+  return await cursorOrStream.next();
 });
 
 operations.set('listCollections', async ({ entities, operation }) => {
