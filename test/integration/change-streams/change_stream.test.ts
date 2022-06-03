@@ -1,6 +1,7 @@
 import { strict as assert } from 'assert';
 import { expect } from 'chai';
 import { on, once } from 'events';
+import { gte, lt } from 'semver';
 import { PassThrough } from 'stream';
 import { setTimeout } from 'timers';
 import { promisify } from 'util';
@@ -10,6 +11,7 @@ import {
   ChangeStream,
   ChangeStreamOptions,
   Collection,
+  CommandStartedEvent,
   Db,
   Long,
   MongoChangeStreamError,
@@ -21,7 +23,13 @@ import {
 } from '../../../src';
 import { isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
-import { getSymbolFrom, sleep, TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
+import {
+  FailPoint,
+  getSymbolFrom,
+  sleep,
+  TestBuilder,
+  UnifiedTestSuiteBuilder
+} from '../../tools/utils';
 import { delay, filterForCommands } from '../shared';
 
 const initIteratorMode = async (cs: ChangeStream) => {
@@ -1561,6 +1569,283 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
           await willBeChange;
           expect(started[0].command).not.to.haveOwnProperty('invalidBSONOption');
         }
+      });
+    });
+  });
+});
+
+describe('ChangeStream resumability', function () {
+  let client: MongoClient;
+  let collection: Collection;
+  let changeStream: ChangeStream;
+  let aggregateEvents: CommandStartedEvent[] = [];
+
+  const resumableErrorCodes = [
+    { error: 'HostUnreachable', code: 6 },
+    { error: 'HostNotFound', code: 7 },
+    { error: 'NetworkTimeout', code: 89 },
+    { error: 'ShutdownInProgress', code: 91 },
+    { error: 'PrimarySteppedDown', code: 189 },
+    { error: 'ExceededTimeLimit', code: 262 },
+    { error: 'SocketException', code: 9001 },
+    { error: 'NotWritablePrimary', code: 10107 },
+    { error: 'InterruptedAtShutdown', code: 11600 },
+    { error: 'InterruptedDueToReplStateChange', code: 11602 },
+    { error: 'NotPrimaryNoSecondaryOk', code: 13435 },
+    { error: 'StaleShardVersion', code: 63 },
+    { error: 'StaleEpoch', code: 150 },
+    { error: 'RetryChangeStream', code: 234 },
+    { error: 'FailedToSatisfyReadPreference', code: 133 },
+    { error: 'CursorNotFound', code: 43 }
+  ];
+
+  const is4_2Server = (serverVersion: string) =>
+    gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
+
+  beforeEach(async function () {
+    client = this.configuration.newClient({ monitorCommands: true });
+    client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
+    await client.connect();
+    collection = client.db('resumabilty_tests').collection('foo');
+  });
+
+  afterEach(async function () {
+    await changeStream.close();
+    await client.close();
+    aggregateEvents = [];
+  });
+
+  context('iterator api', function () {
+    context('#next', function () {
+      for (const { error, code } of resumableErrorCodes) {
+        it(
+          `resumes on error code ${code} (${error})`,
+          { requires: { mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await client.db('admin').command(<FailPoint>{
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 1 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: code
+              }
+            });
+
+            await collection.insertOne({ name: 'bailey' });
+
+            const change = await changeStream.next();
+            expect(change).to.have.property('operationType', 'insert');
+
+            expect(aggregateEvents).to.have.lengthOf(2);
+          }
+        );
+      }
+
+      context('when the error is not a resumable error', function () {
+        it('does not resume', { requires: { mongodb: '>=4.2' } }, async function () {
+          changeStream = collection.watch([]);
+
+          const unresumableErrorCode = 1000;
+          await client.db('admin').command(<FailPoint>{
+            configureFailPoint: is4_2Server(this.configuration.version)
+              ? 'failCommand'
+              : 'failGetMoreAfterCursorCheckout',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              errorCode: unresumableErrorCode
+            }
+          });
+
+          await initIteratorMode(changeStream);
+
+          await collection.insertOne({ name: 'bailey' });
+
+          const error = await changeStream.next().catch(err => err);
+
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(aggregateEvents).to.have.lengthOf(1);
+        });
+      });
+    });
+
+    context('#hasNext', function () {
+      for (const { error, code } of resumableErrorCodes) {
+        it(
+          `resumes on error code ${code} (${error})`,
+          { requires: { mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await client.db('admin').command(<FailPoint>{
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 1 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: code
+              }
+            });
+
+            await collection.insertOne({ name: 'bailey' });
+
+            const change = await changeStream.hasNext();
+            expect(change).to.have.property('operationType', 'insert');
+
+            expect(aggregateEvents).to.have.lengthOf(2);
+          }
+        );
+      }
+
+      context('when the error is not a resumable error', function () {
+        it('does not resume', { requires: { mongodb: '>=4.2' } }, async function () {
+          changeStream = collection.watch([]);
+
+          const unresumableErrorCode = 1000;
+          await client.db('admin').command(<FailPoint>{
+            configureFailPoint: is4_2Server(this.configuration.version)
+              ? 'failCommand'
+              : 'failGetMoreAfterCursorCheckout',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              errorCode: unresumableErrorCode
+            }
+          });
+
+          await initIteratorMode(changeStream);
+
+          await collection.insertOne({ name: 'bailey' });
+
+          const error = await changeStream.hasNext().catch(err => err);
+
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(aggregateEvents).to.have.lengthOf(1);
+        });
+      });
+    });
+
+    context('#tryNext', function () {
+      for (const { error, code } of resumableErrorCodes) {
+        it(
+          `resumes on error code ${code} (${error})`,
+          { requires: { mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await client.db('admin').command(<FailPoint>{
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 1 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: code
+              }
+            });
+
+            await collection.insertOne({ name: 'bailey' });
+
+            const change = await changeStream.tryNext();
+            expect(change).to.have.property('operationType', 'insert');
+            expect(aggregateEvents).to.have.lengthOf(2);
+          }
+        );
+      }
+
+      context('when the error is not a resumable error', function () {
+        it('does not resume', { requires: { mongodb: '>=4.2' } }, async function () {
+          changeStream = collection.watch([]);
+
+          const unresumableErrorCode = 1000;
+          await client.db('admin').command(<FailPoint>{
+            configureFailPoint: is4_2Server(this.configuration.version)
+              ? 'failCommand'
+              : 'failGetMoreAfterCursorCheckout',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              errorCode: unresumableErrorCode
+            }
+          });
+
+          await initIteratorMode(changeStream);
+
+          await collection.insertOne({ name: 'bailey' });
+
+          const error = await changeStream.tryNext().catch(err => err);
+
+          expect(error).to.be.instanceOf(MongoServerError);
+          expect(aggregateEvents).to.have.lengthOf(1);
+        });
+      });
+    });
+  });
+
+  describe('event emitter based iteration', function () {
+    for (const { error, code } of resumableErrorCodes) {
+      it(
+        `resumes on error code ${code} (${error})`,
+        { requires: { mongodb: '>=4.2' } },
+        async function () {
+          changeStream = collection.watch([]);
+
+          await client.db('admin').command(<FailPoint>{
+            configureFailPoint: is4_2Server(this.configuration.version)
+              ? 'failCommand'
+              : 'failGetMoreAfterCursorCheckout',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              errorCode: code
+            }
+          });
+
+          const changes = once(changeStream, 'change');
+          await once(changeStream.cursor, 'init');
+
+          await collection.insertOne({ name: 'bailey' });
+
+          const [change] = await changes;
+          expect(change).to.have.property('operationType', 'insert');
+
+          expect(aggregateEvents).to.have.lengthOf(2);
+        }
+      );
+    }
+
+    context('when the error is not a resumable error', function () {
+      it('does not resume', { requires: { mongodb: '>=4.2' } }, async function () {
+        changeStream = collection.watch([]);
+
+        const unresumableErrorCode = 1000;
+        await client.db('admin').command(<FailPoint>{
+          configureFailPoint: is4_2Server(this.configuration.version)
+            ? 'failCommand'
+            : 'failGetMoreAfterCursorCheckout',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['getMore'],
+            errorCode: unresumableErrorCode
+          }
+        });
+
+        const willBeError = once(changeStream, 'change').catch(error => error);
+        await once(changeStream.cursor, 'init');
+        await collection.insertOne({ name: 'bailey' });
+
+        const error = await willBeError;
+
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(aggregateEvents).to.have.lengthOf(1);
       });
     });
   });
