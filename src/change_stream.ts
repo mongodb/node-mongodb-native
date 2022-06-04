@@ -106,18 +106,6 @@ export interface PipeOptions {
   end?: boolean;
 }
 
-/** @internal */
-export type ChangeStreamAggregateRawResult<TChange> = {
-  $clusterTime: { clusterTime: Timestamp };
-  cursor: {
-    postBatchResumeToken: ResumeToken;
-    ns: string;
-    id: number | Long;
-  } & ({ firstBatch: TChange[] } | { nextBatch: TChange[] });
-  ok: 1;
-  operationTime: Timestamp;
-};
-
 /**
  * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
  * @public
@@ -930,7 +918,7 @@ export class ChangeStream<
       const topology = getTopology(this.parent);
       this._waitForTopologyConnected(topology, { readPreference: cursor.readPreference }, err => {
         // if the topology can't reconnect, close the stream
-        if (err) return this._closeWithError(err);
+        if (err) return this._closeWithError(err, callback);
 
         // create a new cursor, preserving the old cursor's options
         const newCursor = this._createChangeStreamCursor(cursor.resumeOptions);

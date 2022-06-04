@@ -1,7 +1,5 @@
-import type { Document } from 'bson';
-
+import type { Document, Long, Timestamp } from '../bson';
 import {
-  type ChangeStreamAggregateRawResult,
   type ChangeStreamDocument,
   type ChangeStreamEvents,
   type OperationTime,
@@ -27,6 +25,18 @@ export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
   collation?: CollationOptions;
   fullDocument?: string;
 }
+
+/** @internal */
+export type ChangeStreamAggregateRawResult<TChange> = {
+  $clusterTime: { clusterTime: Timestamp };
+  cursor: {
+    postBatchResumeToken: ResumeToken;
+    ns: string;
+    id: number | Long;
+  } & ({ firstBatch: TChange[] } | { nextBatch: TChange[] });
+  ok: 1;
+  operationTime: Timestamp;
+};
 
 /** @internal */
 export class ChangeStreamCursor<

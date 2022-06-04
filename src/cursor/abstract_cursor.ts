@@ -721,7 +721,7 @@ function nextDocument<T>(cursor: AbstractCursor): T | null {
  *     the cursor has been exhausted.  In certain scenarios (ChangeStreams, tailable await cursors and
  *     `tryNext`, for example) blocking is necessary because a getMore returning no documents does
  *     not indicate the end of the cursor.
- * @param callback - called when
+ * @param callback - callback to return the result to the caller
  * @returns
  */
 export function next<T>(
