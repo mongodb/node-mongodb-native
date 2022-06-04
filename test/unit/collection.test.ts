@@ -6,8 +6,12 @@ import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {
   let server = null;
-  beforeEach(() => createServer().then(_server => (server = _server)));
-  afterEach(() => cleanup());
+  beforeEach(async () => {
+    server = await createServer();
+  });
+  afterEach(async () => {
+    await cleanup();
+  });
 
   context('#createIndex', () => {
     it('should error when createIndex fails', function (done) {

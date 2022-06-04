@@ -531,7 +531,7 @@ describe('class MongoClient', function () {
     };
 
     beforeEach(function () {
-      client = this.configuration.newClient();
+      client = this.configuration.newClient({ monitorCommands: true });
       db = client.db();
     });
 
@@ -626,6 +626,25 @@ describe('class MongoClient', function () {
       const result2 = await db.command({ ping: 1 }).catch(error => error);
       expect(result2).to.not.be.instanceOf(MongoNotConnectedError);
       expect(result2).to.have.property('ok', 1);
+    });
+
+    it('sends endSessions with noResponse set', async () => {
+      const session = client.startSession(); // make a session to be ended
+      await client.db('test').command({ ping: 1 }, { session });
+      await session.endSession();
+
+      const startedEvents = [];
+      const endEvents = [];
+      client.on('commandStarted', event => startedEvents.push(event));
+      client.on('commandSucceeded', event => endEvents.push(event));
+      client.on('commandFailed', event => endEvents.push(event));
+
+      await client.close();
+
+      expect(startedEvents).to.have.lengthOf(1);
+      expect(startedEvents[0]).to.have.property('commandName', 'endSessions');
+      expect(endEvents).to.have.lengthOf(1);
+      expect(endEvents[0]).to.have.property('reply', undefined); // noReponse: true
     });
   });
 });

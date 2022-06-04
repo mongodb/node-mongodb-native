@@ -55,9 +55,7 @@ describe('Causal Consistency - prose tests', function () {
      */
     {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'] },
-        // Skipping session leak tests b/c these are explicit sessions
-        sessions: { skipLeakTests: true }
+        requires: { topology: ['replicaset', 'sharded'] }
       },
 
       test: function () {
@@ -93,9 +91,7 @@ describe('Causal Consistency - prose tests', function () {
 
       it('case: successful read with causal consistency', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'] },
-          // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true }
+          requires: { topology: ['replicaset', 'sharded'] }
         },
 
         test: function () {
@@ -131,9 +127,7 @@ describe('Causal Consistency - prose tests', function () {
     () => {
       it('case: second operation is findOne', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'] },
-          // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true }
+          requires: { topology: ['replicaset', 'sharded'] }
         },
 
         test: function () {
@@ -176,9 +170,7 @@ describe('Causal Consistency - prose tests', function () {
     () => {
       it('case: successful insert', {
         metadata: {
-          requires: { topology: ['replicaset', 'sharded'] },
-          // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true }
+          requires: { topology: ['replicaset', 'sharded'] }
         },
 
         test: function () {
@@ -216,9 +208,7 @@ describe('Causal Consistency - prose tests', function () {
      */
     {
       metadata: {
-        requires: { topology: ['replicaset', 'sharded'] },
-        // Skipping session leak tests b/c these are explicit sessions
-        sessions: { skipLeakTests: true }
+        requires: { topology: ['replicaset', 'sharded'] }
       },
 
       test: function () {

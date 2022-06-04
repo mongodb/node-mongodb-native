@@ -1,16 +1,21 @@
 import { expect } from 'chai';
 
-import type { MongoClient } from '../../../src';
+import type { CommandStartedEvent, CommandSucceededEvent, MongoClient } from '../../../src';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { MongoServerError } from '../../../src/error';
+import type { TestConfiguration } from '../../tools/runner/config';
 import { setupDatabase, withMonitoredClient } from '../shared';
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND];
 let hasInitialPingOccurred = false;
-const test = {
+const test: {
+  client: MongoClient;
+  commands: { started: CommandStartedEvent[]; succeeded: CommandSucceededEvent[] };
+  setup: (config: TestConfiguration) => Promise<void>;
+} = {
   client: null,
   commands: { started: [], succeeded: [] },
-  setup: function (config) {
+  async setup(config) {
     this.commands = { started: [], succeeded: [] };
     this.client = config.newClient({ w: 1 }, { maxPoolSize: 1, monitorCommands: true });
 
@@ -35,7 +40,7 @@ const test = {
       }
     });
 
-    return this.client.connect();
+    await this.client.connect();
   }
 };
 
@@ -46,30 +51,23 @@ describe('Sessions Spec', function () {
     });
 
     describe('endSessions', function () {
-      beforeEach(function () {
-        return test.setup(this.configuration);
+      beforeEach(async function () {
+        await test.setup(this.configuration);
       });
 
-      it('should send endSessions for multiple sessions', {
-        metadata: {
-          requires: { topology: ['single'], mongodb: '>=3.6.0' },
-          // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true }
-        },
-        test: function (done) {
-          const client = test.client;
-          const sessions = [client.startSession(), client.startSession()].map(s => s.id);
+      it('should send endSessions for multiple sessions', function (done) {
+        const client = test.client;
+        const sessions = [client.startSession(), client.startSession()].map(s => s.id);
 
-          client.close(err => {
-            expect(err).to.not.exist;
-            expect(test.commands.started).to.have.length(1);
-            expect(test.commands.started[0].commandName).to.equal('endSessions');
-            expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
-            expect(client.s.sessions.size).to.equal(0);
+        client.close(err => {
+          expect(err).to.not.exist;
+          expect(test.commands.started).to.have.length(1);
+          expect(test.commands.started[0].commandName).to.equal('endSessions');
+          expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
+          expect(client.s.activeSessions.size).to.equal(0);
 
-            done();
-          });
-        }
+          done();
+        });
       });
     });
 
@@ -147,13 +145,13 @@ describe('Sessions Spec', function () {
                   if (shouldReject) {
                     expect.fail('this should have rejected');
                   }
-                  expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+                  expect(client.s.sessionPool.sessions).to.have.length(1);
                 },
                 () => {
                   if (shouldResolve) {
                     expect.fail('this should have resolved');
                   }
-                  expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+                  expect(client.s.sessionPool.sessions).to.have.length(1);
                 }
               )
               .then(() => {
@@ -175,7 +173,7 @@ describe('Sessions Spec', function () {
           await client.db('test').collection('foo').find({}, { session }).toArray();
         });
 
-        expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+        expect(client.s.sessionPool.sessions).to.have.length(1);
         expect(sessionWasEnded).to.be.true;
       });
     });
@@ -215,7 +213,9 @@ describe('Sessions Spec', function () {
                 expect(err.message).to.equal(
                   'Cannot have explicit session with unacknowledged writes'
                 );
-                client.close(done);
+                session.endSession(() => {
+                  client.close(done);
+                });
               });
           }
         )

@@ -2,7 +2,6 @@
 const { assert: test, setupDatabase } = require('../shared');
 const { setTimeout } = require('timers');
 const { format: f } = require('util');
-const { Topology } = require('../../../src/sdam/topology');
 const { Code, ObjectId, ReturnDocument } = require('../../../src');
 
 const chai = require('chai');
@@ -4034,41 +4033,6 @@ describe('Operation Examples', function () {
     }
   });
 
-  /**
-   * Simple replicaset connection setup, requires a running replicaset on the correct ports
-   *
-   * @example-class Db
-   * @example-method open
-   */
-  it('Should correctly connect with default replicasetNoOption', {
-    metadata: { requires: { topology: 'replicaset' } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-
-      // Replica configuration
-      var client = new Topology(configuration.options.hostAddresses, {
-        replicaSet: configuration.replicasetName
-      });
-
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect(function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        client.close(done);
-      });
-      // END
-    }
-  });
-
   /**************************************************************************
    *
    * ADMIN TESTS
@@ -4732,13 +4696,15 @@ describe('Operation Examples', function () {
           var cursor = collection.find({});
           // Fetch the first object off the cursor
           cursor.next(function (err, item) {
-            test.equal(0, item.a);
+            expect(err).to.not.exist;
+            expect(item).to.have.property('a', 0);
             // Rewind the cursor, resetting it to point to the start of the query
             cursor.rewind();
 
             // Grab the first object again
             cursor.next(function (err, item) {
-              test.equal(0, item.a);
+              expect(err).to.not.exist;
+              expect(item).to.have.property('a', 0);
 
               client.close(done);
             });

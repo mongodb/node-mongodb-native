@@ -6,7 +6,7 @@ const {
   withClient,
   withMonitoredClient
 } = require('../shared');
-const { runLater } = require('../../tools/utils');
+const { runLater, getSymbolFrom } = require('../../tools/utils');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -1977,11 +1977,7 @@ describe('Cursor', function () {
   });
 
   it('should close dead tailable cursors', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] },
-      sessions: { skipLeakTests: true },
       os: '!win32' // NODE-2943: timeout on windows
     },
 
@@ -3795,89 +3791,58 @@ describe('Cursor', function () {
     }
   });
 
-  it(
-    'should return implicit session to pool when client-side cursor exhausts results on initial query',
-    {
-      metadata: {
-        requires: {
-          topology: ['single', 'replicaset', 'sharded'],
-          mongodb: '>=3.6.0'
-        }
-      },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+  it('should return implicit session to pool when client-side cursor exhausts results on initial query', async function () {
+    const configuration = this.configuration;
+    const client = configuration.newClient();
 
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
+    await client.connect();
+    const db = client.db(configuration.db);
+    const collection = db.collection('cursor_session_tests');
 
-          const db = client.db(configuration.db);
-          const collection = db.collection('cursor_session_tests');
+    await collection.insertMany([{ a: 1, b: 2 }]);
+    const cursor = collection.find({});
 
-          collection.insertMany([{ a: 1, b: 2 }], err => {
-            expect(err).to.not.exist;
-            const cursor = collection.find({});
+    await cursor.next(); // implicit close, cursor is exhausted
+    expect(client.s.activeSessions.size).to.equal(0);
+    await cursor.close();
+    await client.close();
+  });
 
+  it('should return implicit session to pool when client-side cursor exhausts results after a getMore', function (done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
+
+    const db = client.db(configuration.db);
+    const collection = db.collection('cursor_session_tests2');
+
+    const docs = [
+      { a: 1, b: 2 },
+      { a: 3, b: 4 },
+      { a: 5, b: 6 },
+      { a: 7, b: 8 },
+      { a: 9, b: 10 }
+    ];
+
+    collection.insertMany(docs, err => {
+      expect(err).to.not.exist;
+      const cursor = collection.find({}, { batchSize: 3 });
+      cursor.next(function () {
+        expect(client.s.activeSessions.size).to.equal(1);
+        cursor.next(function () {
+          expect(client.s.activeSessions.size).to.equal(1);
+          cursor.next(function () {
+            expect(client.s.activeSessions.size).to.equal(1);
             cursor.next(function () {
-              test.equal(client.topology.s.sessions.size, 0);
-              done();
-            });
-          });
-        });
-      }
-    }
-  );
-
-  it(
-    'should return implicit session to pool when client-side cursor exhausts results after a getMore',
-    {
-      metadata: {
-        requires: {
-          topology: ['single', 'replicaset', 'sharded'],
-          mongodb: '>=3.6.0'
-        }
-      },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
-
-          const db = client.db(configuration.db);
-          const collection = db.collection('cursor_session_tests2');
-
-          const docs = [
-            { a: 1, b: 2 },
-            { a: 3, b: 4 },
-            { a: 5, b: 6 },
-            { a: 7, b: 8 },
-            { a: 9, b: 10 }
-          ];
-
-          collection.insertMany(docs, err => {
-            expect(err).to.not.exist;
-            const cursor = collection.find({}, { batchSize: 3 });
-            cursor.next(function () {
-              test.equal(client.topology.s.sessions.size, 1);
-              cursor.next(function () {
-                test.equal(client.topology.s.sessions.size, 1);
-                cursor.next(function () {
-                  test.equal(client.topology.s.sessions.size, 1);
-                  cursor.next(function () {
-                    test.equal(client.topology.s.sessions.size, 0);
-                    done();
-                  });
-                });
+              expect(client.s.activeSessions.size).to.equal(0);
+              cursor.close(() => {
+                client.close(done);
               });
             });
           });
         });
-      }
-    }
-  );
+      });
+    });
+  });
 
   describe('#clone', function () {
     let client;
@@ -3908,7 +3873,8 @@ describe('Cursor', function () {
               expect(doc).to.exist;
               const clonedCursor = cursor.clone();
               expect(clonedCursor.cursorOptions.session).to.not.exist;
-              expect(clonedCursor.session).to.not.exist;
+              const kServerSession = getSymbolFrom(clonedCursor.session, 'serverSession');
+              expect(clonedCursor.session).to.have.property(kServerSession, null); // session is brand new and has not been used
             })
             .finally(() => {
               return cursor.close();
@@ -3928,7 +3894,8 @@ describe('Cursor', function () {
               expect(doc).to.exist;
               const clonedCursor = cursor.clone();
               expect(clonedCursor.cursorOptions.session).to.not.exist;
-              expect(clonedCursor.session).to.not.exist;
+              const kServerSession = getSymbolFrom(clonedCursor.session, 'serverSession');
+              expect(clonedCursor.session).to.have.property(kServerSession, null); // session is brand new and has not been used
             })
             .finally(() => {
               return cursor.close();

@@ -28,21 +28,16 @@ describe('examples(causal-consistency):', function () {
     collection = undefined;
   });
 
-  it('supports causal consistency', {
-    metadata: {
-      requires: { topology: ['single'], mongodb: '>=3.6.0' },
-      sessions: { skipLeakTests: true }
-    },
+  it('supports causal consistency', async function () {
+    const session = client.startSession({ causalConsistency: true });
 
-    test: async function () {
-      const session = client.startSession({ causalConsistency: true });
+    collection.insertOne({ darmok: 'jalad' }, { session });
+    collection.updateOne({ darmok: 'jalad' }, { $set: { darmok: 'tanagra' } }, { session });
 
-      collection.insertOne({ darmok: 'jalad' }, { session });
-      collection.updateOne({ darmok: 'jalad' }, { $set: { darmok: 'tanagra' } }, { session });
+    const results = await collection.find({}, { session }).toArray();
 
-      const results = await collection.find({}, { session }).toArray();
+    expect(results).to.exist;
 
-      expect(results).to.exist;
-    }
+    await session.endSession();
   });
 });
