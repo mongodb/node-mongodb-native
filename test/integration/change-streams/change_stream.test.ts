@@ -1696,8 +1696,8 @@ describe('ChangeStream resumability', function () {
 
             await collection.insertOne({ name: 'bailey' });
 
-            const change = await changeStream.hasNext();
-            expect(change).to.have.property('operationType', 'insert');
+            const hasNext = await changeStream.hasNext();
+            expect(hasNext).to.be.true;
 
             expect(aggregateEvents).to.have.lengthOf(2);
           }
