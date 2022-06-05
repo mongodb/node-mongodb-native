@@ -662,7 +662,7 @@ export class ChangeStream<
         cursor.next((error, change) => {
           if (error) {
             this[kResumeQueue].push(() => this.next(cb));
-            this._processError(error, cb);
+            this._processErrorIteratorMode(error, cb);
             return;
           }
           this._processNewChange(change ?? null, cb);
@@ -803,7 +803,7 @@ export class ChangeStream<
     const stream = this[kCursorStream] ?? cursor.stream();
     this[kCursorStream] = stream;
     stream.on('data', change => this._processNewChange(change));
-    stream.on('error', error => this._processError(error));
+    stream.on('error', error => this._processErrorStreamMode(error));
   }
 
   /** @internal */
@@ -847,30 +847,40 @@ export class ChangeStream<
     return callback(undefined, change);
   }
 
-  /** @internal */
-  private _processError(error: AnyError, callback?: Callback) {
+  private _processErrorStreamMode(error: AnyError) {
+    // If the change stream has been closed explicitly, do not process error.
+    if (this[kClosed]) return;
+
     const cursor = this.cursor;
 
-    // If the change stream has been closed explicitly, do not process error.
+    if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
+      this.cursor = undefined;
+      this._endStream();
+      cursor.close();
+
+      const topology = getTopology(this.parent);
+      topology.selectServer(cursor.readPreference, {}, err => {
+        if (err) return this._closeWithError(err);
+        this.cursor = this._createChangeStreamCursor(cursor.resumeOptions);
+      });
+    } else {
+      this._closeWithError(error);
+    }
+  }
+
+  /** @internal */
+  private _processErrorIteratorMode(error: AnyError, callback: Callback) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
       return;
     }
 
-    // if the resume succeeds, continue with the new cursor
-    const resumeWithCursor = (newCursor: ChangeStreamCursor<TSchema, TChange>) => {
-      this.cursor = newCursor;
-      this._processResumeQueue();
-    };
+    const cursor = this.cursor;
 
     if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
       this.cursor = undefined;
 
-      // stop listening to all events from old cursor
-      this._endStream();
-
-      // close internal cursor, ignore errors
       cursor.close();
 
       const topology = getTopology(this.parent);
@@ -878,24 +888,17 @@ export class ChangeStream<
         // if the topology can't reconnect, close the stream
         if (err) return this._closeWithError(err, callback);
 
-        // create a new cursor, preserving the old cursor's options
         const newCursor = this._createChangeStreamCursor(cursor.resumeOptions);
-
-        // attempt to continue in emitter mode
-        if (!callback) return resumeWithCursor(newCursor);
-
-        // attempt to continue in iterator mode
         newCursor.hasNext(err => {
-          // if there's an error immediately after resuming, close the stream
-          if (err) return this._closeWithError(err);
-          resumeWithCursor(newCursor);
+          if (err) return this._closeWithError(err, callback);
+
+          this.cursor = newCursor;
+          this._processResumeQueue();
         });
       });
-      return;
+    } else {
+      this._closeWithError(error, callback);
     }
-
-    // if initial error wasn't resumable, raise an error and close the change stream
-    return this._closeWithError(error, callback);
   }
 
   /** @internal */
