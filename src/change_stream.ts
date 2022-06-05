@@ -1,4 +1,3 @@
-import Denque = require('denque');
 import type { Readable } from 'stream';
 import { promisify } from 'util';
 
@@ -644,7 +643,7 @@ export class ChangeStream<
           const hasNext = await this.cursor!.hasNext();
           return callback(undefined, hasNext);
         } catch (error) {
-          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
+          const errorOnResume = await this._processErrorIteratorMode(error).catch(err => err);
           if (errorOnResume) return callback(errorOnResume);
           try {
             const hasNext = await this.cursor!.hasNext();
@@ -668,7 +667,7 @@ export class ChangeStream<
           const change = await this.cursor!.next();
           this._processNewChange(change ?? null, callback);
         } catch (error) {
-          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
+          const errorOnResume = await this._processErrorIteratorMode(error).catch(err => err);
           if (errorOnResume) return callback(errorOnResume);
           try {
             const change = await this.cursor!.next();
@@ -694,7 +693,7 @@ export class ChangeStream<
           const change = await this.cursor!.tryNext();
           callback(undefined, change ?? null);
         } catch (error) {
-          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
+          const errorOnResume = await this._processErrorIteratorMode(error).catch(err => err);
           if (errorOnResume) return callback(errorOnResume);
           try {
             const change = await this.cursor!.tryNext();
@@ -889,13 +888,11 @@ export class ChangeStream<
     }
   }
 
-  private _processErrorAsync = promisify(this._processErrorIteratorMode);
-
   /** @internal */
-  private _processErrorIteratorMode(error: AnyError, callback: Callback) {
+  private async _processErrorIteratorMode(error: AnyError) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
+      throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
     const cursor = this.cursor;
@@ -906,15 +903,16 @@ export class ChangeStream<
       cursor.close();
 
       const topology = getTopology(this.parent);
-      topology.selectServer(cursor.readPreference, {}, err => {
-        // if the topology can't reconnect, close the stream
-        if (err) return this._closeWithError(err, callback);
-
-        this.cursor = this._createChangeStreamCursor(cursor.resumeOptions);
-        callback();
-      });
+      await promisify(topology.selectServer.bind(topology))(cursor.readPreference, {}).catch(
+        async error => {
+          await this.close();
+          throw error;
+        }
+      );
+      this.cursor = this._createChangeStreamCursor(cursor.resumeOptions);
     } else {
-      this._closeWithError(error, callback);
+      await this.close();
+      throw error;
     }
   }
 }
