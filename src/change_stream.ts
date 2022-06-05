@@ -1,5 +1,6 @@
 import Denque = require('denque');
 import type { Readable } from 'stream';
+import { promisify } from 'util';
 
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
@@ -29,8 +30,6 @@ import {
   MongoDBNamespace
 } from './utils';
 
-/** @internal */
-const kResumeQueue = Symbol('resumeQueue');
 /** @internal */
 const kCursorStream = Symbol('cursorStream');
 /** @internal */
@@ -539,8 +538,6 @@ export class ChangeStream<
   cursor: ChangeStreamCursor<TSchema, TChange> | undefined;
   streamOptions?: CursorStreamOptions;
   /** @internal */
-  [kResumeQueue]: Denque<Callback<ChangeStreamCursor<TSchema, TChange>>>;
-  /** @internal */
   [kCursorStream]?: Readable & AsyncIterable<TChange>;
   /** @internal */
   [kClosed]: boolean;
@@ -606,8 +603,6 @@ export class ChangeStream<
       this.options.readPreference = parent.readPreference;
     }
 
-    this[kResumeQueue] = new Denque();
-
     // Create contained Change Stream cursor
     this.cursor = this._createChangeStreamCursor(options);
 
@@ -643,11 +638,23 @@ export class ChangeStream<
   hasNext(callback: Callback<boolean>): void;
   hasNext(callback?: Callback): Promise<boolean> | void {
     this._setIsIterator();
-    return maybePromise(callback, cb => {
-      this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        cursor.hasNext(cb);
-      });
+    return maybePromise(callback, callback => {
+      (async () => {
+        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
+        try {
+          const hasNext = await this.cursor.hasNext();
+          return callback(undefined, hasNext);
+        } catch (error) {
+          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
+          if (errorOnResume) return callback(errorOnResume);
+          try {
+            const hasNext = await this.cursor.hasNext();
+            return callback(undefined, hasNext);
+          } catch (error) {
+            this._closeWithError(error, callback);
+          }
+        }
+      })();
     });
   }
 
@@ -656,18 +663,23 @@ export class ChangeStream<
   next(callback: Callback<TChange>): void;
   next(callback?: Callback<TChange>): Promise<TChange> | void {
     this._setIsIterator();
-    return maybePromise(callback, cb => {
-      this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        cursor.next((error, change) => {
-          if (error) {
-            this[kResumeQueue].push(() => this.next(cb));
-            this._processErrorIteratorMode(error, cb);
-            return;
+    return maybePromise(callback, callback => {
+      (async () => {
+        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
+        try {
+          const change = await this.cursor.next();
+          this._processNewChange(change ?? null, callback);
+        } catch (error) {
+          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
+          if (errorOnResume) return callback(errorOnResume);
+          try {
+            const change = await this.cursor.next();
+            this._processNewChange(change ?? null, callback);
+          } catch (error) {
+            this._closeWithError(error, callback);
           }
-          this._processNewChange(change ?? null, cb);
-        });
-      });
+        }
+      })();
     });
   }
 
@@ -678,11 +690,23 @@ export class ChangeStream<
   tryNext(callback: Callback<Document | null>): void;
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
     this._setIsIterator();
-    return maybePromise(callback, cb => {
-      this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        return cursor.tryNext(cb);
-      });
+    return maybePromise(callback, callback => {
+      (async () => {
+        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
+        try {
+          const change = await this.cursor.tryNext();
+          callback(undefined, change ?? null);
+        } catch (error) {
+          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
+          if (errorOnResume) return callback(errorOnResume);
+          try {
+            const change = await this.cursor.tryNext();
+            callback(undefined, change ?? null);
+          } catch (error) {
+            this._closeWithError(error, callback);
+          }
+        }
+      })();
     });
   }
 
@@ -868,12 +892,13 @@ export class ChangeStream<
     }
   }
 
+  private _processErrorAsync = promisify(this._processErrorIteratorMode);
+
   /** @internal */
   private _processErrorIteratorMode(error: AnyError, callback: Callback) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
-      return;
+      return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     }
 
     const cursor = this.cursor;
@@ -888,60 +913,11 @@ export class ChangeStream<
         // if the topology can't reconnect, close the stream
         if (err) return this._closeWithError(err, callback);
 
-        const newCursor = this._createChangeStreamCursor(cursor.resumeOptions);
-        newCursor.hasNext(err => {
-          if (err) return this._closeWithError(err, callback);
-
-          this.cursor = newCursor;
-          this._processResumeQueue();
-        });
+        this.cursor = this._createChangeStreamCursor(cursor.resumeOptions);
+        callback();
       });
     } else {
       this._closeWithError(error, callback);
-    }
-  }
-
-  /** @internal */
-  private _getCursor(callback: Callback<ChangeStreamCursor<TSchema, TChange>>) {
-    if (this[kClosed]) {
-      // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
-      return;
-    }
-
-    // if a cursor exists and it is open, return it
-    if (this.cursor) {
-      callback(undefined, this.cursor);
-      return;
-    }
-
-    // no cursor, queue callback until topology reconnects
-    this[kResumeQueue].push(callback);
-  }
-
-  /**
-   * Drain the resume queue when a new has become available
-   * @internal
-   *
-   * @param error - error getting a new cursor
-   */
-  private _processResumeQueue(error?: Error) {
-    while (this[kResumeQueue].length) {
-      const request = this[kResumeQueue].pop();
-      if (!request) break; // Should never occur but TS can't use the length check in the while condition
-
-      if (!error) {
-        if (this[kClosed]) {
-          // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-          request(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
-          return;
-        }
-        if (!this.cursor) {
-          request(new MongoChangeStreamError(NO_CURSOR_ERROR));
-          return;
-        }
-      }
-      request(error, this.cursor ?? undefined);
     }
   }
 }
