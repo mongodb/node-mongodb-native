@@ -1,6 +1,5 @@
 import Denque = require('denque');
 import type { Readable } from 'stream';
-import { setTimeout } from 'timers';
 
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
@@ -20,17 +19,14 @@ import { InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
-import type { Topology } from './sdam/topology';
 import type { ServerSessionId } from './sessions';
 import {
-  calculateDurationInMs,
   Callback,
   filterOptions,
   getTopology,
   maxWireVersion,
   maybePromise,
-  MongoDBNamespace,
-  now
+  MongoDBNamespace
 } from './utils';
 
 /** @internal */
@@ -56,14 +52,6 @@ const CHANGE_DOMAIN_TYPES = {
   DATABASE: Symbol('Database'),
   CLUSTER: Symbol('Cluster')
 };
-
-interface TopologyWaitOptions {
-  start?: number;
-  timeout?: number;
-  readPreference?: ReadPreference;
-}
-
-const SELECTION_TIMEOUT = 30000;
 
 const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE];
 
@@ -800,36 +788,6 @@ export class ChangeStream<
     return changeStreamCursor;
   }
 
-  /**
-   * This method performs a basic server selection loop, satisfying the requirements of
-   * ChangeStream resumability until the new SDAM layer can be used.
-   * @internal
-   */
-  private _waitForTopologyConnected(
-    topology: Topology,
-    options: TopologyWaitOptions,
-    callback: Callback
-  ) {
-    setTimeout(() => {
-      if (options && options.start == null) {
-        options.start = now();
-      }
-
-      const start = options.start || now();
-      const timeout = options.timeout || SELECTION_TIMEOUT;
-      if (topology.isConnected()) {
-        return callback();
-      }
-
-      if (calculateDurationInMs(start) > timeout) {
-        // TODO(NODE-3497): Replace with MongoNetworkTimeoutError
-        return callback(new MongoRuntimeError('Timed out waiting for connection'));
-      }
-
-      this._waitForTopologyConnected(topology, options, callback);
-    }, 500); // this is an arbitrary wait time to allow SDAM to transition
-  }
-
   /** @internal */
   private _closeWithError(error: AnyError, callback?: Callback): void {
     if (!callback) {
@@ -916,7 +874,7 @@ export class ChangeStream<
       cursor.close();
 
       const topology = getTopology(this.parent);
-      this._waitForTopologyConnected(topology, { readPreference: cursor.readPreference }, err => {
+      topology.selectServer(cursor.readPreference, {}, err => {
         // if the topology can't reconnect, close the stream
         if (err) return this._closeWithError(err, callback);
 
