@@ -639,14 +639,15 @@ export class ChangeStream<
     this._setIsIterator();
     return maybePromise(callback, callback => {
       (async () => {
+        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
         try {
-          const hasNext = await this.cursor!.hasNext();
+          const hasNext = await this.cursor.hasNext();
           return callback(undefined, hasNext);
         } catch (error) {
           const errorOnResume = await this._processErrorIteratorMode(error).catch(err => err);
           if (errorOnResume) return callback(errorOnResume);
           try {
-            const hasNext = await this.cursor!.hasNext();
+            const hasNext = await this.cursor.hasNext();
             return callback(undefined, hasNext);
           } catch (error) {
             this._closeWithError(error, callback);
@@ -663,14 +664,15 @@ export class ChangeStream<
     this._setIsIterator();
     return maybePromise(callback, callback => {
       (async () => {
+        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
         try {
-          const change = await this.cursor!.next();
+          const change = await this.cursor.next();
           this._processNewChange(change ?? null, callback);
         } catch (error) {
           const errorOnResume = await this._processErrorIteratorMode(error).catch(err => err);
           if (errorOnResume) return callback(errorOnResume);
           try {
-            const change = await this.cursor!.next();
+            const change = await this.cursor.next();
             this._processNewChange(change ?? null, callback);
           } catch (error) {
             this._closeWithError(error, callback);
@@ -689,14 +691,15 @@ export class ChangeStream<
     this._setIsIterator();
     return maybePromise(callback, callback => {
       (async () => {
+        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
         try {
-          const change = await this.cursor!.tryNext();
+          const change = await this.cursor.tryNext();
           callback(undefined, change ?? null);
         } catch (error) {
           const errorOnResume = await this._processErrorIteratorMode(error).catch(err => err);
           if (errorOnResume) return callback(errorOnResume);
           try {
-            const change = await this.cursor!.tryNext();
+            const change = await this.cursor.tryNext();
             callback(undefined, change ?? null);
           } catch (error) {
             this._closeWithError(error, callback);
