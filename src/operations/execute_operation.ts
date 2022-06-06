@@ -120,10 +120,18 @@ export function executeOperation<
       } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
         return callback(new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later'));
       }
-    } else if (session) {
-      // If the user passed an explicit session and we are still, after server selection,
-      // trying to run against a topology that doesn't support sessions we error out.
-      return callback(new MongoCompatibilityError('Current topology does not support sessions'));
+    } else {
+      // no session support
+      if (session && session.explicit) {
+        // If the user passed an explicit session and we are still, after server selection,
+        // trying to run against a topology that doesn't support sessions we error out.
+        return callback(new MongoCompatibilityError('Current topology does not support sessions'));
+      } else if (session && !session.explicit) {
+        // We do not have to worry about ending the session because the server session has not been acquired yet
+        delete operation.options.session;
+        operation.clearSession();
+        session = undefined;
+      }
     }
 
     try {

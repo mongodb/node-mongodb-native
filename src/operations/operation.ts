@@ -94,6 +94,10 @@ export abstract class AbstractOperation<TResult = any> {
     return this[kSession];
   }
 
+  clearSession() {
+    this[kSession] = undefined;
+  }
+
   get canRetryRead(): boolean {
     return true;
   }
