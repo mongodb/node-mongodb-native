@@ -727,7 +727,6 @@ export class CryptoConnection extends Connection {
         callback(err, null);
         return;
       }
-
       super.command(ns, encrypted, options, (err, response) => {
         if (err || response == null) {
           callback(err, response);

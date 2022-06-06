@@ -60,13 +60,7 @@ const skippedMaxWireVersionTest = 'operation fails with maxWireVersion < 8';
 const SKIPPED_TESTS = new Set([
   ...(isAuthEnabled
     ? skippedAuthTests.concat(skippedMaxWireVersionTest)
-    : [skippedMaxWireVersionTest]),
-  // TODO(NODE-4288): Fix FLE 2 tests
-  'default state collection names are applied',
-  'drop removes all state collections',
-  'CreateCollection from encryptedFields.',
-  'DropCollection from encryptedFields',
-  'DropCollection from remote encryptedFields'
+    : [skippedMaxWireVersionTest])
 ]);
 
 describe('Client Side Encryption', function () {
