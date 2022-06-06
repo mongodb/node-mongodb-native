@@ -10,7 +10,6 @@ import type {
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { MongoCompatibilityError, MongoServerError } from '../../../src/error';
 import type { TestConfiguration } from '../../tools/runner/config';
-import { getSymbolFrom } from '../../tools/utils';
 import { setupDatabase, withMonitoredClient } from '../shared';
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND];
@@ -411,12 +410,14 @@ describe('Sessions', function () {
   describe('session support detection', () => {
     let client: MongoClient;
     let collection: Collection<{ a: number }>;
+
     beforeEach(async function () {
       client = this.configuration.newClient({ monitorCommands: true });
       await client.connect();
       collection = client.db('test').collection('session.support.detection');
       await collection.drop().catch(() => null);
 
+      // Never run a server selection for support since we're overriding it
       sinon.stub(client.topology, 'shouldCheckForSessionSupport').callsFake(() => false);
     });
 
@@ -425,7 +426,7 @@ describe('Sessions', function () {
       sinon.restore();
     });
 
-    context('when hasSessionSupport=false', () => {
+    context('when hasSessionSupport is false', () => {
       beforeEach(() => sinon.stub(client.topology, 'hasSessionSupport').callsFake(() => false));
 
       it('should not send session', async () => {
@@ -464,7 +465,7 @@ describe('Sessions', function () {
       });
     });
 
-    context('when hasSessionSupport=true', () => {
+    context('when hasSessionSupport is true', () => {
       beforeEach(() => sinon.stub(client.topology, 'hasSessionSupport').callsFake(() => true));
 
       it('should send session', async () => {
