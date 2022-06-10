@@ -441,11 +441,14 @@ describe('Sessions', function () {
           await cursor.next() // getMore
         ];
 
+        await cursor.close();
+
         expect(docs).to.deep.equal([{ a: 1 }, { a: 1 }]);
         expect(events.map(({ commandName }) => commandName)).to.deep.equal([
           'insert',
           'find',
-          'getMore'
+          'getMore',
+          'killCursors'
         ]);
         for (const event of events) {
           expect(event.command).to.not.have.property('lsid');

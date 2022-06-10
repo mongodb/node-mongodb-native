@@ -17,6 +17,7 @@ import { GetMoreOperation } from '../operations/get_more';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
+import { sameServerSelector } from '../sdam/server_selection';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 
@@ -834,11 +835,22 @@ function cleanupCursor(
   }
 
   cursor[kKilled] = true;
-  server.killCursors(
-    cursorNs,
-    [cursorId],
-    { ...pluckBSONSerializeOptions(cursor[kOptions]), session },
-    () => completeCleanup()
+
+  cursor[kClient].topology?.selectServer(
+    sameServerSelector(server.description),
+    {},
+    (error, server) => {
+      if (error || !server) return completeCleanup();
+      server.killCursors(
+        cursorNs,
+        [cursorId],
+        {
+          ...pluckBSONSerializeOptions(cursor[kOptions]),
+          session: cursor[kClient].topology?.hasSessionSupport() ? session : undefined
+        },
+        () => completeCleanup()
+      );
+    }
   );
 }
 
