@@ -2,7 +2,7 @@ import Denque = require('denque');
 import type { Readable } from 'stream';
 import { setTimeout } from 'timers';
 
-import type { Binary, Document, Long, Timestamp } from './bson';
+import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
 import type { AbstractCursorEvents, CursorStreamOptions } from './cursor/abstract_cursor';
