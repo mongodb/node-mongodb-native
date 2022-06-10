@@ -860,10 +860,7 @@ export function assertUninitialized(cursor: AbstractCursor): void {
 
 class ReadableCursorStream extends Readable {
   private _cursor: AbstractCursor;
-
-  private _initialized = false;
-  private _reading = false;
-  private _needToClose = true; // NOTE: we must close the cursor if we never read from it, use `_construct` in future node versions
+  private _readInProgress = false;
 
   constructor(cursor: AbstractCursor) {
     super({
@@ -876,30 +873,18 @@ class ReadableCursorStream extends Readable {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override _read(size: number): void {
-    if (this._initialized === false) {
-      this._needToClose = false;
-      this._initialized = true;
-    }
-
-    if (!this._reading) {
-      this._reading = true;
+    if (!this._readInProgress) {
+      this._readInProgress = true;
       this._readNext();
     }
   }
 
   override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
-    if (this._needToClose) {
-      this._cursor.close(err => process.nextTick(callback, err || error));
-    } else {
-      callback(error);
-    }
+    this._cursor.close(err => process.nextTick(callback, err || error));
   }
 
   private _readNext() {
-    this._needToClose = false;
     next(this._cursor, true, (err, result) => {
-      this._needToClose = err ? !this._cursor.closed : result != null;
-
       if (err) {
         // NOTE: This is questionable, but we have a test backing the behavior. It seems the
         //       desired behavior is that a stream ends cleanly when a user explicitly closes
@@ -931,7 +916,7 @@ class ReadableCursorStream extends Readable {
           return this._readNext();
         }
 
-        this._reading = false;
+        this._readInProgress = false;
       }
     });
   }
