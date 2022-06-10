@@ -83,6 +83,9 @@ export class Encrypter {
 
       clonedOptions.minPoolSize = 0;
 
+      clonedOptions.promoteValues = false;
+      clonedOptions.promoteLongs = false;
+
       internalClient = new MongoClient(uri, clonedOptions);
       this[kInternalClient] = internalClient;
 
