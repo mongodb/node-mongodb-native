@@ -29,6 +29,7 @@ export {
   ObjectId,
   Timestamp
 } from './bson';
+export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 /**
  * @public
  * @deprecated Please use `ObjectId`
@@ -170,12 +171,9 @@ export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
 export type {
   ChangeStream,
-  ChangeStreamAggregateRawResult,
   ChangeStreamCollModDocument,
   ChangeStreamCreateDocument,
   ChangeStreamCreateIndexDocument,
-  ChangeStreamCursor,
-  ChangeStreamCursorOptions,
   ChangeStreamDeleteDocument,
   ChangeStreamDocument,
   ChangeStreamDocumentCollectionUUID,
@@ -259,6 +257,10 @@ export type {
 } from './cursor/abstract_cursor';
 export type { InternalAbstractCursorOptions } from './cursor/abstract_cursor';
 export type { AggregationCursorOptions } from './cursor/aggregation_cursor';
+export type {
+  ChangeStreamAggregateRawResult,
+  ChangeStreamCursorOptions
+} from './cursor/change_stream_cursor';
 export type { DbOptions, DbPrivate } from './db';
 export type { AutoEncrypter, AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';

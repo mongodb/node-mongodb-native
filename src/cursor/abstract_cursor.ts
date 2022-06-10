@@ -264,7 +264,7 @@ export abstract class AbstractCursor<
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
     if (options?.transform) {
       const transform = options.transform;
-      const readable = makeCursorStream(this);
+      const readable = new ReadableCursorStream(this);
 
       return readable.pipe(
         new Transform({
@@ -282,7 +282,7 @@ export abstract class AbstractCursor<
       );
     }
 
-    return makeCursorStream(this);
+    return new ReadableCursorStream(this);
   }
 
   hasNext(): Promise<boolean>;
@@ -714,7 +714,21 @@ function nextDocument<T>(cursor: AbstractCursor): T | null {
   return null;
 }
 
-function next<T>(cursor: AbstractCursor<T>, blocking: boolean, callback: Callback<T | null>): void {
+/**
+ * @param cursor - the cursor on which to call `next`
+ * @param blocking - a boolean indicating whether or not the cursor should `block` until data
+ *     is available.  Generally, this flag is set to `false` because if the getMore returns no documents,
+ *     the cursor has been exhausted.  In certain scenarios (ChangeStreams, tailable await cursors and
+ *     `tryNext`, for example) blocking is necessary because a getMore returning no documents does
+ *     not indicate the end of the cursor.
+ * @param callback - callback to return the result to the caller
+ * @returns
+ */
+export function next<T>(
+  cursor: AbstractCursor<T>,
+  blocking: boolean,
+  callback: Callback<T | null>
+): void {
   const cursorId = cursor[kId];
   if (cursor.closed) {
     return callback(undefined, null);
@@ -844,50 +858,41 @@ export function assertUninitialized(cursor: AbstractCursor): void {
   }
 }
 
-function makeCursorStream(cursor: AbstractCursor) {
-  const readable = new Readable({
-    objectMode: true,
-    autoDestroy: false,
-    highWaterMark: 1
-  });
+class ReadableCursorStream extends Readable {
+  private _cursor: AbstractCursor;
+  private _readInProgress = false;
 
-  let initialized = false;
-  let reading = false;
-  let needToClose = true; // NOTE: we must close the cursor if we never read from it, use `_construct` in future node versions
+  constructor(cursor: AbstractCursor) {
+    super({
+      objectMode: true,
+      autoDestroy: false,
+      highWaterMark: 1
+    });
+    this._cursor = cursor;
+  }
 
-  readable._read = function () {
-    if (initialized === false) {
-      needToClose = false;
-      initialized = true;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override _read(size: number): void {
+    if (!this._readInProgress) {
+      this._readInProgress = true;
+      this._readNext();
     }
+  }
 
-    if (!reading) {
-      reading = true;
-      readNext();
-    }
-  };
+  override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
+    this._cursor.close(err => process.nextTick(callback, err || error));
+  }
 
-  readable._destroy = function (error, cb) {
-    if (needToClose) {
-      cursor.close(err => process.nextTick(cb, err || error));
-    } else {
-      cb(error);
-    }
-  };
-
-  function readNext() {
-    needToClose = false;
-    next(cursor, true, (err, result) => {
-      needToClose = err ? !cursor.closed : result != null;
-
+  private _readNext() {
+    next(this._cursor, true, (err, result) => {
       if (err) {
         // NOTE: This is questionable, but we have a test backing the behavior. It seems the
         //       desired behavior is that a stream ends cleanly when a user explicitly closes
         //       a client during iteration. Alternatively, we could do the "right" thing and
         //       propagate the error message by removing this special case.
         if (err.message.match(/server is closed/)) {
-          cursor.close();
-          return readable.push(null);
+          this._cursor.close();
+          return this.push(null);
         }
 
         // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
@@ -896,25 +901,23 @@ function makeCursorStream(cursor: AbstractCursor) {
         //       that changed to happen in cleanup legitimate errors would not destroy the
         //       stream. There are change streams test specifically test these cases.
         if (err.message.match(/interrupted/)) {
-          return readable.push(null);
+          return this.push(null);
         }
 
-        return readable.destroy(err);
+        return this.destroy(err);
       }
 
       if (result == null) {
-        readable.push(null);
-      } else if (readable.destroyed) {
-        cursor.close();
+        this.push(null);
+      } else if (this.destroyed) {
+        this._cursor.close();
       } else {
-        if (readable.push(result)) {
-          return readNext();
+        if (this.push(result)) {
+          return this._readNext();
         }
 
-        reading = false;
+        this._readInProgress = false;
       }
     });
   }
-
-  return readable;
 }
