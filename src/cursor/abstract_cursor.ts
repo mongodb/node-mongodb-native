@@ -838,7 +838,7 @@ function cleanupCursor(
 
   return executeOperation(
     cursor[kClient],
-    new KillCursorsOperation(cursorId, cursorNs, server, cursor[kOptions]),
+    new KillCursorsOperation(cursorId, cursorNs, server, { session }),
     completeCleanup
   );
 }

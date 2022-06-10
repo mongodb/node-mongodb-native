@@ -61,6 +61,5 @@ const SKIP = [
 ];
 
 describe('Load Balancer Unified Tests', function () {
-  this.timeout(10000);
   runUnifiedSuite(loadSpecTests(path.join('load-balancers')), SKIP);
 });
