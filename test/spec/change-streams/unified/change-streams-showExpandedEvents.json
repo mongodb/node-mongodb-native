@@ -433,6 +433,7 @@
         {
           "name": "runCommand",
           "object": "database0",
+          "commandName": "collMod",
           "arguments": {
             "command": {
               "collMod": "collection0"
@@ -485,6 +486,7 @@
         {
           "name": "runCommand",
           "object": "adminDb",
+          "commandName": "shardCollection",
           "arguments": {
             "command": {
               "shardCollection": "shardedDb.shardedCollection",

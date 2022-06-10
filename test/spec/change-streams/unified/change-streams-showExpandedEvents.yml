@@ -256,6 +256,7 @@ tests:
         saveResultAsEntity: &changeStream0 changeStream0
       - name: runCommand
         object: *database0
+        commandName: collMod
         arguments:
           command:
             collMod: *collection0
@@ -284,6 +285,7 @@ tests:
         saveResultAsEntity: &changeStream0 changeStream0
       - name: runCommand
         object: *adminDb
+        commandName: shardCollection
         arguments:
           command:
             shardCollection: shardedDb.shardedCollection
