@@ -14,10 +14,10 @@ import type { MongoClient } from '../mongo_client';
 import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
+import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
-import { sameServerSelector } from '../sdam/server_selection';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
 import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
 
@@ -836,21 +836,10 @@ function cleanupCursor(
 
   cursor[kKilled] = true;
 
-  cursor[kClient].topology?.selectServer(
-    sameServerSelector(server.description),
-    {},
-    (error, server) => {
-      if (error || !server) return completeCleanup();
-      server.killCursors(
-        cursorNs,
-        [cursorId],
-        {
-          ...pluckBSONSerializeOptions(cursor[kOptions]),
-          session: cursor[kClient].topology?.hasSessionSupport() ? session : undefined
-        },
-        () => completeCleanup()
-      );
-    }
+  return executeOperation(
+    cursor[kClient],
+    new KillCursorsOperation(cursorId, cursorNs, server, cursor[kOptions]),
+    completeCleanup
   );
 }
 

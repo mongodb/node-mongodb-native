@@ -11,7 +11,8 @@ export const Aspect = {
   EXPLAINABLE: Symbol('EXPLAINABLE'),
   SKIP_COLLATION: Symbol('SKIP_COLLATION'),
   CURSOR_CREATING: Symbol('CURSOR_CREATING'),
-  CURSOR_ITERATING: Symbol('CURSOR_ITERATING')
+  CURSOR_ITERATING: Symbol('CURSOR_ITERATING'),
+  CLOSING: Symbol('CLOSING')
 } as const;
 
 /** @public */
