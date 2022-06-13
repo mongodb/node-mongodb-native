@@ -1,4 +1,3 @@
-import Denque = require('denque');
 import type { Readable } from 'stream';
 import { promisify } from 'util';
 
