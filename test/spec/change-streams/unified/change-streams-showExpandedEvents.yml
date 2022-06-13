@@ -256,10 +256,10 @@ tests:
         saveResultAsEntity: &changeStream0 changeStream0
       - name: runCommand
         object: *database0
-        commandName: collMod
         arguments:
           command:
             collMod: *collection0
+          commandName: collMod
       - name: iterateUntilDocumentOrError
         object: *changeStream0
         expectResult:
@@ -285,12 +285,12 @@ tests:
         saveResultAsEntity: &changeStream0 changeStream0
       - name: runCommand
         object: *adminDb
-        commandName: shardCollection
         arguments:
           command:
             shardCollection: shardedDb.shardedCollection
             key:
               _id: 1
+          commandName: shardCollection
       - name: iterateUntilDocumentOrError
         object: *changeStream0
         expectResult:

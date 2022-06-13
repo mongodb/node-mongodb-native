@@ -433,11 +433,11 @@
         {
           "name": "runCommand",
           "object": "database0",
-          "commandName": "collMod",
           "arguments": {
             "command": {
               "collMod": "collection0"
-            }
+            },
+            "commandName": "collMod"
           }
         },
         {
@@ -486,14 +486,14 @@
         {
           "name": "runCommand",
           "object": "adminDb",
-          "commandName": "shardCollection",
           "arguments": {
             "command": {
               "shardCollection": "shardedDb.shardedCollection",
               "key": {
                 "_id": 1
               }
-            }
+            },
+            "commandName": "shardCollection"
           }
         },
         {
