@@ -735,6 +735,10 @@ export class ChangeStream<
 
   /**
    * Return a modified Readable stream including a possible transform method.
+   *
+   * NOTE: When using a Stream to process change stream events, the stream will
+   * NOT automatically resume in the case a resumable error is encountered.
+   *
    * @throws MongoDriverError if this.cursor is undefined
    */
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
