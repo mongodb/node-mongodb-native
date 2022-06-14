@@ -20,8 +20,8 @@ export class KillCursorsOperation extends AbstractOperation {
         new MongoRuntimeError('Killcursor must run on the same server operation began on')
       );
     }
-    server.killCursors(this.ns, [this.cursorId], { session }, () => callback());
+    server.killCursors(this.ns, [this.cursorId], { session, noResponse: true }, () => callback());
   }
 }
 
-defineAspects(KillCursorsOperation, [Aspect.CLOSING, Aspect.CURSOR_ITERATING]);
+defineAspects(KillCursorsOperation, [Aspect.MUST_SELECT_SAME_SERVER]);

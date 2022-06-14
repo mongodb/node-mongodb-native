@@ -268,7 +268,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
         if (serverSession != null) {
           // release the server session back to the pool
           this.sessionPool.release(serverSession);
-          // Make sure a new serverSession never makes it on to this ClientSession
+          // Make sure a new serverSession never makes it onto this ClientSession
           Object.defineProperty(this, kServerSession, {
             value: ServerSession.clone(serverSession),
             writable: false
@@ -883,7 +883,7 @@ export class ServerSessionPool {
 
   constructor(client: MongoClient) {
     if (client == null) {
-      throw new MongoRuntimeError('ServerSessionPool requires a topology');
+      throw new MongoRuntimeError('ServerSessionPool requires a MongoClient');
     }
 
     this.client = client;

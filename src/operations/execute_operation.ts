@@ -174,8 +174,8 @@ function executeWithServerSelection<TResult>(
 
   let selector: ReadPreference | ServerSelector;
 
-  if (operation.hasAspect(Aspect.CURSOR_ITERATING)) {
-    // Get more operations must always select the same server, but run through
+  if (operation.hasAspect(Aspect.MUST_SELECT_SAME_SERVER)) {
+    // GetMore and KillCursor operations must always select the same server, but run through
     // server selection to potentially force monitor checks if the server is
     // in an unknown state.
     selector = sameServerSelector(operation.server?.description);

@@ -270,7 +270,7 @@ class APMEventCollector {
 }
 
 /**
- * @param {(client: MongoClient, done: Mocha.Done)} callback
+ * @param {(client: MongoClient, done: Mocha.Done) => void} callback
  */
 function withClientV2(callback) {
   return async function testFunction() {

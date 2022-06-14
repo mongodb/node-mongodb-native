@@ -60,4 +60,4 @@ export class GetMoreOperation extends AbstractOperation {
   }
 }
 
-defineAspects(GetMoreOperation, [Aspect.READ_OPERATION, Aspect.CURSOR_ITERATING]);
+defineAspects(GetMoreOperation, [Aspect.READ_OPERATION, Aspect.MUST_SELECT_SAME_SERVER]);

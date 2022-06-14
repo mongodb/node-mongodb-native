@@ -14,7 +14,7 @@ class ConcreteCursor extends AbstractCursor {
     return new ConcreteCursor(new MongoClient('mongodb://iLoveJavascript'));
   }
   _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
-    return callback(null, { server: {} as Server, session, response: { ok: 1 } });
+    return callback(undefined, { server: {} as Server, session, response: { ok: 1 } });
   }
 }
 

@@ -430,7 +430,7 @@ describe('Sessions', function () {
       beforeEach(() => sinon.stub(client.topology, 'hasSessionSupport').callsFake(() => false));
 
       it('should not send session', async () => {
-        const events = [];
+        const events: CommandStartedEvent[] = [];
         client.on('commandStarted', event => events.push(event));
 
         await collection.insertMany([{ a: 1 }, { a: 1 }]);
@@ -472,7 +472,7 @@ describe('Sessions', function () {
       beforeEach(() => sinon.stub(client.topology, 'hasSessionSupport').callsFake(() => true));
 
       it('should send session', async () => {
-        const events = [];
+        const events: CommandStartedEvent[] = [];
         client.on('commandStarted', event => events.push(event));
 
         await collection.insertMany([{ a: 1 }, { a: 1 }]);

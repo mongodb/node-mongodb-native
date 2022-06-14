@@ -3,6 +3,9 @@ import { once } from 'events';
 import * as sinon from 'sinon';
 
 import {
+  CommandFailedEvent,
+  CommandStartedEvent,
+  CommandSucceededEvent,
   MongoClient,
   MongoNotConnectedError,
   MongoServerSelectionError,
@@ -633,8 +636,8 @@ describe('class MongoClient', function () {
       await client.db('test').command({ ping: 1 }, { session });
       await session.endSession();
 
-      const startedEvents = [];
-      const endEvents = [];
+      const startedEvents: CommandStartedEvent[] = [];
+      const endEvents: Array<CommandFailedEvent | CommandSucceededEvent> = [];
       client.on('commandStarted', event => startedEvents.push(event));
       client.on('commandSucceeded', event => endEvents.push(event));
       client.on('commandFailed', event => endEvents.push(event));
