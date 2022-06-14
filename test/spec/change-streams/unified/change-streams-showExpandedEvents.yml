@@ -259,6 +259,7 @@ tests:
         arguments:
           command:
             collMod: *collection0
+          commandName: collMod
       - name: iterateUntilDocumentOrError
         object: *changeStream0
         expectResult:
@@ -289,6 +290,7 @@ tests:
             shardCollection: shardedDb.shardedCollection
             key:
               _id: 1
+          commandName: shardCollection
       - name: iterateUntilDocumentOrError
         object: *changeStream0
         expectResult:

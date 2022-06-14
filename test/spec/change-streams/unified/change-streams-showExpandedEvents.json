@@ -436,7 +436,8 @@
           "arguments": {
             "command": {
               "collMod": "collection0"
-            }
+            },
+            "commandName": "collMod"
           }
         },
         {
@@ -491,7 +492,8 @@
               "key": {
                 "_id": 1
               }
-            }
+            },
+            "commandName": "shardCollection"
           }
         },
         {
