@@ -17,7 +17,6 @@ import {
   Long,
   MongoChangeStreamError,
   MongoClient,
-  MongoNetworkError,
   MongoServerError,
   ReadPreference,
   ResumeToken
@@ -362,8 +361,8 @@ describe('Change Streams', function () {
           expect(err).to.not.exist;
 
           // Check the cursor is closed
-          assert.equal(changeStream.closed, true);
-          assert.ok(!changeStream.cursor);
+          expect(changeStream.closed).to.be.true;
+          expect(changeStream.cursor.closed).to.be.true;
           done();
         });
       });
@@ -1595,7 +1594,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
             const mock = sinon
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              .stub(changeStream.cursor!.server!, 'getMore')
+              .stub(changeStream.cursor.server!, 'getMore')
               .callsFake((_ns, _cursorId, _options, callback) => {
                 mock.restore();
                 const error = new MongoServerError({ message: 'Something went wrong' });
@@ -1720,7 +1719,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
             const mock = sinon
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              .stub(changeStream.cursor!.server!, 'getMore')
+              .stub(changeStream.cursor.server!, 'getMore')
               .callsFake((_ns, _cursorId, _options, callback) => {
                 mock.restore();
                 const error = new MongoServerError({ message: 'Something went wrong' });
@@ -1844,7 +1843,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
             const mock = sinon
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              .stub(changeStream.cursor!.server!, 'getMore')
+              .stub(changeStream.cursor.server!, 'getMore')
               .callsFake((_ns, _cursorId, _options, callback) => {
                 mock.restore();
                 const error = new MongoServerError({ message: 'Something went wrong' });

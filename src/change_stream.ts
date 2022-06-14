@@ -534,7 +534,7 @@ export class ChangeStream<
   namespace: MongoDBNamespace;
   type: symbol;
   /** @internal */
-  cursor: ChangeStreamCursor<TSchema, TChange> | undefined;
+  cursor: ChangeStreamCursor<TSchema, TChange>;
   streamOptions?: CursorStreamOptions;
   /** @internal */
   [kCursorStream]?: Readable & AsyncIterable<TChange>;
@@ -726,7 +726,6 @@ export class ChangeStream<
       const cursor = this.cursor;
       return cursor.close(err => {
         this._endStream();
-        this.cursor = undefined;
         return cb(err);
       });
     });
@@ -878,17 +877,14 @@ export class ChangeStream<
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
-    const cursor = this.cursor;
-
-    if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
-      this.cursor = undefined;
+    if (this.cursor && isResumableError(error, maxWireVersion(this.cursor.server))) {
       this._endStream();
-      cursor.close();
+      this.cursor.close();
 
       const topology = getTopology(this.parent);
-      topology.selectServer(cursor.readPreference, {}, err => {
+      topology.selectServer(this.cursor.readPreference, {}, err => {
         if (err) return this._closeWithError(err);
-        this.cursor = this._createChangeStreamCursor(cursor.resumeOptions);
+        this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
       });
     } else {
       this._closeWithError(error);
@@ -904,19 +900,15 @@ export class ChangeStream<
       return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     }
 
-    const cursor = this.cursor;
-
-    if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
-      this.cursor = undefined;
-
-      cursor.close();
+    if (this.cursor && isResumableError(error, maxWireVersion(this.cursor.server))) {
+      this.cursor.close();
 
       const topology = getTopology(this.parent);
-      topology.selectServer(cursor.readPreference, {}, err => {
+      topology.selectServer(this.cursor.readPreference, {}, err => {
         // if the topology can't reconnect, close the stream
         if (err) return this._closeWithError(err, callback);
 
-        this.cursor = this._createChangeStreamCursor(cursor.resumeOptions);
+        this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
         callback();
       });
     } else {
