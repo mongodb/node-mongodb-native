@@ -271,8 +271,9 @@ export interface MongoClientPrivate {
   namespace: MongoDBNamespace;
   hasBeenClosed: boolean;
   /**
-   * We keep a reference to the sessions that are acquired from the pool
-   * so we can end them at client.close time. Bookkeeping for testing mainly (non-spec).
+   * We keep a reference to the sessions that are acquired from the pool.
+   * - used to track and close all sessions in client.close() (which is non-standard behavior)
+   * - used to notify the leak checker in our tests if test author forgot to clean up explicit sessions
    */
   readonly activeSessions: Set<ClientSession>;
   readonly sessionPool: ServerSessionPool;
