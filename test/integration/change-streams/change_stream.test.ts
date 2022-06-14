@@ -2015,4 +2015,25 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       });
     });
   });
+
+  it('caches the server version after the initial aggregate call', async function () {
+    changeStream = collection.watch([], changeStreamResumeOptions);
+    await initIteratorMode(changeStream);
+
+    expect(changeStream.cursor.maxWireVersion).not.to.be.undefined;
+  });
+
+  it('caches the server version after each getMore call', async function () {
+    changeStream = collection.watch([], changeStreamResumeOptions);
+    await initIteratorMode(changeStream);
+
+    const maxWireVersion = changeStream.cursor.maxWireVersion;
+    changeStream.cursor.maxWireVersion = 20;
+
+    await collection.insertOne({ name: 'bailey' });
+
+    await changeStream.next();
+
+    expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
+  });
 });

@@ -20,14 +20,7 @@ import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
 import type { ServerSessionId } from './sessions';
-import {
-  Callback,
-  filterOptions,
-  getTopology,
-  maxWireVersion,
-  maybePromise,
-  MongoDBNamespace
-} from './utils';
+import { Callback, filterOptions, getTopology, maybePromise, MongoDBNamespace } from './utils';
 
 /** @internal */
 const kCursorStream = Symbol('cursorStream');
@@ -877,7 +870,7 @@ export class ChangeStream<
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
-    if (this.cursor && isResumableError(error, maxWireVersion(this.cursor.server))) {
+    if (this.cursor && isResumableError(error, this.cursor.maxWireVersion)) {
       this._endStream();
       this.cursor.close();
 
@@ -900,7 +893,7 @@ export class ChangeStream<
       return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     }
 
-    if (this.cursor && isResumableError(error, maxWireVersion(this.cursor.server))) {
+    if (this.cursor && isResumableError(error, this.cursor.maxWireVersion)) {
       this.cursor.close();
 
       const topology = getTopology(this.parent);

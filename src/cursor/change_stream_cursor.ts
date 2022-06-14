@@ -53,6 +53,13 @@ export class ChangeStreamCursor<
   postBatchResumeToken?: ResumeToken;
   pipeline: Document[];
 
+  /**
+   * @internal
+   *
+   * used to determine change stream resumability
+   */
+  maxWireVersion: number | undefined;
+
   constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
@@ -148,11 +155,13 @@ export class ChangeStreamCursor<
         }
 
         const server = aggregateOperation.server;
+        this.maxWireVersion = maxWireVersion(server);
+
         if (
           this.startAtOperationTime == null &&
           this.resumeAfter == null &&
           this.startAfter == null &&
-          maxWireVersion(server) >= 7
+          this.maxWireVersion >= 7
         ) {
           this.startAtOperationTime = response.operationTime;
         }
@@ -174,6 +183,7 @@ export class ChangeStreamCursor<
         return callback(err);
       }
 
+      this.maxWireVersion = maxWireVersion(this.server);
       this._processBatch(response as TODO_NODE_3286 as ChangeStreamAggregateRawResult<TChange>);
 
       this.emit(ChangeStream.MORE, response);
