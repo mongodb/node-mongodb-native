@@ -14,6 +14,7 @@ import type { MongoClient } from '../mongo_client';
 import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
+import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -118,7 +119,7 @@ export abstract class AbstractCursor<
   /** @internal */
   [kId]?: Long;
   /** @internal */
-  [kSession]?: ClientSession;
+  [kSession]: ClientSession;
   /** @internal */
   [kServer]?: Server;
   /** @internal */
@@ -187,6 +188,8 @@ export abstract class AbstractCursor<
 
     if (options.session instanceof ClientSession) {
       this[kSession] = options.session;
+    } else {
+      this[kSession] = this[kClient].startSession({ owner: this, explicit: false });
     }
   }
 
@@ -217,11 +220,11 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
-  get session(): ClientSession | undefined {
+  get session(): ClientSession {
     return this[kSession];
   }
 
-  set session(clientSession: ClientSession | undefined) {
+  set session(clientSession: ClientSession) {
     this[kSession] = clientSession;
   }
 
@@ -592,11 +595,12 @@ export abstract class AbstractCursor<
     const session = this[kSession];
     if (session) {
       // We only want to end this session if we created it, and it hasn't ended yet
-      if (session.explicit === false && !session.hasEnded) {
-        session.endSession();
+      if (session.explicit === false) {
+        if (!session.hasEnded) {
+          session.endSession(() => null);
+        }
+        this[kSession] = this.client.startSession({ owner: this, explicit: false });
       }
-
-      this[kSession] = undefined;
     }
   }
 
@@ -644,22 +648,10 @@ export abstract class AbstractCursor<
    * a significant refactor.
    */
   [kInit](callback: Callback<TSchema | null>): void {
-    if (this[kSession] == null) {
-      if (this[kClient].topology?.shouldCheckForSessionSupport()) {
-        return this[kClient].topology?.selectServer(ReadPreference.primaryPreferred, {}, err => {
-          if (err) return callback(err);
-          return this[kInit](callback);
-        });
-      } else if (this[kClient].topology?.hasSessionSupport()) {
-        this[kSession] = this[kClient].topology?.startSession({ owner: this, explicit: false });
-      }
-    }
-
     this._initialize(this[kSession], (err, state) => {
       if (state) {
         const response = state.response;
         this[kServer] = state.server;
-        this[kSession] = state.session;
 
         if (response.cursor) {
           this[kId] =
@@ -843,11 +835,11 @@ function cleanupCursor(
   }
 
   cursor[kKilled] = true;
-  server.killCursors(
-    cursorNs,
-    [cursorId],
-    { ...pluckBSONSerializeOptions(cursor[kOptions]), session },
-    () => completeCleanup()
+
+  return executeOperation(
+    cursor[kClient],
+    new KillCursorsOperation(cursorId, cursorNs, server, { session }),
+    completeCleanup
   );
 }
 

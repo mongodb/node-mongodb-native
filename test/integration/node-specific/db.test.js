@@ -93,30 +93,6 @@ describe('Db', function () {
     }
   });
 
-  it('shouldCorrectlyReconnectWhenError', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(`mongodb://127.0.0.1:27088/test`, {
-        maxPoolSize: 4,
-        serverSelectionTimeoutMS: 10
-      });
-
-      // Establish connection to db
-      client.connect(function (err) {
-        test.ok(err != null);
-
-        client.connect(function (err) {
-          test.ok(err != null);
-          client.close(done);
-        });
-      });
-    }
-  });
-
   it('should not cut collection name when it is the same as the database', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'] }

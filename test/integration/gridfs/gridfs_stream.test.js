@@ -599,117 +599,97 @@ describe('GridFS Stream', function () {
    * @example-class GridFSBucket
    * @example-method delete
    */
-  it('Deleting a file using promises', {
-    metadata: {
-      requires: { topology: ['single'], sessions: { skipLeakTests: true } }
-    },
+  it('Deleting a file using promises', function (done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client.connect(function (err, client) {
+      const db = client.db(configuration.db);
+      const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      const CHUNKS_COLL = 'gridfsdownload.chunks';
+      const FILES_COLL = 'gridfsdownload.files';
+      const readStream = fs.createReadStream('./LICENSE.md');
 
-    test(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
-        const CHUNKS_COLL = 'gridfsdownload.chunks';
-        const FILES_COLL = 'gridfsdownload.files';
-        const readStream = fs.createReadStream('./LICENSE.md');
+      const uploadStream = bucket.openUploadStream('test.dat');
+      const id = uploadStream.id;
 
-        const uploadStream = bucket.openUploadStream('test.dat');
-        const id = uploadStream.id;
+      uploadStream.once('finish', function () {
+        bucket.delete(id).then(function () {
+          const chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
+          chunksQuery.toArray(function (error, docs) {
+            expect(error).to.not.exist;
+            expect(docs.length).to.equal(0);
 
-        uploadStream.once('finish', function () {
-          bucket.delete(id).then(function () {
-            const chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
-            chunksQuery.toArray(function (error, docs) {
+            const filesQuery = db.collection(FILES_COLL).find({ _id: id });
+            filesQuery.toArray(function (error, docs) {
               expect(error).to.not.exist;
               expect(docs.length).to.equal(0);
 
-              const filesQuery = db.collection(FILES_COLL).find({ _id: id });
-              filesQuery.toArray(function (error, docs) {
-                expect(error).to.not.exist;
-                expect(docs.length).to.equal(0);
-
-                client.close(done);
-              });
+              client.close(done);
             });
           });
         });
-
-        readStream.pipe(uploadStream);
       });
-    }
+
+      readStream.pipe(uploadStream);
+    });
   });
 
-  it('find()', {
-    metadata: { requires: { topology: ['single'], sessions: { skipLeakTests: true } } },
+  it('find()', function (done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client.connect(function (err, client) {
+      const db = client.db(configuration.db);
+      const bucket = new GridFSBucket(db, { bucketName: 'fs' });
 
-    test(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'fs' });
-
-        // We're only making sure this doesn't throw
-        bucket.find({
-          batchSize: 1,
-          limit: 2,
-          maxTimeMS: 3,
-          noCursorTimeout: true,
-          skip: 4,
-          sort: { _id: 1 }
-        });
-
-        client.close(done);
+      // We're only making sure this doesn't throw
+      bucket.find({
+        batchSize: 1,
+        limit: 2,
+        maxTimeMS: 3,
+        noCursorTimeout: true,
+        skip: 4,
+        sort: { _id: 1 }
       });
-    }
+
+      client.close(done);
+    });
   });
 
-  /**
-   * Drop an entire buckets files and chunks
-   *
-   * @example-class GridFSBucket
-   * @example-method drop
-   */
-  it('drop example', {
-    metadata: { requires: { topology: ['single'], sessions: { skipLeakTests: true } } },
+  it('drop example', function (done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    client.connect(function (err, client) {
+      const db = client.db(configuration.db);
+      const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      const CHUNKS_COLL = 'gridfsdownload.chunks';
+      const FILES_COLL = 'gridfsdownload.files';
+      const readStream = fs.createReadStream('./LICENSE.md');
 
-    test(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
-        const CHUNKS_COLL = 'gridfsdownload.chunks';
-        const FILES_COLL = 'gridfsdownload.files';
-        const readStream = fs.createReadStream('./LICENSE.md');
+      const uploadStream = bucket.openUploadStream('test.dat');
+      const id = uploadStream.id;
 
-        const uploadStream = bucket.openUploadStream('test.dat');
-        const id = uploadStream.id;
+      uploadStream.once('finish', function () {
+        bucket.drop(function (err) {
+          expect(err).to.not.exist;
 
-        uploadStream.once('finish', function () {
-          bucket.drop(function (err) {
-            expect(err).to.not.exist;
+          const chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
+          chunksQuery.toArray(function (error, docs) {
+            expect(error).to.not.exist;
+            expect(docs.length).to.equal(0);
 
-            const chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
-            chunksQuery.toArray(function (error, docs) {
+            const filesQuery = db.collection(FILES_COLL).find({ _id: id });
+            filesQuery.toArray(function (error, docs) {
               expect(error).to.not.exist;
               expect(docs.length).to.equal(0);
 
-              const filesQuery = db.collection(FILES_COLL).find({ _id: id });
-              filesQuery.toArray(function (error, docs) {
-                expect(error).to.not.exist;
-                expect(docs.length).to.equal(0);
-
-                client.close(done);
-              });
+              client.close(done);
             });
           });
         });
-
-        readStream.pipe(uploadStream);
       });
-    }
+
+      readStream.pipe(uploadStream);
+    });
   });
 
   /**
@@ -1089,8 +1069,7 @@ describe('GridFS Stream', function () {
           expect(err).to.not.exist;
           const names = indexes.map(i => i.name);
           expect(names).to.eql(['_id_', 'filename_1_uploadDate_1']);
-          client.close();
-          done();
+          client.close(done);
         });
       });
     });

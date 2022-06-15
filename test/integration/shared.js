@@ -142,15 +142,7 @@ function withClient(client, callback) {
     if (!client) {
       client = this.configuration.newClient(connectionString);
     }
-    return client
-      .connect()
-      .then(callback)
-      .then(err => {
-        cleanup();
-        if (err) {
-          throw err;
-        }
-      }, cleanup);
+    return client.connect().then(callback).finally(cleanup);
   }
 
   if (this && this.configuration) {
@@ -277,20 +269,28 @@ class APMEventCollector {
   }
 }
 
-// simplified `withClient` helper that only uses callbacks
+/**
+ * @param {(client: MongoClient, done: Mocha.Done) => void} callback
+ */
 function withClientV2(callback) {
-  return function testFunction(done) {
+  return async function testFunction() {
     const client = this.configuration.newClient({ monitorCommands: true });
-    client.connect(err => {
-      if (err) return done(err);
-      this.defer(() => client.close());
 
-      try {
-        callback.call(this, client, done);
-      } catch (err) {
-        done(err);
-      }
-    });
+    try {
+      await client.connect();
+      await new Promise((resolve, reject) => {
+        try {
+          callback.call(this, client, error => {
+            if (error) return reject(error);
+            resolve();
+          });
+        } catch (err) {
+          return reject(err);
+        }
+      });
+    } finally {
+      await client.close();
+    }
   };
 }
 

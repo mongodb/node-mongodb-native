@@ -39,7 +39,7 @@ const pipeline = [
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
 
-describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
+describe('Change Streams', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
@@ -760,6 +760,8 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
       const [data] = await willBeData;
       const parsedEvent = JSON.parse(data);
       expect(parsedEvent).to.have.nested.property('fullDocument.a', 1);
+
+      outStream.destroy();
     }
   });
 
@@ -873,23 +875,12 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
       });
     });
 
-    afterEach(function () {
-      return Promise.resolve()
-        .then(() => {
-          if (changeStream && !changeStream.closed) {
-            return changeStream.close();
-          }
-        })
-        .then(() => {
-          if (client) {
-            return client.close();
-          }
-        })
-        .then(() => {
-          coll = undefined;
-          changeStream = undefined;
-          client = undefined;
-        });
+    afterEach(async function () {
+      await changeStream?.close();
+      await client?.close();
+      coll = undefined;
+      changeStream = undefined;
+      client = undefined;
     });
 
     it('when invoked with promises', {
@@ -1147,8 +1138,15 @@ describe('Change Streams', { sessions: { skipLeakTests: true } }, function () {
 
     describe('NODE-2626 - handle null changes without error', function () {
       let mockServer;
-      afterEach(() => mock.cleanup());
-      beforeEach(() => mock.createServer().then(server => (mockServer = server)));
+
+      beforeEach(async () => {
+        mockServer = await mock.createServer();
+      });
+
+      afterEach(async () => {
+        await mock.cleanup();
+      });
+
       it('changeStream should close if cursor id for initial aggregate is Long.ZERO', function (done) {
         mockServer.setMessageHandler(req => {
           const doc = req.document;

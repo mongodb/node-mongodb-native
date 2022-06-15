@@ -11,7 +11,7 @@ export const Aspect = {
   EXPLAINABLE: Symbol('EXPLAINABLE'),
   SKIP_COLLATION: Symbol('SKIP_COLLATION'),
   CURSOR_CREATING: Symbol('CURSOR_CREATING'),
-  CURSOR_ITERATING: Symbol('CURSOR_ITERATING')
+  MUST_SELECT_SAME_SERVER: Symbol('MUST_SELECT_SAME_SERVER')
 } as const;
 
 /** @public */
@@ -92,6 +92,10 @@ export abstract class AbstractOperation<TResult = any> {
 
   get session(): ClientSession | undefined {
     return this[kSession];
+  }
+
+  clearSession() {
+    this[kSession] = undefined;
   }
 
   get canRetryRead(): boolean {

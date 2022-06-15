@@ -1,5 +1,6 @@
 import Denque = require('denque');
 import { setTimeout } from 'timers';
+import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';
 import { deserialize, serialize } from '../bson';
@@ -29,20 +30,14 @@ import {
   MongoServerSelectionError,
   MongoTopologyClosedError
 } from '../error';
-import type { MongoClient, MongoOptions, ServerApi } from '../mongo_client';
+import type { MongoClient, ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
-import {
-  ClientSession,
-  ClientSessionOptions,
-  ServerSessionId,
-  ServerSessionPool
-} from '../sessions';
+import type { ClientSession } from '../sessions';
 import type { Transaction } from '../transactions';
 import {
   Callback,
   ClientMetadata,
-  eachAsync,
   emitWarning,
   EventEmitterWithState,
   HostAddress,
@@ -120,10 +115,6 @@ export interface TopologyPrivate {
   minHeartbeatFrequencyMS: number;
   /** A map of server instances to normalized addresses */
   servers: Map<string, Server>;
-  /** Server Session Pool */
-  sessionPool: ServerSessionPool;
-  /** Active client sessions */
-  sessions: Set<ClientSession>;
   credentials?: MongoCredentials;
   clusterTime?: ClusterTime;
   /** timers created for the initial connect to a server */
@@ -316,10 +307,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS,
       // a map of server instances to normalized addresses
       servers: new Map(),
-      // Server Session Pool
-      sessionPool: new ServerSessionPool(this),
-      // Active client sessions
-      sessions: new Set(),
       credentials: options?.credentials,
       clusterTime: undefined,
 
@@ -443,13 +430,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
+    const exitWithError = (error: Error) =>
+      callback ? callback(error) : this.emit(Topology.ERROR, error);
+
     const readPreference = options.readPreference ?? ReadPreference.primary;
     this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
       if (err) {
-        this.close();
-
-        typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
-        return;
+        return this.close({ force: false }, () => exitWithError(err));
       }
 
       // TODO: NODE-2471
@@ -457,15 +444,14 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       if (!skipPingOnConnect && server && this.s.credentials) {
         server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
           if (err) {
-            typeof callback === 'function' ? callback(err) : this.emit(Topology.ERROR, err);
-            return;
+            return exitWithError(err);
           }
 
           stateTransition(this, STATE_CONNECTED);
           this.emit(Topology.OPEN, this);
           this.emit(Topology.CONNECT, this);
 
-          if (typeof callback === 'function') callback(undefined, this);
+          callback?.(undefined, this);
         });
 
         return;
@@ -475,7 +461,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       this.emit(Topology.OPEN, this);
       this.emit(Topology.CONNECT, this);
 
-      if (typeof callback === 'function') callback(undefined, this);
+      callback?.(undefined, this);
     });
   }
 
@@ -489,52 +475,38 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     if (typeof options === 'boolean') {
       options = { force: options };
     }
-
     options = options ?? {};
+
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
-      if (typeof callback === 'function') {
-        callback();
-      }
-
-      return;
+      return callback?.();
     }
 
-    stateTransition(this, STATE_CLOSING);
+    const destroyedServers = Array.from(this.s.servers.values(), server => {
+      return promisify(destroyServer)(server, this, options);
+    });
 
-    drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
-    drainTimerQueue(this.s.connectionTimers);
+    Promise.all(destroyedServers)
+      .then(() => {
+        this.s.servers.clear();
 
-    if (this.s.srvPoller) {
-      this.s.srvPoller.stop();
-      this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
-    }
+        stateTransition(this, STATE_CLOSING);
 
-    this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
+        drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
+        drainTimerQueue(this.s.connectionTimers);
 
-    eachAsync(
-      Array.from(this.s.sessions.values()),
-      (session, cb) => session.endSession(cb),
-      () => {
-        this.s.sessionPool.endAllPooledSessions(() => {
-          eachAsync(
-            Array.from(this.s.servers.values()),
-            (server, cb) => destroyServer(server, this, options, cb),
-            err => {
-              this.s.servers.clear();
+        if (this.s.srvPoller) {
+          this.s.srvPoller.stop();
+          this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
+        }
 
-              // emit an event for close
-              this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
+        this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
 
-              stateTransition(this, STATE_CLOSED);
+        stateTransition(this, STATE_CLOSED);
 
-              if (typeof callback === 'function') {
-                callback(err);
-              }
-            }
-          );
-        });
-      }
-    );
+        // emit an event for close
+        this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
+      })
+      .finally(() => callback?.());
   }
 
   /**
@@ -626,44 +598,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    */
   hasSessionSupport(): boolean {
     return this.loadBalanced || this.description.logicalSessionTimeoutMinutes != null;
-  }
-
-  /** Start a logical session */
-  startSession(options: ClientSessionOptions, clientOptions?: MongoOptions): ClientSession {
-    const session = new ClientSession(this.client, this.s.sessionPool, options, clientOptions);
-    session.once('ended', () => {
-      this.s.sessions.delete(session);
-    });
-
-    this.s.sessions.add(session);
-    return session;
-  }
-
-  /** Send endSessions command(s) with the given session ids */
-  endSessions(sessions: ServerSessionId[], callback?: Callback<Document>): void {
-    if (!Array.isArray(sessions)) {
-      sessions = [sessions];
-    }
-
-    this.selectServer(
-      readPreferenceServerSelector(ReadPreference.primaryPreferred),
-      {},
-      (err, server) => {
-        if (err || !server) {
-          if (typeof callback === 'function') callback(err);
-          return;
-        }
-
-        server.command(
-          ns('admin.$cmd'),
-          { endSessions: sessions },
-          { noResponse: true },
-          (err, result) => {
-            if (typeof callback === 'function') callback(err, result);
-          }
-        );
-      }
-    );
   }
 
   /**

@@ -127,6 +127,7 @@ const testConfigBeforeHook = async function () {
     version: this.configuration.buildInfo.version,
     node: process.version,
     os: process.platform,
+    pid: process.pid,
     serverless: process.env.SERVERLESS === '1',
     auth: process.env.AUTH === 'auth',
     tls: process.env.SSL === 'ssl',

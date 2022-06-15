@@ -126,29 +126,7 @@ function genClusterTime(time) {
   };
 }
 
-function sessionCleanupHandler(session, sessionPool, done) {
-  return err => {
-    if (session == null) {
-      sessionPool.endAllPooledSessions();
-      done();
-      return;
-    }
-
-    if (session.hasEnded) {
-      sessionPool.endAllPooledSessions();
-      done(err);
-      return;
-    }
-
-    session.endSession(() => {
-      sessionPool.endAllPooledSessions();
-      done(err);
-    });
-  };
-}
-
 module.exports = {
   ReplSetFixture: ReplSetFixture,
-  genClusterTime: genClusterTime,
-  sessionCleanupHandler
+  genClusterTime: genClusterTime
 };
