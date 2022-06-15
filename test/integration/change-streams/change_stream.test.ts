@@ -1494,7 +1494,7 @@ describe('Change Streams', function () {
   });
 });
 
-describe('ChangeStream resumability', { requires: { topology: '!single' } }, function () {
+describe('ChangeStream resumability', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
@@ -1552,7 +1552,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       for (const { error, code } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
-          { requires: { mongodb: '>=4.2' } },
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -1580,7 +1580,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       for (const { error, code } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
-          { requires: { mongodb: '<4.2' } },
+          { requires: { topology: '!single', mongodb: '<4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -1614,7 +1614,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
       it(
         'maintains change stream options on resume',
-        { requires: { mongodb: '>=4.2' } },
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([], changeStreamResumeOptions);
           await initIteratorMode(changeStream);
@@ -1645,7 +1645,10 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       );
 
       context('when the error is not a resumable error', function () {
-        it('does not resume', { requires: { mongodb: '>=4.2' } }, async function () {
+        it(
+          'does not resume',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
           changeStream = collection.watch([]);
 
           const unresumableErrorCode = 1000;
@@ -1668,7 +1671,8 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
           expect(error).to.be.instanceOf(MongoServerError);
           expect(aggregateEvents).to.have.lengthOf(1);
-        });
+          }
+        );
       });
     });
 
@@ -1676,7 +1680,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       for (const { error, code } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
-          { requires: { mongodb: '>=4.2' } },
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -1705,7 +1709,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       for (const { error, code } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
-          { requires: { mongodb: '<4.2' } },
+          { requires: { topology: '!single', mongodb: '<4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -1739,7 +1743,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
       it(
         'maintains change stream options on resume',
-        { requires: { mongodb: '>=4.2' } },
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([], changeStreamResumeOptions);
           await initIteratorMode(changeStream);
@@ -1770,7 +1774,10 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       );
 
       context('when the error is not a resumable error', function () {
-        it('does not resume', { requires: { mongodb: '>=4.2' } }, async function () {
+        it(
+          'does not resume',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
           changeStream = collection.watch([]);
 
           const unresumableErrorCode = 1000;
@@ -1793,7 +1800,8 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
           expect(error).to.be.instanceOf(MongoServerError);
           expect(aggregateEvents).to.have.lengthOf(1);
-        });
+          }
+        );
       });
     });
 
@@ -1801,7 +1809,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       for (const { error, code } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
-          { requires: { mongodb: '>=4.2' } },
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -1829,7 +1837,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       for (const { error, code } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
-          { requires: { mongodb: '<4.2' } },
+          { requires: { topology: '!single', mongodb: '<4.2' } },
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
@@ -1863,7 +1871,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
       it(
         'maintains change stream options on resume',
-        { requires: { mongodb: '>=4.2' } },
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([], changeStreamResumeOptions);
           await initIteratorMode(changeStream);
@@ -1894,7 +1902,10 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
       );
 
       context('when the error is not a resumable error', function () {
-        it('does not resume', { requires: { mongodb: '>=4.2' } }, async function () {
+        it(
+          'does not resume',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
           changeStream = collection.watch([]);
 
           const unresumableErrorCode = 1000;
@@ -1917,7 +1928,8 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
           expect(error).to.be.instanceOf(MongoServerError);
           expect(aggregateEvents).to.have.lengthOf(1);
-        });
+          }
+        );
       });
     });
   });
@@ -1926,7 +1938,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
     for (const { error, code } of resumableErrorCodes) {
       it(
         `resumes on error code ${code} (${error})`,
-        { requires: { mongodb: '>=4.2' } },
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([]);
 
@@ -1956,7 +1968,7 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
     it(
       'maintains the change stream options on resume',
-      { requires: { mongodb: '>=4.2' } },
+      { requires: { topology: '!single', mongodb: '>=4.2' } },
       async function () {
         changeStream = collection.watch([], changeStreamResumeOptions);
 
@@ -1989,7 +2001,10 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
     );
 
     context('when the error is not a resumable error', function () {
-      it('does not resume', { requires: { mongodb: '>=4.2' } }, async function () {
+      it(
+        'does not resume',
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
+        async function () {
         changeStream = collection.watch([]);
 
         const unresumableErrorCode = 1000;
@@ -2012,18 +2027,26 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
 
         expect(error).to.be.instanceOf(MongoServerError);
         expect(aggregateEvents).to.have.lengthOf(1);
-      });
+        }
+      );
     });
   });
 
-  it('caches the server version after the initial aggregate call', async function () {
+  it(
+    'caches the server version after the initial aggregate call',
+    { requires: { topology: '!single' } },
+    async function () {
     changeStream = collection.watch([], changeStreamResumeOptions);
     await initIteratorMode(changeStream);
 
     expect(changeStream.cursor.maxWireVersion).not.to.be.undefined;
-  });
+    }
+  );
 
-  it('caches the server version after each getMore call', async function () {
+  it(
+    'caches the server version after each getMore call',
+    { requires: { topology: '!single' } },
+    async function () {
     changeStream = collection.watch([], changeStreamResumeOptions);
     await initIteratorMode(changeStream);
 
@@ -2035,5 +2058,6 @@ describe('ChangeStream resumability', { requires: { topology: '!single' } }, fun
     await changeStream.next();
 
     expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
-  });
+    }
+  );
 });
