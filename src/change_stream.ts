@@ -700,7 +700,7 @@ export class ChangeStream<
 
   /** Is the cursor closed */
   get closed(): boolean {
-    return this[kClosed] || (this.cursor.closed ?? false);
+    return this[kClosed] || this.cursor.closed;
   }
 
   /** Close the Change Stream */
@@ -722,9 +722,13 @@ export class ChangeStream<
    * NOTE: When using a Stream to process change stream events, the stream will
    * NOT automatically resume in the case a resumable error is encountered.
    *
-   * @throws MongoDriverError if this.cursor is undefined
+   * @throws MongoChangeStreamError if the underlying cursor or the change stream is closed
    */
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
+    if (this.closed) {
+      throw new MongoChangeStreamError(CHANGESTREAM_CLOSED_ERROR);
+    }
+
     this.streamOptions = options;
     return this.cursor.stream(options);
   }
