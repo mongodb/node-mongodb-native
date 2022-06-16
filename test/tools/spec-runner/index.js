@@ -95,6 +95,20 @@ function translateClientOptions(options) {
   return options;
 }
 
+function isRelaxed(fileName) {
+  return (
+    !fileName.includes('fle2-CreateCollection') &&
+    !fileName.includes('fle2-BypassQueryAnalysis') &&
+    !fileName.includes('fle2-validatorAndPartialFieldExpression') &&
+    !fileName.includes('fle2-EncryptedFields-vs-jsonSchema') &&
+    !fileName.includes('fle2-FindOneAndUpdate') &&
+    !fileName.includes('fle2-InsertFind-Indexed') &&
+    !fileName.includes('fle2-InsertFind-Unindexed') &&
+    !fileName.includes('fle2-Update') &&
+    !fileName.includes('fle2-Delete')
+  );
+}
+
 function gatherTestSuites(specPath) {
   return fs
     .readdirSync(specPath)
@@ -102,7 +116,7 @@ function gatherTestSuites(specPath) {
     .map(x =>
       Object.assign(
         EJSON.parse(fs.readFileSync(path.join(specPath, x)), {
-          relaxed: !x.includes('fle2-CreateCollection')
+          relaxed: isRelaxed(x)
         }),
         {
           name: path.basename(x, '.json')
@@ -206,23 +220,25 @@ function generateTopologyTests(testSuites, testContext, filter) {
       beforeEach(beforeEachFilter);
       beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
       afterEach(() => testContext.cleanupAfterSuite());
-      for (const spec of testSuite.tests) {
-        const mochaTest = it(spec.description, async function () {
-          if (spec.failPoint) {
-            await testContext.enableFailPoint(spec.failPoint);
-          }
+      if (testSuite.name.includes('fle2-')) {
+        for (const spec of testSuite.tests) {
+          const mochaTest = it(spec.description, async function () {
+            if (spec.failPoint) {
+              await testContext.enableFailPoint(spec.failPoint);
+            }
 
-          // run the actual test
-          await runTestSuiteTest(this.configuration, spec, testContext);
+            // run the actual test
+            await runTestSuiteTest(this.configuration, spec, testContext);
 
-          if (spec.failPoint) {
-            await testContext.disableFailPoint(spec.failPoint);
-          }
+            if (spec.failPoint) {
+              await testContext.disableFailPoint(spec.failPoint);
+            }
 
-          await validateOutcome(spec, testContext);
-        });
-        // Make the spec test available to the beforeEach filter
-        mochaTest.spec = spec;
+            await validateOutcome(spec, testContext);
+          });
+          // Make the spec test available to the beforeEach filter
+          mochaTest.spec = spec;
+        }
       }
     });
   }
