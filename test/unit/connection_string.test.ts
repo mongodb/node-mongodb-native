@@ -382,9 +382,15 @@ describe('Connection String', function () {
 
   describe('validation', function () {
     it('should validate compressors options', function () {
-      expect(() => parseOptions('mongodb://localhost/?compressors=bunnies')).to.throw(
-        MongoInvalidArgumentError,
-        'bunnies is not a valid compression mechanism'
+      let thrownError;
+      try {
+        parseOptions('mongodb://localhost/?compressors=bunnies');
+      } catch (error) {
+        thrownError = error;
+      }
+      expect(thrownError).to.be.instanceOf(MongoInvalidArgumentError);
+      expect(thrownError.message).to.equal(
+        'bunnies is not a valid compression mechanism. Must be one of: none,snappy,zlib,zstd.'
       );
     });
 
