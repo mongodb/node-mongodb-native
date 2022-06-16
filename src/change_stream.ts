@@ -657,13 +657,13 @@ export class ChangeStream<
       (async () => {
         try {
           const change = await this.cursor.next();
-          this._processNewChange(change ?? null, callback);
+          this.handleChangeCallback(change ?? null, callback);
         } catch (error) {
           const errorOnResume = await this._processErrorAsync(error).catch(err => err);
           if (errorOnResume) return callback(errorOnResume);
           try {
             const change = await this.cursor.next();
-            this._processNewChange(change ?? null, callback);
+            this.handleChangeCallback(change ?? null, callback);
           } catch (error) {
             this.close(() => callback(error));
           }
@@ -696,6 +696,15 @@ export class ChangeStream<
         }
       })();
     });
+  }
+
+  handleChangeCallback(change: TChange | null, callback: Callback): void {
+    try {
+      const processedChange = this._processChange(change);
+      callback(undefined, processedChange);
+    } catch (error) {
+      callback(error);
+    }
   }
 
   /** Is the cursor closed */
@@ -805,7 +814,7 @@ export class ChangeStream<
   }
 
   private _closeEmitterModeWithError(error: AnyError): void {
-      this.emit(ChangeStream.ERROR, error);
+    this.emit(ChangeStream.ERROR, error);
 
     this.close(() => {
       // nothing to do
@@ -832,22 +841,20 @@ export class ChangeStream<
     this[kCursorStream] = undefined;
   }
 
-  /** @internal */
-  private _processNewChange(change: TChange | null, callback?: Callback<TChange>) {
+  private _processChange(change: TChange | null): TChange {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
-      return;
+      throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
     // a null change means the cursor has been notified, implicitly closing the change stream
     if (change == null) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      return this._closeWithError(new MongoRuntimeError(CHANGESTREAM_CLOSED_ERROR), callback);
+      throw new MongoRuntimeError(CHANGESTREAM_CLOSED_ERROR);
     }
 
     if (change && !change._id) {
-      return this._closeWithError(new MongoChangeStreamError(NO_RESUME_TOKEN_ERROR), callback);
+      throw new MongoChangeStreamError(NO_RESUME_TOKEN_ERROR);
     }
 
     // cache the resume token
@@ -857,9 +864,16 @@ export class ChangeStream<
     // between resumeToken and startAtOperationTime if we need to reconnect the cursor
     this.options.startAtOperationTime = undefined;
 
-    // Return the change
-    if (!callback) return this.emit(ChangeStream.CHANGE, change);
-    return callback(undefined, change);
+    return change;
+  }
+
+  private _processNewChangeEmitterMode(change: TChange | null): void {
+    try {
+      const processedChange = this._processChange(change);
+      this.emit(ChangeStream.CHANGE, processedChange);
+    } catch (error) {
+      this.emit(ChangeStream.ERROR, error);
+    }
   }
 
   /** @internal */
