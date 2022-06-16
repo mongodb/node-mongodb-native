@@ -261,7 +261,13 @@ function prepareDatabaseForSuite(suite, context) {
 
   const coll = db.collection(context.collectionName);
   return setupPromise
-    .then(() => coll.drop({ writeConcern: { w: 'majority' } }))
+    .then(() => {
+      const options = { writeConcern: { w: 'majority' } };
+      if (suite.encrypted_fields) {
+        options.encryptedFields = suite.encrypted_fields;
+      }
+      return coll.drop(options);
+    })
     .catch(err => {
       if (!err.message.match(/ns not found/)) throw err;
     })
@@ -288,6 +294,9 @@ function prepareDatabaseForSuite(suite, context) {
       const options = { writeConcern: { w: 'majority' } };
       if (suite.json_schema) {
         options.validator = { $jsonSchema: suite.json_schema };
+      }
+      if (suite.encrypted_fields) {
+        options.encryptedFields = suite.encrypted_fields;
       }
 
       return db.createCollection(context.collectionName, options);
