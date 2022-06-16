@@ -641,7 +641,7 @@ export class ChangeStream<
             const hasNext = await this.cursor.hasNext();
             return callback(undefined, hasNext);
           } catch (error) {
-            this._closeWithError(error, callback);
+            this.close(() => callback(error));
           }
         }
       })();
@@ -665,7 +665,7 @@ export class ChangeStream<
             const change = await this.cursor.next();
             this._processNewChange(change ?? null, callback);
           } catch (error) {
-            this._closeWithError(error, callback);
+            this.close(() => callback(error));
           }
         }
       })();
@@ -691,7 +691,7 @@ export class ChangeStream<
             const change = await this.cursor.tryNext();
             callback(undefined, change ?? null);
           } catch (error) {
-            this._closeWithError(error, callback);
+            this.close(() => callback(error));
           }
         }
       })();
@@ -802,13 +802,12 @@ export class ChangeStream<
     return changeStreamCursor;
   }
 
-  /** @internal */
-  private _closeWithError(error: AnyError, callback?: Callback): void {
-    if (!callback) {
+  private _closeEmitterModeWithError(error: AnyError): void {
       this.emit(ChangeStream.ERROR, error);
-    }
 
-    this.close(() => callback && callback(error));
+    this.close(() => {
+      // nothing to do
+    });
   }
 
   /** @internal */
@@ -816,7 +815,7 @@ export class ChangeStream<
     this._setIsEmitter();
     const stream = this[kCursorStream] ?? cursor.stream();
     this[kCursorStream] = stream;
-    stream.on('data', change => this._processNewChange(change));
+    stream.on('data', change => this._processNewChangeEmitterMode(change));
     stream.on('error', error => this._processErrorStreamMode(error));
   }
 
@@ -872,11 +871,11 @@ export class ChangeStream<
 
       const topology = getTopology(this.parent);
       topology.selectServer(this.cursor.readPreference, {}, err => {
-        if (err) return this._closeWithError(err);
+        if (err) return this._closeEmitterModeWithError(err);
         this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
       });
     } else {
-      this._closeWithError(error);
+      this._closeEmitterModeWithError(error);
     }
   }
 
@@ -896,13 +895,13 @@ export class ChangeStream<
       const topology = getTopology(this.parent);
       topology.selectServer(this.cursor.readPreference, {}, err => {
         // if the topology can't reconnect, close the stream
-        if (err) return this._closeWithError(err, callback);
+        if (err) return this.close(() => callback(error));
 
         this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
         callback();
       });
     } else {
-      this._closeWithError(error, callback);
+      this.close(() => callback(error));
     }
   }
 }
