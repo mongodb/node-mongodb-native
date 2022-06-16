@@ -57,9 +57,11 @@ const skippedAuthTests = [
 // TODO(NODE-4006): Investigate csfle test "operation fails with maxWireVersion < 8"
 const skippedMaxWireVersionTest = 'operation fails with maxWireVersion < 8';
 
-const SKIPPED_TESTS = new Set(
-  isAuthEnabled ? skippedAuthTests.concat(skippedMaxWireVersionTest) : [skippedMaxWireVersionTest]
-);
+const SKIPPED_TESTS = new Set([
+  ...(isAuthEnabled
+    ? skippedAuthTests.concat(skippedMaxWireVersionTest)
+    : [skippedMaxWireVersionTest])
+]);
 
 describe('Client Side Encryption', function () {
   const testContext = new TestRunnerContext();

@@ -261,7 +261,17 @@ function passwordDigest(username: string, password: string) {
     throw new MongoInvalidArgumentError('Password cannot be empty');
   }
 
-  const md5 = crypto.createHash('md5');
+  let md5: crypto.Hash;
+  try {
+    md5 = crypto.createHash('md5');
+  } catch (err) {
+    if (crypto.getFips()) {
+      // This error is (slightly) more helpful than what comes from OpenSSL directly, e.g.
+      // 'Error: error:060800C8:digital envelope routines:EVP_DigestInit_ex:disabled for FIPS'
+      throw new Error('Auth mechanism SCRAM-SHA-1 is not supported in FIPS mode');
+    }
+    throw err;
+  }
   md5.update(`${username}:mongo:${password}`, 'utf8');
   return md5.digest('hex');
 }

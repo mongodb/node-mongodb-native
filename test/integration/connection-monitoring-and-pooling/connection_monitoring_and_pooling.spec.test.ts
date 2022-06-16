@@ -15,9 +15,14 @@ const LB_SKIP_TESTS: SkipDescription[] = [
 describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
   const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
-  runCmapTestSuite(
-    // TODO(NODE-2993): unskip integration tests for maxConnecting
-    tests.filter(({ style }) => style === 'unit'),
-    { testsToSkip: LB_SKIP_TESTS }
-  );
+  runCmapTestSuite(tests, {
+    testsToSkip: LB_SKIP_TESTS.concat([
+      {
+        description: 'waiting on maxConnecting is limited by WaitQueueTimeoutMS',
+        skipIfCondition: 'always',
+        skipReason:
+          'not applicable: waitQueueTimeoutMS limits connection establishment time in our driver'
+      }
+    ])
+  });
 });

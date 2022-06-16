@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.7.0](https://github.com/mongodb/node-mongodb-native/compare/v4.6.0...v4.7.0) (2022-06-06)
+
+
+### Features
+
+* **NODE-1837:** add zstd compression option ([#3237](https://github.com/mongodb/node-mongodb-native/issues/3237)) ([1261432](https://github.com/mongodb/node-mongodb-native/commit/12614320d34478693ad3821e75f7b15da44c2230))
+* **NODE-2993:** implement maxConnecting ([#3255](https://github.com/mongodb/node-mongodb-native/issues/3255)) ([c9d3816](https://github.com/mongodb/node-mongodb-native/commit/c9d38163199d5cb0974d2c497e80e4c317927f6e))
+* **NODE-3750:** make maxConnecting configurable ([#3261](https://github.com/mongodb/node-mongodb-native/issues/3261)) ([ee41447](https://github.com/mongodb/node-mongodb-native/commit/ee414476aa839e364bce6b26ab47859be1b99307))
+* **NODE-3938:** Add support for pre/post images in change streams ([#3250](https://github.com/mongodb/node-mongodb-native/issues/3250)) ([981465c](https://github.com/mongodb/node-mongodb-native/commit/981465c35e9c104ef3e4de3d9c5d033337220cf7))
+* **NODE-4079:** estimated document count uses count ([#3244](https://github.com/mongodb/node-mongodb-native/issues/3244)) ([a752e75](https://github.com/mongodb/node-mongodb-native/commit/a752e75a26025e56ab9e47e4da59e1e6ccee511f))
+* **NODE-4081:** fix and deprecate change stream resume options ([#3270](https://github.com/mongodb/node-mongodb-native/issues/3270)) ([47adfb3](https://github.com/mongodb/node-mongodb-native/commit/47adfb3db6e38e153e8e78f2b6e4463754775cc6))
+* **NODE-4139:** streaming protocol message changes ([#3256](https://github.com/mongodb/node-mongodb-native/issues/3256)) ([4b9ad77](https://github.com/mongodb/node-mongodb-native/commit/4b9ad777fb78cc37b71dece0e647593950efccb8))
+* **NODE-4192:** make MongoClient.connect optional ([#3232](https://github.com/mongodb/node-mongodb-native/issues/3232)) ([a2359e4](https://github.com/mongodb/node-mongodb-native/commit/a2359e43d7a59acf69785104b5f6e6c1516a5e27))
+* **NODE-4196:** add support for showExpandedEvents in change streams ([#3254](https://github.com/mongodb/node-mongodb-native/issues/3254)) ([9c1782e](https://github.com/mongodb/node-mongodb-native/commit/9c1782e23c7d63dc45d9242e451953fb2ef294a6))
+* **NODE-4229:** bump maxWireVersion to 17 ([#3265](https://github.com/mongodb/node-mongodb-native/issues/3265)) ([d13cec2](https://github.com/mongodb/node-mongodb-native/commit/d13cec2e1ae1da2983218275aefccc48d0cfd260))
+
+
+### Bug Fixes
+
+* **NODE-4103:** respect BSON options when creating change streams ([#3247](https://github.com/mongodb/node-mongodb-native/issues/3247)) ([b2798d9](https://github.com/mongodb/node-mongodb-native/commit/b2798d939ee9ed7a5ff9a63980ad6a29ddea3cf1))
+* **NODE-4108:** improve return type for withTransaction() ([#3236](https://github.com/mongodb/node-mongodb-native/issues/3236)) ([48e0e6e](https://github.com/mongodb/node-mongodb-native/commit/48e0e6ed17a5227b0781cbdf8c547824e5c26d59))
+* **NODE-4254:** allow csfle to be dynamically required ([#3260](https://github.com/mongodb/node-mongodb-native/issues/3260)) ([cd6b5a0](https://github.com/mongodb/node-mongodb-native/commit/cd6b5a08964363d93be5d702476b5d331c78a7b2))
+* **NODE-4281:** ensure that the driver always uses Node.js timers ([#3275](https://github.com/mongodb/node-mongodb-native/issues/3275)) ([4501a1c](https://github.com/mongodb/node-mongodb-native/commit/4501a1ce55ba4adf141fdb851ccd33ff4f2a4e59))
+
 ## [4.6.0](https://github.com/mongodb/node-mongodb-native/compare/v4.6.0-alpha.0...v4.6.0) (2022-05-11)
 
 

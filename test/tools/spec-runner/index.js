@@ -102,7 +102,7 @@ function gatherTestSuites(specPath) {
     .map(x =>
       Object.assign(
         EJSON.parse(fs.readFileSync(path.join(specPath, x)), {
-          relaxed: !x.includes('fle2-CreateCollection')
+          relaxed: !x.includes('fle2')
         }),
         {
           name: path.basename(x, '.json')
@@ -655,8 +655,9 @@ const kOperations = new Map([
     (operation, db, context /*, options */) => {
       const collectionName = operation.arguments.collection;
       const encryptedFields = operation.arguments.encryptedFields;
+      const validator = operation.arguments.validator;
       const session = maybeSession(operation, context);
-      return db.createCollection(collectionName, { session, encryptedFields });
+      return db.createCollection(collectionName, { session, encryptedFields, validator });
     }
   ],
   [

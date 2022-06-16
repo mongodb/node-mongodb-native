@@ -133,9 +133,9 @@ describe('GetMoreOperation', function () {
     const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
     const operation = new GetMoreOperation(ns, cursorId, server, options);
 
-    context('when the aspect is cursor iterating', function () {
+    context('when the aspect is must select same server', function () {
       it('returns true', function () {
-        expect(operation.hasAspect(Aspect.CURSOR_ITERATING)).to.be.true;
+        expect(operation.hasAspect(Aspect.MUST_SELECT_SAME_SERVER)).to.be.true;
       });
     });
 

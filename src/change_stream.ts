@@ -1,15 +1,12 @@
 import Denque = require('denque');
 import type { Readable } from 'stream';
+import { setTimeout } from 'timers';
 
-import type { Document, Long, Timestamp } from './bson';
+import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
-import {
-  AbstractCursor,
-  AbstractCursorEvents,
-  AbstractCursorOptions,
-  CursorStreamOptions
-} from './cursor/abstract_cursor';
+import type { AbstractCursorEvents, CursorStreamOptions } from './cursor/abstract_cursor';
+import { ChangeStreamCursor, ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 import { Db } from './db';
 import {
   AnyError,
@@ -19,13 +16,12 @@ import {
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
-import { InferIdType, TODO_NODE_3286, TypedEventEmitter } from './mongo_types';
-import { AggregateOperation, AggregateOptions } from './operations/aggregate';
+import { InferIdType, TypedEventEmitter } from './mongo_types';
+import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
-import { executeOperation, ExecutionResult } from './operations/execute_operation';
 import type { ReadPreference } from './read_preference';
 import type { Topology } from './sdam/topology';
-import type { ClientSession, ServerSessionId } from './sessions';
+import type { ServerSessionId } from './sessions';
 import {
   calculateDurationInMs,
   Callback,
@@ -51,16 +47,8 @@ const CHANGE_STREAM_OPTIONS = [
   'startAfter',
   'startAtOperationTime',
   'fullDocument',
-  'fullDocumentBeforeChange'
-] as const;
-
-const CURSOR_OPTIONS = [
-  'batchSize',
-  'maxAwaitTimeMS',
-  'collation',
-  'readPreference',
-  'comment',
-  ...CHANGE_STREAM_OPTIONS
+  'fullDocumentBeforeChange',
+  'showExpandedEvents'
 ] as const;
 
 const CHANGE_DOMAIN_TYPES = {
@@ -84,7 +72,10 @@ const NO_RESUME_TOKEN_ERROR =
 const NO_CURSOR_ERROR = 'ChangeStream has no cursor';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
-/** @public */
+/**
+ * @public
+ * @deprecated Please use the ChangeStreamCursorOptions type instead.
+ */
 export interface ResumeOptions {
   startAtOperationTime?: Timestamp;
   batchSize?: number;
@@ -93,6 +84,7 @@ export interface ResumeOptions {
   readPreference?: ReadPreference;
   resumeAfter?: ResumeToken;
   startAfter?: ResumeToken;
+  fullDocument?: string;
 }
 
 /**
@@ -113,18 +105,6 @@ export type OperationTime = Timestamp;
 export interface PipeOptions {
   end?: boolean;
 }
-
-/** @internal */
-export type ChangeStreamAggregateRawResult<TChange> = {
-  $clusterTime: { clusterTime: Timestamp };
-  cursor: {
-    postBatchResumeToken: ResumeToken;
-    ns: string;
-    id: number | Long;
-  } & ({ firstBatch: TChange[] } | { nextBatch: TChange[] });
-  ok: 1;
-  operationTime: Timestamp;
-};
 
 /**
  * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
@@ -180,6 +160,19 @@ export interface ChangeStreamOptions extends AggregateOptions {
    * @see https://docs.mongodb.com/manual/reference/command/aggregate
    */
   batchSize?: number;
+
+  /**
+   * When enabled, configures the change stream to include extra change events.
+   *
+   * - createIndexes
+   * - dropIndexes
+   * - modify
+   * - create
+   * - shardCollection
+   * - reshardCollection
+   * - refineCollectionShardKey
+   */
+  showExpandedEvents?: boolean;
 }
 
 /** @public */
@@ -229,13 +222,41 @@ export interface ChangeStreamDocumentCommon {
   lsid?: ServerSessionId;
 }
 
+/** @public */
+export interface ChangeStreamDocumentCollectionUUID {
+  /**
+   * The UUID (Binary subtype 4) of the collection that the operation was performed on.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * **NOTE:** collectionUUID will be converted to a NodeJS Buffer if the promoteBuffers
+   *    flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  collectionUUID: Binary;
+}
+
+/** @public */
+export interface ChangeStreamDocumentOperationDescription {
+  /**
+   * An description of the operation.
+   *
+   * Only present when the `showExpandedEvents` flag is enabled.
+   *
+   * @since 6.1.0
+   */
+  operationDescription?: Document;
+}
+
 /**
  * @public
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#insert-event
  */
 export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentKey<TSchema> {
+    ChangeStreamDocumentKey<TSchema>,
+    ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'insert';
   /** This key will contain the document being inserted */
@@ -250,7 +271,8 @@ export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
  */
 export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentKey<TSchema> {
+    ChangeStreamDocumentKey<TSchema>,
+    ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'update';
   /**
@@ -303,7 +325,8 @@ export interface ChangeStreamReplaceDocument<TSchema extends Document = Document
  */
 export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
   extends ChangeStreamDocumentCommon,
-    ChangeStreamDocumentKey<TSchema> {
+    ChangeStreamDocumentKey<TSchema>,
+    ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'delete';
   /** Namespace the delete event occured on */
@@ -322,7 +345,9 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
  * @public
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#drop-event
  */
-export interface ChangeStreamDropDocument extends ChangeStreamDocumentCommon {
+export interface ChangeStreamDropDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'drop';
   /** Namespace the drop event occured on */
@@ -333,7 +358,9 @@ export interface ChangeStreamDropDocument extends ChangeStreamDocumentCommon {
  * @public
  * @see https://www.mongodb.com/docs/manual/reference/change-events/#rename-event
  */
-export interface ChangeStreamRenameDocument extends ChangeStreamDocumentCommon {
+export interface ChangeStreamRenameDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'rename';
   /** The new name for the `ns.coll` collection */
@@ -362,6 +389,91 @@ export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentComm
   operationType: 'invalidate';
 }
 
+/**
+ * Only present when the `showExpandedEvents` flag is enabled.
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ */
+export interface ChangeStreamCreateIndexDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentOperationDescription {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'createIndexes';
+}
+
+/**
+ * Only present when the `showExpandedEvents` flag is enabled.
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ */
+export interface ChangeStreamDropIndexDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentOperationDescription {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'dropIndexes';
+}
+
+/**
+ * Only present when the `showExpandedEvents` flag is enabled.
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ */
+export interface ChangeStreamCollModDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'modify';
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ */
+export interface ChangeStreamCreateDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'create';
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ */
+export interface ChangeStreamShardCollectionDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentOperationDescription {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'shardCollection';
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ */
+export interface ChangeStreamReshardCollectionDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentOperationDescription {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'reshardCollection';
+}
+
+/**
+ * @public
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ */
+export interface ChangeStreamRefineCollectionShardKeyDocument
+  extends ChangeStreamDocumentCommon,
+    ChangeStreamDocumentCollectionUUID,
+    ChangeStreamDocumentOperationDescription {
+  /** Describes the type of operation represented in this change notification */
+  operationType: 'refineCollectionShardKey';
+}
+
 /** @public */
 export type ChangeStreamDocument<TSchema extends Document = Document> =
   | ChangeStreamInsertDocument<TSchema>
@@ -371,7 +483,14 @@ export type ChangeStreamDocument<TSchema extends Document = Document> =
   | ChangeStreamDropDocument
   | ChangeStreamRenameDocument
   | ChangeStreamDropDatabaseDocument
-  | ChangeStreamInvalidateDocument;
+  | ChangeStreamInvalidateDocument
+  | ChangeStreamCreateIndexDocument
+  | ChangeStreamCreateDocument
+  | ChangeStreamCollModDocument
+  | ChangeStreamDropIndexDocument
+  | ChangeStreamShardCollectionDocument
+  | ChangeStreamReshardCollectionDocument
+  | ChangeStreamRefineCollectionShardKeyDocument;
 
 /** @public */
 export interface UpdateDescription<TSchema extends Document = Document> {
@@ -564,6 +683,21 @@ export class ChangeStream<
     });
   }
 
+  /**
+   * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
+   */
+  tryNext(): Promise<Document | null>;
+  tryNext(callback: Callback<Document | null>): void;
+  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
+    this._setIsIterator();
+    return maybePromise(callback, cb => {
+      this._getCursor((err, cursor) => {
+        if (err || !cursor) return cb(err); // failed to resume, raise an error
+        return cursor.tryNext(cb);
+      });
+    });
+  }
+
   /** Is the cursor closed */
   get closed(): boolean {
     return this[kClosed] || (this.cursor?.closed ?? false);
@@ -597,21 +731,6 @@ export class ChangeStream<
     return this.cursor.stream(options);
   }
 
-  /**
-   * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
-   */
-  tryNext(): Promise<Document | null>;
-  tryNext(callback: Callback<Document | null>): void;
-  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
-    this._setIsIterator();
-    return maybePromise(callback, cb => {
-      this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        return cursor.tryNext(cb);
-      });
-    });
-  }
-
   /** @internal */
   private _setIsEmitter(): void {
     if (this[kMode] === 'iterator') {
@@ -639,15 +758,13 @@ export class ChangeStream<
    * @internal
    */
   private _createChangeStreamCursor(
-    options: ChangeStreamOptions | ResumeOptions
+    options: ChangeStreamOptions | ChangeStreamCursorOptions
   ): ChangeStreamCursor<TSchema, TChange> {
     const changeStreamStageOptions = filterOptions(options, CHANGE_STREAM_OPTIONS);
     if (this.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
       changeStreamStageOptions.allChangesForCluster = true;
     }
     const pipeline = [{ $changeStream: changeStreamStageOptions }, ...this.pipeline];
-
-    const cursorOptions: ChangeStreamCursorOptions = filterOptions(options, CURSOR_OPTIONS);
 
     const client: MongoClient | null =
       this.type === CHANGE_DOMAIN_TYPES.CLUSTER
@@ -669,7 +786,7 @@ export class ChangeStream<
       client,
       this.namespace,
       pipeline,
-      cursorOptions
+      options
     );
 
     for (const event of CHANGE_STREAM_EVENTS) {
@@ -789,15 +906,6 @@ export class ChangeStream<
       this._processResumeQueue();
     };
 
-    // otherwise, raise an error and close the change stream
-    const unresumableError = (err: AnyError) => {
-      if (!callback) {
-        this.emit(ChangeStream.ERROR, err);
-      }
-
-      this.close(() => this._processResumeQueue(err));
-    };
-
     if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
       this.cursor = undefined;
 
@@ -810,7 +918,7 @@ export class ChangeStream<
       const topology = getTopology(this.parent);
       this._waitForTopologyConnected(topology, { readPreference: cursor.readPreference }, err => {
         // if the topology can't reconnect, close the stream
-        if (err) return unresumableError(err);
+        if (err) return this._closeWithError(err, callback);
 
         // create a new cursor, preserving the old cursor's options
         const newCursor = this._createChangeStreamCursor(cursor.resumeOptions);
@@ -821,7 +929,7 @@ export class ChangeStream<
         // attempt to continue in iterator mode
         newCursor.hasNext(err => {
           // if there's an error immediately after resuming, close the stream
-          if (err) return unresumableError(err);
+          if (err) return this._closeWithError(err);
           resumeWithCursor(newCursor);
         });
       });
@@ -854,7 +962,7 @@ export class ChangeStream<
    * Drain the resume queue when a new has become available
    * @internal
    *
-   * @param err - error getting a new cursor
+   * @param error - error getting a new cursor
    */
   private _processResumeQueue(error?: Error) {
     while (this[kResumeQueue].length) {
@@ -874,156 +982,5 @@ export class ChangeStream<
       }
       request(error, this.cursor ?? undefined);
     }
-  }
-}
-
-/** @internal */
-export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
-  startAtOperationTime?: OperationTime;
-  resumeAfter?: ResumeToken;
-  startAfter?: ResumeToken;
-}
-
-/** @internal */
-export class ChangeStreamCursor<
-  TSchema extends Document = Document,
-  TChange extends Document = ChangeStreamDocument<TSchema>
-> extends AbstractCursor<TChange, ChangeStreamEvents> {
-  _resumeToken: ResumeToken;
-  startAtOperationTime?: OperationTime;
-  hasReceived?: boolean;
-  resumeAfter: ResumeToken;
-  startAfter: ResumeToken;
-  options: ChangeStreamCursorOptions;
-
-  postBatchResumeToken?: ResumeToken;
-  pipeline: Document[];
-
-  constructor(
-    client: MongoClient,
-    namespace: MongoDBNamespace,
-    pipeline: Document[] = [],
-    options: ChangeStreamCursorOptions = {}
-  ) {
-    super(client, namespace, options);
-
-    this.pipeline = pipeline;
-    this.options = options;
-    this._resumeToken = null;
-    this.startAtOperationTime = options.startAtOperationTime;
-
-    if (options.startAfter) {
-      this.resumeToken = options.startAfter;
-    } else if (options.resumeAfter) {
-      this.resumeToken = options.resumeAfter;
-    }
-  }
-
-  set resumeToken(token: ResumeToken) {
-    this._resumeToken = token;
-    this.emit(ChangeStream.RESUME_TOKEN_CHANGED, token);
-  }
-
-  get resumeToken(): ResumeToken {
-    return this._resumeToken;
-  }
-
-  get resumeOptions(): ResumeOptions {
-    const result: ResumeOptions = filterOptions(this.options, CURSOR_OPTIONS);
-
-    if (this.resumeToken || this.startAtOperationTime) {
-      for (const key of ['resumeAfter', 'startAfter', 'startAtOperationTime']) {
-        Reflect.deleteProperty(result, key);
-      }
-
-      if (this.resumeToken) {
-        const resumeKey =
-          this.options.startAfter && !this.hasReceived ? 'startAfter' : 'resumeAfter';
-
-        result[resumeKey] = this.resumeToken;
-      } else if (this.startAtOperationTime && maxWireVersion(this.server) >= 7) {
-        result.startAtOperationTime = this.startAtOperationTime;
-      }
-    }
-
-    return result;
-  }
-
-  cacheResumeToken(resumeToken: ResumeToken): void {
-    if (this.bufferedCount() === 0 && this.postBatchResumeToken) {
-      this.resumeToken = this.postBatchResumeToken;
-    } else {
-      this.resumeToken = resumeToken;
-    }
-    this.hasReceived = true;
-  }
-
-  _processBatch(response: ChangeStreamAggregateRawResult<TChange>): void {
-    const cursor = response.cursor;
-    if (cursor.postBatchResumeToken) {
-      this.postBatchResumeToken = response.cursor.postBatchResumeToken;
-
-      const batch =
-        'firstBatch' in response.cursor ? response.cursor.firstBatch : response.cursor.nextBatch;
-      if (batch.length === 0) {
-        this.resumeToken = cursor.postBatchResumeToken;
-      }
-    }
-  }
-
-  clone(): AbstractCursor<TChange> {
-    return new ChangeStreamCursor(this.client, this.namespace, this.pipeline, {
-      ...this.cursorOptions
-    });
-  }
-
-  _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
-    const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
-      ...this.cursorOptions,
-      ...this.options,
-      session
-    });
-
-    executeOperation<TODO_NODE_3286, ChangeStreamAggregateRawResult<TChange>>(
-      session.client,
-      aggregateOperation,
-      (err, response) => {
-        if (err || response == null) {
-          return callback(err);
-        }
-
-        const server = aggregateOperation.server;
-        if (
-          this.startAtOperationTime == null &&
-          this.resumeAfter == null &&
-          this.startAfter == null &&
-          maxWireVersion(server) >= 7
-        ) {
-          this.startAtOperationTime = response.operationTime;
-        }
-
-        this._processBatch(response);
-
-        this.emit(ChangeStream.INIT, response);
-        this.emit(ChangeStream.RESPONSE);
-
-        // TODO: NODE-2882
-        callback(undefined, { server, session, response });
-      }
-    );
-  }
-
-  override _getMore(batchSize: number, callback: Callback): void {
-    super._getMore(batchSize, (err, response) => {
-      if (err) {
-        return callback(err);
-      }
-
-      this._processBatch(response as TODO_NODE_3286 as ChangeStreamAggregateRawResult<TChange>);
-
-      this.emit(ChangeStream.MORE, response);
-      this.emit(ChangeStream.RESPONSE);
-      callback(err, response);
-    });
   }
 }

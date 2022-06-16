@@ -309,6 +309,7 @@ export function executeUriValidationTest(
 
       //** DIRECTLY MAPPED OPTIONS **/
       case 'zlibCompressionLevel':
+      case 'maxConnecting':
       case 'maxPoolSize':
       case 'minPoolSize':
       case 'connectTimeoutMS':

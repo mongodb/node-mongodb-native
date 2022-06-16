@@ -6,5 +6,14 @@ describe('Connection Monitoring and Pooling (Node Driver)', function () {
     '../integration/connection-monitoring-and-pooling/cmap-node-specs'
   );
 
-  runCmapTestSuite(tests, { injectPoolStats: true });
+  runCmapTestSuite(tests, {
+    injectPoolStats: true,
+    testsToSkip: [
+      {
+        description: 'must replace removed connections up to minPoolSize',
+        skipIfCondition: 'loadBalanced',
+        skipReason: 'cannot run against load balancer due to reliance on pool.clear() command'
+      }
+    ]
+  });
 });

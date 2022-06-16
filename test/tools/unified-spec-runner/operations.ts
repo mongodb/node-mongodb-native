@@ -236,6 +236,12 @@ operations.set('createIndex', async ({ entities, operation }) => {
   await collection.createIndex(keys, opts);
 });
 
+operations.set('dropIndex', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { name, ...opts } = operation.arguments;
+  await collection.dropIndex(name, opts);
+});
+
 operations.set('deleteOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, ...options } = operation.arguments;
@@ -322,7 +328,7 @@ operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) =>
     return await cursor.next();
   }
 
-  return changeStream.cursor.next();
+  return changeStream.next();
 });
 
 operations.set('listCollections', async ({ entities, operation }) => {

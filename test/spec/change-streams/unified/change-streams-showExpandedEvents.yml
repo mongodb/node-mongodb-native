@@ -1,0 +1,297 @@
+description: "change-streams-showExpandedEvents"
+schemaVersion: "1.7"
+runOnRequirements:
+  - minServerVersion: "6.0.0"
+    topologies: [ replicaset, sharded-replicaset, sharded ]
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+      ignoreCommandMonitoringEvents: [ killCursors ]
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: *database0
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: *collection0
+  - database:
+      id: &database1 database1
+      client: *client0
+      databaseName: *database1
+  - collection:
+      id: &collection1 collection1
+      database: *database1
+      collectionName: *collection1
+  - database:
+      id: &shardedDb shardedDb
+      client: *client0
+      databaseName: *shardedDb
+  - database:
+      id: &adminDb adminDb
+      client: *client0
+      databaseName: admin
+  - collection:
+      id: &shardedCollection shardedCollection
+      database: *shardedDb
+      collectionName: *shardedCollection
+
+initialData:
+  - collectionName: *collection0
+    databaseName: *database0
+    documents: []
+
+tests:
+  - description: "when provided, showExpandedEvents is sent as a part of the aggregate command"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          showExpandedEvents: true
+        saveResultAsEntity: &changeStream0 changeStream0
+    expectEvents:
+      - client: *client0
+        ignoreExtraEvents: true
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                cursor: {}
+                pipeline:
+                  - $changeStream:
+                      showExpandedEvents: true
+              commandName: aggregate
+              databaseName: *database0
+
+  - description: "when omitted, showExpandedEvents is not sent as a part of the aggregate command"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+        saveResultAsEntity: &changeStream0 changeStream0
+    expectEvents:
+      - client: *client0
+        ignoreExtraEvents: true
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                cursor: {}
+                pipeline:
+                  - $changeStream:
+                      showExpandedEvents:
+                        $$exists: false
+              commandName: aggregate
+              databaseName: *database0
+
+  - description: "when showExpandedEvents is true, new fields on change stream events are handled appropriately"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: &existing-collection foo
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *existing-collection
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          showExpandedEvents: true
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document:
+            a: 1
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys:
+            x: 1
+          name: x_1
+      - name: rename
+        object: *collection0
+        arguments:
+          to: *existing-collection
+          dropTarget: true
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: insert
+          ns:
+            db: *database0
+            coll: *collection0
+          collectionUUID:
+            $$exists: true
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: createIndexes
+          ns:
+            db: *database0
+            coll: *collection0
+          operationDescription:
+            $$exists: true
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: rename
+          ns:
+            db: *database0
+            coll: *collection0
+          to:
+            db: *database0
+            coll: *existing-collection
+          operationDescription:
+            dropTarget:
+              $$exists: true
+            to:
+              db: *database0
+              coll: *existing-collection
+
+  - description: "when showExpandedEvents is true, createIndex events are reported"
+    operations:
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          showExpandedEvents: true
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys:
+            x: 1
+          name: x_1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: createIndexes
+
+  - description: "when showExpandedEvents is true, dropIndexes events are reported"
+    operations:
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys:
+            x: 1
+          name: &index1 x_1
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          showExpandedEvents: true
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: dropIndex
+        object: *collection0
+        arguments:
+          name: *index1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: dropIndexes
+
+  - description: "when showExpandedEvents is true, create events are reported"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: &collection1 foo
+      - name: createChangeStream
+        object: *database0
+        arguments:
+          pipeline: []
+          showExpandedEvents: true
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection1
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: create
+
+  - description: "when showExpandedEvents is true, create events on views are reported"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: &collection1 foo
+      - name: createChangeStream
+        object: *database0
+        arguments:
+          pipeline: []
+          showExpandedEvents: true
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection1
+          viewOn: testName
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: create
+
+  - description: "when showExpandedEvents is true, modify events are reported"
+    operations:
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys:
+            x: 1
+          name: &index2 x_2
+      - name: createChangeStream
+        object: *collection0
+        arguments:
+          pipeline: []
+          showExpandedEvents: true
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: runCommand
+        object: *database0
+        arguments:
+          command:
+            collMod: *collection0
+          commandName: collMod
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: modify
+
+  - description: "when showExpandedEvents is true, shardCollection events are reported"
+    runOnRequirements:
+      - topologies: [ sharded-replicaset, sharded ]
+    operations:
+      - name: dropCollection
+        object: *shardedDb
+        arguments:
+          collection: *shardedCollection
+      - name: createCollection
+        object: *shardedDb
+        arguments:
+          collection: *shardedCollection
+      - name: createChangeStream
+        object: *shardedCollection
+        arguments:
+          pipeline: []
+          showExpandedEvents: true
+        saveResultAsEntity: &changeStream0 changeStream0
+      - name: runCommand
+        object: *adminDb
+        arguments:
+          command:
+            shardCollection: shardedDb.shardedCollection
+            key:
+              _id: 1
+          commandName: shardCollection
+      - name: iterateUntilDocumentOrError
+        object: *changeStream0
+        expectResult:
+          operationType: shardCollection

@@ -14,6 +14,7 @@ import type { MongoClient } from '../mongo_client';
 import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
+import { KillCursorsOperation } from '../operations/kill_cursors';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -118,7 +119,7 @@ export abstract class AbstractCursor<
   /** @internal */
   [kId]?: Long;
   /** @internal */
-  [kSession]?: ClientSession;
+  [kSession]: ClientSession;
   /** @internal */
   [kServer]?: Server;
   /** @internal */
@@ -187,6 +188,8 @@ export abstract class AbstractCursor<
 
     if (options.session instanceof ClientSession) {
       this[kSession] = options.session;
+    } else {
+      this[kSession] = this[kClient].startSession({ owner: this, explicit: false });
     }
   }
 
@@ -217,11 +220,11 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
-  get session(): ClientSession | undefined {
+  get session(): ClientSession {
     return this[kSession];
   }
 
-  set session(clientSession: ClientSession | undefined) {
+  set session(clientSession: ClientSession) {
     this[kSession] = clientSession;
   }
 
@@ -264,7 +267,7 @@ export abstract class AbstractCursor<
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
     if (options?.transform) {
       const transform = options.transform;
-      const readable = makeCursorStream(this);
+      const readable = new ReadableCursorStream(this);
 
       return readable.pipe(
         new Transform({
@@ -282,7 +285,7 @@ export abstract class AbstractCursor<
       );
     }
 
-    return makeCursorStream(this);
+    return new ReadableCursorStream(this);
   }
 
   hasNext(): Promise<boolean>;
@@ -592,11 +595,12 @@ export abstract class AbstractCursor<
     const session = this[kSession];
     if (session) {
       // We only want to end this session if we created it, and it hasn't ended yet
-      if (session.explicit === false && !session.hasEnded) {
-        session.endSession();
+      if (session.explicit === false) {
+        if (!session.hasEnded) {
+          session.endSession(() => null);
+        }
+        this[kSession] = this.client.startSession({ owner: this, explicit: false });
       }
-
-      this[kSession] = undefined;
     }
   }
 
@@ -644,22 +648,10 @@ export abstract class AbstractCursor<
    * a significant refactor.
    */
   [kInit](callback: Callback<TSchema | null>): void {
-    if (this[kSession] == null) {
-      if (this[kClient].topology?.shouldCheckForSessionSupport()) {
-        return this[kClient].topology?.selectServer(ReadPreference.primaryPreferred, {}, err => {
-          if (err) return callback(err);
-          return this[kInit](callback);
-        });
-      } else if (this[kClient].topology?.hasSessionSupport()) {
-        this[kSession] = this[kClient].topology?.startSession({ owner: this, explicit: false });
-      }
-    }
-
     this._initialize(this[kSession], (err, state) => {
       if (state) {
         const response = state.response;
         this[kServer] = state.server;
-        this[kSession] = state.session;
 
         if (response.cursor) {
           this[kId] =
@@ -714,7 +706,21 @@ function nextDocument<T>(cursor: AbstractCursor): T | null {
   return null;
 }
 
-function next<T>(cursor: AbstractCursor<T>, blocking: boolean, callback: Callback<T | null>): void {
+/**
+ * @param cursor - the cursor on which to call `next`
+ * @param blocking - a boolean indicating whether or not the cursor should `block` until data
+ *     is available.  Generally, this flag is set to `false` because if the getMore returns no documents,
+ *     the cursor has been exhausted.  In certain scenarios (ChangeStreams, tailable await cursors and
+ *     `tryNext`, for example) blocking is necessary because a getMore returning no documents does
+ *     not indicate the end of the cursor.
+ * @param callback - callback to return the result to the caller
+ * @returns
+ */
+export function next<T>(
+  cursor: AbstractCursor<T>,
+  blocking: boolean,
+  callback: Callback<T | null>
+): void {
   const cursorId = cursor[kId];
   if (cursor.closed) {
     return callback(undefined, null);
@@ -829,11 +835,11 @@ function cleanupCursor(
   }
 
   cursor[kKilled] = true;
-  server.killCursors(
-    cursorNs,
-    [cursorId],
-    { ...pluckBSONSerializeOptions(cursor[kOptions]), session },
-    () => completeCleanup()
+
+  return executeOperation(
+    cursor[kClient],
+    new KillCursorsOperation(cursorId, cursorNs, server, { session }),
+    completeCleanup
   );
 }
 
@@ -844,50 +850,41 @@ export function assertUninitialized(cursor: AbstractCursor): void {
   }
 }
 
-function makeCursorStream(cursor: AbstractCursor) {
-  const readable = new Readable({
-    objectMode: true,
-    autoDestroy: false,
-    highWaterMark: 1
-  });
+class ReadableCursorStream extends Readable {
+  private _cursor: AbstractCursor;
+  private _readInProgress = false;
 
-  let initialized = false;
-  let reading = false;
-  let needToClose = true; // NOTE: we must close the cursor if we never read from it, use `_construct` in future node versions
+  constructor(cursor: AbstractCursor) {
+    super({
+      objectMode: true,
+      autoDestroy: false,
+      highWaterMark: 1
+    });
+    this._cursor = cursor;
+  }
 
-  readable._read = function () {
-    if (initialized === false) {
-      needToClose = false;
-      initialized = true;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override _read(size: number): void {
+    if (!this._readInProgress) {
+      this._readInProgress = true;
+      this._readNext();
     }
+  }
 
-    if (!reading) {
-      reading = true;
-      readNext();
-    }
-  };
+  override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
+    this._cursor.close(err => process.nextTick(callback, err || error));
+  }
 
-  readable._destroy = function (error, cb) {
-    if (needToClose) {
-      cursor.close(err => process.nextTick(cb, err || error));
-    } else {
-      cb(error);
-    }
-  };
-
-  function readNext() {
-    needToClose = false;
-    next(cursor, true, (err, result) => {
-      needToClose = err ? !cursor.closed : result != null;
-
+  private _readNext() {
+    next(this._cursor, true, (err, result) => {
       if (err) {
         // NOTE: This is questionable, but we have a test backing the behavior. It seems the
         //       desired behavior is that a stream ends cleanly when a user explicitly closes
         //       a client during iteration. Alternatively, we could do the "right" thing and
         //       propagate the error message by removing this special case.
         if (err.message.match(/server is closed/)) {
-          cursor.close();
-          return readable.push(null);
+          this._cursor.close();
+          return this.push(null);
         }
 
         // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
@@ -896,25 +893,23 @@ function makeCursorStream(cursor: AbstractCursor) {
         //       that changed to happen in cleanup legitimate errors would not destroy the
         //       stream. There are change streams test specifically test these cases.
         if (err.message.match(/interrupted/)) {
-          return readable.push(null);
+          return this.push(null);
         }
 
-        return readable.destroy(err);
+        return this.destroy(err);
       }
 
       if (result == null) {
-        readable.push(null);
-      } else if (readable.destroyed) {
-        cursor.close();
+        this.push(null);
+      } else if (this.destroyed) {
+        this._cursor.close();
       } else {
-        if (readable.push(result)) {
-          return readNext();
+        if (this.push(result)) {
+          return this._readNext();
         }
 
-        reading = false;
+        this._readInProgress = false;
       }
     });
   }
-
-  return readable;
 }

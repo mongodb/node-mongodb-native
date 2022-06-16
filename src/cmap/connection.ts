@@ -1,3 +1,5 @@
+import { setTimeout } from 'timers';
+
 import { BSONSerializeOptions, Document, Long, ObjectId, pluckBSONSerializeOptions } from '../bson';
 import {
   CLOSE,
@@ -291,6 +293,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // TODO: remove this, and only use the `StreamDescription` in the future
     this[kHello] = response;
+  }
+
+  // Set the whether the message stream is for a monitoring connection.
+  set isMonitoringConnection(value: boolean) {
+    this[kMessageStream].isMonitoringConnection = value;
+  }
+
+  get isMonitoringConnection(): boolean {
+    return this[kMessageStream].isMonitoringConnection;
   }
 
   get serviceId(): ObjectId | undefined {
@@ -716,7 +727,6 @@ export class CryptoConnection extends Connection {
         callback(err, null);
         return;
       }
-
       super.command(ns, encrypted, options, (err, response) => {
         if (err || response == null) {
           callback(err, response);

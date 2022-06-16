@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "style": "integration",
+  "description": "custom maxConnecting is enforced",
+  "runOn": [
+    {
+      "minServerVersion": "4.4.0"
+    }
+  ],
+  "failPoint": {
+    "configureFailPoint": "failCommand",
+    "mode": "alwaysOn",
+    "data": {
+      "failCommands": [
+        "isMaster",
+        "hello"
+      ],
+      "closeConnection": false,
+      "blockConnection": true,
+      "blockTimeMS": 500
+    }
+  },
+  "poolOptions": {
+    "maxConnecting": 1,
+    "maxPoolSize": 2,
+    "waitQueueTimeoutMS": 5000
+  },
+  "operations": [
+    {
+      "name": "ready"
+    },
+    {
+      "name": "start",
+      "target": "thread1"
+    },
+    {
+      "name": "start",
+      "target": "thread2"
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread1"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCreated",
+      "count": 1
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread2"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionReady",
+      "count": 2
+    }
+  ],
+  "events": [
+    {
+      "type": "ConnectionCreated"
+    },
+    {
+      "type": "ConnectionReady"
+    },
+    {
+      "type": "ConnectionCreated"
+    },
+    {
+      "type": "ConnectionReady"
+    }
+  ],
+  "ignore": [
+    "ConnectionCheckOutStarted",
+    "ConnectionCheckedIn",
+    "ConnectionCheckedOut",
+    "ConnectionClosed",
+    "ConnectionPoolCreated",
+    "ConnectionPoolReady"
+  ]
+}

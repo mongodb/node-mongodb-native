@@ -240,11 +240,8 @@ export function runUnifiedSuite(specTests: uni.UnifiedSuite[], testsToSkip?: str
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const test of unifiedSuite.tests) {
-        it(String(test.description), {
-          metadata: { sessions: { skipLeakTests: true } },
-          test: async function () {
-            await runUnifiedTest(this, unifiedSuite, test, testsToSkip);
-          }
+        it(String(test.description), async function () {
+          await runUnifiedTest(this, unifiedSuite, test, testsToSkip);
         });
       }
     });

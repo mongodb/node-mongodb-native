@@ -1,6 +1,6 @@
 'use strict';
 
-const { ServerHeartbeatStartedEvent, MongoClient } = require('../../../src');
+const { ServerHeartbeatStartedEvent, MongoClient, MongoServerError } = require('../../../src');
 const { Connection } = require('../../../src/cmap/connection');
 const { connect } = require('../../../src/cmap/connect');
 const { expect } = require('chai');
@@ -162,24 +162,8 @@ describe('Connection', function () {
     let testClient;
 
     afterEach(async () => {
-      let savedError;
-      if (client) {
-        try {
-          await client.close();
-        } catch (err) {
-          savedError = err;
-        }
-      }
-      if (testClient) {
-        try {
-          await testClient.close();
-        } catch (err) {
-          savedError = err;
-        }
-      }
-      if (savedError) {
-        throw savedError;
-      }
+      if (client) await client.close();
+      if (testClient) await testClient.close();
     });
 
     it('should correctly start monitoring for single server connection', {
@@ -394,23 +378,16 @@ describe('Connection', function () {
       }
     });
 
-    it('test connect bad auth', {
-      metadata: { requires: { topology: 'single' } },
-
-      test: function (done) {
-        var configuration = this.configuration;
-        client = configuration.newClient({
-          auth: {
-            username: 'slithy',
-            password: 'toves'
-          }
-        });
-        client.connect(function (err, client) {
-          expect(err).to.exist;
-          expect(client).to.not.exist;
-          done();
-        });
-      }
+    it('test connect bad auth', async function () {
+      client = this.configuration.newClient({
+        auth: {
+          username: 'slithy',
+          password: 'toves'
+        }
+      });
+      const error = await client.connect().catch(error => error);
+      expect(error).to.be.instanceOf(MongoServerError);
+      await client.close();
     });
 
     it('test connect bad url', {

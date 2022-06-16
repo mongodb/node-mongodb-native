@@ -1,16 +1,27 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import type { MongoClient } from '../../../src';
+import type {
+  Collection,
+  CommandStartedEvent,
+  CommandSucceededEvent,
+  MongoClient
+} from '../../../src';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { MongoServerError } from '../../../src/error';
+import { MongoCompatibilityError, MongoServerError } from '../../../src/error';
+import type { TestConfiguration } from '../../tools/runner/config';
 import { setupDatabase, withMonitoredClient } from '../shared';
 
 const ignoredCommands = [LEGACY_HELLO_COMMAND];
 let hasInitialPingOccurred = false;
-const test = {
+const test: {
+  client: MongoClient;
+  commands: { started: CommandStartedEvent[]; succeeded: CommandSucceededEvent[] };
+  setup: (config: TestConfiguration) => Promise<void>;
+} = {
   client: null,
   commands: { started: [], succeeded: [] },
-  setup: function (config) {
+  async setup(config) {
     this.commands = { started: [], succeeded: [] };
     this.client = config.newClient({ w: 1 }, { maxPoolSize: 1, monitorCommands: true });
 
@@ -35,41 +46,34 @@ const test = {
       }
     });
 
-    return this.client.connect();
+    await this.client.connect();
   }
 };
 
-describe('Sessions Spec', function () {
+describe('Sessions', function () {
   describe('Sessions - functional - old format', function () {
     before(function () {
       return setupDatabase(this.configuration);
     });
 
     describe('endSessions', function () {
-      beforeEach(function () {
-        return test.setup(this.configuration);
+      beforeEach(async function () {
+        await test.setup(this.configuration);
       });
 
-      it('should send endSessions for multiple sessions', {
-        metadata: {
-          requires: { topology: ['single'], mongodb: '>=3.6.0' },
-          // Skipping session leak tests b/c these are explicit sessions
-          sessions: { skipLeakTests: true }
-        },
-        test: function (done) {
-          const client = test.client;
-          const sessions = [client.startSession(), client.startSession()].map(s => s.id);
+      it('should send endSessions for multiple sessions', function (done) {
+        const client = test.client;
+        const sessions = [client.startSession(), client.startSession()].map(s => s.id);
 
-          client.close(err => {
-            expect(err).to.not.exist;
-            expect(test.commands.started).to.have.length(1);
-            expect(test.commands.started[0].commandName).to.equal('endSessions');
-            expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
-            expect(client.s.sessions.size).to.equal(0);
+        client.close(err => {
+          expect(err).to.not.exist;
+          expect(test.commands.started).to.have.length(1);
+          expect(test.commands.started[0].commandName).to.equal('endSessions');
+          expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
+          expect(client.s.activeSessions.size).to.equal(0);
 
-            done();
-          });
-        }
+          done();
+        });
       });
     });
 
@@ -147,13 +151,13 @@ describe('Sessions Spec', function () {
                   if (shouldReject) {
                     expect.fail('this should have rejected');
                   }
-                  expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+                  expect(client.s.sessionPool.sessions).to.have.length(1);
                 },
                 () => {
                   if (shouldResolve) {
                     expect.fail('this should have resolved');
                   }
-                  expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+                  expect(client.s.sessionPool.sessions).to.have.length(1);
                 }
               )
               .then(() => {
@@ -175,7 +179,7 @@ describe('Sessions Spec', function () {
           await client.db('test').collection('foo').find({}, { session }).toArray();
         });
 
-        expect(client.topology.s.sessionPool.sessions).to.have.length(1);
+        expect(client.s.sessionPool.sessions).to.have.length(1);
         expect(sessionWasEnded).to.be.true;
       });
     });
@@ -215,7 +219,9 @@ describe('Sessions Spec', function () {
                 expect(err.message).to.equal(
                   'Cannot have explicit session with unacknowledged writes'
                 );
-                client.close(done);
+                session.endSession(() => {
+                  client.close(done);
+                });
               });
           }
         )
@@ -398,6 +404,92 @@ describe('Sessions Spec', function () {
       expect(events).to.have.lengthOf(documents.length);
 
       expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(1);
+    });
+  });
+
+  describe('session support detection', () => {
+    let client: MongoClient;
+    let collection: Collection<{ a: number }>;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      await client.connect();
+      collection = client.db('test').collection('session.support.detection');
+      await collection.drop().catch(() => null);
+
+      // Never run a server selection for support since we're overriding it
+      sinon.stub(client.topology, 'shouldCheckForSessionSupport').callsFake(() => false);
+    });
+
+    afterEach(async function () {
+      await client.close();
+      sinon.restore();
+    });
+
+    context('when hasSessionSupport is false', () => {
+      beforeEach(() => sinon.stub(client.topology, 'hasSessionSupport').callsFake(() => false));
+
+      it('should not send session', async () => {
+        const events: CommandStartedEvent[] = [];
+        client.on('commandStarted', event => events.push(event));
+
+        await collection.insertMany([{ a: 1 }, { a: 1 }]);
+        const cursor = collection.find({ a: 1 }, { batchSize: 1, projection: { _id: 0 } });
+
+        const docs = [
+          await cursor.next(), // find
+          await cursor.next() // getMore
+        ];
+
+        await cursor.close();
+
+        expect(docs).to.deep.equal([{ a: 1 }, { a: 1 }]);
+        expect(events.map(({ commandName }) => commandName)).to.deep.equal([
+          'insert',
+          'find',
+          'getMore',
+          'killCursors'
+        ]);
+        for (const event of events) {
+          expect(event.command).to.not.have.property('lsid');
+        }
+      });
+
+      it('should fail for an explicit session', async () => {
+        const session = client.startSession();
+
+        const error = await collection
+          .insertMany([{ a: 1 }, { a: 1 }], { session })
+          .catch(error => error);
+
+        expect(error).to.be.instanceOf(MongoCompatibilityError);
+
+        await session.endSession();
+      });
+    });
+
+    context('when hasSessionSupport is true', () => {
+      beforeEach(() => sinon.stub(client.topology, 'hasSessionSupport').callsFake(() => true));
+
+      it('should send session', async () => {
+        const events: CommandStartedEvent[] = [];
+        client.on('commandStarted', event => events.push(event));
+
+        await collection.insertMany([{ a: 1 }, { a: 1 }]);
+        const cursor = collection.find({ a: 1 }, { batchSize: 1, projection: { _id: 0 } });
+
+        const docs = [await cursor.next(), await cursor.next()];
+
+        expect(docs).to.deep.equal([{ a: 1 }, { a: 1 }]);
+        expect(events.map(({ commandName }) => commandName)).to.deep.equal([
+          'insert',
+          'find',
+          'getMore'
+        ]);
+        for (const event of events) {
+          expect(event.command).to.have.property('lsid');
+        }
+      });
     });
   });
 });

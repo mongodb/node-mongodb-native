@@ -2,6 +2,7 @@
 const { assert: test, setupDatabase, withMonitoredClient } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
+const { setTimeout } = require('timers');
 const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../../src');
 
 describe('Find', function () {

@@ -1,0 +1,50 @@
+version: 1
+style: integration
+description: custom maxConnecting is enforced
+runOn:
+  -
+    minServerVersion: "4.4.0"
+failPoint:
+  configureFailPoint: failCommand
+  mode: "alwaysOn"
+  data:
+    failCommands: ["isMaster","hello"]
+    closeConnection: false
+    blockConnection: true
+    blockTimeMS: 500
+poolOptions:
+  maxConnecting: 1
+  # gives opportunity for the checkout in thread2 to establish a new connection, which it must not do until thread1 establishes one
+  maxPoolSize: 2
+  waitQueueTimeoutMS: 5000
+operations:
+  - name: ready
+  # thread1 exists to consume the single permit to open a connection,
+  # so that thread2 would be blocked acquiring a permit, which results in ordering its ConnectionCreated event after
+  # the ConnectionReady event from thread1.
+  - name: start
+    target: thread1
+  - name: start
+    target: thread2
+  - name: checkOut
+    thread: thread1
+  - name: waitForEvent
+    event: ConnectionCreated
+    count: 1
+  - name: checkOut
+    thread: thread2
+  - name: waitForEvent
+    event: ConnectionReady
+    count: 2
+events:
+  - type: ConnectionCreated
+  - type: ConnectionReady
+  - type: ConnectionCreated
+  - type: ConnectionReady
+ignore:
+  - ConnectionCheckOutStarted
+  - ConnectionCheckedIn
+  - ConnectionCheckedOut
+  - ConnectionClosed
+  - ConnectionPoolCreated
+  - ConnectionPoolReady

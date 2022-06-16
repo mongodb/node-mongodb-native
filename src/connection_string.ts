@@ -856,6 +856,16 @@ export const OPTIONS = {
       return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
     }
   },
+  maxConnecting: {
+    default: 2,
+    transform({ name, values: [value] }): number {
+      const maxConnecting = getUint(name, value);
+      if (maxConnecting === 0) {
+        throw new MongoInvalidArgumentError('maxConnecting must be > 0 if specified');
+      }
+      return maxConnecting;
+    }
+  },
   maxIdleTimeMS: {
     default: 0,
     type: 'uint'

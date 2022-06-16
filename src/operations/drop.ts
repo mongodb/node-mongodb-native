@@ -51,24 +51,6 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
         encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
       }
 
-      let result;
-      let errorForMainOperation;
-      try {
-        result = await this.executeWithoutEncryptedFieldsCheck(server, session);
-      } catch (err) {
-        if (
-          !encryptedFields ||
-          !(err instanceof MongoServerError) ||
-          err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
-        ) {
-          throw err;
-        }
-        // Save a possible NamespaceNotFound error for later
-        // in the encryptedFields case, so that the auxilliary
-        // collections will still be dropped.
-        errorForMainOperation = err;
-      }
-
       if (encryptedFields) {
         const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
         const eccCollection = encryptedFields.eccCollection || `enxcol_.${name}.ecc`;
@@ -88,13 +70,9 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
             }
           }
         }
-
-        if (errorForMainOperation) {
-          throw errorForMainOperation;
-        }
       }
 
-      return result;
+      return await this.executeWithoutEncryptedFieldsCheck(server, session);
     })().then(
       result => callback(undefined, result),
       err => callback(err)

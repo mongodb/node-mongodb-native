@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import * as os from 'os';
+import { setTimeout } from 'timers';
 import { URL } from 'url';
 
 import { Document, ObjectId, resolveBSONOptions } from './bson';

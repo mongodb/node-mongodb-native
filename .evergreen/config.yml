@@ -265,6 +265,7 @@ functions:
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: next
+          TRY_COMPILING_DRIVER: 'false'
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
@@ -1630,7 +1631,7 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          TOPOLOGY: server
+          TOPOLOGY: replica_set
       - func: bootstrap kms servers
       - func: run custom csfle tests
   - name: test-latest-server-noauth

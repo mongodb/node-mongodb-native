@@ -3,6 +3,7 @@ var test = require('./shared').assert;
 const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
+const { setTimeout, setInterval } = require('timers');
 
 describe('ObjectId', function () {
   before(function () {

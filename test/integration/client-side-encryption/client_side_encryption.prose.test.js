@@ -1,12 +1,13 @@
 'use strict';
 const BSON = require('bson');
-const chai = require('chai');
+const { expect } = require('chai');
 const fs = require('fs');
 const path = require('path');
-const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
 
-const expect = chai.expect;
-chai.use(require('chai-subset'));
+const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
+const { dropCollection, APMEventCollector } = require('../shared');
+
+const { EJSON } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
@@ -52,10 +53,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-
-  const shared = require('../shared');
-  const dropCollection = shared.dropCollection;
-  const APMEventCollector = shared.APMEventCollector;
 
   const LOCAL_KEY = Buffer.from(
     'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
@@ -337,9 +334,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   // and confirming that the externalClient is firing off keyVault requests during
   // encrypted operations
   describe('External Key Vault Test', function () {
-    const fs = require('fs');
-    const path = require('path');
-    const { EJSON } = BSON;
     function loadExternal(file) {
       return EJSON.parse(
         fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/external', file))
@@ -541,9 +535,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   });
 
   describe('BSON size limits and batch splitting', function () {
-    const fs = require('fs');
-    const path = require('path');
-    const { EJSON } = BSON;
     function loadLimits(file) {
       return EJSON.parse(
         fs.readFileSync(path.resolve(__dirname, '../../spec/client-side-encryption/limits', file))
@@ -621,7 +612,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       }
     });
 
-    after(function () {
+    afterEach(function () {
       return this.client && this.client.close();
     });
 

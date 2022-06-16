@@ -12,13 +12,12 @@ describe('Transactions', function () {
 
     beforeEach(async function () {
       client = this.configuration.newClient();
-      const topology = (await client.connect()).topology;
-      sessionPool = topology.s.sessionPool;
-      session = new ClientSession(topology, sessionPool, {});
+      await client.connect();
+      sessionPool = client.s.sessionPool;
+      session = new ClientSession(client, sessionPool, {});
     });
 
     afterEach(async () => {
-      sessionPool.endAllPooledSessions();
       await client.close();
     });
 

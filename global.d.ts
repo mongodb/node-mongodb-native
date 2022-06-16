@@ -44,6 +44,20 @@ declare global {
       (title: string, metadata: MongoDBMetadataUI, fn: (this: Suite) => void): Mocha.Suite;
     }
 
+    interface ExclusiveSuiteFunction {
+      (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
+      (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
+      (title: string, metadataAndTest: MetadataAndTest<Mocha.Func>): Mocha.Test;
+      (title: string, metadataAndTest: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
+    }
+
+    interface ExclusiveTestFunction {
+      (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
+      (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
+      (title: string, metadataAndTest: MetadataAndTest<Mocha.Func>): Mocha.Test;
+      (title: string, metadataAndTest: MetadataAndTest<Mocha.AsyncFunc>): Mocha.Test;
+    }
+
     interface TestFunction {
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.Func): Mocha.Test;
       (title: string, metadata: MongoDBMetadataUI, fn: Mocha.AsyncFunc): Mocha.Test;
