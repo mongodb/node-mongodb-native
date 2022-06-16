@@ -633,18 +633,21 @@ export class ChangeStream<
       (async () => {
         try {
           const hasNext = await this.cursor.hasNext();
-          return callback(undefined, hasNext);
+          return hasNext;
         } catch (error) {
-          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
-          if (errorOnResume) return callback(errorOnResume);
           try {
+            await this._processErrorAsync(error);
             const hasNext = await this.cursor.hasNext();
-            return callback(undefined, hasNext);
+            return hasNext;
           } catch (error) {
-            this.close(() => callback(error));
+            await this.close().catch(err => err);
+            throw error;
           }
         }
-      })();
+      })().then(
+        hasNext => callback(undefined, hasNext),
+        error => callback(error)
+      );
     });
   }
 
@@ -657,18 +660,23 @@ export class ChangeStream<
       (async () => {
         try {
           const change = await this.cursor.next();
-          this.handleChangeCallback(change ?? null, callback);
+          const processedChange = this._processChange(change ?? null);
+          return processedChange;
         } catch (error) {
-          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
-          if (errorOnResume) return callback(errorOnResume);
           try {
+            await this._processErrorAsync(error);
             const change = await this.cursor.next();
-            this.handleChangeCallback(change ?? null, callback);
+            const processedChange = this._processChange(change ?? null);
+            return processedChange;
           } catch (error) {
-            this.close(() => callback(error));
+            await this.close().catch(err => err);
+            throw error;
           }
         }
-      })();
+      })().then(
+        change => callback(undefined, change),
+        error => callback(error)
+      );
     });
   }
 
@@ -683,18 +691,21 @@ export class ChangeStream<
       (async () => {
         try {
           const change = await this.cursor.tryNext();
-          callback(undefined, change ?? null);
+          return change ?? null;
         } catch (error) {
-          const errorOnResume = await this._processErrorAsync(error).catch(err => err);
-          if (errorOnResume) return callback(errorOnResume);
           try {
+            await this._processErrorAsync(error);
             const change = await this.cursor.tryNext();
-            callback(undefined, change ?? null);
+            return change ?? null;
           } catch (error) {
-            this.close(() => callback(error));
+            await this.close().catch(err => err);
+            throw error;
           }
         }
-      })();
+      })().then(
+        change => callback(undefined, change),
+        error => callback(error)
+      );
     });
   }
 
