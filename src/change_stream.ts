@@ -861,6 +861,7 @@ export class ChangeStream<
     return callback(undefined, change);
   }
 
+  /** @internal */
   private _processErrorStreamMode(error: AnyError) {
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
@@ -879,6 +880,7 @@ export class ChangeStream<
     }
   }
 
+  /** @internal */
   private _processErrorAsync = promisify(this._processErrorIteratorMode);
 
   /** @internal */
