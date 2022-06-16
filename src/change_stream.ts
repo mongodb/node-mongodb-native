@@ -704,6 +704,8 @@ export class ChangeStream<
   }
 
   /** Close the Change Stream */
+  close(): Promise<void>;
+  close(callback: Callback): void;
   close(callback?: Callback): Promise<void> | void {
     this[kClosed] = true;
 
