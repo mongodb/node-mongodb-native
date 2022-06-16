@@ -48,7 +48,6 @@ const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE];
 
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
-const NO_CURSOR_ERROR = 'ChangeStream has no cursor';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
 /**
@@ -632,7 +631,6 @@ export class ChangeStream<
     this._setIsIterator();
     return maybePromise(callback, callback => {
       (async () => {
-        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
         try {
           const hasNext = await this.cursor.hasNext();
           return callback(undefined, hasNext);
@@ -657,7 +655,6 @@ export class ChangeStream<
     this._setIsIterator();
     return maybePromise(callback, callback => {
       (async () => {
-        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
         try {
           const change = await this.cursor.next();
           this._processNewChange(change ?? null, callback);
@@ -684,7 +681,6 @@ export class ChangeStream<
     this._setIsIterator();
     return maybePromise(callback, callback => {
       (async () => {
-        if (!this.cursor) return callback(new MongoChangeStreamError(NO_CURSOR_ERROR));
         try {
           const change = await this.cursor.tryNext();
           callback(undefined, change ?? null);
@@ -704,7 +700,7 @@ export class ChangeStream<
 
   /** Is the cursor closed */
   get closed(): boolean {
-    return this[kClosed] || (this.cursor?.closed ?? false);
+    return this[kClosed] || (this.cursor.closed ?? false);
   }
 
   /** Close the Change Stream */
@@ -712,10 +708,6 @@ export class ChangeStream<
     this[kClosed] = true;
 
     return maybePromise(callback, cb => {
-      if (!this.cursor) {
-        return cb();
-      }
-
       const cursor = this.cursor;
       return cursor.close(err => {
         this._endStream();
@@ -734,7 +726,6 @@ export class ChangeStream<
    */
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
     this.streamOptions = options;
-    if (!this.cursor) throw new MongoChangeStreamError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
   }
 
@@ -855,7 +846,7 @@ export class ChangeStream<
     }
 
     // cache the resume token
-    this.cursor?.cacheResumeToken(change._id);
+    this.cursor.cacheResumeToken(change._id);
 
     // wipe the startAtOperationTime if there was one so that there won't be a conflict
     // between resumeToken and startAtOperationTime if we need to reconnect the cursor
@@ -870,7 +861,7 @@ export class ChangeStream<
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
-    if (this.cursor && isResumableError(error, this.cursor.maxWireVersion)) {
+    if (isResumableError(error, this.cursor.maxWireVersion)) {
       this._endStream();
       this.cursor.close();
 
@@ -893,7 +884,7 @@ export class ChangeStream<
       return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     }
 
-    if (this.cursor && isResumableError(error, this.cursor.maxWireVersion)) {
+    if (isResumableError(error, this.cursor.maxWireVersion)) {
       this.cursor.close();
 
       const topology = getTopology(this.parent);
