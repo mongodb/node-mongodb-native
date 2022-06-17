@@ -509,9 +509,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       .finally(() => callback?.());
   }
 
-  /** @internal */
-  _selectServer = promisify(this.selectServer);
-
   /**
    * Selects a server according to the selection predicate provided
    *
