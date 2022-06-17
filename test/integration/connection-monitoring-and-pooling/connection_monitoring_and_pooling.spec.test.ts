@@ -26,7 +26,7 @@ const POOL_PAUSED_SKIP_TESTS: SkipDescription[] = [
   skipReason: 'TODO(NODE-2994): implement pool pausing'
 }));
 
-describe.only('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
+describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
   const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
   runCmapTestSuite(tests, {
