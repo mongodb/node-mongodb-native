@@ -639,7 +639,7 @@ export class ChangeStream<
           return hasNext;
         } catch (error) {
           try {
-            await this._processErrorAsync(error);
+            await this._processErrorIteratorMode(error);
             const hasNext = await this.cursor.hasNext();
             return hasNext;
           } catch (error) {
@@ -670,7 +670,7 @@ export class ChangeStream<
           return processedChange;
         } catch (error) {
           try {
-            await this._processErrorAsync(error);
+            await this._processErrorIteratorMode(error);
             const change = await this.cursor.next();
             const processedChange = this._processChange(change ?? null);
             return processedChange;
@@ -703,7 +703,7 @@ export class ChangeStream<
           return change ?? null;
         } catch (error) {
           try {
-            await this._processErrorAsync(error);
+            await this._processErrorIteratorMode(error);
             const change = await this.cursor.tryNext();
             return change ?? null;
           } catch (error) {
@@ -907,10 +907,10 @@ export class ChangeStream<
   }
 
   /** @internal */
-  private _processErrorAsync = promisify(this._processErrorIteratorMode);
+  private _processErrorIteratorMode = promisify(this._processErrorIteratorModeCallback);
 
   /** @internal */
-  private _processErrorIteratorMode(error: AnyError, callback: Callback) {
+  private _processErrorIteratorModeCallback(error: AnyError, callback: Callback) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
