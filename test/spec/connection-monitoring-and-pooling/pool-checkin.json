@@ -4,6 +4,9 @@
   "description": "must have a method of allowing the driver to check in a connection",
   "operations": [
     {
+      "name": "ready"
+    },
+    {
       "name": "checkOut",
       "label": "conn"
     },
@@ -21,6 +24,7 @@
   ],
   "ignore": [
     "ConnectionPoolCreated",
+    "ConnectionPoolReady",
     "ConnectionCreated",
     "ConnectionReady",
     "ConnectionClosed",

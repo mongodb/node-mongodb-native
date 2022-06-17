@@ -1,13 +1,23 @@
 {
   "version": 1,
   "style": "unit",
-  "description": "must have IDs assigned in order of creation",
+  "description": "pool starts as cleared and becomes ready",
   "operations": [
     {
-      "name": "ready"
+      "name": "start",
+      "target": "thread1"
     },
     {
-      "name": "checkOut"
+      "name": "checkOut",
+      "thread": "thread1"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCheckOutFailed",
+      "count": 1
+    },
+    {
+      "name": "ready"
     },
     {
       "name": "checkOut"
@@ -19,13 +29,12 @@
       "address": 42
     },
     {
-      "type": "ConnectionCreated",
-      "connectionId": 1,
+      "type": "ConnectionCheckOutFailed",
+      "reason": "connectionError",
       "address": 42
     },
     {
-      "type": "ConnectionCheckedOut",
-      "connectionId": 1,
+      "type": "ConnectionPoolReady",
       "address": 42
     },
     {
@@ -34,19 +43,15 @@
     },
     {
       "type": "ConnectionCreated",
-      "connectionId": 2,
       "address": 42
     },
     {
       "type": "ConnectionCheckedOut",
-      "connectionId": 2,
       "address": 42
     }
   ],
   "ignore": [
     "ConnectionPoolCreated",
-    "ConnectionPoolReady",
-    "ConnectionPoolClosed",
     "ConnectionReady"
   ]
 }

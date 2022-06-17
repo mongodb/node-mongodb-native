@@ -2,6 +2,7 @@ version: 1
 style: unit
 description: must be able to check out multiple connections at the same time
 operations:
+  - name: ready
   - name: start
     target: thread1
   - name: start
@@ -32,6 +33,7 @@ events:
     address: 42
 ignore:
   - ConnectionCreated
+  - ConnectionPoolReady
   - ConnectionReady
   - ConnectionPoolCreated
   - ConnectionCheckOutStarted

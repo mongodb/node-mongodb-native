@@ -2,6 +2,7 @@ version: 1
 style: unit
 description: must be able to check out a connection
 operations:
+  - name: ready
   - name: checkOut
 events:
   - type: ConnectionCheckOutStarted
@@ -16,4 +17,5 @@ events:
     connectionId: 1
     address: 42
 ignore:
+  - ConnectionPoolReady
   - ConnectionPoolCreated

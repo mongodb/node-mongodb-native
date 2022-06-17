@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "style": "unit",
+  "description": "readying a ready pool emits no events",
+  "operations": [
+    {
+      "name": "ready"
+    },
+    {
+      "name": "ready"
+    },
+    {
+      "name": "ready"
+    },
+    {
+      "name": "clear"
+    },
+    {
+      "name": "ready"
+    }
+  ],
+  "events": [
+    {
+      "type": "ConnectionPoolReady",
+      "address": 42
+    },
+    {
+      "type": "ConnectionPoolCleared",
+      "address": 42
+    },
+    {
+      "type": "ConnectionPoolReady",
+      "address": 42
+    }
+  ],
+  "ignore": [
+    "ConnectionPoolCreated"
+  ]
+}

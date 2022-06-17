@@ -18,6 +18,7 @@ poolOptions:
   maxPoolSize: 10
   waitQueueTimeoutMS: 5000
 operations:
+  - name: ready
   # start 3 threads
   - name: start
     target: thread1
@@ -75,3 +76,4 @@ ignore:
   - ConnectionCheckedOut
   - ConnectionClosed
   - ConnectionPoolCreated
+  - ConnectionPoolReady

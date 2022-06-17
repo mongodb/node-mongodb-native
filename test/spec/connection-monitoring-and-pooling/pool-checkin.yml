@@ -2,6 +2,7 @@ version: 1
 style: unit
 description: must have a method of allowing the driver to check in a connection
 operations:
+  - name: ready
   - name: checkOut
     label: conn
   - name: checkIn
@@ -12,6 +13,7 @@ events:
     address: 42
 ignore:
   - ConnectionPoolCreated
+  - ConnectionPoolReady
   - ConnectionCreated
   - ConnectionReady
   - ConnectionClosed

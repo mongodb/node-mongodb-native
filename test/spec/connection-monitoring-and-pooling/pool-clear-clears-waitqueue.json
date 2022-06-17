@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "style": "unit",
+  "description": "clearing pool clears the WaitQueue",
+  "poolOptions": {
+    "maxPoolSize": 1,
+    "waitQueueTimeoutMS": 30000
+  },
+  "operations": [
+    {
+      "name": "ready"
+    },
+    {
+      "name": "checkOut"
+    },
+    {
+      "name": "start",
+      "target": "thread1"
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread1"
+    },
+    {
+      "name": "start",
+      "target": "thread2"
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread2"
+    },
+    {
+      "name": "start",
+      "target": "thread3"
+    },
+    {
+      "name": "checkOut",
+      "thread": "thread3"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCheckOutStarted",
+      "count": 4
+    },
+    {
+      "name": "clear"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCheckOutFailed",
+      "count": 3,
+      "timeout": 1000
+    }
+  ],
+  "events": [
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckedOut",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutStarted",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutFailed",
+      "reason": "connectionError",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutFailed",
+      "reason": "connectionError",
+      "address": 42
+    },
+    {
+      "type": "ConnectionCheckOutFailed",
+      "reason": "connectionError",
+      "address": 42
+    }
+  ],
+  "ignore": [
+    "ConnectionPoolReady",
+    "ConnectionPoolCleared",
+    "ConnectionPoolCreated",
+    "ConnectionCreated",
+    "ConnectionReady",
+    "ConnectionCheckedIn",
+    "ConnectionClosed"
+  ]
+}

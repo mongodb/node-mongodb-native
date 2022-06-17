@@ -24,7 +24,11 @@ Common Test Format
 Each YAML file has the following keys:
 
 - ``version``: A version number indicating the expected format of the spec tests (current version = 1)
-- ``style``: A string indicating what style of tests this file contains. Currently ``unit`` is the only valid value
+- ``style``: A string indicating what style of tests this file contains. Contains one of the following:
+
+  - ``"unit"``: a test that may be run without connecting to a MongoDB deployment.
+  - ``"integration"``: a test that MUST be run against a real MongoDB deployment.
+
 - ``description``: A text description of what the test is meant to assert
 
 Unit Test Format:
@@ -32,7 +36,20 @@ Unit Test Format:
 
 All Unit Tests have some of the following fields:
 
-- ``poolOptions``: if present, connection pool options to use when creating a pool
+- ``poolOptions``: If present, connection pool options to use when creating a pool;
+  both `standard ConnectionPoolOptions <https://github.com/mongodb/specifications/blob/master/source/connection-monitoring-and-pooling/connection-monitoring-and-pooling.rst#connection-pool-options-1>`__
+  and the following test-specific options are allowed:
+
+  - ``backgroundThreadIntervalMS``: A time interval between the end of a
+    `Background Thread Run <https://github.com/mongodb/specifications/blob/master/source/connection-monitoring-and-pooling/connection-monitoring-and-pooling.rst#background-thread>`__
+    and the beginning of the next Run. If a Connection Pool does not implement a Background Thread, the Test Runner MUST ignore the option.
+    If the option is not specified, an implementation is free to use any value it finds reasonable.
+
+    Possible values (0 is not allowed):
+
+    - A negative value: never begin a Run.
+    - A positive value: the interval between Runs in milliseconds.
+
 - ``operations``: A list of operations to perform. All operations support the following fields:
 
   - ``name``: A string describing which operation to issue.
@@ -68,10 +85,11 @@ Valid Unit Test Operations are the following:
 
   - ``target``: The name of the thread to wait for.
 
-- ``waitForEvent(event, count)``: block the current thread until ``event`` has occurred ``count`` times
+- ``waitForEvent(event, count, timeout)``: block the current thread until ``event`` has occurred ``count`` times
 
   - ``event``: The name of the event
   - ``count``: The number of times the event must occur (counting from the start of the test)
+  - ``timeout``: If specified, time out with an error after waiting for this many milliseconds without seeing the required events
 
 - ``label = pool.checkOut()``: call ``checkOut`` on pool, returning the checked out connection
 
@@ -83,6 +101,35 @@ Valid Unit Test Operations are the following:
 
 - ``pool.clear()``: call ``clear`` on Pool
 - ``pool.close()``: call ``close`` on Pool
+- ``pool.ready()``: call ``ready`` on Pool
+
+
+Integration Test Format
+=======================
+
+The integration test format is identical to the unit test format with
+the addition of the following fields to each test:
+
+- ``runOn`` (optional): An array of server version and/or topology requirements
+  for which the tests can be run. If the test environment satisfies one or more
+  of these requirements, the tests may be executed; otherwise, this test should
+  be skipped. If this field is omitted, the tests can be assumed to have no
+  particular requirements and should be executed. Each element will have some or
+  all of the following fields:
+
+  - ``minServerVersion`` (optional): The minimum server version (inclusive)
+    required to successfully run the tests. If this field is omitted, it should
+    be assumed that there is no lower bound on the required server version.
+
+  - ``maxServerVersion`` (optional): The maximum server version (inclusive)
+    against which the tests can be run successfully. If this field is omitted,
+    it should be assumed that there is no upper bound on the required server
+    version.
+
+- ``failPoint``: optional, a document containing a ``configureFailPoint``
+  command to run against the endpoint being used for the test.
+
+- ``poolOptions.appName`` (optional): appName attribute to be set in connections, which will be affected by the fail point.
 
 Spec Test Match Function
 ========================
@@ -122,11 +169,10 @@ For each YAML file with ``style: unit``:
   - If ``poolOptions`` is specified, use those options to initialize both pools
   - The returned pool must have an ``address`` set as a string value.
 
-- Execute each ``operation`` in ``operations``
+- Process each ``operation`` in ``operations`` (on the main thread)
 
-  - If a ``thread`` is specified, execute in that corresponding thread. Otherwise, execute in the main thread.
+  - If a ``thread`` is specified, the main thread MUST schedule the operation to execute in the corresponding thread. Otherwise, execute the operation directly in the main thread.
 
-- Wait for the main thread to finish executing all of its operations
 - If ``error`` is presented
 
   - Assert that an actual error ``actualError`` was thrown by the main thread
@@ -144,6 +190,30 @@ For each YAML file with ``style: unit``:
 
 
 It is important to note that the ``ignore`` list is used for calculating ``actualEvents``, but is NOT used for the ``waitForEvent`` command
+
+Integration Test Runner
+=======================
+
+The steps to run the integration tests are the same as those used to run the
+unit tests with the following modifications:
+
+- The integration tests MUST be run against an actual endpoint. If the
+  deployment being tested contains multiple endpoints, then the runner MUST
+  only use one of them to run the tests against.
+
+- For each test, if `failPoint` is specified, its value is a
+  ``configureFailPoint`` command. Run the command on the admin database of the
+  endpoint being tested to enable the fail point.
+
+- At the end of each test, any enabled fail point MUST be disabled to avoid
+  spurious failures in subsequent tests. The fail point may be disabled like
+  so::
+
+    db.adminCommand({
+        configureFailPoint: <fail point name>,
+        mode: "off"
+    });
+
 
 Prose Tests
 ===========

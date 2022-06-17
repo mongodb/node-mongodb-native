@@ -2,6 +2,7 @@ version: 1
 style: unit
 description: must make valid checked in connection available
 operations:
+  - name: ready
   - name: checkOut
     label: conn
   - name: checkIn
@@ -19,6 +20,7 @@ events:
     address: 42
 ignore:
   - ConnectionPoolCreated
+  - ConnectionPoolReady
   - ConnectionCreated
   - ConnectionReady
   - ConnectionCheckOutStarted

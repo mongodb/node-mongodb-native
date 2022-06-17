@@ -4,6 +4,9 @@
   "description": "must make valid checked in connection available",
   "operations": [
     {
+      "name": "ready"
+    },
+    {
       "name": "checkOut",
       "label": "conn"
     },
@@ -34,6 +37,7 @@
   ],
   "ignore": [
     "ConnectionPoolCreated",
+    "ConnectionPoolReady",
     "ConnectionCreated",
     "ConnectionReady",
     "ConnectionCheckOutStarted"

@@ -1,0 +1,63 @@
+version: 1
+style: unit
+description: clearing pool clears the WaitQueue
+poolOptions:
+  maxPoolSize: 1
+  waitQueueTimeoutMS: 30000
+operations:
+  - name: ready
+  # check out only connection in the pool
+  - name: checkOut
+  # start a few threads that all will enter
+  # the wait queue
+  - name: start
+    target: thread1
+  - name: checkOut
+    thread: thread1
+  - name: start
+    target: thread2
+  - name: checkOut
+    thread: thread2
+  - name: start
+    target: thread3 
+  - name: checkOut
+    thread: thread3
+  # wait for the 3 threads to start checking out a connection
+  - name: waitForEvent
+    event: ConnectionCheckOutStarted
+    count: 4
+  # clear the pool, ejecting the previous three threads
+  # from the WaitQueue
+  - name: clear
+  - name: waitForEvent
+    event: ConnectionCheckOutFailed
+    count: 3
+    timeout: 1000
+events:
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckedOut
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutStarted
+    address: 42
+  - type: ConnectionCheckOutFailed
+    reason: connectionError
+    address: 42
+  - type: ConnectionCheckOutFailed
+    reason: connectionError
+    address: 42
+  - type: ConnectionCheckOutFailed
+    reason: connectionError
+    address: 42
+ignore:
+  - ConnectionPoolReady
+  - ConnectionPoolCleared
+  - ConnectionPoolCreated
+  - ConnectionCreated
+  - ConnectionReady
+  - ConnectionCheckedIn
+  - ConnectionClosed

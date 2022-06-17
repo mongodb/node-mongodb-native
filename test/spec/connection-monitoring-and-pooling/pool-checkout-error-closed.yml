@@ -2,6 +2,7 @@ version: 1
 style: unit
 description: must throw error if checkOut is called on a closed pool
 operations:
+  - name: ready
   - name: checkOut
     label: conn1
   - name: checkIn
@@ -31,6 +32,7 @@ events:
     address: 42
     reason: poolClosed
 ignore:
+  - ConnectionPoolReady
   - ConnectionCreated
   - ConnectionReady
   - ConnectionClosed

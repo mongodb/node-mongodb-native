@@ -2,6 +2,7 @@ version: 1
 style: unit
 description: must destroy checked in connection if it is stale
 operations:
+  - name: ready
   - name: checkOut
     label: conn
   - name: clear
@@ -22,6 +23,7 @@ events:
     address: 42
 ignore:
   - ConnectionPoolCreated
+  - ConnectionPoolReady
   - ConnectionCreated
   - ConnectionReady
   - ConnectionCheckOutStarted

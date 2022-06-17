@@ -4,6 +4,10 @@ description: must be able to start a pool with minPoolSize connections
 poolOptions:
   minPoolSize: 3
 operations:
+  # ensure no connections are created until this pool is ready
+  - name: wait
+    ms: 200
+  - name: ready
   - name: waitForEvent
     event: ConnectionCreated
     count: 3
@@ -15,6 +19,8 @@ events:
   - type: ConnectionPoolCreated
     address: 42
     options: 42
+  - type: ConnectionPoolReady
+    address: 42
   - type: ConnectionCreated
     connectionId: 42
     address: 42
