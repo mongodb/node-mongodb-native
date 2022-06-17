@@ -74,7 +74,7 @@ collectionType.bulkWrite([
       update: {
         $set: {
           numberField: 123,
-          'dot.notation': true
+          'subInterfaceField.field1': 'true'
         }
       }
     }
@@ -123,7 +123,7 @@ collectionType.bulkWrite([
       update: {
         $set: {
           numberField: 123,
-          'dot.notation': true
+          'subInterfaceField.field2': 'true'
         }
       }
     }

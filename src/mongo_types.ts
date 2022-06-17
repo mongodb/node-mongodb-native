@@ -215,6 +215,9 @@ export type IsAny<Type, ResultIfAny, ResultIfNotAny> = true extends false & Type
 export type Flatten<Type> = Type extends ReadonlyArray<infer Item> ? Item : Type;
 
 /** @public */
+export type ArrayElement<Type> = Type extends ReadonlyArray<infer Item> ? Item : never;
+
+/** @public */
 export type SchemaMember<T, V> = { [P in keyof T]?: V } | { [key: string]: V };
 
 /** @public */
@@ -258,7 +261,19 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
 >;
 
 /** @public */
-export type MatchKeysAndValues<TSchema> = Readonly<Partial<TSchema>> & Record<string, any>;
+export type MatchKeysAndValues<TSchema> = Readonly<
+  {
+    [Property in Join<NestedPaths<TSchema>, '.'>]?: PropertyType<TSchema, Property>;
+  } & {
+    [Property in `${NestedPathsOfType<TSchema, any[]>}.$${`[${string}]` | ''}`]?: ArrayElement<
+      PropertyType<TSchema, Property extends `${infer Key}.$${string}` ? Key : never>
+    >;
+  } & {
+    [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
+      | `[${string}]`
+      | ''}.${string}`]?: any; // Could be further narrowed
+  }
+>;
 
 /** @public */
 export type AddToSetOperators<Type> = {
@@ -520,3 +535,15 @@ export type NestedPaths<Type> = Type extends
           [Key, ...NestedPaths<Type[Key]>];
     }[Extract<keyof Type, string>]
   : [];
+
+/**
+ * @public
+ * returns keys (strings) for every path into a schema with a value of type
+ * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
+ */
+export type NestedPathsOfType<TSchema, Type> = KeysOfAType<
+  {
+    [Property in Join<NestedPaths<TSchema>, '.'>]: PropertyType<TSchema, Property>;
+  },
+  Type
+>;

@@ -22,7 +22,10 @@ import type {
 } from '../../../../src/mongo_types';
 
 // MatchKeysAndValues - for basic mapping keys to their values, restricts that key types must be the same but optional, and permit dot array notation
-expectAssignable<MatchKeysAndValues<{ a: number; b: string }>>({ a: 2, 'dot.notation': true });
+expectAssignable<MatchKeysAndValues<{ a: number; b: string; c: { d: boolean } }>>({
+  a: 2,
+  'c.d': true
+});
 expectNotType<MatchKeysAndValues<{ a: number; b: string }>>({ b: 2 });
 
 // AddToSetOperators
@@ -70,6 +73,7 @@ interface SubTestModel {
   _id: ObjectId;
   field1: string;
   field2?: string;
+  field3?: number;
 }
 
 type FruitTypes = 'apple' | 'pear';
@@ -78,6 +82,7 @@ type FruitTypes = 'apple' | 'pear';
 interface TestModel {
   stringField: string;
   numberField: number;
+  numberArray: number[];
   decimal128Field: Decimal128;
   doubleField: Double;
   int32Field: Int32;
@@ -148,10 +153,13 @@ expectAssignable<UpdateFilter<TestModel>>({ $min: { doubleField: new Double(1.23
 expectAssignable<UpdateFilter<TestModel>>({ $min: { int32Field: new Int32(10) } });
 expectAssignable<UpdateFilter<TestModel>>({ $min: { longField: Long.fromString('999') } });
 expectAssignable<UpdateFilter<TestModel>>({ $min: { stringField: 'a' } });
-expectAssignable<UpdateFilter<TestModel>>({ $min: { 'dot.notation': 2 } });
-expectAssignable<UpdateFilter<TestModel>>({ $min: { 'subInterfaceArray.$': 'string' } });
-expectAssignable<UpdateFilter<TestModel>>({ $min: { 'subInterfaceArray.$[bla]': 40 } });
-expectAssignable<UpdateFilter<TestModel>>({ $min: { 'subInterfaceArray.$[]': 1000.2 } });
+expectAssignable<UpdateFilter<TestModel>>({ $min: { 'subInterfaceField.field1': '2' } });
+expectAssignable<UpdateFilter<TestModel>>({ $min: { 'numberArray.$': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $min: { 'numberArray.$[bla]': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $min: { 'numberArray.$[]': 1000.2 } });
+expectAssignable<UpdateFilter<TestModel>>({ $min: { 'subInterfaceArray.$.field3': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $min: { 'subInterfaceArray.$[bla].field3': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $min: { 'subInterfaceArray.$[].field3': 1000.2 } });
 
 expectNotType<UpdateFilter<TestModel>>({ $min: { numberField: 'a' } }); // Matches the type of the keys
 
@@ -163,10 +171,13 @@ expectAssignable<UpdateFilter<TestModel>>({ $max: { doubleField: new Double(1.23
 expectAssignable<UpdateFilter<TestModel>>({ $max: { int32Field: new Int32(10) } });
 expectAssignable<UpdateFilter<TestModel>>({ $max: { longField: Long.fromString('999') } });
 expectAssignable<UpdateFilter<TestModel>>({ $max: { stringField: 'a' } });
-expectAssignable<UpdateFilter<TestModel>>({ $max: { 'dot.notation': 2 } });
-expectAssignable<UpdateFilter<TestModel>>({ $max: { 'subInterfaceArray.$': -10 } });
-expectAssignable<UpdateFilter<TestModel>>({ $max: { 'subInterfaceArray.$[bla]': 40 } });
-expectAssignable<UpdateFilter<TestModel>>({ $max: { 'subInterfaceArray.$[]': 1000.2 } });
+expectAssignable<UpdateFilter<TestModel>>({ $max: { 'subInterfaceField.field1': '2' } });
+expectAssignable<UpdateFilter<TestModel>>({ $max: { 'numberArray.$': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $max: { 'numberArray.$[bla]': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $max: { 'numberArray.$[]': 1000.2 } });
+expectAssignable<UpdateFilter<TestModel>>({ $max: { 'subInterfaceArray.$.field3': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $max: { 'subInterfaceArray.$[bla].field3': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $max: { 'subInterfaceArray.$[].field3': 1000.2 } });
 
 expectNotType<UpdateFilter<TestModel>>({ $min: { numberField: 'a' } }); // Matches the type of the keys
 
@@ -192,10 +203,16 @@ expectAssignable<UpdateFilter<TestModel>>({ $set: { int32Field: new Int32(10) } 
 expectAssignable<UpdateFilter<TestModel>>({ $set: { longField: Long.fromString('999') } });
 expectAssignable<UpdateFilter<TestModel>>({ $set: { stringField: 'a' } });
 expectError(buildUpdateFilter({ $set: { stringField: 123 } }));
-expectAssignable<UpdateFilter<TestModel>>({ $set: { 'dot.notation': 2 } });
-expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$': -10 } });
-expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$[bla]': 40 } });
-expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$[]': 1000.2 } });
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceField.field2': '2' } });
+expectError(buildUpdateFilter({ $set: { 'subInterfaceField.field2': 2 } }));
+expectError(buildUpdateFilter({ $set: { 'unknown.field': null } }));
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'numberArray.$': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'numberArray.$[bla]': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'numberArray.$[]': 1000.2 } });
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$.field3': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$[bla].field3': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceArray.$[].field3': 1000.2 } });
+expectError(buildUpdateFilter({ $set: { 'numberArray.$': '20' } }));
 
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { numberField: 1 } });
 expectAssignable<UpdateFilter<TestModel>>({
@@ -206,10 +223,19 @@ expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { int32Field: new Int3
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { longField: Long.fromString('999') } });
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { stringField: 'a' } });
 expectError(buildUpdateFilter({ $setOnInsert: { stringField: 123 } }));
-expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'dot.notation': 2 } });
-expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceArray.$': -10 } });
-expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceArray.$[bla]': 40 } });
-expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceArray.$[]': 1000.2 } });
+expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceField.field1': '2' } });
+expectError(buildUpdateFilter({ $setOnInsert: { 'subInterfaceField.field2': 2 } }));
+expectError(buildUpdateFilter({ $setOnInsert: { 'unknown.field': null } }));
+expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'numberArray.$': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'numberArray.$[bla]': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'numberArray.$[]': 1000.2 } });
+expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceArray.$.field3': 40 } });
+expectAssignable<UpdateFilter<TestModel>>({
+  $setOnInsert: { 'subInterfaceArray.$[bla].field3': 40 }
+});
+expectAssignable<UpdateFilter<TestModel>>({
+  $ssetOnInsert: { 'subInterfaceArray.$[].field3': 1000.2 }
+});
 
 expectAssignable<UpdateFilter<TestModel>>({ $unset: { numberField: '' } });
 expectAssignable<UpdateFilter<TestModel>>({ $unset: { decimal128Field: '' } });
