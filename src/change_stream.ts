@@ -824,6 +824,7 @@ export class ChangeStream<
     return changeStreamCursor;
   }
 
+  /** @internal */
   private _closeEmitterModeWithError(error: AnyError): void {
     this.emit(ChangeStream.ERROR, error);
 
@@ -837,7 +838,14 @@ export class ChangeStream<
     this._setIsEmitter();
     const stream = this[kCursorStream] ?? cursor.stream();
     this[kCursorStream] = stream;
-    stream.on('data', change => this._processNewChangeEmitterMode(change));
+    stream.on('data', change => {
+      try {
+        const processedChange = this._processChange(change);
+        this.emit(ChangeStream.CHANGE, processedChange);
+      } catch (error) {
+        this.emit(ChangeStream.ERROR, error);
+      }
+    });
     stream.on('error', error => this._processErrorStreamMode(error));
   }
 
@@ -852,6 +860,7 @@ export class ChangeStream<
     this[kCursorStream] = undefined;
   }
 
+  /** @internal */
   private _processChange(change: TChange | null): TChange {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
@@ -876,15 +885,6 @@ export class ChangeStream<
     this.options.startAtOperationTime = undefined;
 
     return change;
-  }
-
-  private _processNewChangeEmitterMode(change: TChange | null): void {
-    try {
-      const processedChange = this._processChange(change);
-      this.emit(ChangeStream.CHANGE, processedChange);
-    } catch (error) {
-      this.emit(ChangeStream.ERROR, error);
-    }
   }
 
   /** @internal */
