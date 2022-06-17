@@ -907,28 +907,26 @@ export class ChangeStream<
   }
 
   /** @internal */
-  private _processErrorIteratorMode = promisify(this._processErrorIteratorModeCallback);
-
-  /** @internal */
-  private _processErrorIteratorModeCallback(changeStreamError: AnyError, callback: Callback) {
+  private async _processErrorIteratorMode(changeStreamError: AnyError): Promise<void> {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
+      throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this.cursor.close();
 
       const topology = getTopology(this.parent);
-      topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
-        // if the topology can't reconnect, close the stream
-        if (serverSelectionError) return this.close(() => callback(changeStreamError));
-
+      try {
+        await topology._selectServer(this.cursor.readPreference, {});
         this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-        callback();
-      });
+      } catch {
+        await this.close().catch(err => err);
+        throw changeStreamError;
+      }
     } else {
-      this.close(() => callback(changeStreamError));
+      await this.close().catch(err => err);
+      throw changeStreamError;
     }
   }
 }
