@@ -888,21 +888,21 @@ export class ChangeStream<
   }
 
   /** @internal */
-  private _processErrorStreamMode(error: AnyError) {
+  private _processErrorStreamMode(changeStreamError: AnyError) {
     // If the change stream has been closed explicitly, do not process error.
     if (this[kClosed]) return;
 
-    if (isResumableError(error, this.cursor.maxWireVersion)) {
+    if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
       this.cursor.close();
 
       const topology = getTopology(this.parent);
-      topology.selectServer(this.cursor.readPreference, {}, err => {
-        if (err) return this._closeEmitterModeWithError(err);
+      topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
+        if (serverSelectionError) return this._closeEmitterModeWithError(changeStreamError);
         this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
       });
     } else {
-      this._closeEmitterModeWithError(error);
+      this._closeEmitterModeWithError(changeStreamError);
     }
   }
 
@@ -910,25 +910,25 @@ export class ChangeStream<
   private _processErrorIteratorMode = promisify(this._processErrorIteratorModeCallback);
 
   /** @internal */
-  private _processErrorIteratorModeCallback(error: AnyError, callback: Callback) {
+  private _processErrorIteratorModeCallback(changeStreamError: AnyError, callback: Callback) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
       return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
     }
 
-    if (isResumableError(error, this.cursor.maxWireVersion)) {
+    if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this.cursor.close();
 
       const topology = getTopology(this.parent);
-      topology.selectServer(this.cursor.readPreference, {}, err => {
+      topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
         // if the topology can't reconnect, close the stream
-        if (err) return this.close(() => callback(error));
+        if (serverSelectionError) return this.close(() => callback(changeStreamError));
 
         this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
         callback();
       });
     } else {
-      this.close(() => callback(error));
+      this.close(() => callback(changeStreamError));
     }
   }
 }
