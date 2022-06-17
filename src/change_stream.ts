@@ -709,15 +709,6 @@ export class ChangeStream<
     });
   }
 
-  handleChangeCallback(change: TChange | null, callback: Callback): void {
-    try {
-      const processedChange = this._processChange(change);
-      callback(undefined, processedChange);
-    } catch (error) {
-      callback(error);
-    }
-  }
-
   /** Is the cursor closed */
   get closed(): boolean {
     return this[kClosed] || this.cursor.closed;

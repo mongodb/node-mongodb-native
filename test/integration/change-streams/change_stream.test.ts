@@ -1532,7 +1532,6 @@ describe('ChangeStream resumability', function () {
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
     client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
-    await client.connect();
     // 3.6 servers do not support creating a change stream on a database that doesn't exist
     await client
       .db('resumabilty_tests')
