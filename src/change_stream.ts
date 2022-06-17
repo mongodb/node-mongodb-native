@@ -906,7 +906,13 @@ export class ChangeStream<
     }
   }
 
-  /** @internal */
+  /**
+   * @internal
+   *
+   * TODO(NODE-4320): promisify selectServer and refactor this code to be async
+   *
+   * we promisify _processErrorIteratorModeCallback until we have a promisifed version of selectServer.
+   */
   private _processErrorIteratorMode = promisify(this._processErrorIteratorModeCallback);
 
   /** @internal */
