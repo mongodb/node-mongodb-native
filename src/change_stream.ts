@@ -629,6 +629,9 @@ export class ChangeStream<
   hasNext(callback: Callback<boolean>): void;
   hasNext(callback?: Callback): Promise<boolean> | void {
     this._setIsIterator();
+    // TOOD(NODE-4319): Add eslint rule preventing accidental variable shadowing
+    // Shadowing is intentional here.  We want to override the `callback` variable
+    // from the outer scope so that the inner scope doesn't accidentally call the wrong callback.
     return maybePromise(callback, callback => {
       (async () => {
         try {
@@ -656,6 +659,9 @@ export class ChangeStream<
   next(callback: Callback<TChange>): void;
   next(callback?: Callback<TChange>): Promise<TChange> | void {
     this._setIsIterator();
+    // TOOD(NODE-4319): Add eslint rule preventing accidental variable shadowing
+    // Shadowing is intentional here.  We want to override the `callback` variable
+    // from the outer scope so that the inner scope doesn't accidentally call the wrong callback.
     return maybePromise(callback, callback => {
       (async () => {
         try {
@@ -687,6 +693,9 @@ export class ChangeStream<
   tryNext(callback: Callback<Document | null>): void;
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
     this._setIsIterator();
+    // TOOD(NODE-4319): Add eslint rule preventing accidental variable shadowing
+    // Shadowing is intentional here.  We want to override the `callback` variable
+    // from the outer scope so that the inner scope doesn't accidentally call the wrong callback.
     return maybePromise(callback, callback => {
       (async () => {
         try {
