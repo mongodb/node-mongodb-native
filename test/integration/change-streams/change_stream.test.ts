@@ -2049,26 +2049,46 @@ describe('ChangeStream resumability', function () {
     { requires: { topology: '!single' } },
     async function () {
       changeStream = collection.watch([], changeStreamResumeOptions);
+      expect(changeStream.cursor.maxWireVersion).to.be.undefined;
       await initIteratorMode(changeStream);
 
-      expect(changeStream.cursor.maxWireVersion).not.to.be.undefined;
+      expect(typeof changeStream.cursor.maxWireVersion).to.equal('number');
     }
   );
 
   it(
-    'caches the server version after each getMore call',
+    'updates the cache3d server version after the first getMore call',
     { requires: { topology: '!single' } },
     async function () {
       changeStream = collection.watch([], changeStreamResumeOptions);
       await initIteratorMode(changeStream);
 
       const maxWireVersion = changeStream.cursor.maxWireVersion;
-      changeStream.cursor.maxWireVersion = 20;
+      changeStream.cursor.maxWireVersion = -1;
 
-      await collection.insertOne({ name: 'bailey' });
+      await changeStream.tryNext();
 
-      await changeStream.next();
+      expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
+    }
+  );
 
+  it(
+    'updates the cached server version after each getMore call',
+    { requires: { topology: '!single' } },
+    async function () {
+      changeStream = collection.watch([], changeStreamResumeOptions);
+      await initIteratorMode(changeStream);
+
+      const maxWireVersion = changeStream.cursor.maxWireVersion;
+      changeStream.cursor.maxWireVersion = -1;
+
+      await changeStream.tryNext();
+
+      expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
+
+      changeStream.cursor.maxWireVersion = -1;
+
+      await changeStream.tryNext();
       expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
     }
   );
