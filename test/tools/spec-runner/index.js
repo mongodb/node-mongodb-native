@@ -95,33 +95,14 @@ function translateClientOptions(options) {
   return options;
 }
 
-function isRelaxed(fileName) {
-  return (
-    !fileName.includes('fle2-CreateCollection') &&
-    !fileName.includes('fle2-BypassQueryAnalysis') &&
-    !fileName.includes('fle2-validatorAndPartialFieldExpression') &&
-    !fileName.includes('fle2-EncryptedFields-vs-jsonSchema') &&
-    !fileName.includes('fle2-FindOneAndUpdate') &&
-    !fileName.includes('fle2-InsertFind-Indexed') &&
-    !fileName.includes('fle2-InsertFind-Unindexed') &&
-    !fileName.includes('fle2-Update') &&
-    !fileName.includes('fle2-Delete')
-  );
-}
-
 function gatherTestSuites(specPath) {
   return fs
     .readdirSync(specPath)
     .filter(x => x.indexOf('.json') !== -1)
     .map(x =>
-      Object.assign(
-        EJSON.parse(fs.readFileSync(path.join(specPath, x)), {
-          relaxed: isRelaxed(x)
-        }),
-        {
-          name: path.basename(x, '.json')
-        }
-      )
+      Object.assign(EJSON.parse(fs.readFileSync(path.join(specPath, x)), { relaxed: false }), {
+        name: path.basename(x, '.json')
+      })
     );
 }
 
@@ -377,7 +358,9 @@ function runTestSuiteTest(configuration, spec, context) {
     minHeartbeatFrequencyMS: 100,
     monitorCommands: true,
     ...spec.clientOptions,
-    [Symbol.for('@@mdb.skipPingOnConnect')]: true
+    [Symbol.for('@@mdb.skipPingOnConnect')]: true,
+    promoteValues: false,
+    promoteLongs: false
   });
 
   const url = resolveConnectionString(configuration, spec, context);
