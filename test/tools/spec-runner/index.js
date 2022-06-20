@@ -201,25 +201,23 @@ function generateTopologyTests(testSuites, testContext, filter) {
       beforeEach(beforeEachFilter);
       beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
       afterEach(() => testContext.cleanupAfterSuite());
-      if (testSuite.name.includes('fle2-')) {
-        for (const spec of testSuite.tests) {
-          const mochaTest = it(spec.description, async function () {
-            if (spec.failPoint) {
-              await testContext.enableFailPoint(spec.failPoint);
-            }
+      for (const spec of testSuite.tests) {
+        const mochaTest = it(spec.description, async function () {
+          if (spec.failPoint) {
+            await testContext.enableFailPoint(spec.failPoint);
+          }
 
-            // run the actual test
-            await runTestSuiteTest(this.configuration, spec, testContext);
+          // run the actual test
+          await runTestSuiteTest(this.configuration, spec, testContext);
 
-            if (spec.failPoint) {
-              await testContext.disableFailPoint(spec.failPoint);
-            }
+          if (spec.failPoint) {
+            await testContext.disableFailPoint(spec.failPoint);
+          }
 
-            await validateOutcome(spec, testContext);
-          });
-          // Make the spec test available to the beforeEach filter
-          mochaTest.spec = spec;
-        }
+          await validateOutcome(spec, testContext);
+        });
+        // Make the spec test available to the beforeEach filter
+        mochaTest.spec = spec;
       }
     });
   }
@@ -493,7 +491,7 @@ function normalizeCommandShapes(commands) {
           commandName: def.command_name || def.commandName || Object.keys(def.command)[0],
           databaseName: def.database_name ? def.database_name : def.databaseName
         },
-        { relaxed: true }
+        { relaxed: false }
       )
     );
     // TODO: this is a workaround to preserve sort Map type until NODE-3235 is completed
@@ -675,7 +673,7 @@ const kOperations = new Map([
       const encryptedFields = operation.arguments.encryptedFields;
       const session = maybeSession(operation, context);
       return db.dropCollection(collectionName, { session, encryptedFields }).catch(err => {
-        if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+        if (!err.message.match(/ns not found/)) {
           throw err;
         }
       });
@@ -762,7 +760,8 @@ const kOperations = new Map([
           .then(results => results.map(({ name }) => name))
           .then(indexes => expect(indexes).to.not.include(indexName))
       ).catch(err => {
-        if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+        // The error message can differ slightly with the same error code.
+        if (!err.message.match(/ns not found|ns does not exist/)) {
           throw err;
         }
       });
