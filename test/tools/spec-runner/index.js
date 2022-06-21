@@ -11,7 +11,6 @@ const resolveConnectionString = require('./utils').resolveConnectionString;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
 const ClientSideEncryptionFilter = require('../runner/filters/client_encryption_filter');
-const { MONGODB_ERROR_CODES } = require('../../../src/error');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -361,7 +360,7 @@ function runTestSuiteTest(configuration, spec, context) {
     minHeartbeatFrequencyMS: 100,
     monitorCommands: true,
     ...spec.clientOptions,
-    [Symbol.for('@@mdb.skipPingOnConnect')]: true,
+    [Symbol.for('@@mdb.skipPingOnConnect')]: true
   });
 
   if (context.requiresCSFLE) {
