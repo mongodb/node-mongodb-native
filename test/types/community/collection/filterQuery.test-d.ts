@@ -413,6 +413,9 @@ nonSpecifiedCollection.find({
 
 export class ExampleNODE4258 {
   constructor(public _id: string, public names: string[]) {}
+  toString(): string {
+    return 'Example';
+  }
 }
 
 const fooCollection = client.db().collection<ExampleNODE4258>('a');

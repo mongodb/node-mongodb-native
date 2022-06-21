@@ -246,7 +246,10 @@ export type AcceptedFields<TSchema, FieldType, AssignableType> = {
   readonly [key in KeysOfAType<TSchema, FieldType>]?: AssignableType;
 };
 
-/** It avoids using fields with not acceptable types @public */
+/**
+ * It avoids using fields with not acceptable types
+ * @public
+ */
 export type NotAcceptedFields<TSchema, FieldType> = {
   readonly [key in KeysOfOtherType<TSchema, FieldType>]?: never;
 };
