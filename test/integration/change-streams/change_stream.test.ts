@@ -1530,14 +1530,18 @@ describe('ChangeStream resumability', function () {
     gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
 
   beforeEach(async function () {
-    client = this.configuration.newClient({ monitorCommands: true });
-    client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
+    const utilClient = this.configuration.newClient();
     // 3.6 servers do not support creating a change stream on a database that doesn't exist
-    await client
+    await utilClient
       .db('resumabilty_tests')
       .dropDatabase()
       .catch(e => e);
-    collection = await client.db('resumabilty_tests').createCollection('foo');
+    await utilClient.db('resumabilty_tests').createCollection('foo');
+    await utilClient.close();
+
+    client = this.configuration.newClient({ monitorCommands: true });
+    client.on('commandStarted', filterForCommands(['aggregate'], aggregateEvents));
+    collection = client.db('resumability_test').collection('foo');
   });
 
   afterEach(async function () {
