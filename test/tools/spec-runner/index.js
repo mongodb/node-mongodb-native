@@ -357,7 +357,6 @@ function runTestSuiteTest(configuration, spec, context) {
     monitorCommands: true,
     ...spec.clientOptions,
     [Symbol.for('@@mdb.skipPingOnConnect')]: true,
-    promoteValues: false,
     promoteLongs: false
   });
 
