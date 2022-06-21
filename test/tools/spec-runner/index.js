@@ -95,14 +95,14 @@ function translateClientOptions(options) {
   return options;
 }
 
-function gatherTestSuites(specPath) {
+function gatherTestSuites(specPath, context) {
   return fs
     .readdirSync(specPath)
     .filter(x => x.indexOf('.json') !== -1)
     .map(x =>
       Object.assign(
         EJSON.parse(fs.readFileSync(path.join(specPath, x)), {
-          relaxed: !x.includes('fle2')
+          relaxed: context ? !context.requiresCSFLE : true
         }),
         {
           name: path.basename(x, '.json')
