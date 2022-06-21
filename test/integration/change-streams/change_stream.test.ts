@@ -2058,7 +2058,7 @@ describe('ChangeStream resumability', function () {
       expect(changeStream.cursor.maxWireVersion).to.be.undefined;
       await initIteratorMode(changeStream);
 
-      expect(typeof changeStream.cursor.maxWireVersion).to.equal('number');
+      expect(changeStream.cursor.maxWireVersion).to.be.a('number');
     }
   );
 
