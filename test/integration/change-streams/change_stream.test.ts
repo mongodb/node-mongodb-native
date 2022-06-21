@@ -2061,7 +2061,7 @@ describe('ChangeStream resumability', function () {
   );
 
   it(
-    'updates the cache3d server version after the first getMore call',
+    'updates the cached server version after the first getMore call',
     { requires: { topology: '!single' } },
     async function () {
       changeStream = collection.watch([], changeStreamResumeOptions);
