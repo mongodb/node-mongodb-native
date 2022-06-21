@@ -28,7 +28,6 @@
     "bson": "^4.6.4",
     "denque": "^2.0.1",
     "mongodb-connection-string-url": "^2.5.2",
-    "npm-check-updates": "^13.1.5",
     "socks": "^2.6.2"
   },
   "devDependencies": {
