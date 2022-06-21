@@ -490,7 +490,7 @@ function normalizeCommandShapes(commands) {
           commandName: def.command_name || def.commandName || Object.keys(def.command)[0],
           databaseName: def.database_name ? def.database_name : def.databaseName
         },
-        { relaxed: false }
+        { relaxed: true }
       )
     );
     // TODO: this is a workaround to preserve sort Map type until NODE-3235 is completed
