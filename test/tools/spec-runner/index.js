@@ -365,8 +365,8 @@ function runTestSuiteTest(configuration, spec, context) {
   });
 
   if (context.requiresCSFLE) {
-    options.promoteValues = false;
-    options.promoteLongs = false;
+    clientOptions.promoteValues = false;
+    clientOptions.promoteLongs = false;
   }
 
   const url = resolveConnectionString(configuration, spec, context);
