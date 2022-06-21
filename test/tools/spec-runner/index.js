@@ -362,8 +362,12 @@ function runTestSuiteTest(configuration, spec, context) {
     monitorCommands: true,
     ...spec.clientOptions,
     [Symbol.for('@@mdb.skipPingOnConnect')]: true,
-    promoteLongs: false
   });
+
+  if (context.requiresCSFLE) {
+    options.promoteValues = false;
+    options.promoteLongs = false;
+  }
 
   const url = resolveConnectionString(configuration, spec, context);
   const client = configuration.newClient(url, clientOptions);
