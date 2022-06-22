@@ -1626,7 +1626,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // to contain BSON binary for the field
         // ``cursor.firstBatch.encrypted``.
         const collection = encryptedClient.db('').collection('decryption_events');
-        await collection.drop();
         await collection.insertOne({ encrypted: malformedCiphertext });
         let result;
         try {
@@ -1650,7 +1649,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // Expect a CommandSucceededEvent. Expect the CommandSucceededEvent.reply
         // to contain BSON binary for the field ``cursor.firstBatch.encrypted``.
         const collection = encryptedClient.db('').collection('decryption_events');
-        await collection.drop();
         await collection.insertOne({ encrypted: cipherText });
         let result;
         try {
