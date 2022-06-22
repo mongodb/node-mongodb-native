@@ -1,0 +1,15 @@
+version: 1
+style: unit
+description: clearing a paused pool emits no events
+operations:
+  - name: clear
+  - name: ready
+  - name: clear
+  - name: clear
+events:
+  - type: ConnectionPoolReady
+    address: 42
+  - type: ConnectionPoolCleared
+    address: 42
+ignore:
+  - ConnectionPoolCreated

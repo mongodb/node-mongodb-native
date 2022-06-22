@@ -4,6 +4,7 @@ description: must never exceed maxPoolSize total connections
 poolOptions:
   maxPoolSize: 3
 operations:
+  - name: ready
   - name: checkOut
     label: conn1
   - name: checkOut
@@ -69,3 +70,4 @@ events:
     address: 42
 ignore:
   - ConnectionReady
+  - ConnectionPoolReady

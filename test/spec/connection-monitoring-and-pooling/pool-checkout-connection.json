@@ -4,6 +4,9 @@
   "description": "must be able to check out a connection",
   "operations": [
     {
+      "name": "ready"
+    },
+    {
       "name": "checkOut"
     }
   ],
@@ -29,6 +32,7 @@
     }
   ],
   "ignore": [
+    "ConnectionPoolReady",
     "ConnectionPoolCreated"
   ]
 }

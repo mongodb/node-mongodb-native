@@ -2,6 +2,7 @@ version: 1
 style: unit
 description: must have an ID number associated with it
 operations:
+  - name: ready
   - name: checkOut
   - name: checkOut
 events:
@@ -23,5 +24,6 @@ events:
     address: 42
 ignore:
   - ConnectionPoolCreated
+  - ConnectionPoolReady
   - ConnectionPoolClosed
   - ConnectionReady

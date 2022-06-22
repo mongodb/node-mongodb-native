@@ -4,6 +4,9 @@
   "description": "When a pool is closed, it MUST first destroy all available connections in that pool",
   "operations": [
     {
+      "name": "ready"
+    },
+    {
       "name": "checkOut"
     },
     {
@@ -40,6 +43,7 @@
   ],
   "ignore": [
     "ConnectionCreated",
+    "ConnectionPoolReady",
     "ConnectionReady",
     "ConnectionPoolCreated",
     "ConnectionCheckOutStarted",

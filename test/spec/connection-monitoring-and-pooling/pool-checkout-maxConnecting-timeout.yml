@@ -21,6 +21,7 @@ poolOptions:
   # it will soon be deprecated, so it is easier for those drivers to just skip this test.
   waitQueueTimeoutMS: 50
 operations:
+  - name: ready
   # start creating two connections simultaneously.
   - name: start
     target: thread1
@@ -65,3 +66,4 @@ ignore:
   - ConnectionCheckedOut
   - ConnectionClosed
   - ConnectionPoolCreated
+  - ConnectionPoolReady

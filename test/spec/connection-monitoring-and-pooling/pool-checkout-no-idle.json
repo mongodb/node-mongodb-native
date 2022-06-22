@@ -3,9 +3,13 @@
   "style": "unit",
   "description": "must destroy and must not check out an idle connection if found while iterating available connections",
   "poolOptions": {
-    "maxIdleTimeMS": 10
+    "maxIdleTimeMS": 10,
+    "backgroundThreadIntervalMS": -1
   },
   "operations": [
+    {
+      "name": "ready"
+    },
     {
       "name": "checkOut",
       "label": "conn"
@@ -20,6 +24,11 @@
     },
     {
       "name": "checkOut"
+    },
+    {
+      "name": "waitForEvent",
+      "event": "ConnectionCheckedOut",
+      "count": 2
     }
   ],
   "events": [
@@ -52,6 +61,7 @@
   ],
   "ignore": [
     "ConnectionReady",
+    "ConnectionPoolReady",
     "ConnectionCreated",
     "ConnectionCheckOutStarted"
   ]

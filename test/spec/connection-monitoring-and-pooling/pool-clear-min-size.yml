@@ -1,0 +1,37 @@
+version: 1
+style: unit
+description: pool clear halts background minPoolSize establishments
+poolOptions:
+  minPoolSize: 1
+  backgroundThreadIntervalMS: 50
+operations:
+  - name: ready
+  - name: waitForEvent
+    event: ConnectionReady
+    count: 1
+  - name: clear
+  # ensure no connections created after clear
+  - name: wait
+    ms: 200
+  - name: ready
+  - name: waitForEvent
+    event: ConnectionReady
+    count: 2
+events:
+  - type: ConnectionPoolReady
+    address: 42
+  - type: ConnectionCreated
+    address: 42
+  - type: ConnectionReady
+    address: 42
+  - type: ConnectionPoolCleared
+    address: 42
+  - type: ConnectionPoolReady
+    address: 42
+  - type: ConnectionCreated
+    address: 42
+  - type: ConnectionReady
+    address: 42
+ignore:
+  - ConnectionPoolCreated
+  - ConnectionClosed

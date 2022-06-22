@@ -12,17 +12,34 @@ const LB_SKIP_TESTS: SkipDescription[] = [
   skipReason: 'cannot run against a load balanced environment'
 }));
 
+const POOL_PAUSED_SKIP_TESTS: SkipDescription[] = [
+  'clearing pool clears the WaitQueue',
+  'pool clear halts background minPoolSize establishments',
+  'clearing a paused pool emits no events',
+  'after clear, cannot check out connections until pool ready',
+  'error during minPoolSize population clears pool',
+  'readying a ready pool emits no events',
+  'pool starts as cleared and becomes ready'
+].map(description => ({
+  description,
+  skipIfCondition: 'always',
+  skipReason: 'TODO(NODE-2994): implement pool pausing'
+}));
+
 describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
   const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
   runCmapTestSuite(tests, {
-    testsToSkip: LB_SKIP_TESTS.concat([
-      {
-        description: 'waiting on maxConnecting is limited by WaitQueueTimeoutMS',
-        skipIfCondition: 'always',
-        skipReason:
-          'not applicable: waitQueueTimeoutMS limits connection establishment time in our driver'
-      }
-    ])
+    testsToSkip: LB_SKIP_TESTS.concat(
+      [
+        {
+          description: 'waiting on maxConnecting is limited by WaitQueueTimeoutMS',
+          skipIfCondition: 'always',
+          skipReason:
+            'not applicable: waitQueueTimeoutMS limits connection establishment time in our driver'
+        }
+      ],
+      POOL_PAUSED_SKIP_TESTS
+    )
   });
 });

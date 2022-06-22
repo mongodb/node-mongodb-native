@@ -4,6 +4,9 @@
   "description": "must destroy checked in connection if it is stale",
   "operations": [
     {
+      "name": "ready"
+    },
+    {
       "name": "checkOut",
       "label": "conn"
     },
@@ -39,6 +42,7 @@
   ],
   "ignore": [
     "ConnectionPoolCreated",
+    "ConnectionPoolReady",
     "ConnectionCreated",
     "ConnectionReady",
     "ConnectionCheckOutStarted"

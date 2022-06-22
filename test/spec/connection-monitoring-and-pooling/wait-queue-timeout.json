@@ -4,9 +4,12 @@
   "description": "must aggressively timeout threads enqueued longer than waitQueueTimeoutMS",
   "poolOptions": {
     "maxPoolSize": 1,
-    "waitQueueTimeoutMS": 20
+    "waitQueueTimeoutMS": 50
   },
   "operations": [
+    {
+      "name": "ready"
+    },
     {
       "name": "checkOut",
       "label": "conn0"
@@ -66,6 +69,7 @@
     "ConnectionCreated",
     "ConnectionReady",
     "ConnectionClosed",
-    "ConnectionPoolCreated"
+    "ConnectionPoolCreated",
+    "ConnectionPoolReady"
   ]
 }

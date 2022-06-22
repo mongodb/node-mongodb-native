@@ -16,7 +16,17 @@ type CmapOperation =
   | { name: 'checkIn'; connection: string }
   | { name: 'clear' | 'close' | 'ready' };
 
+const CMAP_POOL_OPTION_NAMES: Array<keyof CmapPoolOptions> = [
+  'backgroundThreadIntervalMS',
+  'maxPoolSize',
+  'minPoolSize',
+  'maxConnecting',
+  'maxIdleTimeMS',
+  'waitQueueTimeoutMS'
+];
+
 type CmapPoolOptions = {
+  backgroundThreadIntervalMS?: number;
   maxPoolSize?: number;
   minPoolSize?: number;
   maxConnecting?: number;
@@ -334,9 +344,19 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   expect(CMAP_TEST_KEYS).to.include.members(Object.keys(test));
 
   const poolOptions = test.poolOptions || {};
+  expect(CMAP_POOL_OPTION_NAMES).to.include.members(Object.keys(poolOptions));
+
+  // TODO(NODE-3255): update condition to only remove option if set to -1
+  if (poolOptions.backgroundThreadIntervalMS) {
+    delete poolOptions.backgroundThreadIntervalMS;
+  }
+
   const operations = test.operations;
   const expectedError = test.error;
-  const expectedEvents = test.events || [];
+  const expectedEvents = test.events
+    ? // TODO(NODE-2994): remove filter once ready is implemented
+      test.events.filter(event => event.type !== 'ConnectionPoolReady')
+    : [];
   const ignoreEvents = test.ignore || [];
 
   let actualError;

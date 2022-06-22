@@ -4,6 +4,9 @@
   "description": "must throw error if checkOut is called on a closed pool",
   "operations": [
     {
+      "name": "ready"
+    },
+    {
       "name": "checkOut",
       "label": "conn1"
     },
@@ -57,6 +60,7 @@
     }
   ],
   "ignore": [
+    "ConnectionPoolReady",
     "ConnectionCreated",
     "ConnectionReady",
     "ConnectionClosed"

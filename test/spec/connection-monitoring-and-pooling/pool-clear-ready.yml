@@ -1,0 +1,36 @@
+version: 1
+style: unit
+description: after clear, cannot check out connections until pool ready
+operations:
+  - name: ready
+  - name: checkOut
+  - name: clear
+  - name: start
+    target: thread1
+  - name: checkOut
+    thread: thread1
+  - name: waitForEvent
+    event: ConnectionCheckOutFailed
+    count: 1
+  - name: ready
+  - name: checkOut
+events:
+  - type: ConnectionPoolReady
+    address: 42
+  - type: ConnectionCheckedOut
+    address: 42
+    connectionId: 42
+  - type: ConnectionPoolCleared
+    address: 42
+  - type: ConnectionCheckOutFailed
+    address: 42
+    reason: connectionError
+  - type: ConnectionPoolReady
+    address: 42
+  - type: ConnectionCheckedOut
+    address: 42
+ignore:
+  - ConnectionPoolCreated
+  - ConnectionReady
+  - ConnectionCheckOutStarted
+  - ConnectionCreated
