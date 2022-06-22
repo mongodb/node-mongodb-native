@@ -1,0 +1,289 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "6.0.0",
+      "topology": [
+        "replicaset",
+        "sharded"
+      ]
+    }
+  ],
+  "database_name": "default",
+  "collection_name": "default",
+  "data": [],
+  "encrypted_fields": {
+    "escCollection": "enxcol_.default.esc",
+    "eccCollection": "enxcol_.default.ecc",
+    "ecocCollection": "enxcol_.default.ecoc",
+    "fields": [
+      {
+        "keyId": {
+          "$binary": {
+            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+            "subType": "04"
+          }
+        },
+        "path": "encryptedIndexed",
+        "bsonType": "string",
+        "queries": {
+          "queryType": "equality",
+          "contention": {
+            "$numberLong": "0"
+          }
+        }
+      },
+      {
+        "keyId": {
+          "$binary": {
+            "base64": "q83vqxI0mHYSNBI0VniQEg==",
+            "subType": "04"
+          }
+        },
+        "path": "encryptedUnindexed",
+        "bsonType": "string"
+      }
+    ]
+  },
+  "key_vault_data": [
+    {
+      "_id": {
+        "$binary": {
+          "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+          "subType": "04"
+        }
+      },
+      "keyMaterial": {
+        "$binary": {
+          "base64": "sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==",
+          "subType": "00"
+        }
+      },
+      "creationDate": {
+        "$date": {
+          "$numberLong": "1648914851981"
+        }
+      },
+      "updateDate": {
+        "$date": {
+          "$numberLong": "1648914851981"
+        }
+      },
+      "status": {
+        "$numberInt": "0"
+      },
+      "masterKey": {
+        "provider": "local"
+      }
+    },
+    {
+      "_id": {
+        "$binary": {
+          "base64": "q83vqxI0mHYSNBI0VniQEg==",
+          "subType": "04"
+        }
+      },
+      "keyMaterial": {
+        "$binary": {
+          "base64": "HBk9BWihXExNDvTp1lUxOuxuZK2Pe2ZdVdlsxPEBkiO1bS4mG5NNDsQ7zVxJAH8BtdOYp72Ku4Y3nwc0BUpIKsvAKX4eYXtlhv5zUQxWdeNFhg9qK7qb8nqhnnLeT0f25jFSqzWJoT379hfwDeu0bebJHr35QrJ8myZdPMTEDYF08QYQ48ShRBli0S+QzBHHAQiM2iJNr4svg2WR8JSeWQ==",
+          "subType": "00"
+        }
+      },
+      "creationDate": {
+        "$date": {
+          "$numberLong": "1648914851981"
+        }
+      },
+      "updateDate": {
+        "$date": {
+          "$numberLong": "1648914851981"
+        }
+      },
+      "status": {
+        "$numberInt": "0"
+      },
+      "masterKey": {
+        "provider": "local"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "BypassQueryAnalysis decrypts",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          },
+          "bypassQueryAnalysis": true
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedIndexed": {
+                "$binary": {
+                  "base64": "BHEBAAAFZAAgAAAAAHb62aV7+mqmaGcotPLdG3KP7S8diFwWMLM/5rYtqLrEBXMAIAAAAAAVJ6OWHRv3OtCozHpt3ZzfBhaxZirLv3B+G8PuaaO4EgVjACAAAAAAsZXWOWA+UiCBbrJNB6bHflB/cn7pWSvwWN2jw4FPeIUFcABQAAAAAMdD1nV2nqeI1eXEQNskDflCy8I7/HvvqDKJ6XxjhrPQWdLqjz+8GosGUsB7A8ee/uG9/guENuL25XD+Fxxkv1LLXtavHOlLF7iW0u9yabqqBXUAEAAAAAQSNFZ4EjSYdhI0EjRWeJASEHQAAgAAAAV2AE0AAAAAq83vqxI0mHYSNBI0VniQEkzZZBBDgeZh+h+gXEmOrSFtVvkUcnHWj/rfPW7iJ0G3UJ8zpuBmUM/VjOMJCY4+eDqdTiPIwX+/vNXegc8FZQAgAAAAAOuac/eRLYakKX6B0vZ1r3QodOQFfjqJD+xlGiPu4/PsAA==",
+                  "subType": "06"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 1,
+              "encryptedIndexed": "value123"
+            }
+          ]
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "listCollections": 1,
+              "filter": {
+                "name": "default"
+              }
+            },
+            "command_name": "listCollections"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default",
+              "documents": [
+                {
+                  "_id": 1,
+                  "encryptedIndexed": {
+                    "$binary": {
+                      "base64": "BHEBAAAFZAAgAAAAAHb62aV7+mqmaGcotPLdG3KP7S8diFwWMLM/5rYtqLrEBXMAIAAAAAAVJ6OWHRv3OtCozHpt3ZzfBhaxZirLv3B+G8PuaaO4EgVjACAAAAAAsZXWOWA+UiCBbrJNB6bHflB/cn7pWSvwWN2jw4FPeIUFcABQAAAAAMdD1nV2nqeI1eXEQNskDflCy8I7/HvvqDKJ6XxjhrPQWdLqjz+8GosGUsB7A8ee/uG9/guENuL25XD+Fxxkv1LLXtavHOlLF7iW0u9yabqqBXUAEAAAAAQSNFZ4EjSYdhI0EjRWeJASEHQAAgAAAAV2AE0AAAAAq83vqxI0mHYSNBI0VniQEkzZZBBDgeZh+h+gXEmOrSFtVvkUcnHWj/rfPW7iJ0G3UJ8zpuBmUM/VjOMJCY4+eDqdTiPIwX+/vNXegc8FZQAgAAAAAOuac/eRLYakKX6B0vZ1r3QodOQFfjqJD+xlGiPu4/PsAA==",
+                      "subType": "06"
+                    }
+                  }
+                }
+              ],
+              "ordered": true
+            },
+            "command_name": "insert"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "find": "default",
+              "filter": {
+                "_id": 1
+              }
+            },
+            "command_name": "find"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "find": "datakeys",
+              "filter": {
+                "$or": [
+                  {
+                    "_id": {
+                      "$in": [
+                        {
+                          "$binary": {
+                            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                            "subType": "04"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "keyAltNames": {
+                      "$in": []
+                    }
+                  }
+                ]
+              },
+              "$db": "keyvault",
+              "readConcern": {
+                "level": "majority"
+              }
+            },
+            "command_name": "find"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "find": "datakeys",
+              "filter": {
+                "$or": [
+                  {
+                    "_id": {
+                      "$in": [
+                        {
+                          "$binary": {
+                            "base64": "q83vqxI0mHYSNBI0VniQEg==",
+                            "subType": "04"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "keyAltNames": {
+                      "$in": []
+                    }
+                  }
+                ]
+              },
+              "$db": "keyvault",
+              "readConcern": {
+                "level": "majority"
+              }
+            },
+            "command_name": "find"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "encryptedIndexed": {
+                "$$type": "binData"
+              },
+              "__safeContent__": [
+                {
+                  "$binary": {
+                    "base64": "ThpoKfQ8AkOzkFfNC1+9PF0pY2nIzfXvRdxQgjkNbBw=",
+                    "subType": "00"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

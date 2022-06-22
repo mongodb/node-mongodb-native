@@ -1,0 +1,83 @@
+runOn:
+  - minServerVersion: "6.0.0"
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topology: [ "replicaset", "sharded" ]
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+data: []
+encrypted_fields: {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
+key_vault_data: [ {'_id': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'keyMaterial': {'$binary': {'base64': 'HBk9BWihXExNDvTp1lUxOuxuZK2Pe2ZdVdlsxPEBkiO1bS4mG5NNDsQ7zVxJAH8BtdOYp72Ku4Y3nwc0BUpIKsvAKX4eYXtlhv5zUQxWdeNFhg9qK7qb8nqhnnLeT0f25jFSqzWJoT379hfwDeu0bebJHr35QrJ8myZdPMTEDYF08QYQ48ShRBli0S+QzBHHAQiM2iJNr4svg2WR8JSeWQ==', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1648914851981'}}, 'updateDate': {'$date': {'$numberLong': '1648914851981'}}, 'status': {'$numberInt': '0'}, 'masterKey': {'provider': 'local'}} ]
+tests:
+  - description: "Insert and find FLE2 unindexed field"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 { _id: 1, encryptedUnindexed: "value123" }
+      - name: find
+        arguments:
+          filter: { _id: 1 }
+        result: [*doc0]
+    expectations:
+      - command_started_event:
+          command:
+            listCollections: 1
+            filter:
+              name: *collection_name
+          command_name: listCollections
+      - command_started_event:
+          command:
+            find: datakeys
+            filter: {
+                  "$or": [
+                      {
+                          "_id": {
+                              "$in": [
+                                  {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}
+                              ]
+                          }
+                      },
+                      {
+                          "keyAltNames": {
+                              "$in": []
+                          }
+                      }
+                  ]
+              }
+            $db: keyvault
+            readConcern: { level: "majority" }
+          command_name: find
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - &doc0_encrypted { "_id": 1, "encryptedUnindexed": { $$type: "binData" } }
+            ordered: true
+          command_name: insert
+      - command_started_event:
+          command:
+            find: *collection_name
+            filter: { "_id": { "$eq": 1 }}
+          command_name: find
+    outcome:
+      collection:
+        data:
+          - { "_id": 1, "encryptedUnindexed": { $$type: "binData" } }
+
+  - description: "Query with an unindexed field fails"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments:
+          document: { _id: 1, encryptedUnindexed: "value123" }
+      - name: find
+        arguments:
+          filter: { encryptedUnindexed: "value123" }
+        result:
+          errorContains: "Cannot query"

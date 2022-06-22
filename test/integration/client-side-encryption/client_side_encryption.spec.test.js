@@ -55,19 +55,19 @@ const skippedAuthTests = [
 ];
 
 // TODO(NODE-4006): Investigate csfle test "operation fails with maxWireVersion < 8"
-const skippedMaxWireVersionTest = 'operation fails with maxWireVersion < 8';
+// TODO(NODE-4324): Int32 and Long not allowed as batchSize option to cursor.
+const skippedNoAuthTests = ['getMore with encryption', 'operation fails with maxWireVersion < 8'];
 
 const SKIPPED_TESTS = new Set([
-  ...(isAuthEnabled
-    ? skippedAuthTests.concat(skippedMaxWireVersionTest)
-    : [skippedMaxWireVersionTest])
+  ...(isAuthEnabled ? skippedAuthTests.concat(skippedNoAuthTests) : skippedNoAuthTests)
 ]);
 
 describe('Client Side Encryption', function () {
   const testContext = new TestRunnerContext();
   testContext.requiresCSFLE = true;
   const testSuites = gatherTestSuites(
-    path.join(__dirname, '../../spec/client-side-encryption/tests')
+    path.join(__dirname, '../../spec/client-side-encryption/tests'),
+    testContext
   );
   after(() => testContext.teardown());
   before(function () {

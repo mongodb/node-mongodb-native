@@ -11,7 +11,6 @@ const resolveConnectionString = require('./utils').resolveConnectionString;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
 const ClientSideEncryptionFilter = require('../runner/filters/client_encryption_filter');
-const { MONGODB_ERROR_CODES } = require('../../../src/error');
 
 // Promise.try alternative https://stackoverflow.com/questions/60624081/promise-try-without-bluebird/60624164?noredirect=1#comment107255389_60624164
 function promiseTry(callback) {
@@ -95,14 +94,14 @@ function translateClientOptions(options) {
   return options;
 }
 
-function gatherTestSuites(specPath) {
+function gatherTestSuites(specPath, context) {
   return fs
     .readdirSync(specPath)
     .filter(x => x.indexOf('.json') !== -1)
     .map(x =>
       Object.assign(
         EJSON.parse(fs.readFileSync(path.join(specPath, x)), {
-          relaxed: !x.includes('fle2')
+          relaxed: context ? !context.requiresCSFLE : true
         }),
         {
           name: path.basename(x, '.json')
@@ -363,6 +362,11 @@ function runTestSuiteTest(configuration, spec, context) {
     ...spec.clientOptions,
     [Symbol.for('@@mdb.skipPingOnConnect')]: true
   });
+
+  if (context.requiresCSFLE) {
+    clientOptions.promoteValues = false;
+    clientOptions.promoteLongs = false;
+  }
 
   const url = resolveConnectionString(configuration, spec, context);
   const client = configuration.newClient(url, clientOptions);
@@ -676,7 +680,7 @@ const kOperations = new Map([
       const encryptedFields = operation.arguments.encryptedFields;
       const session = maybeSession(operation, context);
       return db.dropCollection(collectionName, { session, encryptedFields }).catch(err => {
-        if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+        if (!err.message.match(/ns not found/)) {
           throw err;
         }
       });
@@ -763,7 +767,8 @@ const kOperations = new Map([
           .then(results => results.map(({ name }) => name))
           .then(indexes => expect(indexes).to.not.include(indexName))
       ).catch(err => {
-        if (err.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+        // The error message can differ slightly with the same error code.
+        if (!err.message.match(/ns not found|ns does not exist/)) {
           throw err;
         }
       });
