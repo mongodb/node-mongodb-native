@@ -7,7 +7,7 @@ const path = require('path');
 const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
 const { dropCollection, APMEventCollector } = require('../shared');
 
-const { EJSON } = BSON;
+const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
@@ -1421,6 +1421,234 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           // Expect an error indicating TLS handshake failed due to an invalid hostname.
           expect(e.originalError.message).to.include('does not match certificate');
         }
+      });
+    });
+  });
+
+  context('14. Decryption Events', function () {
+    let setupClient;
+    let clientEncryption;
+    let keyId;
+    let cipherText;
+    let malformedCiphertext;
+    let encryptedClient;
+    let aggregateSucceeded;
+    let aggregateStarted;
+    let aggregateFailed;
+
+    beforeEach(async function () {
+      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+      // Create a MongoClient named ``setupClient``.
+      setupClient = this.configuration.newClient();
+      // Drop and create the collection ``db.decryption_events``.
+      const db = setupClient.db('db');
+      await db.dropCollection('decryption_events').catch((error) => {
+        if (!error.message.match(/ns not found/)) {
+          throw error;
+        }
+      });
+      await db.createCollection('decryption_events');
+      // Create a ClientEncryption object named ``clientEncryption`` with these options:
+      //   ClientEncryptionOpts {
+      //     keyVaultClient: <setupClient>,
+      //     keyVaultNamespace: "keyvault.datakeys",
+      //     kmsProviders: { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+      //   }
+      clientEncryption = new mongodbClientEncryption.ClientEncryption(setupClient, {
+        keyVaultNamespace: 'keyvault.datakeys',
+        kmsProviders: getKmsProviders(LOCAL_KEY),
+        bson: BSON
+      });
+      // Create a data key with the "local" KMS provider.
+      // Storing the result in a variable named ``keyID``.
+      keyId = await clientEncryption.createDataKey('local');
+      // Use ``clientEncryption`` to encrypt the string "hello" with the following ``EncryptOpts``:
+      //   EncryptOpts {
+      //     keyId: <keyID>,
+      //     algorithm: "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+      //   }
+      // Store the result in a variable named ``ciphertext``.
+      cipherText = await clientEncryption.encrypt('hello', {
+        keyId: keyId,
+        algorithm: "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+      });
+      // Copy ``ciphertext`` into a variable named ``malformedCiphertext``.
+      // Change the last byte to 0. This will produce an invalid HMAC tag.
+      const buffer = Buffer.from(cipherText.buffer);
+      buffer.writeInt8(0, buffer.length - 1);
+      malformedCiphertext = new Binary(buffer, 6);
+      // Create a MongoClient named ``encryptedClient`` with these ``AutoEncryptionOpts``:
+      //   AutoEncryptionOpts {
+      //     keyVaultNamespace: "keyvault.datakeys";
+      //     kmsProviders: { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
+      //   }
+      // Configure ``encryptedClient`` with "retryReads=false".
+      encryptedClient = this.configuration.newClient({}, {
+        retryReads: false,
+        monitorCommands: true,
+        autoEncryption: {
+          keyVaultNamespace: 'keyvault.datakeys',
+          kmsProviders: getKmsProviders(LOCAL_KEY)
+        }
+      });
+      // Register a listener for CommandSucceeded events on ``encryptedClient``.
+      encryptedClient.on('commandSucceeded', (event) => {
+        if (event.commandName === 'aggregate') {
+          aggregateSucceeded = event;
+        }
+      });
+      // The listener must store the most recent CommandStartedEvent reply for the "aggregate" command.
+      encryptedClient.on('commandStarted', (event) => {
+        if (event.commandName === 'aggregate') {
+          aggregateStarted = event;
+        }
+      });
+      // The listener must store the most recent CommandFailedEvent error for the "aggregate" command.
+      encryptedClient.on('commandFailed', (event) => {
+        if (event.commandName === 'aggregate') {
+          aggregateFailed = event;
+        }
+      });
+    });
+
+    afterEach(async function () {
+      aggregateSucceeded = undefined;
+      aggregateStarted = undefined;
+      aggregateFailed = undefined;
+      await setupClient.close();
+      await encryptedClient.close();
+    });
+
+    context('Case 1: Command Error', function () {
+      beforeEach(async function () {
+        // Use ``setupClient`` to configure the following failpoint:
+        //    {
+        //         "configureFailPoint": "failCommand",
+        //         "mode": {
+        //             "times": 1
+        //         },
+        //         "data": {
+        //             "errorCode": 123,
+        //             "failCommands": [
+        //                 "aggregate"
+        //             ]
+        //         }
+        //     }
+        await setupClient.db().admin().command({
+          configureFailPoint: 'failCommand',
+          mode: {
+            times: 1
+          },
+          data: {
+            errorCode: 123,
+            failCommands: ['aggregate']
+          }
+        });
+      });
+
+      it('expects an error and a command failed event', async function () {
+        // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
+        // Expect an exception to be thrown from the command error. Expect a CommandFailedEvent.
+        const collection = encryptedClient.db('').collection('decryption_events');
+        let result;
+        try {
+          result = await collection.aggregate([]).toArray();
+        } catch (error) {
+          expect(error.code).to.equal(123);
+        }
+        expect(result).to.not.exist;
+        expect(aggregateFailed.failure.code).to.equal(123);
+      });
+    });
+
+    context('Case 2: Network Error', function () {
+      beforeEach(async function () {
+        // Use ``setupClient`` to configure the following failpoint:
+        //    {
+        //         "configureFailPoint": "failCommand",
+        //         "mode": {
+        //             "times": 1
+        //         },
+        //         "data": {
+        //             "errorCode": 123,
+        //             "closeConnection": true,
+        //             "failCommands": [
+        //                 "aggregate"
+        //             ]
+        //         }
+        //     }
+        await setupClient.db().admin().command({
+          configureFailPoint: 'failCommand',
+          mode: {
+            times: 1
+          },
+          data: {
+            errorCode: 123,
+            closeConnection: true,
+            failCommands: ['aggregate']
+          }
+        });
+      });
+
+      it('expects an error and a command failed event', async function () {
+        // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
+        // Expect an exception to be thrown from the network error. Expect a CommandFailedEvent.
+        const collection = encryptedClient.db('').collection('decryption_events');
+        let result;
+        try {
+          result = await collection.aggregate([]).toArray();
+        } catch (error) {
+          expect(error.message).to.include('closed');
+        }
+        expect(result).to.not.exist;
+        expect(aggregateFailed.failure.message).to.include('closed');
+      });
+    });
+
+    context('Case 3: Decrypt Error', function () {
+      it('errors on decryption but command succeeds', async function () {
+        // Use ``encryptedClient`` to insert the document ``{ "encrypted": <malformedCiphertext> }``
+        // into ``db.decryption_events``.
+        // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
+        // Expect an exception to be thrown from the decryption error.
+        // Expect a CommandSucceededEvent. Expect the CommandSucceededEvent.reply
+        // to contain BSON binary for the field 
+        // ``cursor.firstBatch.encrypted``.
+        const collection = encryptedClient.db('').collection('decryption_events');
+        await collection.drop();
+        await collection.insertOne({ encrypted: malformedCiphertext });
+        let result;
+        try {
+          result = await collection.aggregate([]).toArray();
+        } catch (error) {
+          expect(error.message).to.include('HMAC validation failure');
+        }
+        expect(result).to.not.exist;
+        const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
+        expect(doc.encrypted).to.be.instanceOf(Binary);
+      });
+    });
+
+    context('Case 4: Decrypt Success', function () {
+      it('succeeds on decryption and command succeeds', async function () {
+        // Use ``encryptedClient`` to insert the document ``{ "encrypted": <ciphertext> }``
+        // into ``db.decryption_events``.
+        // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
+        // Expect no exception.
+        // Expect a CommandSucceededEvent. Expect the CommandSucceededEvent.reply
+        // to contain BSON binary for the field ``cursor.firstBatch.encrypted``.
+        const collection = encryptedClient.db('').collection('decryption_events');
+        await collection.drop();
+        await collection.insertOne({ encrypted: cipherText });
+        let result;
+        try {
+          result = await collection.aggregate([]).toArray();
+        } catch (error) {
+          expect(error).to.not.exist;
+        }
+        expect(result[0].encrypted).to.equal('hello');
+        const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
+        expect(doc.encrypted).to.be.instanceOf(Binary);
       });
     });
   });
