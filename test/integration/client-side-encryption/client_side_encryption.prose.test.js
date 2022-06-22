@@ -1442,7 +1442,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       setupClient = this.configuration.newClient();
       // Drop and create the collection ``db.decryption_events``.
       const db = setupClient.db('db');
-      await db.dropCollection('decryption_events').catch((error) => {
+      await db.dropCollection('decryption_events').catch(error => {
         if (!error.message.match(/ns not found/)) {
           throw error;
         }
@@ -1470,7 +1470,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       // Store the result in a variable named ``ciphertext``.
       cipherText = await clientEncryption.encrypt('hello', {
         keyId: keyId,
-        algorithm: "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+        algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
       });
       // Copy ``ciphertext`` into a variable named ``malformedCiphertext``.
       // Change the last byte to 0. This will produce an invalid HMAC tag.
@@ -1483,28 +1483,31 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       //     kmsProviders: { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
       //   }
       // Configure ``encryptedClient`` with "retryReads=false".
-      encryptedClient = this.configuration.newClient({}, {
-        retryReads: false,
-        monitorCommands: true,
-        autoEncryption: {
-          keyVaultNamespace: 'keyvault.datakeys',
-          kmsProviders: getKmsProviders(LOCAL_KEY)
+      encryptedClient = this.configuration.newClient(
+        {},
+        {
+          retryReads: false,
+          monitorCommands: true,
+          autoEncryption: {
+            keyVaultNamespace: 'keyvault.datakeys',
+            kmsProviders: getKmsProviders(LOCAL_KEY)
+          }
         }
-      });
+      );
       // Register a listener for CommandSucceeded events on ``encryptedClient``.
-      encryptedClient.on('commandSucceeded', (event) => {
+      encryptedClient.on('commandSucceeded', event => {
         if (event.commandName === 'aggregate') {
           aggregateSucceeded = event;
         }
       });
       // The listener must store the most recent CommandStartedEvent reply for the "aggregate" command.
-      encryptedClient.on('commandStarted', (event) => {
+      encryptedClient.on('commandStarted', event => {
         if (event.commandName === 'aggregate') {
           aggregateStarted = event;
         }
       });
       // The listener must store the most recent CommandFailedEvent error for the "aggregate" command.
-      encryptedClient.on('commandFailed', (event) => {
+      encryptedClient.on('commandFailed', event => {
         if (event.commandName === 'aggregate') {
           aggregateFailed = event;
         }
@@ -1534,16 +1537,19 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         //             ]
         //         }
         //     }
-        await setupClient.db().admin().command({
-          configureFailPoint: 'failCommand',
-          mode: {
-            times: 1
-          },
-          data: {
-            errorCode: 123,
-            failCommands: ['aggregate']
-          }
-        });
+        await setupClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              errorCode: 123,
+              failCommands: ['aggregate']
+            }
+          });
       });
 
       it('expects an error and a command failed event', async function () {
@@ -1558,6 +1564,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
         expect(result).to.not.exist;
         expect(aggregateFailed.failure.code).to.equal(123);
+        expect(aggregateStarted).to.exist;
       });
     });
 
@@ -1577,17 +1584,20 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         //             ]
         //         }
         //     }
-        await setupClient.db().admin().command({
-          configureFailPoint: 'failCommand',
-          mode: {
-            times: 1
-          },
-          data: {
-            errorCode: 123,
-            closeConnection: true,
-            failCommands: ['aggregate']
-          }
-        });
+        await setupClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              errorCode: 123,
+              closeConnection: true,
+              failCommands: ['aggregate']
+            }
+          });
       });
 
       it('expects an error and a command failed event', async function () {
@@ -1602,6 +1612,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
         expect(result).to.not.exist;
         expect(aggregateFailed.failure.message).to.include('closed');
+        expect(aggregateStarted).to.exist;
       });
     });
 
@@ -1612,7 +1623,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
         // Expect an exception to be thrown from the decryption error.
         // Expect a CommandSucceededEvent. Expect the CommandSucceededEvent.reply
-        // to contain BSON binary for the field 
+        // to contain BSON binary for the field
         // ``cursor.firstBatch.encrypted``.
         const collection = encryptedClient.db('').collection('decryption_events');
         await collection.drop();
@@ -1626,6 +1637,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         expect(result).to.not.exist;
         const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
         expect(doc.encrypted).to.be.instanceOf(Binary);
+        expect(aggregateStarted).to.exist;
       });
     });
 
@@ -1649,6 +1661,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         expect(result[0].encrypted).to.equal('hello');
         const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
         expect(doc.encrypted).to.be.instanceOf(Binary);
+        expect(aggregateStarted).to.exist;
       });
     });
   });
