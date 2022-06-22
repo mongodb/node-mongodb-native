@@ -1,6 +1,5 @@
-import Denque = require('denque');
 import type { Readable } from 'stream';
-import { setTimeout } from 'timers';
+import { promisify } from 'util';
 
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
@@ -20,21 +19,9 @@ import { InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
-import type { Topology } from './sdam/topology';
 import type { ServerSessionId } from './sessions';
-import {
-  calculateDurationInMs,
-  Callback,
-  filterOptions,
-  getTopology,
-  maxWireVersion,
-  maybePromise,
-  MongoDBNamespace,
-  now
-} from './utils';
+import { Callback, filterOptions, getTopology, maybePromise, MongoDBNamespace } from './utils';
 
-/** @internal */
-const kResumeQueue = Symbol('resumeQueue');
 /** @internal */
 const kCursorStream = Symbol('cursorStream');
 /** @internal */
@@ -57,19 +44,10 @@ const CHANGE_DOMAIN_TYPES = {
   CLUSTER: Symbol('Cluster')
 };
 
-interface TopologyWaitOptions {
-  start?: number;
-  timeout?: number;
-  readPreference?: ReadPreference;
-}
-
-const SELECTION_TIMEOUT = 30000;
-
 const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE];
 
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';
-const NO_CURSOR_ERROR = 'ChangeStream has no cursor';
 const CHANGESTREAM_CLOSED_ERROR = 'ChangeStream is closed';
 
 /**
@@ -548,10 +526,8 @@ export class ChangeStream<
   namespace: MongoDBNamespace;
   type: symbol;
   /** @internal */
-  cursor: ChangeStreamCursor<TSchema, TChange> | undefined;
+  cursor: ChangeStreamCursor<TSchema, TChange>;
   streamOptions?: CursorStreamOptions;
-  /** @internal */
-  [kResumeQueue]: Denque<Callback<ChangeStreamCursor<TSchema, TChange>>>;
   /** @internal */
   [kCursorStream]?: Readable & AsyncIterable<TChange>;
   /** @internal */
@@ -618,8 +594,6 @@ export class ChangeStream<
       this.options.readPreference = parent.readPreference;
     }
 
-    this[kResumeQueue] = new Denque();
-
     // Create contained Change Stream cursor
     this.cursor = this._createChangeStreamCursor(options);
 
@@ -655,11 +629,28 @@ export class ChangeStream<
   hasNext(callback: Callback<boolean>): void;
   hasNext(callback?: Callback): Promise<boolean> | void {
     this._setIsIterator();
-    return maybePromise(callback, cb => {
-      this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        cursor.hasNext(cb);
-      });
+    // TOOD(NODE-4319): Add eslint rule preventing accidental variable shadowing
+    // Shadowing is intentional here.  We want to override the `callback` variable
+    // from the outer scope so that the inner scope doesn't accidentally call the wrong callback.
+    return maybePromise(callback, callback => {
+      (async () => {
+        try {
+          const hasNext = await this.cursor.hasNext();
+          return hasNext;
+        } catch (error) {
+          try {
+            await this._processErrorIteratorMode(error);
+            const hasNext = await this.cursor.hasNext();
+            return hasNext;
+          } catch (error) {
+            await this.close().catch(err => err);
+            throw error;
+          }
+        }
+      })().then(
+        hasNext => callback(undefined, hasNext),
+        error => callback(error)
+      );
     });
   }
 
@@ -668,18 +659,30 @@ export class ChangeStream<
   next(callback: Callback<TChange>): void;
   next(callback?: Callback<TChange>): Promise<TChange> | void {
     this._setIsIterator();
-    return maybePromise(callback, cb => {
-      this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        cursor.next((error, change) => {
-          if (error) {
-            this[kResumeQueue].push(() => this.next(cb));
-            this._processError(error, cb);
-            return;
+    // TOOD(NODE-4319): Add eslint rule preventing accidental variable shadowing
+    // Shadowing is intentional here.  We want to override the `callback` variable
+    // from the outer scope so that the inner scope doesn't accidentally call the wrong callback.
+    return maybePromise(callback, callback => {
+      (async () => {
+        try {
+          const change = await this.cursor.next();
+          const processedChange = this._processChange(change ?? null);
+          return processedChange;
+        } catch (error) {
+          try {
+            await this._processErrorIteratorMode(error);
+            const change = await this.cursor.next();
+            const processedChange = this._processChange(change ?? null);
+            return processedChange;
+          } catch (error) {
+            await this.close().catch(err => err);
+            throw error;
           }
-          this._processNewChange(change ?? null, cb);
-        });
-      });
+        }
+      })().then(
+        change => callback(undefined, change),
+        error => callback(error)
+      );
     });
   }
 
@@ -690,32 +693,46 @@ export class ChangeStream<
   tryNext(callback: Callback<Document | null>): void;
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
     this._setIsIterator();
-    return maybePromise(callback, cb => {
-      this._getCursor((err, cursor) => {
-        if (err || !cursor) return cb(err); // failed to resume, raise an error
-        return cursor.tryNext(cb);
-      });
+    // TOOD(NODE-4319): Add eslint rule preventing accidental variable shadowing
+    // Shadowing is intentional here.  We want to override the `callback` variable
+    // from the outer scope so that the inner scope doesn't accidentally call the wrong callback.
+    return maybePromise(callback, callback => {
+      (async () => {
+        try {
+          const change = await this.cursor.tryNext();
+          return change ?? null;
+        } catch (error) {
+          try {
+            await this._processErrorIteratorMode(error);
+            const change = await this.cursor.tryNext();
+            return change ?? null;
+          } catch (error) {
+            await this.close().catch(err => err);
+            throw error;
+          }
+        }
+      })().then(
+        change => callback(undefined, change),
+        error => callback(error)
+      );
     });
   }
 
   /** Is the cursor closed */
   get closed(): boolean {
-    return this[kClosed] || (this.cursor?.closed ?? false);
+    return this[kClosed] || this.cursor.closed;
   }
 
   /** Close the Change Stream */
+  close(): Promise<void>;
+  close(callback: Callback): void;
   close(callback?: Callback): Promise<void> | void {
     this[kClosed] = true;
 
     return maybePromise(callback, cb => {
-      if (!this.cursor) {
-        return cb();
-      }
-
       const cursor = this.cursor;
       return cursor.close(err => {
         this._endStream();
-        this.cursor = undefined;
         return cb(err);
       });
     });
@@ -723,11 +740,18 @@ export class ChangeStream<
 
   /**
    * Return a modified Readable stream including a possible transform method.
-   * @throws MongoDriverError if this.cursor is undefined
+   *
+   * NOTE: When using a Stream to process change stream events, the stream will
+   * NOT automatically resume in the case a resumable error is encountered.
+   *
+   * @throws MongoChangeStreamError if the underlying cursor or the change stream is closed
    */
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TChange> {
+    if (this.closed) {
+      throw new MongoChangeStreamError(CHANGESTREAM_CLOSED_ERROR);
+    }
+
     this.streamOptions = options;
-    if (!this.cursor) throw new MongoChangeStreamError(NO_CURSOR_ERROR);
     return this.cursor.stream(options);
   }
 
@@ -800,43 +824,13 @@ export class ChangeStream<
     return changeStreamCursor;
   }
 
-  /**
-   * This method performs a basic server selection loop, satisfying the requirements of
-   * ChangeStream resumability until the new SDAM layer can be used.
-   * @internal
-   */
-  private _waitForTopologyConnected(
-    topology: Topology,
-    options: TopologyWaitOptions,
-    callback: Callback
-  ) {
-    setTimeout(() => {
-      if (options && options.start == null) {
-        options.start = now();
-      }
-
-      const start = options.start || now();
-      const timeout = options.timeout || SELECTION_TIMEOUT;
-      if (topology.isConnected()) {
-        return callback();
-      }
-
-      if (calculateDurationInMs(start) > timeout) {
-        // TODO(NODE-3497): Replace with MongoNetworkTimeoutError
-        return callback(new MongoRuntimeError('Timed out waiting for connection'));
-      }
-
-      this._waitForTopologyConnected(topology, options, callback);
-    }, 500); // this is an arbitrary wait time to allow SDAM to transition
-  }
-
   /** @internal */
-  private _closeWithError(error: AnyError, callback?: Callback): void {
-    if (!callback) {
-      this.emit(ChangeStream.ERROR, error);
-    }
+  private _closeEmitterModeWithError(error: AnyError): void {
+    this.emit(ChangeStream.ERROR, error);
 
-    this.close(() => callback && callback(error));
+    this.close(() => {
+      // nothing to do
+    });
   }
 
   /** @internal */
@@ -844,8 +838,15 @@ export class ChangeStream<
     this._setIsEmitter();
     const stream = this[kCursorStream] ?? cursor.stream();
     this[kCursorStream] = stream;
-    stream.on('data', change => this._processNewChange(change));
-    stream.on('error', error => this._processError(error));
+    stream.on('data', change => {
+      try {
+        const processedChange = this._processChange(change);
+        this.emit(ChangeStream.CHANGE, processedChange);
+      } catch (error) {
+        this.emit(ChangeStream.ERROR, error);
+      }
+    });
+    stream.on('error', error => this._processErrorStreamMode(error));
   }
 
   /** @internal */
@@ -860,127 +861,80 @@ export class ChangeStream<
   }
 
   /** @internal */
-  private _processNewChange(change: TChange | null, callback?: Callback<TChange>) {
+  private _processChange(change: TChange | null): TChange {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
-      return;
+      throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
     // a null change means the cursor has been notified, implicitly closing the change stream
     if (change == null) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      return this._closeWithError(new MongoRuntimeError(CHANGESTREAM_CLOSED_ERROR), callback);
+      throw new MongoRuntimeError(CHANGESTREAM_CLOSED_ERROR);
     }
 
     if (change && !change._id) {
-      return this._closeWithError(new MongoChangeStreamError(NO_RESUME_TOKEN_ERROR), callback);
+      throw new MongoChangeStreamError(NO_RESUME_TOKEN_ERROR);
     }
 
     // cache the resume token
-    this.cursor?.cacheResumeToken(change._id);
+    this.cursor.cacheResumeToken(change._id);
 
     // wipe the startAtOperationTime if there was one so that there won't be a conflict
     // between resumeToken and startAtOperationTime if we need to reconnect the cursor
     this.options.startAtOperationTime = undefined;
 
-    // Return the change
-    if (!callback) return this.emit(ChangeStream.CHANGE, change);
-    return callback(undefined, change);
+    return change;
   }
 
   /** @internal */
-  private _processError(error: AnyError, callback?: Callback) {
-    const cursor = this.cursor;
-
+  private _processErrorStreamMode(changeStreamError: AnyError) {
     // If the change stream has been closed explicitly, do not process error.
-    if (this[kClosed]) {
-      // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      if (callback) callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
-      return;
-    }
+    if (this[kClosed]) return;
 
-    // if the resume succeeds, continue with the new cursor
-    const resumeWithCursor = (newCursor: ChangeStreamCursor<TSchema, TChange>) => {
-      this.cursor = newCursor;
-      this._processResumeQueue();
-    };
-
-    if (cursor && isResumableError(error, maxWireVersion(cursor.server))) {
-      this.cursor = undefined;
-
-      // stop listening to all events from old cursor
+    if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
-
-      // close internal cursor, ignore errors
-      cursor.close();
+      this.cursor.close();
 
       const topology = getTopology(this.parent);
-      this._waitForTopologyConnected(topology, { readPreference: cursor.readPreference }, err => {
-        // if the topology can't reconnect, close the stream
-        if (err) return this._closeWithError(err, callback);
-
-        // create a new cursor, preserving the old cursor's options
-        const newCursor = this._createChangeStreamCursor(cursor.resumeOptions);
-
-        // attempt to continue in emitter mode
-        if (!callback) return resumeWithCursor(newCursor);
-
-        // attempt to continue in iterator mode
-        newCursor.hasNext(err => {
-          // if there's an error immediately after resuming, close the stream
-          if (err) return this._closeWithError(err);
-          resumeWithCursor(newCursor);
-        });
+      topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
+        if (serverSelectionError) return this._closeEmitterModeWithError(changeStreamError);
+        this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
       });
-      return;
+    } else {
+      this._closeEmitterModeWithError(changeStreamError);
     }
-
-    // if initial error wasn't resumable, raise an error and close the change stream
-    return this._closeWithError(error, callback);
-  }
-
-  /** @internal */
-  private _getCursor(callback: Callback<ChangeStreamCursor<TSchema, TChange>>) {
-    if (this[kClosed]) {
-      // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
-      return;
-    }
-
-    // if a cursor exists and it is open, return it
-    if (this.cursor) {
-      callback(undefined, this.cursor);
-      return;
-    }
-
-    // no cursor, queue callback until topology reconnects
-    this[kResumeQueue].push(callback);
   }
 
   /**
-   * Drain the resume queue when a new has become available
    * @internal
    *
-   * @param error - error getting a new cursor
+   * TODO(NODE-4320): promisify selectServer and refactor this code to be async
+   *
+   * we promisify _processErrorIteratorModeCallback until we have a promisifed version of selectServer.
    */
-  private _processResumeQueue(error?: Error) {
-    while (this[kResumeQueue].length) {
-      const request = this[kResumeQueue].pop();
-      if (!request) break; // Should never occur but TS can't use the length check in the while condition
+  private _processErrorIteratorMode = promisify(this._processErrorIteratorModeCallback);
 
-      if (!error) {
-        if (this[kClosed]) {
-          // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-          request(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
-          return;
-        }
-        if (!this.cursor) {
-          request(new MongoChangeStreamError(NO_CURSOR_ERROR));
-          return;
-        }
-      }
-      request(error, this.cursor ?? undefined);
+  /** @internal */
+  private _processErrorIteratorModeCallback(changeStreamError: AnyError, callback: Callback) {
+    if (this[kClosed]) {
+      // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
+      return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
+    }
+
+    if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+      this.cursor.close();
+
+      const topology = getTopology(this.parent);
+      topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
+        // if the topology can't reconnect, close the stream
+        if (serverSelectionError) return this.close(() => callback(changeStreamError));
+
+        this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
+        callback();
+      });
+    } else {
+      this.close(() => callback(changeStreamError));
     }
   }
 }
