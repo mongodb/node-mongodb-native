@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-//   the tests in this file are intended to be an in-code outline of the functionailty required from
-//   the filter scope.  these tests are not exhaustive, but merely serve to demonstrate more explicitly
-//   the functionailty described in the scope.
-
 import { expectAssignable, expectError } from 'tsd';
 
-import type { Document, Filter } from '../../src';
+import { Decimal128, Document, Filter, Long } from '../../src';
 
 interface Metadata {
   id: string;
@@ -34,14 +30,6 @@ expectAssignable<Filter<User>>({ unknownProperty: 3 } as any);
 expectAssignable<Filter<User>>({ unknownProperty: 3 } as Filter<Document>);
 
 // Functionality 2
-// The Filter type should allow any valid MongoDB query but should steer users towards correct
-// queries by throwing type errors.  Users who do actually want to express an incorrect query
-// should have multiple options to work around this (casting as any, using Collection<Document>,
-// using Filter<Document> or not using Typescript).
-
-// TODO: what goes here
-
-// Functionality 3
 interface RecursiveType {
   name: string;
   recur?: RecursiveType;
@@ -67,14 +55,14 @@ expectAssignable<Filter<RecursiveType>>({ friend: { name: 'bailey' } });
 expectError<Filter<RecursiveType>>({ name: 42 });
 expectError<Filter<RecursiveType>>({ friend: { name: 42 } });
 
-// Functionality 4
+// Functionality 3
 // The Filter type should provide type exactness for queries that use dot notation.
 // The Node driver currently supports type exactness for queries that use dot notation.
 expectAssignable<Filter<User>>({ 'metadata.id': 'unique id' });
 expectError<Filter<User>>({ 'metadata.unknownProperty': 'error' });
 expectError<Filter<User>>({ 'metadata.id': 3 });
 
-// Functionality 5
+// Functionality 4
 // The Filter type should provide type checking on the keys for known $-prefixed query
 // operators and provides type checking on some associated properties.  This is a best effort
 // attempt - some query operators allow aggregation expressions or pipelines that would be too
@@ -82,15 +70,15 @@ expectError<Filter<User>>({ 'metadata.id': 3 });
 expectAssignable<Filter<User>>({ $and: [{ name: 'bailey' }] });
 expectError<Filter<User>>({ $unknownOperator: 'bailey' });
 
-// Functionality 6
+// Functionality 5
 // The Filter type should be strict by default.  This would prevent automatic forward compatibility
 // for any future root filter operators.  However, the Filter type should have a strict mode
 // toggle that allows users to disable the strictness in favor of forward compatibility.
 
-// NOTE: the syntax here is a potential solution to provide a toggle but need not the the actual solution
+// NOTE: the syntax here is a potential solution to provide a toggle but need not be the final solution
 expectAssignable<Filter<User, 'not strict'>>({ $unknownOperator: 'bailey' });
 
-// Functionality 7
+// Functionality 6
 // The Filter type should permit users to specify $-prefixed keys in their schema without
 // flagging them as invalid queries (see $-prefixed keys in schema below).
 interface SchemaWithDollar {
@@ -100,7 +88,7 @@ interface SchemaWithDollar {
 expectAssignable<Filter<SchemaWithDollar>>({ $name: 'bailey' });
 expectError<Filter<SchemaWithDollar>>({ $name: 23 });
 
-// Functionality 8
+// Functionality 7
 // The Filter type should be ergonomic to use.  This means that Filters can be constructed
 // easily using two common object construction techniques in Javascript: programatically adding
 // fields and using an object literal
@@ -126,3 +114,32 @@ function build(user: User): Filter<User> {
 
   return filter;
 }
+
+// Functionality 8
+// Numeric types should enforce exact typing for equality queries, but allow any numeric type for
+// range based queries. the Javascript 'number' type should be assignable to all types, purely
+// for convenience while users are building filters and to prevent type errors in scenarios when
+// users are importing filters in from other places that don't have typescript support
+// (Compass for example)
+interface NumericSchema {
+  age: number;
+  reallyOldAge: Decimal128;
+}
+
+expectAssignable<Filter<NumericSchema>>({
+  age: 23,
+  reallyOldAge: Decimal128.fromString('1')
+});
+
+expectAssignable<Filter<NumericSchema>>({
+  reallyOldAge: 45
+});
+
+expectError<Filter<NumericSchema>>({
+  reallyOldAge: Long.fromNumber(1)
+});
+
+expectAssignable<Filter<NumericSchema>>({
+  reallyOldAge: { $lt: Long.fromNumber(25) },
+  age: { $gt: Long.fromNumber(25) }
+});
