@@ -19,9 +19,6 @@ const SKIPPED_TESTS = [
   // TODO(NODE-2034): Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
 
-  // TODO(NODE-3951): investigate why this is failing while the legacy version is passing
-  'Dirty explicit session is discarded',
-
   // TODO(NODE-3308):
   'A successful find event with a getmore and the server kills the cursor',
 
