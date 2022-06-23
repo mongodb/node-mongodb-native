@@ -448,7 +448,6 @@
           "name": "insertOne",
           "object": "collection0",
           "arguments": {
-            "session": "session0",
             "document": {
               "_id": 2
             }
