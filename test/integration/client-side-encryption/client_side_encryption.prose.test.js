@@ -9,6 +9,7 @@ const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { MongoNetworkError } = require('../../../src/error');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -1436,23 +1437,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     let aggregateStarted;
     let aggregateFailed;
 
-    const drop = async (collection) => {
-      try {
-        await collection.drop({ writeConcern: { w: 'majority', j: true } });
-      } catch (error) {
-        if (!error.message.match(/ns not found/)) {
-          throw error;
-        }
-      }
-    };
-
     beforeEach(async function () {
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       // Create a MongoClient named ``setupClient``.
       setupClient = this.configuration.newClient();
       // Drop and create the collection ``db.decryption_events``.
       const db = setupClient.db('db');
-      await drop(db.collection('decryption_events'));
+      await dropCollection(db, 'decryption_events');
       await db.createCollection('decryption_events');
       // Create a ClientEncryption object named ``clientEncryption`` with these options:
       //   ClientEncryptionOpts {
@@ -1561,14 +1552,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       it('expects an error and a command failed event', async function () {
         // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
         // Expect an exception to be thrown from the command error. Expect a CommandFailedEvent.
-        const collection = encryptedClient.db('').collection('decryption_events');
-        let result;
+        const collection = encryptedClient.db('db').collection('decryption_events');
         try {
-          result = await collection.aggregate([]).toArray();
+          await collection.aggregate([]).toArray();
+          expect.fail('aggregate must fail with error');
         } catch (error) {
           expect(error.code).to.equal(123);
         }
-        expect(result).to.not.exist;
         expect(aggregateFailed.failure.code).to.equal(123);
         expect(aggregateStarted).to.exist;
       });
@@ -1609,14 +1599,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       it('expects an error and a command failed event', async function () {
         // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
         // Expect an exception to be thrown from the network error. Expect a CommandFailedEvent.
-        const collection = encryptedClient.db('').collection('decryption_events');
-        let result;
+        const collection = encryptedClient.db('db').collection('decryption_events');
         try {
-          result = await collection.aggregate([]).toArray();
+          await collection.aggregate([]).toArray();
+          expect.fail('aggregate must fail with error');
         } catch (error) {
-          expect(error.message).to.include('closed');
+          expect(error.message).to.be.instanceOf(MongoNetworkError);
         }
-        expect(result).to.not.exist;
         expect(aggregateFailed.failure.message).to.include('closed');
         expect(aggregateStarted).to.exist;
       });
@@ -1631,15 +1620,14 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // Expect a CommandSucceededEvent. Expect the CommandSucceededEvent.reply
         // to contain BSON binary for the field
         // ``cursor.firstBatch.encrypted``.
-        const collection = encryptedClient.db('').collection('decryption_events');
+        const collection = encryptedClient.db('db').collection('decryption_events');
         await collection.insertOne({ encrypted: malformedCiphertext });
-        let result;
         try {
-          result = await collection.aggregate([]).toArray();
+          await collection.aggregate([]).toArray();
+          expect.fail('aggregate must fail with error');
         } catch (error) {
           expect(error.message).to.include('HMAC validation failure');
         }
-        expect(result).to.not.exist;
         const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
         expect(doc.encrypted).to.be.instanceOf(Binary);
         expect(aggregateStarted).to.exist;
@@ -1654,8 +1642,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // Expect no exception.
         // Expect a CommandSucceededEvent. Expect the CommandSucceededEvent.reply
         // to contain BSON binary for the field ``cursor.firstBatch.encrypted``.
-        const collection = encryptedClient.db('').collection('decryption_events');
-        await drop(collection);
+        const collection = encryptedClient.db('db').collection('decryption_events');
         await collection.insertOne({ encrypted: cipherText });
         let result;
         try {
