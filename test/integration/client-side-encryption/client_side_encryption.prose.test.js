@@ -1711,8 +1711,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       encryptedClient = this.configuration.newClient(
         {},
         {
-          bypassQueryAnalysis: true,
           autoEncryption: {
+            bypassQueryAnalysis: true,
             keyVaultNamespace: 'keyvault.datakeys',
             kmsProviders: getKmsProviders(LOCAL_KEY)
           }
