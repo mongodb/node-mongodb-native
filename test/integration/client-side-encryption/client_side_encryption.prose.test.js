@@ -1426,7 +1426,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context('14. Decryption Events', function () {
+  context('14. Decryption Events', metadata, function () {
     let setupClient;
     let clientEncryption;
     let keyId;
@@ -1511,7 +1511,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       await encryptedClient.close();
     });
 
-    context('Case 1: Command Error', function () {
+    context('Case 1: Command Error', metadata, function () {
       beforeEach(async function () {
         // Use ``setupClient`` to configure the following failpoint:
         //    {
@@ -1555,7 +1555,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
-    context('Case 2: Network Error', function () {
+    context('Case 2: Network Error', metadata, function () {
       beforeEach(async function () {
         // Use ``setupClient`` to configure the following failpoint:
         //    {
@@ -1601,7 +1601,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
-    context('Case 3: Decrypt Error', function () {
+    context('Case 3: Decrypt Error', metadata, function () {
       it('errors on decryption but command succeeds', async function () {
         // Use ``encryptedClient`` to insert the document ``{ "encrypted": <malformedCiphertext> }``
         // into ``db.decryption_events``.
@@ -1623,7 +1623,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
-    context('Case 4: Decrypt Success', function () {
+    context('Case 4: Decrypt Success', metadata, function () {
       it('succeeds on decryption and command succeeds', async function () {
         // Use ``encryptedClient`` to insert the document ``{ "encrypted": <ciphertext> }``
         // into ``db.decryption_events``.
