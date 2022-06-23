@@ -1637,7 +1637,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         try {
           result = await collection.aggregate([]).toArray();
         } catch (error) {
-          expect(error).to.not.exist;
+          expect.fail(`aggregate must not fail, got ${error.message}`);
         }
         expect(result[0].encrypted).to.equal('hello');
         const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
