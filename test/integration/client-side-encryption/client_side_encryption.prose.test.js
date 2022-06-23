@@ -44,7 +44,7 @@ const eeMetadata = {
   requires: {
     clientSideEncryption: true,
     mongodb: '>=6.0.0',
-    topology: ['replicaset', 'sharded', 'single']
+    topology: ['replicaset', 'sharded']
   }
 };
 
@@ -1545,7 +1545,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // collection with the filter { "encryptedIndexed": <findPayload> }.
         // Assert one document is returned containing the field
         // { "encryptedIndexed": "encrypted indexed value" }.
-        const result = await encryptedClient.findOne({ encryptedIndexed: findPayload });
+        const collection = encryptedClient.db('db').collection('explicit_encryption');
+        const result = await collection.findOne({ encryptedIndexed: findPayload });
         expect(result.encryptedIndexed).to.equal('encrypted indexed value');
       });
     });
@@ -1613,7 +1614,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           // Assert less than 10 documents are returned. 0 documents may be returned.
           // Assert each returned document contains the field
           // { "encryptedIndexed": "encrypted indexed value" }.
-          const result = await encryptedClient.find({ encryptedIndexed: findPayload }).toArray();
+          const collection = encryptedClient.db('db').collection('explicit_encryption');
+          const result = await collection.find({ encryptedIndexed: findPayload }).toArray();
           expect(result.length).to.be.below(10);
           for (const doc of result) {
             expect(doc.encryptedIndexed).to.equal('encrypted indexed value');
@@ -1625,7 +1627,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           // collection with the filter { "encryptedIndexed": <findPayload2> }.
           // Assert 10 documents are returned. Assert each returned document contains the
           // field { "encryptedIndexed": "encrypted indexed value" }.
-          const result = await encryptedClient.find({ encryptedIndexed: findPayload2 }).toArray();
+          const collection = encryptedClient.db('db').collection('explicit_encryption');
+          const result = await collection.find({ encryptedIndexed: findPayload2 }).toArray();
           expect(result.length).to.equal(10);
           for (const doc of result) {
             expect(doc.encryptedIndexed).to.equal('encrypted indexed value');
@@ -1651,6 +1654,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // Use encryptedClient to insert the document { "_id": 1, "encryptedUnindexed": <insertPayload> }
         // into db.explicit_encryption.
         await encryptedClient.db('db').collection('explicit_encryption').insertOne({
+          _id: 1,
           encryptedIndexed: insertPayload
         });
       });
@@ -1660,7 +1664,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // collection with the filter { "_id": 1 }.
         // Assert one document is returned containing the field
         // { "encryptedUnindexed": "encrypted unindexed value" }.
-        const result = await encryptedClient.findOne({ _id: 1 });
+        const collection = encryptedClient.db('db').collection('explicit_encryption');
+        const result = await collection.findOne({ _id: 1 });
         expect(result.encryptedIndexed).to.equal('encrypted unindexed value');
       });
     });
@@ -1699,7 +1704,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         //    algorithm: "Unindexed",
         // }
         // Store the result in payload.
-        payload = await clientEncryption.encrypt('encrypted indexed value', {
+        payload = await clientEncryption.encrypt('encrypted unindexed value', {
           keyId: key1Id,
           algorithm: 'Unindexed'
         });
