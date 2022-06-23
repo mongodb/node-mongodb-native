@@ -1434,7 +1434,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     let malformedCiphertext;
     let encryptedClient;
     let aggregateSucceeded;
-    let aggregateStarted;
     let aggregateFailed;
 
     beforeEach(async function () {
@@ -1497,12 +1496,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           aggregateSucceeded = event;
         }
       });
-      // The listener must store the most recent CommandStartedEvent reply for the "aggregate" command.
-      encryptedClient.on('commandStarted', event => {
-        if (event.commandName === 'aggregate') {
-          aggregateStarted = event;
-        }
-      });
       // The listener must store the most recent CommandFailedEvent error for the "aggregate" command.
       encryptedClient.on('commandFailed', event => {
         if (event.commandName === 'aggregate') {
@@ -1513,7 +1506,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     afterEach(async function () {
       aggregateSucceeded = undefined;
-      aggregateStarted = undefined;
       aggregateFailed = undefined;
       await setupClient.close();
       await encryptedClient.close();
@@ -1560,7 +1552,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect(error.code).to.equal(123);
         }
         expect(aggregateFailed.failure.code).to.equal(123);
-        expect(aggregateStarted).to.exist;
       });
     });
 
@@ -1607,7 +1598,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect(error.message).to.be.instanceOf(MongoNetworkError);
         }
         expect(aggregateFailed.failure.message).to.include('closed');
-        expect(aggregateStarted).to.exist;
       });
     });
 
@@ -1630,7 +1620,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
         const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
         expect(doc.encrypted).to.be.instanceOf(Binary);
-        expect(aggregateStarted).to.exist;
       });
     });
 
@@ -1653,7 +1642,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         expect(result[0].encrypted).to.equal('hello');
         const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
         expect(doc.encrypted).to.be.instanceOf(Binary);
-        expect(aggregateStarted).to.exist;
       });
     });
   });
