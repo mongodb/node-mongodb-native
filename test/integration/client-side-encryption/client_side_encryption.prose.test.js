@@ -1436,17 +1436,23 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     let aggregateStarted;
     let aggregateFailed;
 
+    const drop = async (collection) => {
+      try {
+        await collection.drop({ writeConcern: { w: 'majority', j: true } });
+      } catch (error) {
+        if (!error.message.match(/ns not found/)) {
+          throw error;
+        }
+      }
+    };
+
     beforeEach(async function () {
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       // Create a MongoClient named ``setupClient``.
       setupClient = this.configuration.newClient();
       // Drop and create the collection ``db.decryption_events``.
       const db = setupClient.db('db');
-      await db.dropCollection('decryption_events').catch(error => {
-        if (!error.message.match(/ns not found/)) {
-          throw error;
-        }
-      });
+      await drop(db.collection('decryption_events'));
       await db.createCollection('decryption_events');
       // Create a ClientEncryption object named ``clientEncryption`` with these options:
       //   ClientEncryptionOpts {
@@ -1649,6 +1655,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // Expect a CommandSucceededEvent. Expect the CommandSucceededEvent.reply
         // to contain BSON binary for the field ``cursor.firstBatch.encrypted``.
         const collection = encryptedClient.db('').collection('decryption_events');
+        await drop(collection);
         await collection.insertOne({ encrypted: cipherText });
         let result;
         try {
