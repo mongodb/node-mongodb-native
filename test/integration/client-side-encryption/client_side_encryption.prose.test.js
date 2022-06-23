@@ -1595,7 +1595,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           await collection.aggregate([]).toArray();
           expect.fail('aggregate must fail with error');
         } catch (error) {
-          expect(error.message).to.be.instanceOf(MongoNetworkError);
+          expect(error).to.be.instanceOf(MongoNetworkError);
         }
         expect(aggregateFailed.failure.message).to.include('closed');
       });
