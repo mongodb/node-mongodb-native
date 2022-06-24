@@ -1,6 +1,5 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
-import { AbstractCursor } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import { MongoCompatibilityError, MONGODB_ERROR_CODES, MongoServerError } from '../error';
 import type { OneOrMore } from '../mongo_types';
@@ -15,7 +14,6 @@ import {
   OperationParent
 } from './command';
 import { indexInformation, IndexInformationOptions } from './common_functions';
-import { executeOperation, ExecutionResult } from './execute_operation';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 const VALID_INDEX_OPTIONS = new Set([
@@ -409,41 +407,6 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     }
 
     super.executeCommand(server, session, command, callback);
-  }
-}
-
-/** @public */
-export class ListIndexesCursor extends AbstractCursor {
-  parent: Collection;
-  options?: ListIndexesOptions;
-
-  constructor(collection: Collection, options?: ListIndexesOptions) {
-    super(collection.s.db.s.client, collection.s.namespace, options);
-    this.parent = collection;
-    this.options = options;
-  }
-
-  clone(): ListIndexesCursor {
-    return new ListIndexesCursor(this.parent, {
-      ...this.options,
-      ...this.cursorOptions
-    });
-  }
-
-  /** @internal */
-  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
-    const operation = new ListIndexesOperation(this.parent, {
-      ...this.cursorOptions,
-      ...this.options,
-      session
-    });
-
-    executeOperation(this.parent.s.db.s.client, operation, (err, response) => {
-      if (err || response == null) return callback(err);
-
-      // TODO: NODE-2882
-      callback(undefined, { server: operation.server, session, response });
-    });
   }
 }
 

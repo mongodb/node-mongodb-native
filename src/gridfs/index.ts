@@ -158,6 +158,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
           if (!res?.deletedCount) {
             // TODO(NODE-3483): Replace with more appropriate error
             // Consider creating new error MongoGridFSFileNotFoundError
+            // TODO(NODE-XXX): This should be a subclass of server error
             return callback(new MongoRuntimeError(`File not found for id ${id}`));
           }
 

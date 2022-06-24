@@ -1,11 +1,9 @@
 import type { Binary, Document } from '../bson';
-import { AbstractCursor } from '../cursor/abstract_cursor';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { Callback, maxWireVersion } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
-import { executeOperation, ExecutionResult } from './execute_operation';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -84,47 +82,6 @@ export interface CollectionInfo extends Document {
     uuid?: Binary;
   };
   idIndex?: Document;
-}
-
-/** @public */
-export class ListCollectionsCursor<
-  T extends Pick<CollectionInfo, 'name' | 'type'> | CollectionInfo =
-    | Pick<CollectionInfo, 'name' | 'type'>
-    | CollectionInfo
-> extends AbstractCursor<T> {
-  parent: Db;
-  filter: Document;
-  options?: ListCollectionsOptions;
-
-  constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
-    super(db.s.client, db.s.namespace, options);
-    this.parent = db;
-    this.filter = filter;
-    this.options = options;
-  }
-
-  clone(): ListCollectionsCursor<T> {
-    return new ListCollectionsCursor(this.parent, this.filter, {
-      ...this.options,
-      ...this.cursorOptions
-    });
-  }
-
-  /** @internal */
-  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
-    const operation = new ListCollectionsOperation(this.parent, this.filter, {
-      ...this.cursorOptions,
-      ...this.options,
-      session
-    });
-
-    executeOperation(this.parent.s.client, operation, (err, response) => {
-      if (err || response == null) return callback(err);
-
-      // TODO: NODE-2882
-      callback(undefined, { server: operation.server, session, response });
-    });
-  }
 }
 
 defineAspects(ListCollectionsOperation, [

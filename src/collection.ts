@@ -5,6 +5,7 @@ import { UnorderedBulkOperation } from './bulk/unordered';
 import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
+import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import type { Db } from './db';
 import { MongoInvalidArgumentError } from './error';
 import type { Logger, LoggerOptions } from './logger';
@@ -57,7 +58,6 @@ import {
   IndexExistsOperation,
   IndexInformationOperation,
   IndexSpecification,
-  ListIndexesCursor,
   ListIndexesOptions
 } from './operations/indexes';
 import {
