@@ -13,7 +13,7 @@ const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const withClient = () => null;
 
 describe('SCRAM_SHA_256', function () {
-  beforeEach(() => {
+  beforeEach(function () {
     this.currentTest.skipReason = 'TODO(NODE-4338): correct withClient usage';
     this.currentTest.skip();
   });
