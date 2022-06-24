@@ -66,7 +66,7 @@ describe('Client Side Encryption', function () {
   const testContext = new TestRunnerContext();
   testContext.requiresCSFLE = true;
   const testSuites = gatherTestSuites(
-    path.join(__dirname, '../../spec/client-side-encryption/tests'),
+    path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),
     testContext
   );
   after(() => testContext.teardown());
