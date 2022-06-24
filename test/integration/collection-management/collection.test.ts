@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { expect, util } from 'chai';
 
 import { Collection, Db, MongoClient } from '../../../src';
 import { isHello } from '../../../src/utils';
@@ -748,12 +748,14 @@ describe('Collection', function () {
     const metadata = { requires: { topology: ['replicaset'] as const, mongodb: '>=3.6.0' } };
 
     beforeEach(async function () {
-      client = configuration.newClient({}, { retryWrites: true });
-      db = client.db('test_retry_writes');
+      const utilClient = this.configuration.newClient({}, { retryWrites: true });
+      db = utilClient.db('test_retry_writes');
       collection = db.collection('tests');
 
       await db.dropDatabase();
       await collection.insertOne({ name: 'foobar' });
+      await utilClient.close();
+      client = this.configuration.newClient({}, { retryWrites: true });
     });
 
     afterEach(async () => {

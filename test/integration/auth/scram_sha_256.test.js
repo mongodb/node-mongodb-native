@@ -7,12 +7,17 @@ const { ScramSHA256 } = require('../../../src/cmap/auth/scram');
 const { setupDatabase } = require('../shared');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
-// TODO(NODE-XXX): withClient usage prevented these tests from running
+// TODO(NODE-4338): withClient usage prevented these tests from running
 // the import has been removed since the function is being deleted, this is here to keep modifications minimal
 // so that the implementer of the fix for these tests can try to reference the original intent
 const withClient = () => null;
 
 describe('SCRAM_SHA_256', function () {
+  beforeEach(() => {
+    this.currentTest.skipReason = 'TODO(NODE-4338): correct withClient usage';
+    this.currentTest.skip();
+  });
+
   const test = {};
 
   // Note: this setup was adapted from the prose test setup

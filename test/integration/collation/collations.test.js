@@ -21,7 +21,7 @@ describe('Collation', function () {
     await Promise.resolve();
     await db.createCollection('cursor_collation_count');
     const collection = db.collection('cursor_collation_count');
-    collection.insertMany(docs);
+    await collection.insertMany(docs);
     const cursor = collection.find({ name: 'foo' }).collation(collation);
     const val = await cursor.count();
     expect(val).to.equal(2);

@@ -4,7 +4,7 @@ const { MongoClient } = require('../../../src');
 // TODO(NODE-3880): These tests are not fully implemented per the spec
 describe('Atlas Data Lake - prose', function () {
   let client;
-  beforeEach(async function () {
+  beforeEach(function () {
     client = null;
   });
 

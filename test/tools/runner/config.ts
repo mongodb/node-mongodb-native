@@ -50,7 +50,6 @@ function convertToConnStringMap(obj: Record<string, any>) {
 export class TestConfiguration {
   version: string;
   clientSideEncryption: Record<string, any>;
-  /** null means topology does not support command (serverless) */
   parameters: Record<string, any>;
   singleMongosLoadBalancerUri: string;
   multiMongosLoadBalancerUri: string;
