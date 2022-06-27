@@ -13,7 +13,6 @@ import {
   ObjectId,
   ProfilingLevel
 } from '../../../src';
-import { MONGODB_ERROR_CODES } from '../../../src/error';
 import { Topology } from '../../../src/sdam/topology';
 import { ClientSession } from '../../../src/sessions';
 import { sleep } from '../../tools/utils';
