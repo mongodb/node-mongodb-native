@@ -137,7 +137,7 @@ describe('MongoClient auto connect', () => {
 
     it(`explain()`, async () => {
       const agg = client.db().collection('test').aggregate(pipeline);
-      await agg.explain();
+      await agg.explain().catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
@@ -547,7 +547,7 @@ describe('MongoClient auto connect', () => {
 
     it(`removeUser()`, async () => {
       const db = client.db();
-      await db.removeUser('neal');
+      await db.removeUser('neal').catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
@@ -582,7 +582,7 @@ describe('MongoClient auto connect', () => {
 
     it(`explain()`, async () => {
       const find = client.db().collection('test').find();
-      await find.explain();
+      await find.explain().catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
