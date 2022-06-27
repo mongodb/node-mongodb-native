@@ -13,6 +13,7 @@ import {
   ObjectId,
   ProfilingLevel
 } from '../../../src';
+import { MONGODB_ERROR_CODES } from '../../../src/error';
 import { Topology } from '../../../src/sdam/topology';
 import { ClientSession } from '../../../src/sessions';
 import { sleep } from '../../tools/utils';
@@ -452,7 +453,7 @@ describe('MongoClient auto connect', () => {
       const c = client.db().collection('test0');
       const error = await c
         .rename('test1')
-        .catch(error => (error.message.includes('does not exist') ? null : error));
+        .catch(error => (error.code === MONGODB_ERROR_CODES.NamespaceNotFound ? null : error));
       expect(error).to.be.null;
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
