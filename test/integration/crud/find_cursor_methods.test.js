@@ -211,7 +211,7 @@ describe('Find Cursor', function () {
     });
   });
 
-  context.skip('#rewind', function () {
+  context('#rewind', function () {
     it('should rewind a cursor', function (done) {
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({});

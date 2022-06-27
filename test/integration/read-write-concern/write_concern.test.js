@@ -7,15 +7,6 @@ const mock = require('../../tools/mongodb-mock/index');
 const { MongoClient } = require('../../../src');
 
 describe('Write Concern', function () {
-  let client;
-  beforeEach(async function () {
-    client = this.configuration.newClient({ monitorCommands: true });
-  });
-
-  afterEach(async function () {
-    await client.close();
-  });
-
   it('should respect writeConcern from uri', function (done) {
     const client = this.configuration.newClient(
       `${this.configuration.url()}&w=0&monitorCommands=true`
