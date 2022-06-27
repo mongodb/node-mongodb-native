@@ -1547,7 +1547,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // { "encryptedIndexed": "encrypted indexed value" }.
         const collection = encryptedClient.db('db').collection('explicit_encryption');
         const result = await collection.findOne({ encryptedIndexed: findPayload });
-        expect(result).to.have.property('encryptedIndexed', 'encrypted indexed value')
+        expect(result).to.have.property('encryptedIndexed', 'encrypted indexed value');
       });
     });
 
@@ -1618,7 +1618,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           const result = await collection.find({ encryptedIndexed: findPayload }).toArray();
           expect(result.length).to.be.below(10);
           for (const doc of result) {
-            expect(doc).to.have.property('encryptedIndexed', 'encrypted indexed value')
+            expect(doc).to.have.property('encryptedIndexed', 'encrypted indexed value');
           }
         });
 
@@ -1631,7 +1631,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           const result = await collection.find({ encryptedIndexed: findPayload2 }).toArray();
           expect(result.length).to.equal(10);
           for (const doc of result) {
-            expect(doc).to.have.property('encryptedIndexed', 'encrypted indexed value')
+            expect(doc).to.have.property('encryptedIndexed', 'encrypted indexed value');
           }
         });
       }
@@ -1666,7 +1666,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // { "encryptedUnindexed": "encrypted unindexed value" }.
         const collection = encryptedClient.db('db').collection('explicit_encryption');
         const result = await collection.findOne({ _id: 1 });
-        expect(result).to.have.property('encryptedUnindexed', 'encrypted unindexed value')
+        expect(result).to.have.property('encryptedUnindexed', 'encrypted unindexed value');
       });
     });
 
