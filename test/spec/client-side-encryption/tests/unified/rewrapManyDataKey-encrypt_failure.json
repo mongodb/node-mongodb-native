@@ -1,0 +1,250 @@
+{
+  "description": "rewrapManyDataKey-encrypt_failure",
+  "schemaVersion": "1.8",
+  "runOnRequirements": [
+    {
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            },
+            "azure": {
+              "tenantId": {
+                "$$placeholder": 1
+              },
+              "clientId": {
+                "$$placeholder": 1
+              },
+              "clientSecret": {
+                "$$placeholder": 1
+              }
+            },
+            "gcp": {
+              "email": {
+                "$$placeholder": 1
+              },
+              "privateKey": {
+                "$$placeholder": 1
+              }
+            },
+            "kmip": {
+              "endpoint": {
+                "$$placeholder": 1
+              }
+            },
+            "local": {
+              "key": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "keyvault"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "datakeys"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "local_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "local"
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "rewrap with invalid masterKey for AWS KMS provider",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {},
+            "opts": {
+              "provider": "aws",
+              "masterKey": {
+                "key": "arn:aws:kms:us-east-2:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+                "region": "us-east-2"
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rewrap with invalid masterKey for Azure KMS provider",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {},
+            "opts": {
+              "provider": "azure",
+              "masterKey": {
+                "keyVaultEndpoint": "invalid-vault-csfle.vault.azure.net",
+                "keyName": "invalid-name-csfle"
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "rewrap with invalid masterKey for GCP KMS provider",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {},
+            "opts": {
+              "provider": "gcp",
+              "masterKey": {
+                "projectId": "devprod-drivers",
+                "location": "global",
+                "keyRing": "invalid-ring-csfle",
+                "keyName": "invalid-name-csfle"
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

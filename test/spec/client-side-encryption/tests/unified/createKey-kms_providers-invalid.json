@@ -1,0 +1,112 @@
+{
+  "description": "createKey-provider-invalid",
+  "schemaVersion": "1.8",
+  "runOnRequirements": [
+    {
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws": {}
+          }
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "create data key without required master key fields",
+      "operations": [
+        {
+          "name": "createKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "kmsProvider": "aws",
+            "opts": {
+              "masterKey": {}
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "create data key with invalid master key field",
+      "operations": [
+        {
+          "name": "createKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "kmsProvider": "local",
+            "opts": {
+              "masterKey": {
+                "invalid": 1
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "create data key with invalid master key",
+      "operations": [
+        {
+          "name": "createKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "kmsProvider": "aws",
+            "opts": {
+              "masterKey": {
+                "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+                "region": "invalid"
+              }
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": []
+        }
+      ]
+    }
+  ]
+}

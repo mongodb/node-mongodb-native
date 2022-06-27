@@ -1,0 +1,666 @@
+{
+  "description": "removeKeyAltName",
+  "schemaVersion": "1.8",
+  "runOnRequirements": [
+    {
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "local": {}
+          }
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "keyvault"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "datakeys"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "alternate_name",
+            "local_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "local"
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "remove keyAltName from non-existent data key",
+      "operations": [
+        {
+          "name": "removeKeyAltName",
+          "object": "clientEncryption0",
+          "arguments": {
+            "id": {
+              "$binary": {
+                "base64": "AAAjYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltName": "does_not_exist"
+          },
+          "expectResult": null
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "findAndModify": "datakeys",
+                  "query": {
+                    "_id": {
+                      "$binary": {
+                        "base64": "AAAjYWxrZXlsb2NhbGtleQ==",
+                        "subType": "04"
+                      }
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "keyAltNames": {
+                          "$cond": [
+                            {
+                              "$eq": [
+                                "$keyAltNames",
+                                [
+                                  "does_not_exist"
+                                ]
+                              ]
+                            },
+                            "$$REMOVE",
+                            {
+                              "$filter": {
+                                "input": "$keyAltNames",
+                                "cond": {
+                                  "$ne": [
+                                    "$$this",
+                                    "does_not_exist"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "datakeys",
+          "databaseName": "keyvault",
+          "documents": [
+            {
+              "_id": {
+                "$binary": {
+                  "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                  "subType": "04"
+                }
+              },
+              "keyAltNames": [
+                "alternate_name",
+                "local_key"
+              ],
+              "keyMaterial": {
+                "$binary": {
+                  "base64": "ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==",
+                  "subType": "00"
+                }
+              },
+              "creationDate": {
+                "$date": {
+                  "$numberLong": "1641024000000"
+                }
+              },
+              "updateDate": {
+                "$date": {
+                  "$numberLong": "1641024000000"
+                }
+              },
+              "status": 1,
+              "masterKey": {
+                "provider": "local"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remove non-existent keyAltName from existing data key",
+      "operations": [
+        {
+          "name": "removeKeyAltName",
+          "object": "clientEncryption0",
+          "arguments": {
+            "id": {
+              "$binary": {
+                "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltName": "does_not_exist"
+          },
+          "expectResult": {
+            "_id": {
+              "$binary": {
+                "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltNames": [
+              "alternate_name",
+              "local_key"
+            ],
+            "keyMaterial": {
+              "$binary": {
+                "base64": "ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==",
+                "subType": "00"
+              }
+            },
+            "creationDate": {
+              "$date": {
+                "$numberLong": "1641024000000"
+              }
+            },
+            "updateDate": {
+              "$date": {
+                "$numberLong": "1641024000000"
+              }
+            },
+            "status": 1,
+            "masterKey": {
+              "provider": "local"
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "findAndModify": "datakeys",
+                  "query": {
+                    "_id": {
+                      "$binary": {
+                        "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                        "subType": "04"
+                      }
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "keyAltNames": {
+                          "$cond": [
+                            {
+                              "$eq": [
+                                "$keyAltNames",
+                                [
+                                  "does_not_exist"
+                                ]
+                              ]
+                            },
+                            "$$REMOVE",
+                            {
+                              "$filter": {
+                                "input": "$keyAltNames",
+                                "cond": {
+                                  "$ne": [
+                                    "$$this",
+                                    "does_not_exist"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "datakeys",
+          "databaseName": "keyvault",
+          "documents": [
+            {
+              "_id": {
+                "$binary": {
+                  "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                  "subType": "04"
+                }
+              },
+              "keyAltNames": [
+                "alternate_name",
+                "local_key"
+              ],
+              "keyMaterial": {
+                "$binary": {
+                  "base64": "ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==",
+                  "subType": "00"
+                }
+              },
+              "creationDate": {
+                "$date": {
+                  "$numberLong": "1641024000000"
+                }
+              },
+              "updateDate": {
+                "$date": {
+                  "$numberLong": "1641024000000"
+                }
+              },
+              "status": 1,
+              "masterKey": {
+                "provider": "local"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remove an existing keyAltName from an existing data key",
+      "operations": [
+        {
+          "name": "removeKeyAltName",
+          "object": "clientEncryption0",
+          "arguments": {
+            "id": {
+              "$binary": {
+                "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltName": "alternate_name"
+          },
+          "expectResult": {
+            "_id": {
+              "$binary": {
+                "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltNames": [
+              "alternate_name",
+              "local_key"
+            ],
+            "keyMaterial": {
+              "$binary": {
+                "base64": "ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==",
+                "subType": "00"
+              }
+            },
+            "creationDate": {
+              "$date": {
+                "$numberLong": "1641024000000"
+              }
+            },
+            "updateDate": {
+              "$date": {
+                "$numberLong": "1641024000000"
+              }
+            },
+            "status": 1,
+            "masterKey": {
+              "provider": "local"
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "filter": {},
+            "projection": {
+              "_id": 0,
+              "keyAltNames": 1
+            }
+          },
+          "expectResult": [
+            {
+              "keyAltNames": [
+                "local_key"
+              ]
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "findAndModify": "datakeys",
+                  "query": {
+                    "_id": {
+                      "$binary": {
+                        "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                        "subType": "04"
+                      }
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "keyAltNames": {
+                          "$cond": [
+                            {
+                              "$eq": [
+                                "$keyAltNames",
+                                [
+                                  "alternate_name"
+                                ]
+                              ]
+                            },
+                            "$$REMOVE",
+                            {
+                              "$filter": {
+                                "input": "$keyAltNames",
+                                "cond": {
+                                  "$ne": [
+                                    "$$this",
+                                    "alternate_name"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "find"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remove the last keyAltName from an existing data key",
+      "operations": [
+        {
+          "name": "removeKeyAltName",
+          "object": "clientEncryption0",
+          "arguments": {
+            "id": {
+              "$binary": {
+                "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltName": "alternate_name"
+          },
+          "expectResult": {
+            "_id": {
+              "$binary": {
+                "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltNames": [
+              "alternate_name",
+              "local_key"
+            ],
+            "keyMaterial": {
+              "$binary": {
+                "base64": "ABKBldDEoDW323yejOnIRk6YQmlD9d3eQthd16scKL75nz2LjNL9fgPDZWrFFOlqlhMCFaSrNJfGrFUjYk5JFDO7soG5Syb50k1niJoKg4ilsj0L4mpimFUtTpOr2nzZOeQtvAksEXc7gsFgq8gV7t/U3lsaXPY7I0t42DfSE8EGlPdxRjFdHnxh+OR8h7U9b8Qs5K5UuhgyeyxaBZ1Hgw==",
+                "subType": "00"
+              }
+            },
+            "creationDate": {
+              "$date": {
+                "$numberLong": "1641024000000"
+              }
+            },
+            "updateDate": {
+              "$date": {
+                "$numberLong": "1641024000000"
+              }
+            },
+            "status": 1,
+            "masterKey": {
+              "provider": "local"
+            }
+          }
+        },
+        {
+          "name": "removeKeyAltName",
+          "object": "clientEncryption0",
+          "arguments": {
+            "id": {
+              "$binary": {
+                "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltName": "local_key"
+          },
+          "expectResult": {
+            "_id": {
+              "$binary": {
+                "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                "subType": "04"
+              }
+            },
+            "keyAltNames": [
+              "local_key"
+            ],
+            "keyMaterial": {
+              "$$type": "binData"
+            },
+            "creationDate": {
+              "$$type": "date"
+            },
+            "updateDate": {
+              "$$type": "date"
+            },
+            "status": 1,
+            "masterKey": {
+              "provider": "local"
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "findAndModify": "datakeys",
+                  "query": {
+                    "_id": {
+                      "$binary": {
+                        "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                        "subType": "04"
+                      }
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "keyAltNames": {
+                          "$cond": [
+                            {
+                              "$eq": [
+                                "$keyAltNames",
+                                [
+                                  "alternate_name"
+                                ]
+                              ]
+                            },
+                            "$$REMOVE",
+                            {
+                              "$filter": {
+                                "input": "$keyAltNames",
+                                "cond": {
+                                  "$ne": [
+                                    "$$this",
+                                    "alternate_name"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "findAndModify": "datakeys",
+                  "query": {
+                    "_id": {
+                      "$binary": {
+                        "base64": "bG9jYWxrZXlsb2NhbGtleQ==",
+                        "subType": "04"
+                      }
+                    }
+                  },
+                  "update": [
+                    {
+                      "$set": {
+                        "keyAltNames": {
+                          "$cond": [
+                            {
+                              "$eq": [
+                                "$keyAltNames",
+                                [
+                                  "local_key"
+                                ]
+                              ]
+                            },
+                            "$$REMOVE",
+                            {
+                              "$filter": {
+                                "input": "$keyAltNames",
+                                "cond": {
+                                  "$ne": [
+                                    "$$this",
+                                    "local_key"
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
