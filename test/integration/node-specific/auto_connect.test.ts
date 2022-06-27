@@ -18,69 +18,16 @@ import { ClientSession } from '../../../src/sessions';
 import { sleep } from '../../tools/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-// const printAPITests = () => {
-//   const api = JSON.parse(
-//     readFileSync(path.resolve(__dirname, '../../../etc/api.json'), { encoding: 'utf8' })
-//   );
-//   const packageMembers = api.members[0].members;
-//   const asyncAPIs = new Map(
-//     packageMembers
-//       .filter(({ kind }) => kind === 'Class')
-//       .filter(({ releaseTag }) => releaseTag === 'Public')
-//       .map(({ name, members }) => [
-//         name,
-//         Array.from(
-//           members
-//             .filter(({ kind }) => kind === 'Method')
-//             .filter(({ releaseTag }) => releaseTag === 'Public')
-//             .reduce((map, method) => {
-//               if (map.has(method.name)) {
-//                 const overloads = map.get(method.name);
-//                 overloads.push(method);
-//               } else {
-//                 map.set(method.name, [method]);
-//               }
-//               return map;
-//             }, new Map<string, { name: string; excerptTokens: any[] }[]>())
-//             .entries()
-//         ).filter(([_, tokens]) => {
-//           const excerptTokens = tokens.flatMap(({ excerptTokens }) => excerptTokens);
-//           const asyncMethod = excerptTokens.filter(({ text }) => text === 'Promise').length > 0;
-//           return !asyncMethod;
-//         })
-//       ])
-//       .filter(([_, methods]) => methods.length > 0)
-//   );
 
-//   const apis: Array<[string, string[]]> = Array.from(asyncAPIs.entries()) as any;
-//   // console.log(inspect(apis, { depth: Infinity }));
-//   // apis.sort(([k0], [k1]) => k0.localeCompare(k1));
-//   for (const [owner, methods] of apis)
-//     for (const [method] of methods) {
-//       console.log(`${owner}.${method}`);
-//     }
-//   // for (const [owner, methods] of apis) {
-//   //   console.log(`\ncontext(\`class ${owner}\`, () => {`);
-//   //   for (const method of methods) {
-//   //     console.log(`\n  it(\`${method}()\`, () => {
-//   //   expect(2).to.equal(3);
-//   // });`);
-//   //   }
-//   //   console.log('});');
-//   // }
-// };
-
-// printAPITests();
-// process.exit(0);
 
 describe('MongoClient auto connect', () => {
   let client: MongoClient;
 
-  beforeEach(async function () {
+  beforeEach('create client', async function () {
     client = this.configuration.newClient();
   });
 
-  afterEach(async function () {
+  afterEach('cleanup client', async function () {
     await client.close();
   });
 
