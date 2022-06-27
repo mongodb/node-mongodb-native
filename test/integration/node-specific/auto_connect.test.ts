@@ -18,45 +18,60 @@ import { ClientSession } from '../../../src/sessions';
 import { sleep } from '../../tools/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const printAPITests = () => {
-  const api = JSON.parse(
-    readFileSync(path.resolve(__dirname, '../../../etc/api.json'), { encoding: 'utf8' })
-  );
-  const packageMembers = api.members[0].members;
-  const asyncAPIs = new Map(
-    packageMembers
-      .filter(({ kind }) => kind === 'Class')
-      .filter(({ releaseTag }) => releaseTag === 'Public')
-      .map(({ name, members }) => [
-        name,
-        Array.from(
-          new Set(
-            members
-              .filter(({ kind }) => kind === 'Method')
-              .filter(({ releaseTag }) => releaseTag === 'Public')
-              .filter(
-                ({ excerptTokens }) =>
-                  excerptTokens.filter(({ text }) => text === 'Promise').length > 0
-              )
-              .map(({ name }) => name)
-          )
-        )
-      ])
-      .filter(([, methods]) => methods.length > 0)
-  );
+// const printAPITests = () => {
+//   const api = JSON.parse(
+//     readFileSync(path.resolve(__dirname, '../../../etc/api.json'), { encoding: 'utf8' })
+//   );
+//   const packageMembers = api.members[0].members;
+//   const asyncAPIs = new Map(
+//     packageMembers
+//       .filter(({ kind }) => kind === 'Class')
+//       .filter(({ releaseTag }) => releaseTag === 'Public')
+//       .map(({ name, members }) => [
+//         name,
+//         Array.from(
+//           members
+//             .filter(({ kind }) => kind === 'Method')
+//             .filter(({ releaseTag }) => releaseTag === 'Public')
+//             .reduce((map, method) => {
+//               if (map.has(method.name)) {
+//                 const overloads = map.get(method.name);
+//                 overloads.push(method);
+//               } else {
+//                 map.set(method.name, [method]);
+//               }
+//               return map;
+//             }, new Map<string, { name: string; excerptTokens: any[] }[]>())
+//             .entries()
+//         ).filter(([_, tokens]) => {
+//           const excerptTokens = tokens.flatMap(({ excerptTokens }) => excerptTokens);
+//           const asyncMethod = excerptTokens.filter(({ text }) => text === 'Promise').length > 0;
+//           return !asyncMethod;
+//         })
+//       ])
+//       .filter(([_, methods]) => methods.length > 0)
+//   );
 
-  const apis: Array<[string, string[]]> = Array.from(asyncAPIs.entries()) as any;
-  apis.sort(([k0], [k1]) => k0.localeCompare(k1));
-  for (const [owner, methods] of apis) {
-    console.log(`\ncontext(\`class ${owner}\`, () => {`);
-    for (const method of methods) {
-      console.log(`\n  it(\`${method}()\`, () => {
-    expect(2).to.equal(3);
-  });`);
-    }
-    console.log('});');
-  }
-};
+//   const apis: Array<[string, string[]]> = Array.from(asyncAPIs.entries()) as any;
+//   // console.log(inspect(apis, { depth: Infinity }));
+//   // apis.sort(([k0], [k1]) => k0.localeCompare(k1));
+//   for (const [owner, methods] of apis)
+//     for (const [method] of methods) {
+//       console.log(`${owner}.${method}`);
+//     }
+//   // for (const [owner, methods] of apis) {
+//   //   console.log(`\ncontext(\`class ${owner}\`, () => {`);
+//   //   for (const method of methods) {
+//   //     console.log(`\n  it(\`${method}()\`, () => {
+//   //   expect(2).to.equal(3);
+//   // });`);
+//   //   }
+//   //   console.log('});');
+//   // }
+// };
+
+// printAPITests();
+// process.exit(0);
 
 describe('MongoClient auto connect', () => {
   let client: MongoClient;
@@ -178,6 +193,15 @@ describe('MongoClient auto connect', () => {
       await agg.tryNext();
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
+
+    it(`stream()`, async () => {
+      const agg = client.db().collection('test').aggregate(pipeline);
+      const stream = agg.stream();
+      await once(stream, 'readable');
+      await stream.read();
+      stream.destroy();
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+    });
   });
 
   context(`class OrderedBulkOperation`, () => {
@@ -221,6 +245,16 @@ describe('MongoClient auto connect', () => {
     it(`tryNext()`, async () => {
       const cs = client.watch();
       await cs.tryNext();
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+    });
+
+    it.skip(`stream()`, async () => {
+      // TODO: Ask bailey for help
+      const cs = client.watch();
+      const stream = cs.stream();
+      await once(stream, 'readable');
+      await stream.read();
+      stream.destroy();
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
   });
@@ -602,6 +636,15 @@ describe('MongoClient auto connect', () => {
     it(`tryNext()`, async () => {
       const find = client.db().collection('test').find();
       await find.tryNext();
+      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
+    });
+
+    it(`stream()`, async () => {
+      const find = client.db().collection('test').find();
+      const stream = find.stream();
+      await once(stream, 'readable');
+      await stream.read();
+      stream.destroy();
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
   });
