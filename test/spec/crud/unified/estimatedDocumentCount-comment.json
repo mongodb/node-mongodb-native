@@ -1,0 +1,170 @@
+{
+  "description": "estimatedDocumentCount-comment",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "edc-comment-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "edc-comment-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "estimatedDocumentCount with document comment",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.14"
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "arguments": {
+            "comment": {
+              "key": "value"
+            }
+          },
+          "expectResult": 3
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll0",
+                  "comment": {
+                    "key": "value"
+                  }
+                },
+                "commandName": "count",
+                "databaseName": "edc-comment-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount with string comment",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "arguments": {
+            "comment": "comment"
+          },
+          "expectResult": 3
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll0",
+                  "comment": "comment"
+                },
+                "commandName": "count",
+                "databaseName": "edc-comment-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "estimatedDocumentCount with document comment - pre 4.4.14, server error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "maxServerVersion": "4.4.13",
+          "topologies": [
+            "single",
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection0",
+          "arguments": {
+            "comment": {
+              "key": "value"
+            }
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "count": "coll0",
+                  "comment": {
+                    "key": "value"
+                  }
+                },
+                "commandName": "count",
+                "databaseName": "edc-comment-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
