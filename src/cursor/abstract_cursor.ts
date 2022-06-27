@@ -67,7 +67,7 @@ export interface CursorCloseOptions {
 /** @public */
 export interface CursorStreamOptions {
   /** A transformation method applied to each document emitted by the stream */
-  transform?(doc: Document): Document;
+  transform?(this: void, doc: Document): Document;
 }
 
 /** @public */
@@ -883,7 +883,10 @@ class ReadableCursorStream extends Readable {
         //       a client during iteration. Alternatively, we could do the "right" thing and
         //       propagate the error message by removing this special case.
         if (err.message.match(/server is closed/)) {
-          this._cursor.close();
+          this._cursor.close().then(
+            () => null,
+            () => null
+          ); // TODO(NODE-XXXX): is this correct?
           return this.push(null);
         }
 
@@ -902,7 +905,10 @@ class ReadableCursorStream extends Readable {
       if (result == null) {
         this.push(null);
       } else if (this.destroyed) {
-        this._cursor.close();
+        this._cursor.close().then(
+          () => null,
+          () => null
+        ); // TODO(NODE-XXXX): is this correct?
       } else {
         if (this.push(result)) {
           return this._readNext();

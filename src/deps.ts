@@ -35,13 +35,12 @@ try {
 } catch {} // eslint-disable-line
 
 export interface KerberosClient {
-  step: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
-  wrap: (
-    challenge: string,
-    options?: { user: string },
-    callback?: Callback<string>
-  ) => Promise<string> | void;
-  unwrap: (challenge: string, callback?: Callback<string>) => Promise<string> | void;
+  step(challenge: string): Promise<string>;
+  step(challenge: string, callback: Callback<string>): void;
+  wrap(challenge: string, options: { user: string }): Promise<string>;
+  wrap(challenge: string, options: { user: string }, callback: Callback<string>): void;
+  unwrap(challenge: string): Promise<string>;
+  unwrap(challenge: string, callback: Callback<string>): void;
 }
 
 type ZStandardLib = {
@@ -80,11 +79,7 @@ type SnappyLib = {
    * @param callback - ONLY USED IN SNAPPY 6.x
    */
   compress(buf: Buffer): Promise<Buffer>;
-  compress(buf: Buffer, callback: (error?: Error, buffer?: Buffer) => void): Promise<Buffer> | void;
-  compress(
-    buf: Buffer,
-    callback?: (error?: Error, buffer?: Buffer) => void
-  ): Promise<Buffer> | void;
+  compress(buf: Buffer, callback: (error?: Error, buffer?: Buffer) => void): void;
 
   /**
    * - Snappy 6.x takes a callback and returns void
@@ -99,12 +94,7 @@ type SnappyLib = {
     buf: Buffer,
     opt: { asBuffer: true },
     callback: (error?: Error, buffer?: Buffer) => void
-  ): Promise<Buffer> | void;
-  uncompress(
-    buf: Buffer,
-    opt: { asBuffer: true },
-    callback?: (error?: Error, buffer?: Buffer) => void
-  ): Promise<Buffer> | void;
+  ): void;
 };
 
 export let Snappy: SnappyLib | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
@@ -141,6 +131,7 @@ interface AWS4 {
    * @param credentials - AWS credential details, sessionToken should be omitted entirely if its false-y
    */
   sign(
+    this: void,
     options: {
       path: '/';
       body: string;

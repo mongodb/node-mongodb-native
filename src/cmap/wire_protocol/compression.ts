@@ -52,9 +52,10 @@ export function compress(
       if (Snappy[PKG_VERSION].major <= 6) {
         Snappy.compress(dataToBeCompressed, callback);
       } else {
-        Snappy.compress(dataToBeCompressed)
-          .then(buffer => callback(undefined, buffer))
-          .catch(error => callback(error));
+        Snappy.compress(dataToBeCompressed).then(
+          buffer => callback(undefined, buffer),
+          error => callback(error)
+        );
       }
       break;
     }
@@ -102,9 +103,10 @@ export function decompress(
       if (Snappy[PKG_VERSION].major <= 6) {
         Snappy.uncompress(compressedData, { asBuffer: true }, callback);
       } else {
-        Snappy.uncompress(compressedData, { asBuffer: true })
-          .then(buffer => callback(undefined, buffer))
-          .catch(error => callback(error));
+        Snappy.uncompress(compressedData, { asBuffer: true }).then(
+          buffer => callback(undefined, buffer),
+          error => callback(error)
+        );
       }
       break;
     }

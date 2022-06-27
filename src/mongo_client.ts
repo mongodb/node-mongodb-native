@@ -638,7 +638,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       .then(() => {
         // Do not return the result of callback
       })
-      .finally(() => session.endSession());
+      .finally(() => {
+        session.endSession().then(
+          () => null,
+          () => null
+        );
+      });
   }
 
   /**

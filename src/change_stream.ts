@@ -894,7 +894,10 @@ export class ChangeStream<
 
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
-      this.cursor.close();
+      this.cursor.close().then(
+        () => null,
+        () => null
+      ); // TODO(NODE-XXX): Is this correct?
 
       const topology = getTopology(this.parent);
       topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
@@ -913,6 +916,7 @@ export class ChangeStream<
    *
    * we promisify _processErrorIteratorModeCallback until we have a promisifed version of selectServer.
    */
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   private _processErrorIteratorMode = promisify(this._processErrorIteratorModeCallback);
 
   /** @internal */
@@ -923,7 +927,10 @@ export class ChangeStream<
     }
 
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
-      this.cursor.close();
+      this.cursor.close().then(
+        () => null,
+        () => null
+      ); // TODO(NODE-XXX): Is this correct?;
 
       const topology = getTopology(this.parent);
       topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {

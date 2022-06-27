@@ -163,14 +163,10 @@ export class ReadPreference {
     } else if (!(readPreference instanceof ReadPreference) && typeof readPreference === 'object') {
       const mode = readPreference.mode || readPreference.preference;
       if (mode && typeof mode === 'string') {
-        return new ReadPreference(
-          mode as ReadPreferenceMode,
-          readPreference.tags ?? readPreferenceTags,
-          {
-            maxStalenessSeconds: readPreference.maxStalenessSeconds,
-            hedge: options.hedge
-          }
-        );
+        return new ReadPreference(mode, readPreference.tags ?? readPreferenceTags, {
+          maxStalenessSeconds: readPreference.maxStalenessSeconds,
+          hedge: options.hedge
+        });
       }
     }
 
@@ -193,7 +189,7 @@ export class ReadPreference {
     } else if (r && !(r instanceof ReadPreference) && typeof r === 'object') {
       const mode = r.mode || r.preference;
       if (mode && typeof mode === 'string') {
-        options.readPreference = new ReadPreference(mode as ReadPreferenceMode, r.tags, {
+        options.readPreference = new ReadPreference(mode, r.tags, {
           maxStalenessSeconds: r.maxStalenessSeconds
         });
       }
