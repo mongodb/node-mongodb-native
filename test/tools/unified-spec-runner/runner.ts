@@ -60,14 +60,14 @@ export async function runUnifiedTest(
   ctx: Mocha.Context,
   unifiedSuite: uni.UnifiedSuite,
   test: uni.Test,
-  skipFilter?: (test: uni.Test) => boolean
+  skipFilter?: uni.TestFilter
 ): Promise<void>;
 
 export async function runUnifiedTest(
   ctx: Mocha.Context,
   unifiedSuite: uni.UnifiedSuite,
   test: uni.Test,
-  testsToSkipOrFilter?: string[] | ((test: uni.Test) => boolean)
+  testsToSkipOrFilter?: string[] | uni.TestFilter
 ): Promise<void> {
   // Some basic expectations we can catch early
   expect(test).to.exist;
@@ -77,7 +77,8 @@ export async function runUnifiedTest(
 
   if (Array.isArray(testsToSkipOrFilter)) {
     const testsToSkip = testsToSkipOrFilter;
-    testsToSkipOrFilter = (test: uni.Test) => testsToSkip.includes(test.description);
+    testsToSkipOrFilter = ({ description }) =>
+      testsToSkip.includes(description) ? 'Test was filtered without a skip reason' : null;
   }
 
   const schemaVersion = patchVersion(unifiedSuite.schemaVersion);
@@ -87,6 +88,16 @@ export async function runUnifiedTest(
   // test and MAY use the string value to log a message.
   if (test.skipReason) {
     ctx.skipReason = test.skipReason;
+    ctx.skip();
+  }
+
+  const skipReason = testsToSkipOrFilter?.(test);
+
+  if (typeof skipReason === 'string') {
+    if (skipReason.length === 0) {
+      expect.fail(`Test was skipped with an empty skip reason: ${test.description}`);
+    }
+    ctx.skipReason = skipReason;
     ctx.skip();
   }
 
@@ -279,14 +290,11 @@ export function runUnifiedSuite(specTests: uni.UnifiedSuite[], testsToSkip?: str
  *
  * @param skipFilter - a function that returns true if the test should be skipped
  */
-export function runUnifiedSuite(
-  specTests: uni.UnifiedSuite[],
-  skipFilter?: (test: uni.Test) => boolean
-): void;
+export function runUnifiedSuite(specTests: uni.UnifiedSuite[], skipFilter?: uni.TestFilter): void;
 
 export function runUnifiedSuite(
   specTests: uni.UnifiedSuite[],
-  testsToSkipOrFilter?: string[] | ((test: uni.Test) => boolean)
+  testsToSkipOrFilter?: string[] | uni.TestFilter
 ): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
