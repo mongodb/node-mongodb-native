@@ -17,6 +17,7 @@ import { Topology } from '../../../src/sdam/topology';
 import { ClientSession } from '../../../src/sessions';
 import { sleep } from '../../tools/utils';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const printAPITests = () => {
   const api = JSON.parse(
     readFileSync(path.resolve(__dirname, '../../../etc/api.json'), { encoding: 'utf8' })
@@ -111,7 +112,7 @@ describe('MongoClient auto connect', () => {
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
-    it(`replSetGetStatus()`, async () => {
+    it(`replSetGetStatus()`, { requires: { topology: 'replicaset' } }, async () => {
       const admin = client.db().admin();
       await admin.replSetGetStatus();
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
@@ -203,7 +204,7 @@ describe('MongoClient auto connect', () => {
     }).skipReason = 'TODO(NODE-4263): legacy bulk operations should auto connect';
   });
 
-  context(`class ChangeStream`, () => {
+  context(`class ChangeStream`, { requires: { topology: '!single' } }, () => {
     it(`close()`, async () => {
       const cs = client.watch();
       await cs.close().catch(error => {
