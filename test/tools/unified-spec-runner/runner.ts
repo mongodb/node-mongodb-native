@@ -39,14 +39,46 @@ async function terminateOpenTransactions(client: MongoClient) {
 export async function runUnifiedTest(
   ctx: Mocha.Context,
   unifiedSuite: uni.UnifiedSuite,
+  test: uni.Test
+): Promise<void>;
+
+/**
+ * @deprecated use the overload that provides a function filter instead
+ */
+export async function runUnifiedTest(
+  ctx: Mocha.Context,
+  unifiedSuite: uni.UnifiedSuite,
   test: uni.Test,
   testsToSkip?: string[]
+): Promise<void>;
+
+/**
+ *
+ * @param skipFilter - a function that returns true if the test should be skipped
+ */
+export async function runUnifiedTest(
+  ctx: Mocha.Context,
+  unifiedSuite: uni.UnifiedSuite,
+  test: uni.Test,
+  skipFilter?: (test: uni.Test) => boolean
+): Promise<void>;
+
+export async function runUnifiedTest(
+  ctx: Mocha.Context,
+  unifiedSuite: uni.UnifiedSuite,
+  test: uni.Test,
+  testsToSkipOrFilter?: string[] | ((test: uni.Test) => boolean)
 ): Promise<void> {
   // Some basic expectations we can catch early
   expect(test).to.exist;
   expect(unifiedSuite).to.exist;
   expect(ctx).to.exist;
   expect(ctx.configuration).to.exist;
+
+  if (Array.isArray(testsToSkipOrFilter)) {
+    const testsToSkip = testsToSkipOrFilter;
+    testsToSkipOrFilter = (test: uni.Test) => testsToSkip.includes(test.description);
+  }
 
   const schemaVersion = patchVersion(unifiedSuite.schemaVersion);
   expect(semverSatisfies(schemaVersion, uni.SupportedVersion)).to.be.true;
@@ -58,7 +90,7 @@ export async function runUnifiedTest(
     ctx.skip();
   }
 
-  if (testsToSkip?.includes(test.description)) {
+  if (testsToSkipOrFilter?.(test)) {
     ctx.skip();
   }
 
@@ -236,12 +268,35 @@ export async function runUnifiedTest(
   }
 }
 
-export function runUnifiedSuite(specTests: uni.UnifiedSuite[], testsToSkip?: string[]): void {
+export function runUnifiedSuite(specTests: uni.UnifiedSuite[]): void;
+
+/**
+ * @deprecated use the overload that provides a function filter instead
+ */
+export function runUnifiedSuite(specTests: uni.UnifiedSuite[], testsToSkip?: string[]): void;
+
+/**
+ *
+ * @param skipFilter - a function that returns true if the test should be skipped
+ */
+export function runUnifiedSuite(
+  specTests: uni.UnifiedSuite[],
+  skipFilter?: (test: uni.Test) => boolean
+): void;
+
+export function runUnifiedSuite(
+  specTests: uni.UnifiedSuite[],
+  testsToSkipOrFilter?: string[] | ((test: uni.Test) => boolean)
+): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const test of unifiedSuite.tests) {
         it(String(test.description), async function () {
-          await runUnifiedTest(this, unifiedSuite, test, testsToSkip);
+          if (Array.isArray(testsToSkipOrFilter)) {
+            await runUnifiedTest(this, unifiedSuite, test, testsToSkipOrFilter);
+          } else {
+            await runUnifiedTest(this, unifiedSuite, test, testsToSkipOrFilter);
+          }
         });
       }
     });
