@@ -332,6 +332,10 @@ The following steps will walk you through how to run the tests for CSFLE.
    | `AWS_REGION`            | The AWS region where the KMS resides (e.g., `us-east-1`)                                    |
    | `AWS_CMK_ID`            | The Customer Master Key for the KMS                                                         |
    | `CSFLE_KMS_PROVIDERS`   | The raw EJSON description of the KMS providers. An example of the format is provided below. |
+   | KMIP_TLS_CA_FILE        | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem
+   |
+   | KMIP_TLS_CERT_FILE      | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem
+
 
    The value of the `CSFLE_KMS_PROVIDERS` variable will have the following format:
 
@@ -357,6 +361,10 @@ The following steps will walk you through how to run the tests for CSFLE.
       }
    }
    ```
+1. Start the KMIP servers:
+
+  `DRIVERS_TOOLS="/path/to/mongodb-labs/drivers-evergreen-tools" .evergreen/run-kms-servers.sh`
+
 
 1. Run the functional tests:
 
