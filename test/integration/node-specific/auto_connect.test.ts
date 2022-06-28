@@ -1,7 +1,5 @@
 import { expect } from 'chai';
 import { once } from 'events';
-import { readFileSync } from 'fs';
-import * as path from 'path';
 import { Readable } from 'stream';
 
 import {
@@ -16,9 +14,6 @@ import {
 import { Topology } from '../../../src/sdam/topology';
 import { ClientSession } from '../../../src/sessions';
 import { sleep } from '../../tools/utils';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-
 
 describe('MongoClient auto connect', () => {
   let client: MongoClient;

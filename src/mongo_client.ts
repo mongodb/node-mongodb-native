@@ -8,21 +8,20 @@ import type { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import { parseOptions } from './connection_string';
-import type { MONGO_CLIENT_EVENTS } from './constants';
+import { parseOptions, resolveSRVRecord } from './connection_string';
+import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import type { Logger, LoggerLevel } from './logger';
 import { TypedEventEmitter } from './mongo_types';
-import { connect } from './operations/connect';
 import { PromiseProvider } from './promise_provider';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
 import type { SrvPoller } from './sdam/srv_polling';
-import type { Topology, TopologyEvents } from './sdam/topology';
+import { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
 import {
   Callback,
@@ -439,10 +438,85 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       throw new MongoInvalidArgumentError('Method `connect` only accepts a callback');
     }
 
-    return maybePromise(callback, cb => {
-      connect(this, this[kOptions], err => {
-        if (err) return cb(err);
-        cb(undefined, this);
+    return maybePromise(callback, callback => {
+      const createTopology = (
+        mongoClient: MongoClient,
+        options: MongoOptions,
+        callback: Callback<Topology>
+      ) => {
+        // Create the topology
+        const topology = new Topology(options.hosts, options);
+        // Events can be emitted before initialization is complete so we have to
+        // save the reference to the topology on the client ASAP if the event handlers need to access it
+        this.topology = topology;
+        topology.client = mongoClient;
+
+        topology.once(Topology.OPEN, () => mongoClient.emit('open', mongoClient));
+
+        for (const event of MONGO_CLIENT_EVENTS) {
+          topology.on(event, (...args: any[]) => mongoClient.emit(event, ...(args as any)));
+        }
+
+        // initialize CSFLE if requested
+        if (mongoClient.autoEncrypter) {
+          return mongoClient.autoEncrypter.init(err => {
+            if (err) {
+              return callback(err);
+            }
+
+            topology.connect(options, err => {
+              if (err) {
+                topology.close({ force: true });
+                return callback(err);
+              }
+
+              options.encrypter.connectInternalClient(error => {
+                if (error) return callback(error);
+
+                callback(undefined, topology);
+              });
+            });
+          });
+        }
+
+        // otherwise connect normally
+        topology.connect(options, err => {
+          if (err) {
+            topology.close({ force: true });
+            return callback(err);
+          }
+
+          callback(undefined, topology);
+          return;
+        });
+      };
+
+      if (!callback) {
+        throw new MongoInvalidArgumentError('Callback function must be provided');
+      }
+
+      // If a connection already been established, we can terminate early
+      if (this.topology && this.topology.isConnected()) {
+        return callback(undefined, this);
+      }
+
+      if (typeof this[kOptions].srvHost === 'string') {
+        return resolveSRVRecord(this[kOptions], (err, hosts) => {
+          if (err || !hosts) return callback(err);
+          for (const [index, host] of hosts.entries()) {
+            this[kOptions].hosts[index] = host;
+          }
+
+          return createTopology(this, this[kOptions], error => {
+            if (error) return callback(error);
+            callback(undefined, this);
+          });
+        });
+      }
+
+      return createTopology(this, this[kOptions], error => {
+        if (error) return callback(error);
+        callback(undefined, this);
       });
     });
   }
