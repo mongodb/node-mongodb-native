@@ -19,7 +19,7 @@ const filter = ({ description }) => {
       'stale errors are ignored'
     ].includes(description)
   ) {
-    // TODO(DRIVERS-1847): The following three tests are skipped pending a decision made on DRIVERS-1847,
+    // TODO(DRIVERS-1847): The above three tests are skipped pending a decision made in DRIVERS-1847
     // since pinning the connection on any getMore error is very awkward in node and likely results
     // in sub-optimal pinning.
     return 'TODO(DRIVERS-1847): Skipped pending a decision made on DRIVERS-1847'
