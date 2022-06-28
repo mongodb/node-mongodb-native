@@ -1,11 +1,21 @@
 'use strict';
-const { setupDatabase, withClient } = require('../shared');
+const { setupDatabase } = require('../shared');
 const { MongoServerError } = require('../../../src');
 const chai = require('chai');
 
 const expect = chai.expect;
 
 describe('Explain', function () {
+  let client;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
+  });
+
   before(function () {
     return setupDatabase(this.configuration);
   });
@@ -16,7 +26,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithDeleteOne');
       var collection = db.collection('test');
 
@@ -31,7 +41,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor boolean explain with delete many', {
@@ -40,7 +50,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithDeleteMany');
       var collection = db.collection('test');
 
@@ -55,7 +65,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor boolean explain with update one', {
@@ -64,7 +74,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithUpdateOne');
       var collection = db.collection('test');
 
@@ -84,7 +94,7 @@ describe('Explain', function () {
           }
         );
       });
-    })
+    }
   });
 
   it('should honor boolean explain with update many', {
@@ -93,7 +103,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithUpdateMany');
       var collection = db.collection('test');
 
@@ -113,7 +123,7 @@ describe('Explain', function () {
           }
         );
       });
-    })
+    }
   });
 
   it('should honor boolean explain with remove one', {
@@ -122,7 +132,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithRemoveOne');
       var collection = db.collection('test');
 
@@ -137,7 +147,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor boolean explain with remove many', {
@@ -146,7 +156,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithRemoveMany');
       var collection = db.collection('test');
 
@@ -161,7 +171,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor boolean explain with distinct', {
@@ -170,7 +180,7 @@ describe('Explain', function () {
         mongodb: '>=3.2'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithDistinct');
       var collection = db.collection('test');
 
@@ -185,7 +195,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor boolean explain with findOneAndModify', {
@@ -194,7 +204,7 @@ describe('Explain', function () {
         mongodb: '>=3.2'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithFindOneAndModify');
       var collection = db.collection('test');
 
@@ -209,7 +219,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor boolean explain with mapReduce', {
@@ -218,7 +228,7 @@ describe('Explain', function () {
         mongodb: '>=4.4'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorBooleanExplainWithMapReduce');
       var collection = db.collection('test');
 
@@ -241,7 +251,7 @@ describe('Explain', function () {
           }
         );
       });
-    })
+    }
   });
 
   it('should use allPlansExecution as true explain verbosity', {
@@ -250,7 +260,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldUseAllPlansExecutionAsTrueExplainVerbosity');
       var collection = db.collection('test');
 
@@ -267,7 +277,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should use queryPlanner as false explain verbosity', {
@@ -276,7 +286,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldUseQueryPlannerAsFalseExplainVerbosity');
       var collection = db.collection('test');
 
@@ -293,7 +303,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor queryPlanner string explain', {
@@ -302,7 +312,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorQueryPlannerStringExplain');
       var collection = db.collection('test');
 
@@ -319,7 +329,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor executionStats string explain', {
@@ -328,7 +338,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorExecutionStatsStringExplain');
       var collection = db.collection('test');
 
@@ -346,7 +356,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor allPlansExecution string explain', {
@@ -355,7 +365,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorAllPlansStringExplain');
       var collection = db.collection('test');
 
@@ -372,7 +382,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor string explain with distinct', {
@@ -381,7 +391,7 @@ describe('Explain', function () {
         mongodb: '>=3.2'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorStringExplainWithDistinct');
       var collection = db.collection('test');
 
@@ -397,7 +407,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor string explain with findOneAndModify', {
@@ -406,7 +416,7 @@ describe('Explain', function () {
         mongodb: '>=3.2'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorStringExplainWithFindOneAndModify');
       var collection = db.collection('test');
 
@@ -426,7 +436,7 @@ describe('Explain', function () {
           }
         );
       });
-    })
+    }
   });
 
   it('should honor string explain with mapReduce', {
@@ -435,7 +445,7 @@ describe('Explain', function () {
         mongodb: '>=4.4'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       var db = client.db('shouldHonorStringExplainWithMapReduce');
       var collection = db.collection('test');
 
@@ -458,7 +468,7 @@ describe('Explain', function () {
           }
         );
       });
-    })
+    }
   });
 
   it('should honor boolean explain with find', {
@@ -467,7 +477,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorBooleanExplainWithFind');
       const collection = db.collection('test');
 
@@ -483,7 +493,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor string explain with find', {
@@ -492,7 +502,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorStringExplainWithFind');
       const collection = db.collection('test');
 
@@ -509,7 +519,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor boolean explain with findOne', {
@@ -518,7 +528,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorBooleanExplainWithFindOne');
       const collection = db.collection('test');
 
@@ -533,7 +543,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor string explain with findOne', {
@@ -542,7 +552,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorStringExplainWithFindOne');
       const collection = db.collection('test');
 
@@ -558,7 +568,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor boolean explain specified on cursor with find', {
@@ -567,7 +577,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorBooleanExplainSpecifiedOnCursor');
       const collection = db.collection('test');
 
@@ -582,7 +592,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor string explain specified on cursor with find', {
@@ -591,7 +601,7 @@ describe('Explain', function () {
         mongodb: '>=3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorStringExplainSpecifiedOnCursor');
       const collection = db.collection('test');
 
@@ -607,7 +617,7 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
   it('should honor legacy explain with find', {
@@ -616,7 +626,7 @@ describe('Explain', function () {
         mongodb: '<3.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorLegacyExplainWithFind');
       const collection = db.collection('test');
 
@@ -630,30 +640,27 @@ describe('Explain', function () {
           done();
         });
       });
-    })
+    }
   });
 
-  it(
-    'should honor boolean explain with aggregate',
-    withClient(function (client, done) {
-      const db = client.db('shouldHonorBooleanExplainWithAggregate');
-      const collection = db.collection('test');
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
+  it('should honor boolean explain with aggregate', function (done) {
+    const db = client.db('shouldHonorBooleanExplainWithAggregate');
+    const collection = db.collection('test');
+    collection.insertOne({ a: 1 }, (err, res) => {
+      expect(err).to.not.exist;
+      expect(res).to.exist;
 
-        collection
-          .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], { explain: true })
-          .toArray((err, docs) => {
-            expect(err).to.not.exist;
-            const result = JSON.stringify(docs[0]);
-            expect(result).to.include('"queryPlanner"');
-            expect(result).to.include('"executionStats"');
-            done();
-          });
-      });
-    })
-  );
+      collection
+        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], { explain: true })
+        .toArray((err, docs) => {
+          expect(err).to.not.exist;
+          const result = JSON.stringify(docs[0]);
+          expect(result).to.include('"queryPlanner"');
+          expect(result).to.include('"executionStats"');
+          done();
+        });
+    });
+  });
 
   it('should honor string explain with aggregate', {
     metadata: {
@@ -661,7 +668,7 @@ describe('Explain', function () {
         mongodb: '>=3.6.0'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorStringExplainWithAggregate');
       const collection = db.collection('test');
 
@@ -681,31 +688,28 @@ describe('Explain', function () {
             done();
           });
       });
-    })
+    }
   });
 
-  it(
-    'should honor boolean explain specified on cursor with aggregate',
-    withClient(function (client, done) {
-      const db = client.db('shouldHonorBooleanExplainSpecifiedOnCursor');
-      const collection = db.collection('test');
+  it('should honor boolean explain specified on cursor with aggregate', function (done) {
+    const db = client.db('shouldHonorBooleanExplainSpecifiedOnCursor');
+    const collection = db.collection('test');
 
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
+    collection.insertOne({ a: 1 }, (err, res) => {
+      expect(err).to.not.exist;
+      expect(res).to.exist;
 
-        collection
-          .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
-          .explain(false, (err, res) => {
-            expect(err).to.not.exist;
-            const result = JSON.stringify(res);
-            expect(result).to.include('"queryPlanner"');
-            expect(result).not.to.include('"executionStats"');
-            done();
-          });
-      });
-    })
-  );
+      collection
+        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
+        .explain(false, (err, res) => {
+          expect(err).to.not.exist;
+          const result = JSON.stringify(res);
+          expect(result).to.include('"queryPlanner"');
+          expect(result).not.to.include('"executionStats"');
+          done();
+        });
+    });
+  });
 
   it('should honor string explain specified on cursor with aggregate', {
     metadata: {
@@ -713,7 +717,7 @@ describe('Explain', function () {
         mongodb: '>=3.6'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldHonorStringExplainSpecifiedOnCursor');
       const collection = db.collection('test');
 
@@ -732,31 +736,28 @@ describe('Explain', function () {
             done();
           });
       });
-    })
+    }
   });
 
-  it(
-    'should honor legacy explain with aggregate',
-    withClient(function (client, done) {
-      const db = client.db('shouldHonorLegacyExplainWithAggregate');
-      const collection = db.collection('test');
+  it('should honor legacy explain with aggregate', function (done) {
+    const db = client.db('shouldHonorLegacyExplainWithAggregate');
+    const collection = db.collection('test');
 
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
+    collection.insertOne({ a: 1 }, (err, res) => {
+      expect(err).to.not.exist;
+      expect(res).to.exist;
 
-        collection
-          .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
-          .explain((err, res) => {
-            expect(err).to.not.exist;
-            const result = JSON.stringify(res);
-            expect(result).to.include('"queryPlanner"');
-            expect(result).to.include('"executionStats"');
-            done();
-          });
-      });
-    })
-  );
+      collection
+        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
+        .explain((err, res) => {
+          expect(err).to.not.exist;
+          const result = JSON.stringify(res);
+          expect(result).to.include('"queryPlanner"');
+          expect(result).to.include('"executionStats"');
+          done();
+        });
+    });
+  });
 
   it('should throw a catchable error with invalid explain string (promise)', {
     metadata: {
@@ -764,7 +765,7 @@ describe('Explain', function () {
         mongodb: '>=3.4'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldThrowCatchableError');
       const collection = db.collection('test');
       collection
@@ -776,7 +777,7 @@ describe('Explain', function () {
           expect(err).to.be.instanceOf(MongoServerError);
           done();
         });
-    })
+    }
   });
 
   it('should throw a catchable error with invalid explain string (callback)', {
@@ -785,7 +786,7 @@ describe('Explain', function () {
         mongodb: '>=3.4'
       }
     },
-    test: withClient(function (client, done) {
+    test: function (done) {
       const db = client.db('shouldThrowCatchableError');
       const collection = db.collection('test');
       collection.find({ a: 1 }).explain('invalidExplain', (err, result) => {
@@ -794,6 +795,6 @@ describe('Explain', function () {
         expect(err).to.be.instanceOf(MongoServerError);
         done();
       });
-    })
+    }
   });
 });

@@ -30,7 +30,6 @@ describe('listDatabases()', function () {
 
     beforeEach(async function () {
       adminClient = this.configuration.newClient();
-      await adminClient.connect();
 
       await adminClient
         .db(mockAuthorizedDb)
@@ -42,7 +41,6 @@ describe('listDatabases()', function () {
       authorizedClient = this.configuration.newClient({
         auth: { username: username, password: password }
       });
-      await authorizedClient.connect();
     });
 
     afterEach(async function () {

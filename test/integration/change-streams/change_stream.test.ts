@@ -77,8 +77,8 @@ describe('Change Streams', function () {
   context('ChangeStreamCursor options', function () {
     let client, db, collection;
 
-    beforeEach(async function () {
-      client = await this.configuration.newClient().connect();
+    beforeEach(function () {
+      client = this.configuration.newClient();
       db = client.db('db');
       collection = db.collection('collection');
     });

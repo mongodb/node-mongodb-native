@@ -1,72 +1,39 @@
 'use strict';
 
 const { expect } = require('chai');
-const { withMonitoredClient } = require('../shared');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 const mock = require('../../tools/mongodb-mock/index');
 const { MongoClient } = require('../../../src');
 
 describe('Write Concern', function () {
-  it(
-    'should respect writeConcern from uri',
-    withMonitoredClient('insert', { queryOptions: { w: 0 } }, function (client, events, done) {
-      expect(client.writeConcern).to.eql({ w: 0 });
-      client
-        .db('test')
-        .collection('test')
-        .insertOne({ a: 1 }, (err, result) => {
-          expect(err).to.not.exist;
-          expect(result).to.exist;
-          expect(events).to.be.an('array').with.lengthOf(1);
-          expect(events[0]).to.containSubset({
-            commandName: 'insert',
-            command: {
-              writeConcern: { w: 0 }
-            }
-          });
-          done();
-        });
-    })
-  );
-
-  // TODO: once `read-write-concern/connection-string` spec tests are implemented these can likely be removed
-  describe('test journal connection string option', function () {
-    function journalOptionTest(client, events, done) {
-      expect(client).to.have.nested.property('s.options.writeConcern');
-      expect(client.s.options.writeConcern).to.satisfy(wc => wc.j || wc.journal);
-      client
-        .db('test')
-        .collection('test')
-        .insertOne({ a: 1 }, (err, result) => {
-          expect(err).to.not.exist;
-          expect(result).to.exist;
-          expect(events).to.be.an('array').with.lengthOf(1);
-          expect(events[0]).to.containSubset({
-            commandName: 'insert',
-            command: {
-              writeConcern: { j: true }
-            }
-          });
-          done();
-        });
-    }
-
-    // baseline to confirm client option is working
-    it(
-      'should set write concern with j: true client option',
-      withMonitoredClient(
-        'insert',
-        { clientOptions: { writeConcern: { j: true } } },
-        journalOptionTest
-      )
+  it('should respect writeConcern from uri', function (done) {
+    const client = this.configuration.newClient(
+      `${this.configuration.url()}&w=0&monitorCommands=true`
     );
+    const events = [];
+    client.on('commandStarted', event => {
+      if (event.commandName === 'insert') {
+        events.push(event);
+      }
+    });
 
-    // ensure query option in connection string passes through
-    it(
-      'should set write concern with journal=true connection string option',
-      withMonitoredClient('insert', { queryOptions: { journal: true } }, journalOptionTest)
-    );
+    expect(client.writeConcern).to.eql({ w: 0 });
+    client
+      .db('test')
+      .collection('test')
+      .insertOne({ a: 1 }, (err, result) => {
+        expect(err).to.not.exist;
+        expect(result).to.exist;
+        expect(events).to.be.an('array').with.lengthOf(1);
+        expect(events[0]).to.containSubset({
+          commandName: 'insert',
+          command: {
+            writeConcern: { w: 0 }
+          }
+        });
+        client.close(done);
+      });
   });
 
   describe('mock server write concern test', () => {

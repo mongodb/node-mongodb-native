@@ -17,7 +17,6 @@ describe('listDatabases() spec prose', function () {
 
   beforeEach(async function () {
     client = this.configuration.newClient();
-    await client.connect();
 
     const dbInfoFromCommand = await client.db('admin').command({ listDatabases: 1 });
     const databasesToDrop = dbInfoFromCommand.databases

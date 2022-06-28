@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 
+import { TopologyType } from '../../../src';
 import { MongoClient, MongoClientOptions } from '../../../src/mongo_client';
 import { getTopology } from '../../../src/utils';
 
@@ -28,5 +29,37 @@ describe('TopologyDescription (integration tests)', function () {
         expect(topologyDescription).to.have.ownProperty('localThresholdMS').to.equal(30);
       });
     });
+  });
+
+  context('topology types', function () {
+    let client: MongoClient;
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    const topologyTypesMap = new Map<TopologyTypeRequirement, TopologyType>([
+      ['single', TopologyType.Single],
+      ['replicaset', TopologyType.ReplicaSetWithPrimary],
+      ['sharded', TopologyType.Sharded],
+      ['load-balanced', TopologyType.LoadBalanced]
+      // Intentionally omitted ReplicaSetNoPrimary & Unknown
+    ]);
+
+    for (const [filterType, driverType] of topologyTypesMap) {
+      it(
+        `when running against ${filterType} driver should declare ${driverType} topology type`,
+        { requires: { topology: filterType } },
+        async () => {
+          await client.db().command({ ping: 1 });
+          expect(client.topology).to.exist;
+          expect(client.topology.description).to.exist;
+          expect(client.topology.description).to.have.property('type', driverType);
+        }
+      );
+    }
   });
 });

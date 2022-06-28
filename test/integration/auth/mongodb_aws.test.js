@@ -15,37 +15,28 @@ describe('MONGODB-AWS', function () {
     }
   });
 
-  it('should not authorize when not authenticated', function (done) {
-    const config = this.configuration;
-    const url = removeAuthFromConnectionString(config.url());
-    const client = config.newClient(url); // strip provided URI of credentials
-    client.connect(err => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+  it('should not authorize when not authenticated', async function () {
+    const url = removeAuthFromConnectionString(this.configuration.url());
+    const client = this.configuration.newClient(url); // strip provided URI of credentials
 
-      client.db('aws').command({ count: 'test' }, (err, count) => {
-        expect(err).to.exist;
-        expect(count).to.not.exist;
+    const error = await client
+      .db('aws')
+      .command({ ping: 1 })
+      .catch(error => error);
 
-        done();
-      });
-    });
+    expect(error).to.be.instanceOf(MongoAWSError);
   });
 
-  it('should authorize when successfully authenticated', function (done) {
-    const config = this.configuration;
-    const client = config.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
-    client.connect(err => {
-      expect(err).to.not.exist;
-      this.defer(() => client.close());
+  it('should authorize when successfully authenticated', async function () {
+    const client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
 
-      client.db('aws').command({ count: 'test' }, (err, count) => {
-        expect(err).to.not.exist;
-        expect(count).to.exist;
+    const result = await client
+      .db('aws')
+      .command({ ping: 1 })
+      .catch(error => error);
 
-        done();
-      });
-    });
+    expect(result).to.not.be.instanceOf(MongoAWSError);
+    expect(result).to.have.property('ok', 1);
   });
 
   it('should allow empty string in authMechanismProperties.AWS_SESSION_TOKEN to override AWS_SESSION_TOKEN environment variable', function () {
@@ -84,10 +75,10 @@ describe('MONGODB-AWS', function () {
       client = config.newClient(process.env.MONGODB_URI, { authMechanism: 'MONGODB-AWS' }); // use the URI built by the test environment
       const startTime = performance.now();
 
-      let caughtError = null;
-      await client.connect().catch(err => {
-        caughtError = err;
-      });
+      const caughtError = await client
+        .db()
+        .command({ ping: 1 })
+        .catch(error => error);
 
       const endTime = performance.now();
       const timeTaken = endTime - startTime;

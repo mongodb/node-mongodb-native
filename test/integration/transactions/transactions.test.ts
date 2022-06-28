@@ -12,7 +12,6 @@ describe('Transactions', function () {
 
     beforeEach(async function () {
       client = this.configuration.newClient();
-      await client.connect();
       sessionPool = client.s.sessionPool;
       session = new ClientSession(client, sessionPool, {});
     });

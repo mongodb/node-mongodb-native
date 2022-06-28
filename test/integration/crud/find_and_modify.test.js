@@ -1,7 +1,7 @@
 'use strict';
 const { format: f } = require('util');
 
-const { setupDatabase, withClient, assert: test } = require(`../shared`);
+const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
 
 describe('Find and Modify', function () {
@@ -312,13 +312,14 @@ describe('Find and Modify', function () {
 
   it('should not allow atomic operators for findOneAndReplace', {
     metadata: { requires: { topology: 'single' } },
-    test: withClient((client, done) => {
+    test: async function () {
+      const client = this.configuration.newClient();
       const db = client.db('fakeDb');
       const collection = db.collection('test');
       expect(() => {
         collection.findOneAndReplace({ a: 1 }, { $set: { a: 14 } });
       }).to.throw(/must not contain atomic operators/);
-      done();
-    })
+      await client.close();
+    }
   });
 });

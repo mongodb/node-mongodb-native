@@ -3,7 +3,7 @@ import ConnectionString from 'mongodb-connection-string-url';
 import * as qs from 'querystring';
 import * as url from 'url';
 
-import { AuthMechanism } from '../../../src';
+import { AuthMechanism, WriteConcernSettings } from '../../../src';
 import { MongoClient } from '../../../src/mongo_client';
 import { TopologyType } from '../../../src/sdam/common';
 import { Topology } from '../../../src/sdam/topology';
@@ -76,7 +76,7 @@ export class TestConfiguration {
     const hostAddresses = hosts.map(HostAddress.fromString);
     this.version = context.version;
     this.clientSideEncryption = context.clientSideEncryption;
-    this.parameters = undefined;
+    this.parameters = { ...context.parameters };
     this.singleMongosLoadBalancerUri = context.singleMongosLoadBalancerUri;
     this.multiMongosLoadBalancerUri = context.multiMongosLoadBalancerUri;
     this.isServerless = !!process.env.SERVERLESS;
@@ -348,7 +348,7 @@ export class TestConfiguration {
     return connectionString;
   }
 
-  writeConcernMax() {
+  writeConcernMax(): { writeConcern: WriteConcernSettings } {
     if (this.topologyType !== TopologyType.Single) {
       return { writeConcern: { w: 'majority', wtimeoutMS: 30000 } };
     }

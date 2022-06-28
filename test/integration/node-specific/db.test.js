@@ -1,8 +1,8 @@
 'use strict';
 
-const { setupDatabase, withClient, assert: test } = require(`../shared`);
+const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
-const { Db } = require('../../../src');
+const { Db, MongoClient } = require('../../../src');
 
 describe('Db', function () {
   before(function () {
@@ -14,7 +14,8 @@ describe('Db', function () {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
     },
 
-    test: withClient((client, done) => {
+    test: done => {
+      const client = { bsonOptions: {} };
       expect(() => new Db(client, 5)).to.throw('Database name must be a string');
       expect(() => new Db(client, '')).to.throw('Database name cannot be the empty string');
       expect(() => new Db(client, 'te$t')).to.throw(
@@ -30,7 +31,7 @@ describe('Db', function () {
         "database names cannot contain the character ' '"
       );
       done();
-    })
+    }
   });
 
   it('shouldCorrectlyHandleFailedConnection', {
@@ -279,13 +280,10 @@ describe('Db', function () {
     }
   });
 
-  it(
-    'should throw if Db.collection is passed a deprecated callback argument',
-    withClient((client, done) => {
-      expect(() => client.db('test').collection('test', () => {})).to.throw(
-        'The callback form of this helper has been removed.'
-      );
-      done();
-    })
-  );
+  it('should throw if Db.collection is passed a deprecated callback argument', () => {
+    const client = new MongoClient('mongodb://iLoveJavascript');
+    expect(() => client.db('test').collection('test', () => {})).to.throw(
+      'The callback form of this helper has been removed.'
+    );
+  });
 });

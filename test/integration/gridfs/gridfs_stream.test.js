@@ -3,7 +3,7 @@
 const { Double } = require('bson');
 const stream = require('stream');
 const fs = require('fs');
-const { setupDatabase, withClient } = require('./../shared');
+const { setupDatabase } = require('./../shared');
 const { expect } = require('chai');
 const { GridFSBucket, ObjectId } = require('../../../src');
 const sinon = require('sinon');
@@ -1075,33 +1075,34 @@ describe('GridFS Stream', function () {
     });
   });
 
-  it('NODE-2623 downloadStream should emit error on end > size', function () {
+  it('NODE-2623 downloadStream should emit error on end > size', function (done) {
     const configuration = this.configuration;
-    return withClient.bind(this)((client, done) => {
-      const db = client.db(configuration.db);
-      const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
-      const readStream = fs.createReadStream('./LICENSE.md');
 
-      const uploadStream = bucket.openUploadStream('test.dat');
+    const client = this.configuration.newClient({ monitorCommands: true });
 
-      const actualSize = fs.fstatSync(fs.openSync('./LICENSE.md', 'r')).size;
-      const wrongExpectedSize = Math.floor(actualSize * 1.1);
+    const db = client.db(configuration.db);
+    const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+    const readStream = fs.createReadStream('./LICENSE.md');
 
-      const id = uploadStream.id;
+    const uploadStream = bucket.openUploadStream('test.dat');
 
-      uploadStream.once('finish', function () {
-        const downloadStream = bucket.openDownloadStream(id, { end: wrongExpectedSize });
-        downloadStream.on('data', function () {});
+    const actualSize = fs.fstatSync(fs.openSync('./LICENSE.md', 'r')).size;
+    const wrongExpectedSize = Math.floor(actualSize * 1.1);
 
-        downloadStream.on('error', function (err) {
-          expect(err.message).to.equal(
-            `Stream end (${wrongExpectedSize}) must not be more than the length of the file (${actualSize})`
-          );
-          done();
-        });
+    const id = uploadStream.id;
+
+    uploadStream.once('finish', function () {
+      const downloadStream = bucket.openDownloadStream(id, { end: wrongExpectedSize });
+      downloadStream.on('data', function () {});
+
+      downloadStream.on('error', function (err) {
+        expect(err.message).to.equal(
+          `Stream end (${wrongExpectedSize}) must not be more than the length of the file (${actualSize})`
+        );
+        client.close(done);
       });
-
-      readStream.pipe(uploadStream);
     });
+
+    readStream.pipe(uploadStream);
   });
 });

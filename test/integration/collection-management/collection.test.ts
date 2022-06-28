@@ -1,13 +1,9 @@
-'use strict';
-const { setupDatabase } = require('../shared');
-const chai = require('chai');
+import { expect } from 'chai';
 
-const expect = chai.expect;
-const sinonChai = require('sinon-chai');
-const mock = require('../../tools/mongodb-mock/index');
-
-chai.use(sinonChai);
-const { isHello } = require('../../../src/utils');
+import { Collection, Db, MongoClient } from '../../../src';
+import { isHello } from '../../../src/utils';
+import * as mock from '../../tools/mongodb-mock/index';
+import { setupDatabase } from '../shared';
 
 describe('Collection', function () {
   let configuration;
@@ -23,14 +19,12 @@ describe('Collection', function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
-      return client.connect().then(client => {
-        db = client.db(configuration.db);
-      });
+      db = client.db(configuration.db);
     });
 
-    afterEach(function () {
+    afterEach(async function () {
       db = undefined;
-      return client.close();
+      await client.close();
     });
 
     it('should correctly execute basic collection methods', function (done) {
@@ -420,7 +414,7 @@ describe('Collection', function () {
 
             emptyDb.listCollections().toArray((err, collections) => {
               expect(err).to.not.exist;
-              let names = [];
+              const names = [];
               for (let i = 0; i < collections.length; i++) {
                 names.push(collections[i].name);
               }
@@ -536,14 +530,13 @@ describe('Collection', function () {
   });
 
   describe('#estimatedDocumentCount', function () {
-    let client;
-    let db;
-    let collection;
+    let client: MongoClient;
+    let db: Db;
+    let collection: Collection<{ a: string }>;
 
     beforeEach(async function () {
       client = configuration.newClient({ w: 1 });
 
-      await client.connect();
       db = client.db(configuration.db);
       collection = db.collection('test_coll');
       await collection.insertOne({ a: 'c' });
@@ -646,16 +639,14 @@ describe('Collection', function () {
         }
       });
 
-      client.connect((err, client) => {
-        const db = client.db('test');
-        const collection = db.collection('countDoc_mock');
+      const db = client.db('test');
+      const collection = db.collection('countDoc_mock');
 
-        config.executeCountDocuments(collection, close);
-      });
+      config.executeCountDocuments(collection, close);
     }
 
     it('countDocuments should return appropriate error if aggregation fails with callback given', function (done) {
-      const replyHandler = () => {};
+      const replyHandler = () => null;
       const executeCountDocuments = (collection, close) => {
         collection.countDocuments(err => {
           expect(err).to.exist;
@@ -676,7 +667,7 @@ describe('Collection', function () {
     });
 
     it('countDocuments should error if aggregation fails using Promises', function (done) {
-      const replyHandler = () => {};
+      const replyHandler = () => null;
       const executeCountDocuments = (collection, close) => {
         collection
           .countDocuments()
@@ -722,32 +713,31 @@ describe('Collection', function () {
     });
   });
 
-  function testCapped(testConfiguration, config, done) {
+  async function testCapped(testConfiguration, config) {
     const configuration = config.config;
     const client = testConfiguration.newClient({ w: 1 });
 
-    client.connect((err, client) => {
-      const db = client.db(configuration.db);
-      const close = e => client.close(() => done(e));
+    const db = client.db(configuration.db);
 
-      db.createCollection(config.collName, config.opts)
-        .then(collection => collection.isCapped())
-        .then(capped => expect(capped).to.be.false)
-        .then(() => close())
-        .catch(e => close(e));
-    });
+    try {
+      const collection = await db.createCollection(config.collName, config.opts);
+      const capped = await collection.isCapped();
+      expect(capped).to.be.false;
+    } finally {
+      client.close();
+    }
   }
 
-  it('isCapped should return false for uncapped collections', function (done) {
-    testCapped(
-      configuration,
-      { config: configuration, collName: 'uncapped', opts: { capped: false } },
-      done
-    );
+  it('isCapped should return false for uncapped collections', async function () {
+    await testCapped(configuration, {
+      config: configuration,
+      collName: 'uncapped',
+      opts: { capped: false }
+    });
   });
 
-  it('isCapped should return false for collections instantiated without specifying capped', function (done) {
-    testCapped(configuration, { config: configuration, collName: 'uncapped2', opts: {} }, done);
+  it('isCapped should return false for collections instantiated without specifying capped', async function () {
+    await testCapped(configuration, { config: configuration, collName: 'uncapped2', opts: {} });
   });
 
   describe('Retryable Writes on bulk ops', function () {
@@ -755,22 +745,24 @@ describe('Collection', function () {
     let db;
     let collection;
 
-    const metadata = { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } };
+    const metadata = { requires: { topology: ['replicaset'] as const, mongodb: '>=3.6.0' } };
 
-    beforeEach(function () {
-      client = configuration.newClient({}, { retryWrites: true });
-      return client.connect().then(() => {
-        db = client.db('test_retry_writes');
-        collection = db.collection('tests');
+    beforeEach(async function () {
+      const utilClient = this.configuration.newClient({}, { retryWrites: true });
+      const utilDb = utilClient.db('test_retry_writes');
+      const utilCollection = utilDb.collection('tests');
 
-        return Promise.resolve()
-          .then(() => db.dropDatabase())
-          .then(() => collection.insertOne({ name: 'foobar' }));
-      });
+      await utilDb.dropDatabase();
+      await utilCollection.insertOne({ name: 'foobar' });
+      await utilClient.close();
+
+      client = this.configuration.newClient({}, { retryWrites: true });
+      db = client.db('test_retry_writes');
+      collection = db.collection('tests');
     });
 
-    afterEach(function () {
-      return client.close();
+    afterEach(async () => {
+      await client.close();
     });
 
     it('should succeed with retryWrite=true when using updateMany', {
@@ -813,25 +805,21 @@ describe('Collection', function () {
       const client = configuration.newClient({ w: 1 });
 
       let finish = err => {
-        finish = () => {};
+        finish = () => null;
         client.close(_err => done(err || _err));
       };
 
-      client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      const collection = db.collection('find_one_and_replace');
+
+      collection.insertOne({ a: 1 }, err => {
         expect(err).to.not.exist;
 
-        const db = client.db(configuration.db);
-        const collection = db.collection('find_one_and_replace');
-
-        collection.insertOne({ a: 1 }, err => {
-          expect(err).to.not.exist;
-
-          try {
-            collection.findOneAndReplace({ a: 1 }, {}, finish);
-          } catch (e) {
-            finish(e);
-          }
-        });
+        try {
+          collection.findOneAndReplace({ a: 1 }, {}, finish);
+        } catch (e) {
+          finish(e);
+        }
       });
     }
   });
@@ -847,22 +835,20 @@ describe('Collection', function () {
         maxPoolSize: 1
       });
 
-      client.connect((err, client) => {
-        const db = client.db(configuration.db);
+      const db = client.db(configuration.db);
 
-        db.createCollection('test_should_correctly_do_update_with_pipeline', (err, collection) => {
-          collection.updateOne(
-            {},
-            [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
-            configuration.writeConcernMax(),
-            (err, r) => {
-              expect(err).to.not.exist;
-              expect(r).property('matchedCount').to.equal(0);
+      db.createCollection('test_should_correctly_do_update_with_pipeline', (err, collection) => {
+        collection.updateOne(
+          {},
+          [{ $set: { a: 1 } }, { $set: { b: 1 } }, { $set: { d: 1 } }],
+          { writeConcern: { w: 'majority' } },
+          (err, r) => {
+            expect(err).to.not.exist;
+            expect(r).property('matchedCount').to.equal(0);
 
-              client.close(done);
-            }
-          );
-        });
+            client.close(done);
+          }
+        );
       });
     }
   });

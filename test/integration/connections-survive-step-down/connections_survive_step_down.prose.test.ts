@@ -1,7 +1,7 @@
-'use strict';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
-const { skipBrokenAuthTestBeforeEachHook } = require('../../tools/runner/hooks/configuration');
+import type { Collection, Db, MongoClient } from '../../../src';
+import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 
 function ignoreNsNotFound(err) {
   if (!err.message.match(/ns not found/)) {
@@ -29,10 +29,10 @@ function expectPoolWasNotCleared(initialCount) {
 // TODO: NODE-3903: check events as specified in the corresponding prose test description
 const maybeDescribe = process.platform === 'darwin' ? describe.skip : describe;
 maybeDescribe('Connections survive primary step down - prose', function () {
-  let client;
-  let checkClient;
-  let db;
-  let collection;
+  let client: MongoClient;
+  let checkClient: MongoClient;
+  let db: Db;
+  let collection: Collection;
 
   beforeEach(
     skipBrokenAuthTestBeforeEachHook({
@@ -55,7 +55,8 @@ maybeDescribe('Connections survive primary step down - prose', function () {
 
     client = this.configuration.newClient(clientOptions);
     return client
-      .connect()
+      .db()
+      .command({ ping: 1 })
       .then(() => {
         const primary = Array.from(client.topology.description.servers.values()).filter(
           sd => sd.type === 'RSPrimary'

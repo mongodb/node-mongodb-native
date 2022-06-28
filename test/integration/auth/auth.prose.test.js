@@ -4,10 +4,20 @@ const sinon = require('sinon');
 const { expect } = require('chai');
 const { Connection } = require('../../../src/cmap/connection');
 const { ScramSHA256 } = require('../../../src/cmap/auth/scram');
-const { setupDatabase, withClient } = require('../shared');
+const { setupDatabase } = require('../shared');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
+// TODO(NODE-4338): withClient usage prevented these tests from running
+// the import has been removed since the function is being deleted, this is here to keep modifications minimal
+// so that the implementer of the fix for these tests can try to reference the original intent
+const withClient = () => null;
+
 describe('auth prose tests', () => {
+  beforeEach(function () {
+    this.currentTest.skipReason = 'TODO(NODE-4338): correct withClient usage';
+    this.currentTest.skip();
+  });
+
   describe('SCRAM-SHA-256 prose test', () => {
     describe('SCRAM-SHA-256 prose test Steps 1-3', function () {
       const test = {};
