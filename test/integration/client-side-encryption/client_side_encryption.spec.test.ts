@@ -1,13 +1,12 @@
-'use strict';
+import path from 'path';
 
-const path = require('path');
-const { loadSpecTests } = require('../../spec');
-const {
-  TestRunnerContext,
+import { loadSpecTests } from '../../spec';
+import {
   gatherTestSuites,
-  generateTopologyTests
-} = require('../../tools/spec-runner');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
+  generateTopologyTests,
+  TestRunnerContext
+} from '../../tools/spec-runner';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const isAuthEnabled = process.env.AUTH === 'auth';
 
@@ -65,8 +64,7 @@ const SKIPPED_TESTS = new Set([
 ]);
 
 describe('Client Side Encryption (Legacy)', function () {
-  const testContext = new TestRunnerContext();
-  testContext.requiresCSFLE = true;
+  const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
     path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),
     testContext
@@ -82,9 +80,9 @@ describe('Client Side Encryption (Legacy)', function () {
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  const allowList = [];
+  const allowList: string[] = [];
   runUnifiedSuite(
     loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
-    test => !allowList.includes(test.description)
+    ({ description }) => (allowList.includes(description) ? 'TODO - skipped for now' : null)
   );
 });

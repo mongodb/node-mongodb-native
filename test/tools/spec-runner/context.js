@@ -38,7 +38,8 @@ class TestRunnerContext {
       user: undefined,
       authSource: undefined,
       useSessions: true,
-      skipPrepareDatabase: false
+      skipPrepareDatabase: false,
+      requiresCSFLE: false
     };
     opts = Object.assign({}, defaults, opts || {});
     this.skipPrepareDatabase = opts.skipPrepareDatabase;
@@ -62,6 +63,7 @@ class TestRunnerContext {
     this.cmapEvents = [];
 
     this.threads = new Map();
+    this.requiresCSFLE = opts.requiresCSFLE;
   }
 
   async runForAllClients(fn) {
