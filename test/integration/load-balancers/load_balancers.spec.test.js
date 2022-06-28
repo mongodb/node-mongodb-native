@@ -9,7 +9,7 @@ const filter = ({ description }) => {
     // a getMore before the killCursors even though the stream is immediately
     // closed.
     // TODO(NODE-3970): implement and reference a node specific integration test for this
-    return 'TODO(NODE-3970)';
+    return 'TODO(NODE-3970): implement and reference a node specific integration test for this';
   }
 
   if (
@@ -22,7 +22,7 @@ const filter = ({ description }) => {
     // TODO(DRIVERS-1847): The following three tests are skipped pending a decision made on DRIVERS-1847,
     // since pinning the connection on any getMore error is very awkward in node and likely results
     // in sub-optimal pinning.
-    return 'TODO(DRIVERS-1847)';
+    return 'TODO(DRIVERS-1847): Skipped pending a decision made on DRIVERS-1847'
   }
 
   if (description === 'errors during the initial connection hello are ignored') {
