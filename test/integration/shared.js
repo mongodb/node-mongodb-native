@@ -38,8 +38,8 @@ function delay(timeout) {
   });
 }
 
-function dropCollection(dbObj, collectionName) {
-  return dbObj.dropCollection(collectionName).catch(ignoreNsNotFound);
+function dropCollection(dbObj, collectionName, options = {}) {
+  return dbObj.dropCollection(collectionName, options).catch(ignoreNsNotFound);
 }
 
 function filterForCommands(commands, bag) {
