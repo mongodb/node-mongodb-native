@@ -1,5 +1,5 @@
 {
-  "description": "createKey-provider-invalid",
+  "description": "createDataKey-provider-invalid",
   "schemaVersion": "1.8",
   "runOnRequirements": [
     {
@@ -35,7 +35,7 @@
       "description": "create data key without required master key fields",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "aws",
@@ -59,7 +59,7 @@
       "description": "create data key with invalid master key field",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local",
@@ -85,7 +85,7 @@
       "description": "create data key with invalid master key",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "aws",

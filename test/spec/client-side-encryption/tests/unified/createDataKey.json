@@ -1,5 +1,5 @@
 {
-  "description": "createKey",
+  "description": "createDataKey",
   "schemaVersion": "1.8",
   "runOnRequirements": [
     {
@@ -90,7 +90,7 @@
       "description": "create data key with AWS KMS provider",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "aws",
@@ -153,7 +153,7 @@
       "description": "create datakey with Azure KMS provider",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "azure",
@@ -216,7 +216,7 @@
       "description": "create datakey with GCP KMS provider",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "gcp",
@@ -283,7 +283,7 @@
       "description": "create datakey with KMIP KMS provider",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "kmip"
@@ -341,7 +341,7 @@
       "description": "create datakey with local KMS provider",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local"
@@ -396,7 +396,7 @@
       "description": "create datakey with no keyAltName",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local",
@@ -457,7 +457,7 @@
       "description": "create datakey with single keyAltName",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local",
@@ -520,7 +520,7 @@
       "description": "create datakey with multiple keyAltNames",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local",
@@ -619,7 +619,7 @@
       "description": "create datakey with custom key material",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local",
@@ -682,7 +682,7 @@
       "description": "create datakey with invalid custom key material (too short)",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local",

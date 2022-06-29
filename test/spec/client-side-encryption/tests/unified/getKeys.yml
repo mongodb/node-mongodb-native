@@ -49,7 +49,7 @@ tests:
 
   - description: getKeys with single key documents
     operations:
-      - name: createKey
+      - name: createDataKey
         object: *clientEncryption0
         arguments:
           kmsProvider: local
@@ -80,12 +80,12 @@ tests:
 
   - description: getKeys with many key documents
     operations:
-      - name: createKey
+      - name: createDataKey
         object: *clientEncryption0
         arguments:
           kmsProvider: local
         expectResult: { $$type: binData }
-      - name: createKey
+      - name: createDataKey
         object: *clientEncryption0
         arguments:
           kmsProvider: local

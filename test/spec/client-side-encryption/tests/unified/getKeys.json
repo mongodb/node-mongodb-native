@@ -87,7 +87,7 @@
       "description": "getKeys with single key documents",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local",
@@ -160,7 +160,7 @@
       "description": "getKeys with many key documents",
       "operations": [
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local"
@@ -170,7 +170,7 @@
           }
         },
         {
-          "name": "createKey",
+          "name": "createDataKey",
           "object": "clientEncryption0",
           "arguments": {
             "kmsProvider": "local"
