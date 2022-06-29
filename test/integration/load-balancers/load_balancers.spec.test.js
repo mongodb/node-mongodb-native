@@ -22,7 +22,7 @@ const filter = ({ description }) => {
     // TODO(DRIVERS-1847): The above three tests are skipped pending a decision made in DRIVERS-1847
     // since pinning the connection on any getMore error is very awkward in node and likely results
     // in sub-optimal pinning.
-    return 'TODO(DRIVERS-1847): Skipped pending a decision made on DRIVERS-1847'
+    return 'TODO(DRIVERS-1847): Skipped pending a decision made on DRIVERS-1847';
   }
 
   if (description === 'errors during the initial connection hello are ignored') {
@@ -44,7 +44,7 @@ const filter = ({ description }) => {
     return 'TODO(NODE-3891): fix tests broken when AUTH enabled';
   }
 
-  return null;
+  return false;
 };
 
 describe('Load Balancer Unified Tests', function () {

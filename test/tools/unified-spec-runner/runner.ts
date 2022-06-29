@@ -44,7 +44,7 @@ export async function runUnifiedTest(
   ctx: Mocha.Context,
   unifiedSuite: uni.UnifiedSuite,
   test: uni.Test,
-  skipFilter: uni.TestFilter = () => null
+  skipFilter: uni.TestFilter = () => false
 ): Promise<void> {
   // Some basic expectations we can catch early
   expect(test).to.exist;
@@ -253,7 +253,7 @@ export async function runUnifiedTest(
  */
 export function runUnifiedSuite(
   specTests: uni.UnifiedSuite[],
-  skipFilter: uni.TestFilter = () => null
+  skipFilter: uni.TestFilter = () => false
 ): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {

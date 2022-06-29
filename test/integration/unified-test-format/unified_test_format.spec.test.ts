@@ -37,7 +37,7 @@ const filter: TestFilter = ({ description }) => {
     return 'TODO(NODE-3891): fix tests broken when AUTH enabled';
   }
 
-  return null;
+  return false;
 };
 
 describe('Unified test format runner', function unifiedTestRunner() {

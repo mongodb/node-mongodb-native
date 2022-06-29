@@ -8,6 +8,6 @@ const SKIPPED_TESTS = ['modifyCollection to changeStreamPreAndPostImages enabled
 
 describe('Collection management unified spec tests', function () {
   runUnifiedSuite(loadSpecTests('collection-management'), ({ description }) =>
-    SKIPPED_TESTS.includes(description) ? `the Node driver does not have a collMod helper.` : null
+    SKIPPED_TESTS.includes(description) ? `the Node driver does not have a collMod helper.` : false
   );
 });

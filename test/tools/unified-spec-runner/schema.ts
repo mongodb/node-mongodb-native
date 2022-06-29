@@ -240,4 +240,4 @@ export interface ExpectedError {
 /**
  * A type that represents the test filter provided to the unifed runner.
  */
-export type TestFilter = (test: Test) => null | string;
+export type TestFilter = (test: Test) => string | false;
