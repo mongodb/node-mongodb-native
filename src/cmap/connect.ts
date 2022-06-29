@@ -490,11 +490,7 @@ function makeSocks5Connection(options: MakeConnectionOptions, callback: Callback
             callback
           );
         },
-        error => {
-          if (error) {
-            return callback(connectionFailureError('error', error));
-          }
-        }
+        error => callback(connectionFailureError('error', error))
       );
     }
   );

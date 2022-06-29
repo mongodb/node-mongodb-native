@@ -897,7 +897,7 @@ export class ChangeStream<
       this.cursor.close().then(
         () => null,
         () => null
-      ); // TODO(NODE-XXX): Is this correct?
+      ); // Ignoring the result of close is intentional
 
       const topology = getTopology(this.parent);
       topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
@@ -930,7 +930,7 @@ export class ChangeStream<
       this.cursor.close().then(
         () => null,
         () => null
-      ); // TODO(NODE-XXX): Is this correct?;
+      ); // Ignoring the result of close is intentional
 
       const topology = getTopology(this.parent);
       topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {

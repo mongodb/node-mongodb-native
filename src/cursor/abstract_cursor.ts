@@ -886,7 +886,7 @@ class ReadableCursorStream extends Readable {
           this._cursor.close().then(
             () => null,
             () => null
-          ); // TODO(NODE-XXXX): is this correct?
+          ); // Ignoring the result of close is intentional
           return this.push(null);
         }
 
@@ -908,7 +908,7 @@ class ReadableCursorStream extends Readable {
         this._cursor.close().then(
           () => null,
           () => null
-        ); // TODO(NODE-XXXX): is this correct?
+        ); // Ignoring the result of close is intentional
       } else {
         if (this.push(result)) {
           return this._readNext();

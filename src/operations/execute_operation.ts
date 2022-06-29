@@ -147,7 +147,7 @@ export function executeOperation<
         session.endSession().then(
           () => null,
           () => null
-        );
+        ); // Ignoring the result of endSession is intentional
       }
 
       throw error;
