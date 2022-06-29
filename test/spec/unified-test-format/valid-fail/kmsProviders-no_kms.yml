@@ -1,0 +1,21 @@
+# No configured KMS providers should lead to clientEncryption initialization failure.
+description: clientEncryptionOpts-no_kms
+
+schemaVersion: "1.8"
+
+runOnRequirements:
+  - csfle: true
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - clientEncryption:
+      id: &clientEncryption0 clientEncryption0
+      clientEncryptionOpts:
+        keyVaultClient: *client0
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders: {}
+
+tests:
+  - description: ""
+    operations: []

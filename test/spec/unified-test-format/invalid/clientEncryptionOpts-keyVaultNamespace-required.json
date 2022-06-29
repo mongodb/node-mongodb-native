@@ -1,0 +1,28 @@
+{
+  "description": "clientEncryptionOpts-keyVaultNamespace-required",
+  "schemaVersion": "1.8",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "kmsProviders": {
+            "aws": {}
+          }
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "",
+      "operations": []
+    }
+  ]
+}

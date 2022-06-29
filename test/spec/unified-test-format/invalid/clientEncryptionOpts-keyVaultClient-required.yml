@@ -1,0 +1,15 @@
+description: clientEncryptionOpts-keyVaultClient-required
+
+schemaVersion: "1.8"
+
+createEntities:
+  - clientEncryption:
+      id: &clientEncryption0 clientEncryption0
+      clientEncryptionOpts:
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          aws: {}
+
+tests:
+  - description: ""
+    operations: []

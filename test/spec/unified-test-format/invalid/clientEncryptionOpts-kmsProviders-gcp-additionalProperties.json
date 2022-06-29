@@ -1,0 +1,31 @@
+{
+  "description": "clientEncryptionOpts-kmsProviders-gcp-additionalProperties",
+  "schemaVersion": "1.8",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "gcp": {
+              "invalid": {}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "",
+      "operations": []
+    }
+  ]
+}
