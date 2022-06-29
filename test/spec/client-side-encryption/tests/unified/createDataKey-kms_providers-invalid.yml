@@ -18,7 +18,7 @@ createEntities:
         keyVaultClient: *client0
         keyVaultNamespace: keyvault.datakeys
         kmsProviders:
-          aws: {}
+          aws: { accessKeyId: { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } }
 
 tests:
   - description: create data key without required master key fields
