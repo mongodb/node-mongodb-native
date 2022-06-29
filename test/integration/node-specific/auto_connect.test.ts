@@ -6,6 +6,7 @@ import {
   BSONType,
   GridFSBucket,
   MongoClient,
+  MongoNotConnectedError,
   MongoRuntimeError,
   MongoServerError,
   ObjectId,
@@ -147,21 +148,21 @@ describe('MongoClient auto connect', () => {
   });
 
   context(`class OrderedBulkOperation`, () => {
-    it.skip(`execute()`, async () => {
-      const bulk = client.db().collection('test').initializeOrderedBulkOp();
-      bulk.find({ a: 1 });
-      await bulk.execute();
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-    }).skipReason = 'TODO(NODE-4263): legacy bulk operations should auto connect';
+    it(`execute() - does not auto connect`, async () => {
+      expect(() => client.db().collection('test').initializeOrderedBulkOp()).to.throw(
+        MongoNotConnectedError
+      );
+      expect(client).to.not.have.property('topology');
+    });
   });
 
   context(`class UnorderedBulkOperation`, () => {
-    it.skip(`execute()`, async () => {
-      const bulk = client.db().collection('test').initializeUnorderedBulkOp();
-      bulk.find({ a: 1 });
-      await bulk.execute();
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-    }).skipReason = 'TODO(NODE-4263): legacy bulk operations should auto connect';
+    it(`execute() - does not auto connect`, async () => {
+      expect(() => client.db().collection('test').initializeUnorderedBulkOp()).to.throw(
+        MongoNotConnectedError
+      );
+      expect(client).to.not.have.property('topology');
+    });
   });
 
   context(`class ChangeStream`, { requires: { topology: '!single' } }, () => {
