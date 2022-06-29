@@ -493,7 +493,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
               { endSessions },
               { readPreference: ReadPreference.primaryPreferred, noResponse: true }
             )
-            .then(() => null) // outcome does not matter
             .catch(() => null); // outcome does not matter
         })
         .then(() => {
@@ -639,10 +638,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         // Do not return the result of callback
       })
       .finally(() => {
-        session.endSession().then(
-          () => null,
-          () => null
-        );
+        session.endSession().catch(() => null);
       });
   }
 

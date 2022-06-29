@@ -894,10 +894,7 @@ export class ChangeStream<
 
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
-      this.cursor.close().then(
-        () => null,
-        () => null
-      ); // Ignoring the result of close is intentional
+      this.cursor.close().catch(() => null);
 
       const topology = getTopology(this.parent);
       topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
@@ -927,10 +924,7 @@ export class ChangeStream<
     }
 
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
-      this.cursor.close().then(
-        () => null,
-        () => null
-      ); // Ignoring the result of close is intentional
+      this.cursor.close().catch(() => null);
 
       const topology = getTopology(this.parent);
       topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {

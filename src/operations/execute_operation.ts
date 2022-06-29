@@ -144,10 +144,7 @@ export function executeOperation<
       });
     } catch (error) {
       if (session?.owner != null && session.owner === owner) {
-        session.endSession().then(
-          () => null,
-          () => null
-        ); // Ignoring the result of endSession is intentional
+        session.endSession().catch(() => null);
       }
 
       throw error;

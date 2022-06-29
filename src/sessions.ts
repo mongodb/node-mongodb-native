@@ -616,10 +616,7 @@ function attemptTransaction<TSchema>(
   }
 
   if (!isPromiseLike(promise)) {
-    session.abortTransaction().then(
-      () => null,
-      () => null
-    ); // TODO(NODE-XXXX): is this correct?
+    session.abortTransaction().catch(() => null);
     throw new MongoInvalidArgumentError(
       'Function provided to `withTransaction` must return a Promise'
     );
