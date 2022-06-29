@@ -36,11 +36,15 @@ async function terminateOpenTransactions(client: MongoClient) {
   }
 }
 
+/*
+ * @param skipFilter - a function that returns null if the test should be run,
+ *                     or a skip reason if the test should be skipped
+ */
 export async function runUnifiedTest(
   ctx: Mocha.Context,
   unifiedSuite: uni.UnifiedSuite,
   test: uni.Test,
-  testsToSkip?: string[]
+  skipFilter: uni.TestFilter = () => false
 ): Promise<void> {
   // Some basic expectations we can catch early
   expect(test).to.exist;
@@ -58,7 +62,13 @@ export async function runUnifiedTest(
     ctx.skip();
   }
 
-  if (testsToSkip?.includes(test.description)) {
+  const skipReason = skipFilter(test);
+
+  if (typeof skipReason === 'string') {
+    if (skipReason.length === 0) {
+      expect.fail(`Test was skipped with an empty skip reason: ${test.description}`);
+    }
+    ctx.skipReason = skipReason;
     ctx.skip();
   }
 
@@ -236,12 +246,20 @@ export async function runUnifiedTest(
   }
 }
 
-export function runUnifiedSuite(specTests: uni.UnifiedSuite[], testsToSkip?: string[]): void {
+/**
+ *
+ * @param skipFilter - a function that returns null if the test should be run,
+ *                     or a skip reason if the test should be skipped
+ */
+export function runUnifiedSuite(
+  specTests: uni.UnifiedSuite[],
+  skipFilter: uni.TestFilter = () => false
+): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
       for (const test of unifiedSuite.tests) {
         it(String(test.description), async function () {
-          await runUnifiedTest(this, unifiedSuite, test, testsToSkip);
+          await runUnifiedTest(this, unifiedSuite, test, skipFilter);
         });
       }
     });

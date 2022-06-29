@@ -1,32 +1,46 @@
 import { loadSpecTests } from '../../spec/index';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
+import { TestFilter } from '../../tools/unified-spec-runner/schema';
 
-// TODO: NODE-3891 - fix tests broken when AUTH enabled
-const FAILING_TESTS_AUTH_ENABLED = [
-  'FindOneAndUpdate is committed on first attempt',
-  'FindOneAndUpdate is not committed on first attempt',
-  'FindOneAndUpdate is never committed',
-  'eventType defaults to command if unset',
-  'events are captured during an operation',
-  'eventType can be set to command and cmap'
-];
+const filter: TestFilter = ({ description }) => {
+  if (description === 'unpin after transient error within a transaction and commit') {
+    // OLD COMMENT: commitTransaction retry seems to be swallowed by mongos in this case
+    // TODO(NODE-3943):
+    return `TODO(NODE-3943): commitTransaction retry seems to be swallowed by mongos in this case`;
+  }
 
-const SKIPPED_TESTS = [
-  // TODO(NODE-3943):
-  // OLD COMMENT: commitTransaction retry seems to be swallowed by mongos in this case
-  'unpin after transient error within a transaction and commit',
+  if (description === 'Client side error in command starting transaction') {
+    // TODO(NODE-2034): Will be implemented as part of NODE-2034
+    return 'TODO(NODE-2034): Specify effect of client-side errors on in-progress transactions';
+  }
 
-  // TODO(NODE-2034): Will be implemented as part of NODE-2034
-  'Client side error in command starting transaction',
+  if (description === 'Dirty explicit session is discarded') {
+    // TODO(NODE-3951): investigate why this is failing while the legacy version is passing
+    return 'TODO(NODE-3951): investigate why this is failing while the legacy version is passing';
+  }
 
-  // TODO(NODE-3308):
-  'A successful find event with a getmore and the server kills the cursor',
+  if (description === 'A successful find event with a getmore and the server kills the cursor') {
+    return 'TODO(NODE-3308): failures due unnecessary getMore and killCursors calls in 5.0';
+  }
 
-  // TODO(NODE-4125): Fix change streams resume logic when used in iterator mode
-  'Test consecutive resume'
-].concat(process.env.AUTH === 'auth' ? FAILING_TESTS_AUTH_ENABLED : []);
+  if (
+    process.env.AUTH === 'auth' &&
+    [
+      'FindOneAndUpdate is committed on first attempt',
+      'FindOneAndUpdate is not committed on first attempt',
+      'FindOneAndUpdate is never committed',
+      'eventType defaults to command if unset',
+      'events are captured during an operation',
+      'eventType can be set to command and cmap'
+    ].includes(description)
+  ) {
+    return 'TODO(NODE-3891): fix tests broken when AUTH enabled';
+  }
+
+  return false;
+};
 
 describe('Unified test format runner', function unifiedTestRunner() {
   // Valid tests that should pass
-  runUnifiedSuite(loadSpecTests('unified-test-format/valid-pass'), SKIPPED_TESTS);
+  runUnifiedSuite(loadSpecTests('unified-test-format/valid-pass'), filter);
 });

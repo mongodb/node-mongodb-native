@@ -236,3 +236,8 @@ export interface ExpectedError {
   errorLabelsOmit?: string[];
   expectResult?: unknown;
 }
+
+/**
+ * A type that represents the test filter provided to the unifed runner.
+ */
+export type TestFilter = (test: Test) => string | false;

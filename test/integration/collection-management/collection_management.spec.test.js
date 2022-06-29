@@ -7,5 +7,7 @@ const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 const SKIPPED_TESTS = ['modifyCollection to changeStreamPreAndPostImages enabled'];
 
 describe('Collection management unified spec tests', function () {
-  runUnifiedSuite(loadSpecTests('collection-management'), SKIPPED_TESTS);
+  runUnifiedSuite(loadSpecTests('collection-management'), ({ description }) =>
+    SKIPPED_TESTS.includes(description) ? `the Node driver does not have a collMod helper.` : false
+  );
 });

@@ -12,5 +12,7 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 const SKIP = ['A successful unordered bulk write with an unacknowledged write concern'];
 
 describe('Command Monitoring Spec (unified)', () => {
-  runUnifiedSuite(loadSpecTests(path.join('command-monitoring', 'unified')), SKIP);
+  runUnifiedSuite(loadSpecTests(path.join('command-monitoring', 'unified')), ({ description }) =>
+    SKIP.includes(description) ? `TODO(NODE-4261): support skip reasons in unified tests` : false
+  );
 });
