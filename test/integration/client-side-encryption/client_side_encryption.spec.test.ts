@@ -83,6 +83,7 @@ describe('Client Side Encryption (Unified)', function () {
   const allowList: string[] = [];
   runUnifiedSuite(
     loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
-    ({ description }) => (allowList.includes(description) ? 'TODO - skipped for now' : null)
+    ({ description }) =>
+      allowList.includes(description) ? 'NODE-4330 - implement the key management API' : false
   );
 });
