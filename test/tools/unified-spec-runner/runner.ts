@@ -58,7 +58,9 @@ export async function runUnifiedTest(
   // If test.skipReason is specified, the test runner MUST skip this
   // test and MAY use the string value to log a message.
   if (test.skipReason) {
-    ctx.skipReason = test.skipReason;
+    if (ctx.test) {
+      ctx.test.skipReason = test.skipReason;
+    }
     ctx.skip();
   }
 
@@ -68,7 +70,9 @@ export async function runUnifiedTest(
     if (skipReason.length === 0) {
       expect.fail(`Test was skipped with an empty skip reason: ${test.description}`);
     }
-    ctx.skipReason = skipReason;
+    if (ctx.test) {
+      ctx.test.skipReason = skipReason;
+    }
     ctx.skip();
   }
 
