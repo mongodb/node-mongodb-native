@@ -37,6 +37,10 @@ const filter: TestFilter = ({ description }) => {
     return 'TODO(NODE-3891): fix tests broken when AUTH enabled';
   }
 
+  if (/kmsProviders/.test(description)) {
+    return 'TODO(NODE-4330): implement the key management API';
+  }
+
   return false;
 };
 
