@@ -42,7 +42,7 @@ const filter: TestFilter = ({ description }) => {
     // client encryption entity is constructed correctly so the "test" section of each
     // unified test is empty (save the required properties) and the test description
     // is just the empty string
-    return 'TODO(NODE-4330): implement the key management API';
+    return 'TODO(NODE-4363): add support for client encryption entity to unified runner';
   }
 
   return false;
