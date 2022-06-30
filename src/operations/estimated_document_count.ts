@@ -38,6 +38,12 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
       cmd.maxTimeMS = this.options.maxTimeMS;
     }
 
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (this.options.comment !== undefined) {
+      cmd.comment = this.options.comment;
+    }
+
     super.executeCommand(server, session, cmd, (err, response) => {
       if (err) {
         callback(err);

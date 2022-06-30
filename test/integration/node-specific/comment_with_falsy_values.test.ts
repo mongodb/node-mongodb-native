@@ -24,7 +24,8 @@ function* generateTestCombinations() {
     ['aggregate', { pipeline: [] }] as const,
     ['insertMany', { documents: [{ name: 'john' }] }] as const,
     ['deleteOne', { filter: { toBeDeleted: true } }] as const,
-    ['findOneAndReplace', { filter: { _id: 1 }, replacement: { x: 12 } }] as const
+    ['findOneAndReplace', { filter: { _id: 1 }, replacement: { x: 12 } }] as const,
+    ['estimatedDocumentCount', {}] as const
   ]) {
     for (const falsyValue of falsyValues) {
       yield { name, args: { ...args, comment: falsyValue } };
