@@ -191,12 +191,10 @@ describe('MongoClient auto connect', () => {
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
-    it.skip(`stream()`, async () => {
-      // TODO: Ask bailey for help
+    it(`stream()`, async () => {
       const cs = client.watch();
       const stream = cs.stream();
-      await once(stream, 'readable');
-      await stream.read();
+      await Promise.race([stream[Symbol.asyncIterator]().next(), sleep(1)]);
       stream.destroy();
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
@@ -592,89 +590,7 @@ describe('MongoClient auto connect', () => {
     });
   });
 
-  context(`class GridFSBucket`, () => {
-    it(`delete()`, async () => {
-      const db = client.db('files');
-      const bucket = new GridFSBucket(db);
-      const error = await bucket
-        .delete(new ObjectId())
-        .catch(error => (error instanceof MongoRuntimeError ? null : error));
-      expect(error).to.be.null;
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-    });
-
-    it(`drop()`, async () => {
-      const db = client.db('files');
-      const bucket = new GridFSBucket(db);
-      const error = await bucket
-        .drop()
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.not.exist;
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-    });
-
-    it(`rename()`, async () => {
-      const db = client.db('files');
-      const bucket = new GridFSBucket(db);
-      const error = await bucket
-        .rename(new ObjectId(), 'new_name.txt')
-        .catch(error => (error instanceof MongoRuntimeError ? null : error));
-      expect(error).to.be.null;
-      expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-    });
-
-    context(`class GridFSBucketWriteStream`, () => {
-      it(`abort()`, async () => {
-        const db = client.db('files');
-        const bucket = new GridFSBucket(db);
-        const stream = bucket.openUploadStream('neal.txt');
-        await stream.abort();
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-
-      it(`write()`, async () => {
-        const db = client.db('files');
-        const bucket = new GridFSBucket(db);
-        const stream = bucket.openUploadStream('neal.txt');
-        stream.write('hello!');
-        stream.end();
-        await sleep(1);
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-
-    context(`class GridFSBucketReadStream`, () => {
-      let utilClient: MongoClient;
-      before(async function () {
-        utilClient = this.configuration.newClient();
-        const bucket = new GridFSBucket(utilClient.db('files'));
-        const stream = bucket.openUploadStream('neal.txt');
-        const willFinish = once(stream, 'finish');
-
-        const readable = new (class extends Readable {
-          _read() {
-            // _read is required but you can noop it
-          }
-        })();
-        readable.push(Buffer.from('hello!', 'utf8'));
-        readable.push(null);
-        readable.pipe(stream);
-
-        await willFinish;
-        await utilClient.close();
-      });
-
-      it(`read()`, async () => {
-        const db = client.db('files');
-        const bucket = new GridFSBucket(db);
-        const stream = bucket.openDownloadStreamByName('neal.txt');
-        await once(stream, 'readable');
-        const text = stream.read(6).toString('utf8');
-        expect(text).to.equal('hello!');
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-  });
+  // GridFS APIs are all made up of CRUD APIs on collections and dbs.
 
   context(`class ListCollectionsCursor`, () => {
     it(`forEach()`, async () => {
