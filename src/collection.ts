@@ -725,7 +725,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     if (typeof filter === 'function') {
-      callback = filter as Callback<WithId<TSchema> | null>;
+      callback = filter;
       filter = {};
       options = {};
     }
@@ -1128,7 +1128,7 @@ export class Collection<TSchema extends Document = Document> {
       this.s.db.s.client,
       new CountDocumentsOperation(
         this as TODO_NODE_3286,
-        filter as Document,
+        filter,
         resolveOptions(this, options as CountDocumentsOptions)
       ),
       callback
@@ -1191,7 +1191,7 @@ export class Collection<TSchema extends Document = Document> {
     callback?: Callback<any[]>
   ): Promise<any[]> | void {
     if (typeof filter === 'function') {
-      (callback = filter as Callback<any[]>), (filter = {}), (options = {});
+      (callback = filter), (filter = {}), (options = {});
     } else {
       if (arguments.length === 3 && typeof options === 'function') {
         (callback = options), (options = {});
@@ -1681,7 +1681,7 @@ export class Collection<TSchema extends Document = Document> {
     callback?: Callback<number>
   ): Promise<number> | void {
     if (typeof filter === 'function') {
-      (callback = filter as Callback<number>), (filter = {}), (options = {});
+      (callback = filter), (filter = {}), (options = {});
     } else {
       if (typeof options === 'function') (callback = options), (options = {});
     }

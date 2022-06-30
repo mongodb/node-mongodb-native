@@ -161,6 +161,7 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
   };
 }
 
+const TO_STRING = (object: unknown) => Object.prototype.toString.call(object);
 /**
  * Checks if arg is an Object:
  * - **NOTE**: the check is based on the `[Symbol.toStringTag]() === 'Object'`
@@ -168,7 +169,7 @@ export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function isObject(arg: unknown): arg is object {
-  return '[object Object]' === Object.prototype.toString.call(arg);
+  return '[object Object]' === TO_STRING(arg);
 }
 
 /** @internal */
@@ -380,7 +381,7 @@ export interface DeprecateOptionsConfig {
   /** index of options object in function arguments array */
   optionsIndex: number;
   /** optional custom message handler to generate warnings */
-  msgHandler?(name: string, option: string): string;
+  msgHandler?(this: void, name: string, option: string): string;
 }
 
 /**
@@ -1024,6 +1025,9 @@ export function setDifference<T>(setA: Iterable<T>, setB: Iterable<T>): Set<T> {
   return difference;
 }
 
+const HAS_OWN = (object: unknown, prop: string) =>
+  Object.prototype.hasOwnProperty.call(object, prop);
+
 export function isRecord<T extends readonly string[]>(
   value: unknown,
   requiredKeys: T
@@ -1033,9 +1037,6 @@ export function isRecord(
   value: unknown,
   requiredKeys: string[] | undefined = undefined
 ): value is Record<string, any> {
-  const toString = Object.prototype.toString;
-  const hasOwnProperty = Object.prototype.hasOwnProperty;
-  const isObject = (v: unknown) => toString.call(v) === '[object Object]';
   if (!isObject(value)) {
     return false;
   }
@@ -1047,7 +1048,7 @@ export function isRecord(
     }
 
     // Check to see if some method exists from the Object exists
-    if (!hasOwnProperty.call(ctor.prototype, 'isPrototypeOf')) {
+    if (!HAS_OWN(ctor.prototype, 'isPrototypeOf')) {
       return false;
     }
   }
@@ -1261,7 +1262,7 @@ export class HostAddress {
     return `${this.socketPath}`;
   }
 
-  static fromString(s: string): HostAddress {
+  static fromString(this: void, s: string): HostAddress {
     return new HostAddress(s);
   }
 

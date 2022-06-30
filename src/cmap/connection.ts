@@ -533,7 +533,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         clusterTime = session.clusterTime;
       }
 
-      const err = applySession(session, finalCmd, options as CommandOptions);
+      const err = applySession(session, finalCmd, options);
       if (err) {
         return callback(err);
       }

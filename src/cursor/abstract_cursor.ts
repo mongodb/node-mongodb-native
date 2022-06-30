@@ -67,7 +67,7 @@ export interface CursorCloseOptions {
 /** @public */
 export interface CursorStreamOptions {
   /** A transformation method applied to each document emitted by the stream */
-  transform?(doc: Document): Document;
+  transform?(this: void, doc: Document): Document;
 }
 
 /** @public */
@@ -597,7 +597,7 @@ export abstract class AbstractCursor<
       // We only want to end this session if we created it, and it hasn't ended yet
       if (session.explicit === false) {
         if (!session.hasEnded) {
-          session.endSession(() => null);
+          session.endSession().catch(() => null);
         }
         this[kSession] = this.client.startSession({ owner: this, explicit: false });
       }
@@ -883,7 +883,7 @@ class ReadableCursorStream extends Readable {
         //       a client during iteration. Alternatively, we could do the "right" thing and
         //       propagate the error message by removing this special case.
         if (err.message.match(/server is closed/)) {
-          this._cursor.close();
+          this._cursor.close().catch(() => null);
           return this.push(null);
         }
 
@@ -902,7 +902,7 @@ class ReadableCursorStream extends Readable {
       if (result == null) {
         this.push(null);
       } else if (this.destroyed) {
-        this._cursor.close();
+        this._cursor.close().catch(() => null);
       } else {
         if (this.push(result)) {
           return this._readNext();

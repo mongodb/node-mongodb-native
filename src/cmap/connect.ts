@@ -8,7 +8,6 @@ import type { Document } from '../bson';
 import { Int32 } from '../bson';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import {
-  AnyError,
   MongoCompatibilityError,
   MongoError,
   MongoErrorLabel,
@@ -462,40 +461,36 @@ function makeSocks5Connection(options: MakeConnectionOptions, callback: Callback
       }
 
       // Then, establish the Socks5 proxy connection:
-      SocksClient.createConnection(
-        {
-          existing_socket: rawSocket,
-          timeout: options.connectTimeoutMS,
-          command: 'connect',
-          destination: {
-            host: destination.host,
-            port: destination.port
-          },
-          proxy: {
-            // host and port are ignored because we pass existing_socket
-            host: 'iLoveJavaScript',
-            port: 0,
-            type: 5,
-            userId: options.proxyUsername || undefined,
-            password: options.proxyPassword || undefined
-          }
+      SocksClient.createConnection({
+        existing_socket: rawSocket,
+        timeout: options.connectTimeoutMS,
+        command: 'connect',
+        destination: {
+          host: destination.host,
+          port: destination.port
         },
-        (err: AnyError, info: { socket: Stream }) => {
-          if (err) {
-            return callback(connectionFailureError('error', err));
-          }
-
+        proxy: {
+          // host and port are ignored because we pass existing_socket
+          host: 'iLoveJavaScript',
+          port: 0,
+          type: 5,
+          userId: options.proxyUsername || undefined,
+          password: options.proxyPassword || undefined
+        }
+      }).then(
+        ({ socket }) => {
           // Finally, now treat the resulting duplex stream as the
           // socket over which we send and receive wire protocol messages:
           makeConnection(
             {
               ...options,
-              existingSocket: info.socket,
+              existingSocket: socket,
               proxyHost: undefined
             },
             callback
           );
-        }
+        },
+        error => callback(connectionFailureError('error', error))
       );
     }
   );

@@ -34,7 +34,7 @@ export function indexInformation(
   let options = _optionsOrCallback as IndexInformationOptions;
   let callback = _callback as Callback;
   if ('function' === typeof _optionsOrCallback) {
-    callback = _optionsOrCallback as Callback;
+    callback = _optionsOrCallback;
     options = {};
   }
   // If we specified full information

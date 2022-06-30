@@ -182,6 +182,29 @@
       }
     },
     {
+      // Settings for typescript test files
+      "files": [
+        "src/**/*.ts"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": ["./tsconfig.json"]
+      },
+      "extends": [
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      ],
+      "rules": {
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-argument": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+
+        "@typescript-eslint/restrict-plus-operands": "off",
+        "@typescript-eslint/restrict-template-expressions": "off"
+      }
+    },
+    {
       // Settings for typescript type test files
       "files": [
         "*.test-d.ts"

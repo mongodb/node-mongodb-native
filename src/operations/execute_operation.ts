@@ -144,8 +144,9 @@ export function executeOperation<
       });
     } catch (error) {
       if (session?.owner != null && session.owner === owner) {
-        session.endSession();
+        session.endSession().catch(() => null);
       }
+
       throw error;
     }
   });

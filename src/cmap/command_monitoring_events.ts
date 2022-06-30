@@ -248,9 +248,8 @@ function extractCommand(command: WriteProtocolMessageType): Document {
     });
 
     OP_QUERY_KEYS.forEach(key => {
-      const opKey = key as typeof OP_QUERY_KEYS[number];
-      if (command[opKey]) {
-        result[opKey] = command[opKey];
+      if (command[key]) {
+        result[key] = command[key];
       }
     });
 
