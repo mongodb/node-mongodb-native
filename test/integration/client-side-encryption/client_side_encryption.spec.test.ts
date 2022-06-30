@@ -79,7 +79,7 @@ describe('Client Side Encryption (Legacy)', function () {
   });
 });
 
-describe.only('Client Side Encryption (Unified)', function () {
+describe('Client Side Encryption (Unified)', function () {
   runUnifiedSuite(
     loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
     () => 'NODE-4330 - implement the key management API'
