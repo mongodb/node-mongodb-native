@@ -54,11 +54,7 @@ export type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack'
 
 /** @public */
 export type IndexSpecification = OneOrMore<
-  | string
-  | [string, IndexDirection]
-  | { [key: string]: IndexDirection }
-  | [string, IndexDirection][]
-  | { [key: string]: IndexDirection }[]
+  string | [string, IndexDirection] | { [key: string]: IndexDirection }
 >;
 
 /** @public */

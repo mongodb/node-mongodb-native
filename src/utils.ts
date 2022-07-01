@@ -115,7 +115,7 @@ interface IndexOptions {
  * @internal
  */
 export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
-  const fieldHash: { [key: string]: IndexDirection } = {};
+  const fieldHash: { [key: string]: IndexDirection } ={};
   const indexes = [];
   let keys;
 
