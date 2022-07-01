@@ -207,7 +207,7 @@ describe('Server Discovery and Monitoring (spec)', function () {
         // call to `selectServers` call a fake, and then immediately restore the original behavior.
         topologySelectServers = sinon
           .stub(Topology.prototype, 'selectServer')
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
           .callsFake(function (selector, options, callback) {
             topologySelectServers.restore();
 

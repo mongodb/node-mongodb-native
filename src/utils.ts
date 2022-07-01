@@ -167,7 +167,7 @@ const TO_STRING = (object: unknown) => Object.prototype.toString.call(object);
  * - **NOTE**: the check is based on the `[Symbol.toStringTag]() === 'Object'`
  * @internal
  */
-// eslint-disable-next-line @typescript-eslint/ban-types
+
 export function isObject(arg: unknown): arg is object {
   return '[object Object]' === TO_STRING(arg);
 }

@@ -22,6 +22,7 @@
     "mocha": true,
     "es6": true
   },
+  "reportUnusedDisableDirectives": true,
   "rules": {
     "no-restricted-properties": [
       "error",

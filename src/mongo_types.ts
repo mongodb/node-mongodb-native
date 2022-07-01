@@ -514,8 +514,7 @@ export type NestedPaths<Type> = Type extends
   ? [] | [number, ...NestedPaths<ArrayType>]
   : Type extends Map<string, any>
   ? [string]
-  : // eslint-disable-next-line @typescript-eslint/ban-types
-  Type extends object
+  : Type extends object
   ? {
       [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
         ? [Key]

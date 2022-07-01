@@ -90,7 +90,6 @@ export type SpecialOperator =
   | UnsetOrMatchesOperator
   | SessionLsidOperator;
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type KeysOfUnion<T> = T extends object ? keyof T : never;
 export type SpecialOperatorKey = KeysOfUnion<SpecialOperator>;
 export function isSpecialOperator(value: unknown): value is SpecialOperator {

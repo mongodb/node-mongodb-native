@@ -8,7 +8,7 @@ import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './op
 /**
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export interface GetMoreOptions extends OperationOptions {
   /** Set the batchSize for the getMoreCommand when iterating over the query results. */
   batchSize?: number;
