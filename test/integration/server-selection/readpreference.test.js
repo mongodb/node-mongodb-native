@@ -97,7 +97,6 @@ describe('ReadPreference', function () {
         collection.mapReduce(map, reduce, { out: { inline: 1 } }, function (/* err */) {
           // expect(err).to.not.exist;
 
-          // eslint-disable-line
           client.topology.command = command;
 
           client.close(done);

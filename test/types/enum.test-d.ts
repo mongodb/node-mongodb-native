@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { expectAssignable, expectType } from 'tsd';
 
 import {
