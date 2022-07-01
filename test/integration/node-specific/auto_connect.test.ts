@@ -3,6 +3,8 @@ import { once } from 'events';
 
 import {
   BSONType,
+  ChangeStream,
+  Collection,
   MongoClient,
   MongoNotConnectedError,
   MongoServerError,
@@ -162,35 +164,63 @@ describe('MongoClient auto connect', () => {
   });
 
   context(`class ChangeStream`, { requires: { topology: '!single' } }, () => {
+    let changeCausingClient;
+    let changeCausingCollection: Collection;
+    let collection: Collection;
+    let cs: ChangeStream;
+    beforeEach(async function () {
+      changeCausingClient = this.configuration.newClient();
+      await changeCausingClient
+        .db('auto-connect-change')
+        .createCollection('auto-connect')
+        .catch(() => null);
+
+      changeCausingCollection = changeCausingClient
+        .db('auto-connect-change')
+        .collection('auto-connect');
+
+      collection = client.db('auto-connect-change').collection('auto-connect');
+      cs = collection.watch();
+    });
+
+    afterEach(async function () {
+      await changeCausingClient.close();
+      await cs.close();
+    });
+
     it(`#close()`, async () => {
-      const cs = client.watch();
       await cs.close().catch(error => {
         expect.fail('cs.close should work without connecting: ' + error.message);
       });
     });
 
     it(`#hasNext()`, async () => {
-      const cs = client.watch();
-      await Promise.race([cs.hasNext(), sleep(1)]).catch(() => null);
+      const willHaveNext = cs.hasNext();
+      await once(cs.cursor, 'init');
+      await changeCausingCollection.insertOne({ a: 1 });
+      await willHaveNext;
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#next()`, async () => {
-      const cs = client.watch();
-      await Promise.race([cs.next(), sleep(1)]).catch(() => null);
+      const willBeNext = cs.next();
+      await once(cs.cursor, 'init');
+      await changeCausingCollection.insertOne({ a: 1 });
+      await willBeNext;
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#tryNext()`, async () => {
-      const cs = client.watch();
-      await cs.tryNext().catch(() => null);
+      await cs.tryNext();
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#stream()`, async () => {
-      const cs = client.watch();
       const stream = cs.stream();
-      await Promise.race([stream[Symbol.asyncIterator]().next(), sleep(1)]);
+      const willBeNext = stream[Symbol.asyncIterator]().next();
+      await once(cs.cursor, 'init');
+      await changeCausingCollection.insertOne({ a: 1 });
+      await willBeNext;
       stream.destroy();
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
