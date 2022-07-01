@@ -469,10 +469,7 @@ describe('MongoClient auto connect', () => {
   context(`class Db`, () => {
     it(`#addUser()`, async () => {
       const db = client.db();
-      const error = await db
-        .addUser('neal', 'iLoveJavaScript', { roles: ['dbAdmin'] })
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.not.be.instanceOf(Error);
+      await db.addUser('neal', 'iLoveJavaScript', { roles: ['dbAdmin'] }).catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
@@ -514,10 +511,7 @@ describe('MongoClient auto connect', () => {
 
     it(`#indexInformation()`, async () => {
       const db = client.db();
-      const error = await db
-        .indexInformation('test')
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.not.be.instanceOf(Error);
+      await db.indexInformation('test').catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
@@ -535,10 +529,8 @@ describe('MongoClient auto connect', () => {
 
     it(`#renameCollection()`, async () => {
       const db = client.db();
-      const error = await db
-        .renameCollection('test0', 'test1')
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.not.be.instanceOf(Error);
+      await db.renameCollection('test0', 'test1').catch(() => null);
+
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
@@ -655,48 +647,35 @@ describe('MongoClient auto connect', () => {
   context(`class ListIndexesCursor`, () => {
     it(`#forEach()`, async () => {
       const indexes = client.db().collection('test').listIndexes();
-      const error = await indexes
+      await indexes
         .forEach(item => {
           expect(item).is.an('object');
         })
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.be.null;
+        .catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#hasNext()`, async () => {
       const indexes = client.db().collection('test').listIndexes();
-      const error = await indexes
-        .hasNext()
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.be.null;
+      await indexes.hasNext().catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#next()`, async () => {
       const indexes = client.db().collection('test').listIndexes();
-      const error = await indexes
-        .next()
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.be.null;
+      await indexes.next().catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#toArray()`, async () => {
       const indexes = client.db().collection('test').listIndexes();
-      const error = await indexes
-        .toArray()
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.be.null;
+      await indexes.toArray().catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#tryNext()`, async () => {
       const indexes = client.db().collection('test').listIndexes();
-      const error = await indexes
-        .tryNext()
-        .catch(error => (error instanceof MongoServerError ? null : error));
-      expect(error).to.be.null;
+      await indexes.tryNext().catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
   });
