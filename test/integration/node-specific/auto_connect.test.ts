@@ -171,19 +171,19 @@ describe('MongoClient auto connect', () => {
 
     it(`#hasNext()`, async () => {
       const cs = client.watch();
-      await Promise.race([cs.hasNext(), sleep(1)]);
+      await Promise.race([cs.hasNext(), sleep(1)]).catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#next()`, async () => {
       const cs = client.watch();
-      await Promise.race([cs.next(), sleep(1)]);
+      await Promise.race([cs.next(), sleep(1)]).catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
     it(`#tryNext()`, async () => {
       const cs = client.watch();
-      await cs.tryNext();
+      await cs.tryNext().catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
@@ -492,8 +492,8 @@ describe('MongoClient auto connect', () => {
     });
 
     it(`#profilingLevel()`, async () => {
-      const db = client.db();
-      await db.profilingLevel();
+      const db = client.db('admin');
+      await db.profilingLevel().catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
@@ -513,8 +513,8 @@ describe('MongoClient auto connect', () => {
     });
 
     it(`#setProfilingLevel()`, async () => {
-      const db = client.db();
-      await db.setProfilingLevel(ProfilingLevel.off);
+      const db = client.db('admin');
+      await db.setProfilingLevel(ProfilingLevel.off).catch(() => null);
       expect(client).to.have.property('topology').that.is.instanceOf(Topology);
     });
 
