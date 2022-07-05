@@ -365,6 +365,12 @@ The following steps will walk you through how to run the tests for CSFLE.
 
   `DRIVERS_TOOLS="/path/to/mongodb-labs/drivers-evergreen-tools" .evergreen/run-kms-servers.sh`
 
+1. Set temporary AWS credentials
+
+  ```
+  pip3 install boto3
+  PYTHON="python3" source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/set-temp-creds.sh
+  ```
 
 1. Run the functional tests:
 
