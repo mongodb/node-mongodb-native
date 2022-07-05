@@ -53,6 +53,57 @@ describe('Client Side Encryption Functional', function () {
     }
   });
 
+  describe('Collection', function () {
+    describe('#bulkWrite()', function () {
+      context('when encryption errors', function () {
+        let client;
+
+        beforeEach(function () {
+          client = this.configuration.newClient(
+            {},
+            {
+              autoEncryption: {
+                keyVaultNamespace: 'test.keyvault',
+                kmsProviders: {
+                  local: {
+                    key: 'A'.repeat(128)
+                  }
+                },
+                encryptedFieldsMap: {
+                  'test.coll': {
+                    fields: [
+                      {
+                        path: 'ssn',
+                        keyId: new BSON.UUID('23f786b4-1d39-4c36-ae88-70a663321ec9').toBinary(),
+                        bsonType: 'string'
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          );
+        });
+
+        afterEach(async function () {
+          await client.close();
+        });
+
+        it('bubbles up the mongocrypt error', async function () {
+          try {
+            await client
+              .db('test')
+              .collection('coll')
+              .bulkWrite([{ insertOne: { ssn: 'foo' } }]);
+            expect.fail('expected error to be thrown');
+          } catch (error) {
+            expect(error.message).to.equal('not all keys requested were satisfied');
+          }
+        });
+      });
+    });
+  });
+
   describe('BSON Options', function () {
     beforeEach(function () {
       this.client = this.configuration.newClient();
