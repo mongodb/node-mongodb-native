@@ -300,7 +300,7 @@ const kOptions = Symbol('options');
  * @public
  *
  * @remarks
- * The programmatically provided options take precedent over the URI options.
+ * The programmatically provided options take precedence over the URI options.
  *
  * @example
  * ```js
@@ -552,7 +552,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * Connect to MongoDB using a url
    *
    * @remarks
-   * The programmatically provided options take precedent over the URI options.
+   * The programmatically provided options take precedence over the URI options.
    *
    * @see https://docs.mongodb.org/manual/reference/connection-string/
    */
