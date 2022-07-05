@@ -365,6 +365,13 @@ The following steps will walk you through how to run the tests for CSFLE.
 
   `DRIVERS_TOOLS="/path/to/mongodb-labs/drivers-evergreen-tools" .evergreen/run-kms-servers.sh`
 
+1. Ensure default ~/.aws/config is present:
+
+  ```
+  aws_access_key_id = AWS_ACCESS_KEY_ID
+  aws_secret_access_key = AWS_SECRET_ACCESS_KEY
+  ```
+
 1. Set temporary AWS credentials
 
   ```
