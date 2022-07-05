@@ -7,12 +7,10 @@ import {
   Collection,
   MongoClient,
   MongoNotConnectedError,
-  MongoServerError,
   ProfilingLevel
 } from '../../../src';
 import { Topology } from '../../../src/sdam/topology';
 import { ClientSession } from '../../../src/sessions';
-import { sleep } from '../../tools/utils';
 
 describe('MongoClient auto connect', () => {
   let client: MongoClient;
