@@ -55,16 +55,7 @@ export async function runUnifiedTest(
   const schemaVersion = patchVersion(unifiedSuite.schemaVersion);
   expect(semverSatisfies(schemaVersion, uni.SupportedVersion)).to.be.true;
 
-  // If test.skipReason is specified, the test runner MUST skip this
-  // test and MAY use the string value to log a message.
-  if (test.skipReason) {
-    if (ctx.test) {
-      ctx.test.skipReason = test.skipReason;
-    }
-    ctx.skip();
-  }
-
-  const skipReason = skipFilter(test);
+  const skipReason = test.skipReason ?? skipFilter(test);
 
   if (typeof skipReason === 'string') {
     if (skipReason.length === 0) {
@@ -72,6 +63,12 @@ export async function runUnifiedTest(
     }
     if (ctx.test) {
       ctx.test.skipReason = skipReason;
+    } else if (ctx.currentTest) {
+      ctx.currentTest.skipReason = skipReason;
+    } else {
+      throw new Error(
+        'Attempted to attach a skip reason to a Mocha ctx that has neither a test nor a currentTest'
+      );
     }
     ctx.skip();
   }
