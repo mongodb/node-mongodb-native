@@ -368,8 +368,9 @@ The following steps will walk you through how to run the tests for CSFLE.
 1. Ensure default ~/.aws/config is present:
 
   ```
-  aws_access_key_id = AWS_ACCESS_KEY_ID
-  aws_secret_access_key = AWS_SECRET_ACCESS_KEY
+  [default]
+  aws_access_key_id=AWS_ACCESS_KEY_ID
+  aws_secret_access_key=AWS_SECRET_ACCESS_KEY
   ```
 
 1. Set temporary AWS credentials
@@ -377,6 +378,28 @@ The following steps will walk you through how to run the tests for CSFLE.
   ```
   pip3 install boto3
   PYTHON="python3" source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/set-temp-creds.sh
+  ```
+
+  Alternatively for fish users the following script can be substituted for set-temp-creds.sh:
+
+  ```fish
+  function set_aws_creds
+      set PYTHON_SCRIPT "\
+  import boto3
+  client = boto3.client('sts')
+  credentials = client.get_session_token()['Credentials']
+  print (credentials['AccessKeyId'] + ' ' + credentials['SecretAccessKey'] + ' ' + credentials['SessionToken'])"
+
+      echo $PYTHON_SCRIPT | python3 -
+  end
+
+  set CREDS (set_aws_creds)
+
+  set CSFLE_AWS_TEMP_ACCESS_KEY_ID (echo $CREDS | awk '{print $1}')
+  set CSFLE_AWS_TEMP_SECRET_ACCESS_KEY (echo $CREDS | awk '{print $2}')
+  set CSFLE_AWS_TEMP_SESSION_TOKEN (echo $CREDS | awk '{print $3}')
+
+  set -e CREDS
   ```
 
 1. Run the functional tests:
