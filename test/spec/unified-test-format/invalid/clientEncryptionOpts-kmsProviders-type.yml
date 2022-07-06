@@ -1,0 +1,17 @@
+description: clientEncryptionOpts-kmsProviders-type
+
+schemaVersion: "1.8"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - clientEncryption:
+      id: &clientEncryption0 clientEncryption0
+      clientEncryptionOpts:
+        keyVaultClient: *client0
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders: 0
+
+tests:
+  - description: ""
+    operations: []

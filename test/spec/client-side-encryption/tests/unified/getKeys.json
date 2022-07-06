@@ -1,0 +1,260 @@
+{
+  "description": "getKeys",
+  "schemaVersion": "1.8",
+  "runOnRequirements": [
+    {
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "keyvault"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "datakeys"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "getKeys with zero key documents",
+      "operations": [
+        {
+          "name": "getKeys",
+          "object": "clientEncryption0",
+          "expectResult": []
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "getKeys with single key documents",
+      "operations": [
+        {
+          "name": "createDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "kmsProvider": "local",
+            "opts": {
+              "keyAltNames": [
+                "abc"
+              ]
+            }
+          },
+          "expectResult": {
+            "$$type": "binData"
+          }
+        },
+        {
+          "name": "getKeys",
+          "object": "clientEncryption0",
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "binData"
+              },
+              "keyAltNames": [
+                "abc"
+              ],
+              "keyMaterial": {
+                "$$type": "binData"
+              },
+              "creationDate": {
+                "$$type": "date"
+              },
+              "updateDate": {
+                "$$type": "date"
+              },
+              "status": {
+                "$$type": "int"
+              },
+              "masterKey": {
+                "$$type": "object"
+              }
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "getKeys with many key documents",
+      "operations": [
+        {
+          "name": "createDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "kmsProvider": "local"
+          },
+          "expectResult": {
+            "$$type": "binData"
+          }
+        },
+        {
+          "name": "createDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "kmsProvider": "local"
+          },
+          "expectResult": {
+            "$$type": "binData"
+          }
+        },
+        {
+          "name": "getKeys",
+          "object": "clientEncryption0",
+          "expectResult": [
+            {
+              "_id": {
+                "$$type": "binData"
+              },
+              "keyMaterial": {
+                "$$type": "binData"
+              },
+              "creationDate": {
+                "$$type": "date"
+              },
+              "updateDate": {
+                "$$type": "date"
+              },
+              "status": {
+                "$$type": "int"
+              },
+              "masterKey": {
+                "$$type": "object"
+              }
+            },
+            {
+              "_id": {
+                "$$type": "binData"
+              },
+              "keyMaterial": {
+                "$$type": "binData"
+              },
+              "creationDate": {
+                "$$type": "date"
+              },
+              "updateDate": {
+                "$$type": "date"
+              },
+              "status": {
+                "$$type": "int"
+              },
+              "masterKey": {
+                "$$type": "object"
+              }
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

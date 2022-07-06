@@ -52,23 +52,22 @@ export async function runUnifiedTest(
   expect(ctx).to.exist;
   expect(ctx.configuration).to.exist;
 
+  expect(ctx.test, 'encountered a unified test where the test is undefined').to.exist;
+  expect(ctx.currentTest, '`runUnifiedTest` can only be used inside of it blocks').to.be.undefined;
+
   const schemaVersion = patchVersion(unifiedSuite.schemaVersion);
   expect(semverSatisfies(schemaVersion, uni.SupportedVersion)).to.be.true;
 
-  // If test.skipReason is specified, the test runner MUST skip this
-  // test and MAY use the string value to log a message.
-  if (test.skipReason) {
-    ctx.skipReason = test.skipReason;
-    ctx.skip();
-  }
-
-  const skipReason = skipFilter(test);
+  const skipReason = test.skipReason ?? skipFilter(test);
 
   if (typeof skipReason === 'string') {
     if (skipReason.length === 0) {
       expect.fail(`Test was skipped with an empty skip reason: ${test.description}`);
     }
-    ctx.skipReason = skipReason;
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    ctx.test!.skipReason = skipReason;
+
     ctx.skip();
   }
 

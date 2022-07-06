@@ -1,11 +1,12 @@
-'use strict';
+import * as path from 'path';
 
-const path = require('path');
-const {
-  TestRunnerContext,
+import { loadSpecTests } from '../../spec';
+import {
   gatherTestSuites,
-  generateTopologyTests
-} = require('../../tools/spec-runner');
+  generateTopologyTests,
+  TestRunnerContext
+} from '../../tools/spec-runner';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const isAuthEnabled = process.env.AUTH === 'auth';
 
@@ -62,11 +63,10 @@ const SKIPPED_TESTS = new Set([
   ...(isAuthEnabled ? skippedAuthTests.concat(skippedNoAuthTests) : skippedNoAuthTests)
 ]);
 
-describe('Client Side Encryption', function () {
-  const testContext = new TestRunnerContext();
-  testContext.requiresCSFLE = true;
+describe('Client Side Encryption (Legacy)', function () {
+  const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
-    path.join(__dirname, '../../spec/client-side-encryption/tests'),
+    path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),
     testContext
   );
   after(() => testContext.teardown());
@@ -77,4 +77,11 @@ describe('Client Side Encryption', function () {
   generateTopologyTests(testSuites, testContext, spec => {
     return !SKIPPED_TESTS.has(spec.description);
   });
+});
+
+describe('Client Side Encryption (Unified)', function () {
+  runUnifiedSuite(
+    loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
+    () => 'NODE-4330 - implement the key management API'
+  );
 });

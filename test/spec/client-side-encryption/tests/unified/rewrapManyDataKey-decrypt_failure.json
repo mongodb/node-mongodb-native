@@ -1,0 +1,162 @@
+{
+  "description": "rewrapManyDataKey-decrypt_failure",
+  "schemaVersion": "1.8",
+  "runOnRequirements": [
+    {
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws": {
+              "accessKeyId": {
+                "$$placeholder": 1
+              },
+              "secretAccessKey": {
+                "$$placeholder": 1
+              }
+            },
+            "azure": {
+              "tenantId": {
+                "$$placeholder": 1
+              },
+              "clientId": {
+                "$$placeholder": 1
+              },
+              "clientSecret": {
+                "$$placeholder": 1
+              }
+            },
+            "gcp": {
+              "email": {
+                "$$placeholder": 1
+              },
+              "privateKey": {
+                "$$placeholder": 1
+              }
+            },
+            "kmip": {
+              "endpoint": {
+                "$$placeholder": 1
+              }
+            },
+            "local": {
+              "key": {
+                "$$placeholder": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "keyvault"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "datakeys"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "keyvault",
+      "collectionName": "datakeys",
+      "documents": [
+        {
+          "_id": {
+            "$binary": {
+              "base64": "YXdzYXdzYXdzYXdzYXdzYQ==",
+              "subType": "04"
+            }
+          },
+          "keyAltNames": [
+            "aws_key"
+          ],
+          "keyMaterial": {
+            "$binary": {
+              "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gFXJqbF0Fy872MD7xl56D/2AAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDO7HPisPUlGzaio9vgIBEIB7/Qow46PMh/8JbEUbdXgTGhLfXPE+KIVW7T8s6YEMlGiRvMu7TV0QCIUJlSHPKZxzlJ2iwuz5yXeOag+EdY+eIQ0RKrsJ3b8UTisZYzGjfzZnxUKLzLoeXremtRCm3x47wCuHKd1dhh6FBbYt5TL2tDaj+vL2GBrKat2L",
+              "subType": "00"
+            }
+          },
+          "creationDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "updateDate": {
+            "$date": {
+              "$numberLong": "1641024000000"
+            }
+          },
+          "status": 1,
+          "masterKey": {
+            "provider": "aws",
+            "key": "arn:aws:kms:us-east-2:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+            "region": "us-east-2"
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "rewrap data key that fails during decryption due to invalid masterKey",
+      "operations": [
+        {
+          "name": "rewrapManyDataKey",
+          "object": "clientEncryption0",
+          "arguments": {
+            "filter": {},
+            "opts": {
+              "provider": "local"
+            }
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "keyvault",
+                "command": {
+                  "find": "datakeys",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "majority"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

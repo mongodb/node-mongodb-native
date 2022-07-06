@@ -1,0 +1,12 @@
+description: entity-clientEncryption-clientEncryptionOpts-type
+
+schemaVersion: "1.8"
+
+createEntities:
+  - clientEncryption:
+      id: &clientEncryption0 clientEncryption0
+      clientEncryptionOpts: 0
+
+tests:
+  - description: ""
+    operations: []

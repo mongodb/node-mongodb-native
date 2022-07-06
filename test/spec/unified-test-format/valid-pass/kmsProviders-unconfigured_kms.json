@@ -1,0 +1,39 @@
+{
+  "description": "kmsProviders-unconfigured_kms",
+  "schemaVersion": "1.8",
+  "runOnRequirements": [
+    {
+      "csfle": true
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "clientEncryption": {
+        "id": "clientEncryption0",
+        "clientEncryptionOpts": {
+          "keyVaultClient": "client0",
+          "keyVaultNamespace": "keyvault.datakeys",
+          "kmsProviders": {
+            "aws": {},
+            "azure": {},
+            "gcp": {},
+            "kmip": {},
+            "local": {}
+          }
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "",
+      "skipReason": "DRIVERS-2280: waiting on driver support for on-demand credentials",
+      "operations": []
+    }
+  ]
+}
