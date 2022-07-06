@@ -332,6 +332,10 @@ The following steps will walk you through how to run the tests for CSFLE.
    | `AWS_REGION`            | The AWS region where the KMS resides (e.g., `us-east-1`)                                    |
    | `AWS_CMK_ID`            | The Customer Master Key for the KMS                                                         |
    | `CSFLE_KMS_PROVIDERS`   | The raw EJSON description of the KMS providers. An example of the format is provided below. |
+   | KMIP_TLS_CA_FILE        | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/ca.pem
+   |
+   | KMIP_TLS_CERT_FILE      | /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/x509gen/client.pem
+
 
    The value of the `CSFLE_KMS_PROVIDERS` variable will have the following format:
 
@@ -357,6 +361,46 @@ The following steps will walk you through how to run the tests for CSFLE.
       }
    }
    ```
+1. Start the KMIP servers:
+
+  `DRIVERS_TOOLS="/path/to/mongodb-labs/drivers-evergreen-tools" .evergreen/run-kms-servers.sh`
+
+1. Ensure default ~/.aws/config is present:
+
+  ```
+  [default]
+  aws_access_key_id=AWS_ACCESS_KEY_ID
+  aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+  ```
+
+1. Set temporary AWS credentials
+
+  ```
+  pip3 install boto3
+  PYTHON="python3" source /path/to/mongodb-labs/drivers-evergreen-tools/.evergreen/csfle/set-temp-creds.sh
+  ```
+
+  Alternatively for fish users the following script can be substituted for set-temp-creds.sh:
+
+  ```fish
+  function set_aws_creds
+      set PYTHON_SCRIPT "\
+  import boto3
+  client = boto3.client('sts')
+  credentials = client.get_session_token()['Credentials']
+  print (credentials['AccessKeyId'] + ' ' + credentials['SecretAccessKey'] + ' ' + credentials['SessionToken'])"
+
+      echo $PYTHON_SCRIPT | python3 -
+  end
+
+  set CREDS (set_aws_creds)
+
+  set CSFLE_AWS_TEMP_ACCESS_KEY_ID (echo $CREDS | awk '{print $1}')
+  set CSFLE_AWS_TEMP_SECRET_ACCESS_KEY (echo $CREDS | awk '{print $2}')
+  set CSFLE_AWS_TEMP_SESSION_TOKEN (echo $CREDS | awk '{print $3}')
+
+  set -e CREDS
+  ```
 
 1. Run the functional tests:
 
