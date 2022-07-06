@@ -62,6 +62,8 @@ const kCancelled = Symbol('cancelled');
 const kMetrics = Symbol('metrics');
 /** @internal */
 const kProcessingWaitQueue = Symbol('processingWaitQueue');
+/** @internal */
+const kPoolState = Symbol('poolState');
 
 /** @public */
 export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'generation'> {
@@ -85,6 +87,13 @@ export interface WaitQueueMember {
   timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
 }
+
+/** @internal */
+const PoolState = Object.freeze({
+  paused: 'paused',
+  ready: 'ready',
+  closed: 'closed'
+} as const);
 
 /** @public */
 export interface CloseOptions {
@@ -112,6 +121,8 @@ export type ConnectionPoolEvents = {
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
+  /** @internal */
+  [kPoolState]: typeof PoolState[keyof typeof PoolState];
   /** @internal */
   [kLogger]: Logger;
   /** @internal */
@@ -197,7 +208,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   constructor(options: ConnectionPoolOptions) {
     super();
 
-    this.closed = false;
     this.options = Object.freeze({
       ...options,
       connectionType: Connection,
@@ -216,6 +226,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
     }
 
+    this.closed = false; // TODO: can we remove this in a non-breaking way?
+    this[kPoolState] = PoolState.paused;
     this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
     this[kPending] = 0;
@@ -283,6 +295,13 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    */
   private waitQueueErrorMetrics(): string {
     return this[kMetrics].info(this.options.maxPoolSize);
+  }
+
+  /**
+   * Set the pool state to "ready"
+   */
+  ready(): void {
+    this[kPoolState] = PoolState.ready;
   }
 
   /**
