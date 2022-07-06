@@ -37,14 +37,6 @@ const filter: TestFilter = ({ description }) => {
     return 'TODO(NODE-3891): fix tests broken when AUTH enabled';
   }
 
-  if (description.length === 0) {
-    // This may seem weird, but the kmsProvider valid pass tests really test that the new
-    // client encryption entity is constructed correctly so the "test" section of each
-    // unified test is empty (save the required properties) and the test description
-    // is just the empty string
-    return 'TODO(NODE-4363): add support for client encryption entity to unified runner';
-  }
-
   return false;
 };
 
