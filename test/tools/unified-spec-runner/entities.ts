@@ -38,7 +38,6 @@ import { trace } from './runner';
 import type { ClientEncryption, ClientEntity, EntityDescription } from './schema';
 import {
   createClientEncryption,
-  getCSFLETestDataFromEnvironment,
   makeConnectionString,
   patchCollectionOptions,
   patchDbOptions

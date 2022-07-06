@@ -267,8 +267,8 @@ export function getCSFLETestDataFromEnvironment(environment: Record<string, stri
 }
 
 /**
- * merges kms provider data from the environment variable with kms provider data from the test.  satisfies
- * the following requirements from the spec:
+ * merges kms provider data from the environment variable with kms provider data from the test.
+ * this function satisfies the following requirements from the spec:
  *
  * Drivers MUST NOT configure a KMS provider if it is not given.
  * This is to permit testing conditions where a required KMS provider is not configured.
@@ -277,20 +277,18 @@ export function getCSFLETestDataFromEnvironment(environment: Record<string, stri
  * drivers MUST configure the KMS provider without credentials to permit testing conditions
  * where KMS credentials are needed.
  *
- * If a KMS credentials field has a placeholder value (e.g. `kmsProviders: { aws: { accessKeyId:
- *  { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } } }`),
+ * If a KMS credentials field has a placeholder value
  * drivers MUST replace the field with credentials that satisfy the operations required by the
  * unified test files. Drivers MAY load the credentials from the environment or a configuration
  * file as needed to satisfy the requirements of the given KMS provider and tests.
  *
- * If a KMS credentials field is not given (e.g. the required field `secretAccessKey` is omitted
- * in: `kmsProviders: { aws: { accessKeyId: { $$placeholder: 1 } }`), drivers MUST NOT include
+ * If a KMS credentials field is not given drivers MUST NOT include
  * the field during KMS configuration. This is to permit testing conditions where required KMS
  * credentials fields are not provided.
  *
  * Otherwise, drivers MUST configure the KMS provider with the explicit value of KMS credentials
- * field given in the test file (e.g. `kmsProviders: { aws: { accessKeyId: abc, secretAccessKey: def } }`).
- * This is to permit testing conditions where invalid KMS credentials are provided.
+ * field given in the test file. This is to permit testing conditions where invalid
+ * KMS credentials are provided.
  */
 export function mergeKMSProviders(
   kmsProvidersFromTest: KMSProvidersEntity,
