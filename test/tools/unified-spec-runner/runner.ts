@@ -52,6 +52,9 @@ export async function runUnifiedTest(
   expect(ctx).to.exist;
   expect(ctx.configuration).to.exist;
 
+  expect(ctx.test, 'encountered a unified test where the test is undefined').to.exist;
+  expect(ctx.currentTest, '`runUnifiedTest` can only be used inside of it blocks').to.be.undefined;
+
   const schemaVersion = patchVersion(unifiedSuite.schemaVersion);
   expect(semverSatisfies(schemaVersion, uni.SupportedVersion)).to.be.true;
 
@@ -61,15 +64,10 @@ export async function runUnifiedTest(
     if (skipReason.length === 0) {
       expect.fail(`Test was skipped with an empty skip reason: ${test.description}`);
     }
-    if (ctx.test) {
-      ctx.test.skipReason = skipReason;
-    } else if (ctx.currentTest) {
-      ctx.currentTest.skipReason = skipReason;
-    } else {
-      throw new Error(
-        'Attempted to attach a skip reason to a Mocha ctx that has neither a test nor a currentTest'
-      );
-    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    ctx.test!.skipReason = skipReason;
+
     ctx.skip();
   }
 
