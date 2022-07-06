@@ -1,3 +1,5 @@
+import { json } from 'stream/consumers';
+
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
@@ -6,7 +8,7 @@ import type { OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, maxWireVersion, MongoDBNamespace, parseIndexOptions } from '../utils';
+import { Callback, isObject, maxWireVersion, MongoDBNamespace } from '../utils';
 import {
   CollationOptions,
   CommandOperation,
@@ -51,6 +53,11 @@ const VALID_INDEX_OPTIONS = new Set([
 
 /** @public */
 export type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
+function isIndexDirection(x: any): x is IndexDirection {
+  return (
+    typeof x === 'number' || x === '2d' || x === '2dsphere' || x === 'text' || x === 'geoHaystack'
+  );
+}
 
 /** @public */
 export type IndexSpecification = OneOrMore<
@@ -126,14 +133,42 @@ export interface CreateIndexesOptions extends CommandOperationOptions {
   hidden?: boolean;
 }
 
-function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
-  const indexParameters = parseIndexOptions(indexSpec);
+export function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
+  function getFieldHash(indexSpec: IndexSpecification) {
+    let fieldHash: Map<string, IndexDirection> = new Map();
+
+    let indexSpecArr: IndexSpecification[];
+
+    // wrap in array if needed
+    if (!Array.isArray(indexSpec) || (indexSpec.length === 2 && isIndexDirection(indexSpec[1]))) {
+      indexSpecArr = [indexSpec];
+    } else {
+      indexSpecArr = indexSpec;
+    }
+
+    // iterate through array and handle different types
+    indexSpecArr.forEach((f: any) => {
+      if ('string' === typeof f) {
+        fieldHash.set(f, 1);
+      } else if (Array.isArray(f)) {
+        fieldHash.set(f[0], f[1]);
+      } else if (isObject(f)) {
+        for (const [key, value] of Object.entries(f)) {
+          fieldHash.set(key, value);
+        }
+      }
+    });
+
+    return fieldHash;
+  }
+
+  const fieldHash = getFieldHash(indexSpec);
 
   // Generate the index name
-  const name = typeof options.name === 'string' ? options.name : indexParameters.name;
+  const name = typeof options.name === 'string' ? options.name : null;
 
   // Set up the index
-  const finalIndexSpec: Document = { name, key: indexParameters.fieldHash };
+  const finalIndexSpec: Document = { name, key: fieldHash };
 
   // merge valid index options into the index spec
   for (const optionName in options) {
@@ -272,8 +307,7 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
     //   coll.createIndex({ a: 1 });
     //   coll.createIndex([['a', 1]]);
     // createIndexes is always called with an array of index spec objects
-
-    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
+    super(parent, collectionName, [makeIndexSpec(indexSpec, options)]);
   }
   override execute(
     server: Server,

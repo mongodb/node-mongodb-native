@@ -104,63 +104,6 @@ export function normalizeHintField(hint?: Hint): Hint | undefined {
   return finalHint;
 }
 
-interface IndexOptions {
-  name: string;
-  keys?: string[];
-  fieldHash: Document;
-}
-
-/**
- * Create an index specifier based on
- * @internal
- */
-export function parseIndexOptions(indexSpec: IndexSpecification): IndexOptions {
-  const fieldHash: { [key: string]: IndexDirection } ={};
-  const indexes = [];
-  let keys;
-
-  // Get all the fields accordingly
-  if ('string' === typeof indexSpec) {
-    // 'type'
-    indexes.push(indexSpec + '_' + 1);
-    fieldHash[indexSpec] = 1;
-  } else if (Array.isArray(indexSpec)) {
-    indexSpec.forEach((f: any) => {
-      if ('string' === typeof f) {
-        // [{location:'2d'}, 'type']
-        indexes.push(f + '_' + 1);
-        fieldHash[f] = 1;
-      } else if (Array.isArray(f)) {
-        // [['location', '2d'],['type', 1]]
-        indexes.push(f[0] + '_' + (f[1] || 1));
-        fieldHash[f[0]] = f[1] || 1;
-      } else if (isObject(f)) {
-        // [{location:'2d'}, {type:1}]
-        keys = Object.keys(f);
-        keys.forEach(k => {
-          indexes.push(k + '_' + (f as AnyOptions)[k]);
-          fieldHash[k] = (f as AnyOptions)[k];
-        });
-      } else {
-        // undefined (ignore)
-      }
-    });
-  } else if (isObject(indexSpec)) {
-    // {location:'2d', type:1}
-    keys = Object.keys(indexSpec);
-    Object.entries(indexSpec).forEach(([key, value]) => {
-      indexes.push(key + '_' + value);
-      fieldHash[key] = value;
-    });
-  }
-
-  return {
-    name: indexes.join('_'),
-    keys: keys,
-    fieldHash: fieldHash
-  };
-}
-
 const TO_STRING = (object: unknown) => Object.prototype.toString.call(object);
 /**
  * Checks if arg is an Object:
