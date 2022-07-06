@@ -291,6 +291,10 @@ export interface ExpectedError {
  */
 export type TestFilter = (test: Test) => string | false;
 
+/**
+ * This interface represents the bare minimum of type information needed to get *some* type
+ * safety on the client encryption object in unified tests.
+ */
 export interface ClientEncryption {
   // eslint-disable-next-line @typescript-eslint/no-misused-new
   new (client: MongoClient, options: any): ClientEncryption;

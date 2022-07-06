@@ -1,4 +1,3 @@
-import { EJSON } from 'bson';
 import { expect } from 'chai';
 
 import { ChangeStream } from '../../../src/change_stream';
@@ -38,7 +37,7 @@ import type { TestConfiguration } from '../runner/config';
 import { trace } from './runner';
 import type { ClientEncryption, ClientEntity, EntityDescription } from './schema';
 import {
-  createClientEncryptionEntity,
+  createClientEncryption,
   getCSFLETestDataFromEnvironment,
   makeConnectionString,
   patchCollectionOptions,
@@ -439,14 +438,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
       } else if ('stream' in entity) {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
       } else if ('clientEncryption' in entity) {
-        const { kmsProvidersFromEnvironment, tlsOptions } = getCSFLETestDataFromEnvironment();
-
-        const clientEncryption = createClientEncryptionEntity(
-          map,
-          entity.clientEncryption,
-          kmsProvidersFromEnvironment,
-          tlsOptions
-        );
+        const clientEncryption = createClientEncryption(map, entity.clientEncryption);
 
         map.set(entity.clientEncryption.id, clientEncryption);
       } else {

@@ -111,7 +111,6 @@ export async function topologySatisfies(
 
   if (typeof r.csfle === 'boolean') {
     if (r.csfle) {
-      // arbitrary determination that csfle is enabled?
       ok &&= typeof process.env.TEST_CSFLE === 'string' && process.env.TEST_CSFLE === 'true';
 
       if (!ok && skipReason == null) {
@@ -197,12 +196,15 @@ export function makeConnectionString(
 }
 
 /**
- * @throws MongoMissingDependencyError when mongodb-client-encryption isn't installed
+ * attempts to import mongodb-client-encryption and extract the client encryption class for
+ * use in the csfle unified tests
+ *
+ * @throws MongoMissingDependencyError when mongodb-client-encryption is not installed
  */
-export function importMongoDBClientEncryption(): ClientEncryption {
-  const mongodbClientEncryption = getMongoDBClientEncryption();
-
+export function getClientEncryptionClass(): ClientEncryption {
   try {
+    const mongodbClientEncryption = getMongoDBClientEncryption();
+
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { ClientEncryption } = mongodbClientEncryption.extension(require('../../../src/index'));
     return ClientEncryption;
@@ -213,43 +215,52 @@ export function importMongoDBClientEncryption(): ClientEncryption {
   }
 }
 
-export function getCSFLETestDataFromEnvironment(): {
-  kmsProvidersFromEnvironment: Document;
+/**
+ * parses the process.env for three required environment variables
+ *
+ * - CSFLE_KMS_PROVIDERS
+ * - KMIP_TLS_CA_FILE
+ * - KMIP_TLS_CERT_FILE
+ *
+ * @throws if any required environment variable is undefined, or if we are unable to
+ *   parse the CLSFE_KMS_PROVIDERS from the environment
+ */
+export function getCSFLETestDataFromEnvironment(environment: Record<string, string | undefined>): {
+  kmsProviders: Document;
   tlsOptions: AutoEncryptionOptions['tlsOptions'];
 } {
-  let kmsProvidersFromEnvironment;
-  try {
-    kmsProvidersFromEnvironment = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS ?? '', {
-      relaxed: false
-    });
-  } catch {
+  if (environment.CSFLE_KMS_PROVIDERS == null) {
     throw new Error(
       'CSFLE_KMS_PROVIDERS is required to run the csfle tests.  Please make sure it is set in the environment.'
     );
   }
+  let parsedKMSProviders;
+  try {
+    parsedKMSProviders = EJSON.parse(environment.CSFLE_KMS_PROVIDERS ?? '', {
+      relaxed: false
+    });
+  } catch {
+    throw new Error('Malformed CSFLE_KMS_PROVIDERS provided to unified tests.');
+  }
 
-  const tlsCAFile = process.env.KMIP_TLS_CA_FILE;
-
-  if (tlsCAFile == null) {
+  if (environment.KMIP_TLS_CA_FILE == null) {
     throw new Error(
       'KMIP_TLS_CA_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
     );
   }
 
-  const tlsCertificateKeyFile = process.env.KMIP_TLS_CERT_FILE;
-
-  if (tlsCertificateKeyFile == null) {
+  if (environment.KMIP_TLS_CERT_FILE == null) {
     throw new Error(
       'KMIP_TLS_CERT_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
     );
   }
 
   return {
-    kmsProvidersFromEnvironment,
+    kmsProviders: parsedKMSProviders,
     tlsOptions: {
       kmip: {
-        tlsCAFile,
-        tlsCertificateKeyFile
+        tlsCAFile: environment.KMIP_TLS_CA_FILE,
+        tlsCertificateKeyFile: environment.KMIP_TLS_CERT_FILE
       }
     }
   };
@@ -320,15 +331,13 @@ export function mergeKMSProviders(
   return options;
 }
 
-export function createClientEncryptionEntity(
+export function createClientEncryption(
   map: EntitiesMap,
-  entity: ClientEncryptionEntity,
-  kmsProvidersFromEnvironment: Document,
-  tlsOptions: AutoEncryptionOptions['tlsOptions']
+  entity: ClientEncryptionEntity
 ): ClientEncryption {
   let ClientEncryptionClass;
   try {
-    ClientEncryptionClass = importMongoDBClientEncryption();
+    ClientEncryptionClass = getClientEncryptionClass();
   } catch {
     throw new Error(
       'unable to import client encryption.  has mongodb-client-encryption been installed?'
@@ -349,7 +358,12 @@ export function createClientEncryptionEntity(
     );
   }
 
+  const { kmsProviders: kmsProvidersFromEnvironment, tlsOptions } = getCSFLETestDataFromEnvironment(
+    process.env
+  );
+
   const kmsProviders = mergeKMSProviders(kmsProvidersFromTest, kmsProvidersFromEnvironment);
+
   const autoEncryptionOptions: AutoEncryptionOptions = {
     keyVaultClient: clientEntity,
     kmsProviders,
