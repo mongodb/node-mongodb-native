@@ -1519,7 +1519,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // Store the result in insertPayload.
         insertPayload = await clientEncryption.encrypt('encrypted indexed value', {
           keyId: key1Id,
-          algorithm: 'Indexed'
+          algorithm: 'Indexed',
+          contentionFactor: 0
         });
         // Use encryptedClient to insert the document { "encryptedIndexed": <insertPayload> }
         // into db.explicit_encryption.
@@ -1536,7 +1537,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         findPayload = await clientEncryption.encrypt('encrypted indexed value', {
           keyId: key1Id,
           algorithm: 'Indexed',
-          queryType: 'equality'
+          queryType: 'equality',
+          contentionFactor: 0
         });
       });
 
@@ -1590,7 +1592,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           findPayload = await clientEncryption.encrypt('encrypted indexed value', {
             keyId: key1Id,
             algorithm: 'Indexed',
-            queryType: 'equality'
+            queryType: 'equality',
+            contentionFactor: 0
           });
           // Use clientEncryption to encrypt the value "encrypted indexed value" with these EncryptOpts:
           // class EncryptOpts {
@@ -1682,7 +1685,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         // Store the result in payload.
         payload = await clientEncryption.encrypt('encrypted indexed value', {
           keyId: key1Id,
-          algorithm: 'Indexed'
+          algorithm: 'Indexed',
+          contentionFactor: 0
         });
       });
 
