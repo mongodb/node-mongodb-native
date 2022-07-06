@@ -7,7 +7,8 @@ import {
   Collection,
   MongoClient,
   MongoNotConnectedError,
-  ProfilingLevel
+  ProfilingLevel,
+  TopologyType
 } from '../../../src';
 import { Topology } from '../../../src/sdam/topology';
 import { ClientSession } from '../../../src/sessions';
@@ -201,12 +202,15 @@ describe('When executing an operation for the first time', () => {
     });
   });
 
-  describe(`class ChangeStream`, { requires: { topology: '!single' } }, () => {
+  describe(`class ChangeStream`, () => {
     let changeCausingClient;
     let changeCausingCollection: Collection;
     let collection: Collection;
     let cs: ChangeStream;
     beforeEach(async function () {
+      if (this.configuration.topologyType === TopologyType.Single) {
+        return;
+      }
       changeCausingClient = this.configuration.newClient();
       await changeCausingClient
         .db('auto-connect-change')
@@ -222,11 +226,11 @@ describe('When executing an operation for the first time', () => {
     });
 
     afterEach(async function () {
-      await changeCausingClient.close();
-      await cs.close();
+      await changeCausingClient?.close();
+      await cs?.close();
     });
 
-    describe(`#close()`, () => {
+    describe(`#close()`, { requires: { topology: '!single' } }, () => {
       it('should connect the client', async () => {
         await cs.close().catch(error => {
           expect.fail('cs.close should work without connecting: ' + error.message);
@@ -234,7 +238,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#hasNext()`, () => {
+    describe(`#hasNext()`, { requires: { topology: '!single' } }, () => {
       it('should connect the client', async () => {
         const willHaveNext = cs.hasNext();
         await once(cs.cursor, 'init');
@@ -244,7 +248,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#next()`, () => {
+    describe(`#next()`, { requires: { topology: '!single' } }, () => {
       it('should connect the client', async () => {
         const willBeNext = cs.next();
         await once(cs.cursor, 'init');
@@ -254,14 +258,14 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#tryNext()`, () => {
+    describe(`#tryNext()`, { requires: { topology: '!single' } }, () => {
       it('should connect the client', async () => {
         await cs.tryNext();
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       });
     });
 
-    describe(`#stream()`, () => {
+    describe(`#stream()`, { requires: { topology: '!single' } }, () => {
       it('should connect the client', async () => {
         const stream = cs.stream();
         const willBeNext = stream[Symbol.asyncIterator]().next();
