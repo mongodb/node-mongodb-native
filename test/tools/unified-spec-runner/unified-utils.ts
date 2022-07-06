@@ -1,11 +1,28 @@
+import { EJSON } from 'bson';
 import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
-import type { CollectionOptions, DbOptions, Document, MongoClient } from '../../../src';
+import {
+  AutoEncryptionOptions,
+  CollectionOptions,
+  DbOptions,
+  Document,
+  MongoClient,
+  MongoMissingDependencyError
+} from '../../../src';
+import { getMongoDBClientEncryption } from '../../../src/utils';
 import { shouldRunServerlessTest } from '../../tools/utils';
-import type { CollectionOrDatabaseOptions, RunOnRequirement } from './schema';
+import { EntitiesMap } from './entities';
+import type {
+  ClientEncryption,
+  ClientEncryptionEntity,
+  CollectionOrDatabaseOptions,
+  KMSProvidersEntity,
+  RunOnRequirement,
+  StringOrPlaceholder
+} from './schema';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {
@@ -92,6 +109,23 @@ export async function topologySatisfies(
     if (!ok && skipReason == null) skipReason = `has serverless set to ${r.serverless}`;
   }
 
+  if (typeof r.csfle === 'boolean') {
+    if (r.csfle) {
+      // arbitrary determination that csfle is enabled?
+      ok &&= typeof process.env.TEST_CSFLE === 'string' && process.env.TEST_CSFLE === 'true';
+
+      if (!ok && skipReason == null) {
+        skipReason = `requires csfle but the TEST_CSFLE environment variable is not set`;
+      }
+    } else {
+      ok &&= typeof process.env.TEST_CSFLE === 'undefined';
+
+      if (!ok && skipReason == null) {
+        skipReason = `requires no csfle but the TEST_CSFLE environment variable is set`;
+      }
+    }
+  }
+
   if (!ok && skipReason != null) {
     if (ctx.currentTest) {
       // called from beforeEach hook
@@ -160,4 +194,169 @@ export function makeConnectionString(
     connectionString.searchParams.set(name, String(value));
   }
   return connectionString.toString();
+}
+
+/**
+ * @throws MongoMissingDependencyError when mongodb-client-encryption isn't installed
+ */
+export function importMongoDBClientEncryption(): ClientEncryption {
+  const mongodbClientEncryption = getMongoDBClientEncryption();
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { ClientEncryption } = mongodbClientEncryption.extension(require('../../../src/index'));
+    return ClientEncryption;
+  } catch {
+    throw new MongoMissingDependencyError(
+      'Attempting to import mongodb-client-encryption but it is not installed.'
+    );
+  }
+}
+
+export function getCSFLETestDataFromEnvironment(): {
+  kmsProvidersFromEnvironment: Document;
+  tlsOptions: AutoEncryptionOptions['tlsOptions'];
+} {
+  let kmsProvidersFromEnvironment;
+  try {
+    kmsProvidersFromEnvironment = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS ?? '', {
+      relaxed: false
+    });
+  } catch {
+    throw new Error(
+      'CSFLE_KMS_PROVIDERS is required to run the csfle tests.  Please make sure it is set in the environment.'
+    );
+  }
+
+  const tlsCAFile = process.env.KMIP_TLS_CA_FILE;
+
+  if (tlsCAFile == null) {
+    throw new Error(
+      'KMIP_TLS_CA_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
+    );
+  }
+
+  const tlsCertificateKeyFile = process.env.KMIP_TLS_CERT_FILE;
+
+  if (tlsCertificateKeyFile == null) {
+    throw new Error(
+      'KMIP_TLS_CERT_FILE is required to run the csfle tests.  Please make sure it is set in the environment.'
+    );
+  }
+
+  return {
+    kmsProvidersFromEnvironment,
+    tlsOptions: {
+      kmip: {
+        tlsCAFile,
+        tlsCertificateKeyFile
+      }
+    }
+  };
+}
+
+/**
+ * merges kms provider data from the environment variable with kms provider data from the test.  satisfies
+ * the following requirements from the spec:
+ *
+ * Drivers MUST NOT configure a KMS provider if it is not given.
+ * This is to permit testing conditions where a required KMS provider is not configured.
+ *
+ * If a KMS provider is given as an empty document (e.g.`kmsProviders: { aws: {} }`),
+ * drivers MUST configure the KMS provider without credentials to permit testing conditions
+ * where KMS credentials are needed.
+ *
+ * If a KMS credentials field has a placeholder value (e.g. `kmsProviders: { aws: { accessKeyId:
+ *  { $$placeholder: 1 }, secretAccessKey: { $$placeholder: 1 } } }`),
+ * drivers MUST replace the field with credentials that satisfy the operations required by the
+ * unified test files. Drivers MAY load the credentials from the environment or a configuration
+ * file as needed to satisfy the requirements of the given KMS provider and tests.
+ *
+ * If a KMS credentials field is not given (e.g. the required field `secretAccessKey` is omitted
+ * in: `kmsProviders: { aws: { accessKeyId: { $$placeholder: 1 } }`), drivers MUST NOT include
+ * the field during KMS configuration. This is to permit testing conditions where required KMS
+ * credentials fields are not provided.
+ *
+ * Otherwise, drivers MUST configure the KMS provider with the explicit value of KMS credentials
+ * field given in the test file (e.g. `kmsProviders: { aws: { accessKeyId: abc, secretAccessKey: def } }`).
+ * This is to permit testing conditions where invalid KMS credentials are provided.
+ */
+export function mergeKMSProviders(
+  kmsProvidersFromTest: KMSProvidersEntity,
+  kmsProvidersFromEnvironment: Document
+): NonNullable<AutoEncryptionOptions['kmsProviders']> {
+  const isPlaceholderValue = (value: StringOrPlaceholder) =>
+    typeof value !== 'string' && typeof value.$$placeholder !== 'undefined';
+
+  const options = {};
+
+  const validKMSProviders: Array<keyof KMSProvidersEntity> = [
+    'kmip',
+    'local',
+    'aws',
+    'azure',
+    'gcp'
+  ];
+
+  for (const provider of validKMSProviders) {
+    if (!(provider in kmsProvidersFromTest)) continue;
+
+    const providerDataFromTest = kmsProvidersFromTest[provider];
+    const providerDataFromEnvironment = kmsProvidersFromEnvironment[provider];
+
+    const providerOptions = {};
+
+    for (const [key, value] of Object.entries(providerDataFromTest ?? {})) {
+      if (isPlaceholderValue(value)) {
+        providerOptions[key] = providerDataFromEnvironment[key];
+      } else {
+        providerOptions[key] = value;
+      }
+    }
+
+    options[provider] = providerOptions;
+  }
+
+  return options;
+}
+
+export function createClientEncryptionEntity(
+  map: EntitiesMap,
+  entity: ClientEncryptionEntity,
+  kmsProvidersFromEnvironment: Document,
+  tlsOptions: AutoEncryptionOptions['tlsOptions']
+): ClientEncryption {
+  let ClientEncryptionClass;
+  try {
+    ClientEncryptionClass = importMongoDBClientEncryption();
+  } catch {
+    throw new Error(
+      'unable to import client encryption.  has mongodb-client-encryption been installed?'
+    );
+  }
+
+  const { clientEncryptionOpts } = entity;
+  const {
+    keyVaultClient,
+    keyVaultNamespace,
+    kmsProviders: kmsProvidersFromTest
+  } = clientEncryptionOpts;
+
+  const clientEntity = map.getEntity('client', keyVaultClient, false);
+  if (!clientEntity) {
+    throw new Error(
+      'unable to get client entity required by client encryption entity in unified test'
+    );
+  }
+
+  const kmsProviders = mergeKMSProviders(kmsProvidersFromTest, kmsProvidersFromEnvironment);
+  const autoEncryptionOptions: AutoEncryptionOptions = {
+    keyVaultClient: clientEntity,
+    kmsProviders,
+    keyVaultNamespace,
+    tlsOptions
+  };
+
+  const clientEncryption = new ClientEncryptionClass(clientEntity, autoEncryptionOptions);
+  return clientEncryption;
 }
