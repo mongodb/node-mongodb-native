@@ -1,7 +1,8 @@
 import { expectNotType, expectType } from 'tsd';
 
+import type { ListCollectionsCursor } from '../../src/cursor/list_collections_cursor';
 import { MongoClient } from '../../src/mongo_client';
-import type { CollectionInfo, ListCollectionsCursor } from '../../src/operations/list_collections';
+import type { CollectionInfo } from '../../src/operations/list_collections';
 
 const db = new MongoClient('').db();
 

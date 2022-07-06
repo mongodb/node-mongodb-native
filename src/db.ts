@@ -4,6 +4,7 @@ import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './chang
 import { Collection, CollectionOptions } from './collection';
 import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
+import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { MongoAPIError, MongoInvalidArgumentError } from './error';
 import { Logger, LoggerOptions } from './logger';
 import type { MongoClient, PkFactory } from './mongo_client';
@@ -26,11 +27,7 @@ import {
   IndexInformationOperation,
   IndexSpecification
 } from './operations/indexes';
-import {
-  CollectionInfo,
-  ListCollectionsCursor,
-  ListCollectionsOptions
-} from './operations/list_collections';
+import type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
 import { ProfilingLevelOperation, ProfilingLevelOptions } from './operations/profiling_level';
 import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
 import { RenameOperation, RenameOptions } from './operations/rename';

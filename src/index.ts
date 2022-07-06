@@ -4,13 +4,13 @@ import { Collection } from './collection';
 import { AbstractCursor } from './cursor/abstract_cursor';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
+import { ListCollectionsCursor } from './cursor/list_collections_cursor';
+import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import { Db } from './db';
 import { GridFSBucket } from './gridfs';
 import { Logger } from './logger';
 import { MongoClient } from './mongo_client';
 import { CancellationToken } from './mongo_types';
-import { ListIndexesCursor } from './operations/indexes';
-import { ListCollectionsCursor } from './operations/list_collections';
 import { PromiseProvider } from './promise_provider';
 
 export {
