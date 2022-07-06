@@ -399,7 +399,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this[kGeneration] += 1;
     }
 
-    this.emit('connectionPoolCleared', new ConnectionPoolClearedEvent(this, serviceId));
+    this.emit(
+      ConnectionPool.CONNECTION_POOL_CLEARED,
+      new ConnectionPoolClearedEvent(this, serviceId)
+    );
   }
 
   /** Close the pool */
