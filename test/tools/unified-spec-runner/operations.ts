@@ -464,6 +464,61 @@ operations.set('rename', async ({ entities, operation }) => {
   return collection.rename(to, options);
 });
 
+operations.set('createDataKey', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { kmsProvider, opts } = operation.arguments ?? {};
+
+  return clientEncryption.createDataKey(kmsProvider, opts);
+});
+
+operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { filter, opts } = operation.arguments ?? {};
+
+  return clientEncryption.rewrapManyDataKey(filter, opts);
+});
+
+operations.set('deleteKey', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { id } = operation.arguments ?? {};
+
+  return clientEncryption.deleteKey(id);
+});
+
+operations.set('getKey', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { id } = operation.arguments ?? {};
+
+  return clientEncryption.getKey(id);
+});
+
+operations.set('getKeys', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+
+  return clientEncryption.getKeys();
+});
+
+operations.set('addKeyAltName', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { id, keyAltName } = operation.arguments ?? {};
+
+  return clientEncryption.addKeyAltName(id, keyAltName);
+});
+
+operations.set('removeKeyAltName', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { id, keyAltName } = operation.arguments ?? {};
+
+  return clientEncryption.removeKeyAltName(id, keyAltName);
+});
+
+operations.set('getKeyByAltName', async ({ entities, operation }) => {
+  const clientEncryption = entities.getEntity('clientEncryption', operation.object);
+  const { keyAltName } = operation.arguments ?? {};
+
+  return clientEncryption.getKeyByAltName(keyAltName);
+});
+
 export async function executeOperationAndCheck(
   operation: OperationDescription,
   entities: EntitiesMap,
