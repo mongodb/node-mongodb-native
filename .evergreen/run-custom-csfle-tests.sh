@@ -41,6 +41,7 @@ pushd libmongocrypt
 git fetch --tags
 git checkout "$CSFLE_GIT_REF" -b csfle-custom
 echo "checked out libmongocrypt at $(git rev-parse HEAD)"
+CSFLE_WORKING_DIR=$(pwd)
 popd # libmongocrypt
 
 git clone https://github.com/mongodb/mongo-c-driver.git
@@ -53,7 +54,7 @@ popd # mongo-c-driver
 pushd libmongocrypt/bindings/node
 
 npm install --production --ignore-scripts
-source ./.evergreen/find_cmake.sh
+source "$CSFLE_WORKING_DIR/.evergreen/find-cmake.sh"
 bash ./etc/build-static.sh
 
 popd # libmongocrypt/bindings/node
