@@ -26,6 +26,7 @@ export const TOPOLOGY_DESCRIPTION_CHANGED = 'topologyDescriptionChanged' as cons
 export const CONNECTION_POOL_CREATED = 'connectionPoolCreated' as const;
 export const CONNECTION_POOL_CLOSED = 'connectionPoolClosed' as const;
 export const CONNECTION_POOL_CLEARED = 'connectionPoolCleared' as const;
+export const CONNECTION_POOL_READY = 'connectionPoolReady' as const;
 export const CONNECTION_CREATED = 'connectionCreated' as const;
 export const CONNECTION_READY = 'connectionReady' as const;
 export const CONNECTION_CLOSED = 'connectionClosed' as const;

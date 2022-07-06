@@ -13,6 +13,7 @@ import {
   CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_CLOSED,
   CONNECTION_POOL_CREATED,
+  CONNECTION_POOL_READY,
   CONNECTION_READY
 } from '../constants';
 import { MongoError, MongoInvalidArgumentError, MongoRuntimeError } from '../error';
@@ -31,6 +32,7 @@ import {
   ConnectionPoolClearedEvent,
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
+  ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './connection_pool_events';
 import { PoolClosedError, WaitQueueTimeoutError } from './errors';
@@ -103,6 +105,7 @@ export interface CloseOptions {
 /** @public */
 export type ConnectionPoolEvents = {
   connectionPoolCreated(event: ConnectionPoolCreatedEvent): void;
+  connectionPoolReady(event: ConnectionPoolReadyEvent): void;
   connectionPoolClosed(event: ConnectionPoolClosedEvent): void;
   connectionPoolCleared(event: ConnectionPoolClearedEvent): void;
   connectionCreated(event: ConnectionCreatedEvent): void;
@@ -167,6 +170,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * @event
    */
   static readonly CONNECTION_POOL_CLEARED = CONNECTION_POOL_CLEARED;
+  /**
+   * Emitted each time the connection pool is marked ready
+   * @event
+   */
+  static readonly CONNECTION_POOL_READY = CONNECTION_POOL_READY;
   /**
    * Emitted when a connection is created.
    * @event
@@ -309,6 +317,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    */
   ready(): void {
     this[kPoolState] = PoolState.ready;
+    this.emit(ConnectionPool.CONNECTION_POOL_READY, new ConnectionPoolReadyEvent(this));
   }
 
   /**
