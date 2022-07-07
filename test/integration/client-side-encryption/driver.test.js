@@ -7,14 +7,6 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const metadata = {
-  requires: {
-    clientSideEncryption: true,
-    mongodb: '>=4.2.0',
-    topology: '!load-balanced'
-  }
-};
-
 describe('Client Side Encryption Functional', function () {
   const dataDbName = 'db';
   const dataCollName = 'coll';
@@ -61,8 +53,8 @@ describe('Client Side Encryption Functional', function () {
     }
   });
 
-  describe('Collection', function () {
-    describe('#bulkWrite()', function () {
+  describe('Collection', metadata, function () {
+    describe('#bulkWrite()', metadata, function () {
       context('when encryption errors', function () {
         let client;
 
