@@ -84,7 +84,8 @@ describe('Client Side Encryption (Unified)', function () {
   const filter: TestFilter = ({ description }) => {
     if (
       description.includes('create datakey with') ||
-      description.includes('create data key with')
+      description.includes('create data key with') ||
+      description.includes('rewrap')
     ) {
       return false;
     }
