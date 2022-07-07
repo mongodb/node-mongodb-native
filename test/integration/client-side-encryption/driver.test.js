@@ -97,8 +97,9 @@ describe('Client Side Encryption Functional', function () {
               .bulkWrite([{ insertOne: { ssn: 'foo' } }]);
             expect.fail('expected error to be thrown');
           } catch (error) {
-            // libmongocrypt 1.5.0 GA now errors on jsonSchema not being present.
-            expect(error.message).to.equal('jsonSchema is a required command field');
+            const expected =
+              /not all keys requested were satisfied|jsonSchema is a required command field/;
+            expect(error.message).to.equal(expected);
           }
         });
       });
