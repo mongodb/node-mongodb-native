@@ -1,5 +1,3 @@
-import { json } from 'stream/consumers';
-
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
