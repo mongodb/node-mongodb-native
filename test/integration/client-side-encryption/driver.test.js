@@ -89,7 +89,7 @@ describe('Client Side Encryption Functional', function () {
           await client.close();
         });
 
-        it('bubbles up the mongocrypt error', async function () {
+        it('bubbles up the error', async function () {
           try {
             await client
               .db('test')
@@ -97,9 +97,7 @@ describe('Client Side Encryption Functional', function () {
               .bulkWrite([{ insertOne: { ssn: 'foo' } }]);
             expect.fail('expected error to be thrown');
           } catch (error) {
-            const expected =
-              /not all keys requested were satisfied|jsonSchema is a required command field/;
-            expect(error.message).to.equal(expected);
+            expect(error.name).to.equal('MongoBulkWriteError');
           }
         });
       });
