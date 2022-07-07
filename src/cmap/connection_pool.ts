@@ -35,7 +35,7 @@ import {
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './connection_pool_events';
-import { PoolClosedError, WaitQueueTimeoutError } from './errors';
+import { PoolClearedError, PoolClosedError, WaitQueueTimeoutError } from './errors';
 import { ConnectionPoolMetrics } from './metrics';
 
 /** @internal */
@@ -331,12 +331,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCheckOutStartedEvent(this)
     );
 
-    if (this.closed) {
+    // TODO: combine these into check for !ready?
+    if (this.closed || this[kPoolState] === PoolState.paused) {
+      const reason = this.closed ? 'poolClosed' : 'connectionError';
+      const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
       this.emit(
         ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-        new ConnectionCheckOutFailedEvent(this, 'poolClosed')
+        new ConnectionCheckOutFailedEvent(this, reason)
       );
-      callback(new PoolClosedError(this));
+      callback(error);
       return;
     }
 
