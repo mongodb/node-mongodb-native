@@ -7,6 +7,14 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
+const metadata = {
+  requires: {
+    clientSideEncryption: true,
+    mongodb: '>=4.2.0',
+    topology: '!load-balanced'
+  }
+};
+
 describe('Client Side Encryption Functional', function () {
   const dataDbName = 'db';
   const dataCollName = 'coll';
@@ -89,7 +97,7 @@ describe('Client Side Encryption Functional', function () {
           await client.close();
         });
 
-        it('bubbles up the error', async function () {
+        it('bubbles up the error', metadata, async function () {
           try {
             await client
               .db('test')
