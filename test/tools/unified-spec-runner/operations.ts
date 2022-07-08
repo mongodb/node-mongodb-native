@@ -26,7 +26,9 @@ interface OperationFunctionParams {
   entities: EntitiesMap;
 }
 
-type RunOperationFn = (p: OperationFunctionParams) => Promise<Document | boolean | number | void>;
+type RunOperationFn = (
+  p: OperationFunctionParams
+) => Promise<Document | boolean | number | void | null>;
 export const operations = new Map<string, RunOperationFn>();
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
@@ -475,18 +477,20 @@ operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { filter, opts } = operation.arguments ?? {};
 
-  const bulkWriteResult = await clientEncryption.rewrapManyDataKey(filter, opts);
+  const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey(filter, opts);
 
   // The unified spec runner match function will assert that documents have no extra
   // keys.  For `rewrapManyDataKey` operations, our unifed tests will fail because
   // our BulkWriteResult class has an extra property - "result".  We explicitly make it
   // non-enumerable for the purposes of testing so that the tests can pass.
-  const { result } = bulkWriteResult.bulkWriteResult;
-  Object.defineProperty(bulkWriteResult.bulkWriteResult, 'result', {
-    value: result,
-    enumerable: false
-  });
-  return bulkWriteResult;
+  if (rewrapManyDataKeyResult != null) {
+    const { bulkWriteResult } = rewrapManyDataKeyResult;
+    Object.defineProperty(bulkWriteResult, 'result', {
+      value: bulkWriteResult.result,
+      enumerable: false
+    });
+  }
+  return rewrapManyDataKeyResult;
 });
 
 operations.set('deleteKey', async ({ entities, operation }) => {
