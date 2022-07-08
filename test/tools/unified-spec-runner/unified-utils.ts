@@ -1,6 +1,7 @@
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
+import { versions } from 'process';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
@@ -110,17 +111,22 @@ export async function topologySatisfies(
   }
 
   if (typeof r.csfle === 'boolean') {
-    if (r.csfle) {
-      ok &&= config.clientSideEncryption.enabled;
+    const versionSupportsCSFLE = semverGte(config.version, '4.2.0');
+    const csfleEnabled = config.clientSideEncryption.enabled;
 
+    if (r.csfle) {
+      ok &&= versionSupportsCSFLE && csfleEnabled;
       if (!ok && skipReason == null) {
-        skipReason = `requires csfle to run but CSFLE is not set for this environment`;
+        skipReason = versionSupportsCSFLE
+          ? `requires csfle to run but CSFLE is not set for this environment`
+          : 'requires mongodb >= 4.2 to run csfle tests';
       }
     } else {
-      ok &&= config.clientSideEncryption.enabled;
-
+      ok &&= !(csfleEnabled && versionSupportsCSFLE);
       if (!ok && skipReason == null) {
-        skipReason = `forbids csfle but CSFLE is set for this environment`;
+        skipReason = versionSupportsCSFLE
+          ? `forbids csfle to run but CSFLE is set for this environment`
+          : 'forbids mongodb >= 4.2 to run csfle tests';
       }
     }
   }
