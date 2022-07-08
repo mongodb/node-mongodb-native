@@ -120,7 +120,9 @@ export async function topologySatisfies(
       ok &&= typeof process.env.TEST_CSFLE === 'undefined';
 
       if (!ok && skipReason == null) {
-        skipReason = `requires no csfle but the TEST_CSFLE environment variable is set`;
+        skipReason = `requires no csfle but the TEST_CSFLE environment variable is set with value ${JSON.stringify(
+          process.env.TEST_CSFLE
+        )}`;
       }
     }
   }

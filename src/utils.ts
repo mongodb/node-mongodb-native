@@ -1417,7 +1417,7 @@ export function commandSupportsReadConcern(command: Document, options?: Document
 export function getMongoDBClientEncryption() {
   let mongodbClientEncryption;
 
-  // Note (NODE-4254): This is to get around the circular dependency between
+  // NOTE(NODE-4254): This is to get around the circular dependency between
   // mongodb-client-encryption and the driver in the test scenarios.
   if (process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE) {
     mongodbClientEncryption = require(process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE);

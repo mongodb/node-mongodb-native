@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { mergeKMSProviders } from './unified-utils';
+import { mergeKMSProviders } from '../../tools/unified-spec-runner/unified-utils';
 
 describe('parseOptions', function () {
   context('aws providers', function () {

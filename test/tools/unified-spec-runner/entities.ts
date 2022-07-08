@@ -307,6 +307,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
       return;
     }
     if (type === 'clientEncryption') {
+      // we do not have instanceof checking here since csfle might not be installed
       return entity;
     }
     const ctor = ENTITY_CTORS.get(type);

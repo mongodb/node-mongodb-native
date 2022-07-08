@@ -479,6 +479,8 @@ operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
 
   const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey(filter, opts);
 
+  // TODO(NODE-4393): refactor BulkWriteResult to not have a 'result' property
+  //
   // The unified spec runner match function will assert that documents have no extra
   // keys.  For `rewrapManyDataKey` operations, our unifed tests will fail because
   // our BulkWriteResult class has an extra property - "result".  We explicitly make it
