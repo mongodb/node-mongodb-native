@@ -26,9 +26,7 @@ interface OperationFunctionParams {
   entities: EntitiesMap;
 }
 
-type RunOperationFn = (
-  p: OperationFunctionParams
-) => Promise<Document | boolean | number | void | null>;
+type RunOperationFn = (p: OperationFunctionParams) => Promise<Document | boolean | number | void>;
 export const operations = new Map<string, RunOperationFn>();
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
@@ -478,6 +476,8 @@ operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
   const { filter, opts } = operation.arguments ?? {};
 
   const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey(filter, opts);
+  const isEmptyObject = (obj: unknown): obj is Record<string, never> =>
+    typeof obj === 'object' && obj != null && Object.keys(obj).length === 0;
 
   // TODO(NODE-4393): refactor BulkWriteResult to not have a 'result' property
   //
@@ -485,7 +485,7 @@ operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
   // keys.  For `rewrapManyDataKey` operations, our unifed tests will fail because
   // our BulkWriteResult class has an extra property - "result".  We explicitly make it
   // non-enumerable for the purposes of testing so that the tests can pass.
-  if (rewrapManyDataKeyResult != null) {
+  if (!isEmptyObject(rewrapManyDataKeyResult)) {
     const { bulkWriteResult } = rewrapManyDataKeyResult;
     Object.defineProperty(bulkWriteResult, 'result', {
       value: bulkWriteResult.result,
