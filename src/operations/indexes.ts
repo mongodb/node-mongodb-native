@@ -59,7 +59,10 @@ function isIndexDirection(x: any): x is IndexDirection {
 
 /** @public */
 export type IndexSpecification = OneOrMore<
-  string | [string, IndexDirection] | { [key: string]: IndexDirection }
+  | string
+  | [string, IndexDirection]
+  | { [key: string]: IndexDirection }
+  | Map<string, IndexDirection>
 >;
 
 /** @public */
@@ -87,7 +90,7 @@ export interface IndexDescription
   > {
   collation?: CollationOptions;
   name?: string;
-  key: Document;
+  key: Document | Map<string, IndexDirection>;
 }
 
 /** @public */
@@ -131,31 +134,39 @@ export interface CreateIndexesOptions extends CommandOperationOptions {
   hidden?: boolean;
 }
 
+function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
+  return Array.isArray(t) && t.length === 2 && isIndexDirection(t[1]);
+}
+
 export function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
   function getFieldHash(indexSpec: IndexSpecification) {
-    let fieldHash: Map<string, IndexDirection> = new Map();
+    const fieldHash: Map<string, IndexDirection> = new Map();
 
     let indexSpecArr: IndexSpecification[];
 
-    // wrap in array if needed
-    if (!Array.isArray(indexSpec) || (indexSpec.length === 2 && isIndexDirection(indexSpec[1]))) {
+    // Wrap indexSpec in array if needed
+    if (!Array.isArray(indexSpec) || isSingleIndexTuple(indexSpec)) {
       indexSpecArr = [indexSpec];
     } else {
       indexSpecArr = indexSpec;
     }
 
-    // iterate through array and handle different types
-    indexSpecArr.forEach((f: any) => {
-      if ('string' === typeof f) {
-        fieldHash.set(f, 1);
-      } else if (Array.isArray(f)) {
-        fieldHash.set(f[0], f[1]);
-      } else if (isObject(f)) {
-        for (const [key, value] of Object.entries(f)) {
+    // Iterate through array and handle different types
+    for (const spec of indexSpecArr) {
+      if ('string' === typeof spec) {
+        fieldHash.set(spec, 1);
+      } else if (Array.isArray(spec)) {
+        fieldHash.set(spec[0], spec[1]);
+      } else if (spec instanceof Map) {
+        for (const [key, value] of spec) {
+          fieldHash.set(key, value);
+        }
+      } else if (isObject(spec)) {
+        for (const [key, value] of Object.entries(spec)) {
           fieldHash.set(key, value);
         }
       }
-    });
+    }
 
     return fieldHash;
   }
@@ -225,9 +236,32 @@ export class CreateIndexesOperation<
     this.options = options ?? {};
     this.collectionName = collectionName;
 
-    this.indexes = indexes;
+    // Ensure we generate the correct name if the parameter is not set
+    const normalizedIndexes = [];
+    for (const userIndex of indexes) {
+      const key =
+        userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
+      const index: Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> } = {
+        ...userIndex,
+        key
+      };
+      if (index.name == null) {
+        const keys = [];
+
+        for (const [name, direction] of index.key) {
+          keys.push(`${name}_${direction}`);
+        }
+
+        // Set the name
+        index.name = keys.join('_');
+      }
+      normalizedIndexes.push(index);
+    }
+    this.indexes = normalizedIndexes;
   }
 
+  /* TODO: create name in the parent class constructor */
+  /* create a type assertion to stop typescript errors */
   override execute(
     server: Server,
     session: ClientSession | undefined,
@@ -238,10 +272,9 @@ export class CreateIndexesOperation<
 
     const serverWireVersion = maxWireVersion(server);
 
-    // Ensure we generate the correct name if the parameter is not set
-    for (let i = 0; i < indexes.length; i++) {
+    for (const index of indexes) {
       // Did the user pass in a collation, check if our write server supports it
-      if (indexes[i].collation && serverWireVersion < 5) {
+      if (index.collation && serverWireVersion < 5) {
         callback(
           new MongoCompatibilityError(
             `Server ${server.name}, which reports wire version ${serverWireVersion}, ` +
@@ -249,17 +282,6 @@ export class CreateIndexesOperation<
           )
         );
         return;
-      }
-
-      if (indexes[i].name == null) {
-        const keys = [];
-
-        for (const name in indexes[i].key) {
-          keys.push(`${name}_${indexes[i].key[name]}`);
-        }
-
-        // Set the name
-        indexes[i].name = keys.join('_');
       }
     }
 

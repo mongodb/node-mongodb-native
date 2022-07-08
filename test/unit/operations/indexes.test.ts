@@ -12,12 +12,14 @@ describe('makeIndexSpec()', () => {
     {
       description: 'single string',
       input: 'sample_index',
-      mapData: new Map<string, IndexDirection>([['sample_index', 1]])
+      mapData: new Map<string, IndexDirection>([['sample_index', 1]]),
+      name: 'sample_index_1'
     },
     {
       description: 'single [string, IndexDirection]',
       input: ['sample_index', -1],
-      mapData: new Map<string, IndexDirection>([['sample_index', -1]])
+      mapData: new Map<string, IndexDirection>([['sample_index', -1]]),
+      name: 'sample_index_-1'
     },
     {
       description: 'array of strings',
@@ -26,7 +28,8 @@ describe('makeIndexSpec()', () => {
         ['sample_index1', 1],
         ['sample_index2', 1],
         ['sample_index3', 1]
-      ])
+      ]),
+      name: 'sample_index1_1_sample_index2_1_sample_index3_1'
     },
     {
       description: 'array of [string, IndexDirection]',
@@ -39,12 +42,14 @@ describe('makeIndexSpec()', () => {
         ['sample_index1', -1],
         ['sample_index2', 1],
         ['sample_index3', '2d']
-      ])
+      ]),
+      name: 'sample_index1_-1_sample_index2_1_sample_index3_2d'
     },
     {
       description: 'single  { [key: string]: IndexDirection }',
       input: { sample_index: -1 },
-      mapData: new Map<string, IndexDirection>([['sample_index', -1]])
+      mapData: new Map<string, IndexDirection>([['sample_index', -1]]),
+      name: 'sample_index_-1'
     },
     {
       description: 'array of { [key: string]: IndexDirection }',
@@ -53,23 +58,25 @@ describe('makeIndexSpec()', () => {
         ['sample_index1', -1],
         ['sample_index2', 1],
         ['sample_index3', '2d']
-      ])
+      ]),
+      name: 'sample_index1_-1_sample_index2_1_sample_index3_2d'
     },
     {
-      name: 'mixed array of [string, [string, IndexDirection], { [key: string]: IndexDirection }]',
+      description: 'mixed array of [string, [string, IndexDirection], { [key: string]: IndexDirection }]',
       input: ['sample_index1', ['sample_index2', -1], { sample_index3: '2d' }],
       mapData: new Map<string, IndexDirection>([
         ['sample_index1', 1],
         ['sample_index2', -1],
         ['sample_index3', '2d']
-      ])
+      ]),
+      name: 'sample_index1_1_sample_index2_-1_sample_index3_2d'
     }
   ];
 
   const makeIndexOperation = (input, options: CreateIndexesOptions = {}) =>
     new CreateIndexOperation({ s: { namespace: ns('a.b') } }, 'b', input, options);
 
-  for (const { description, input, mapData } of testCases) {
+  for (const { description, input, mapData, name } of testCases) {
     it(`should create fieldHash correctly when input is: ${description}`, () => {
       const realOutput = makeIndexOperation(input);
       expect(realOutput.indexes[0].key).to.deep.equal(mapData);
@@ -77,7 +84,18 @@ describe('makeIndexSpec()', () => {
 
     it(`should set name to null if none provided with ${description} input `, () => {
       const realOutput = makeIndexOperation(input);
-      expect(realOutput.indexes[0].name).to.equal(null);
+      expect(realOutput.indexes[0].name).to.equal(name);
     });
   }
+
+  it('should keep numerical keys in chronological ordering', () => {
+    const desiredMapData = new Map<string, IndexDirection>([
+      ['2', -1],
+      ['1', 1]
+    ]);
+    const realOutput = makeIndexOperation(desiredMapData);
+    const desiredName = '2_-1_1_1';
+    expect(realOutput.indexes[0].key).to.deep.equal(desiredMapData);
+    expect(realOutput.indexes[0].name).to.equal(desiredName);
+  });
 });
