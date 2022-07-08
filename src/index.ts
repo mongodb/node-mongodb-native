@@ -235,6 +235,7 @@ export type {
   ConnectionPool,
   ConnectionPoolEvents,
   ConnectionPoolOptions,
+  PoolState,
   WaitQueueMember,
   WithConnectionCallback
 } from './cmap/connection_pool';

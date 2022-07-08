@@ -89,7 +89,7 @@ export interface WaitQueueMember {
 }
 
 /** @internal */
-const PoolState = Object.freeze({
+export const PoolState = Object.freeze({
   paused: 'paused',
   ready: 'ready',
   closed: 'closed'
