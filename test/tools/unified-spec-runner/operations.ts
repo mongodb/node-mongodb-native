@@ -476,16 +476,14 @@ operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
   const { filter, opts } = operation.arguments ?? {};
 
   const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey(filter, opts);
-  const isEmptyObject = (obj: unknown): obj is Record<string, never> =>
-    typeof obj === 'object' && obj != null && Object.keys(obj).length === 0;
 
-  // TODO(NODE-4393): refactor BulkWriteResult to not have a 'result' property
-  //
-  // The unified spec runner match function will assert that documents have no extra
-  // keys.  For `rewrapManyDataKey` operations, our unifed tests will fail because
-  // our BulkWriteResult class has an extra property - "result".  We explicitly make it
-  // non-enumerable for the purposes of testing so that the tests can pass.
-  if (!isEmptyObject(rewrapManyDataKeyResult)) {
+  if (rewrapManyDataKeyResult.bulkWriteResult != null) {
+    // TODO(NODE-4393): refactor BulkWriteResult to not have a 'result' property
+    //
+    // The unified spec runner match function will assert that documents have no extra
+    // keys.  For `rewrapManyDataKey` operations, our unifed tests will fail because
+    // our BulkWriteResult class has an extra property - "result".  We explicitly make it
+    // non-enumerable for the purposes of testing so that the tests can pass.
     const { bulkWriteResult } = rewrapManyDataKeyResult;
     Object.defineProperty(bulkWriteResult, 'result', {
       value: bulkWriteResult.result,
