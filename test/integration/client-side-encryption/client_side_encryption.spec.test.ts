@@ -87,6 +87,9 @@ describe('Client Side Encryption (Unified)', function () {
       description.includes('create data key with') ||
       description.includes('rewrap')
     ) {
+      if (description === 'no keys to rewrap due to no filter matches') {
+        return 'TODO(NODE-4330): implement the key management API';
+      }
       return false;
     }
 
