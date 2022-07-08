@@ -1,4 +1,4 @@
-import type { Document, Long } from '../bson';
+import type { Document } from '../bson';
 import { CommandOptions, Connection, DestroyOptions, GetMoreOptions } from '../cmap/connection';
 import {
   ConnectionPool,
@@ -366,88 +366,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           cmd,
           finalOptions,
           makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-            this.s.operationCount -= 1;
-            cb(error, response);
-          })
-        );
-      },
-      callback
-    );
-  }
-
-  /**
-   * Execute a `getMore` against the server
-   * @internal
-   */
-  getMore(
-    ns: MongoDBNamespace,
-    cursorId: Long,
-    options: GetMoreOptions,
-    callback: Callback<Document>
-  ): void {
-    if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoServerClosedError());
-      return;
-    }
-
-    this.s.operationCount += 1;
-
-    this.s.pool.withConnection(
-      options.session?.pinnedConnection,
-      (err, conn, cb) => {
-        if (err || !conn) {
-          this.s.operationCount -= 1;
-          markServerUnknown(this, err);
-          return cb(err);
-        }
-
-        conn.getMore(
-          ns,
-          cursorId,
-          options,
-          makeOperationHandler(this, conn, {}, options, (error, response) => {
-            this.s.operationCount -= 1;
-            cb(error, response);
-          })
-        );
-      },
-      callback
-    );
-  }
-
-  /**
-   * Execute a `killCursors` command against the server
-   * @internal
-   */
-  killCursors(
-    ns: MongoDBNamespace,
-    cursorIds: Long[],
-    options: CommandOptions,
-    callback?: Callback
-  ): void {
-    if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      if (typeof callback === 'function') {
-        callback(new MongoServerClosedError());
-      }
-
-      return;
-    }
-
-    this.s.operationCount += 1;
-    this.s.pool.withConnection(
-      options.session?.pinnedConnection,
-      (err, conn, cb) => {
-        if (err || !conn) {
-          this.s.operationCount -= 1;
-          markServerUnknown(this, err);
-          return cb(err);
-        }
-
-        conn.killCursors(
-          ns,
-          cursorIds,
-          options,
-          makeOperationHandler(this, conn, {}, undefined, (error, response) => {
             this.s.operationCount -= 1;
             cb(error, response);
           })

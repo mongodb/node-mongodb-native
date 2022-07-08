@@ -1598,9 +1598,8 @@ describe('ChangeStream resumability', function () {
             await changeStream.next();
 
             const mock = sinon
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              .stub(changeStream.cursor.server!, 'getMore')
-              .callsFake((_ns, _cursorId, _options, callback) => {
+              .stub(changeStream.cursor, '_getMore')
+              .callsFake((_batchSize, callback) => {
                 mock.restore();
                 const error = new MongoServerError({ message: 'Something went wrong' });
                 error.code = code;
@@ -1727,9 +1726,8 @@ describe('ChangeStream resumability', function () {
             await changeStream.next();
 
             const mock = sinon
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              .stub(changeStream.cursor.server!, 'getMore')
-              .callsFake((_ns, _cursorId, _options, callback) => {
+              .stub(changeStream.cursor, '_getMore')
+              .callsFake((_batchSize, callback) => {
                 mock.restore();
                 const error = new MongoServerError({ message: 'Something went wrong' });
                 error.code = code;
@@ -1863,9 +1861,8 @@ describe('ChangeStream resumability', function () {
             await changeStream.next();
 
             const mock = sinon
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              .stub(changeStream.cursor.server!, 'getMore')
-              .callsFake((_ns, _cursorId, _options, callback) => {
+              .stub(changeStream.cursor, '_getMore')
+              .callsFake((_batchSize, callback) => {
                 mock.restore();
                 const error = new MongoServerError({ message: 'Something went wrong' });
                 error.code = code;

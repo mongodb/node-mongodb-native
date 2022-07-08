@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { promisify } from 'util';
 
 import { Long } from '../../../src/bson';
 import { MongoRuntimeError } from '../../../src/error';
@@ -10,23 +11,23 @@ import { Server } from '../../../src/sdam/server';
 import { ServerDescription } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
 import { ClientSession } from '../../../src/sessions';
-import { MongoDBNamespace } from '../../../src/utils';
+import { ns } from '../../../src/utils';
 
 describe('GetMoreOperation', function () {
-  const ns = new MongoDBNamespace('db.coll');
+  const namespace = ns('db.coll');
   const cursorId = Object.freeze(Long.fromNumber(1));
   const options = {
     batchSize: 100,
-    maxTimeMS: 500,
+    maxAwaitTimeMS: 500,
     readPreference: ReadPreference.primary
   };
 
   describe('#constructor', function () {
     const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
-    const operation = new GetMoreOperation(ns, cursorId, server, options);
+    const operation = new GetMoreOperation(namespace, cursorId, server, options);
 
     it('sets the namespace', function () {
-      expect(operation.ns).to.equal(ns);
+      expect(operation.ns).to.equal(namespace);
     });
 
     it('sets the cursorId', function () {
@@ -42,7 +43,7 @@ describe('GetMoreOperation', function () {
         ...options,
         comment: 'test'
       };
-      it('does not set the comment option if the server version is <4', () => {
+      it('does not set the comment on the command if the server version is <9', async () => {
         const server = new Server(
           new Topology([], {} as any),
           new ServerDescription(''),
@@ -51,13 +52,16 @@ describe('GetMoreOperation', function () {
         server.hello = {
           maxWireVersion: 8
         };
-        const operation = new GetMoreOperation(ns, cursorId, server, optionsWithComment);
-        const expected = {
+        const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
+        const expectedGetMoreCommand = {
+          getMore: cursorId,
+          collection: namespace.collection,
           batchSize: 100,
-          maxTimeMS: 500,
-          readPreference: ReadPreference.primary
+          maxTimeMS: 500
         };
-        expect(operation.options).to.deep.equal(expected);
+        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        await promisify(operation.execute.bind(operation))(server, undefined);
+        expect(stub.getCall(0).args[1]).to.deep.equal(expectedGetMoreCommand);
       });
 
       it('sets the comment option if the server version is >=4', () => {
@@ -69,7 +73,7 @@ describe('GetMoreOperation', function () {
         server.hello = {
           maxWireVersion: 10
         };
-        const operation = new GetMoreOperation(ns, cursorId, server, optionsWithComment);
+        const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
         expect(operation.options).to.deep.equal(optionsWithComment);
       });
     });
@@ -81,26 +85,29 @@ describe('GetMoreOperation', function () {
     });
 
     context('when the server is the same as the instance', function () {
-      it('executes a getMore on the provided server', function (done) {
+      it('executes a getMore on the provided server', async function () {
         const server = new Server(
           new Topology([], {} as any),
           new ServerDescription(''),
           {} as any
         );
-        const session = sinon.createStubInstance(ClientSession);
-        const opts = { ...options, session };
-        const operation = new GetMoreOperation(ns, cursorId, server, opts);
-        const stub = sinon.stub(server, 'getMore').callsFake((_, __, ___, cb) => cb());
+        const opts = { ...options, documentsReturnedIn: 'nextBatch', returnFieldSelector: null };
+        const operation = new GetMoreOperation(namespace, cursorId, server, opts);
+        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
 
-        const callback = () => {
-          const call = stub.getCall(0);
-          expect(stub.calledOnce).to.be.true;
-          expect(call.args[0]).to.equal(ns);
-          expect(call.args[1]).to.equal(cursorId);
-          expect(call.args[2]).to.deep.equal(opts);
-          done();
+        const expectedGetMoreCommand = {
+          getMore: cursorId,
+          collection: namespace.collection,
+          batchSize: 100,
+          maxTimeMS: 500
         };
-        operation.execute(server, session, callback);
+
+        await promisify(operation.execute.bind(operation))(server, undefined);
+        expect(stub.calledOnce).to.be.true;
+        const call = stub.getCall(0);
+        expect(call.args[0]).to.equal(namespace);
+        expect(call.args[1]).to.deep.equal(expectedGetMoreCommand);
+        expect(call.args[2]).to.deep.equal(opts);
       });
     });
 
@@ -118,7 +125,7 @@ describe('GetMoreOperation', function () {
         );
         const session = sinon.createStubInstance(ClientSession);
         const opts = { ...options, session };
-        const operation = new GetMoreOperation(ns, cursorId, server1, opts);
+        const operation = new GetMoreOperation(namespace, cursorId, server1, opts);
         const callback = error => {
           expect(error).to.be.instanceOf(MongoRuntimeError);
           expect(error.message).to.equal('Getmore must run on the same server operation began on');
@@ -131,7 +138,7 @@ describe('GetMoreOperation', function () {
 
   describe('#hasAspect', function () {
     const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
-    const operation = new GetMoreOperation(ns, cursorId, server, options);
+    const operation = new GetMoreOperation(namespace, cursorId, server, options);
 
     context('when the aspect is must select same server', function () {
       it('returns true', function () {
