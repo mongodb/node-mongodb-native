@@ -53,8 +53,8 @@ describe('Client Side Encryption Functional', function () {
     }
   });
 
-  describe('Collection', function () {
-    describe('#bulkWrite()', function () {
+  describe('Collection', metadata, function () {
+    describe('#bulkWrite()', metadata, function () {
       context('when encryption errors', function () {
         let client;
 
@@ -89,7 +89,7 @@ describe('Client Side Encryption Functional', function () {
           await client.close();
         });
 
-        it('bubbles up the mongocrypt error', async function () {
+        it('bubbles up the error', metadata, async function () {
           try {
             await client
               .db('test')
@@ -97,7 +97,7 @@ describe('Client Side Encryption Functional', function () {
               .bulkWrite([{ insertOne: { ssn: 'foo' } }]);
             expect.fail('expected error to be thrown');
           } catch (error) {
-            expect(error.message).to.equal('not all keys requested were satisfied');
+            expect(error.name).to.equal('MongoBulkWriteError');
           }
         });
       });
