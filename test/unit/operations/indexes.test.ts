@@ -62,14 +62,41 @@ describe('makeIndexSpec()', () => {
       name: 'sample_index1_-1_sample_index2_1_sample_index3_2d'
     },
     {
-      description: 'mixed array of [string, [string, IndexDirection], { [key: string]: IndexDirection }]',
-      input: ['sample_index1', ['sample_index2', -1], { sample_index3: '2d' }],
+      description:
+        'mixed array of [string, [string, IndexDirection], { [key: string]: IndexDirection }, Map<string, IndexDirection>]',
+      input: [
+        'sample_index1',
+        ['sample_index2', -1],
+        { sample_index3: '2d' },
+        new Map<string, IndexDirection>([['sample_index4', '2dsphere']])
+      ],
+      mapData: new Map<string, IndexDirection>([
+        ['sample_index1', 1],
+        ['sample_index2', -1],
+        ['sample_index3', '2d'],
+        ['sample_index4', '2dsphere']
+      ]),
+      name: 'sample_index1_1_sample_index2_-1_sample_index3_2d_sample_index4_2dsphere'
+    },
+    {
+      description: 'array of Map<string, IndexDirection>',
+      input: [
+        new Map<string, IndexDirection>([['sample_index1', 1]]),
+        new Map<string, IndexDirection>([['sample_index2', -1]]),
+        new Map<string, IndexDirection>([['sample_index3', '2d']])
+      ],
       mapData: new Map<string, IndexDirection>([
         ['sample_index1', 1],
         ['sample_index2', -1],
         ['sample_index3', '2d']
       ]),
       name: 'sample_index1_1_sample_index2_-1_sample_index3_2d'
+    },
+    {
+      description: 'single  Map<string, IndexDirection>',
+      input: new Map<string, IndexDirection>([['sample_index', -1]]),
+      mapData: new Map<string, IndexDirection>([['sample_index', -1]]),
+      name: 'sample_index_-1'
     }
   ];
 
@@ -82,7 +109,7 @@ describe('makeIndexSpec()', () => {
       expect(realOutput.indexes[0].key).to.deep.equal(mapData);
     });
 
-    it(`should set name to null if none provided with ${description} input `, () => {
+    it(`should set name correctly if none provided with ${description} input `, () => {
       const realOutput = makeIndexOperation(input);
       expect(realOutput.indexes[0].name).to.equal(name);
     });
