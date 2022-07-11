@@ -13,13 +13,7 @@ const LB_SKIP_TESTS: SkipDescription[] = [
 }));
 
 const POOL_PAUSED_SKIP_TESTS: SkipDescription[] = [
-  'clearing pool clears the WaitQueue',
-  'pool clear halts background minPoolSize establishments',
-  'clearing a paused pool emits no events',
-  'after clear, cannot check out connections until pool ready',
-  'error during minPoolSize population clears pool',
-  'readying a ready pool emits no events',
-  'pool starts as cleared and becomes ready'
+  'error during minPoolSize population clears pool'
 ].map(description => ({
   description,
   skipIfCondition: 'always',
