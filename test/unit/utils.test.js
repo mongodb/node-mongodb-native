@@ -1,12 +1,8 @@
+'use strict';
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
-import { LEGACY_HELLO_COMMAND } from '../../src/constants';
-import { MongoRuntimeError } from '../../src/error';
 import {
-  BufferPool,
   eachAsync,
-  isHello,
   makeInterruptibleAsyncInterval,
   MongoDBNamespace,
   parseIndexOptions,

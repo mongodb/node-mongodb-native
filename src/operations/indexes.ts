@@ -56,7 +56,6 @@ function isIndexDirection(x: any): x is IndexDirection {
     typeof x === 'number' || x === '2d' || x === '2dsphere' || x === 'text' || x === 'geoHaystack'
   );
 }
-
 /** @public */
 export type IndexSpecification = OneOrMore<
   | string
@@ -260,8 +259,6 @@ export class CreateIndexesOperation<
     this.indexes = normalizedIndexes;
   }
 
-  /* TODO: create name in the parent class constructor */
-  /* create a type assertion to stop typescript errors */
   override execute(
     server: Server,
     session: ClientSession | undefined,
