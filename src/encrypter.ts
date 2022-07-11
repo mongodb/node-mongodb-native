@@ -4,7 +4,7 @@ import { MONGO_CLIENT_EVENTS } from './constants';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
 import { MongoClient, MongoClientOptions } from './mongo_client';
-import type { Callback } from './utils';
+import { Callback, getMongoDBClientEncryption } from './utils';
 
 let AutoEncrypterClass: AutoEncrypter;
 
@@ -123,23 +123,15 @@ export class Encrypter {
   }
 
   static checkForMongoCrypt(): void {
-    let mongodbClientEncryption = undefined;
-    // Ensure you always wrap an optional require in the try block NODE-3199
     try {
-      // Note (NODE-4254): This is to get around the circular dependency between
-      // mongodb-client-encryption and the driver in the test scenarios.
-      if (process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE) {
-        mongodbClientEncryption = require(process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE);
-      } else {
-        mongodbClientEncryption = require('mongodb-client-encryption');
-      }
-    } catch (err) {
+      // NOTE(NODE-3199): Ensure you always wrap an optional require in the try block
+      const mongodbClientEncryption = getMongoDBClientEncryption();
+      AutoEncrypterClass = mongodbClientEncryption.extension(require('../lib/index')).AutoEncrypter;
+    } catch {
       throw new MongoMissingDependencyError(
         'Auto-encryption requested, but the module is not installed. ' +
           'Please add `mongodb-client-encryption` as a dependency of your project'
       );
     }
-
-    AutoEncrypterClass = mongodbClientEncryption.extension(require('../lib/index')).AutoEncrypter;
   }
 }

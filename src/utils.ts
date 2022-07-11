@@ -1407,3 +1407,26 @@ export function commandSupportsReadConcern(command: Document, options?: Document
 
   return false;
 }
+
+/**
+ * A utility function to get the instance of mongodb-client-encryption, if it exists.
+ *
+ * @throws MongoMissingDependencyError if mongodb-client-encryption isn't installed.
+ * @returns
+ */
+export function getMongoDBClientEncryption() {
+  let mongodbClientEncryption;
+
+  // NOTE(NODE-4254): This is to get around the circular dependency between
+  // mongodb-client-encryption and the driver in the test scenarios.
+  if (
+    typeof process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE === 'string' &&
+    process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE.length > 0
+  ) {
+    mongodbClientEncryption = require(process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE);
+  } else {
+    mongodbClientEncryption = require('mongodb-client-encryption');
+  }
+
+  return mongodbClientEncryption;
+}

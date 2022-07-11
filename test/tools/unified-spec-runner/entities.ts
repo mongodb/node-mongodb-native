@@ -35,8 +35,13 @@ import { WriteConcern } from '../../../src/write_concern';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { trace } from './runner';
-import type { ClientEntity, EntityDescription } from './schema';
-import { makeConnectionString, patchCollectionOptions, patchDbOptions } from './unified-utils';
+import type { ClientEncryption, ClientEntity, EntityDescription } from './schema';
+import {
+  createClientEncryption,
+  makeConnectionString,
+  patchCollectionOptions,
+  patchDbOptions
+} from './unified-utils';
 
 export interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
@@ -231,6 +236,7 @@ export type Entity =
   | AbstractCursor
   | UnifiedChangeStream
   | GridFSBucket
+  | ClientEncryption
   | Document; // Results from operations
 
 export type EntityCtor =
@@ -240,7 +246,8 @@ export type EntityCtor =
   | typeof ClientSession
   | typeof ChangeStream
   | typeof AbstractCursor
-  | typeof GridFSBucket;
+  | typeof GridFSBucket
+  | ClientEncryption;
 
 export type EntityTypeId =
   | 'client'
@@ -249,7 +256,8 @@ export type EntityTypeId =
   | 'session'
   | 'bucket'
   | 'cursor'
-  | 'stream';
+  | 'stream'
+  | 'clientEncryption';
 
 const ENTITY_CTORS = new Map<EntityTypeId, EntityCtor>();
 ENTITY_CTORS.set('client', UnifiedMongoClient);
@@ -275,6 +283,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   mapOf(type: 'bucket'): EntitiesMap<GridFSBucket>;
   mapOf(type: 'cursor'): EntitiesMap<AbstractCursor>;
   mapOf(type: 'stream'): EntitiesMap<UnifiedChangeStream>;
+  mapOf(type: 'clientEncryption'): EntitiesMap<ClientEncryption>;
   mapOf(type: EntityTypeId): EntitiesMap<Entity> {
     const ctor = ENTITY_CTORS.get(type);
     if (!ctor) {
@@ -290,11 +299,16 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'bucket', key: string, assertExists?: boolean): GridFSBucket;
   getEntity(type: 'cursor', key: string, assertExists?: boolean): AbstractCursor;
   getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
+  getEntity(type: 'clientEncryption', key: string, assertExists?: boolean): ClientEncryption;
   getEntity(type: EntityTypeId, key: string, assertExists = true): Entity {
     const entity = this.get(key);
     if (!entity) {
       if (assertExists) throw new Error(`Entity '${key}' does not exist`);
       return;
+    }
+    if (type === 'clientEncryption') {
+      // we do not have instanceof checking here since csfle might not be installed
+      return entity;
     }
     const ctor = ENTITY_CTORS.get(type);
     if (!ctor) {
@@ -423,6 +437,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         map.set(entity.bucket.id, new GridFSBucket(db, options));
       } else if ('stream' in entity) {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
+      } else if ('clientEncryption' in entity) {
+        const clientEncryption = createClientEncryption(map, entity.clientEncryption);
+
+        map.set(entity.clientEncryption.id, clientEncryption);
       } else {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
       }

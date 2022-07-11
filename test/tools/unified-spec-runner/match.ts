@@ -204,6 +204,7 @@ export function resultCheck(
 
       if (checkExtraKeys) {
         expect(actual, `Expected actual to exist at ${path.join('')}`).to.exist;
+        // by using `Object.keys`, we ignore non-enumerable properties. This is intentional.
         const actualKeys = Object.keys(actual);
         const expectedKeys = Object.keys(expected);
         // Don't check for full key set equality because some of the actual keys

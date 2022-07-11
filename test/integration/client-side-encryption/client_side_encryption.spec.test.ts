@@ -7,6 +7,7 @@ import {
   TestRunnerContext
 } from '../../tools/spec-runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
+import { TestFilter } from '../../tools/unified-spec-runner/schema';
 
 const isAuthEnabled = process.env.AUTH === 'auth';
 
@@ -80,8 +81,19 @@ describe('Client Side Encryption (Legacy)', function () {
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  runUnifiedSuite(
-    loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')),
-    () => 'NODE-4330 - implement the key management API'
-  );
+  const filter: TestFilter = ({ description }) => {
+    if (
+      description.includes('create datakey with') ||
+      description.includes('create data key with') ||
+      description.includes('rewrap')
+    ) {
+      if (description === 'no keys to rewrap due to no filter matches') {
+        return 'TODO(NODE-4330): implement the key management API';
+      }
+      return false;
+    }
+
+    return 'TODO(NODE-4330): implement the key management API';
+  };
+  runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')), filter);
 });

@@ -1,4 +1,4 @@
-import { ServerApiVersion } from '../../../src';
+import { MongoClient, ServerApiVersion } from '../../../src';
 import type { Document, ObjectId } from '../../../src/bson';
 import type { ReadConcernLevel } from '../../../src/read_concern';
 import type { ReadPreferenceMode } from '../../../src/read_preference';
@@ -57,7 +57,15 @@ export const OperationNames = [
   'runCommand',
   'updateMany',
   'updateOne',
-  'rename'
+  'rename',
+  'createDataKey',
+  'rewrapManyDataKey',
+  'deleteKey',
+  'getKey',
+  'getKeys',
+  'addKeyAltName',
+  'removeKeyAltName',
+  'getKeyByAltName'
 ] as const;
 export type OperationName = typeof OperationNames[number];
 
@@ -95,6 +103,7 @@ export interface RunOnRequirement {
   minServerVersion?: string;
   topologies?: TopologyId[];
   serverParameters?: Document;
+  csfle?: boolean;
 }
 export type ObservableCommandEventId =
   | 'commandStartedEvent'
@@ -146,13 +155,53 @@ export interface StreamEntity {
   id: string;
   hexBytes: string;
 }
+
+export type StringOrPlaceholder = string | { $$placeholder: number };
+
+export interface ClientEncryptionEntity {
+  id: string;
+  clientEncryptionOpts: {
+    /** this is the id of the client entity to use as the keyvault client */
+    keyVaultClient: string;
+    keyVaultNamespace: string;
+    kmsProviders: {
+      aws?: {
+        accessKeyId: StringOrPlaceholder;
+        secretAccessKey: StringOrPlaceholder;
+        sessionToken: StringOrPlaceholder;
+      };
+      azure?: {
+        tenantId: StringOrPlaceholder;
+        clientId: StringOrPlaceholder;
+        clientSecret: StringOrPlaceholder;
+        identityPlatformEndpoint: StringOrPlaceholder;
+      };
+      gcp?: {
+        email: StringOrPlaceholder;
+        privateKey: StringOrPlaceholder;
+        endPoint: StringOrPlaceholder;
+      };
+      kmip?: {
+        endpoint: StringOrPlaceholder;
+      };
+      local?: {
+        key: StringOrPlaceholder;
+      };
+    };
+  };
+}
+
+export type KMSProvidersEntity = ClientEncryptionEntity['clientEncryptionOpts']['kmsProviders'];
+
 export type EntityDescription =
   | { client: ClientEntity }
   | { database: DatabaseEntity }
   | { collection: CollectionEntity }
   | { bucket: BucketEntity }
   | { stream: StreamEntity }
-  | { session: SessionEntity };
+  | { session: SessionEntity }
+  | { clientEncryption: ClientEncryptionEntity };
+
 export interface ServerApi {
   version: ServerApiVersion;
   strict?: boolean;
@@ -241,3 +290,20 @@ export interface ExpectedError {
  * A type that represents the test filter provided to the unifed runner.
  */
 export type TestFilter = (test: Test) => string | false;
+
+/**
+ * This interface represents the bare minimum of type information needed to get *some* type
+ * safety on the client encryption object in unified tests.
+ */
+export interface ClientEncryption {
+  // eslint-disable-next-line @typescript-eslint/no-misused-new
+  new (client: MongoClient, options: any): ClientEncryption;
+  createDataKey(provider, options): Promise<any>;
+  rewrapManyDataKey(filter, options): Promise<any>;
+  deleteKey(id): Promise<any>;
+  getKey(id): Promise<any>;
+  getKeys(): Promise<any>;
+  addKeyAltName(id, keyAltName): Promise<any>;
+  removeKeyAltName(id, keyAltName): Promise<any>;
+  getKeyByAltName(keyAltName): Promise<any>;
+}

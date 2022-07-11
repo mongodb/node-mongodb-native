@@ -402,6 +402,12 @@ The following steps will walk you through how to run the tests for CSFLE.
   set -e CREDS
   ```
 
+1. If you are running the unified tests, you must set the following environment variable as well:
+
+```shell
+export TEST_CSFLE=true
+```
+
 1. Run the functional tests:
 
    `npm run check:test`
