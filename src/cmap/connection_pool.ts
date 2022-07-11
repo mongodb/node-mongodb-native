@@ -550,7 +550,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             this[kPoolState] === PoolState.paused
               ? 'Connection pool cleared'
               : 'Connection pool closed';
+          const reason = this.closed ? 'poolClosed' : 'connectionError';
           // TODO(NODE-3483): Replace with more specific error type
+          this.emit(
+            ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+            new ConnectionCheckOutFailedEvent(this, reason)
+          );
           waitQueueMember.callback(new MongoRuntimeError(errorMessage));
         }
       }
