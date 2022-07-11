@@ -115,7 +115,7 @@ describe('makeIndexSpec()', () => {
     });
   }
 
-  it('should keep numerical keys in chronological ordering', () => {
+  it('should keep numerical keys in chronological ordering when using Map input type', () => {
     const desiredMapData = new Map<string, IndexDirection>([
       ['2', -1],
       ['1', 1]
