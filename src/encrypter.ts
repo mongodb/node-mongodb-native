@@ -124,6 +124,7 @@ export class Encrypter {
 
   static checkForMongoCrypt(): void {
     try {
+      // NOTE(NODE-3199): Ensure you always wrap an optional require in the try block
       const mongodbClientEncryption = getMongoDBClientEncryption();
       AutoEncrypterClass = mongodbClientEncryption.extension(require('../lib/index')).AutoEncrypter;
     } catch {
