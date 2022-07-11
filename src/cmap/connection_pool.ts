@@ -624,12 +624,24 @@ function destroyConnection(pool: ConnectionPool, connection: Connection, reason:
   process.nextTick(() => connection.destroy());
 }
 
+function isPerished(pool: ConnectionPool, connection: Connection) {
+  const isStale = connectionIsStale(pool, connection);
+  const isIdle = connectionIsIdle(pool, connection);
+  if (!isStale && !isIdle && !connection.closed) {
+    return false;
+  }
+  const reason = connection.closed ? 'error' : isStale ? 'stale' : 'idle';
+  destroyConnection(pool, connection, reason);
+  return true;
+}
+
 function processWaitQueue(pool: ConnectionPool) {
   if (pool.closed || pool[kProcessingWaitQueue]) {
     return;
   }
 
   pool[kProcessingWaitQueue] = true;
+
   while (pool.waitQueueSize) {
     const waitQueueMember = pool[kWaitQueue].peekFront();
     if (!waitQueueMember) {
@@ -651,10 +663,9 @@ function processWaitQueue(pool: ConnectionPool) {
       break;
     }
 
-    const isStale = connectionIsStale(pool, connection);
-    const isIdle = connectionIsIdle(pool, connection);
-    if (!isStale && !isIdle && !connection.closed) {
+    if (!isPerished(pool, connection)) {
       pool[kCheckedOut]++;
+      console.log('DEBUG: checkout() succeeded', pool.id);
       pool.emit(
         ConnectionPool.CONNECTION_CHECKED_OUT,
         new ConnectionCheckedOutEvent(pool, connection)
@@ -665,9 +676,6 @@ function processWaitQueue(pool: ConnectionPool) {
 
       pool[kWaitQueue].shift();
       waitQueueMember.callback(undefined, connection);
-    } else {
-      const reason = connection.closed ? 'error' : isStale ? 'stale' : 'idle';
-      destroyConnection(pool, connection, reason);
     }
   }
 
