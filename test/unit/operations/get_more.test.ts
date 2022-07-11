@@ -21,6 +21,9 @@ describe('GetMoreOperation', function () {
     maxAwaitTimeMS: 500,
     readPreference: ReadPreference.primary
   };
+  afterEach(function () {
+    sinon.restore();
+  });
 
   describe('#constructor', function () {
     const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
@@ -43,47 +46,60 @@ describe('GetMoreOperation', function () {
         ...options,
         comment: 'test'
       };
-      it('does not set the comment on the command if the server version is <9', async () => {
-        const server = new Server(
-          new Topology([], {} as any),
-          new ServerDescription(''),
-          {} as any
-        );
-        server.hello = {
-          maxWireVersion: 8
-        };
-        const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
-        const expectedGetMoreCommand = {
-          getMore: cursorId,
-          collection: namespace.collection,
-          batchSize: 100,
-          maxTimeMS: 500
-        };
-        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
-        await promisify(operation.execute.bind(operation))(server, undefined);
-        expect(stub.getCall(0).args[1]).to.deep.equal(expectedGetMoreCommand);
-      });
 
-      it('sets the comment option if the server version is >=4', () => {
-        const server = new Server(
-          new Topology([], {} as any),
-          new ServerDescription(''),
-          {} as any
-        );
-        server.hello = {
-          maxWireVersion: 10
-        };
-        const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
-        expect(operation.options).to.deep.equal(optionsWithComment);
-      });
+      const serverVersions = [
+        {
+          serverVersion: 8,
+          getMore: {
+            getMore: cursorId,
+            collection: namespace.collection,
+            batchSize: 100,
+            maxTimeMS: 500
+          }
+        },
+        {
+          serverVersion: 9,
+          getMore: {
+            getMore: cursorId,
+            collection: namespace.collection,
+            batchSize: 100,
+            maxTimeMS: 500,
+            comment: 'test'
+          }
+        },
+        {
+          serverVersion: 10,
+          getMore: {
+            getMore: cursorId,
+            collection: namespace.collection,
+            batchSize: 100,
+            maxTimeMS: 500,
+            comment: 'test'
+          }
+        }
+      ];
+      for (const { serverVersion, getMore } of serverVersions) {
+        const verb = serverVersion < 9 ? 'does not' : 'does';
+        const state = serverVersion < 9 ? 'less than 9' : 'greater than or equal to 9';
+        it(`${verb} set the comment on the command if the server wire version is ${state}`, async () => {
+          const server = new Server(
+            new Topology([], {} as any),
+            new ServerDescription(''),
+            {} as any
+          );
+          server.hello = {
+            maxWireVersion: serverVersion
+          };
+          const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
+          const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+          await promisify(operation.execute.bind(operation))(server, undefined);
+          expect(stub.getCall(0).args[1]).to.deep.equal(getMore);
+        });
+      }
     });
   });
 
   describe('#execute', function () {
-    afterEach(function () {
-      sinon.restore();
-    });
-
     context('when the server is the same as the instance', function () {
       it('executes a getMore on the provided server', async function () {
         const server = new Server(
