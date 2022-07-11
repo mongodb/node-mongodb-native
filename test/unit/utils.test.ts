@@ -1,16 +1,17 @@
-'use strict';
-const {
-  eachAsync,
-  makeInterruptibleAsyncInterval,
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
+import { MongoRuntimeError } from '../../src/error';
+import {
   BufferPool,
-  shuffle,
-  isHello
-} = require('../../src/utils');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { MongoRuntimeError } = require('../../src/error');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
-const { createTimerSandbox } = require('./timer_sandbox');
+  eachAsync,
+  isHello,
+  makeInterruptibleAsyncInterval,
+  MongoDBNamespace,
+  shuffle
+} from '../../src/utils';
+import { createTimerSandbox } from './timer_sandbox';
 
 describe('driver utils', function () {
   context('eachAsync()', function () {
@@ -18,7 +19,7 @@ describe('driver utils', function () {
       eachAsync(
         [{ error: false }, { error: true }],
         (item, cb) => {
-          cb(item.error ? new Error('error requested') : null);
+          cb(item.error ? new Error('error requested') : undefined);
         },
         err => {
           expect(err).to.exist;
@@ -387,6 +388,7 @@ describe('driver utils', function () {
 
       it('should throw an error if a non-number size is requested', function () {
         const buffer = new BufferPool();
+        // @ts-expect-error: Testing invalid input
         expect(() => buffer.read('256')).to.throw(/Argument "size" must be a non-negative number/);
       });
 
@@ -523,6 +525,34 @@ describe('driver utils', function () {
     it('should return false if the legacy hello property and hello property are set to false', function () {
       const doc = { [LEGACY_HELLO_COMMAND]: false, hello: false };
       expect(isHello(doc)).to.be.false;
+    });
+  });
+
+  describe('class MongoDBNamespace', () => {
+    describe('constructor()', () => {
+      it('should constrain collection property to undefined if empty string passed in', () => {
+        const namespace = new MongoDBNamespace('test', '');
+        expect(namespace).to.have.property('collection').that.is.undefined;
+      });
+    });
+
+    describe('fromString()', () => {
+      it('should constrain collection nothing follows the db name', () => {
+        const namespaceNoDot = MongoDBNamespace.fromString('test');
+        expect(namespaceNoDot).to.have.property('collection').that.is.undefined;
+        const namespaceDotFollowedByNothing = MongoDBNamespace.fromString('test.');
+        expect(namespaceDotFollowedByNothing).to.have.property('collection').that.is.undefined;
+      });
+    });
+
+    describe('withCollection()', () => {
+      it('should return new MongoDBNamespace instance', () => {
+        const dbNamespace = MongoDBNamespace.fromString('test');
+        const withCollectionNamespace = dbNamespace.withCollection('pets');
+        expect(dbNamespace).to.not.equal(withCollectionNamespace);
+        expect(dbNamespace).to.have.property('collection').that.is.undefined;
+        expect(withCollectionNamespace).to.have.property('collection').that.equals('pets');
+      });
     });
   });
 });

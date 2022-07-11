@@ -452,7 +452,7 @@ export function ns(ns: string): MongoDBNamespace {
 /** @public */
 export class MongoDBNamespace {
   db: string;
-  collection?: string;
+  collection: string | undefined;
   /**
    * Create a namespace object
    *
