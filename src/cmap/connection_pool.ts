@@ -575,7 +575,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       ConnectionPool.CONNECTION_CLOSED,
       new ConnectionClosedEvent(this, connection, reason)
     );
-
     // destroy the connection
     process.nextTick(() => connection.destroy());
   }
@@ -669,6 +668,13 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     const minPoolSize = this.options.minPoolSize;
     if (this.closed || minPoolSize === 0) {
       return;
+    }
+
+    for (let i = 0; i < this[kConnections].length; i++) {
+      const connection = this[kConnections].peekAt(i);
+      if (connection && this.connectionIsPerished(connection)) {
+        this[kConnections].removeOne(i);
+      }
     }
 
     if (
