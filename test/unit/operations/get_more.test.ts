@@ -135,18 +135,6 @@ describe('GetMoreOperation', function () {
         expect(command).to.have.property('maxTimeMS').that.equals(options.maxAwaitTimeMS);
       });
 
-      it('should build getMore command with maxTimeMS if maxAwaitTimeMS specified', async () => {
-        const options = {
-          maxAwaitTimeMS: 234
-        };
-        const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
-        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
-        await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
-        expect(stub).to.have.been.calledOnce;
-        const command = stub.getCall(0).args[1];
-        expect(command).to.have.property('maxTimeMS').that.equals(options.maxAwaitTimeMS);
-      });
-
       context('comment', function () {
         const optionsWithComment = {
           ...options,
