@@ -17,7 +17,7 @@ export interface GetMoreOptions extends OperationOptions {
   comment?: unknown;
   /** Number of milliseconds to wait before aborting the query. */
   maxTimeMS?: number;
-  /** TODO(NODE-4173) */
+  /** TODO(NODE-4413): Address bug with maxAwaitTimeMS not being passed in from the cursor correctly */
   maxAwaitTimeMS?: number;
 }
 
