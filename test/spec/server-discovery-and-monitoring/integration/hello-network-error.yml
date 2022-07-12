@@ -84,14 +84,15 @@ tests:
             - _id: 1
             - _id: 2
       # Configure the next streaming hello check to fail with a non-timeout
-      # network error. Use times: 2 to ensure that the the Monitor check fails
-      # since the RTT hello may trigger this failpoint as well.
+      # network error. Use "times: 4" to increase the probability that the
+      # Monitor check fails since the RTT hello may trigger this failpoint one
+      # or many times as well.
       - name: configureFailPoint
         object: testRunner
         arguments:
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 2 }
+            mode: { times: 4 }
             data:
                 failCommands: ["hello", "isMaster"]
                 appName: networkErrorCheckTest
@@ -116,8 +117,8 @@ tests:
             - _id: 3
             - _id: 4
       # We cannot assert the server was marked Unknown and pool was cleared an
-      # exact number of times because the RTT hello may or may not have
-      # triggered this failpoint as well.
+      # exact number of times because the RTT hello may have triggered this
+      # failpoint one or many times as well.
       # - name: assertEventCount
       #   object: testRunner
       #   arguments:
