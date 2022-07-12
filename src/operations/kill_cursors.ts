@@ -46,12 +46,7 @@ export class KillCursorsOperation extends AbstractOperation {
       cursors: [this.cursorId]
     };
 
-    server.command(
-      this.ns,
-      killCursorsCommand,
-      { [Symbol.for('@@mdb.commandOptions.fullResult')]: true, session },
-      () => callback()
-    );
+    server.command(this.ns, killCursorsCommand, { session }, () => callback());
   }
 }
 

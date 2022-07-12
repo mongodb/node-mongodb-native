@@ -66,8 +66,6 @@ const kHello = Symbol('hello');
 /** @internal */
 const kAutoEncrypter = Symbol('autoEncrypter');
 /** @internal */
-const kFullResult = Symbol.for('@@mdb.commandOptions.fullResult');
-/** @internal */
 const kDelayedTimeoutId = Symbol('delayedTimeoutId');
 
 /** @internal */
@@ -95,7 +93,6 @@ export interface CommandOptions extends BSONSerializeOptions {
   readPreference?: ReadPreferenceLike;
   raw?: boolean;
   monitoring?: boolean;
-  [kFullResult]?: boolean;
   socketTimeoutMS?: number;
   /** Session to use for the operation */
   session?: ClientSession;
@@ -450,7 +447,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
     }
 
-    callback(undefined, operationDescription.fullResult ? message : message.documents[0]);
+    callback(undefined, message.documents[0]);
   }
 
   destroy(options?: DestroyOptions, callback?: Callback): void {
@@ -654,7 +651,6 @@ function write(
     requestId: command.requestId,
     cb: callback,
     session: options.session,
-    fullResult: !!options[kFullResult],
     noResponse: typeof options.noResponse === 'boolean' ? options.noResponse : false,
     documentsReturnedIn: options.documentsReturnedIn,
     command: !!options.command,

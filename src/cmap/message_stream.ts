@@ -32,7 +32,6 @@ export interface OperationDescription extends BSONSerializeOptions {
   cb: Callback<Document>;
   command: boolean;
   documentsReturnedIn?: string;
-  fullResult: boolean;
   noResponse: boolean;
   raw: boolean;
   requestId: number;
