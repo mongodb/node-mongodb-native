@@ -40,63 +40,6 @@ describe('GetMoreOperation', function () {
     it('sets the server', function () {
       expect(operation.server).to.equal(server);
     });
-
-    context('options', function () {
-      const optionsWithComment = {
-        ...options,
-        comment: 'test'
-      };
-
-      const serverVersions = [
-        {
-          serverVersion: 8,
-          getMore: {
-            getMore: cursorId,
-            collection: namespace.collection,
-            batchSize: 100,
-            maxTimeMS: 500
-          }
-        },
-        {
-          serverVersion: 9,
-          getMore: {
-            getMore: cursorId,
-            collection: namespace.collection,
-            batchSize: 100,
-            maxTimeMS: 500,
-            comment: 'test'
-          }
-        },
-        {
-          serverVersion: 10,
-          getMore: {
-            getMore: cursorId,
-            collection: namespace.collection,
-            batchSize: 100,
-            maxTimeMS: 500,
-            comment: 'test'
-          }
-        }
-      ];
-      for (const { serverVersion, getMore } of serverVersions) {
-        const verb = serverVersion < 9 ? 'does not' : 'does';
-        const state = serverVersion < 9 ? 'less than 9' : 'greater than or equal to 9';
-        it(`${verb} set the comment on the command if the server wire version is ${state}`, async () => {
-          const server = new Server(
-            new Topology([], {} as any),
-            new ServerDescription(''),
-            {} as any
-          );
-          server.hello = {
-            maxWireVersion: serverVersion
-          };
-          const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
-          const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
-          await promisify(operation.execute.bind(operation))(server, undefined);
-          expect(stub.getCall(0).args[1]).to.deep.equal(getMore);
-        });
-      }
-    });
   });
 
   describe('#execute', function () {
@@ -148,6 +91,117 @@ describe('GetMoreOperation', function () {
           done();
         };
         operation.execute(server2, session, callback);
+      });
+    });
+
+    context('command construction', () => {
+      const cursorId = Long.fromBigInt(0xffff_ffffn);
+      const namespace = ns('db.collection');
+      const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+
+      it('should build basic getMore command with cursorId and collection', async () => {
+        const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, {});
+        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
+        expect(stub).to.have.been.calledOnce;
+        const command = stub.getCall(0).args[1];
+        expect(command).to.deep.equal({
+          getMore: cursorId,
+          collection: namespace.collection
+        });
+      });
+
+      it('should build getMore command with batchSize', async () => {
+        const options = {
+          batchSize: 234
+        };
+        const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
+        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
+        expect(stub).to.have.been.calledOnce;
+        const command = stub.getCall(0).args[1];
+        expect(command).to.have.property('batchSize').that.equals(options.batchSize);
+      });
+
+      it('should build getMore command with maxTimeMS if maxAwaitTimeMS specified', async () => {
+        const options = {
+          maxAwaitTimeMS: 234
+        };
+        const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
+        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
+        expect(stub).to.have.been.calledOnce;
+        const command = stub.getCall(0).args[1];
+        expect(command).to.have.property('maxTimeMS').that.equals(options.maxAwaitTimeMS);
+      });
+
+      it('should build getMore command with maxTimeMS if maxAwaitTimeMS specified', async () => {
+        const options = {
+          maxAwaitTimeMS: 234
+        };
+        const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
+        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
+        expect(stub).to.have.been.calledOnce;
+        const command = stub.getCall(0).args[1];
+        expect(command).to.have.property('maxTimeMS').that.equals(options.maxAwaitTimeMS);
+      });
+
+      context('comment', function () {
+        const optionsWithComment = {
+          ...options,
+          comment: 'test'
+        };
+
+        const serverVersions = [
+          {
+            serverVersion: 8,
+            getMore: {
+              getMore: cursorId,
+              collection: namespace.collection,
+              batchSize: 100,
+              maxTimeMS: 500
+            }
+          },
+          {
+            serverVersion: 9,
+            getMore: {
+              getMore: cursorId,
+              collection: namespace.collection,
+              batchSize: 100,
+              maxTimeMS: 500,
+              comment: 'test'
+            }
+          },
+          {
+            serverVersion: 10,
+            getMore: {
+              getMore: cursorId,
+              collection: namespace.collection,
+              batchSize: 100,
+              maxTimeMS: 500,
+              comment: 'test'
+            }
+          }
+        ];
+        for (const { serverVersion, getMore } of serverVersions) {
+          const verb = serverVersion < 9 ? 'does not' : 'does';
+          const state = serverVersion < 9 ? 'less than 9' : 'greater than or equal to 9';
+          it(`${verb} set the comment on the command if the server wire version is ${state}`, async () => {
+            const server = new Server(
+              new Topology([], {} as any),
+              new ServerDescription(''),
+              {} as any
+            );
+            server.hello = {
+              maxWireVersion: serverVersion
+            };
+            const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
+            const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+            await promisify(operation.execute.bind(operation))(server, undefined);
+            expect(stub.getCall(0).args[1]).to.deep.equal(getMore);
+          });
+        }
       });
     });
   });
