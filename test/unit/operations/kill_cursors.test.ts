@@ -85,11 +85,9 @@ describe('class KillCursorsOperation', () => {
         server,
         options
       ) as any;
-      const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+      const stub = sinon.stub(server, 'command').yieldsRight(null, true);
       await promisify(killCursorsOperation.execute.bind(killCursorsOperation))(server, undefined);
-      expect(stub).to.have.been.calledOnce;
-      const command = stub.getCall(0).args[1];
-      expect(command).to.deep.equal({
+      expect(stub).to.have.been.calledOnceWith(namespace, {
         killCursors: namespace.collection,
         cursors: [cursorId]
       });

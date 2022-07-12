@@ -530,28 +530,43 @@ describe('driver utils', function () {
 
   describe('class MongoDBNamespace', () => {
     describe('constructor()', () => {
+      it('should set db property', () => {
+        const namespace = new MongoDBNamespace('myDb', 'myCollection');
+        expect(namespace).to.have.property('collection', 'myCollection');
+      });
+
+      it('should set collection property', () => {
+        const namespace = new MongoDBNamespace('myDb', 'myCollection');
+        expect(namespace).to.have.property('collection', 'myCollection');
+      });
+
       it('should constrain collection property to undefined if empty string passed in', () => {
-        const namespace = new MongoDBNamespace('test', '');
+        const namespace = new MongoDBNamespace('myDb', '');
         expect(namespace).to.have.property('collection').that.is.undefined;
       });
     });
 
     describe('fromString()', () => {
-      it('should constrain collection nothing follows the db name', () => {
+      it('should constrain collection to undefined if nothing follows the db name', () => {
         const namespaceNoDot = MongoDBNamespace.fromString('test');
         expect(namespaceNoDot).to.have.property('collection').that.is.undefined;
+      });
+
+      it('should not include a dot in the db name if the input ends with one', () => {
         const namespaceDotFollowedByNothing = MongoDBNamespace.fromString('test.');
+        expect(namespaceDotFollowedByNothing).to.have.property('db', 'test');
         expect(namespaceDotFollowedByNothing).to.have.property('collection').that.is.undefined;
       });
     });
 
     describe('withCollection()', () => {
+      const dbNamespace = MongoDBNamespace.fromString('test');
+
       it('should return new MongoDBNamespace instance', () => {
-        const dbNamespace = MongoDBNamespace.fromString('test');
         const withCollectionNamespace = dbNamespace.withCollection('pets');
-        expect(dbNamespace).to.not.equal(withCollectionNamespace);
-        expect(dbNamespace).to.have.property('collection').that.is.undefined;
-        expect(withCollectionNamespace).to.have.property('collection').that.equals('pets');
+        expect(withCollectionNamespace).to.not.equal(dbNamespace);
+        expect(withCollectionNamespace).to.have.property('db', 'test');
+        expect(withCollectionNamespace).to.have.property('collection', 'pets');
       });
     });
   });

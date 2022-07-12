@@ -101,11 +101,9 @@ describe('GetMoreOperation', function () {
 
       it('should build basic getMore command with cursorId and collection', async () => {
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, {});
-        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        const stub = sinon.stub(server, 'command').yieldsRight(null, true);
         await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
-        expect(stub).to.have.been.calledOnce;
-        const command = stub.getCall(0).args[1];
-        expect(command).to.deep.equal({
+        expect(stub).to.have.been.calledOnceWith(namespace, {
           getMore: cursorId,
           collection: namespace.collection
         });
@@ -116,11 +114,12 @@ describe('GetMoreOperation', function () {
           batchSize: 234
         };
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
-        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        const stub = sinon.stub(server, 'command').yieldsRight(null, true);
         await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
-        expect(stub).to.have.been.calledOnce;
-        const command = stub.getCall(0).args[1];
-        expect(command).to.have.property('batchSize').that.equals(options.batchSize);
+        expect(stub).to.have.been.calledOnceWith(
+          namespace,
+          sinon.match.has('batchSize', options.batchSize)
+        );
       });
 
       it('should build getMore command with maxTimeMS if maxAwaitTimeMS specified', async () => {
@@ -128,11 +127,12 @@ describe('GetMoreOperation', function () {
           maxAwaitTimeMS: 234
         };
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
-        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        const stub = sinon.stub(server, 'command').yieldsRight(null, true);
         await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
-        expect(stub).to.have.been.calledOnce;
-        const command = stub.getCall(0).args[1];
-        expect(command).to.have.property('maxTimeMS').that.equals(options.maxAwaitTimeMS);
+        expect(stub).to.have.been.calledOnceWith(
+          namespace,
+          sinon.match.has('maxTimeMS', options.maxAwaitTimeMS)
+        );
       });
 
       context('comment', function () {
@@ -185,9 +185,9 @@ describe('GetMoreOperation', function () {
               maxWireVersion: serverVersion
             };
             const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
-            const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+            const stub = sinon.stub(server, 'command').yieldsRight(null, true);
             await promisify(operation.execute.bind(operation))(server, undefined);
-            expect(stub.getCall(0).args[1]).to.deep.equal(getMore);
+            expect(stub).to.have.been.calledOnceWith(namespace, getMore);
           });
         }
       });
