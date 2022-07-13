@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';
-import { MongoRuntimeError } from '../../src/error';
+import { MongoInvalidArgumentError, MongoRuntimeError } from '../../src/error';
 import {
   BufferPool,
   eachAsync,
@@ -547,6 +547,12 @@ describe('driver utils', function () {
     });
 
     describe('fromString()', () => {
+      it('should accept dot delimited namespace', () => {
+        const namespaceNoDot = MongoDBNamespace.fromString('a.b');
+        expect(namespaceNoDot).to.have.property('db', 'a');
+        expect(namespaceNoDot).to.have.property('collection', 'b');
+      });
+
       it('should constrain collection to undefined if nothing follows the db name', () => {
         const namespaceNoDot = MongoDBNamespace.fromString('test');
         expect(namespaceNoDot).to.have.property('collection').that.is.undefined;
@@ -556,6 +562,15 @@ describe('driver utils', function () {
         const namespaceDotFollowedByNothing = MongoDBNamespace.fromString('test.');
         expect(namespaceDotFollowedByNothing).to.have.property('db', 'test');
         expect(namespaceDotFollowedByNothing).to.have.property('collection').that.is.undefined;
+      });
+
+      it('should throw on non-string inputs', () => {
+        // @ts-expect-error: testing incorrect input type
+        expect(() => MongoDBNamespace.fromString(2.3)).to.throw(MongoRuntimeError);
+      });
+
+      it('should throw on empty string input', () => {
+        expect(() => MongoDBNamespace.fromString('')).to.throw(MongoRuntimeError);
       });
     });
 
