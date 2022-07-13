@@ -551,7 +551,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return !!(this.options.maxIdleTimeMS && connection.idleTime > this.options.maxIdleTimeMS);
   }
 
-  private isPerished(connection: Connection) {
+  private connectionIsPerished(connection: Connection) {
     const isStale = this.connectionIsStale(connection);
     const isIdle = this.connectionIsIdle(connection);
     if (!isStale && !isIdle && !connection.closed) {
@@ -675,7 +675,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         break;
       }
 
-      if (!this.isPerished(connection)) {
+      if (!this.connectionIsPerished(connection)) {
         this[kCheckedOut]++;
         this.emit(
           ConnectionPool.CONNECTION_CHECKED_OUT,
