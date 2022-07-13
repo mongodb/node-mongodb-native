@@ -101,7 +101,7 @@ describe('GetMoreOperation', function () {
 
       it('should build basic getMore command with cursorId and collection', async () => {
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, {});
-        const stub = sinon.stub(server, 'command').yieldsRight(null, true);
+        const stub = sinon.stub(server, 'command').yieldsRight();
         await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
         expect(stub).to.have.been.calledOnceWith(namespace, {
           getMore: cursorId,
@@ -114,7 +114,7 @@ describe('GetMoreOperation', function () {
           batchSize: 234
         };
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
-        const stub = sinon.stub(server, 'command').yieldsRight(null, true);
+        const stub = sinon.stub(server, 'command').yieldsRight();
         await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
         expect(stub).to.have.been.calledOnceWith(
           namespace,
@@ -127,7 +127,7 @@ describe('GetMoreOperation', function () {
           maxAwaitTimeMS: 234
         };
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
-        const stub = sinon.stub(server, 'command').yieldsRight(null, true);
+        const stub = sinon.stub(server, 'command').yieldsRight();
         await promisify(getMoreOperation.execute.bind(getMoreOperation))(server, undefined);
         expect(stub).to.have.been.calledOnceWith(
           namespace,
@@ -185,7 +185,7 @@ describe('GetMoreOperation', function () {
               maxWireVersion: serverVersion
             };
             const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
-            const stub = sinon.stub(server, 'command').yieldsRight(null, true);
+            const stub = sinon.stub(server, 'command').yieldsRight();
             await promisify(operation.execute.bind(operation))(server, undefined);
             expect(stub).to.have.been.calledOnceWith(namespace, getMore);
           });

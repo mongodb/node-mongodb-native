@@ -85,7 +85,7 @@ describe('class KillCursorsOperation', () => {
         server,
         options
       ) as any;
-      const stub = sinon.stub(server, 'command').yieldsRight(null, true);
+      const stub = sinon.stub(server, 'command').yieldsRight();
       await promisify(killCursorsOperation.execute.bind(killCursorsOperation))(server, undefined);
       expect(stub).to.have.been.calledOnceWith(namespace, {
         killCursors: namespace.collection,
