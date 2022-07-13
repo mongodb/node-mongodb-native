@@ -119,7 +119,6 @@ export type ConnectionPoolEvents = {
  * @internal
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
-  closed: boolean;
   options: Readonly<ConnectionPoolOptions>;
   /** @internal */
   [kPoolState]: typeof PoolState[keyof typeof PoolState];
@@ -226,7 +225,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
     }
 
-    this.closed = false; // TODO: can we remove this in a non-breaking way?
     this[kPoolState] = PoolState.paused;
     this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
@@ -251,6 +249,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** The address of the endpoint the pool is connected to */
   get address(): string {
     return this.options.hostAddress.toString();
+  }
+
+  /**
+   * Check if the pool has been closed
+   *
+   * TODO(NODE-3263): We can remove this property once shell no longer needs it
+   */
+  get closed(): boolean {
+    return this[kPoolState] === PoolState.closed;
   }
 
   /** An integer representing the SDAM generation of the pool */
@@ -449,7 +456,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     // mark the pool as closed immediately
-    this.closed = true;
+    this[kPoolState] = PoolState.closed;
     eachAsync<Connection>(
       this[kConnections].toArray(),
       (conn, cb) => {
