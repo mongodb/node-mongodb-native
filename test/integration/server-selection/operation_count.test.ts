@@ -131,46 +131,6 @@ describe('Server Operation Count Tests', function () {
       expect(commandSpy.called).to.be.true;
       expect(server.s.operationCount).to.equal(0);
     });
-
-    it('is zero after a successful getMore', testMetadata, async function () {
-      cursor = collection.find({}, { batchSize: 1 });
-      await cursor.next();
-
-      const server = Array.from(client.topology.s.servers.values())[0];
-      expect(server.s.operationCount).to.equal(0);
-
-      const getMoreSpy = sinon.spy(server, 'getMore');
-
-      const operation = cursor.next();
-
-      expect(server.s.operationCount).to.equal(1);
-
-      await operation;
-
-      expect(getMoreSpy.called).to.be.true;
-      expect(server.s.operationCount).to.equal(0);
-
-      await cursor.close();
-    });
-
-    it('is zero after a successful killCursors', testMetadata, async function () {
-      cursor = collection.find({}, { batchSize: 1 });
-      await cursor.next();
-
-      const server = Array.from(client.topology.s.servers.values())[0];
-      expect(server.s.operationCount).to.equal(0);
-
-      const killCursorsSpy = sinon.spy(server, 'killCursors');
-
-      const promise = cursor.close();
-
-      expect(server.s.operationCount).to.equal(1);
-
-      await promise;
-
-      expect(killCursorsSpy.called).to.be.true;
-      expect(server.s.operationCount).to.equal(0);
-    });
   });
 
   context('operationCount is adjusted properly when operations fail', function () {
@@ -187,41 +147,6 @@ describe('Server Operation Count Tests', function () {
       expect(error).to.exist;
       expect(commandSpy.called).to.be.true;
 
-      expect(server.s.operationCount).to.equal(0);
-    });
-
-    it('is zero after a getMore fails', testMetadata, async function () {
-      cursor = collection.find({}, { batchSize: 1 });
-      await cursor.next();
-
-      await client.db('admin').command(enableFailPointCommand);
-
-      const server = Array.from(client.topology.s.servers.values())[0];
-      expect(server.s.operationCount).to.equal(0);
-      const getMoreSpy = sinon.spy(server, 'getMore');
-
-      const error = await cursor.next().catch(e => e);
-
-      expect(error).to.exist;
-      expect(getMoreSpy.called).to.be.true;
-      expect(server.s.operationCount).to.equal(0);
-
-      await cursor.close();
-    });
-
-    it('is zero after a killCursors fails', testMetadata, async function () {
-      cursor = collection.find({}, { batchSize: 1 });
-      await cursor.next(); // initialize the cursor
-
-      await client.db('admin').command(enableFailPointCommand);
-
-      const server = Array.from(client.topology.s.servers.values())[0];
-      expect(server.s.operationCount).to.equal(0);
-      const killCursorsSpy = sinon.spy(server, 'killCursors');
-
-      await cursor.close();
-
-      expect(killCursorsSpy.called).to.be.true;
       expect(server.s.operationCount).to.equal(0);
     });
   });
@@ -246,52 +171,6 @@ describe('Server Operation Count Tests', function () {
           expect(error).to.exist;
           expect(error).to.match(/unable to checkout connection/i);
           expect(commandSpy.called).to.be.true;
-          expect(server.s.operationCount).to.equal(0);
-        }
-      );
-
-      it(
-        'is zero after failing to check out a connection for a getMore',
-        testMetadata,
-        async function () {
-          cursor = collection.find({}, { batchSize: 1 });
-          await cursor.next();
-
-          const server = Array.from(client.topology.s.servers.values())[0];
-          expect(server.s.operationCount).to.equal(0);
-
-          sinon.stub(ConnectionPool.prototype, 'checkOut').callsFake(function (cb) {
-            cb(new Error('unable to checkout connection'), undefined);
-          });
-          const getMoreSpy = sinon.spy(server, 'getMore');
-
-          const error = await cursor.next().catch(e => e);
-
-          expect(error).to.exist;
-          expect(error).to.match(/unable to checkout connection/i);
-          expect(getMoreSpy.called).to.be.true;
-          expect(server.s.operationCount).to.equal(0);
-        }
-      );
-
-      it(
-        'is zero after failing to check out a connection for a killCursors',
-        testMetadata,
-        async function () {
-          cursor = collection.find({}, { batchSize: 1 });
-          await cursor.next();
-
-          const server = Array.from(client.topology.s.servers.values())[0];
-          expect(server.s.operationCount).to.equal(0);
-
-          sinon.stub(ConnectionPool.prototype, 'checkOut').callsFake(function (cb) {
-            cb(new Error('unable to checkout connection'), undefined);
-          });
-          const killCursorsSpy = sinon.spy(server, 'killCursors');
-
-          await cursor.close();
-
-          expect(killCursorsSpy.called).to.be.true;
           expect(server.s.operationCount).to.equal(0);
         }
       );

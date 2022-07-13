@@ -5,8 +5,19 @@ import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './operation';
 
+/**
+ * https://www.mongodb.com/docs/manual/reference/command/killCursors/
+ * @internal
+ */
+interface KillCursorsCommand {
+  killCursors: string;
+  cursors: Long[];
+  comment?: unknown;
+}
+
 export class KillCursorsOperation extends AbstractOperation {
   cursorId: Long;
+
   constructor(cursorId: Long, ns: MongoDBNamespace, server: Server, options: OperationOptions) {
     super(options);
     this.ns = ns;
@@ -20,7 +31,22 @@ export class KillCursorsOperation extends AbstractOperation {
         new MongoRuntimeError('Killcursor must run on the same server operation began on')
       );
     }
-    server.killCursors(this.ns, [this.cursorId], { session }, () => callback());
+
+    const killCursors = this.ns.collection;
+    if (killCursors == null) {
+      // Cursors should have adopted the namespace returned by MongoDB
+      // which should always defined a collection name (even a pseudo one, ex. db.aggregate())
+      return callback(
+        new MongoRuntimeError('A collection name must be determined before killCursors')
+      );
+    }
+
+    const killCursorsCommand: KillCursorsCommand = {
+      killCursors,
+      cursors: [this.cursorId]
+    };
+
+    server.command(this.ns, killCursorsCommand, { session }, () => callback());
   }
 }
 

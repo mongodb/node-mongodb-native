@@ -4,7 +4,7 @@ import type { BSONSerializeOptions, Document } from '../bson';
 import { MongoDecompressionError, MongoParseError } from '../error';
 import type { ClientSession } from '../sessions';
 import { BufferPool, Callback } from '../utils';
-import { BinMsg, MessageHeader, Msg, Query, Response, WriteProtocolMessageType } from './commands';
+import { BinMsg, MessageHeader, Msg, Response, WriteProtocolMessageType } from './commands';
 import {
   compress,
   Compressor,
@@ -32,7 +32,6 @@ export interface OperationDescription extends BSONSerializeOptions {
   cb: Callback<Document>;
   command: boolean;
   documentsReturnedIn?: string;
-  fullResult: boolean;
   noResponse: boolean;
   raw: boolean;
   requestId: number;
@@ -128,7 +127,7 @@ export class MessageStream extends Duplex {
 // Return whether a command contains an uncompressible command term
 // Will return true if command contains no uncompressible command terms
 function canCompress(command: WriteProtocolMessageType) {
-  const commandDoc = command instanceof Msg ? command.command : (command as Query).query;
+  const commandDoc = command instanceof Msg ? command.command : command.query;
   const commandName = Object.keys(commandDoc)[0];
   return !uncompressibleCommands.has(commandName);
 }

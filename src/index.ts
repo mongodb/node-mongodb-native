@@ -207,11 +207,8 @@ export type {
 } from './cmap/auth/mongo_credentials';
 export type {
   BinMsg,
-  GetMore,
-  KillCursor,
   MessageHeader,
   Msg,
-  OpGetMoreOptions,
   OpMsgOptions,
   OpQueryOptions,
   OpResponseOptions,

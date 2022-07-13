@@ -1,7 +1,7 @@
 import type { Document, ObjectId } from '../bson';
 import { LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMMAND_CAMEL_CASE } from '../constants';
 import { calculateDurationInMs, deepCopy } from '../utils';
-import { GetMore, KillCursor, Msg, WriteProtocolMessageType } from './commands';
+import { Msg, WriteProtocolMessageType } from './commands';
 import type { Connection } from './connection';
 
 /**
@@ -206,21 +206,6 @@ const OP_QUERY_KEYS = [
 
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
-  if (command instanceof GetMore) {
-    return {
-      getMore: deepCopy(command.cursorId),
-      collection: collectionName(command),
-      batchSize: command.numberToReturn
-    };
-  }
-
-  if (command instanceof KillCursor) {
-    return {
-      killCursors: collectionName(command),
-      cursors: deepCopy(command.cursorIds)
-    };
-  }
-
   if (command instanceof Msg) {
     return deepCopy(command.command);
   }
@@ -280,26 +265,8 @@ function extractCommand(command: WriteProtocolMessageType): Document {
 }
 
 function extractReply(command: WriteProtocolMessageType, reply?: Document) {
-  if (command instanceof KillCursor) {
-    return {
-      ok: 1,
-      cursorsUnknown: command.cursorIds
-    };
-  }
-
   if (!reply) {
     return reply;
-  }
-
-  if (command instanceof GetMore) {
-    return {
-      ok: 1,
-      cursor: {
-        id: deepCopy(reply.cursorId),
-        ns: namespace(command),
-        nextBatch: deepCopy(reply.documents)
-      }
-    };
   }
 
   if (command instanceof Msg) {

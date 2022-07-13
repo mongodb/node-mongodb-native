@@ -1,16 +1,17 @@
-'use strict';
-const {
-  eachAsync,
-  makeInterruptibleAsyncInterval,
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+
+import { LEGACY_HELLO_COMMAND } from '../../src/constants';
+import { MongoRuntimeError } from '../../src/error';
+import {
   BufferPool,
-  shuffle,
-  isHello
-} = require('../../src/utils');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { MongoRuntimeError } = require('../../src/error');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
-const { createTimerSandbox } = require('./timer_sandbox');
+  eachAsync,
+  isHello,
+  makeInterruptibleAsyncInterval,
+  MongoDBNamespace,
+  shuffle
+} from '../../src/utils';
+import { createTimerSandbox } from './timer_sandbox';
 
 describe('driver utils', function () {
   context('eachAsync()', function () {
@@ -18,7 +19,7 @@ describe('driver utils', function () {
       eachAsync(
         [{ error: false }, { error: true }],
         (item, cb) => {
-          cb(item.error ? new Error('error requested') : null);
+          cb(item.error ? new Error('error requested') : undefined);
         },
         err => {
           expect(err).to.exist;
@@ -387,6 +388,7 @@ describe('driver utils', function () {
 
       it('should throw an error if a non-number size is requested', function () {
         const buffer = new BufferPool();
+        // @ts-expect-error: Testing invalid input
         expect(() => buffer.read('256')).to.throw(/Argument "size" must be a non-negative number/);
       });
 
@@ -523,6 +525,64 @@ describe('driver utils', function () {
     it('should return false if the legacy hello property and hello property are set to false', function () {
       const doc = { [LEGACY_HELLO_COMMAND]: false, hello: false };
       expect(isHello(doc)).to.be.false;
+    });
+  });
+
+  describe('class MongoDBNamespace', () => {
+    describe('constructor()', () => {
+      it('should set db property', () => {
+        const namespace = new MongoDBNamespace('myDb', 'myCollection');
+        expect(namespace).to.have.property('collection', 'myCollection');
+      });
+
+      it('should set collection property', () => {
+        const namespace = new MongoDBNamespace('myDb', 'myCollection');
+        expect(namespace).to.have.property('collection', 'myCollection');
+      });
+
+      it('should constrain collection property to undefined if empty string passed in', () => {
+        const namespace = new MongoDBNamespace('myDb', '');
+        expect(namespace).to.have.property('collection').that.is.undefined;
+      });
+    });
+
+    describe('fromString()', () => {
+      it('should accept dot delimited namespace', () => {
+        const namespaceNoDot = MongoDBNamespace.fromString('a.b');
+        expect(namespaceNoDot).to.have.property('db', 'a');
+        expect(namespaceNoDot).to.have.property('collection', 'b');
+      });
+
+      it('should constrain collection to undefined if nothing follows the db name', () => {
+        const namespaceNoDot = MongoDBNamespace.fromString('test');
+        expect(namespaceNoDot).to.have.property('collection').that.is.undefined;
+      });
+
+      it('should not include a dot in the db name if the input ends with one', () => {
+        const namespaceDotFollowedByNothing = MongoDBNamespace.fromString('test.');
+        expect(namespaceDotFollowedByNothing).to.have.property('db', 'test');
+        expect(namespaceDotFollowedByNothing).to.have.property('collection').that.is.undefined;
+      });
+
+      it('should throw on non-string inputs', () => {
+        // @ts-expect-error: testing incorrect input type
+        expect(() => MongoDBNamespace.fromString(2.3)).to.throw(MongoRuntimeError);
+      });
+
+      it('should throw on empty string input', () => {
+        expect(() => MongoDBNamespace.fromString('')).to.throw(MongoRuntimeError);
+      });
+    });
+
+    describe('withCollection()', () => {
+      const dbNamespace = MongoDBNamespace.fromString('test');
+
+      it('should return new MongoDBNamespace instance', () => {
+        const withCollectionNamespace = dbNamespace.withCollection('pets');
+        expect(withCollectionNamespace).to.not.equal(dbNamespace);
+        expect(withCollectionNamespace).to.have.property('db', 'test');
+        expect(withCollectionNamespace).to.have.property('collection', 'pets');
+      });
     });
   });
 });

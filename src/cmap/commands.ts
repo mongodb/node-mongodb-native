@@ -5,7 +5,7 @@ import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import { databaseNamespace } from '../utils';
 import type { CommandOptions } from './connection';
-import { OP_GETMORE, OP_KILL_CURSORS, OP_MSG, OP_QUERY } from './wire_protocol/constants';
+import { OP_MSG, OP_QUERY } from './wire_protocol/constants';
 
 // Incrementing request id
 let _requestId = 0;
@@ -26,7 +26,7 @@ const SHARD_CONFIG_STALE = 4;
 const AWAIT_CAPABLE = 8;
 
 /** @internal */
-export type WriteProtocolMessageType = Query | Msg | GetMore | KillCursor;
+export type WriteProtocolMessageType = Query | Msg;
 
 /** @internal */
 export interface OpQueryOptions extends CommandOptions {
@@ -267,194 +267,6 @@ export class Query {
 
     // Return the buffers
     return buffers;
-  }
-}
-
-/** @internal */
-export interface OpGetMoreOptions {
-  numberToReturn?: number;
-}
-
-/**************************************************************
- * GETMORE
- **************************************************************/
-/** @internal */
-export class GetMore {
-  numberToReturn: number;
-  requestId: number;
-  ns: string;
-  cursorId: Long;
-
-  constructor(ns: string, cursorId: Long, opts: OpGetMoreOptions = {}) {
-    this.numberToReturn = opts.numberToReturn || 0;
-    this.requestId = _requestId++;
-    this.ns = ns;
-    this.cursorId = cursorId;
-  }
-
-  // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin(): Buffer[] {
-    const length = 4 + Buffer.byteLength(this.ns) + 1 + 4 + 8 + 4 * 4;
-    // Create command buffer
-    let index = 0;
-    // Allocate buffer
-    const _buffer = Buffer.alloc(length);
-
-    // Write header information
-    // index = write32bit(index, _buffer, length);
-    _buffer[index + 3] = (length >> 24) & 0xff;
-    _buffer[index + 2] = (length >> 16) & 0xff;
-    _buffer[index + 1] = (length >> 8) & 0xff;
-    _buffer[index] = length & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, requestId);
-    _buffer[index + 3] = (this.requestId >> 24) & 0xff;
-    _buffer[index + 2] = (this.requestId >> 16) & 0xff;
-    _buffer[index + 1] = (this.requestId >> 8) & 0xff;
-    _buffer[index] = this.requestId & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, 0);
-    _buffer[index + 3] = (0 >> 24) & 0xff;
-    _buffer[index + 2] = (0 >> 16) & 0xff;
-    _buffer[index + 1] = (0 >> 8) & 0xff;
-    _buffer[index] = 0 & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, OP_GETMORE);
-    _buffer[index + 3] = (OP_GETMORE >> 24) & 0xff;
-    _buffer[index + 2] = (OP_GETMORE >> 16) & 0xff;
-    _buffer[index + 1] = (OP_GETMORE >> 8) & 0xff;
-    _buffer[index] = OP_GETMORE & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, 0);
-    _buffer[index + 3] = (0 >> 24) & 0xff;
-    _buffer[index + 2] = (0 >> 16) & 0xff;
-    _buffer[index + 1] = (0 >> 8) & 0xff;
-    _buffer[index] = 0 & 0xff;
-    index = index + 4;
-
-    // Write collection name
-    index = index + _buffer.write(this.ns, index, 'utf8') + 1;
-    _buffer[index - 1] = 0;
-
-    // Write batch size
-    // index = write32bit(index, _buffer, numberToReturn);
-    _buffer[index + 3] = (this.numberToReturn >> 24) & 0xff;
-    _buffer[index + 2] = (this.numberToReturn >> 16) & 0xff;
-    _buffer[index + 1] = (this.numberToReturn >> 8) & 0xff;
-    _buffer[index] = this.numberToReturn & 0xff;
-    index = index + 4;
-
-    // Write cursor id
-    // index = write32bit(index, _buffer, cursorId.getLowBits());
-    _buffer[index + 3] = (this.cursorId.getLowBits() >> 24) & 0xff;
-    _buffer[index + 2] = (this.cursorId.getLowBits() >> 16) & 0xff;
-    _buffer[index + 1] = (this.cursorId.getLowBits() >> 8) & 0xff;
-    _buffer[index] = this.cursorId.getLowBits() & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, cursorId.getHighBits());
-    _buffer[index + 3] = (this.cursorId.getHighBits() >> 24) & 0xff;
-    _buffer[index + 2] = (this.cursorId.getHighBits() >> 16) & 0xff;
-    _buffer[index + 1] = (this.cursorId.getHighBits() >> 8) & 0xff;
-    _buffer[index] = this.cursorId.getHighBits() & 0xff;
-    index = index + 4;
-
-    // Return buffer
-    return [_buffer];
-  }
-}
-
-/**************************************************************
- * KILLCURSOR
- **************************************************************/
-/** @internal */
-export class KillCursor {
-  ns: string;
-  requestId: number;
-  cursorIds: Long[];
-
-  constructor(ns: string, cursorIds: Long[]) {
-    this.ns = ns;
-    this.requestId = _requestId++;
-    this.cursorIds = cursorIds;
-  }
-
-  // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin(): Buffer[] {
-    const length = 4 + 4 + 4 * 4 + this.cursorIds.length * 8;
-
-    // Create command buffer
-    let index = 0;
-    const _buffer = Buffer.alloc(length);
-
-    // Write header information
-    // index = write32bit(index, _buffer, length);
-    _buffer[index + 3] = (length >> 24) & 0xff;
-    _buffer[index + 2] = (length >> 16) & 0xff;
-    _buffer[index + 1] = (length >> 8) & 0xff;
-    _buffer[index] = length & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, requestId);
-    _buffer[index + 3] = (this.requestId >> 24) & 0xff;
-    _buffer[index + 2] = (this.requestId >> 16) & 0xff;
-    _buffer[index + 1] = (this.requestId >> 8) & 0xff;
-    _buffer[index] = this.requestId & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, 0);
-    _buffer[index + 3] = (0 >> 24) & 0xff;
-    _buffer[index + 2] = (0 >> 16) & 0xff;
-    _buffer[index + 1] = (0 >> 8) & 0xff;
-    _buffer[index] = 0 & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, OP_KILL_CURSORS);
-    _buffer[index + 3] = (OP_KILL_CURSORS >> 24) & 0xff;
-    _buffer[index + 2] = (OP_KILL_CURSORS >> 16) & 0xff;
-    _buffer[index + 1] = (OP_KILL_CURSORS >> 8) & 0xff;
-    _buffer[index] = OP_KILL_CURSORS & 0xff;
-    index = index + 4;
-
-    // index = write32bit(index, _buffer, 0);
-    _buffer[index + 3] = (0 >> 24) & 0xff;
-    _buffer[index + 2] = (0 >> 16) & 0xff;
-    _buffer[index + 1] = (0 >> 8) & 0xff;
-    _buffer[index] = 0 & 0xff;
-    index = index + 4;
-
-    // Write batch size
-    // index = write32bit(index, _buffer, this.cursorIds.length);
-    _buffer[index + 3] = (this.cursorIds.length >> 24) & 0xff;
-    _buffer[index + 2] = (this.cursorIds.length >> 16) & 0xff;
-    _buffer[index + 1] = (this.cursorIds.length >> 8) & 0xff;
-    _buffer[index] = this.cursorIds.length & 0xff;
-    index = index + 4;
-
-    // Write all the cursor ids into the array
-    for (let i = 0; i < this.cursorIds.length; i++) {
-      // Write cursor id
-      // index = write32bit(index, _buffer, cursorIds[i].getLowBits());
-      _buffer[index + 3] = (this.cursorIds[i].getLowBits() >> 24) & 0xff;
-      _buffer[index + 2] = (this.cursorIds[i].getLowBits() >> 16) & 0xff;
-      _buffer[index + 1] = (this.cursorIds[i].getLowBits() >> 8) & 0xff;
-      _buffer[index] = this.cursorIds[i].getLowBits() & 0xff;
-      index = index + 4;
-
-      // index = write32bit(index, _buffer, cursorIds[i].getHighBits());
-      _buffer[index + 3] = (this.cursorIds[i].getHighBits() >> 24) & 0xff;
-      _buffer[index + 2] = (this.cursorIds[i].getHighBits() >> 16) & 0xff;
-      _buffer[index + 1] = (this.cursorIds[i].getHighBits() >> 8) & 0xff;
-      _buffer[index] = this.cursorIds[i].getHighBits() & 0xff;
-      index = index + 4;
-    }
-
-    // Return buffer
-    return [_buffer];
   }
 }
 

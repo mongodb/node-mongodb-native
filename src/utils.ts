@@ -452,7 +452,7 @@ export function ns(ns: string): MongoDBNamespace {
 /** @public */
 export class MongoDBNamespace {
   db: string;
-  collection?: string;
+  collection: string | undefined;
   /**
    * Create a namespace object
    *
@@ -461,7 +461,7 @@ export class MongoDBNamespace {
    */
   constructor(db: string, collection?: string) {
     this.db = db;
-    this.collection = collection;
+    this.collection = collection === '' ? undefined : collection;
   }
 
   toString(): string {
@@ -473,13 +473,14 @@ export class MongoDBNamespace {
   }
 
   static fromString(namespace?: string): MongoDBNamespace {
-    if (!namespace) {
+    if (typeof namespace !== 'string' || namespace === '') {
       // TODO(NODE-3483): Replace with MongoNamespaceError
       throw new MongoRuntimeError(`Cannot parse namespace from "${namespace}"`);
     }
 
-    const [db, ...collection] = namespace.split('.');
-    return new MongoDBNamespace(db, collection.join('.'));
+    const [db, ...collectionParts] = namespace.split('.');
+    const collection = collectionParts.join('.');
+    return new MongoDBNamespace(db, collection === '' ? undefined : collection);
   }
 }
 

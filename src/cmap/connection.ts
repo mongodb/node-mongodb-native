@@ -1,6 +1,6 @@
 import { setTimeout } from 'timers';
 
-import { BSONSerializeOptions, Document, Long, ObjectId, pluckBSONSerializeOptions } from '../bson';
+import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
 import {
   CLOSE,
   CLUSTER_TIME_RECEIVED,
@@ -17,7 +17,6 @@ import {
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoRuntimeError,
   MongoServerError,
   MongoWriteConcernError
 } from '../error';
@@ -42,19 +41,11 @@ import {
   CommandStartedEvent,
   CommandSucceededEvent
 } from './command_monitoring_events';
-import {
-  BinMsg,
-  GetMore,
-  KillCursor,
-  Msg,
-  Query,
-  Response,
-  WriteProtocolMessageType
-} from './commands';
+import { BinMsg, Msg, Query, Response, WriteProtocolMessageType } from './commands';
 import type { Stream } from './connect';
 import { MessageStream, OperationDescription } from './message_stream';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
-import { applyCommonQueryOptions, getReadPreference, isSharded } from './wire_protocol/shared';
+import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
 const kStream = Symbol('stream');
@@ -74,8 +65,6 @@ const kDescription = Symbol('description');
 const kHello = Symbol('hello');
 /** @internal */
 const kAutoEncrypter = Symbol('autoEncrypter');
-/** @internal */
-const kFullResult = Symbol('fullResult');
 /** @internal */
 const kDelayedTimeoutId = Symbol('delayedTimeoutId');
 
@@ -104,7 +93,6 @@ export interface CommandOptions extends BSONSerializeOptions {
   readPreference?: ReadPreferenceLike;
   raw?: boolean;
   monitoring?: boolean;
-  [kFullResult]?: boolean;
   socketTimeoutMS?: number;
   /** Session to use for the operation */
   session?: ClientSession;
@@ -459,7 +447,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
     }
 
-    callback(undefined, operationDescription.fullResult ? message : message.documents[0]);
+    callback(undefined, message.documents[0]);
   }
 
   destroy(options?: DestroyOptions, callback?: Callback): void {
@@ -505,11 +493,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     options: CommandOptions | undefined,
     callback: Callback
   ): void {
-    if (!(ns instanceof MongoDBNamespace)) {
-      // TODO(NODE-3483): Replace this with a MongoCommandError
-      throw new MongoRuntimeError('Must provide a MongoDBNamespace instance');
-    }
-
     const readPreference = getReadPreference(cmd, options);
     const shouldUseOpMsg = supportsOpMsg(this);
     const session = options?.session;
@@ -573,117 +556,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     } catch (err) {
       callback(err);
     }
-  }
-
-  getMore(
-    ns: MongoDBNamespace,
-    cursorId: Long,
-    options: GetMoreOptions,
-    callback: Callback<Document>
-  ): void {
-    const fullResult = !!options[kFullResult];
-    const wireVersion = maxWireVersion(this);
-    if (!cursorId) {
-      // TODO(NODE-3483): Replace this with a MongoCommandError
-      callback(new MongoRuntimeError('Invalid internal cursor state, no known cursor id'));
-      return;
-    }
-
-    if (wireVersion < 4) {
-      const getMoreOp = new GetMore(ns.toString(), cursorId, { numberToReturn: options.batchSize });
-      const queryOptions = applyCommonQueryOptions(
-        {},
-        Object.assign(options, { ...pluckBSONSerializeOptions(options) })
-      );
-
-      queryOptions[kFullResult] = true;
-      queryOptions.command = true;
-      write(this, getMoreOp, queryOptions, (err, response) => {
-        if (fullResult) return callback(err, response);
-        if (err) return callback(err);
-        callback(undefined, { cursor: { id: response.cursorId, nextBatch: response.documents } });
-      });
-
-      return;
-    }
-
-    const getMoreCmd: Document = {
-      getMore: cursorId,
-      collection: ns.collection
-    };
-
-    if (typeof options.batchSize === 'number') {
-      getMoreCmd.batchSize = Math.abs(options.batchSize);
-    }
-
-    if (typeof options.maxAwaitTimeMS === 'number') {
-      getMoreCmd.maxTimeMS = options.maxAwaitTimeMS;
-    }
-    // we check for undefined specifically here to allow falsy values
-    // eslint-disable-next-line no-restricted-syntax
-    if (options.comment !== undefined) {
-      getMoreCmd.comment = options.comment;
-    }
-
-    const commandOptions = Object.assign(
-      {
-        returnFieldSelector: null,
-        documentsReturnedIn: 'nextBatch'
-      },
-      options
-    );
-
-    this.command(ns, getMoreCmd, commandOptions, callback);
-  }
-
-  killCursors(
-    ns: MongoDBNamespace,
-    cursorIds: Long[],
-    options: CommandOptions,
-    callback: Callback
-  ): void {
-    if (!cursorIds || !Array.isArray(cursorIds)) {
-      // TODO(NODE-3483): Replace this with a MongoCommandError
-      throw new MongoRuntimeError(`Invalid list of cursor ids provided: ${cursorIds}`);
-    }
-
-    if (maxWireVersion(this) < 4) {
-      try {
-        write(
-          this,
-          new KillCursor(ns.toString(), cursorIds),
-          { noResponse: true, ...options },
-          callback
-        );
-      } catch (err) {
-        callback(err);
-      }
-
-      return;
-    }
-
-    this.command(
-      ns,
-      { killCursors: ns.collection, cursors: cursorIds },
-      { [kFullResult]: true, ...options },
-      (err, response) => {
-        if (err || !response) return callback(err);
-        if (response.cursorNotFound) {
-          return callback(new MongoNetworkError('cursor killed or timed out'), null);
-        }
-
-        if (!Array.isArray(response.documents) || response.documents.length === 0) {
-          return callback(
-            // TODO(NODE-3483)
-            new MongoRuntimeError(
-              `invalid killCursors result returned for cursor id ${cursorIds[0]}`
-            )
-          );
-        }
-
-        callback(undefined, response.documents[0]);
-      }
-    );
   }
 }
 
@@ -774,16 +646,11 @@ function write(
   options: CommandOptions,
   callback: Callback
 ) {
-  if (typeof options === 'function') {
-    callback = options;
-  }
-
   options = options ?? {};
   const operationDescription: OperationDescription = {
     requestId: command.requestId,
     cb: callback,
     session: options.session,
-    fullResult: !!options[kFullResult],
     noResponse: typeof options.noResponse === 'boolean' ? options.noResponse : false,
     documentsReturnedIn: options.documentsReturnedIn,
     command: !!options.command,
