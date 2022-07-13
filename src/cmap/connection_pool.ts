@@ -668,7 +668,6 @@ function processWaitQueue(pool: ConnectionPool) {
 
     if (!isPerished(pool, connection)) {
       pool[kCheckedOut]++;
-      console.log('DEBUG: checkout() succeeded', pool.id);
       pool.emit(
         ConnectionPool.CONNECTION_CHECKED_OUT,
         new ConnectionCheckedOutEvent(pool, connection)
