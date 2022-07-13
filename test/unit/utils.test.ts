@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';
-import { MongoInvalidArgumentError, MongoRuntimeError } from '../../src/error';
+import { MongoRuntimeError } from '../../src/error';
 import {
   BufferPool,
   eachAsync,
