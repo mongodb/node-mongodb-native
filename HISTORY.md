@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.8.0](https://github.com/mongodb/node-mongodb-native/compare/v4.7.0...v4.8.0) (2022-07-13)
+
+
+### Features
+
+* **NODE-4078:** allow comment with estimated doc count ([#3301](https://github.com/mongodb/node-mongodb-native/issues/3301)) ([bed1fe3](https://github.com/mongodb/node-mongodb-native/commit/bed1fe3cc070861b4566ff494512d78a5b1d37a8))
+* **NODE-4267:** support nested fields in type completion for UpdateFilter ([#3259](https://github.com/mongodb/node-mongodb-native/issues/3259)) ([1a9a44c](https://github.com/mongodb/node-mongodb-native/commit/1a9a44cf91847258cf33454d6d3c71c3ba002507))
+* **NODE-4294:** mark queryable encryption options beta ([#3300](https://github.com/mongodb/node-mongodb-native/issues/3300)) ([4c07bbb](https://github.com/mongodb/node-mongodb-native/commit/4c07bbbed939516e50369aac44b170ec02ceeba3))
+* **NODE-4301:** remove shared lib experimental tags ([#3298](https://github.com/mongodb/node-mongodb-native/issues/3298)) ([3976783](https://github.com/mongodb/node-mongodb-native/commit/3976783331114ec52740982fea3b82b789581ed5))
+
+
+### Bug Fixes
+
+* **NODE-4125:** change stream resumability ([#3289](https://github.com/mongodb/node-mongodb-native/issues/3289)) ([aa5f97e](https://github.com/mongodb/node-mongodb-native/commit/aa5f97ec65ca49f5320812ae36044f525a8fd9c8))
+* **NODE-4262:** make startSession work without a connection ([#3286](https://github.com/mongodb/node-mongodb-native/issues/3286)) ([89ad7c3](https://github.com/mongodb/node-mongodb-native/commit/89ad7c3e5f3ae9ac485b7e1ff6699aed32e2eb34))
+* sync showExpandedEvents spec tests ([#3288](https://github.com/mongodb/node-mongodb-native/issues/3288)) ([cfe18f9](https://github.com/mongodb/node-mongodb-native/commit/cfe18f966c6d40f3dcc874b668bac65640275449))
+
 ## [4.7.0](https://github.com/mongodb/node-mongodb-native/compare/v4.6.0...v4.7.0) (2022-06-06)
 
 
