@@ -30,9 +30,8 @@ export class PoolClearedError extends MongoDriverError {
 
   constructor(pool: ConnectionPool) {
     // TODO: pass in original pool-clearing error and use in message
-    super(
-      `Connection pool for ${pool.address} was cleared because another operation failed with: <original error which cleared the pool>`
-    );
+    // "failed with: <original error which cleared the pool>"
+    super(`Connection pool for ${pool.address} was cleared because another operation failed`);
     this.address = pool.address;
   }
 
