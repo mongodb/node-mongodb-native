@@ -37,7 +37,7 @@ export class PoolClearedError extends MongoDriverError {
   }
 
   override get name(): string {
-    return 'MongoPoolClosedError';
+    return 'MongoPoolClearedError';
   }
 }
 
