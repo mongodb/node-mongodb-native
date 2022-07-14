@@ -47,9 +47,9 @@ describe('makeIndexSpec()', () => {
     },
     {
       description: 'single  { [key: string]: IndexDirection }',
-      input: { sample_index: -1 },
-      mapData: new Map<string, IndexDirection>([['sample_index', -1]]),
-      name: 'sample_index_-1'
+      input: { x: 1 },
+      mapData: new Map<string, IndexDirection>([['x', 1]]),
+      name: 'x_1'
     },
     {
       description: 'array of { [key: string]: IndexDirection }',

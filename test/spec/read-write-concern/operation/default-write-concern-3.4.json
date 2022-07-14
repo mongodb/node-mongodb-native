@@ -117,60 +117,6 @@
       ]
     },
     {
-      "description": "CreateIndex and dropIndex omits default write concern",
-      "operations": [
-        {
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
-          "name": "createIndex",
-          "arguments": {
-            "keys": {
-              "x": 1
-            }
-          }
-        },
-        {
-          "object": "collection",
-          "collectionOptions": {
-            "writeConcern": {}
-          },
-          "name": "dropIndex",
-          "arguments": {
-            "name": "x_1"
-          }
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "createIndexes": "default_write_concern_coll",
-              "indexes": [
-                {
-                  "name": "x_1",
-                  "key": {
-                    "x": 1
-                  }
-                }
-              ],
-              "writeConcern": null
-            }
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "dropIndexes": "default_write_concern_coll",
-              "index": "x_1",
-              "writeConcern": null
-            }
-          }
-        }
-      ]
-    },
-    {
       "description": "MapReduce omits default write concern",
       "operations": [
         {

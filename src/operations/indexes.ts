@@ -155,7 +155,7 @@ export function makeIndexSpec(indexSpec: IndexSpecification, options: any): Inde
       if ('string' === typeof spec) {
         fieldHash.set(spec, 1);
       } else if (Array.isArray(spec)) {
-        fieldHash.set(spec[0], spec[1] || 1);
+        fieldHash.set(spec[0], spec[1] ?? 1);
       } else if (spec instanceof Map) {
         for (const [key, value] of spec) {
           fieldHash.set(key, value);
