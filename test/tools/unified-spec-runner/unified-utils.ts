@@ -206,6 +206,11 @@ export function makeConnectionString(
 export function getClientEncryptionClass(): ClientEncryption {
   try {
     const mongodbClientEncryption = getMongoDBClientEncryption();
+    if (mongodbClientEncryption == null) {
+      throw new MongoMissingDependencyError(
+        'Attempting to import mongodb-client-encryption but it is not installed.'
+      );
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { ClientEncryption } = mongodbClientEncryption.extension(require('../../../src/index'));
