@@ -86,17 +86,7 @@ operations.set('assertIndexNotExists', async ({ operation, client }) => {
       return;
     }
   }
-  //.catch(error => (error.code === 26 || error.message.includes('ns does not exist') ? [] : null));
   expect(indexes.map(({ name }) => name)).to.not.include(operation.arguments.indexName);
-  /*
-  try {
-    expect(await collection.indexExists(operation.arguments.indexName)).to.be.true;
-  } catch (error) {
-    if (error.code === 26 || error.message.includes('ns does not exist')) {
-      return;
-    }
-    throw error;
-  } */
 });
 
 operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operation }) => {
