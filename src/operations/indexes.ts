@@ -137,7 +137,7 @@ function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
   return Array.isArray(t) && t.length === 2 && isIndexDirection(t[1]);
 }
 
-export function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
+function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
   function getFieldHash(indexSpec: IndexSpecification) {
     const fieldHash: Map<string, IndexDirection> = new Map();
 
@@ -323,7 +323,7 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
     //   coll.createIndex({ a: 1 });
     //   coll.createIndex([['a', 1]]);
     // createIndexes is always called with an array of index spec objects
-    super(parent, collectionName, [makeIndexSpec(indexSpec, options)]);
+    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
   override execute(
     server: Server,

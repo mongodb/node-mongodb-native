@@ -485,6 +485,13 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
       actualCommand.sort = { [expectedKey]: actualCommand.sort.get(expectedKey) };
     }
 
+    if (expectedCommand.createIndexes) {
+      actualCommand.indexes = actualCommand.indexes.map((dbIndex) => ({
+        ...dbIndex,
+        key: Object.fromEntries(dbIndex.key.entries()) //[expectedKey]: actualCommand.createIndexes.get(expectedKey)
+      }));
+    }
+
     expect(actualCommand).withSessionData(savedSessionData).to.matchMongoSpec(expectedCommand);
   }
 }
@@ -504,6 +511,13 @@ function normalizeCommandShapes(commands) {
     // TODO: this is a workaround to preserve sort Map type until NODE-3235 is completed
     if (def.command.sort) {
       output.command.sort = def.command.sort;
+    }
+    if (def.command.createIndexes) {
+      for (const [i, dbIndex] of output.command.indexes.entries()) {
+        dbIndex.key = def.command.indexes[i].key;
+      }
+
+      //output.command.createIndexes.
     }
     return output;
   });

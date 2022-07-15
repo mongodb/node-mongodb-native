@@ -76,6 +76,19 @@ operations.set('assertIndexNotExists', async ({ operation, client }) => {
   const collection = client
     .db(operation.arguments.databaseName)
     .collection(operation.arguments.collectionName);
+
+  const listIndexCursor = collection.listIndexes();
+  let indexes;
+  try {
+    indexes = await listIndexCursor.toArray();
+  } catch (error) {
+    if (error.code === 26 || error.message.includes('ns does not exist')) {
+      return;
+    }
+  }
+  //.catch(error => (error.code === 26 || error.message.includes('ns does not exist') ? [] : null));
+  expect(indexes.map(({ name }) => name)).to.not.include(operation.arguments.indexName);
+  /*
   try {
     expect(await collection.indexExists(operation.arguments.indexName)).to.be.true;
   } catch (error) {
@@ -83,7 +96,7 @@ operations.set('assertIndexNotExists', async ({ operation, client }) => {
       return;
     }
     throw error;
-  }
+  } */
 });
 
 operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operation }) => {

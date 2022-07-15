@@ -166,6 +166,8 @@ export function resultCheck(
       expect(actual[key]).to.have.all.keys(expectedSortKey);
       const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
       resultCheck(objFromActual, value, entities, path, checkExtraKeys);
+    } else if (key === 'key') {
+      actual.key = Object.fromEntries(actual.key.entries());
     } else {
       resultCheck(actual[key], value, entities, path, checkExtraKeys);
     }
