@@ -40,7 +40,7 @@ export interface UpdateResult {
   /** The number of documents that were upserted */
   upsertedCount: number;
   /** The identifier of the inserted document if an upsert took place */
-  upsertedId: ObjectId;
+  upsertedId: ObjectId | null;
 }
 
 /** @public */
