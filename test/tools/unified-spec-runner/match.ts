@@ -166,9 +166,8 @@ export function resultCheck(
       expect(actual[key]).to.have.all.keys(expectedSortKey);
       const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
       resultCheck(objFromActual, value, entities, path, checkExtraKeys);
-    } else if (key === 'key') {
+    } else if (key === 'key' && key in actual && actual[key] instanceof Map) {
       expect(Object.keys(value)).to.have.lengthOf(1);
-      expect(actual[key]).to.be.instanceOf(Map);
       expect(actual[key].size).to.equal(1);
       resultCheck(Object.fromEntries(actual.key.entries()), value, entities, path, checkExtraKeys);
     } else {

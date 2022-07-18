@@ -491,9 +491,9 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
         expect(index.key).to.be.instanceOf(Map);
         expect(index.key.size).to.equal(1);
       }
-      actualCommand.indexes = actualCommand.indexes.map((dbIndex) => ({
+      actualCommand.indexes = actualCommand.indexes.map(dbIndex => ({
         ...dbIndex,
-        key: Object.fromEntries(dbIndex.key.entries()) //[expectedKey]: actualCommand.createIndexes.get(expectedKey)
+        key: Object.fromEntries(dbIndex.key.entries())
       }));
     }
 
@@ -521,8 +521,6 @@ function normalizeCommandShapes(commands) {
       for (const [i, dbIndex] of output.command.indexes.entries()) {
         dbIndex.key = def.command.indexes[i].key;
       }
-
-      //output.command.createIndexes.
     }
     return output;
   });
