@@ -405,7 +405,7 @@ The following steps will walk you through how to run the tests for CSFLE.
 1. If you are running the unified tests, you must set the following environment variable as well:
 
 ```shell
-export TEST_CSFLE=true
+export CLIENT_ENCRYPTION=true
 ```
 
 1. Run the functional tests:
