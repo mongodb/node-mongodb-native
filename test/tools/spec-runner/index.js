@@ -486,10 +486,10 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
     }
 
     if (expectedCommand.createIndexes) {
-      for (const index of actualCommand.indexes) {
-        expect(index.key).to.have.lengthOf(1);
-        expect(index.key).to.be.instanceOf(Map);
-        expect(index.key.size).to.equal(1);
+      for (const [i, dbIndex] of actualCommand.indexes.entries()) {
+        expect(Object.keys(expectedCommand.indexes[i].key)).to.have.lengthOf(1);
+        expect(dbIndex.key).to.be.instanceOf(Map);
+        expect(dbIndex.key.size).to.equal(1);
       }
       actualCommand.indexes = actualCommand.indexes.map(dbIndex => ({
         ...dbIndex,
