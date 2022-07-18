@@ -1426,14 +1426,18 @@ export function getMongoDBClientEncryption(): {
     process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE.length > 0
   ) {
     try {
-      // NOTE(NODE-3199): Ensure you always wrap an optional require in the try block
+      // NOTE(NODE-3199): Ensure you always wrap an optional require literally in the try block
+      // Cannot be moved to helper utility function, bundlers search and replace the actual require call
+      // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
       mongodbClientEncryption = require(process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE);
     } catch {
       // ignore
     }
   } else {
     try {
-      // NOTE(NODE-3199): Ensure you always wrap an optional require in the try block
+      // NOTE(NODE-3199): Ensure you always wrap an optional require literally in the try block
+      // Cannot be moved to helper utility function, bundlers search and replace the actual require call
+      // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
       mongodbClientEncryption = require('mongodb-client-encryption');
     } catch {
       // ignore
