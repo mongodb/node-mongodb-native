@@ -111,20 +111,16 @@ export async function topologySatisfies(
 
   if (typeof r.csfle === 'boolean') {
     if (r.csfle) {
-      ok &&=
-        typeof process.env.CLIENT_ENCRYPTION === 'string' &&
-        process.env.CLIENT_ENCRYPTION === 'true';
+      ok &&= this.configuration.clientSideEncryption.enabled;
 
       if (!ok && skipReason == null) {
-        skipReason = `requires csfle but the CLIENT_ENCRYPTION environment variable is not set`;
+        skipReason = `requires csfle to run but CSFLE is not set for this environment`;
       }
     } else {
-      ok &&= typeof process.env.CLIENT_ENCRYPTION === 'undefined';
+      ok &&= this.configuration.clientSideEncryption.enabled;
 
       if (!ok && skipReason == null) {
-        skipReason = `requires no csfle but the CLIENT_ENCRYPTION environment variable is set with value ${JSON.stringify(
-          process.env.CLIENT_ENCRYPTION
-        )}`;
+        skipReason = `forbids csfle but CSFLE is set for this environment`;
       }
     }
   }
