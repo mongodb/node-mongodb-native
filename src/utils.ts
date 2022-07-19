@@ -12,7 +12,6 @@ import { LEGACY_HELLO_COMMAND } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import type { FindCursor } from './cursor/find_cursor';
 import type { Db } from './db';
-import type { AutoEncrypter } from './deps';
 import {
   AnyError,
   MongoCompatibilityError,
