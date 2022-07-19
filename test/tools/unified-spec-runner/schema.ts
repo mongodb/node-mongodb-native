@@ -4,6 +4,7 @@ import type { ReadConcernLevel } from '../../../src/read_concern';
 import type { ReadPreferenceMode } from '../../../src/read_preference';
 import type { TagSet } from '../../../src/sdam/server_description';
 import type { W } from '../../../src/write_concern';
+import { TestConfiguration } from '../runner/config';
 
 export const SupportedVersion = '^1.0';
 
@@ -289,7 +290,7 @@ export interface ExpectedError {
 /**
  * A type that represents the test filter provided to the unifed runner.
  */
-export type TestFilter = (test: Test) => string | false;
+export type TestFilter = (test: Test, ctx: TestConfiguration) => string | false;
 
 /**
  * This interface represents the bare minimum of type information needed to get *some* type

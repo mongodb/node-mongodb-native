@@ -1529,6 +1529,17 @@ describe('ChangeStream resumability', function () {
   const is4_2Server = (serverVersion: string) =>
     gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
 
+  beforeEach(function () {
+    assert(this.currentTest != null);
+    if (
+      this.currentTest.title.includes('StaleShardVersion') &&
+      gte(this.configuration.version, '6.0.0')
+    ) {
+      this.currentTest.skipReason = 'TODO(NODE-4434): fix StaleShardVersion resumability test';
+      this.skip();
+    }
+  });
+
   beforeEach(async function () {
     const dbName = 'resumabilty_tests';
     const collectionName = 'foo';
