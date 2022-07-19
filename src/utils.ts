@@ -1412,7 +1412,7 @@ export function commandSupportsReadConcern(command: Document, options?: Document
 
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
 export function getMongoDBClientEncryption(): {
-  extension: (mdb: typeof import('../src/index')) => {
+  extension: (mdb: unknown) => {
     AutoEncrypter: any;
     ClientEncryption: any;
   };
