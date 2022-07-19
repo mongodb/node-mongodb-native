@@ -1409,14 +1409,14 @@ export function commandSupportsReadConcern(command: Document, options?: Document
   return false;
 }
 
-/**
- * A utility function to get the instance of mongodb-client-encryption, if it exists.
- *
- * @throws MongoMissingDependencyError if mongodb-client-encryption isn't installed.
- * @returns
- */
-export function getMongoDBClientEncryption() {
-  let mongodbClientEncryption;
+/** A utility function to get the instance of mongodb-client-encryption, if it exists. */
+export function getMongoDBClientEncryption(): {
+  extension: (mdb: unknown) => {
+    AutoEncrypter: any;
+    ClientEncryption: any;
+  };
+} | null {
+  let mongodbClientEncryption = null;
 
   // NOTE(NODE-4254): This is to get around the circular dependency between
   // mongodb-client-encryption and the driver in the test scenarios.
@@ -1424,9 +1424,23 @@ export function getMongoDBClientEncryption() {
     typeof process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE === 'string' &&
     process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE.length > 0
   ) {
-    mongodbClientEncryption = require(process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE);
+    try {
+      // NOTE(NODE-3199): Ensure you always wrap an optional require literally in the try block
+      // Cannot be moved to helper utility function, bundlers search and replace the actual require call
+      // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
+      mongodbClientEncryption = require(process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE);
+    } catch {
+      // ignore
+    }
   } else {
-    mongodbClientEncryption = require('mongodb-client-encryption');
+    try {
+      // NOTE(NODE-3199): Ensure you always wrap an optional require literally in the try block
+      // Cannot be moved to helper utility function, bundlers search and replace the actual require call
+      // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
+      mongodbClientEncryption = require('mongodb-client-encryption');
+    } catch {
+      // ignore
+    }
   }
 
   return mongodbClientEncryption;

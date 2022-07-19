@@ -6,7 +6,7 @@ import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error'
 import { MongoClient, MongoClientOptions } from './mongo_client';
 import { Callback, getMongoDBClientEncryption } from './utils';
 
-let AutoEncrypterClass: AutoEncrypter;
+let AutoEncrypterClass: { new (...args: ConstructorParameters<AutoEncrypter>): AutoEncrypter };
 
 /** @internal */
 const kInternalClient = Symbol('internalClient');
@@ -123,15 +123,13 @@ export class Encrypter {
   }
 
   static checkForMongoCrypt(): void {
-    try {
-      // NOTE(NODE-3199): Ensure you always wrap an optional require in the try block
-      const mongodbClientEncryption = getMongoDBClientEncryption();
-      AutoEncrypterClass = mongodbClientEncryption.extension(require('../lib/index')).AutoEncrypter;
-    } catch {
+    const mongodbClientEncryption = getMongoDBClientEncryption();
+    if (mongodbClientEncryption == null) {
       throw new MongoMissingDependencyError(
         'Auto-encryption requested, but the module is not installed. ' +
           'Please add `mongodb-client-encryption` as a dependency of your project'
       );
     }
+    AutoEncrypterClass = mongodbClientEncryption.extension(require('../lib/index')).AutoEncrypter;
   }
 }
