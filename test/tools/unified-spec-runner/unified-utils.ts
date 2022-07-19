@@ -111,13 +111,13 @@ export async function topologySatisfies(
 
   if (typeof r.csfle === 'boolean') {
     if (r.csfle) {
-      ok &&= this.configuration.clientSideEncryption.enabled;
+      ok &&= config.clientSideEncryption.enabled;
 
       if (!ok && skipReason == null) {
         skipReason = `requires csfle to run but CSFLE is not set for this environment`;
       }
     } else {
-      ok &&= this.configuration.clientSideEncryption.enabled;
+      ok &&= config.clientSideEncryption.enabled;
 
       if (!ok && skipReason == null) {
         skipReason = `forbids csfle but CSFLE is set for this environment`;
