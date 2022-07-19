@@ -729,6 +729,21 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
 
+    it('should maintain an ordered sort', async function () {
+      const coll = this.encryptedColl;
+      const events = [];
+      this.clientEncrypted.on('commandStarted', ev => events.push(ev));
+      const sort = new Map([
+        ['1', 1],
+        ['0', 1]
+      ]);
+      await coll.findOne({}, { sort });
+      expect(events).to.have.lengthOf(2);
+      expect(events[0]).to.have.property('commandName', 'listCollections');
+      expect(events[1]).to.have.property('commandName', 'find');
+      expect(events[1].command.sort).to.deep.equal(sort);
+    });
+
     function pruneEvents(events) {
       return events.map(event => {
         // We are pruning out the bunch of repeating As, mostly
