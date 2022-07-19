@@ -58,7 +58,7 @@ export async function runUnifiedTest(
   const schemaVersion = patchVersion(unifiedSuite.schemaVersion);
   expect(semverSatisfies(schemaVersion, uni.SupportedVersion)).to.be.true;
 
-  const skipReason = test.skipReason ?? skipFilter(test);
+  const skipReason = test.skipReason ?? skipFilter(test, ctx.configuration);
 
   if (typeof skipReason === 'string') {
     if (skipReason.length === 0) {
