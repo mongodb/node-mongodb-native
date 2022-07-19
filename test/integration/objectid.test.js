@@ -3,7 +3,7 @@ var test = require('./shared').assert;
 const { expect } = require('chai');
 var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
-const { setInterval } = require('timers');
+const { clearInterval, setInterval } = require('timers');
 const { sleep } = require('../tools/utils');
 
 describe('ObjectId', function () {

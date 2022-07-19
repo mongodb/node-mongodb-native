@@ -1,4 +1,4 @@
-import { setTimeout } from 'timers';
+import { clearTimeout, setTimeout } from 'timers';
 
 import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';

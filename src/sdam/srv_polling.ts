@@ -1,5 +1,5 @@
 import * as dns from 'dns';
-import { setTimeout } from 'timers';
+import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoRuntimeError } from '../error';
 import { Logger, LoggerOptions } from '../logger';
