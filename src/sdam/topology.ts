@@ -1,5 +1,5 @@
 import Denque = require('denque');
-import { setTimeout } from 'timers';
+import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';

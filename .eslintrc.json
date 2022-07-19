@@ -42,6 +42,18 @@
     "no-restricted-globals": [
       "error",
       {
+        "name": "clearTimeout",
+        "message": "Use `import { clearTimeout } from 'timers';` instead"
+      },
+      {
+        "name": "clearImmediate",
+        "message": "Use `import { clearImmediate } from 'timers';` instead"
+      },
+      {
+        "name": "clearInterval",
+        "message": "Use `import { clearInterval } from 'timers';` instead"
+      },
+      {
         "name": "setTimeout",
         "message": "Use `import { setTimeout } from 'timers';` instead"
       },

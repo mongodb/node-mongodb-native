@@ -1,3 +1,5 @@
+import { clearTimeout } from 'timers';
+
 import type { Binary, Long, Timestamp } from '../bson';
 import type { ClientSession } from '../sessions';
 import type { Topology } from './topology';

@@ -1,4 +1,4 @@
-import { setTimeout } from 'timers';
+import { clearTimeout, setTimeout } from 'timers';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
 import {

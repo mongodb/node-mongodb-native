@@ -1,6 +1,6 @@
 'use strict';
 
-const { setTimeout } = require('timers');
+const { clearTimeout, setTimeout } = require('timers');
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const sinon = require('sinon');
