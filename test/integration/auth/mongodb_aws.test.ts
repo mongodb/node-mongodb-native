@@ -23,7 +23,6 @@ describe('MONGODB-AWS', function () {
   it('should not authorize when not authenticated', async function () {
     const url = removeAuthFromConnectionString(this.configuration.url());
     client = this.configuration.newClient(url); // strip provided URI of credentials
-    console.log('\n'.repeat(3) + url + '\n'.repeat(3));
 
     const error = await client
       .db('aws')
