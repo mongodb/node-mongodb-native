@@ -204,7 +204,7 @@ expectNotType<Filter<PetModel>>({ 'friends.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'laps.foo': 'string' });
 expectNotType<Filter<PetModel>>({ 'treats.0': 123 });
-expectNotType<Filter<PetModel>>({ meta: { deep: { nested: { level: 'string' } } } }); // no impact on actual nesting
+expectNotType<Filter<PetModel>>({ meta: { deep: { nested: { level: 'string' } } } });
 expectNotType<Filter<PetModel>>({ 'meta.deep': { nested: { level: 'string' } } }); // no impact on actual nesting
 
 /// it should not accept wrong types for nested document array fields
