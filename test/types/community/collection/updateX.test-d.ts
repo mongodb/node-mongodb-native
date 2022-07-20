@@ -218,7 +218,7 @@ expectError<UpdateFilter<TestModel>>({
   $set: { 'subInterfaceField.nestedObject': { a: '1' } }
 });
 expectError<UpdateFilter<TestModel>>({
-  $set: { 'subInterfaceField.nestedObject': { a: 1, 'b': '2' } }
+  $set: { 'subInterfaceField.nestedObject': { a: 1, b: '2' } }
 });
 expectError(buildUpdateFilter({ $set: { 'subInterfaceField.field2': 2 } }));
 expectError(buildUpdateFilter({ $set: { 'unknown.field': null } }));
