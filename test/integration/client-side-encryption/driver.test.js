@@ -7,19 +7,19 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
+const metadata = {
+  requires: {
+    mongodb: '>=4.2.0',
+    clientSideEncryption: true
+  }
+};
+
 describe('Client Side Encryption Functional', function () {
   const dataDbName = 'db';
   const dataCollName = 'coll';
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
-
-  const metadata = {
-    requires: {
-      mongodb: '>=4.2.0',
-      clientSideEncryption: true
-    }
-  };
 
   it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
     if (process.env.CSFLE_KMS_PROVIDERS) {
@@ -228,6 +228,9 @@ describe('Client Side Encryption Functional', function () {
     let collection;
 
     beforeEach(async function () {
+      if (this.configuration.clientSideEncryption == null) {
+        return;
+      }
       const encryptionOptions = {
         monitorCommands: true,
         autoEncryption: {
@@ -244,7 +247,7 @@ describe('Client Side Encryption Functional', function () {
     });
 
     describe('find', () => {
-      it('should maintain ordered sort', async function () {
+      it('should maintain ordered sort', metadata, async function () {
         const events = [];
         client.on('commandStarted', ev => events.push(ev));
         const sort = new Map([
@@ -259,7 +262,7 @@ describe('Client Side Encryption Functional', function () {
     });
 
     describe('findAndModify', () => {
-      it('should maintain ordered sort', async function () {
+      it('should maintain ordered sort', metadata, async function () {
         const events = [];
         client.on('commandStarted', ev => events.push(ev));
         const sort = new Map([
@@ -274,7 +277,7 @@ describe('Client Side Encryption Functional', function () {
     });
 
     describe('createIndexes', () => {
-      it('should maintain ordered index keys', async function () {
+      it('should maintain ordered index keys', metadata, async function () {
         const events = [];
         client.on('commandStarted', ev => events.push(ev));
         const indexDescription = new Map([
