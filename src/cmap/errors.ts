@@ -1,4 +1,4 @@
-import { MongoDriverError } from '../error';
+import { MongoDriverError, MongoNetworkError } from '../error';
 import type { ConnectionPool } from './connection_pool';
 
 /**
@@ -23,7 +23,7 @@ export class PoolClosedError extends MongoDriverError {
  * An error indicating a connection pool is currently paused
  * @category Error
  */
-export class PoolClearedError extends MongoDriverError {
+export class PoolClearedError extends MongoNetworkError {
   // TODO: needs to extend RetryableError or be marked retryable in some other way per spec
   /** The address of the connection pool */
   address: string;

@@ -5,6 +5,7 @@ import { promisify } from 'util';
 
 import { Connection, HostAddress, MongoClient } from '../../src';
 import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
+import { CMAP_EVENTS } from '../../src/constants';
 import { makeClientMetadata, shuffle } from '../../src/utils';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { FailPoint, sleep } from './utils';
@@ -80,19 +81,7 @@ export type CmapTest = {
   failPoint?: FailPoint;
 };
 
-const ALL_POOL_EVENTS = new Set([
-  ConnectionPool.CONNECTION_POOL_CREATED,
-  ConnectionPool.CONNECTION_POOL_CLOSED,
-  ConnectionPool.CONNECTION_POOL_CLEARED,
-  ConnectionPool.CONNECTION_POOL_READY,
-  ConnectionPool.CONNECTION_CREATED,
-  ConnectionPool.CONNECTION_READY,
-  ConnectionPool.CONNECTION_CLOSED,
-  ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
-  ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-  ConnectionPool.CONNECTION_CHECKED_OUT,
-  ConnectionPool.CONNECTION_CHECKED_IN
-]);
+const ALL_POOL_EVENTS = new Set(CMAP_EVENTS);
 
 function getEventType(event) {
   const eventName = event.constructor.name;
