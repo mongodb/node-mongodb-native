@@ -594,11 +594,27 @@ export class CryptoConnection extends Connection {
       return;
     }
 
+    const sort: Map<string, number> | null = cmd.find || cmd.findAndModify ? cmd.sort : null;
+    const indexKeys: Map<string, number>[] | null = cmd.createIndexes
+      ? cmd.indexes.map((index: { key: Map<string, number> }) => index.key)
+      : null;
+
     autoEncrypter.encrypt(ns.toString(), cmd, options, (err, encrypted) => {
       if (err || encrypted == null) {
         callback(err, null);
         return;
       }
+
+      // Repair JS Map loss
+      if ((cmd.find || cmd.findAndModify) && sort != null) {
+        encrypted.sort = sort;
+      }
+      if (cmd.createIndexes && indexKeys != null) {
+        for (const [offset, index] of indexKeys.entries()) {
+          encrypted.indexes[offset].key = index;
+        }
+      }
+
       super.command(ns, encrypted, options, (err, response) => {
         if (err || response == null) {
           callback(err, response);

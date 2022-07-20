@@ -222,4 +222,72 @@ describe('Client Side Encryption Functional', function () {
       });
     });
   });
+
+  describe('key order aware command properties', () => {
+    let client;
+    let collection;
+
+    beforeEach(async function () {
+      const encryptionOptions = {
+        monitorCommands: true,
+        autoEncryption: {
+          keyVaultNamespace,
+          kmsProviders: { local: { key: 'A'.repeat(128) } }
+        }
+      };
+      client = this.configuration.newClient({}, encryptionOptions);
+      collection = client.db(dataDbName).collection('keyOrder');
+    });
+
+    afterEach(async () => {
+      if (client) await client.close();
+    });
+
+    describe('find', () => {
+      it('should maintain ordered sort', async function () {
+        const events = [];
+        client.on('commandStarted', ev => events.push(ev));
+        const sort = new Map([
+          ['1', 1],
+          ['0', 1]
+        ]);
+        await collection.findOne({}, { sort });
+        const findEvent = events.find(event => !!event.command.find);
+        expect(findEvent).to.have.property('commandName', 'find');
+        expect(findEvent.command.sort).to.deep.equal(sort);
+      });
+    });
+
+    describe('findAndModify', () => {
+      it('should maintain ordered sort', async function () {
+        const events = [];
+        client.on('commandStarted', ev => events.push(ev));
+        const sort = new Map([
+          ['1', 1],
+          ['0', 1]
+        ]);
+        await collection.findOneAndUpdate({}, { $setOnInsert: { a: 1 } }, { sort });
+        const findAndModifyEvent = events.find(event => !!event.command.findAndModify);
+        expect(findAndModifyEvent).to.have.property('commandName', 'findAndModify');
+        expect(findAndModifyEvent.command.sort).to.deep.equal(sort);
+      });
+    });
+
+    describe('createIndexes', () => {
+      it('should maintain ordered index keys', async function () {
+        const events = [];
+        client.on('commandStarted', ev => events.push(ev));
+        const indexDescription = new Map([
+          ['1', 1],
+          ['0', 1]
+        ]);
+        await collection.createIndex(indexDescription, { name: 'myIndex' });
+        const createIndexEvent = events.find(event => !!event.command.createIndexes);
+        expect(createIndexEvent).to.have.property('commandName', 'createIndexes');
+        expect(createIndexEvent.command.indexes).to.have.lengthOf(1);
+        const index = createIndexEvent.command.indexes[0];
+        expect(index.key).to.deep.equal(indexDescription);
+      });
+    });
+  });
 });
