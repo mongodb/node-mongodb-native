@@ -178,7 +178,7 @@ expectNotType<Filter<PetModel>>({ 'regex.dotAll': true });
 collectionT.find({ 'meta.updatedAt': new Date() });
 collectionT.find({ 'meta.deep.nested.level': 123 });
 collectionT.find({ meta: { deep: { nested: { level: 123 } } } }); // no impact on actual nesting
-collectionT.find({ 'meta.deep': { nested: { level: 123 } } }); // no impact on actual nesting
+collectionT.find({ 'meta.deep': { nested: { level: 123 } } });
 collectionT.find({ 'friends.0.name': 'John' });
 collectionT.find({ 'playmates.0.name': 'John' });
 // supports arrays with primitive types
