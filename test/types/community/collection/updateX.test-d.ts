@@ -74,6 +74,10 @@ interface SubTestModel {
   field1: string;
   field2?: string;
   field3?: number;
+  nestedObject?: {
+    a: string;
+    b: string;
+  };
 }
 
 type FruitTypes = 'apple' | 'pear';
@@ -204,6 +208,13 @@ expectAssignable<UpdateFilter<TestModel>>({ $set: { longField: Long.fromString('
 expectAssignable<UpdateFilter<TestModel>>({ $set: { stringField: 'a' } });
 expectError(buildUpdateFilter({ $set: { stringField: 123 } }));
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceField.field2': '2' } });
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceField.nestedObject.a': '2' } });
+expectAssignable<UpdateFilter<TestModel>>({
+  $set: { 'subInterfaceField.nestedObject': { a: '1', b: '2' } }
+});
+expectError<UpdateFilter<TestModel>>({
+  $set: { 'subInterfaceField.nestedObject': { a: '1' } }
+});
 expectError(buildUpdateFilter({ $set: { 'subInterfaceField.field2': 2 } }));
 expectError(buildUpdateFilter({ $set: { 'unknown.field': null } }));
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'numberArray.$': 40 } });
