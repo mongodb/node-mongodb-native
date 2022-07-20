@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
-import { setTimeout } from 'timers';
+import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import { Connection, HostAddress, MongoClient } from '../../src';
@@ -237,7 +237,7 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
 
       function run() {
         if (threadContext.poolEvents.filter(ev => getEventType(ev) === event).length >= count) {
-          clearTimeout(timeoutId); // TODO: do we want to also always import this from timers?
+          clearTimeout(timeoutId);
           return resolve();
         }
 

@@ -17,7 +17,7 @@ const POOL_PAUSED_SKIP_TESTS: SkipDescription[] = [
 ].map(description => ({
   description,
   skipIfCondition: 'always',
-  skipReason: 'TODO(NODE-2994): implement pool pausing'
+  skipReason: 'TODO(NODE-3135): make connection pool SDAM aware'
 }));
 
 describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {

@@ -169,17 +169,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
       const { spec } = this.currentTest;
 
-      // if (
-      //   shouldRun &&
-      //   spec.operations.some(
-      //     op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
-      //   )
-      // ) {
-      //   this.currentTest.skipReason =
-      //     'TODO(NODE-2994): Connection storms work will add new events to connection pool';
-      //   shouldRun = false;
-      // }
-
       if (shouldRun && spec.skipReason) {
         this.currentTest.skipReason = spec.skipReason;
         shouldRun = false;
