@@ -137,54 +137,39 @@ function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
   return Array.isArray(t) && t.length === 2 && isIndexDirection(t[1]);
 }
 
-function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
-  function getFieldHash(indexSpec: IndexSpecification) {
-    const fieldHash: Map<string, IndexDirection> = new Map();
+function makeIndexSpec(
+  indexSpec: IndexSpecification,
+  options?: CreateIndexesOptions
+): IndexDescription {
+  const key: Map<string, IndexDirection> = new Map();
 
-    let indexSpecArr: IndexSpecification[];
+  const indexSpecs =
+    !Array.isArray(indexSpec) || isSingleIndexTuple(indexSpec) ? [indexSpec] : indexSpec;
 
-    // Wrap indexSpec in array if needed
-    if (!Array.isArray(indexSpec) || isSingleIndexTuple(indexSpec)) {
-      indexSpecArr = [indexSpec];
-    } else {
-      indexSpecArr = indexSpec;
-    }
-
-    // Iterate through array and handle different types
-    for (const spec of indexSpecArr) {
-      if ('string' === typeof spec) {
-        fieldHash.set(spec, 1);
-      } else if (Array.isArray(spec)) {
-        fieldHash.set(spec[0], spec[1] ?? 1);
-      } else if (spec instanceof Map) {
-        for (const [key, value] of spec) {
-          fieldHash.set(key, value);
-        }
-      } else if (isObject(spec)) {
-        for (const [key, value] of Object.entries(spec)) {
-          fieldHash.set(key, value);
-        }
+  // Iterate through array and handle different types
+  for (const spec of indexSpecs) {
+    if (typeof spec === 'string') {
+      key.set(spec, 1);
+    } else if (Array.isArray(spec)) {
+      key.set(spec[0], spec[1] ?? 1);
+    } else if (spec instanceof Map) {
+      for (const [property, value] of spec) {
+        key.set(property, value);
+      }
+    } else if (isObject(spec)) {
+      for (const [property, value] of Object.entries(spec)) {
+        key.set(property, value);
       }
     }
-    return fieldHash;
   }
-
-  const fieldHash = getFieldHash(indexSpec);
-
-  // Generate the index name
-  const name = typeof options.name === 'string' ? options.name : null;
 
   // Set up the index
-  const finalIndexSpec: Document = { name, key: fieldHash };
-
-  // merge valid index options into the index spec
-  for (const optionName in options) {
-    if (VALID_INDEX_OPTIONS.has(optionName)) {
-      finalIndexSpec[optionName] = options[optionName];
-    }
-  }
-
-  return finalIndexSpec as IndexDescription;
+  return {
+    ...Object.fromEntries(
+      Object.entries({ ...options }).filter(([optionName]) => VALID_INDEX_OPTIONS.has(optionName))
+    ),
+    key
+  };
 }
 
 /** @internal */
@@ -235,27 +220,24 @@ export class CreateIndexesOperation<
     this.collectionName = collectionName;
 
     // Ensure we generate the correct name if the parameter is not set
-    const normalizedIndexes = [];
+    const namedIndexes = [];
     for (const userIndex of indexes) {
-      const key =
-        userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
       const index: Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> } = {
         ...userIndex,
-        key
+        // Ensure the key is a Map to preserve index key ordering
+        key: userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key))
       };
       if (index.name == null) {
+        // Ensure every index is named
         const keys = [];
-
         for (const [name, direction] of index.key) {
           keys.push(`${name}_${direction}`);
         }
-
-        // Set the name
         index.name = keys.join('_');
       }
-      normalizedIndexes.push(index);
+      namedIndexes.push(index);
     }
-    this.indexes = normalizedIndexes;
+    this.indexes = namedIndexes;
   }
 
   override execute(
@@ -318,11 +300,6 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
     indexSpec: IndexSpecification,
     options?: CreateIndexesOptions
   ) {
-    // createIndex can be called with a variety of styles:
-    //   coll.createIndex('a');
-    //   coll.createIndex({ a: 1 });
-    //   coll.createIndex([['a', 1]]);
-    // createIndexes is always called with an array of index spec objects
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
   override execute(

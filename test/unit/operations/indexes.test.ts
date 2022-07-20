@@ -125,4 +125,19 @@ describe('makeIndexSpec()', () => {
     expect(realOutput.indexes[0].key).to.deep.equal(desiredMapData);
     expect(realOutput.indexes[0].name).to.equal(desiredName);
   });
+
+  it('should omit options that are not in the permitted list', () => {
+    const indexOutput = makeIndexOperation(
+      { a: 1 },
+      // @ts-expect-error: Testing bad options get filtered
+      { randomOptionThatWillNeverBeAdded: true, storageEngine: { iLoveJavascript: 1 } }
+    );
+    expect(indexOutput.indexes).to.have.lengthOf(1);
+    expect(indexOutput.indexes[0]).to.have.property('key').that.is.instanceOf(Map);
+    expect(indexOutput.indexes[0]).to.have.property('name', 'a_1');
+    expect(indexOutput.indexes[0])
+      .to.have.property('storageEngine')
+      .that.deep.equals({ iLoveJavascript: 1 });
+    expect(indexOutput.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
+  });
 });

@@ -85,6 +85,8 @@ operations.set('assertIndexNotExists', async ({ operation, client }) => {
     if (error.code === 26 || error.message.includes('ns does not exist')) {
       return;
     }
+    // Error will always exist here, this makes the output show what caused an issue with assertIndexNotExists
+    expect(error).to.not.exist;
   }
   expect(indexes.map(({ name }) => name)).to.not.include(operation.arguments.indexName);
 });

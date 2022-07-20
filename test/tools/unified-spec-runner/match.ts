@@ -166,10 +166,16 @@ export function resultCheck(
       expect(actual[key]).to.have.all.keys(expectedSortKey);
       const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
       resultCheck(objFromActual, value, entities, path, checkExtraKeys);
-    } else if (key === 'key' && key in actual && actual[key] instanceof Map) {
-      expect(Object.keys(value)).to.have.lengthOf(1);
-      expect(actual[key].size).to.equal(1);
-      resultCheck(Object.fromEntries(actual.key.entries()), value, entities, path, checkExtraKeys);
+    } else if (key === 'createIndexes') {
+      for (const index of actual.indexes) {
+        expect(index).to.have.property('key').that.is.instanceOf(Map);
+        expect(
+          index.key.size,
+          'Test input is JSON and cannot correctly test more than 1 key'
+        ).to.equal(1);
+        index.key = Object.fromEntries(index.key.entries());
+      }
+      resultCheck(actual[key], value, entities, path, checkExtraKeys);
     } else {
       resultCheck(actual[key], value, entities, path, checkExtraKeys);
     }
