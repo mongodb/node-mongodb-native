@@ -7,6 +7,9 @@
   },
   "operations": [
     {
+      "name": "ready"
+    },
+    {
       "name": "waitForEvent",
       "event": "ConnectionCreated",
       "count": 3
@@ -66,6 +69,7 @@
     }
   ],
   "ignore": [
+    "ConnectionPoolReady",
     "ConnectionReady",
     "ConnectionClosed",
     "ConnectionCheckOutStarted"
