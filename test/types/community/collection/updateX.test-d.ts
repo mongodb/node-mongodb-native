@@ -101,6 +101,7 @@ interface TestModel {
   subInterfaceField: SubTestModel;
   subInterfaceArray: SubTestModel[];
   timestampField: Timestamp;
+  extras: Record<string, { id: string }>;
 }
 const collectionTType = db.collection<TestModel>('test.update');
 
@@ -205,6 +206,7 @@ expectAssignable<UpdateFilter<TestModel>>({
 expectAssignable<UpdateFilter<TestModel>>({ $set: { doubleField: new Double(1.23) } });
 expectAssignable<UpdateFilter<TestModel>>({ $set: { int32Field: new Int32(10) } });
 expectAssignable<UpdateFilter<TestModel>>({ $set: { longField: Long.fromString('999') } });
+expectAssignable<UpdateFilter<TestModel>>({ $set: { extras: { someExtras: { id: 'someId' } } } });
 expectAssignable<UpdateFilter<TestModel>>({ $set: { stringField: 'a' } });
 expectError(buildUpdateFilter({ $set: { stringField: 123 } }));
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceField.field2': '2' } });
