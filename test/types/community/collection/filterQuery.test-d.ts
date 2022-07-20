@@ -178,6 +178,7 @@ expectNotType<Filter<PetModel>>({ 'regex.dotAll': true });
 collectionT.find({ 'meta.updatedAt': new Date() });
 collectionT.find({ 'meta.deep.nested.level': 123 });
 collectionT.find({ meta: { deep: { nested: { level: 123 } } } }); // no impact on actual nesting
+collectionT.find({ 'meta.deep': { nested: { level: 123 } } });
 collectionT.find({ 'friends.0.name': 'John' });
 collectionT.find({ 'playmates.0.name': 'John' });
 // supports arrays with primitive types
@@ -203,6 +204,8 @@ expectNotType<Filter<PetModel>>({ 'friends.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'playmates.0.name': 123 });
 expectNotType<Filter<PetModel>>({ 'laps.foo': 'string' });
 expectNotType<Filter<PetModel>>({ 'treats.0': 123 });
+expectNotType<Filter<PetModel>>({ meta: { deep: { nested: { level: 'string' } } } });
+expectNotType<Filter<PetModel>>({ 'meta.deep': { nested: { level: 'string' } } });
 
 /// it should not accept wrong types for nested document array fields
 expectError<Filter<PetModel>>({
