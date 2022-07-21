@@ -27,6 +27,7 @@ describe('Connection Pool', function () {
     });
 
     const pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
+    pool.ready();
 
     const events = [];
     pool.on('connectionClosed', event => events.push(event));
@@ -74,6 +75,8 @@ describe('Connection Pool', function () {
       hostAddress: server.hostAddress()
     });
 
+    pool.ready();
+
     pool.withConnection(
       (err, conn, cb) => {
         expect(err).to.not.exist;
@@ -101,6 +104,8 @@ describe('Connection Pool', function () {
       waitQueueTimeoutMS: 200,
       hostAddress: server.hostAddress()
     });
+
+    pool.ready();
 
     pool.checkOut((err, conn) => {
       expect(err).to.not.exist;
@@ -133,6 +138,8 @@ describe('Connection Pool', function () {
       });
 
       const pool = new ConnectionPool({ hostAddress: server.hostAddress() });
+      pool.ready();
+
       const callback = (err, result) => {
         expect(err).to.not.exist;
         expect(result).to.exist;
@@ -167,6 +174,8 @@ describe('Connection Pool', function () {
         hostAddress: server.hostAddress()
       });
 
+      pool.ready();
+
       const callback = err => {
         expect(err).to.exist;
         expect(err).to.match(/closed/);
@@ -193,6 +202,8 @@ describe('Connection Pool', function () {
       });
 
       const pool = new ConnectionPool({ hostAddress: server.hostAddress() });
+      pool.ready();
+
       const callback = (err, result) => {
         expect(err).to.exist;
         expect(result).to.not.exist;
@@ -219,6 +230,7 @@ describe('Connection Pool', function () {
       });
 
       const pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
+      pool.ready();
 
       const events = [];
       pool.on('connectionCheckedOut', event => events.push(event));
