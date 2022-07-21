@@ -1,11 +1,17 @@
-'use strict';
+import { EJSON, UUID } from 'bson';
+import { expect } from 'chai';
+import * as crypto from 'crypto';
 
-const crypto = require('crypto');
-const BSON = require('bson');
-const chai = require('chai');
-
-const expect = chai.expect;
-chai.use(require('chai-subset'));
+import {
+  Collection,
+  CommandStartedEvent,
+  Db,
+  IndexDirection,
+  MongoClient,
+  SortDirection
+} from '../../../src';
+import * as BSON from '../../../src/bson';
+import { ClientEncryption } from '../../tools/unified-spec-runner/schema';
 
 const metadata = {
   requires: {
@@ -22,10 +28,12 @@ describe('Client Side Encryption Functional', function () {
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
   it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
-    if (process.env.CSFLE_KMS_PROVIDERS) {
+    const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
+    if (typeof CSFLE_KMS_PROVIDERS === 'string') {
       /**
        * The shape of CSFLE_KMS_PROVIDERS is as follows:
        *
+       * ```ts
        * interface CSFLE_kms_providers {
        *    aws: {
        *      accessKeyId: string;
@@ -46,8 +54,9 @@ describe('Client Side Encryption Functional', function () {
        *     key: Binary;
        *   }
        * }
+       * ```
        */
-      expect(() => BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS)).to.not.throw(SyntaxError);
+      expect(() => EJSON.parse(CSFLE_KMS_PROVIDERS)).to.not.throw(SyntaxError);
     } else {
       this.skip();
     }
@@ -56,7 +65,7 @@ describe('Client Side Encryption Functional', function () {
   describe('Collection', metadata, function () {
     describe('#bulkWrite()', metadata, function () {
       context('when encryption errors', function () {
-        let client;
+        let client: MongoClient;
 
         beforeEach(function () {
           client = this.configuration.newClient(
@@ -74,7 +83,7 @@ describe('Client Side Encryption Functional', function () {
                     fields: [
                       {
                         path: 'ssn',
-                        keyId: new BSON.UUID('23f786b4-1d39-4c36-ae88-70a663321ec9').toBinary(),
+                        keyId: new UUID('23f786b4-1d39-4c36-ae88-70a663321ec9').toBinary(),
                         bsonType: 'string'
                       }
                     ]
@@ -94,6 +103,7 @@ describe('Client Side Encryption Functional', function () {
             await client
               .db('test')
               .collection('coll')
+              // @ts-expect-error: Incorrectly formatted bulkWrite to test error case
               .bulkWrite([{ insertOne: { ssn: 'foo' } }]);
             expect.fail('expected error to be thrown');
           } catch (error) {
@@ -105,10 +115,12 @@ describe('Client Side Encryption Functional', function () {
   });
 
   describe('BSON Options', function () {
-    beforeEach(function () {
-      this.client = this.configuration.newClient();
+    let client: MongoClient;
 
-      const noop = () => {};
+    beforeEach(function () {
+      client = this.configuration.newClient();
+
+      const noop = () => null;
       function encryptSchema(keyId, bsonType) {
         return {
           encrypt: {
@@ -119,13 +131,13 @@ describe('Client Side Encryption Functional', function () {
         };
       }
 
-      let encryption;
-      let dataDb;
-      let keyVaultDb;
+      let encryption: ClientEncryption;
+      let dataDb: Db;
+      let keyVaultDb: Db;
 
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       const kmsProviders = this.configuration.kmsProviders(crypto.randomBytes(96));
-      return this.client
+      return client
         .connect()
         .then(() => {
           encryption = new mongodbClientEncryption.ClientEncryption(this.client, {
@@ -134,8 +146,8 @@ describe('Client Side Encryption Functional', function () {
             kmsProviders
           });
         })
-        .then(() => (dataDb = this.client.db(dataDbName)))
-        .then(() => (keyVaultDb = this.client.db(keyVaultDbName)))
+        .then(() => (dataDb = client.db(dataDbName)))
+        .then(() => (keyVaultDb = client.db(keyVaultDbName)))
         .then(() => dataDb.dropCollection(dataCollName).catch(noop))
         .then(() => keyVaultDb.dropCollection(keyVaultCollName).catch(noop))
         .then(() => keyVaultDb.createCollection(keyVaultCollName))
@@ -157,12 +169,7 @@ describe('Client Side Encryption Functional', function () {
         .then(() => {
           this.encryptedClient = this.configuration.newClient(
             {},
-            {
-              autoEncryption: {
-                keyVaultNamespace,
-                kmsProviders
-              }
-            }
+            { autoEncryption: { keyVaultNamespace, kmsProviders } }
           );
           return this.encryptedClient.connect();
         });
@@ -176,33 +183,20 @@ describe('Client Side Encryption Functional', function () {
 
     const testCases = [
       {},
-      {
-        promoteValues: true
-      },
-      {
-        promoteValues: false
-      },
-      {
-        promoteValues: true,
-        promoteLongs: false
-      },
-      {
-        promoteValues: true,
-        promoteLongs: true
-      },
-      {
-        bsonRegExp: true
-      },
-      {
-        ignoreUndefined: true
-      }
+      { promoteValues: true },
+      { promoteValues: false },
+      { promoteValues: true, promoteLongs: false },
+      { promoteValues: true, promoteLongs: true },
+      { bsonRegExp: true },
+      { ignoreUndefined: true }
     ];
 
-    testCases.forEach(bsonOptions => {
+    for (const bsonOptions of testCases) {
       const name = `should respect bson options ${JSON.stringify(bsonOptions)}`;
 
-      it(name, metadata, function () {
+      it(name, metadata, async function () {
         const data = {
+          _id: new BSON.ObjectId(),
           a: 12,
           b: new BSON.Int32(12),
           c: new BSON.Long(12),
@@ -215,17 +209,20 @@ describe('Client Side Encryption Functional', function () {
         const expected = BSON.deserialize(BSON.serialize(data, bsonOptions), bsonOptions);
 
         const coll = this.encryptedClient.db(dataDbName).collection(dataCollName);
-        return Promise.resolve()
-          .then(() => coll.insertOne(data, bsonOptions))
-          .then(result => coll.findOne({ _id: result.insertedId }, bsonOptions))
-          .then(actual => expect(actual).to.containSubset(expected));
+        const result = await coll.insertOne(data, bsonOptions);
+        const actual = await coll.findOne({ _id: result.insertedId }, bsonOptions);
+        const gValue = actual.g;
+        delete actual.g;
+
+        expect(actual).to.deep.equal(expected);
+        expect(gValue).to.equal(bsonOptions.ignoreUndefined ? data.g : null);
       });
-    });
+    }
   });
 
   describe('key order aware command properties', () => {
-    let client;
-    let collection;
+    let client: MongoClient;
+    let collection: Collection;
 
     beforeEach(async function () {
       if (this.configuration.clientSideEncryption == null) {
@@ -248,48 +245,50 @@ describe('Client Side Encryption Functional', function () {
 
     describe('find', () => {
       it('should maintain ordered sort', metadata, async function () {
-        const events = [];
+        const events: CommandStartedEvent[] = [];
         client.on('commandStarted', ev => events.push(ev));
-        const sort = new Map([
+        const sort: [string, SortDirection][] = [
           ['1', 1],
           ['0', 1]
-        ]);
+        ];
         await collection.findOne({}, { sort });
         const findEvent = events.find(event => !!event.command.find);
         expect(findEvent).to.have.property('commandName', 'find');
-        expect(findEvent.command.sort).to.deep.equal(sort);
+        expect(findEvent).to.have.nested.property('command.sort').deep.equal(new Map(sort));
       });
     });
 
     describe('findAndModify', () => {
       it('should maintain ordered sort', metadata, async function () {
-        const events = [];
+        const events: CommandStartedEvent[] = [];
         client.on('commandStarted', ev => events.push(ev));
-        const sort = new Map([
+        const sort: [string, SortDirection][] = [
           ['1', 1],
           ['0', 1]
-        ]);
+        ];
         await collection.findOneAndUpdate({}, { $setOnInsert: { a: 1 } }, { sort });
         const findAndModifyEvent = events.find(event => !!event.command.findAndModify);
         expect(findAndModifyEvent).to.have.property('commandName', 'findAndModify');
-        expect(findAndModifyEvent.command.sort).to.deep.equal(sort);
+        expect(findAndModifyEvent)
+          .to.have.nested.property('command.sort')
+          .deep.equal(new Map(sort));
       });
     });
 
     describe('createIndexes', () => {
       it('should maintain ordered index keys', metadata, async function () {
-        const events = [];
+        const events: CommandStartedEvent[] = [];
         client.on('commandStarted', ev => events.push(ev));
-        const indexDescription = new Map([
+        const indexDescription: [string, IndexDirection][] = [
           ['1', 1],
           ['0', 1]
-        ]);
+        ];
         await collection.createIndex(indexDescription, { name: 'myIndex' });
         const createIndexEvent = events.find(event => !!event.command.createIndexes);
         expect(createIndexEvent).to.have.property('commandName', 'createIndexes');
-        expect(createIndexEvent.command.indexes).to.have.lengthOf(1);
-        const index = createIndexEvent.command.indexes[0];
-        expect(index.key).to.deep.equal(indexDescription);
+        expect(createIndexEvent).to.have.nested.property('command.indexes').that.has.lengthOf(1);
+        const index = createIndexEvent?.command.indexes[0];
+        expect(index.key).to.deep.equal(new Map(indexDescription));
       });
     });
   });
