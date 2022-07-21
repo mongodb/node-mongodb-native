@@ -126,7 +126,26 @@ TASKS.push(
       ]
     },
     {
-      name: 'test-load-balancer-6.0.0',
+      name: 'test-5.0-load-balanced',
+      tags: ['latest', 'sharded_cluster', 'load_balancer'],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: '5.0',
+            TOPOLOGY: 'sharded_cluster',
+            AUTH: 'auth',
+            LOAD_BALANCER: 'true',
+          }
+        },
+        { func: 'start-load-balancer' },
+        { func: 'run-lb-tests' },
+        { func: 'stop-load-balancer' }
+      ]
+    },
+    {
+      name: 'test-6.0-load-balanced',
       tags: ['latest', 'sharded_cluster', 'load_balancer'],
       commands: [
         { func: 'install dependencies' },
@@ -145,7 +164,7 @@ TASKS.push(
       ]
     },
     {
-      name: 'test-load-balancer-latest',
+      name: 'test-latest-load-balanced',
       tags: ['latest', 'sharded_cluster', 'load_balancer'],
       commands: [
         { func: 'install dependencies' },
