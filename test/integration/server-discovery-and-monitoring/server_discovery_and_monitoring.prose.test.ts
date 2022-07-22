@@ -9,7 +9,7 @@ import {
   SERVER_HEARTBEAT_SUCCEEDED
 } from '../../../src/constants';
 
-describe('Server Discover and Monitoring Prose Tests', function () {
+describe('Server Discovery and Monitoring Prose Tests', function () {
   context('Connection Pool Management', function () {
     /* 
       This test will be used to ensure monitors properly create and unpause connection pools when they discover servers.
@@ -69,7 +69,7 @@ describe('Server Discover and Monitoring Prose Tests', function () {
     });
 
     it('ensure monitors properly create and unpause connection pools when they discover servers', {
-      metadata: { requires: { mongodb: '>=4.2.9' } },
+      metadata: { requires: { mongodb: '>=4.2.9', topology: '!load-balanced' } },
       test: async function () {
         await client.connect();
         expect(events.shift()).to.equal(SERVER_HEARTBEAT_SUCCEEDED);
