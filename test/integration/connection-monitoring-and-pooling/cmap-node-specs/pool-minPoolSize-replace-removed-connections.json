@@ -26,11 +26,11 @@
       "name": "clear"
     },
     {
-      "name": "ready"
-    },
-    {
       "name": "checkIn",
       "connection": "conn"
+    },
+    {
+      "name": "ready"
     },
     {
       "name": "waitForEvent",
