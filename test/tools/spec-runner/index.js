@@ -486,6 +486,10 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
     }
 
     if (expectedCommand.createIndexes) {
+      // TODO(NODE-3235): This is a workaround that works because all indexes in the specs
+      // are objects with one key; ideally we'd want to adjust the spec definitions
+      // to indicate whether order matters for any given key and set general
+      // expectations accordingly
       for (const [i, dbIndex] of actualCommand.indexes.entries()) {
         expect(Object.keys(expectedCommand.indexes[i].key)).to.have.lengthOf(1);
         expect(dbIndex.key).to.be.instanceOf(Map);
