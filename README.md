@@ -65,12 +65,6 @@ yarn add mongodb
 
 This will download the MongoDB driver and add a dependency entry in your `package.json` file.
 
-If you are a Typescript user, you will need the Node.js type definitions to use the driver's definitions:
-
-```sh
-npm install -D @types/node
-```
-
 ## Troubleshooting
 
 The MongoDB driver depends on several other packages. These are:
