@@ -173,19 +173,13 @@ function makeIndexSpec(
 }
 
 function fillInIndexNames(indexes: IndexDescription[]) {
-  const namedIndexes = [];
-  for (const userIndex of indexes) {
-    const index: Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> } = {
-      ...userIndex,
-      // Ensure the key is a Map to preserve index key ordering
-      key: userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key))
-    };
-    if (index.name == null) {
-      index.name = Array.from(index.key).flat().join('_');
-    }
-    namedIndexes.push(index);
-  }
-  return namedIndexes;
+  return indexes.map(userIndex => {
+    // Ensure the key is a Map to preserve index key ordering
+    const key =
+      userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
+    const name = userIndex.name != null ? userIndex.name : Array.from(key).flat().join('_');
+    return { ...userIndex, key, name };
+  });
 }
 
 /** @internal */
