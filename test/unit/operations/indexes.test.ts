@@ -7,7 +7,7 @@ import {
 } from '../../../src/operations/indexes';
 import { ns } from '../../../src/utils';
 
-describe('makeIndexSpec()', () => {
+describe('class CreateIndexOperation', () => {
   const testCases = [
     {
       description: 'single string',
@@ -103,41 +103,43 @@ describe('makeIndexSpec()', () => {
   const makeIndexOperation = (input, options: CreateIndexesOptions = {}) =>
     new CreateIndexOperation({ s: { namespace: ns('a.b') } }, 'b', input, options);
 
-  for (const { description, input, mapData, name } of testCases) {
-    it(`should create fieldHash correctly when input is: ${description}`, () => {
-      const realOutput = makeIndexOperation(input);
-      expect(realOutput.indexes[0].key).to.deep.equal(mapData);
+  describe('#constructor()', () => {
+    for (const { description, input, mapData, name } of testCases) {
+      it(`should create fieldHash correctly when input is: ${description}`, () => {
+        const realOutput = makeIndexOperation(input);
+        expect(realOutput.indexes[0].key).to.deep.equal(mapData);
+      });
+
+      it(`should set name correctly if none provided with ${description} input `, () => {
+        const realOutput = makeIndexOperation(input);
+        expect(realOutput.indexes[0].name).to.equal(name);
+      });
+    }
+
+    it('should keep numerical keys in chronological ordering when using Map input type', () => {
+      const desiredMapData = new Map<string, IndexDirection>([
+        ['2', -1],
+        ['1', 1]
+      ]);
+      const realOutput = makeIndexOperation(desiredMapData);
+      const desiredName = '2_-1_1_1';
+      expect(realOutput.indexes[0].key).to.deep.equal(desiredMapData);
+      expect(realOutput.indexes[0].name).to.equal(desiredName);
     });
 
-    it(`should set name correctly if none provided with ${description} input `, () => {
-      const realOutput = makeIndexOperation(input);
-      expect(realOutput.indexes[0].name).to.equal(name);
+    it('should omit options that are not in the permitted list', () => {
+      const indexOutput = makeIndexOperation(
+        { a: 1 },
+        // @ts-expect-error: Testing bad options get filtered
+        { randomOptionThatWillNeverBeAdded: true, storageEngine: { iLoveJavascript: 1 } }
+      );
+      expect(indexOutput.indexes).to.have.lengthOf(1);
+      expect(indexOutput.indexes[0]).to.have.property('key').that.is.instanceOf(Map);
+      expect(indexOutput.indexes[0]).to.have.property('name', 'a_1');
+      expect(indexOutput.indexes[0])
+        .to.have.property('storageEngine')
+        .that.deep.equals({ iLoveJavascript: 1 });
+      expect(indexOutput.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
     });
-  }
-
-  it('should keep numerical keys in chronological ordering when using Map input type', () => {
-    const desiredMapData = new Map<string, IndexDirection>([
-      ['2', -1],
-      ['1', 1]
-    ]);
-    const realOutput = makeIndexOperation(desiredMapData);
-    const desiredName = '2_-1_1_1';
-    expect(realOutput.indexes[0].key).to.deep.equal(desiredMapData);
-    expect(realOutput.indexes[0].name).to.equal(desiredName);
-  });
-
-  it('should omit options that are not in the permitted list', () => {
-    const indexOutput = makeIndexOperation(
-      { a: 1 },
-      // @ts-expect-error: Testing bad options get filtered
-      { randomOptionThatWillNeverBeAdded: true, storageEngine: { iLoveJavascript: 1 } }
-    );
-    expect(indexOutput.indexes).to.have.lengthOf(1);
-    expect(indexOutput.indexes[0]).to.have.property('key').that.is.instanceOf(Map);
-    expect(indexOutput.indexes[0]).to.have.property('name', 'a_1');
-    expect(indexOutput.indexes[0])
-      .to.have.property('storageEngine')
-      .that.deep.equals({ iLoveJavascript: 1 });
-    expect(indexOutput.indexes[0]).to.not.have.property('randomOptionThatWillNeverBeAdded');
   });
 });

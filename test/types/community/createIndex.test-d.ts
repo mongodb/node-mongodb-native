@@ -11,3 +11,16 @@ const indexName = collection.createIndex({}, options);
 
 expectType<Promise<string>>(indexName);
 expectType<Document | undefined>(options.partialFilterExpression);
+
+// One
+collection.createIndex('someKey');
+collection.createIndex(['someKey', 1]);
+collection.createIndex(new Map([['someKey', 1]]));
+collection.createIndex({ a: 1, b: -1 });
+collection.createIndex({ a: '2dsphere', b: -1 });
+// OrMore
+collection.createIndex(['someKey']);
+collection.createIndex([['someKey', 1]]);
+collection.createIndex([new Map([['someKey', 1]])]);
+collection.createIndex([{ a: 1, b: -1 }]);
+collection.createIndex([{ a: '2dsphere', b: -1 }]);

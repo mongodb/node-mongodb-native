@@ -51,7 +51,7 @@ const VALID_INDEX_OPTIONS = new Set([
 
 /** @public */
 export type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
-function isIndexDirection(x: any): x is IndexDirection {
+function isIndexDirection(x: unknown): x is IndexDirection {
   return (
     typeof x === 'number' || x === '2d' || x === '2dsphere' || x === 'text' || x === 'geoHaystack'
   );
@@ -172,6 +172,22 @@ function makeIndexSpec(
   };
 }
 
+function fillInIndexNames(indexes: IndexDescription[]) {
+  const namedIndexes = [];
+  for (const userIndex of indexes) {
+    const index: Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> } = {
+      ...userIndex,
+      // Ensure the key is a Map to preserve index key ordering
+      key: userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key))
+    };
+    if (index.name == null) {
+      index.name = Array.from(index.key).flat().join('_');
+    }
+    namedIndexes.push(index);
+  }
+  return namedIndexes;
+}
+
 /** @internal */
 export class IndexesOperation extends AbstractOperation<Document[]> {
   override options: IndexInformationOptions;
@@ -218,26 +234,7 @@ export class CreateIndexesOperation<
 
     this.options = options ?? {};
     this.collectionName = collectionName;
-
-    // Ensure we generate the correct name if the parameter is not set
-    const namedIndexes = [];
-    for (const userIndex of indexes) {
-      const index: Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> } = {
-        ...userIndex,
-        // Ensure the key is a Map to preserve index key ordering
-        key: userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key))
-      };
-      if (index.name == null) {
-        // Ensure every index is named
-        const keys = [];
-        for (const [name, direction] of index.key) {
-          keys.push(`${name}_${direction}`);
-        }
-        index.name = keys.join('_');
-      }
-      namedIndexes.push(index);
-    }
-    this.indexes = namedIndexes;
+    this.indexes = fillInIndexNames(indexes);
   }
 
   override execute(
