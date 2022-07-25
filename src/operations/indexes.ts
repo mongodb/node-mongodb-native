@@ -241,19 +241,6 @@ export class CreateIndexesOperation<
 
     const serverWireVersion = maxWireVersion(server);
 
-    for (const index of indexes) {
-      // Did the user pass in a collation, check if our write server supports it
-      if (index.collation && serverWireVersion < 5) {
-        callback(
-          new MongoCompatibilityError(
-            `Server ${server.name}, which reports wire version ${serverWireVersion}, ` +
-              'does not support collation'
-          )
-        );
-        return;
-      }
-    }
-
     const cmd: Document = { createIndexes: this.collectionName, indexes };
 
     if (options.commitQuorum != null) {
