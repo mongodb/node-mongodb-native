@@ -116,6 +116,7 @@ describe('Client Side Encryption Functional', function () {
 
   describe('BSON Options', function () {
     let client: MongoClient;
+    let encryptedClient: MongoClient;
 
     beforeEach(function () {
       client = this.configuration.newClient();
@@ -140,7 +141,7 @@ describe('Client Side Encryption Functional', function () {
       return client
         .connect()
         .then(() => {
-          encryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+          encryption = new mongodbClientEncryption.ClientEncryption(client, {
             bson: BSON,
             keyVaultNamespace,
             kmsProviders
@@ -167,18 +168,18 @@ describe('Client Side Encryption Functional', function () {
           });
         })
         .then(() => {
-          this.encryptedClient = this.configuration.newClient(
+          encryptedClient = this.configuration.newClient(
             {},
             { autoEncryption: { keyVaultNamespace, kmsProviders } }
           );
-          return this.encryptedClient.connect();
+          return encryptedClient.connect();
         });
     });
 
     afterEach(function () {
       return Promise.resolve()
-        .then(() => this.encryptedClient && this.encryptedClient.close())
-        .then(() => this.client.close());
+        .then(() => encryptedClient?.close())
+        .then(() => client?.close());
     });
 
     const testCases = [
@@ -208,11 +209,11 @@ describe('Client Side Encryption Functional', function () {
 
         const expected = BSON.deserialize(BSON.serialize(data, bsonOptions), bsonOptions);
 
-        const coll = this.encryptedClient.db(dataDbName).collection(dataCollName);
+        const coll = encryptedClient.db(dataDbName).collection(dataCollName);
         const result = await coll.insertOne(data, bsonOptions);
         const actual = await coll.findOne({ _id: result.insertedId }, bsonOptions);
-        const gValue = actual.g;
-        delete actual.g;
+        const gValue = actual?.g;
+        delete actual?.g;
 
         expect(actual).to.deep.equal(expected);
         expect(gValue).to.equal(bsonOptions.ignoreUndefined ? data.g : null);
