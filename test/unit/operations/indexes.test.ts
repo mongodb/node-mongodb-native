@@ -116,6 +116,12 @@ describe('class CreateIndexOperation', () => {
       });
     }
 
+    it('should not generate a name if one is provided', () => {
+      const realOutput = makeIndexOperation({ a: 1, b: 1 }, { name: 'MyIndex' });
+      expect(realOutput.indexes).to.be.an('array');
+      expect(realOutput.indexes).to.have.nested.property('[0].name', 'MyIndex');
+    });
+
     it('should keep numerical keys in chronological ordering when using Map input type', () => {
       const desiredMapData = new Map<string, IndexDirection>([
         ['2', -1],

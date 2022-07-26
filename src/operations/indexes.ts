@@ -163,23 +163,7 @@ function makeIndexSpec(
     }
   }
 
-  // Set up the index
-  return {
-    ...Object.fromEntries(
-      Object.entries({ ...options }).filter(([optionName]) => VALID_INDEX_OPTIONS.has(optionName))
-    ),
-    key
-  };
-}
-
-function fillInIndexNames(indexes: IndexDescription[]) {
-  return indexes.map(userIndex => {
-    // Ensure the key is a Map to preserve index key ordering
-    const key =
-      userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
-    const name = userIndex.name != null ? userIndex.name : Array.from(key).flat().join('_');
-    return { ...userIndex, key, name };
-  });
+  return { ...options, key };
 }
 
 /** @internal */
@@ -216,7 +200,7 @@ export class CreateIndexesOperation<
 > extends CommandOperation<T> {
   override options: CreateIndexesOptions;
   collectionName: string;
-  indexes: IndexDescription[];
+  indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
 
   constructor(
     parent: OperationParent,
@@ -228,7 +212,22 @@ export class CreateIndexesOperation<
 
     this.options = options ?? {};
     this.collectionName = collectionName;
-    this.indexes = fillInIndexNames(indexes);
+    this.indexes = indexes.map(userIndex => {
+      // Ensure the key is a Map to preserve index key ordering
+      const key =
+        userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
+      const name = userIndex.name != null ? userIndex.name : Array.from(key).flat().join('_');
+      const validIndexOptions = Object.fromEntries(
+        Object.entries({ ...userIndex }).filter(([optionName]) =>
+          VALID_INDEX_OPTIONS.has(optionName)
+        )
+      );
+      return {
+        ...validIndexOptions,
+        name,
+        key
+      };
+    });
   }
 
   override execute(

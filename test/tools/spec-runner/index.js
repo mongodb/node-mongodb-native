@@ -497,7 +497,7 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
       }
       actualCommand.indexes = actualCommand.indexes.map(dbIndex => ({
         ...dbIndex,
-        key: Object.fromEntries(dbIndex.key.entries())
+        key: Object.fromEntries(dbIndex.key)
       }));
     }
 

@@ -226,9 +226,10 @@ describe('Client Side Encryption Functional', function () {
     let collection: Collection;
 
     beforeEach(async function () {
-      if (this.configuration.clientSideEncryption == null) {
+      if (!this.configuration.clientSideEncryption.enabled) {
         return;
       }
+
       const encryptionOptions = {
         monitorCommands: true,
         autoEncryption: {
@@ -248,10 +249,10 @@ describe('Client Side Encryption Functional', function () {
       it('should maintain ordered sort', metadata, async function () {
         const events: CommandStartedEvent[] = [];
         client.on('commandStarted', ev => events.push(ev));
-        const sort: [string, SortDirection][] = [
+        const sort: ReadonlyArray<[string, SortDirection]> = Object.freeze([
           ['1', 1],
           ['0', 1]
-        ];
+        ]);
         await collection.findOne({}, { sort });
         const findEvent = events.find(event => !!event.command.find);
         expect(findEvent).to.have.property('commandName', 'find');
