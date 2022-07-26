@@ -1723,6 +1723,150 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
+  context('13. Unique Index on keyAltNames', function () {
+    let client, clientEncryption, setupKeyId;
+
+    beforeEach(async function () {
+      // Create a MongoClient object (referred to as client).
+      client = this.configuration.newClient();
+      await client.connect();
+
+      // Using client, drop the collection keyvault.datakeys.
+      await client
+        .db('keyvault')
+        .dropCollection('datakeys')
+        .catch(() => null);
+
+      await client
+        .db('keyvault')
+        .collection('datakeys')
+        .createIndex(
+          { keyAltNames: 1 },
+          {
+            unique: true,
+            partialFilterExpression: { keyAltNames: { $exists: true } },
+            writeConcern: { w: 'majority' }
+          }
+        );
+
+      // Create a ClientEncryption object (referred to as client_encryption) with client set as the keyVaultClient.
+      clientEncryption = new this.configuration.mongodbClientEncryption.ClientEncryption(client, {
+        keyVaultNamespace: 'keyvault.datakeys',
+        kmsProviders: getKmsProviders()
+      });
+
+      // Using client_encryption, create a data key with a local KMS provider and the keyAltName "def".
+      setupKeyId = await clientEncryption.createDataKey('local', {
+        keyAltNames: ['def']
+      });
+    });
+
+    afterEach(async () => {
+      clientEncryption = null;
+      setupKeyId = null;
+      await client.close();
+    });
+
+    context('Case 1', metadata, function () {
+      it('createDataKey() handles duplicate key errors on the keyvault collection', async function () {
+        // 1. Use client_encryption to create a new local data key with a keyAltName "abc" and assert the operation does not fail.
+        try {
+          await clientEncryption.createDataKey('local', {
+            keyAltNames: ['abc']
+          });
+        } catch (err) {
+          expect.fail(
+            'Error in step 1) expected clientEncryption.createDataKey to not fail, but received',
+            err
+          );
+        }
+
+        // 2. Repeat Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
+        try {
+          await clientEncryption.createDataKey('local', {
+            keyAltNames: ['abc']
+          });
+          expect.fail(
+            'Error in step 2) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
+          );
+        } catch (err) {
+          expect(err.code).to.equal(11000);
+        }
+
+        // 3. Use client_encryption to create a new local data key with a keyAltName "def" and assert the operation fails due to a duplicate key server error (error code 11000).
+        try {
+          await clientEncryption.createDataKey('local', {
+            keyAltNames: ['def']
+          });
+          expect.fail(
+            'Error in step 3) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
+          );
+        } catch (err) {
+          expect(err.code).to.equal(11000);
+        }
+      });
+    });
+
+    context('Case 2', metadata, function () {
+      it('addKeyAltName() handles duplicate key errors on the keyvault collection', async function () {
+        let _id;
+        // 1. Use client_encryption to create a new local data key and assert the operation does not fail.
+        try {
+          _id = await clientEncryption.createDataKey('local');
+        } catch (err) {
+          expect.fail(
+            'Error in step 1) expected clientEncryption.createDataKey to not fail, but received',
+            err
+          );
+        }
+
+        // 2. Use client_encryption to add a keyAltName "abc" to the key created in Step 1 and assert the operation does not fail.
+        try {
+          await clientEncryption.addKeyAltName(_id, 'abc');
+        } catch (err) {
+          expect.fail(
+            'Error in step 2) expected clientEncryption.createDataKey not to fail, but received',
+            err
+          );
+        }
+
+        // 3. Repeat Step 2, assert the operation does not fail, and assert the returned key document contains the keyAltName "abc" added in Step 2.
+        try {
+          const { keyAltNames } = await clientEncryption.addKeyAltName(_id, 'abc');
+          expect(keyAltNames).to.contain('abc');
+        } catch (err) {
+          expect.fail(
+            'Error in step 3) expected clientEncryption.createDataKey not to fail, but received',
+            err
+          );
+        }
+
+        // 4. Use client_encryption to add a keyAltName "def" to the key created in Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
+        try {
+          await clientEncryption.createDataKey('local', {
+            keyAltNames: ['def']
+          });
+          expect.fail(
+            'Error in step 4) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
+          );
+        } catch (err) {
+          expect(err.code).to.equal(11000);
+        }
+
+        // 5. Use client_encryption to add a keyAltName "def" to the existing key, assert the operation does not fail, and assert the returned key document contains the keyAltName "def" added during Setup.
+        try {
+          const { keyAltNames } = await clientEncryption.addKeyAltName(setupKeyId, 'def');
+          expect(keyAltNames).to.contain('def');
+        } catch (err) {
+          expect.fail(
+            'Error in step 4) expected clientEncryption.createDataKey not to fail, but received',
+            err
+          );
+        }
+      });
+    });
+  });
+
   context('14. Decryption Events', metadata, function () {
     let setupClient;
     let clientEncryption;
