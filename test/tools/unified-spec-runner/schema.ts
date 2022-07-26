@@ -1,4 +1,4 @@
-import { MongoClient, ServerApiVersion } from '../../../src';
+import { FindCursor, MongoClient, ServerApiVersion } from '../../../src';
 import type { Document, ObjectId } from '../../../src/bson';
 import type { ReadConcernLevel } from '../../../src/read_concern';
 import type { ReadPreferenceMode } from '../../../src/read_preference';
@@ -303,7 +303,7 @@ export interface ClientEncryption {
   rewrapManyDataKey(filter, options): Promise<any>;
   deleteKey(id): Promise<any>;
   getKey(id): Promise<any>;
-  getKeys(): Promise<any>;
+  getKeys(): FindCursor;
   addKeyAltName(id, keyAltName): Promise<any>;
   removeKeyAltName(id, keyAltName): Promise<any>;
   getKeyByAltName(keyAltName): Promise<any>;
