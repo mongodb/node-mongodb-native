@@ -818,9 +818,16 @@ functions:
           . ./prepare_client_encryption.sh
           rm -f ./prepare_client_encryption.sh
 
+          MONGODB_VERSION=${VERSION}
+          if [ -z "$MONGODB_VERSION" ]; then
+            # default to latest to match behavior of run-orchestration.sh.
+            MONGODB_VERSION=latest
+          fi
+
           . $DRIVERS_TOOLS/.evergreen/download-mongodb.sh
           get_distro
           # get_distro defines $DISTRO.
+          echo "distro='$DISTRO' version='$MONGODB_VERSION'".
           get_mongodb_download_url_for "$DISTRO" "$MONGODB_VERSION"
           # get_mongodb_download_url_for defines $MONGO_CRYPT_SHARED_DOWNLOAD_URL and $EXTRACT.
           if [ -z "$MONGO_CRYPT_SHARED_DOWNLOAD_URL" ]; then
