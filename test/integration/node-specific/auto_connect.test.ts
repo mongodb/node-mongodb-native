@@ -20,6 +20,17 @@ describe('When executing an operation for the first time', () => {
     client = this.configuration.newClient();
   });
 
+  beforeEach('create test namespace', async function () {
+    const utilClient = this.configuration.newClient();
+
+    await utilClient
+      .db('test')
+      .createCollection('test')
+      .catch(() => null);
+
+    await utilClient.close();
+  });
+
   afterEach('cleanup client', async function () {
     await client.close();
   });
