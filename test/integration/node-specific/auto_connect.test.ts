@@ -448,7 +448,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#indexes()`, () => {
+    describe.only(`#indexes()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
         await c.indexes().catch(() => null);
@@ -456,7 +456,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#indexExists()`, () => {
+    describe.skip(`#indexExists()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
         await c.indexExists('a_1').catch(() => null);
@@ -464,7 +464,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#indexInformation()`, () => {
+    describe.skip(`#indexInformation()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
         await c.indexInformation().catch(() => null);
@@ -647,7 +647,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#indexInformation()`, () => {
+    describe.skip(`#indexInformation()`, () => {
       it('should connect the client', async () => {
         const db = client.db();
         await db.indexInformation('test').catch(() => null);
@@ -822,7 +822,7 @@ describe('When executing an operation for the first time', () => {
     });
   });
 
-  describe(`class ListIndexesCursor`, () => {
+  describe.skip(`class ListIndexesCursor`, () => {
     describe(`#forEach()`, () => {
       it('should connect the client', async () => {
         const indexes = client.db().collection('test').listIndexes();
@@ -836,7 +836,7 @@ describe('When executing an operation for the first time', () => {
     });
 
     describe(`#hasNext()`, () => {
-      it('should connect the client', async () => {
+      it.skip('should connect the client', async () => {
         const indexes = client.db().collection('test').listIndexes();
         await indexes.hasNext().catch(() => null);
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
