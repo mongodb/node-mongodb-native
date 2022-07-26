@@ -20,6 +20,17 @@ describe('When executing an operation for the first time', () => {
     client = this.configuration.newClient();
   });
 
+  beforeEach('create test namespace', async function () {
+    const utilClient = this.configuration.newClient();
+
+    await utilClient
+      .db('test')
+      .createCollection('test')
+      .catch(() => null);
+
+    await utilClient.close();
+  });
+
   afterEach('cleanup client', async function () {
     await client.close();
   });
@@ -448,7 +459,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe.only(`#indexes()`, () => {
+    describe(`#indexes()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
         await c.indexes().catch(() => null);
@@ -456,7 +467,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe.skip(`#indexExists()`, () => {
+    describe(`#indexExists()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
         await c.indexExists('a_1').catch(() => null);
@@ -464,7 +475,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe.skip(`#indexInformation()`, () => {
+    describe(`#indexInformation()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
         await c.indexInformation().catch(() => null);
@@ -647,7 +658,7 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe.skip(`#indexInformation()`, () => {
+    describe(`#indexInformation()`, () => {
       it('should connect the client', async () => {
         const db = client.db();
         await db.indexInformation('test').catch(() => null);
@@ -822,7 +833,7 @@ describe('When executing an operation for the first time', () => {
     });
   });
 
-  describe.skip(`class ListIndexesCursor`, () => {
+  describe(`class ListIndexesCursor`, () => {
     describe(`#forEach()`, () => {
       it('should connect the client', async () => {
         const indexes = client.db().collection('test').listIndexes();
@@ -836,7 +847,7 @@ describe('When executing an operation for the first time', () => {
     });
 
     describe(`#hasNext()`, () => {
-      it.skip('should connect the client', async () => {
+      it('should connect the client', async () => {
         const indexes = client.db().collection('test').listIndexes();
         await indexes.hasNext().catch(() => null);
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
