@@ -754,6 +754,65 @@ functions:
           rm -f ./prepare_client_encryption.sh
 
           MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+  run custom csfle shared lib tests:
+    - command: shell.exec
+      type: test
+      params:
+        silent: true
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          cat <<EOT > prepare_client_encryption.sh
+          export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+          export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
+          export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+          export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+          export CSFLE_GIT_REF="${CSFLE_GIT_REF}"
+          export CDRIVER_GIT_REF="${CDRIVER_GIT_REF}"
+          EOT
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          # Disable xtrace (just in case it was accidentally set).
+          set +x
+          . ./prepare_client_encryption.sh
+          rm -f ./prepare_client_encryption.sh
+
+          . $DRIVERS_TOOLS/.evergreen/download-mongodb.sh
+          get_distro
+          # get_distro defines $DISTRO.
+          get_mongodb_download_url_for "$DISTRO" "$MONGODB_VERSION"
+          # get_mongodb_download_url_for defines $MONGO_CRYPT_SHARED_DOWNLOAD_URL and $EXTRACT.
+          if [ -z "$MONGO_CRYPT_SHARED_DOWNLOAD_URL" ]; then
+            echo "There is no crypt_shared library for distro='$DISTRO' and version='$MONGODB_VERSION'".
+            exit 1
+          else
+            echo "Downloading crypt_shared package from $MONGO_CRYPT_SHARED_DOWNLOAD_URL"
+            download_and_extract_crypt_shared "$MONGO_CRYPT_SHARED_DOWNLOAD_URL" "$EXTRACT"
+            CRYPT_SHARED_LIB_PATH="$(find $(pwd) -maxdepth 1 -type f \
+              -name 'mongo_crypt_v1.so' -o \
+              -name 'mongo_crypt_v1.dll' -o \
+              -name 'mongo_crypt_v1.dylib')"
+            # Expect that we always find a crypt_shared library file and set the CRYPT_SHARED_LIB_PATH
+            # environment variable. If we didn't, print an error message and exit.
+            if [ -z "$CRYPT_SHARED_LIB_PATH" ]; then
+              echo 'CRYPT_SHARED_LIB_PATH is empty. Exiting.'
+              exit 1
+            fi
+            # If we're on Windows, convert the "cygdrive"  path to Windows-style paths.
+            if [ "Windows_NT" = "$OS" ]; then
+              CRYPT_SHARED_LIB_PATH=$(cygpath -m $CRYPT_SHARED_LIB_PATH)
+            fi
+            echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH" > expansion.yml
+          fi
+
+          MONGODB_URI="${MONGODB_URI}" CRYPT_SHARED_LIB_PATH="${CRYPT_SHARED_LIB_PATH}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
   run custom snappy tests:
     - command: subprocess.exec
       params:

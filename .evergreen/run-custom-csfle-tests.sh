@@ -65,6 +65,11 @@ export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
 export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
 export TEST_CSFLE=true
+
+if [ -n "$CRYPT_SHARED_LIB_PATH" ]; then
+  export CRYPT_SHARED_LIB_PATH=${CRYPT_SHARED_LIB_PATH}
+fi
+
 set +o errexit # We want to run both test suites even if the first fails
 npm run check:csfle
 DRIVER_CSFLE_TEST_RESULT=$?
