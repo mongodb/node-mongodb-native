@@ -499,7 +499,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
 }));
 
 oneOffFuncAsTasks.push({
-  name: 'run-custom-csfle-tests',
+  name: 'run-custom-csfle-tests-pinned-commit',
   tags: ['run-custom-dependency-tests'],
   commands: [
     {
@@ -516,7 +516,39 @@ oneOffFuncAsTasks.push({
       }
     },
     { func: 'bootstrap kms servers' },
-    { func: 'run custom csfle tests' }
+    {
+      func: 'run custom csfle tests',
+      vars: {
+        CSFLE_GIT_REF: 'e157c35ee4028b292883c4628dc5926f9742b34a'
+      }
+    }
+  ]
+});
+
+oneOffFuncAsTasks.push({
+  name: 'run-custom-csfle-tests-master',
+  tags: ['run-custom-dependency-tests'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: LOWEST_LTS
+      }
+    },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'latest',
+        TOPOLOGY: 'replica_set'
+      }
+    },
+    { func: 'bootstrap kms servers' },
+    {
+      func: 'run custom csfle tests',
+      vars: {
+        CSFLE_GIT_REF: 'master'
+      }
+    }
   ]
 });
 
