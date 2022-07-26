@@ -89,7 +89,7 @@ export interface IndexDescription
   > {
   collation?: CollationOptions;
   name?: string;
-  key: Document | Map<string, IndexDirection>;
+  key: { [key: string]: IndexDirection } | Map<string, IndexDirection>;
 }
 
 /** @public */

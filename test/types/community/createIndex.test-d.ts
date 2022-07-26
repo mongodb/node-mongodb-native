@@ -28,3 +28,6 @@ collection.createIndex([
   { a: 'geoHaystack', b: 1 }
 ]);
 collection.createIndex(['a', ['b', 1], { a: 'geoHaystack', b: 1 }, new Map([['someKey', 1]])]);
+
+// @ts-expect-error: CreateIndexes now asserts the object value types as of NODE-3517
+collection.createIndexes([{ key: { a: 34n } }]);
