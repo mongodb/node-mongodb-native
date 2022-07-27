@@ -79,7 +79,22 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   readPreference?: ReadPreferenceLike;
   readConcern?: ReadConcernLike;
   batchSize?: number;
+  /**
+   * For **`tailable=false` cursor** OR **`tailable=true && awaitData=false` cursor**,
+   * - the driver MUST set `maxTimeMS` on the `find` command and MUST NOT set `maxTimeMS` on the `getMore` command.
+   * - If `maxTimeMS` is not set in options, the driver SHOULD refrain from setting **maxTimeMS**
+   *
+   * For **`tailable=true && awaitData=true` cursor**
+   * - the driver MUST provide a cursor level option named `maxAwaitTimeMS`.
+   * - The `maxTimeMS` option on the `getMore` command MUST be set to the value of the option `maxAwaitTimeMS`.
+   * - If no `maxAwaitTimeMS` is specified, the driver MUST not set `maxTimeMS` on the `getMore` command.
+   * - `maxAwaitTimeMS` option is not set on the `aggregate` command nor `$changeStream` pipeline stage
+   *
+   * ## `maxCommitTimeMS`
+   * Note, this option is an alias for the `maxTimeMS` commitTransaction command option.
+   */
   maxTimeMS?: number;
+  maxAwaitTimeMS?: number;
   /**
    * Comment to apply to the operation.
    *
@@ -155,7 +170,7 @@ export abstract class AbstractCursor<
     }
     this[kClient] = client;
     this[kNamespace] = namespace;
-    this[kDocuments] = []; // TODO: https://github.com/microsoft/TypeScript/issues/36230
+    this[kDocuments] = [];
     this[kInitialized] = false;
     this[kClosed] = false;
     this[kKilled] = false;
@@ -184,6 +199,10 @@ export abstract class AbstractCursor<
 
     if (typeof options.maxTimeMS === 'number') {
       this[kOptions].maxTimeMS = options.maxTimeMS;
+    }
+
+    if (typeof options.maxAwaitTimeMS === 'number') {
+      this[kOptions].maxAwaitTimeMS = options.maxAwaitTimeMS;
     }
 
     if (options.session instanceof ClientSession) {
@@ -617,21 +636,8 @@ export abstract class AbstractCursor<
 
   /** @internal */
   _getMore(batchSize: number, callback: Callback<Document>): void {
-    const cursorId = this[kId];
-    const cursorNs = this[kNamespace];
-    const server = this[kServer];
-
-    if (cursorId == null) {
-      callback(new MongoRuntimeError('Unable to iterate cursor with no id'));
-      return;
-    }
-
-    if (server == null) {
-      callback(new MongoRuntimeError('Unable to iterate cursor without selected server'));
-      return;
-    }
-
-    const getMoreOperation = new GetMoreOperation(cursorNs, cursorId, server, {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const getMoreOperation = new GetMoreOperation(this[kNamespace], this[kId]!, this[kServer]!, {
       ...this[kOptions],
       session: this[kSession],
       batchSize

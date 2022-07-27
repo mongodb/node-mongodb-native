@@ -44,6 +44,7 @@ export interface CommandOperationOptions
   readConcern?: ReadConcernLike;
   /** Collation */
   collation?: CollationOptions;
+  /** TODO This is probably in the wrong place................. specs only mention this being a thing for createIndex/dropIndex */
   maxTimeMS?: number;
   /**
    * Comment to apply to the operation.
