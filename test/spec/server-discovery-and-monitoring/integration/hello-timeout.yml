@@ -84,14 +84,16 @@ tests:
           documents:
             - _id: 1
             - _id: 2
-      # Configure the next streaming hello check to fail with a timeout
-      # Use times: 2 so that the RTT hello is blocked as well.
+      # Configure the next streaming hello check to fail with a timeout.
+      # Use "times: 4" to increase the probability that the Monitor check times
+      # out since the RTT hello may trigger this failpoint one or many times as
+      # well.
       - name: configureFailPoint
         object: testRunner
         arguments:
           failPoint:
             configureFailPoint: failCommand
-            mode: { times: 2 }
+            mode: { times: 4 }
             data:
                 failCommands: ["hello", "isMaster"]
                 appName: timeoutMonitorCheckTest
@@ -119,17 +121,19 @@ tests:
           documents:
             - _id: 3
             - _id: 4
-      # Assert the server was marked Unknown and pool was cleared exactly once.
-      - name: assertEventCount
-        object: testRunner
-        arguments:
-          event: ServerMarkedUnknownEvent
-          count: 1
-      - name: assertEventCount
-        object: testRunner
-        arguments:
-          event: PoolClearedEvent
-          count: 1
+      # We cannot assert the server was marked Unknown and pool was cleared an
+      # exact number of times because the RTT hello may have triggered this
+      # failpoint one or many times as well.
+      # - name: assertEventCount
+      #   object: testRunner
+      #   arguments:
+      #     event: ServerMarkedUnknownEvent
+      #     count: 1
+      # - name: assertEventCount
+      #   object: testRunner
+      #   arguments:
+      #     event: PoolClearedEvent
+      #     count: 1
 
     expectations:
       - command_started_event:
