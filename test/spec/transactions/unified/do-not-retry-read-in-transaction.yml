@@ -1,0 +1,64 @@
+description: "do not retry read in a transaction"
+
+schemaVersion: "1.4"
+
+runOnRequirements:
+  - minServerVersion: "4.0.0"
+    topologies: [ replicaset ]
+  - minServerVersion: "4.2.0"
+    topologies: [ sharded, load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [commandStartedEvent]
+      uriOptions: { retryReads: true }
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName retryable-read-in-transaction-test
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName coll
+  - session:
+      id: &session0 session0
+      client: *client0
+
+tests:
+  - description: "find does not retry in a transaction"
+    operations:
+
+      - name: startTransaction
+        object: *session0
+
+      - name: failPoint # fail the following find command
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [find]
+              closeConnection: true
+
+      - name: find
+        object: *collection0
+        arguments:
+          filter: {}
+          session: *session0
+        expectError:
+          isError: true
+          errorLabelsContain: ["TransientTransactionError"]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collectionName
+                filter: {}
+                startTransaction: true
+              commandName: find
+              databaseName: *databaseName
