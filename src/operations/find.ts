@@ -63,6 +63,11 @@ export interface FindOptions<TSchema extends Document = Document> extends Comman
   showRecordId?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /**
+   * Option to enable an optimized code path for queries looking for a particular range of `ts` values in the oplog. Requires `tailable` to be true.
+   * @deprecated Starting from MongoDB 4.4 this flag is not needed and will be ignored.
+   */
+  oplogReplay?: boolean;
 }
 
 const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
@@ -240,6 +245,10 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
 
   if (typeof options.tailable === 'boolean') {
     findCommand.tailable = options.tailable;
+  }
+
+  if (typeof options.oplogReplay === 'boolean') {
+    findCommand.oplogReplay = options.oplogReplay;
   }
 
   if (typeof options.timeout === 'boolean') {
