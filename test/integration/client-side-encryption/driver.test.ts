@@ -118,62 +118,56 @@ describe('Client Side Encryption Functional', function () {
     let client: MongoClient;
     let encryptedClient: MongoClient;
 
-    beforeEach(function () {
+    beforeEach(async function () {
       client = this.configuration.newClient();
 
-      const noop = () => null;
-      function encryptSchema(keyId, bsonType) {
-        return {
-          encrypt: {
-            bsonType,
-            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
-            keyId: [keyId]
-          }
-        };
-      }
-
-      let encryption: ClientEncryption;
-      let dataDb: Db;
-      let keyVaultDb: Db;
+      const encryptSchema = (keyId: unknown, bsonType: string) => ({
+        encrypt: {
+          bsonType,
+          algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Random',
+          keyId: [keyId]
+        }
+      });
 
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       const kmsProviders = this.configuration.kmsProviders(crypto.randomBytes(96));
-      return client
-        .connect()
-        .then(() => {
-          encryption = new mongodbClientEncryption.ClientEncryption(client, {
-            bson: BSON,
-            keyVaultNamespace,
-            kmsProviders
-          });
-        })
-        .then(() => (dataDb = client.db(dataDbName)))
-        .then(() => (keyVaultDb = client.db(keyVaultDbName)))
-        .then(() => dataDb.dropCollection(dataCollName).catch(noop))
-        .then(() => keyVaultDb.dropCollection(keyVaultCollName).catch(noop))
-        .then(() => keyVaultDb.createCollection(keyVaultCollName))
-        .then(() => encryption.createDataKey('local'))
-        .then(dataKey => {
-          const $jsonSchema = {
-            bsonType: 'object',
-            properties: {
-              a: encryptSchema(dataKey, 'int'),
-              b: encryptSchema(dataKey, 'int'),
-              c: encryptSchema(dataKey, 'long'),
-              d: encryptSchema(dataKey, 'double')
-            }
-          };
-          return dataDb.createCollection(dataCollName, {
-            validator: { $jsonSchema }
-          });
-        })
-        .then(() => {
-          encryptedClient = this.configuration.newClient(
-            {},
-            { autoEncryption: { keyVaultNamespace, kmsProviders } }
-          );
-          return encryptedClient.connect();
-        });
+
+      await client.connect();
+
+      const encryption: ClientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
+        bson: BSON,
+        keyVaultNamespace,
+        kmsProviders
+      });
+
+      const dataDb = client.db(dataDbName);
+      const keyVaultDb = client.db(keyVaultDbName);
+
+      await dataDb.dropCollection(dataCollName).catch(() => null);
+      await keyVaultDb.dropCollection(keyVaultCollName).catch(() => null);
+      await keyVaultDb.createCollection(keyVaultCollName);
+      const dataKey = await encryption.createDataKey('local');
+
+      const $jsonSchema = {
+        bsonType: 'object',
+        properties: {
+          a: encryptSchema(dataKey, 'int'),
+          b: encryptSchema(dataKey, 'int'),
+          c: encryptSchema(dataKey, 'long'),
+          d: encryptSchema(dataKey, 'double')
+        }
+      };
+
+      await dataDb.createCollection(dataCollName, {
+        validator: { $jsonSchema }
+      });
+
+      encryptedClient = this.configuration.newClient(
+        {},
+        { autoEncryption: { keyVaultNamespace, kmsProviders } }
+      );
+
+      await encryptedClient.connect();
     });
 
     afterEach(function () {
@@ -249,10 +243,11 @@ describe('Client Side Encryption Functional', function () {
       it('should maintain ordered sort', metadata, async function () {
         const events: CommandStartedEvent[] = [];
         client.on('commandStarted', ev => events.push(ev));
-        const sort: ReadonlyArray<[string, SortDirection]> = Object.freeze([
-          ['1', 1],
-          ['0', 1]
+        const sort = Object.freeze([
+          Object.freeze(['1', 1] as const),
+          Object.freeze(['0', 1] as const)
         ]);
+        // @ts-expect-error: Our findOne API does not accept readonly input
         await collection.findOne({}, { sort });
         const findEvent = events.find(event => !!event.command.find);
         expect(findEvent).to.have.property('commandName', 'find');
@@ -264,10 +259,11 @@ describe('Client Side Encryption Functional', function () {
       it('should maintain ordered sort', metadata, async function () {
         const events: CommandStartedEvent[] = [];
         client.on('commandStarted', ev => events.push(ev));
-        const sort: [string, SortDirection][] = [
-          ['1', 1],
-          ['0', 1]
-        ];
+        const sort = Object.freeze([
+          Object.freeze(['1', 1] as const),
+          Object.freeze(['0', 1] as const)
+        ]);
+        // @ts-expect-error: Our findOneAndUpdate API does not accept readonly input
         await collection.findOneAndUpdate({}, { $setOnInsert: { a: 1 } }, { sort });
         const findAndModifyEvent = events.find(event => !!event.command.findAndModify);
         expect(findAndModifyEvent).to.have.property('commandName', 'findAndModify');
@@ -281,10 +277,11 @@ describe('Client Side Encryption Functional', function () {
       it('should maintain ordered index keys', metadata, async function () {
         const events: CommandStartedEvent[] = [];
         client.on('commandStarted', ev => events.push(ev));
-        const indexDescription: [string, IndexDirection][] = [
-          ['1', 1],
-          ['0', 1]
-        ];
+        const indexDescription = Object.freeze([
+          Object.freeze(['1', 1] as const),
+          Object.freeze(['0', 1] as const)
+        ]);
+        // @ts-expect-error: Our createIndex API does not accept readonly input
         await collection.createIndex(indexDescription, { name: 'myIndex' });
         const createIndexEvent = events.find(event => !!event.command.createIndexes);
         expect(createIndexEvent).to.have.property('commandName', 'createIndexes');
