@@ -557,7 +557,7 @@ oneOffFuncAsTasks.push({
     {
       func: 'run custom csfle tests',
       vars: {
-        CSFLE_GIT_REF: 'e157c35ee4028b292883c4628dc5926f9742b34a'
+        CSFLE_GIT_REF: 'c2712248e9f4909cdad723607ea5291d2eb48b91'
       }
     }
   ]
