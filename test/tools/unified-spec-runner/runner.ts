@@ -40,7 +40,7 @@ async function terminateOpenTransactions(client: MongoClient) {
  * @param skipFilter - a function that returns null if the test should be run,
  *                     or a skip reason if the test should be skipped
  */
-export async function runUnifiedTest(
+async function runUnifiedTest(
   ctx: Mocha.Context,
   unifiedSuite: uni.UnifiedSuite,
   test: uni.Test,
@@ -256,8 +256,8 @@ export function runUnifiedSuite(
 ): void {
   for (const unifiedSuite of specTests) {
     context(String(unifiedSuite.description), function () {
-      for (const test of unifiedSuite.tests) {
-        it(String(test.description), async function () {
+      for (const [index, test] of unifiedSuite.tests.entries()) {
+        it(String(test.description === '' ? `Test ${index}` : test.description), async function () {
           await runUnifiedTest(this, unifiedSuite, test, skipFilter);
         });
       }

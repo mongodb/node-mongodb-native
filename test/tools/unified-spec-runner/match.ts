@@ -166,6 +166,19 @@ export function resultCheck(
       expect(actual[key]).to.have.all.keys(expectedSortKey);
       const objFromActual = { [expectedSortKey]: actual[key].get(expectedSortKey) };
       resultCheck(objFromActual, value, entities, path, checkExtraKeys);
+    } else if (key === 'createIndexes') {
+      for (const [i, userIndex] of actual.indexes.entries()) {
+        expect(expected).to.have.nested.property(`.indexes[${i}].key`).to.be.a('object');
+        // @ts-expect-error: Not worth narrowing to a document
+        expect(Object.keys(expected.indexes[i].key)).to.have.lengthOf(1);
+        expect(userIndex).to.have.property('key').that.is.instanceOf(Map);
+        expect(
+          userIndex.key.size,
+          'Test input is JSON and cannot correctly test more than 1 key'
+        ).to.equal(1);
+        userIndex.key = Object.fromEntries(userIndex.key);
+      }
+      resultCheck(actual[key], value, entities, path, checkExtraKeys);
     } else {
       resultCheck(actual[key], value, entities, path, checkExtraKeys);
     }

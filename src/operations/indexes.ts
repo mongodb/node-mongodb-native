@@ -6,7 +6,7 @@ import type { OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, maxWireVersion, MongoDBNamespace, parseIndexOptions } from '../utils';
+import { Callback, isObject, maxWireVersion, MongoDBNamespace } from '../utils';
 import {
   CollationOptions,
   CommandOperation,
@@ -51,14 +51,17 @@ const VALID_INDEX_OPTIONS = new Set([
 
 /** @public */
 export type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
-
+function isIndexDirection(x: unknown): x is IndexDirection {
+  return (
+    typeof x === 'number' || x === '2d' || x === '2dsphere' || x === 'text' || x === 'geoHaystack'
+  );
+}
 /** @public */
 export type IndexSpecification = OneOrMore<
   | string
   | [string, IndexDirection]
   | { [key: string]: IndexDirection }
-  | [string, IndexDirection][]
-  | { [key: string]: IndexDirection }[]
+  | Map<string, IndexDirection>
 >;
 
 /** @public */
@@ -86,7 +89,7 @@ export interface IndexDescription
   > {
   collation?: CollationOptions;
   name?: string;
-  key: Document;
+  key: { [key: string]: IndexDirection } | Map<string, IndexDirection>;
 }
 
 /** @public */
@@ -130,23 +133,37 @@ export interface CreateIndexesOptions extends CommandOperationOptions {
   hidden?: boolean;
 }
 
-function makeIndexSpec(indexSpec: IndexSpecification, options: any): IndexDescription {
-  const indexParameters = parseIndexOptions(indexSpec);
+function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
+  return Array.isArray(t) && t.length === 2 && isIndexDirection(t[1]);
+}
 
-  // Generate the index name
-  const name = typeof options.name === 'string' ? options.name : indexParameters.name;
+function makeIndexSpec(
+  indexSpec: IndexSpecification,
+  options?: CreateIndexesOptions
+): IndexDescription {
+  const key: Map<string, IndexDirection> = new Map();
 
-  // Set up the index
-  const finalIndexSpec: Document = { name, key: indexParameters.fieldHash };
+  const indexSpecs =
+    !Array.isArray(indexSpec) || isSingleIndexTuple(indexSpec) ? [indexSpec] : indexSpec;
 
-  // merge valid index options into the index spec
-  for (const optionName in options) {
-    if (VALID_INDEX_OPTIONS.has(optionName)) {
-      finalIndexSpec[optionName] = options[optionName];
+  // Iterate through array and handle different types
+  for (const spec of indexSpecs) {
+    if (typeof spec === 'string') {
+      key.set(spec, 1);
+    } else if (Array.isArray(spec)) {
+      key.set(spec[0], spec[1] ?? 1);
+    } else if (spec instanceof Map) {
+      for (const [property, value] of spec) {
+        key.set(property, value);
+      }
+    } else if (isObject(spec)) {
+      for (const [property, value] of Object.entries(spec)) {
+        key.set(property, value);
+      }
     }
   }
 
-  return finalIndexSpec as IndexDescription;
+  return { ...options, key };
 }
 
 /** @internal */
@@ -183,7 +200,7 @@ export class CreateIndexesOperation<
 > extends CommandOperation<T> {
   override options: CreateIndexesOptions;
   collectionName: string;
-  indexes: IndexDescription[];
+  indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
 
   constructor(
     parent: OperationParent,
@@ -195,8 +212,22 @@ export class CreateIndexesOperation<
 
     this.options = options ?? {};
     this.collectionName = collectionName;
-
-    this.indexes = indexes;
+    this.indexes = indexes.map(userIndex => {
+      // Ensure the key is a Map to preserve index key ordering
+      const key =
+        userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
+      const name = userIndex.name != null ? userIndex.name : Array.from(key).flat().join('_');
+      const validIndexOptions = Object.fromEntries(
+        Object.entries({ ...userIndex }).filter(([optionName]) =>
+          VALID_INDEX_OPTIONS.has(optionName)
+        )
+      );
+      return {
+        ...validIndexOptions,
+        name,
+        key
+      };
+    });
   }
 
   override execute(
@@ -208,31 +239,6 @@ export class CreateIndexesOperation<
     const indexes = this.indexes;
 
     const serverWireVersion = maxWireVersion(server);
-
-    // Ensure we generate the correct name if the parameter is not set
-    for (let i = 0; i < indexes.length; i++) {
-      // Did the user pass in a collation, check if our write server supports it
-      if (indexes[i].collation && serverWireVersion < 5) {
-        callback(
-          new MongoCompatibilityError(
-            `Server ${server.name}, which reports wire version ${serverWireVersion}, ` +
-              'does not support collation'
-          )
-        );
-        return;
-      }
-
-      if (indexes[i].name == null) {
-        const keys = [];
-
-        for (const name in indexes[i].key) {
-          keys.push(`${name}_${indexes[i].key[name]}`);
-        }
-
-        // Set the name
-        indexes[i].name = keys.join('_');
-      }
-    }
 
     const cmd: Document = { createIndexes: this.collectionName, indexes };
 
@@ -271,12 +277,6 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
     indexSpec: IndexSpecification,
     options?: CreateIndexesOptions
   ) {
-    // createIndex can be called with a variety of styles:
-    //   coll.createIndex('a');
-    //   coll.createIndex({ a: 1 });
-    //   coll.createIndex([['a', 1]]);
-    // createIndexes is always called with an array of index spec objects
-
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
   override execute(

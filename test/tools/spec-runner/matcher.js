@@ -118,6 +118,10 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
 function generateMatchAndDiff(expected, actual, metadata) {
   const typeOfExpected = typeof expected;
 
+  if (typeOfExpected === 'object' && expected._bsontype === 'Int32' && typeof actual === 'number') {
+    return { match: expected.value === actual, expected, actual };
+  }
+
   if (typeOfExpected !== typeof actual) {
     return { match: false, expected, actual };
   }

@@ -594,11 +594,33 @@ export class CryptoConnection extends Connection {
       return;
     }
 
+    // Save sort or indexKeys based on the command being run
+    // the encrypt API serializes our JS objects to BSON to pass to the native code layer
+    // and then deserializes the encrypted result, the protocol level components
+    // of the command (ex. sort) are then converted to JS objects potentially losing
+    // import key order information. These fields are never encrypted so we can save the values
+    // from before the encryption and replace them after encryption has been performed
+    const sort: Map<string, number> | null = cmd.find || cmd.findAndModify ? cmd.sort : null;
+    const indexKeys: Map<string, number>[] | null = cmd.createIndexes
+      ? cmd.indexes.map((index: { key: Map<string, number> }) => index.key)
+      : null;
+
     autoEncrypter.encrypt(ns.toString(), cmd, options, (err, encrypted) => {
       if (err || encrypted == null) {
         callback(err, null);
         return;
       }
+
+      // Replace the saved values
+      if (sort != null && (cmd.find || cmd.findAndModify)) {
+        encrypted.sort = sort;
+      }
+      if (indexKeys != null && cmd.createIndexes) {
+        for (const [offset, index] of indexKeys.entries()) {
+          encrypted.indexes[offset].key = index;
+        }
+      }
+
       super.command(ns, encrypted, options, (err, response) => {
         if (err || response == null) {
           callback(err, response);

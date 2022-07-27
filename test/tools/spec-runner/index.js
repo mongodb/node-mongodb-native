@@ -485,6 +485,22 @@ function validateExpectations(commandEvents, spec, savedSessionData) {
       actualCommand.sort = { [expectedKey]: actualCommand.sort.get(expectedKey) };
     }
 
+    if (expectedCommand.createIndexes) {
+      // TODO(NODE-3235): This is a workaround that works because all indexes in the specs
+      // are objects with one key; ideally we'd want to adjust the spec definitions
+      // to indicate whether order matters for any given key and set general
+      // expectations accordingly
+      for (const [i, dbIndex] of actualCommand.indexes.entries()) {
+        expect(Object.keys(expectedCommand.indexes[i].key)).to.have.lengthOf(1);
+        expect(dbIndex.key).to.be.instanceOf(Map);
+        expect(dbIndex.key.size).to.equal(1);
+      }
+      actualCommand.indexes = actualCommand.indexes.map(dbIndex => ({
+        ...dbIndex,
+        key: Object.fromEntries(dbIndex.key)
+      }));
+    }
+
     expect(actualCommand).withSessionData(savedSessionData).to.matchMongoSpec(expectedCommand);
   }
 }
@@ -504,6 +520,11 @@ function normalizeCommandShapes(commands) {
     // TODO: this is a workaround to preserve sort Map type until NODE-3235 is completed
     if (def.command.sort) {
       output.command.sort = def.command.sort;
+    }
+    if (def.command.createIndexes) {
+      for (const [i, dbIndex] of output.command.indexes.entries()) {
+        dbIndex.key = def.command.indexes[i].key;
+      }
     }
     return output;
   });

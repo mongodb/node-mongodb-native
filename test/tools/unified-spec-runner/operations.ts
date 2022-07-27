@@ -76,14 +76,19 @@ operations.set('assertIndexNotExists', async ({ operation, client }) => {
   const collection = client
     .db(operation.arguments.databaseName)
     .collection(operation.arguments.collectionName);
+
+  const listIndexCursor = collection.listIndexes();
+  let indexes;
   try {
-    expect(await collection.indexExists(operation.arguments.indexName)).to.be.true;
+    indexes = await listIndexCursor.toArray();
   } catch (error) {
     if (error.code === 26 || error.message.includes('ns does not exist')) {
       return;
     }
-    throw error;
+    // Error will always exist here, this makes the output show what caused an issue with assertIndexNotExists
+    expect(error).to.not.exist;
   }
+  expect(indexes.map(({ name }) => name)).to.not.include(operation.arguments.indexName);
 });
 
 operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operation }) => {
