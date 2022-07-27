@@ -173,7 +173,10 @@ describe('MaxTimeMS', function () {
             const timeIsSetOnGetMore = typeof maxAwaitTimeMS === 'number';
             return [
               {
-                options: { tailable, awaitData, maxAwaitTimeMS, maxTimeMS },
+                // Use JSON to drop explicit undefined
+                options: JSON.parse(
+                  JSON.stringify({ tailable, awaitData, maxAwaitTimeMS, maxTimeMS })
+                ),
                 outcome: {
                   // Cannot set 'awaitData' without also setting 'tailable'
                   isFindError: awaitDataSet && !tailableSet,
@@ -187,33 +190,55 @@ describe('MaxTimeMS', function () {
       )
     );
 
+    it('meta test: should setup test table correctly', () => {
+      expect(tests).to.have.lengthOf(81);
+      expect(tests.filter(t => t.outcome.isFindError)).to.have.lengthOf(18);
+      expect(tests.filter(t => t.outcome.isGetMoreError)).to.have.lengthOf(36);
+      expect(
+        tests.filter(t => {
+          return !t.outcome.isFindError && !t.outcome.isGetMoreError;
+        })
+      ).to.have.lengthOf(27);
+    });
+
     for (const { options, outcome } of tests) {
       let optionsString = inspect(options, { breakLength: Infinity });
-      optionsString = optionsString
-        .slice(2, optionsString.length - 2)
-        .split('undefined')
-        .join('omit');
+      optionsString = optionsString.slice(1, optionsString.length - 1).trim();
+      optionsString = optionsString === '' ? 'nothing set' : optionsString;
 
-      it(`should create find cursor with ${optionsString}`, async () => {
+      const operation = async () => {
         cursor = cappedCollection.find({ _id: { $gt: 0 } }, { ...options, batchSize: 1 });
-
         const findDocOrError: { _id: number } | Error = await cursor.next().catch(error => error);
-
         const exhaustedByFind = !!cursor.id?.isZero();
-
         const getMoreDocOrError: { _id: number } | Error | null = await cursor
           .tryNext()
           .catch(error => error);
-
         expect(events).to.have.length.of.at.least(1); // At least find must be sent
+        return { findDocOrError, exhaustedByFind, getMoreDocOrError };
+      };
 
-        if (outcome.isFindError) {
+      if (outcome.isFindError) {
+        it(`should error on find due to setting ${optionsString}`, async () => {
+          const { findDocOrError } = await operation();
           expect(findDocOrError).to.be.instanceOf(MongoServerError);
-        } else {
-          if (findDocOrError instanceof Error) {
-            throw findDocOrError;
+        });
+      } else if (outcome.isGetMoreError) {
+        it(`should error on getMore due to setting ${optionsString}`, async () => {
+          const { exhaustedByFind, getMoreDocOrError } = await operation();
+          if (exhaustedByFind) {
+            expect(getMoreDocOrError).to.be.instanceOf(MongoCursorExhaustedError);
+          } else {
+            expect(getMoreDocOrError).to.be.instanceOf(MongoServerError);
           }
-          expect(findDocOrError).to.have.property('_id', 1);
+        });
+      } else {
+        it(`should create find cursor with ${optionsString}`, async () => {
+          const { findDocOrError: findDoc, getMoreDocOrError: getMoreDoc } = await operation();
+
+          expect(findDoc).to.not.be.instanceOf(Error);
+          expect(getMoreDoc).to.not.be.instanceOf(Error);
+
+          expect(findDoc).to.have.property('_id', 1);
 
           expect(events[0].command).to.be.an('object').that.has.a.property('find');
           const findCommand = events[0].command;
@@ -223,17 +248,8 @@ describe('MaxTimeMS', function () {
           } else {
             expect(findCommand).to.not.have.property('maxTimeMS');
           }
-        }
 
-        if (outcome.isGetMoreError) {
-          expect(getMoreDocOrError).to.be.instanceOf(MongoServerError);
-        } else if (exhaustedByFind) {
-          expect(getMoreDocOrError).to.be.instanceOf(MongoCursorExhaustedError);
-        } else {
-          if (getMoreDocOrError instanceof Error) {
-            throw getMoreDocOrError;
-          }
-          expect(getMoreDocOrError).to.be.null;
+          expect(getMoreDoc).to.be.null;
 
           expect(events[1].command).to.be.an('object').that.has.a.property('getMore');
           const getMoreCommand = events[1].command;
@@ -243,10 +259,8 @@ describe('MaxTimeMS', function () {
           } else {
             expect(getMoreCommand).to.not.have.property('maxTimeMS');
           }
-        }
-
-        await cursor.close();
-      });
+        });
+      }
     }
   });
 });
