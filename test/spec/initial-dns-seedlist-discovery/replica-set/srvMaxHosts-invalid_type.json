@@ -1,7 +1,0 @@
-{
-  "uri": "mongodb+srv://test1.test.build.10gen.cc/?replicaSet=repl0&srvMaxHosts=foo",
-  "seeds": [],
-  "hosts": [],
-  "error": true,
-  "comment": "Should fail because srvMaxHosts is not an integer"
-}
