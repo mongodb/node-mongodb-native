@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.8.1](https://github.com/mongodb/node-mongodb-native/compare/v4.8.0...v4.8.1) (2022-07-26)
+
+
+### Bug Fixes
+
+* **NODE-4423:** better type support for nested objects in query & update ([#3328](https://github.com/mongodb/node-mongodb-native/issues/3328)) ([05e007b](https://github.com/mongodb/node-mongodb-native/commit/05e007b0b5ff98151c3ff972ee2f881b4203639e))
+* **NODE-4425:** webpack optional import of FLE issue ([#3324](https://github.com/mongodb/node-mongodb-native/issues/3324)) ([5ab2b05](https://github.com/mongodb/node-mongodb-native/commit/5ab2b0517216b6675bed38824448fd9d598fd096))
+* **NODE-4444:** use Node.js clear timers ([#3327](https://github.com/mongodb/node-mongodb-native/issues/3327)) ([c5cfe21](https://github.com/mongodb/node-mongodb-native/commit/c5cfe214ac320386033effc1b62967efa0eabf46))
+
 ## [4.8.0](https://github.com/mongodb/node-mongodb-native/compare/v4.7.0...v4.8.0) (2022-07-13)
 
 

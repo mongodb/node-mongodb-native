@@ -510,7 +510,7 @@ operations.set('getKey', async ({ entities, operation }) => {
 operations.set('getKeys', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
 
-  return clientEncryption.getKeys();
+  return clientEncryption.getKeys().toArray();
 });
 
 operations.set('addKeyAltName', async ({ entities, operation }) => {

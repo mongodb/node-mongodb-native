@@ -268,7 +268,9 @@ The following steps will walk you through how to start and test a load balancer.
     `mongod --configsvr --replSet test --dbpath config1 --bind_ip localhost --port 27217`
 
     Initiate the config server in the shell:
-    `rs.initiate( { _id: "test", configsvr: true, members: [ { _id: 0, host: "localhost:27217" } ] })`
+    ```shell
+    mongosh "mongodb://localhost:27217" --exec "rs.initiate( { _id: "test", configsvr: true, members: [ { _id: 0, host: "localhost:27217" } ] })"
+    ```
 
     Create shard replica sets:
     `mongod --shardsvr --replSet testing  --dbpath repl1 --bind_ip localhost --port 27218 --setParameter enableTestCommands=true`
@@ -276,15 +278,19 @@ The following steps will walk you through how to start and test a load balancer.
     `mongod --shardsvr --replSet testing  --dbpath repl3 --bind_ip localhost --port 27220 --setParameter enableTestCommands=true`
 
     Initiate replica set in the shell:
-    `rs.initiate( { _id: "testing", members: [ { _id: 0, host: "localhost:27218" }, { _id: 1, host: "localhost:27219" }, { _id: 2, host: "localhost:27220" }] })`
+    ```shell
+    mongosh "mongodb://localhost:27218" --exec "rs.initiate( { _id: "testing", members: [ { _id: 0, host: "localhost:27218" }, { _id: 1, host: "localhost:27219" }, { _id: 2, host: "localhost:27220" }] })"
+    ```
 
-    Create mongoses:
+    Create two mongoses running on ports 27017 and 27018:
     `mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter featureFlagLoadBalancer=true --setParameter loadBalancerPort=27050`
-    `mongos --configdb test/localhost:27217 --port 27018 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter featureFlagLoadBalancer=true --setParameter loadBalancerPort=27051`
+    `mongos --configdb test/localhost:27217 --port 27018 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter featureFlagLoadBalancer=true --setParameter loadBalancerPort=27051`.
 
     Initiate cluster on mongos in shell:
-    `sh.addShard("testing/localhost:27218,localhost:27219,localhost:27220")`
-    `sh.enableSharding("test")`
+    ```shell
+    mongosh "mongodb://localhost:27017" --exec "sh.addShard("testing/localhost:27218,localhost:27219,localhost:27220")"
+    mongosh "mongodb://localhost:27017" --exec "sh.enableSharding("test")"
+    ```
 
 1. Create an environment variable named `MONGODB_URI` that stores the URI of the sharded cluster you just created. For example: `export MONGODB_URI="mongodb://host1,host2/"`
 1. Install the HAProxy load balancer. For those on macOS, you can install HAProxy with `brew install haproxy`.
@@ -304,6 +310,8 @@ The following steps will walk you through how to start and test a load balancer.
    A new file name `lb.env` is automatically created.
 1. Source the environment variables using a command like `source lb.env`.
 1. Export **each** of the environment variables that were created in `lb.env`. For example: `export SINGLE_MONGOS_LB_URI`.
+1. Export the `LOAD_BALANCED` environment variable to 'true': `export LOAD_BALANCED='true'`
+1. Disable auth for tests: `export AUTH='noauth'`
 1. Run the test suite as you normally would:
    ```sh
    npm run check:test
