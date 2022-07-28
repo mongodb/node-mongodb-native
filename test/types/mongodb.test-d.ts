@@ -1,7 +1,7 @@
 import type { Document } from 'bson';
 import { expectDeprecated, expectError, expectNotDeprecated, expectType } from 'tsd';
 
-import { Db, WithId } from '../../src';
+import { Db, WithId, WriteConcern, WriteConcernSettings } from '../../src';
 import * as MongoDBDriver from '../../src';
 import type { ChangeStreamDocument } from '../../src/change_stream';
 import { Collection } from '../../src/collection';
@@ -22,6 +22,13 @@ expectDeprecated(Topology.prototype.unref);
 expectDeprecated(Db.prototype.unref);
 expectDeprecated(MongoDBDriver.ObjectID);
 expectNotDeprecated(MongoDBDriver.ObjectId);
+
+declare const options: MongoDBDriver.MongoClientOptions;
+expectDeprecated(options.w);
+expectDeprecated(options.journal);
+expectDeprecated(options.wtimeoutMS);
+expectNotDeprecated(options.writeConcern);
+expectType<WriteConcernSettings | WriteConcern | undefined>(options.writeConcern);
 
 interface TSchema extends Document {
   name: string;

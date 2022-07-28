@@ -33,7 +33,7 @@ import {
   ns,
   resolveOptions
 } from './utils';
-import type { W, WriteConcern } from './write_concern';
+import type { W, WriteConcern, WriteConcernSettings } from './write_concern';
 
 /** @public */
 export const ServerApiVersion = Object.freeze({
@@ -183,14 +183,28 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   directConnection?: boolean;
   /** Instruct the driver it is connecting to a load balancer fronting a mongos like service */
   loadBalanced?: boolean;
-
-  /** The write concern w value */
+  /**
+   * The write concern w value
+   * @deprecated Please use the `writeConcern` option instead
+   */
   w?: W;
-  /** The write concern timeout */
+  /**
+   * The write concern timeout
+   * @deprecated Please use the `writeConcern` option instead
+   */
   wtimeoutMS?: number;
-  /** The journal write concern */
+  /**
+   * The journal write concern
+   * @deprecated Please use the `writeConcern` option instead
+   */
   journal?: boolean;
-
+  /**
+   * A MongoDB WriteConcern, which describes the level of acknowledgement
+   * requested from MongoDB for write operations.
+   *
+   * @see https://docs.mongodb.com/manual/reference/write-concern/
+   */
+  writeConcern?: WriteConcern | WriteConcernSettings;
   /** Validate mongod server certificate against Certificate Authority */
   sslValidate?: boolean;
   /** SSL Certificate file path. */
