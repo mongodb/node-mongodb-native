@@ -1719,7 +1719,7 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
-  - name: run-custom-csfle-tests-pinned-commit
+  - name: run-custom-csfle-tests-pinned-commit-mongocryptd
     tags:
       - run-custom-dependency-tests
     commands:
@@ -1734,7 +1734,7 @@ tasks:
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c2712248e9f4909cdad723607ea5291d2eb48b91
-  - name: run-custom-csfle-tests-master
+  - name: run-custom-csfle-tests-master-mongocryptd
     tags:
       - run-custom-dependency-tests
     commands:
@@ -1748,6 +1748,38 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
+          CSFLE_GIT_REF: master
+  - name: run-custom-csfle-shared-lib-tests-pinned-commit
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: bootstrap kms servers
+      - func: run custom csfle shared lib tests
+        vars:
+          VERSION: latest
+          CSFLE_GIT_REF: c2712248e9f4909cdad723607ea5291d2eb48b91
+  - name: run-custom-csfle-shared-lib-tests-master
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: bootstrap kms servers
+      - func: run custom csfle shared lib tests
+        vars:
+          VERSION: latest
           CSFLE_GIT_REF: master
   - name: test-latest-server-noauth
     tags:
@@ -2309,8 +2341,10 @@ buildvariants:
     tasks:
       - run-custom-snappy-tests
       - run-bson-ext-test
-      - run-custom-csfle-tests-pinned-commit
-      - run-custom-csfle-tests-master
+      - run-custom-csfle-tests-pinned-commit-mongocryptd
+      - run-custom-csfle-tests-master-mongocryptd
+      - run-custom-csfle-shared-lib-tests-pinned-commit
+      - run-custom-csfle-shared-lib-tests-master
   - name: ubuntu1804-test-serverless
     display_name: Serverless Test
     run_on: ubuntu1804-test
