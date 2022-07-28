@@ -1790,7 +1790,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             'Error in step 2) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
           );
         } catch (err) {
-          expect(err.code).to.equal(11000);
+          expect(err).have.property('code', 11000);
         }
 
         // 3. Use client_encryption to create a new local data key with a keyAltName "def" and assert the operation fails due to a duplicate key server error (error code 11000).
@@ -1802,7 +1802,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             'Error in step 3) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
           );
         } catch (err) {
-          expect(err.code).to.equal(11000);
+          expect(err).to.have.property('code', 11000);
         }
       });
     });
@@ -1848,7 +1848,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             'Error in step 4) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
           );
         } catch (err) {
-          expect(err.code).to.equal(11000);
+          expect(err).to.have.property('code', 11000);
         }
 
         // 5. Use client_encryption to add a keyAltName "def" to the existing key, assert the operation does not fail, and assert the returned key document contains the keyAltName "def" added during Setup.
