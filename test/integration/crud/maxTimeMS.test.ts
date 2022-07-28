@@ -141,7 +141,7 @@ describe('MaxTimeMS', function () {
         .db()
         .dropCollection('cappedAt3')
         .catch(() => null);
-      await sleep(500);
+      await sleep(100); // Need to make sure it has had time to drop entirely
       cappedCollection = await client
         .db()
         .createCollection('cappedAt3', { capped: true, size: 4096, max: 3 });
