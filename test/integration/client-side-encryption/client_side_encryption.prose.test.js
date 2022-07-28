@@ -9,7 +9,7 @@ const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
-const { MongoNetworkError } = require('../../../src/error');
+const { MongoNetworkError, MongoServerError } = require('../../../src/error');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -1723,7 +1723,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context('13. Unique Index on keyAltNames', function () {
+  context.only('13. Unique Index on keyAltNames', function () {
     let client, clientEncryption, setupKeyId;
 
     beforeEach(async function () {
@@ -1782,28 +1782,28 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
 
         // 2. Repeat Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
-        try {
-          await clientEncryption.createDataKey('local', {
+        let maybeError = await clientEncryption
+          .createDataKey('local', {
             keyAltNames: ['abc']
-          });
-          expect.fail(
-            'Error in step 2) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
-          );
-        } catch (err) {
-          expect(err).have.property('code', 11000);
-        }
+          })
+          .catch(e => e);
+        expect(
+          maybeError,
+          'Error in step 2) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
+        ).to.be.instanceof(MongoServerError);
+        expect(maybeError).have.property('code', 11000);
 
         // 3. Use client_encryption to create a new local data key with a keyAltName "def" and assert the operation fails due to a duplicate key server error (error code 11000).
-        try {
-          await clientEncryption.createDataKey('local', {
+        maybeError = await clientEncryption
+          .createDataKey('local', {
             keyAltNames: ['def']
-          });
-          expect.fail(
-            'Error in step 3) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
-          );
-        } catch (err) {
-          expect(err).to.have.property('code', 11000);
-        }
+          })
+          .catch(e => e);
+        expect(
+          maybeError,
+          'Error in step 3) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
+        ).to.be.instanceof(MongoServerError);
+        expect(maybeError).have.property('code', 11000);
       });
     });
 
@@ -1831,36 +1831,29 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         }
 
         // 3. Repeat Step 2, assert the operation does not fail, and assert the returned key document contains the keyAltName "abc" added in Step 2.
-        try {
-          const { keyAltNames } = await clientEncryption.addKeyAltName(_id, 'abc');
-          expect(keyAltNames).to.contain('abc');
-        } catch (err) {
-          expect.fail(
-            'Error in step 3) expected clientEncryption.createDataKey not to fail, but received',
-            err
-          );
-        }
+        let maybeError = await await clientEncryption.addKeyAltName(_id, 'abc').catch(e => e);
+        expect(
+          maybeError,
+          `Error in step 3) expected clientEncryption.createDataKey not to fail, but received ${maybeError}`
+        ).not.to.be.instanceof(MongoServerError);
+        expect(maybeError).to.have.property('keyAltNames').to.include('abc');
 
         // 4. Use client_encryption to add a keyAltName "def" to the key created in Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
-        try {
-          await clientEncryption.addKeyAltName(_id, 'def');
-          expect.fail(
-            'Error in step 4) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
-          );
-        } catch (err) {
-          expect(err).to.have.property('code', 11000);
-        }
+
+        maybeError = await clientEncryption.addKeyAltName(_id, 'def').catch(e => e);
+        expect(
+          maybeError,
+          'Error in step 4) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
+        ).to.be.instanceof(MongoServerError);
+        expect(maybeError).to.have.property('code', 11000);
 
         // 5. Use client_encryption to add a keyAltName "def" to the existing key, assert the operation does not fail, and assert the returned key document contains the keyAltName "def" added during Setup.
-        try {
-          const { keyAltNames } = await clientEncryption.addKeyAltName(setupKeyId, 'def');
-          expect(keyAltNames).to.contain('def');
-        } catch (err) {
-          expect.fail(
-            'Error in step 4) expected clientEncryption.createDataKey not to fail, but received',
-            err
-          );
-        }
+        maybeError = await clientEncryption.addKeyAltName(setupKeyId, 'def').catch(e => e);
+        expect(
+          maybeError,
+          `Error in step 4) expected clientEncryption.addKeyAltName not to fail, but received ${maybeError}`
+        ).not.to.be.instanceof(MongoServerError);
+        expect(maybeError).to.have.property('keyAltNames').to.include('def');
       });
     });
   });
