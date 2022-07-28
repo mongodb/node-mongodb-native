@@ -17,7 +17,7 @@ describe('MaxTimeMS', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('Should Correctly respect the maxTimeMS property on count', function (done) {
+  it('should correctly respect the maxTimeMS property on count', function (done) {
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
     client.connect(function () {
@@ -43,7 +43,7 @@ describe('MaxTimeMS', function () {
     });
   });
 
-  it('Should Correctly respect the maxTimeMS property on toArray', {
+  it('should correctly respect the maxTimeMS property on toArray', {
     metadata: {
       requires: {
         topology: ['single', 'replicaset']
@@ -77,7 +77,7 @@ describe('MaxTimeMS', function () {
     }
   });
 
-  it('Should Correctly fail with maxTimeMS error', {
+  it('should correctly fail with maxTimeMS error', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
@@ -201,11 +201,13 @@ describe('MaxTimeMS', function () {
       ).to.have.lengthOf(27);
     });
 
+    const metadata = { requires: { mongodb: '>=5.0.0' } };
     for (const { options, outcome } of tests) {
       let optionsString = inspect(options, { breakLength: Infinity });
       optionsString = optionsString.slice(1, optionsString.length - 1).trim();
       optionsString = optionsString === '' ? 'nothing set' : optionsString;
 
+      // Each test runs the same find operation, but asserts different outcomes
       const operation = async () => {
         cursor = cappedCollection.find({ _id: { $gt: 0 } }, { ...options, batchSize: 1 });
         const findDocOrError: { _id: number } | Error = await cursor.next().catch(error => error);
@@ -218,12 +220,12 @@ describe('MaxTimeMS', function () {
       };
 
       if (outcome.isFindError) {
-        it(`should error on find due to setting ${optionsString}`, async () => {
+        it(`should error on find due to setting ${optionsString}`, metadata, async () => {
           const { findDocOrError } = await operation();
           expect(findDocOrError).to.be.instanceOf(MongoServerError);
         });
       } else if (outcome.isGetMoreError) {
-        it(`should error on getMore due to setting ${optionsString}`, async () => {
+        it(`should error on getMore due to setting ${optionsString}`, metadata, async () => {
           const { exhaustedByFind, getMoreDocOrError } = await operation();
           if (exhaustedByFind) {
             expect(getMoreDocOrError).to.be.instanceOf(MongoCursorExhaustedError);
@@ -232,7 +234,7 @@ describe('MaxTimeMS', function () {
           }
         });
       } else {
-        it(`should create find cursor with ${optionsString}`, async () => {
+        it(`should create find cursor with ${optionsString}`, metadata, async () => {
           const { findDocOrError: findDoc, getMoreDocOrError: getMoreDoc } = await operation();
 
           expect(findDoc).to.not.be.instanceOf(Error);
