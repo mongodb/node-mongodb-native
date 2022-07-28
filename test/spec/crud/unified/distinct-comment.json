@@ -1,0 +1,186 @@
+{
+  "description": "distinct-comment",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "distinct-comment-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "coll0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll0",
+      "databaseName": "distinct-comment-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "distinct with document comment",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.14"
+        }
+      ],
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {},
+            "comment": {
+              "key": "value"
+            }
+          },
+          "expectResult": [
+            11,
+            22,
+            33
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "coll0",
+                  "key": "x",
+                  "query": {},
+                  "comment": {
+                    "key": "value"
+                  }
+                },
+                "commandName": "distinct",
+                "databaseName": "distinct-comment-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "distinct with string comment",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {},
+            "comment": "comment"
+          },
+          "expectResult": [
+            11,
+            22,
+            33
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "coll0",
+                  "key": "x",
+                  "query": {},
+                  "comment": "comment"
+                },
+                "commandName": "distinct",
+                "databaseName": "distinct-comment-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "distinct with document comment - pre 4.4, server error",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6.0",
+          "maxServerVersion": "4.4.13"
+        }
+      ],
+      "operations": [
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "fieldName": "x",
+            "filter": {},
+            "comment": {
+              "key": "value"
+            }
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "distinct": "coll0",
+                  "key": "x",
+                  "query": {},
+                  "comment": {
+                    "key": "value"
+                  }
+                },
+                "commandName": "distinct",
+                "databaseName": "distinct-comment-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

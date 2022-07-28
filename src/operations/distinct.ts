@@ -61,6 +61,12 @@ export class DistinctOperation extends CommandOperation<any[]> {
       cmd.maxTimeMS = options.maxTimeMS;
     }
 
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (typeof options.comment !== 'undefined') {
+      cmd.comment = options.comment;
+    }
+
     // Do we have a readConcern specified
     decorateWithReadConcern(cmd, coll, options);
 
@@ -69,13 +75,6 @@ export class DistinctOperation extends CommandOperation<any[]> {
       decorateWithCollation(cmd, coll, options);
     } catch (err) {
       return callback(err);
-    }
-
-    if (this.explain && maxWireVersion(server) < 4) {
-      callback(
-        new MongoCompatibilityError(`Server ${server.name} does not support explain on distinct`)
-      );
-      return;
     }
 
     super.executeCommand(server, session, cmd, (err, result) => {
