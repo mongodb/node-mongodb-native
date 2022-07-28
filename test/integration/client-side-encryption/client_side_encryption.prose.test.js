@@ -1843,9 +1843,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
         // 4. Use client_encryption to add a keyAltName "def" to the key created in Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
         try {
-          await clientEncryption.createDataKey('local', {
-            keyAltNames: ['def']
-          });
+          await clientEncryption.addKeyAltName(_id, 'def');
           expect.fail(
             'Error in step 4) expected clientEncryption.createDataKey to throw duplicate key error but it did not'
           );
