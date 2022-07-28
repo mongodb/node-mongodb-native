@@ -1770,16 +1770,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     context('Case 1', metadata, function () {
       it('createDataKey() handles duplicate key errors on the keyvault collection', async function () {
         // 1. Use client_encryption to create a new local data key with a keyAltName "abc" and assert the operation does not fail.
-        try {
-          await clientEncryption.createDataKey('local', {
-            keyAltNames: ['abc']
-          });
-        } catch (err) {
-          expect.fail(
-            'Error in step 1) expected clientEncryption.createDataKey to not fail, but received',
-            err
-          );
-        }
+        await clientEncryption.createDataKey('local', {
+          keyAltNames: ['abc']
+        });
 
         // 2. Repeat Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
         const maybeErrorStep2 = await clientEncryption
@@ -1809,26 +1802,11 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     context('Case 2', metadata, function () {
       it('addKeyAltName() handles duplicate key errors on the keyvault collection', async function () {
-        let _id;
         // 1. Use client_encryption to create a new local data key and assert the operation does not fail.
-        try {
-          _id = await clientEncryption.createDataKey('local');
-        } catch (err) {
-          expect.fail(
-            'Error in step 1) expected clientEncryption.createDataKey to not fail, but received',
-            err
-          );
-        }
+        const _id = await clientEncryption.createDataKey('local');
 
         // 2. Use client_encryption to add a keyAltName "abc" to the key created in Step 1 and assert the operation does not fail.
-        try {
-          await clientEncryption.addKeyAltName(_id, 'abc');
-        } catch (err) {
-          expect.fail(
-            'Error in step 2) expected clientEncryption.addKeyAltName not to fail, but received',
-            err
-          );
-        }
+        await clientEncryption.addKeyAltName(_id, 'abc');
 
         // 3. Repeat Step 2, assert the operation does not fail, and assert the returned key document contains the keyAltName "abc" added in Step 2.
         const maybeErrorStep3 = await await clientEncryption
