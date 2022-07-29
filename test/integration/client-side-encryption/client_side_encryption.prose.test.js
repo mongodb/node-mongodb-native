@@ -1723,7 +1723,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context.only('13. Unique Index on keyAltNames', function () {
+  context('13. Unique Index on keyAltNames', function () {
     let client, clientEncryption, setupKeyId;
 
     beforeEach(async function () {
@@ -1819,7 +1819,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         expect(maybeErrorStep3).to.have.property('keyAltNames').to.include('abc');
 
         // 4. Use client_encryption to add a keyAltName "def" to the key created in Step 1 and assert the operation fails due to a duplicate key server error (error code 11000).
-
         const maybeErrorStep4 = await clientEncryption.addKeyAltName(_id, 'def').catch(e => e);
         expect(
           maybeErrorStep4,
