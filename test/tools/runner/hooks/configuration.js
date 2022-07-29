@@ -149,7 +149,8 @@ const testConfigBeforeHook = async function () {
     ldap: MONGODB_URI.includes('authMechanism=PLAIN'),
     ocsp: process.env.OCSP_TLS_SHOULD_SUCCEED != null && process.env.CA_FILE != null,
     socks5: MONGODB_URI.includes('proxyHost='),
-    compressor: process.env.COMPRESSOR
+    compressor: process.env.COMPRESSOR,
+    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
   };
 
   console.error(inspect(currentEnv, { colors: true }));
