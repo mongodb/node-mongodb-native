@@ -537,7 +537,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
 }));
 
 oneOffFuncAsTasks.push({
-  name: 'run-custom-csfle-tests-pinned-commit-mongocryptd',
+  name: 'run-custom-csfle-tests-mongocryptd-pinned-commit',
   tags: ['run-custom-dependency-tests'],
   commands: [
     {
