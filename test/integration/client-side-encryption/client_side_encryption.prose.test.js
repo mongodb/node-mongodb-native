@@ -1809,9 +1809,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         await clientEncryption.addKeyAltName(_id, 'abc');
 
         // 3. Repeat Step 2, assert the operation does not fail, and assert the returned key document contains the keyAltName "abc" added in Step 2.
-        const maybeErrorStep3 = await await clientEncryption
-          .addKeyAltName(_id, 'abc')
-          .catch(e => e);
+        const maybeErrorStep3 = await clientEncryption.addKeyAltName(_id, 'abc').catch(e => e);
         expect(
           maybeErrorStep3,
           `Error in step 3) expected clientEncryption.addKeyAltName not to fail, but received ${maybeErrorStep3}`
