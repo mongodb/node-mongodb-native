@@ -1653,7 +1653,7 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
-  - name: run-custom-csfle-tests
+  - name: run-custom-csfle-tests-pinned-commit
     tags:
       - run-custom-dependency-tests
     commands:
@@ -1666,6 +1666,23 @@ tasks:
           TOPOLOGY: replica_set
       - func: bootstrap kms servers
       - func: run custom csfle tests
+        vars:
+          CSFLE_GIT_REF: c2712248e9f4909cdad723607ea5291d2eb48b91
+  - name: run-custom-csfle-tests-master
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: bootstrap kms servers
+      - func: run custom csfle tests
+        vars:
+          CSFLE_GIT_REF: master
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -2226,7 +2243,8 @@ buildvariants:
     tasks:
       - run-custom-snappy-tests
       - run-bson-ext-test
-      - run-custom-csfle-tests
+      - run-custom-csfle-tests-pinned-commit
+      - run-custom-csfle-tests-master
   - name: ubuntu1804-test-serverless
     display_name: Serverless Test
     run_on: ubuntu1804-test
