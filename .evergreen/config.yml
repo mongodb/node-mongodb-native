@@ -1687,7 +1687,7 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
-  - name: run-custom-csfle-tests-pinned-commit-mongocryptd
+  - name: run-custom-csfle-tests-mongocryptd-pinned-commit
     tags:
       - run-custom-dependency-tests
     commands:
@@ -1702,7 +1702,7 @@ tasks:
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c2712248e9f4909cdad723607ea5291d2eb48b91
-  - name: run-custom-csfle-tests-master-mongocryptd
+  - name: run-custom-csfle-tests-mongocryptd-master
     tags:
       - run-custom-dependency-tests
     commands:
@@ -2309,8 +2309,8 @@ buildvariants:
     tasks:
       - run-custom-snappy-tests
       - run-bson-ext-test
-      - run-custom-csfle-tests-pinned-commit-mongocryptd
-      - run-custom-csfle-tests-master-mongocryptd
+      - run-custom-csfle-tests-mongocryptd-pinned-commit
+      - run-custom-csfle-tests-mongocryptd-master
       - run-custom-csfle-shared-lib-tests-pinned-commit
       - run-custom-csfle-shared-lib-tests-master
   - name: ubuntu1804-test-serverless
