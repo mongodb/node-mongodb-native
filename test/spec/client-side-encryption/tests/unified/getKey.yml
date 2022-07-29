@@ -59,7 +59,7 @@ tests:
         arguments:
           # *aws_key_id with first three letters replaced with 'A' (value: "3awsawsawsawsa").
           id: &non_existent_id { $binary: { base64: AAAzYXdzYXdzYXdzYXdzYQ==, subType: "04" } }
-        expectResult: null
+        expectResult: { $$unsetOrMatches: null }
     expectEvents:
       - client: *client0
         events:

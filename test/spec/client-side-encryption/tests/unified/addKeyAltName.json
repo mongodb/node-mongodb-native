@@ -98,7 +98,9 @@
             },
             "keyAltName": "new_key_alt_name"
           },
-          "expectResult": null
+          "expectResult": {
+            "$$unsetOrMatches": null
+          }
         }
       ],
       "expectEvents": [
