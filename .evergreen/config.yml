@@ -754,6 +754,40 @@ functions:
           rm -f ./prepare_client_encryption.sh
 
           MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+  run custom csfle shared lib tests:
+    - command: shell.exec
+      type: test
+      params:
+        silent: true
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          cat <<EOT > prepare_client_encryption.sh
+          export CLIENT_ENCRYPTION='${CLIENT_ENCRYPTION}'
+          export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
+          export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
+          export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
+          export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
+          export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
+          EOT
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        script: |
+          ${PREPARE_SHELL}
+
+          # Disable xtrace (just in case it was accidentally set).
+          set +x
+          . ./prepare_client_encryption.sh
+          rm -f ./prepare_client_encryption.sh
+
+          VERSION=${VERSION} DRIVERS_TOOLS=${DRIVERS_TOOLS} \
+            bash ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+
+          MONGODB_URI="${MONGODB_URI}" CRYPT_SHARED_LIB_PATH="${CRYPT_SHARED_LIB_PATH}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
   run custom snappy tests:
     - command: subprocess.exec
       params:
@@ -1653,7 +1687,7 @@ tasks:
       - func: run bson-ext test
         vars:
           NODE_LTS_NAME: erbium
-  - name: run-custom-csfle-tests-pinned-commit
+  - name: run-custom-csfle-tests-mongocryptd-pinned-commit
     tags:
       - run-custom-dependency-tests
     commands:
@@ -1668,7 +1702,7 @@ tasks:
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c2712248e9f4909cdad723607ea5291d2eb48b91
-  - name: run-custom-csfle-tests-master
+  - name: run-custom-csfle-tests-mongocryptd-master
     tags:
       - run-custom-dependency-tests
     commands:
@@ -1682,6 +1716,38 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
+          CSFLE_GIT_REF: master
+  - name: run-custom-csfle-shared-lib-tests-pinned-commit
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: bootstrap kms servers
+      - func: run custom csfle shared lib tests
+        vars:
+          VERSION: latest
+          CSFLE_GIT_REF: c2712248e9f4909cdad723607ea5291d2eb48b91
+  - name: run-custom-csfle-shared-lib-tests-master
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: bootstrap kms servers
+      - func: run custom csfle shared lib tests
+        vars:
+          VERSION: latest
           CSFLE_GIT_REF: master
   - name: test-latest-server-noauth
     tags:
@@ -2243,8 +2309,10 @@ buildvariants:
     tasks:
       - run-custom-snappy-tests
       - run-bson-ext-test
-      - run-custom-csfle-tests-pinned-commit
-      - run-custom-csfle-tests-master
+      - run-custom-csfle-tests-mongocryptd-pinned-commit
+      - run-custom-csfle-tests-mongocryptd-master
+      - run-custom-csfle-shared-lib-tests-pinned-commit
+      - run-custom-csfle-shared-lib-tests-master
   - name: ubuntu1804-test-serverless
     display_name: Serverless Test
     run_on: ubuntu1804-test

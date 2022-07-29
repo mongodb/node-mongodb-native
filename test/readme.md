@@ -416,6 +416,8 @@ The following steps will walk you through how to run the tests for CSFLE.
 
    The output of the tests will include sections like "Client Side Encryption Corpus," "Client Side Encryption Functional," "Client Side Encryption Prose Tests," and "Client Side Encryption."
 
+  To run the functional tests using the crypt shared library instead of mongocryptd, download the appropriate version of the crypt shared library for the enterprise server version [here](https://www.mongodb.com/download-center/enterprise/releases) and then set the location of it in the environment variable `CRYPT_SHARED_LIB_PATH`.
+
 #### KMIP FLE support tests
 
 1. Install virtualenv: `pip install virtualenv`
