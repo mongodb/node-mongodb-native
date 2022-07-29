@@ -564,7 +564,7 @@ oneOffFuncAsTasks.push({
 });
 
 oneOffFuncAsTasks.push({
-  name: 'run-custom-csfle-tests-master-mongocryptd',
+  name: 'run-custom-csfle-tests-mongocryptd-master',
   tags: ['run-custom-dependency-tests'],
   commands: [
     {
