@@ -24,7 +24,7 @@ context('command distinct', function () {
   context('comment with falsy values', function () {
     for (const falsyValue of falsyValues) {
       it(`should send falsy value ${falsyToString(falsyValue)} on the command`, async function () {
-        await collection.distinct('some-key', {}, { comment: falsyValue });
+        await collection.distinct('some-key', {}, { comment: falsyValue }).catch(() => null);
 
         expect(commands).to.have.lengthOf(1);
         const distinctCommand = commands.find(command => command.commandName === 'distinct');
