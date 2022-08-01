@@ -1,0 +1,69 @@
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+import { promisify } from 'util';
+
+import { FindOperation } from '../../../src/operations/find';
+import { Server } from '../../../src/sdam/server';
+import { ServerDescription } from '../../../src/sdam/server_description';
+import { Topology } from '../../../src/sdam/topology';
+import { ns } from '../../../src/utils';
+
+describe('FindOperation', function () {
+  const namespace = ns('db.coll');
+  const options = {
+    batchSize: 100
+  };
+  const filter = {
+    ts: { $gt: new Date() }
+  };
+
+  afterEach(function () {
+    sinon.restore();
+  });
+
+  describe('#constructor', function () {
+    const operation = new FindOperation(undefined, namespace, filter, options);
+
+    it('sets the namespace', function () {
+      expect(operation.ns).to.equal(namespace);
+    });
+
+    it('sets options', function () {
+      expect(operation.options).to.equal(options);
+    });
+
+    it('sets filter', function () {
+      expect(operation.filter).to.equal(filter);
+    });
+  });
+
+  describe('#execute', function () {
+    context('command construction', () => {
+      const namespace = ns('db.collection');
+      const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+
+      it('should build basic find command with filter', async () => {
+        const findOperation = new FindOperation(undefined, namespace, filter);
+        const stub = sinon.stub(server, 'command').yieldsRight();
+        await promisify(findOperation.execute.bind(findOperation))(server, undefined);
+        expect(stub).to.have.been.calledOnceWith(namespace, {
+          find: namespace.collection,
+          filter
+        });
+      });
+
+      it('should build find command with oplogReplay', async () => {
+        const options = {
+          oplogReplay: true
+        };
+        const findOperation = new FindOperation(undefined, namespace, {}, options);
+        const stub = sinon.stub(server, 'command').yieldsRight();
+        await promisify(findOperation.execute.bind(findOperation))(server, undefined);
+        expect(stub).to.have.been.calledOnceWith(
+          namespace,
+          sinon.match.has('oplogReplay', options.oplogReplay)
+        );
+      });
+    });
+  });
+});
