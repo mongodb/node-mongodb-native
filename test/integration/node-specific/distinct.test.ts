@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, CommandStartedEvent, Db, MongoClient } from '../../../src';
+import { Collection, CommandStartedEvent, MongoClient } from '../../../src';
 import { falsyToString, falsyValues } from './comment_with_falsy_values.test';
 
 context('command distinct', function () {
