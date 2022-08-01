@@ -1,8 +1,8 @@
 import { Long } from '../../../src';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
 
-const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;
-const falsyToString = (value: typeof falsyValues[number]) => {
+export const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;
+export const falsyToString = (value: typeof falsyValues[number]) => {
   if (Number.isNaN(value)) {
     return 'NaN';
   }
