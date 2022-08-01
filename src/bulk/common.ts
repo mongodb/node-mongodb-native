@@ -441,6 +441,7 @@ export class WriteError {
 
 /** Converts the number to a Long or returns it. */
 function longOrConvert(value: number | Long | Timestamp): Long | Timestamp {
+  // TODO(NODE-2674): Preserve int64 sent from MongoDB
   return typeof value === 'number' ? Long.fromNumber(value) : value;
 }
 

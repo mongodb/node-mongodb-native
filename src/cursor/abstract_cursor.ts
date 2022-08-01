@@ -654,6 +654,7 @@ export abstract class AbstractCursor<
         this[kServer] = state.server;
 
         if (response.cursor) {
+          // TODO(NODE-2674): Preserve int64 sent from MongoDB
           this[kId] =
             typeof response.cursor.id === 'number'
               ? Long.fromNumber(response.cursor.id)

@@ -105,6 +105,7 @@ export class ServerDescription {
     if (options?.topologyVersion) {
       this.topologyVersion = options.topologyVersion;
     } else if (hello?.topologyVersion) {
+      // TODO(NODE-2674): Preserve int64 sent from MongoDB
       this.topologyVersion = hello.topologyVersion;
     }
 
@@ -254,19 +255,37 @@ function tagsStrictEqual(tags: TagSet, tags2: TagSet): boolean {
 /**
  * Compares two topology versions.
  *
- * @returns A negative number if `lhs` is older than `rhs`; positive if `lhs` is newer than `rhs`; 0 if they are equivalent.
+ * 1. If the response topologyVersion is unset or the ServerDescription's
+ *    topologyVersion is null, the client MUST assume the response is more recent.
+ * 1. If the response's topologyVersion.processId is not equal to the
+ *    ServerDescription's, the client MUST assume the response is more recent.
+ * 1. If the response's topologyVersion.processId is equal to the
+ *    ServerDescription's, the client MUST use the counter field to determine
+ *    which topologyVersion is more recent.
+ *
+ * ```ts
+ * currentTv <   newTv === -1
+ * currentTv === newTv === 0
+ * currentTv >   newTv === 1
+ * ```
  */
-export function compareTopologyVersion(lhs?: TopologyVersion, rhs?: TopologyVersion): number {
-  if (lhs == null || rhs == null) {
+export function compareTopologyVersion(
+  currentTv?: TopologyVersion,
+  newTv?: TopologyVersion
+): 0 | -1 | 1 {
+  if (currentTv == null || newTv == null) {
     return -1;
   }
 
-  if (lhs.processId.equals(rhs.processId)) {
-    // tests mock counter as just number, but in a real situation counter should always be a Long
-    const lhsCounter = Long.isLong(lhs.counter) ? lhs.counter : Long.fromNumber(lhs.counter);
-    const rhsCounter = Long.isLong(rhs.counter) ? lhs.counter : Long.fromNumber(rhs.counter);
-    return lhsCounter.compare(rhsCounter);
+  if (!currentTv.processId.equals(newTv.processId)) {
+    return -1;
   }
 
-  return -1;
+  // TODO(NODE-2674): Preserve int64 sent from MongoDB
+  const currentCounter = Long.isLong(currentTv.counter)
+    ? currentTv.counter
+    : Long.fromNumber(currentTv.counter);
+  const newCounter = Long.isLong(newTv.counter) ? newTv.counter : Long.fromNumber(newTv.counter);
+
+  return currentCounter.compare(newCounter);
 }
