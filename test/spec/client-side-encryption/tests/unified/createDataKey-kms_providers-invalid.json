@@ -1,5 +1,5 @@
 {
-  "description": "createDataKey-provider-invalid",
+  "description": "createDataKey-kms_providers-invalid",
   "schemaVersion": "1.8",
   "runOnRequirements": [
     {

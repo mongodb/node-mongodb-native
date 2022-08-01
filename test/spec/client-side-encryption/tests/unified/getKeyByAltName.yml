@@ -58,7 +58,7 @@ tests:
         object: *clientEncryption0
         arguments:
           keyAltName: does_not_exist
-        expectResult: null
+        expectResult: { $$unsetOrMatches: null }
     expectEvents:
       - client: *client0
         events:

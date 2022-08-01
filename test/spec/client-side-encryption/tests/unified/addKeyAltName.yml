@@ -48,7 +48,7 @@ tests:
           # First 3 letters of local_key_id replaced with 'A' (value: "#alkeylocalkey").
           id: &non_existent_id { $binary: { base64: AAAjYWxrZXlsb2NhbGtleQ==, subType: "04" } }
           keyAltName: new_key_alt_name
-        expectResult: null
+        expectResult: { $$unsetOrMatches: null }
     expectEvents:
       - client: *client0
         events:

@@ -557,7 +557,7 @@ oneOffFuncAsTasks.push({
     {
       func: 'run custom csfle tests',
       vars: {
-        CSFLE_GIT_REF: 'c2712248e9f4909cdad723607ea5291d2eb48b91'
+        CSFLE_GIT_REF: '41afd44ca04d246998969c53de4e0f22802b0c8a'
       }
     }
   ]
@@ -612,7 +612,7 @@ oneOffFuncAsTasks.push({
       func: 'run custom csfle shared lib tests',
       vars: {
         VERSION: 'latest',
-        CSFLE_GIT_REF: 'c2712248e9f4909cdad723607ea5291d2eb48b91'
+        CSFLE_GIT_REF: '41afd44ca04d246998969c53de4e0f22802b0c8a'
       }
     }
   ]
