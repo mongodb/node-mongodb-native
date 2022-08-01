@@ -201,7 +201,7 @@ describe('MaxTimeMS', function () {
       ).to.have.lengthOf(27);
     });
 
-    const metadata = { requires: { mongodb: '>=5.0.0' } };
+    const metadata = { requires: { mongodb: '>=4', topology: ['replicaset'] as const } };
     for (const { options, outcome } of tests) {
       let optionsString = inspect(options, { breakLength: Infinity });
       optionsString = optionsString.slice(1, optionsString.length - 1).trim();
