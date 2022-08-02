@@ -91,6 +91,7 @@ EOT
   nvm use "$NODE_VERSION"
   which node || echo "node not found, PATH=$PATH"
   which npm || echo "npm not found, PATH=$PATH"
+  npm cache clear --force # Fixes: Cannot read properties of null (reading 'pickAlgorithm') error on windows
   npm config set msvs_version ${MSVS_VERSION}
   npm config set scripts-prepend-node-path true
 
