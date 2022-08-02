@@ -80,4 +80,8 @@ tests:
         arguments:
           filter: { encryptedUnindexed: "value123" }
         result:
-          errorContains: "Cannot query"
+          # Expected error message changed in https://github.com/10gen/mongo-enterprise-modules/commit/212b584d4f7a44bed41c826a180a4aff00923d7a#diff-5f12b55e8d5c52c2f62853ec595dc2c1e2e5cb4fdbf7a32739a8e3acb3c6f818
+          # Before the message was "cannot query non-indexed fields with the randomized encryption algorithm"
+          # After: "can only execute encrypted equality queries with an encrypted equality index"
+          # Use a small common substring.
+          errorContains: "encrypt"

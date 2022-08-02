@@ -241,7 +241,7 @@
             }
           },
           "result": {
-            "errorContains": "Cannot query"
+            "errorContains": "encrypt"
           }
         }
       ]
