@@ -3,8 +3,8 @@ import { expect } from 'chai';
 import { Collection, CommandStartedEvent, Long, MongoClient } from '../../../src';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
 
-export const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;
-export const falsyToString = (value: typeof falsyValues[number]) => {
+const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;
+const falsyToString = (value: typeof falsyValues[number]) => {
   if (Number.isNaN(value)) {
     return 'NaN';
   }
