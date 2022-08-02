@@ -2109,7 +2109,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             client1,
             {
               keyVaultNamespace: 'keyvault.datakeys',
-              kmsProviders: getKmsProviders()
+              kmsProviders: getKmsProviders(),
+              tlsOptions: {
+                kmip: {
+                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                }
+              }
             }
           );
 
@@ -2129,7 +2135,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             client1,
             {
               keyVaultNamespace: 'keyvault.datakeys',
-              kmsProviders: getKmsProviders()
+              kmsProviders: getKmsProviders(),
+              tlsOptions: {
+                kmip: {
+                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                }
+              }
             }
           );
 
