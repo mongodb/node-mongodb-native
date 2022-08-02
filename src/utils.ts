@@ -1387,3 +1387,25 @@ export function getMongoDBClientEncryption(): {
 
   return mongodbClientEncryption;
 }
+
+/**
+ * Compare objectIds. `null` is always less
+ * - `+1 = oid1 is greater than oid2`
+ * - `-1 = oid1 is less than oid2`
+ * - `+0 = oid1 is equal oid2`
+ */
+export function compareObjectId(oid1?: ObjectId, oid2?: ObjectId): 0 | 1 | -1 {
+  if (oid1 == null && oid2 == null) {
+    return 0;
+  }
+
+  if (oid1 == null) {
+    return -1;
+  }
+
+  if (oid2 == null) {
+    return 1;
+  }
+
+  return oid1.id.compare(oid2.id);
+}

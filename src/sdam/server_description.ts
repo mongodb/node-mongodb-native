@@ -1,6 +1,6 @@
 import { Document, Long, ObjectId } from '../bson';
 import type { MongoError } from '../error';
-import { arrayStrictEqual, errorStrictEqual, HostAddress, now } from '../utils';
+import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
 import type { ClusterTime } from './common';
 import { ServerType } from './common';
 
@@ -180,16 +180,7 @@ export class ServerDescription {
    * Determines if another `ServerDescription` is equal to this one per the rules defined
    * in the {@link https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#serverdescription|SDAM spec}
    */
-  equals(other: ServerDescription): boolean {
-    const topologyVersionsEqual =
-      this.topologyVersion === other.topologyVersion ||
-      compareTopologyVersion(this.topologyVersion, other.topologyVersion) === 0;
-
-    const electionIdsEqual: boolean =
-      this.electionId && other.electionId
-        ? other.electionId && this.electionId.equals(other.electionId)
-        : this.electionId === other.electionId;
-
+  equals(other?: ServerDescription | null): boolean {
     return (
       other != null &&
       errorStrictEqual(this.error, other.error) &&
@@ -199,10 +190,10 @@ export class ServerDescription {
       tagsStrictEqual(this.tags, other.tags) &&
       this.setName === other.setName &&
       this.setVersion === other.setVersion &&
-      electionIdsEqual &&
+      compareObjectId(this.electionId, other.electionId) === 0 &&
       this.primary === other.primary &&
       this.logicalSessionTimeoutMinutes === other.logicalSessionTimeoutMinutes &&
-      topologyVersionsEqual
+      compareTopologyVersion(this.topologyVersion, other.topologyVersion) === 0
     );
   }
 }
