@@ -2046,4 +2046,114 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
     });
   });
+
+  context('16. Rewrap', function () {
+    const masterKeys = {
+      aws: {
+        region: 'us-east-1',
+        key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+      },
+      azure: {
+        keyVaultEndpoint: 'key-vault-csfle.vault.azure.net',
+        keyName: 'key-name-csfle'
+      },
+      gcp: {
+        projectId: 'devprod-drivers',
+        location: 'global',
+        keyRing: 'key-ring-csfle',
+        keyName: 'key-name-csfle'
+      },
+      kmip: {},
+      local: undefined
+    };
+    let client1, client2;
+
+    /**
+     * Run the following test case for each pair of KMS providers (referred to as ``srcProvider`` and ``dstProvider``).
+     * Include pairs where ``srcProvider`` equals ``dstProvider``.
+     */
+    function* generateTestCombinations() {
+      const providers = Object.keys(masterKeys);
+      for (const srcProvider of providers) {
+        for (const destProvider of providers) {
+          yield { srcProvider, destProvider };
+        }
+      }
+    }
+
+    beforeEach(async function () {
+      client1 = this.configuration.newClient();
+      await client1.connect();
+      client2 = this.configuration.newClient();
+      await client2.connect();
+    });
+
+    afterEach(async function () {
+      await client1.close();
+      await client2.close();
+    });
+
+    for (const { srcProvider, destProvider } of generateTestCombinations()) {
+      it(
+        `should rewrap data key from ${srcProvider} to ${destProvider}`,
+        metadata,
+        async function () {
+          // Step 1. Drop the collection ``keyvault.datakeys``
+          await client1
+            .db('keyvault')
+            .dropCollection('datakeys')
+            .catch(() => null);
+
+          // Step 2. Create a ``ClientEncryption`` object named ``clientEncryption1``
+          const clientEncryption1 = new this.configuration.mongodbClientEncryption.ClientEncryption(
+            client1,
+            {
+              keyVaultNamespace: 'keyvault.datakeys',
+              kmsProviders: getKmsProviders()
+            }
+          );
+
+          // Step 3. Call ``clientEncryption1.createDataKey`` with ``srcProvider``
+          const keyId = await clientEncryption1.createDataKey(srcProvider, {
+            masterKey: masterKeys[srcProvider]
+          });
+
+          // Step 4. Call ``clientEncryption1.encrypt`` with the value "test"
+          const cipherText = await clientEncryption1.encrypt('test', {
+            keyId,
+            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+          });
+
+          // Step 5. Create a ``ClientEncryption`` object named ``clientEncryption2``
+          const clientEncryption2 = new this.configuration.mongodbClientEncryption.ClientEncryption(
+            client1,
+            {
+              keyVaultNamespace: 'keyvault.datakeys',
+              kmsProviders: getKmsProviders()
+            }
+          );
+
+          // Step 6. Call ``clientEncryption2.rewrapManyDataKey`` with an empty ``filter``
+          const rewrapManyDataKeyResult = await clientEncryption2.rewrapManyDataKey(
+            {},
+            {
+              provider: destProvider,
+              masterKey: masterKeys[destProvider]
+            }
+          );
+
+          expect(rewrapManyDataKeyResult).to.have.property('bulkWriteResult');
+          expect(rewrapManyDataKeyResult.bulkWriteResult).to.have.property('nModified', 1);
+
+          // 7. Call ``clientEncryption1.decrypt`` with the ``ciphertext``. Assert the return value is "test".
+          const decryptResult1 = await clientEncryption1.decrypt(cipherText);
+          expect(decryptResult1).to.equal('test');
+
+          // 8. Call ``clientEncryption2.decrypt`` with the ``ciphertext``. Assert the return value is "test".
+          const decryptResult2 = await clientEncryption1.decrypt(cipherText);
+          expect(decryptResult2).to.equal('test');
+        }
+      );
+    }
+  });
 });
