@@ -206,7 +206,15 @@ describe('Comment with falsy values', () => {
 
         // chai does not narrow types, so TS doesn't know the distinct command exists at this point.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        expect(distinctCommand!.command).to.haveOwnProperty('comment');
+        const command = distinctCommand!.command;
+
+        expect(command).to.haveOwnProperty('comment');
+
+        if (Number.isNaN(falsyValue)) {
+          expect(command.comment).to.be.NaN;
+        } else {
+          expect(command.comment).to.equal(falsyValue);
+        }
       });
     }
   });
