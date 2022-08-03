@@ -1,4 +1,6 @@
-import { Long } from '../../../src';
+import { expect } from 'chai';
+
+import { Collection, CommandStartedEvent, Long, MongoClient } from '../../../src';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../../tools/utils';
 
 const falsyValues = [0, false, '', Long.ZERO, null, NaN] as const;
@@ -173,4 +175,47 @@ describe('Comment with falsy values', () => {
     .test(testsForChangeStreamsAggregate)
     .test(testsForGetMore)
     .run();
+
+  context('Collection.distinct()', function () {
+    let client: MongoClient;
+    let collection: Collection;
+    let commands: CommandStartedEvent[] = [];
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      client.on('commandStarted', e => commands.push(e));
+      await client.connect();
+      collection = await client.db('comment-falsy-values').createCollection('collection');
+      commands = [];
+    });
+
+    afterEach(async function () {
+      await collection.drop();
+      await client.close();
+    });
+
+    for (const falsyValue of falsyValues) {
+      it(`distinct should send falsy value ${falsyToString(
+        falsyValue
+      )} on the command`, async function () {
+        await collection.distinct('some-key', {}, { comment: falsyValue }).catch(() => null);
+
+        expect(commands).to.have.lengthOf(1);
+        const distinctCommand = commands.find(command => command.commandName === 'distinct');
+        expect(distinctCommand).to.exist;
+
+        // chai does not narrow types, so TS doesn't know the distinct command exists at this point.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const command = distinctCommand!.command;
+
+        expect(command).to.haveOwnProperty('comment');
+
+        if (Number.isNaN(falsyValue)) {
+          expect(command.comment).to.be.NaN;
+        } else {
+          expect(command.comment).to.equal(falsyValue);
+        }
+      });
+    }
+  });
 });

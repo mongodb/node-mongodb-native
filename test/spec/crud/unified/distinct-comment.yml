@@ -1,0 +1,98 @@
+description: "distinct-comment"
+
+schemaVersion: "1.0"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name distinct-comment-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+
+tests:
+  - description: "distinct with document comment"
+    runOnRequirements:
+      # https://jira.mongodb.org/browse/SERVER-44847
+      # Server supports distinct with comment of any type for comment starting from 4.4.14.
+      - minServerVersion: "4.4.14"
+    operations:
+      - name: distinct
+        object: *collection0
+        arguments:
+          fieldName: &fieldName x
+          filter: &filter {}
+          comment: &documentComment { key: "value"}
+        expectResult: [ 11, 22, 33 ]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                distinct: *collection0Name
+                key: *fieldName
+                query: *filter
+                comment: *documentComment
+              commandName: distinct
+              databaseName: *database0Name
+
+  - description: "distinct with string comment"
+    runOnRequirements:
+      - minServerVersion: "4.4.0"
+    operations:
+      - name: distinct
+        object: *collection0
+        arguments:
+          fieldName: *fieldName
+          filter: *filter
+          comment: &stringComment "comment"
+        expectResult: [ 11, 22, 33 ]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                distinct: *collection0Name
+                key: *fieldName
+                query: *filter
+                comment: *stringComment
+              commandName: distinct
+              databaseName: *database0Name
+
+  - description: "distinct with document comment - pre 4.4, server error"
+    runOnRequirements:
+      - minServerVersion: "3.6.0"
+        maxServerVersion: "4.4.13"
+    operations:
+      - name: distinct
+        object: *collection0
+        arguments:
+          fieldName: *fieldName
+          filter: *filter
+          comment: *documentComment
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                distinct: *collection0Name
+                key: *fieldName
+                query: *filter
+                comment: *documentComment
+              commandName: distinct
+              databaseName: *database0Name
