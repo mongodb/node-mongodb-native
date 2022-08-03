@@ -819,7 +819,7 @@ functions:
           rm -f ./prepare_client_encryption.sh
 
           VERSION=${VERSION} DRIVERS_TOOLS=${DRIVERS_TOOLS} \
-            bash ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+            . ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
 
           echo "setting CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
 
