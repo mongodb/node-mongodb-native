@@ -181,6 +181,15 @@ export class ServerDescription {
    * in the {@link https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#serverdescription|SDAM spec}
    */
   equals(other?: ServerDescription | null): boolean {
+    const topologyVersionsEqual =
+      this.topologyVersion === other?.topologyVersion ||
+      compareTopologyVersion(this.topologyVersion, other?.topologyVersion) === 0;
+
+    const electionIdsEqual =
+      this.electionId && other?.electionId != null
+        ? other.electionId && compareObjectId(this.electionId, other.electionId) === 0
+        : this.electionId === other?.electionId;
+
     return (
       other != null &&
       errorStrictEqual(this.error, other.error) &&
@@ -190,10 +199,10 @@ export class ServerDescription {
       tagsStrictEqual(this.tags, other.tags) &&
       this.setName === other.setName &&
       this.setVersion === other.setVersion &&
-      compareObjectId(this.electionId, other.electionId) === 0 &&
+      electionIdsEqual &&
       this.primary === other.primary &&
       this.logicalSessionTimeoutMinutes === other.logicalSessionTimeoutMinutes &&
-      compareTopologyVersion(this.topologyVersion, other.topologyVersion) === 0
+      topologyVersionsEqual
     );
   }
 }
