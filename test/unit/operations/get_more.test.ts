@@ -192,6 +192,54 @@ describe('GetMoreOperation', function () {
         }
       });
     });
+
+    context('error cases', () => {
+      const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+      sinon.stub(server, 'command').yieldsRight();
+
+      it('should throw if the cursorId is undefined', async () => {
+        const getMoreOperation = new GetMoreOperation(
+          ns('db.collection'),
+          // @ts-expect-error: Testing undefined cursorId
+          undefined,
+          server,
+          options
+        );
+        const error = await promisify(getMoreOperation.execute.bind(getMoreOperation))(
+          server,
+          undefined
+        ).catch(error => error);
+        expect(error).to.be.instanceOf(MongoRuntimeError);
+      });
+
+      it('should throw if the collection is undefined', async () => {
+        const getMoreOperation = new GetMoreOperation(
+          ns('db'),
+          Long.fromNumber(1),
+          server,
+          options
+        );
+        const error = await promisify(getMoreOperation.execute.bind(getMoreOperation))(
+          server,
+          undefined
+        ).catch(error => error);
+        expect(error).to.be.instanceOf(MongoRuntimeError);
+      });
+
+      it('should throw if the cursorId is zero', async () => {
+        const getMoreOperation = new GetMoreOperation(
+          ns('db.collection'),
+          Long.fromNumber(0),
+          server,
+          options
+        );
+        const error = await promisify(getMoreOperation.execute.bind(getMoreOperation))(
+          server,
+          undefined
+        ).catch(error => error);
+        expect(error).to.be.instanceOf(MongoRuntimeError);
+      });
+    });
   });
 
   describe('#hasAspect', function () {
