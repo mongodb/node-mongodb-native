@@ -2075,8 +2075,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     function* generateTestCombinations() {
       const providers = Object.keys(masterKeys);
       for (const srcProvider of providers) {
-        for (const destProvider of providers) {
-          yield { srcProvider, destProvider };
+        for (const dstProvider of providers) {
+          yield { srcProvider, dstProvider };
         }
       }
     }
@@ -2093,9 +2093,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       await client2.close();
     });
 
-    for (const { srcProvider, destProvider } of generateTestCombinations()) {
+    for (const { srcProvider, dstProvider } of generateTestCombinations()) {
       it(
-        `should rewrap data key from ${srcProvider} to ${destProvider}`,
+        `should rewrap data key from ${srcProvider} to ${dstProvider}`,
         metadata,
         async function () {
           // Step 1. Drop the collection ``keyvault.datakeys``
@@ -2149,8 +2149,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           const rewrapManyDataKeyResult = await clientEncryption2.rewrapManyDataKey(
             {},
             {
-              provider: destProvider,
-              masterKey: masterKeys[destProvider]
+              provider: dstProvider,
+              masterKey: masterKeys[dstProvider]
             }
           );
 
