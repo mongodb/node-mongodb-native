@@ -1,4 +1,4 @@
-import type { Document, ObjectId } from '../bson';
+import type { ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { MongoError, MongoRuntimeError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
