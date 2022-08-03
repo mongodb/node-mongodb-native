@@ -2047,7 +2047,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context('16. Rewrap', function () {
+  context.only('16. Rewrap', function () {
     const masterKeys = {
       aws: {
         region: 'us-east-1',
@@ -2082,10 +2082,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     }
 
     beforeEach(async function () {
-      client1 = this.configuration.newClient();
-      await client1.connect();
-      client2 = this.configuration.newClient();
-      await client2.connect();
+      client1 = await this.configuration.newClient().connect();
+      client2 = await this.configuration.newClient().connect();
     });
 
     afterEach(async function () {
