@@ -58,20 +58,22 @@ describe('ServerDescription', function () {
   describe('compareTopologyVersion()', () => {
     const processIdZero = new ObjectId('00'.repeat(12));
     const processIdOne = new ObjectId('00'.repeat(11) + '01');
-    const compareTopologyVersionTests: {
+    type CompareTopologyVersionTest = {
       title: string;
       currentTv?: TopologyVersion;
       newTv?: TopologyVersion;
       out: 0 | -1 | 1;
-    }[] = [
+    };
+
+    const compareTopologyVersionEqualTests: CompareTopologyVersionTest[] = [
       {
-        title: 'should return that currentTv and newTv are equal',
+        title: 'when process ids are equal and both counter values are Long.ZERO',
         currentTv: { processId: processIdZero, counter: Long.ZERO },
         newTv: { processId: processIdZero, counter: Long.ZERO },
         out: 0
       },
       {
-        title: 'should return that currentTv and newTv are equal, both counters as numbers',
+        title: 'when process ids are equal and both counter values are non-zero numbers',
         // @ts-expect-error: Testing that the function handles numbers
         currentTv: { processId: processIdZero, counter: 2 },
         // @ts-expect-error: Testing that the function handles numbers
@@ -79,51 +81,76 @@ describe('ServerDescription', function () {
         out: 0
       },
       {
-        title: 'should return that currentTv and newTv are equal newTv.counter as number',
+        title: 'when process ids are equal and both counter values are zero numbers',
+        // @ts-expect-error: Testing that the function handles numbers
+        currentTv: { processId: processIdZero, counter: 0 },
+        // @ts-expect-error: Testing that the function handles numbers
+        newTv: { processId: processIdZero, counter: 0 },
+        out: 0
+      },
+      {
+        title:
+          'when process ids are equal and counter values are equal but current has a different type',
         currentTv: { processId: processIdZero, counter: Long.fromNumber(2) },
         // @ts-expect-error: Testing that the function handles numbers
         newTv: { processId: processIdZero, counter: 2 },
         out: 0
       },
       {
-        title: 'should return that currentTv and newTv are equal currentTv.counter as number',
+        title:
+          'when process ids are equal and counter values are equal but new has a different type',
         // @ts-expect-error: Testing that the function handles numbers
         currentTv: { processId: processIdZero, counter: 2 },
         newTv: { processId: processIdZero, counter: Long.fromNumber(2) },
         out: 0
-      },
+      }
+    ];
+    const compareTopologyVersionLessThanTests: CompareTopologyVersionTest[] = [
       {
-        title: 'should return that newTv is greater than currentTv when null',
+        title: 'when both versions are nullish',
         currentTv: undefined,
         newTv: undefined,
         out: -1
       },
       {
-        title: 'should return that newTv is greater than currentTv when processIds are not equal',
+        title:
+          'when new processId is greater the topologyVersion is too regardless of counter being less',
         // Even if processId of current is greater, it is not an ordered value
         currentTv: { processId: processIdOne, counter: Long.fromNumber(2) },
-        newTv: { processId: processIdZero, counter: Long.fromNumber(2) },
+        newTv: { processId: processIdZero, counter: Long.fromNumber(1) },
         out: -1
       },
       {
-        title:
-          'should return that newTv is greater than currentTv when currentTv.counter is smaller',
+        title: 'when processIds are equal but new counter is greater',
         currentTv: { processId: processIdZero, counter: Long.fromNumber(2) },
         newTv: { processId: processIdZero, counter: Long.fromNumber(3) },
         out: -1
-      },
+      }
+    ];
+    const compareTopologyVersionGreaterThanTests: CompareTopologyVersionTest[] = [
       {
-        title:
-          'should return that currentTv is greater than newTv when currentTv.counter is greater',
+        title: 'when processIds are equal but new counter is less than current',
         currentTv: { processId: processIdZero, counter: Long.fromNumber(3) },
         newTv: { processId: processIdZero, counter: Long.fromNumber(2) },
         out: 1
       }
     ];
-    for (const { title, currentTv, newTv, out } of compareTopologyVersionTests) {
-      it(title, () => {
-        expect(compareTopologyVersion(currentTv, newTv)).to.equal(out);
-      });
-    }
+
+    const makeTopologyVersionComparisonTests = tests => {
+      for (const { title, currentTv, newTv, out } of tests) {
+        it(title, () => {
+          expect(compareTopologyVersion(currentTv, newTv)).to.equal(out);
+        });
+      }
+    };
+    context('should return that versions are equal', () => {
+      makeTopologyVersionComparisonTests(compareTopologyVersionEqualTests);
+    });
+    context('should return that current version is less than', () => {
+      makeTopologyVersionComparisonTests(compareTopologyVersionLessThanTests);
+    });
+    context('should return that current version is greater than', () => {
+      makeTopologyVersionComparisonTests(compareTopologyVersionGreaterThanTests);
+    });
   });
 });
