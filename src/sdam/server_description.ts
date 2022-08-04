@@ -181,13 +181,14 @@ export class ServerDescription {
    * in the {@link https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#serverdescription|SDAM spec}
    */
   equals(other?: ServerDescription | null): boolean {
+    // TODO(NODE-4510): Check ServerDescription equality logic for nullish topologyVersion meaning "greater than"
     const topologyVersionsEqual =
       this.topologyVersion === other?.topologyVersion ||
       compareTopologyVersion(this.topologyVersion, other?.topologyVersion) === 0;
 
     const electionIdsEqual =
-      this.electionId && other?.electionId != null
-        ? other.electionId && compareObjectId(this.electionId, other.electionId) === 0
+      this.electionId != null && other?.electionId != null
+        ? compareObjectId(this.electionId, other.electionId) === 0
         : this.electionId === other?.electionId;
 
     return (
