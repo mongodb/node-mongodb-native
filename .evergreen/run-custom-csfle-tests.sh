@@ -65,6 +65,7 @@ export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
 export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
 export TEST_CSFLE=true
+echo "csfle CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
 
 if [ -n "$CRYPT_SHARED_LIB_PATH" ]; then
   export CRYPT_SHARED_LIB_PATH=${CRYPT_SHARED_LIB_PATH}
