@@ -824,7 +824,7 @@ functions:
           echo "setting CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
 
           MONGODB_URI="${MONGODB_URI}" CRYPT_SHARED_LIB_PATH="${CRYPT_SHARED_LIB_PATH}" \
-            . ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
 
   "run custom snappy tests":
     - command: subprocess.exec
