@@ -9,7 +9,6 @@ import {
   MongoCursorExhaustedError,
   MongoServerError
 } from '../../../src';
-import { sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
 describe('MaxTimeMS', function () {
