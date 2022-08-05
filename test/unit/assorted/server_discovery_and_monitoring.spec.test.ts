@@ -51,6 +51,8 @@ const SDAM_EVENT_CLASSES = {
   ServerHeartbeatFailedEvent
 } as const;
 
+const WIRE_VERSION_KEYS = new Set(['minWireVersion', 'maxWireVersion']);
+
 const specDir = path.resolve(__dirname, '../../spec/server-discovery-and-monitoring');
 function collectTests(): Record<string, SDAMTest[]> {
   const testTypes = fs
@@ -263,21 +265,6 @@ function convertOutcomeEvents(events) {
   });
 }
 
-// iterates through expectation building a path of keys that should not exist (null), and
-// removes them from the expectation (NOTE: this mutates the expectation)
-function findOmittedFields(expected) {
-  const result = [];
-  for (const key of Object.keys(expected)) {
-    if (expected[key] == null) {
-      result.push(key);
-      // TODO(NODE-4159): remove this delete
-      delete expected[key];
-    }
-  }
-
-  return result;
-}
-
 function normalizeServerDescription(serverDescription) {
   if (serverDescription.type === 'PossiblePrimary') {
     // Some single-threaded drivers care a lot about ordering potential primary
@@ -470,27 +457,39 @@ function assertTopologyDescriptionOutcomeExpectations(
   expect(actualServers).to.be.instanceOf(Map);
 
   // TODO(NODE-4159): The node driver keeps unknown servers where it should discard
-  // expect(actualServers.size).to.equal(expectedServers.size);
+  expect(actualServers).to.have.lengthOf(expectedServers.size);
 
   for (const serverName of expectedServers.keys()) {
     expect(actualServers).to.include.keys(serverName);
     const expectedServer = expectedServers.get(serverName);
+    if (expectedServer == null) expect.fail(`Must have server defined for ${serverName}`);
 
     if (expectedServer.pool != null) {
-      const expectedPool = expectedServers.get(serverName).pool;
-      const actualPoolGeneration = topology.s.servers.get(serverName).s.pool;
+      const expectedPool = expectedServer.pool;
+      const actualServer = topology.s.servers.get(serverName);
+      if (actualServer == null) expect.fail(`Must have server defined for ${serverName}`);
+      const actualPoolGeneration = actualServer.s.pool;
       expect(actualPoolGeneration).to.have.property('generation', expectedPool.generation);
       delete expectedServer.pool;
     }
 
     const normalizedExpectedServer = normalizeServerDescription(expectedServer);
-    const omittedFields = findOmittedFields(normalizedExpectedServer);
+    // const omittedFields = findOmittedFields(normalizedExpectedServer);
     const actualServer = actualServers.get(serverName);
-    expect(actualServer).to.matchMongoSpec(normalizedExpectedServer);
-
-    if (omittedFields.length !== 0) {
-      // TODO(NODE-4159): There are properties that should be nulled out when the server transitions to Unknown
-      // instead of looking for keys to be omitted, null them out
+    // expect(actualServer).to.matchMongoSpec(normalizedExpectedServer);
+    const entriesOnExpectedServer = Object.entries(normalizedExpectedServer);
+    expect(entriesOnExpectedServer).to.not.be.empty;
+    for (const [expectedKey, expectedValue] of entriesOnExpectedServer) {
+      if (WIRE_VERSION_KEYS.has(expectedKey)) {
+        if (expectedValue === null) {
+          // For wireVersion keys we default to zero instead of null
+          expect(actualServer).to.have.property(expectedKey, 0);
+        } else {
+          expect(actualServer).to.have.deep.property(expectedKey, expectedValue);
+        }
+      } else {
+        expect(actualServer).to.have.deep.property(expectedKey, expectedValue);
+      }
     }
   }
 

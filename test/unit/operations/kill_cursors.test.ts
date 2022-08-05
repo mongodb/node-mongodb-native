@@ -18,7 +18,7 @@ describe('class KillCursorsOperation', () => {
   describe('constructor()', () => {
     const cursorId = Long.fromBigInt(0xffff_ffffn);
     const namespace = ns('db.collection');
-    const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+    const server = new Server(new Topology([], {} as any), new ServerDescription('a:1'), {} as any);
     const options = {};
     const killCursorsOperation = new KillCursorsOperation(cursorId, namespace, server, options);
 
@@ -38,10 +38,10 @@ describe('class KillCursorsOperation', () => {
   describe('execute()', () => {
     const cursorId = Long.fromBigInt(0xffff_ffffn);
     const namespace = ns('db.collection');
-    const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+    const server = new Server(new Topology([], {} as any), new ServerDescription('a:1'), {} as any);
     const differentServer = new Server(
       new Topology([], {} as any),
-      new ServerDescription(''),
+      new ServerDescription('a:1'),
       {} as any
     );
     const options = {};

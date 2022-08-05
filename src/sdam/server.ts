@@ -29,6 +29,7 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoServerClosedError,
+  MongoServerError,
   MongoUnexpectedServerResponseError,
   needsRetryableWriteLabel
 } from '../error';
@@ -385,7 +386,7 @@ function calculateRoundTripTime(oldRtt: number, duration: number): number {
   return alpha * duration + (1 - alpha) * oldRtt;
 }
 
-function markServerUnknown(server: Server, error?: MongoError) {
+function markServerUnknown(server: Server, error?: MongoServerError) {
   // Load balancer servers can never be marked unknown.
   if (server.loadBalanced) {
     return;
@@ -397,11 +398,7 @@ function markServerUnknown(server: Server, error?: MongoError) {
 
   server.emit(
     Server.DESCRIPTION_RECEIVED,
-    new ServerDescription(server.description.hostAddress, undefined, {
-      error,
-      topologyVersion:
-        error && error.topologyVersion ? error.topologyVersion : server.description.topologyVersion
-    })
+    new ServerDescription(server.description.hostAddress, undefined, { error })
   );
 }
 

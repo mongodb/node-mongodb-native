@@ -1,6 +1,6 @@
 import type { ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { MongoError, MongoRuntimeError } from '../error';
+import { MongoRuntimeError, MongoServerError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
 import { ServerType, TopologyType } from './common';
 import { ServerDescription } from './server_description';
@@ -200,11 +200,6 @@ export class TopologyDescription {
     // potentially mutated values
     let { type: topologyType, setName, maxSetVersion, maxElectionId, commonWireVersion } = this;
 
-    if (serverDescription.setName && setName && serverDescription.setName !== setName) {
-      // TODO(NODE-4159): servers with an incorrect setName should be removed not marked Unknown
-      serverDescription = new ServerDescription(address, undefined);
-    }
-
     const serverType = serverDescription.type;
     const serverDescriptions = new Map(this.servers);
 
@@ -214,6 +209,19 @@ export class TopologyDescription {
         commonWireVersion = serverDescription.maxWireVersion;
       } else {
         commonWireVersion = Math.min(commonWireVersion, serverDescription.maxWireVersion);
+      }
+    }
+
+    if (
+      typeof serverDescription.setName === 'string' &&
+      typeof setName === 'string' &&
+      serverDescription.setName !== setName
+    ) {
+      if (topologyType === TopologyType.Single) {
+        // "Single" Topology with setName mismatch is direct connection usage, mark unknown do not remove
+        serverDescription = new ServerDescription(address);
+      } else {
+        serverDescriptions.delete(address);
       }
     }
 
@@ -311,7 +319,7 @@ export class TopologyDescription {
     );
   }
 
-  get error(): MongoError | undefined {
+  get error(): MongoServerError | null {
     const descriptionsWithError = Array.from(this.servers.values()).filter(
       (sd: ServerDescription) => sd.error
     );
@@ -319,7 +327,8 @@ export class TopologyDescription {
     if (descriptionsWithError.length > 0) {
       return descriptionsWithError[0].error;
     }
-    return;
+
+    return null;
   }
 
   /**

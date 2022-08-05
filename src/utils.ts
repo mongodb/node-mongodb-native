@@ -627,7 +627,7 @@ export function arrayStrictEqual(arr: unknown[], arr2: unknown[]): boolean {
 }
 
 /** @internal */
-export function errorStrictEqual(lhs?: AnyError, rhs?: AnyError): boolean {
+export function errorStrictEqual(lhs?: AnyError | null, rhs?: AnyError | null): boolean {
   if (lhs === rhs) {
     return true;
   }
