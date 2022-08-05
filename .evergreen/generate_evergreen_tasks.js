@@ -5,7 +5,7 @@ const yaml = require('js-yaml');
 const LATEST_EFFECTIVE_VERSION = '6.0';
 const MONGODB_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
 const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
-NODE_VERSIONS.sort()
+NODE_VERSIONS.sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
 
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
@@ -136,7 +136,7 @@ TASKS.push(
             VERSION: '5.0',
             TOPOLOGY: 'sharded_cluster',
             AUTH: 'auth',
-            LOAD_BALANCER: 'true',
+            LOAD_BALANCER: 'true'
           }
         },
         { func: 'start-load-balancer' },
@@ -155,7 +155,7 @@ TASKS.push(
             VERSION: '6.0',
             TOPOLOGY: 'sharded_cluster',
             AUTH: 'auth',
-            LOAD_BALANCER: 'true',
+            LOAD_BALANCER: 'true'
           }
         },
         { func: 'start-load-balancer' },
@@ -522,11 +522,12 @@ const oneOffFuncs = [
       TEST_NPM_SCRIPT: 'check:unit'
     }
   }
-
 ];
 
 const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
-  name: `${oneOffFunc.name ?? oneOffFunc.func.split(' ').join('-')}`,
+  name: `${
+    typeof oneOffFunc.name === 'string' ? oneOffFunc.name : oneOffFunc.func.split(' ').join('-')
+  }`,
   tags: ['run-custom-dependency-tests'],
   commands: [
     {
