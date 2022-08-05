@@ -60,8 +60,8 @@ describe('ServerDescription', function () {
     const processIdOne = new ObjectId('00'.repeat(11) + '01');
     type CompareTopologyVersionTest = {
       title: string;
-      currentTv?: TopologyVersion;
-      newTv?: TopologyVersion;
+      currentTv?: TopologyVersion | null;
+      newTv?: TopologyVersion | null;
       out: 0 | -1 | 1;
     };
 
@@ -103,13 +103,37 @@ describe('ServerDescription', function () {
         currentTv: { processId: processIdZero, counter: 2 },
         newTv: { processId: processIdZero, counter: Long.fromNumber(2) },
         out: 0
+      },
+      {
+        title: 'when process ids are equal and counter values are equal and both are Long',
+        currentTv: { processId: processIdZero, counter: Long.fromNumber(2) },
+        newTv: { processId: processIdZero, counter: Long.fromNumber(2) },
+        out: 0
       }
     ];
     const compareTopologyVersionLessThanTests: CompareTopologyVersionTest[] = [
       {
-        title: 'when both versions are nullish',
+        title: 'when both versions are null',
+        currentTv: null,
+        newTv: null,
+        out: -1
+      },
+      {
+        title: 'when both versions are undefined',
         currentTv: undefined,
         newTv: undefined,
+        out: -1
+      },
+      {
+        title: 'when current is null and new is undefined',
+        currentTv: null,
+        newTv: undefined,
+        out: -1
+      },
+      {
+        title: 'when current is undefined and new is null',
+        currentTv: undefined,
+        newTv: null,
         out: -1
       },
       {
