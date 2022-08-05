@@ -489,3 +489,12 @@ export class UnifiedTestSuiteBuilder {
     return JSON.parse(JSON.stringify(this));
   }
 }
+
+export function isBSONExtInstalled() {
+  try {
+    require.resolve('bson-ext');
+    return true;
+  } catch (_) {
+    return false;
+  }
+}

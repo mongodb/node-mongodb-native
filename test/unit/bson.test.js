@@ -2,15 +2,7 @@
 
 const { expect } = require('chai');
 const BSON = require('../../src/bson');
-
-function isBSONExtInstalled() {
-  try {
-    require.resolve('bson-ext');
-    return true;
-  } catch (_) {
-    return false;
-  }
-}
+const { isBSONExtInstalled } = require('../tools/utils');
 
 describe('When importing BSON', function () {
   const types = [

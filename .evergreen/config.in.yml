@@ -837,15 +837,19 @@ functions:
           - "${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh"
 
   "run bson-ext test":
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
         working_dir: "src"
         timeout_secs: 60
-        script: |
-          ${PREPARE_SHELL}
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          MONGODB_URI: ${MONGODB_URI}
+          TEST_NPM_SCRIPT: ${TEST_NPM_SCRIPT}
+        binary: bash
+        args:
+          - '${PROJECT_DIRECTORY}/.evergreen/run-bson-ext-test.sh'
 
-          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-bson-ext-test.sh
 
   "upload test results":
     # Upload the xunit-format test results.

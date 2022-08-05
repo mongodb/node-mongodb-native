@@ -507,15 +507,26 @@ BUILD_VARIANTS.push({
 const oneOffFuncs = [
   { func: 'run custom snappy tests' },
   {
+    name: 'run-bson-ext-integration',
     func: 'run bson-ext test',
     vars: {
-      NODE_LTS_NAME: LOWEST_LTS
+      NODE_LTS_NAME: LOWEST_LTS,
+      TEST_NPM_SCRIPT: 'check:test'
+    }
+  },
+  {
+    name: 'run-bson-ext-unit',
+    func: 'run bson-ext test',
+    vars: {
+      NODE_LTS_NAME: LOWEST_LTS,
+      TEST_NPM_SCRIPT: 'check:unit'
     }
   }
+
 ];
 
 const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
-  name: `${oneOffFunc.func.split(' ').join('-')}`,
+  name: `${oneOffFunc.name ?? oneOffFunc.func.split(' ').join('-')}`,
   tags: ['run-custom-dependency-tests'],
   commands: [
     {
