@@ -9,121 +9,74 @@ import {
   MongoCursorExhaustedError,
   MongoServerError
 } from '../../../src';
-import { assert as test, setupDatabase } from '../shared';
+import { getSymbolFrom } from '../../tools/utils';
 
 describe('MaxTimeMS', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
+  let client: MongoClient;
+  let commandStartedEvents: CommandStartedEvent[];
+
+  beforeEach(async function () {
+    client = this.configuration.newClient({ monitorCommands: true });
+    commandStartedEvents = [];
+    client.on('commandStarted', ev => commandStartedEvents.push(ev));
   });
 
-  it('should correctly respect the maxTimeMS property on count', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-    client.connect(function () {
-      const db = client.db(configuration.db);
-      const col = db.collection('max_time_ms');
-
-      // Insert a couple of docs
-      const docs_1 = [{ agg_pipe: 1 }];
-
-      // Simple insert
-      col.insertMany(docs_1, { writeConcern: { w: 1 } }, function (err) {
-        expect(err).to.not.exist;
-
-        // Execute a find command
-        col
-          .find({ $where: 'sleep(100) || true' })
-          .maxTimeMS(50)
-          .count(function (err) {
-            test.ok(err != null);
-            client.close(done);
-          });
-      });
-    });
+  afterEach(async function () {
+    commandStartedEvents = [];
+    await client.close();
   });
 
-  it('should correctly respect the maxTimeMS property on toArray', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset']
-      }
-    },
+  it('should correctly respect the maxTimeMS property on count', async function () {
+    const col = client.db().collection('max_time_ms');
+    await col.insertMany([{ agg_pipe: 1 }], { writeConcern: { w: 1 } });
+    const cursor = col.find({ $where: 'sleep(100) || true' }).maxTimeMS(50);
+    const kBuiltOptions = getSymbolFrom(cursor, 'builtOptions');
+    expect(cursor[kBuiltOptions]).to.have.property('maxTimeMS', 50);
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function () {
-        const db = client.db(configuration.db);
-        const col = db.collection('max_time_ms_2');
+    const error = await cursor.count().catch(error => error);
+    expect(error).to.be.instanceOf(MongoServerError);
 
-        // Insert a couple of docs
-        const docs_1 = [{ agg_pipe: 1 }];
-
-        // Simple insert
-        col.insertMany(docs_1, { writeConcern: { w: 1 } }, function (err) {
-          expect(err).to.not.exist;
-
-          // Execute a find command
-          col
-            .find({ $where: 'sleep(100) || true' })
-            .maxTimeMS(50)
-            .toArray(function (err) {
-              test.ok(err != null);
-              client.close(done);
-            });
-        });
-      });
-    }
+    const countCommandEvent = commandStartedEvents.find(ev => ev.commandName === 'count');
+    expect(countCommandEvent).to.have.nested.property('command.maxTimeMS', 50);
   });
 
-  it('should correctly fail with maxTimeMS error', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset']
-      }
-    },
+  it('should correctly respect the maxTimeMS property on toArray', async function () {
+    const col = client.db().collection('max_time_ms');
+    await col.insertMany([{ agg_pipe: 1 }], { writeConcern: { w: 1 } });
+    const cursor = col.find({ $where: 'sleep(100) || true' }).maxTimeMS(50);
+    const kBuiltOptions = getSymbolFrom(cursor, 'builtOptions');
+    expect(cursor[kBuiltOptions]).to.have.property('maxTimeMS', 50);
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function () {
-        const db = client.db(configuration.db);
-        const col = db.collection('max_time_ms_5');
+    const error = await cursor.toArray().catch(error => error);
+    expect(error).to.be.instanceOf(MongoServerError);
 
-        // Insert a couple of docs
-        const docs_1 = [{ agg_pipe: 10 }];
+    const findCommandEvent = commandStartedEvents.find(ev => ev.commandName === 'find');
+    expect(findCommandEvent).to.have.nested.property('command.maxTimeMS', 50);
+  });
 
-        // Simple insert
-        col.insertMany(docs_1, { writeConcern: { w: 1 } }, function (err) {
-          expect(err).to.not.exist;
+  it('should correctly fail with maxTimeMS error', async function () {
+    const admin = client.db().admin();
+    const col = client.db().collection('max_time_ms_5');
 
-          db.admin().command(
-            { configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'alwaysOn' },
-            function (err, result) {
-              expect(err).to.not.exist;
-              test.equal(1, result?.ok);
+    await col.insertMany([{ agg_pipe: 10 }], { writeConcern: { w: 1 } });
 
-              col
-                .find({})
-                .maxTimeMS(10)
-                .toArray(function (err) {
-                  test.ok(err != null);
-
-                  db.admin().command(
-                    { configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'off' },
-                    function (err, result) {
-                      expect(err).to.not.exist;
-                      test.equal(1, result?.ok);
-                      client.close(done);
-                    }
-                  );
-                });
-            }
-          );
-        });
+    try {
+      const res = await admin.command({
+        configureFailPoint: 'maxTimeAlwaysTimeOut',
+        mode: 'alwaysOn'
       });
+      expect(res).to.have.property('ok', 1);
+
+      const error = await col
+        .find({})
+        .maxTimeMS(10)
+        .toArray()
+        .catch(error => error);
+
+      expect(error).to.be.instanceOf(MongoServerError);
+    } finally {
+      const res = await admin.command({ configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'off' });
+      expect(res).to.have.property('ok', 1);
     }
   });
 
