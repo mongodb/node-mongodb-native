@@ -493,37 +493,21 @@ function assertTopologyDescriptionOutcomeExpectations(
     }
   }
 
-  if (outcome.setName != null) {
-    expect(description).to.have.property('setName', outcome.setName);
-  } else {
-    expect(description).to.not.have.property('setName');
-  }
-
-  if (outcome.maxSetVersion != null) {
-    expect(description).to.have.property('maxSetVersion', outcome.maxSetVersion);
-  } else {
-    expect(description).to.not.have.property('maxSetVersion');
-  }
-
   if (outcome.maxElectionId != null) {
     expect(description).to.have.property('maxElectionId').that.is.instanceOf(ObjectId);
-    const driverMaxId = description.maxElectionId.toString('hex');
+    const driverMaxId = description.maxElectionId?.toString('hex');
     const testMaxId = outcome.maxElectionId.toString('hex');
     // Much easier to debug a hex string mismatch
     expect(driverMaxId).to.equal(testMaxId);
   } else {
-    expect(description).to.not.have.property('maxElectionId');
+    expect(description).to.have.property('maxElectionId', null);
   }
 
-  if (outcome.compatible != null) {
-    expect(description).to.have.property('compatible', outcome.compatible);
-  } else {
-    expect(description).to.have.property('compatible', true);
-  }
-
-  // logicalSessionTimeoutMinutes is always defined
+  expect(description).to.have.property('setName', outcome.setName ?? null);
+  expect(description).to.have.property('maxSetVersion', outcome.maxSetVersion ?? null);
+  expect(description).to.have.property('compatible', outcome.compatible ?? true);
   expect(description).to.have.property(
     'logicalSessionTimeoutMinutes',
-    outcome.logicalSessionTimeoutMinutes ?? undefined
+    outcome.logicalSessionTimeoutMinutes ?? null
   );
 }
