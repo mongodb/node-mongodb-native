@@ -787,9 +787,9 @@ functions:
             . ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
 
           echo "setting CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
-          export CRYPT_SHARED_LIB_PATH='${CRYPT_SHARED_LIB_PATH}'
 
-          MONGODB_URI="${MONGODB_URI}" bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+          MONGODB_URI="${MONGODB_URI}" CRYPT_SHARED_LIB_PATH="${CRYPT_SHARED_LIB_PATH}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
   run custom snappy tests:
     - command: subprocess.exec
       params:

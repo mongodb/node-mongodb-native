@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-
+set -euxo pipefail
 set +o xtrace # Do not write AWS credentials to stderr
 
 # Initiail checks for running these tests
@@ -10,6 +10,11 @@ if [ -z ${CSFLE_KMS_PROVIDERS+omitted} ]; then echo "CSFLE_KMS_PROVIDERS is unse
 export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 export CSFLE_KMS_PROVIDERS=${CSFLE_KMS_PROVIDERS}
+echo "csfle CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
+
+if [ -n "$CRYPT_SHARED_LIB_PATH" ]; then
+  export CRYPT_SHARED_LIB_PATH=${CRYPT_SHARED_LIB_PATH}
+fi
 
 [ -s "$PROJECT_DIRECTORY/node-artifacts/nvm/nvm.sh" ] && source "$PROJECT_DIRECTORY"/node-artifacts/nvm/nvm.sh
 
@@ -65,11 +70,6 @@ export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
 export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
 export TEST_CSFLE=true
-echo "csfle CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
-
-if [ -n "$CRYPT_SHARED_LIB_PATH" ]; then
-  export CRYPT_SHARED_LIB_PATH=${CRYPT_SHARED_LIB_PATH}
-fi
 
 set +o errexit # We want to run both test suites even if the first fails
 npm run check:csfle
