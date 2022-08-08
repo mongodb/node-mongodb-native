@@ -53,21 +53,19 @@ export class ServerDescription {
   passives: string[];
   arbiters: string[];
   tags: TagSet;
-
   error: MongoServerError | null;
-  topologyVersion?: TopologyVersion;
+  topologyVersion: TopologyVersion | null;
   minWireVersion: number;
   maxWireVersion: number;
   roundTripTime: number;
   lastUpdateTime: number;
   lastWriteDate: number;
-
-  me?: string;
-  primary?: string;
-  setName?: string;
-  setVersion?: number;
-  electionId?: ObjectId;
-  logicalSessionTimeoutMinutes?: number;
+  me: string | null;
+  primary: string | null;
+  setName: string | null;
+  setVersion: number | null;
+  electionId: ObjectId | null;
+  logicalSessionTimeoutMinutes: number | null;
 
   // NOTE: does this belong here? It seems we should gossip the cluster time at the CMAP level
   $clusterTime?: ClusterTime;
@@ -238,8 +236,8 @@ function tagsStrictEqual(tags: TagSet, tags2: TagSet): boolean {
  * ```
  */
 export function compareTopologyVersion(
-  currentTv?: TopologyVersion,
-  newTv?: TopologyVersion
+  currentTv?: TopologyVersion | null,
+  newTv?: TopologyVersion | null
 ): 0 | -1 | 1 {
   if (currentTv == null || newTv == null) {
     return -1;

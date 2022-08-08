@@ -1153,9 +1153,9 @@ export class HostAddress {
     const escapedHost = hostString.split(' ').join('%20'); // escape spaces, for socket path hosts
     const { hostname, port } = new URL(`mongodb://${escapedHost}`);
 
-    if (hostname.endsWith('.sock')) {
+    if (escapedHost.endsWith('.sock')) {
       // heuristically determine if we're working with a domain socket
-      this.socketPath = decodeURIComponent(hostname);
+      this.socketPath = decodeURIComponent(escapedHost);
     } else if (typeof hostname === 'string') {
       this.isIPv6 = false;
 
