@@ -1,7 +1,7 @@
-import type { Document, ObjectId } from '../bson';
+import type { ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { MongoError, MongoRuntimeError } from '../error';
-import { shuffle } from '../utils';
+import { compareObjectId, shuffle } from '../utils';
 import { ServerType, TopologyType } from './common';
 import { ServerDescription } from './server_description';
 import type { SrvPollingEvent } from './srv_polling';
@@ -361,27 +361,6 @@ function topologyTypeForServerType(serverType: ServerType): TopologyType {
     default:
       return TopologyType.Unknown;
   }
-}
-
-// TODO: improve these docs when ObjectId is properly typed
-function compareObjectId(oid1: Document, oid2: Document): number {
-  if (oid1 == null) {
-    return -1;
-  }
-
-  if (oid2 == null) {
-    return 1;
-  }
-
-  if (oid1.id instanceof Buffer && oid2.id instanceof Buffer) {
-    const oid1Buffer = oid1.id;
-    const oid2Buffer = oid2.id;
-    return oid1Buffer.compare(oid2Buffer);
-  }
-
-  const oid1String = oid1.toString();
-  const oid2String = oid2.toString();
-  return oid1String.localeCompare(oid2String);
 }
 
 function updateRsFromPrimary(

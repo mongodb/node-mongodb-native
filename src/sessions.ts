@@ -1002,6 +1002,7 @@ export function applySession(
   if (isRetryableWrite || inTxnOrTxnCommand) {
     serverSession.txnNumber += session[kTxnNumberIncrement];
     session[kTxnNumberIncrement] = 0;
+    // TODO(NODE-2674): Preserve int64 sent from MongoDB
     command.txnNumber = Long.fromNumber(serverSession.txnNumber);
   }
 
