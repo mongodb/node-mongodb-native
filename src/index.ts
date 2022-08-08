@@ -321,7 +321,6 @@ export type {
   KeysOfOtherType,
   MatchKeysAndValues,
   NestedPaths,
-  NestedPathsOfType,
   NonObjectIdLikeDocument,
   NotAcceptedFields,
   NumericType,
