@@ -32,29 +32,29 @@ export interface TopologyDescriptionOptions {
  */
 export class TopologyDescription {
   type: TopologyType;
-  setName?: string;
-  maxSetVersion?: number;
-  maxElectionId?: ObjectId;
+  setName: string | null;
+  maxSetVersion: number | null;
+  maxElectionId: ObjectId | null;
   servers: Map<string, ServerDescription>;
   stale: boolean;
   compatible: boolean;
   compatibilityError?: string;
-  logicalSessionTimeoutMinutes?: number;
+  logicalSessionTimeoutMinutes: number | null;
   heartbeatFrequencyMS: number;
   localThresholdMS: number;
-  commonWireVersion?: number;
+  commonWireVersion: number;
 
   /**
    * Create a TopologyDescription
    */
   constructor(
     topologyType: TopologyType,
-    serverDescriptions?: Map<string, ServerDescription>,
-    setName?: string,
-    maxSetVersion?: number,
-    maxElectionId?: ObjectId,
-    commonWireVersion?: number,
-    options?: TopologyDescriptionOptions
+    serverDescriptions: Map<string, ServerDescription> | null = null,
+    setName: string | null = null,
+    maxSetVersion: number | null = null,
+    maxElectionId: ObjectId | null = null,
+    commonWireVersion: number | null = null,
+    options: TopologyDescriptionOptions | null = null
   ) {
     options = options ?? {};
 
@@ -64,22 +64,10 @@ export class TopologyDescription {
     this.compatible = true;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 0;
     this.localThresholdMS = options.localThresholdMS ?? 15;
-
-    if (setName) {
-      this.setName = setName;
-    }
-
-    if (maxSetVersion) {
-      this.maxSetVersion = maxSetVersion;
-    }
-
-    if (maxElectionId) {
-      this.maxElectionId = maxElectionId;
-    }
-
-    if (commonWireVersion) {
-      this.commonWireVersion = commonWireVersion;
-    }
+    this.setName = setName ?? null;
+    this.maxElectionId = maxElectionId ?? null;
+    this.maxSetVersion = maxSetVersion ?? null;
+    this.commonWireVersion = commonWireVersion ?? 0;
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
@@ -108,12 +96,12 @@ export class TopologyDescription {
     // value among ServerDescriptions of all data-bearing server types. If any have a null
     // logicalSessionTimeoutMinutes, then TopologyDescription.logicalSessionTimeoutMinutes MUST be
     // set to null.
-    this.logicalSessionTimeoutMinutes = undefined;
+    this.logicalSessionTimeoutMinutes = null;
     for (const [, server] of this.servers) {
       if (server.isReadable) {
         if (server.logicalSessionTimeoutMinutes == null) {
           // If any of the servers have a null logicalSessionsTimeout, then the whole topology does
-          this.logicalSessionTimeoutMinutes = undefined;
+          this.logicalSessionTimeoutMinutes = null;
           break;
         }
 
@@ -375,10 +363,10 @@ function topologyTypeForServerType(serverType: ServerType): TopologyType {
 function updateRsFromPrimary(
   serverDescriptions: Map<string, ServerDescription>,
   serverDescription: ServerDescription,
-  setName?: string,
-  maxSetVersion?: number,
-  maxElectionId?: ObjectId
-): [TopologyType, string?, number?, ObjectId?] {
+  setName: string | null = null,
+  maxSetVersion: number | null = null,
+  maxElectionId: ObjectId | null = null
+): [TopologyType, string | null, number | null, ObjectId | null] {
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
     serverDescriptions.delete(serverDescription.address);
@@ -445,7 +433,7 @@ function updateRsFromPrimary(
 function updateRsWithPrimaryFromMember(
   serverDescriptions: Map<string, ServerDescription>,
   serverDescription: ServerDescription,
-  setName?: string
+  setName: string | null = null
 ): TopologyType {
   if (setName == null) {
     // TODO(NODE-3483): should be an appropriate runtime error
@@ -465,10 +453,10 @@ function updateRsWithPrimaryFromMember(
 function updateRsNoPrimaryFromMember(
   serverDescriptions: Map<string, ServerDescription>,
   serverDescription: ServerDescription,
-  setName?: string
-): [TopologyType, string?] {
+  setName: string | null = null
+): [TopologyType, string | null] {
   const topologyType = TopologyType.ReplicaSetNoPrimary;
-  setName = setName || serverDescription.setName;
+  setName = setName ?? serverDescription.setName;
   if (setName !== serverDescription.setName) {
     serverDescriptions.delete(serverDescription.address);
     return [topologyType, setName];
