@@ -264,14 +264,6 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
 export type MatchKeysAndValues<TSchema> = Readonly<
   {
     [Property in Join<NestedPaths<TSchema>, '.'>]?: PropertyType<TSchema, Property>;
-  } & {
-    [Property in `${NestedPathsOfType<TSchema, any[]>}.$${`[${string}]` | ''}`]?: ArrayElement<
-      PropertyType<TSchema, Property extends `${infer Key}.$${string}` ? Key : never>
-    >;
-  } & {
-    [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
-      | `[${string}]`
-      | ''}.${string}`]?: any; // Could be further narrowed
   }
 >;
 
@@ -474,75 +466,67 @@ export type Join<T extends unknown[], D extends string> = T extends []
   : string;
 
 /** @public */
-export type PropertyType<Type, Property extends string> = string extends Property
-  ? unknown
-  : Property extends keyof Type
-  ? Type[Property]
-  : Property extends `${number}`
-  ? Type extends ReadonlyArray<infer ArrayType>
-    ? ArrayType
-    : unknown
-  : Property extends `${infer Key}.${infer Rest}`
-  ? Key extends `${number}`
+export type PropertyType<Type, Property extends string> = Type extends unknown
+  ? string extends Property
+    ? never
+    : Property extends keyof Type
+    ? Type[Property]
+    : Property extends `${number | `$${'' | `[${string}]`}`}`
     ? Type extends ReadonlyArray<infer ArrayType>
-      ? PropertyType<ArrayType, Rest>
-      : unknown
-    : Key extends keyof Type
-    ? Type[Key] extends Map<string, infer MapType>
-      ? MapType
-      : PropertyType<Type[Key], Rest>
-    : unknown
-  : unknown;
+      ? ArrayType
+      : never
+    : Property extends `${infer Key}.${infer Rest}`
+    ? Key extends `${number | `$${'' | `[${string}]`}`}`
+      ? Type extends ReadonlyArray<infer ArrayType>
+        ? PropertyType<ArrayType, Rest>
+        : never
+      : Key extends keyof Type
+      ? Type[Key] extends Map<string, infer MapType>
+        ? MapType
+        : PropertyType<Type[Key], Rest>
+      : never
+    : never
+  : never;
 
 /**
  * @public
  * returns tuple of strings (keys to be joined on '.') that represent every path into a schema
  * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
  */
-export type NestedPaths<Type> = Type extends
-  | string
-  | number
-  | boolean
-  | Date
-  | RegExp
-  | Buffer
-  | Uint8Array
-  | ((...args: any[]) => any)
-  | { _bsontype: string }
-  ? []
-  : Type extends ReadonlyArray<infer ArrayType>
-  ? [] | [number, ...NestedPaths<ArrayType>]
-  : Type extends Map<string, any>
-  ? [string]
-  : Type extends object
-  ? {
-      [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
-        ? [Key]
-        : // for a recursive union type, the child will never extend the parent type.
-        // but the parent will still extend the child
-        Type extends Type[Key]
-        ? [Key]
-        : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
-        ? Type extends ArrayType // is the type of the parent the same as the type of the array?
-          ? [Key] // yes, it's a recursive array type
-          : // for unions, the child type extends the parent
-          ArrayType extends Type
-          ? [Key] // we have a recursive array union
-          : // child is an array, but it's not a recursive array
-            [Key, ...NestedPaths<Type[Key]>]
-        : // child is not structured the same as the parent
-          [Key, ...NestedPaths<Type[Key]>] | [Key];
-    }[Extract<keyof Type, string>]
-  : [];
-
-/**
- * @public
- * returns keys (strings) for every path into a schema with a value of type
- * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
- */
-export type NestedPathsOfType<TSchema, Type> = KeysOfAType<
-  {
-    [Property in Join<NestedPaths<TSchema>, '.'>]: PropertyType<TSchema, Property>;
-  },
-  Type
->;
+export type NestedPaths<Type> = Type extends unknown
+  ? Type extends
+    | string
+    | number
+    | boolean
+    | Date
+    | RegExp
+    | Buffer
+    | Uint8Array
+    | ((...args: any[]) => any)
+    | { _bsontype: string }
+    ? []
+    : Type extends ReadonlyArray<infer ArrayType>
+    ? [] | [number | `$${'' | `[${string}]`}`, ...NestedPaths<ArrayType>, ...NestedPaths<ArrayType>]
+    : Type extends Map<string, any>
+    ? [string]
+    : Type extends object
+    ? {
+        [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
+          ? [Key]
+          : // for a recursive union type, the child will never extend the parent type.
+          // but the parent will still extend the child
+          Type extends Type[Key]
+          ? [Key]
+          : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
+          ? Type extends ArrayType // is the type of the parent the same as the type of the array?
+            ? [Key] // yes, it's a recursive array type
+            : // for unions, the child type extends the parent
+            ArrayType extends Type
+            ? [Key] // we have a recursive array union
+            : // child is an array, but it's not a recursive array
+              [Key, ...NestedPaths<Type[Key]>]
+          : // child is not structured the same as the parent
+            [Key, ...NestedPaths<Type[Key]>] | [Key];
+      }[Extract<keyof Type, string>]
+    : []
+  : never;
