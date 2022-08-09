@@ -2047,7 +2047,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context.only('16. Rewrap', function () {
+  context('16. Rewrap', function () {
     const masterKeys = {
       aws: {
         region: 'us-east-1',
