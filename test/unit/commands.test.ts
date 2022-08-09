@@ -43,8 +43,10 @@ const msgBodyNKeyWithInvalidUtf8 = Buffer.from(nKeyWithInvalidUtf8, 'hex');
 
 describe('BinMsg BSON utf8 validation', () => {
   describe('when bson-ext is installed', () => {
-    before(function () {
+    beforeEach(function () {
       if (!isBSONExtImported()) {
+        if (this.currentTest)
+          this.currentTest.skipReason = 'tests require driver to be using bson-ext';
         this.skip();
       }
     });
@@ -159,8 +161,9 @@ describe('BinMsg BSON utf8 validation', () => {
   });
 
   describe('when js-bson is installed', () => {
-    before(function () {
+    beforeEach(function () {
       if (isBSONExtImported()) {
+        if (this.currentTest) this.currentTest.skipReason = 'tests require driver to be using bson';
         this.skip();
       }
     });
