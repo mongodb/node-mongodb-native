@@ -456,7 +456,6 @@ function assertTopologyDescriptionOutcomeExpectations(
   const actualServers = description.servers;
   expect(actualServers).to.be.instanceOf(Map);
 
-  // TODO(NODE-4159): The node driver keeps unknown servers where it should discard
   expect(actualServers).to.have.lengthOf(expectedServers.size);
 
   for (const serverName of expectedServers.keys()) {
@@ -474,19 +473,14 @@ function assertTopologyDescriptionOutcomeExpectations(
     }
 
     const normalizedExpectedServer = normalizeServerDescription(expectedServer);
-    // const omittedFields = findOmittedFields(normalizedExpectedServer);
     const actualServer = actualServers.get(serverName);
-    // expect(actualServer).to.matchMongoSpec(normalizedExpectedServer);
+
     const entriesOnExpectedServer = Object.entries(normalizedExpectedServer);
     expect(entriesOnExpectedServer).to.not.be.empty;
     for (const [expectedKey, expectedValue] of entriesOnExpectedServer) {
-      if (WIRE_VERSION_KEYS.has(expectedKey)) {
-        if (expectedValue === null) {
-          // For wireVersion keys we default to zero instead of null
-          expect(actualServer).to.have.property(expectedKey, 0);
-        } else {
-          expect(actualServer).to.have.deep.property(expectedKey, expectedValue);
-        }
+      if (WIRE_VERSION_KEYS.has(expectedKey) && expectedValue === null) {
+        // For wireVersion keys we default to zero instead of null
+        expect(actualServer).to.have.property(expectedKey, 0);
       } else {
         expect(actualServer).to.have.deep.property(expectedKey, expectedValue);
       }

@@ -607,7 +607,7 @@ describe('driver utils', function () {
         expect(ha).to.not.have.property('port');
       });
 
-      it('should handle encoded unix socket path with an non-encoded space', () => {
+      it('should handle encoded unix socket path with an unencoded space', () => {
         const socketPathWithSpaces = '/tmp/some directory/mongodb-27017.sock';
         const ha = new HostAddress(socketPathWithSpaces);
         expect(ha).to.have.property('socketPath', socketPathWithSpaces);
@@ -621,16 +621,17 @@ describe('driver utils', function () {
         expect(ha).to.not.have.property('port');
       });
 
-      it('should determine unix socket usage based on .sock ending', () => {
+      it('should only set the socketPath property on HostAddress when hostString ends in .sock', () => {
         // We heuristically determine if we are using a domain socket solely based on .sock
         // if someone has .sock in their hostname we will fail to connect to that host
         const hostnameThatEndsWithSock = 'iLoveJavascript.sock';
         const ha = new HostAddress(hostnameThatEndsWithSock);
         expect(ha).to.have.property('socketPath', hostnameThatEndsWithSock);
         expect(ha).to.not.have.property('port');
+        expect(ha).to.not.have.property('host');
       });
 
-      it('should allow port number to work around hostname ending in .sock limitation', () => {
+      it('should set the host and port property on HostAddress even when hostname ends in .sock if there is a port number specified', () => {
         // "should determine unix socket usage based on .sock ending" can be worked around by putting
         // the port number at the end of the hostname (even if it is the default)
         const hostnameThatEndsWithSockHasPort = 'iLoveJavascript.sock:27017';
