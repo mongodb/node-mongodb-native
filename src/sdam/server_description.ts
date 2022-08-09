@@ -1,5 +1,5 @@
 import { Document, Long, ObjectId } from '../bson';
-import type { MongoServerError } from '../error';
+import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
 import type { ClusterTime } from './common';
 import { ServerType } from './common';
@@ -82,6 +82,12 @@ export class ServerDescription {
     hello?: Document,
     options: ServerDescriptionOptions = {}
   ) {
+    if (address == null || address === '') {
+      throw new MongoInvalidArgumentError(
+        'ServerDescription must be provided with a non-empty address'
+      );
+    }
+
     this.address =
       typeof address === 'string'
         ? HostAddress.fromString(address).toString(false) // Use HostAddress to normalize
