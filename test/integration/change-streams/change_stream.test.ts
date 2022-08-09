@@ -1432,6 +1432,7 @@ describe('Change Streams', function () {
         })
         .expectEvents({
           client: 'client0',
+          ignoreExtraEvents: true, // Sharded clusters have extra getMores
           events: [
             { commandStartedEvent: { commandName: 'aggregate', command: { maxTimeMS: 5000 } } },
             { commandStartedEvent: { commandName: 'insert' } },
