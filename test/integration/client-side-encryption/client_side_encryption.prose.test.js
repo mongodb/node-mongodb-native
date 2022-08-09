@@ -2047,7 +2047,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  context('16. Rewrap', function () {
+  context.only('16. Rewrap', function () {
     const masterKeys = {
       aws: {
         region: 'us-east-1',
@@ -2130,7 +2130,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
           // Step 5. Create a ``ClientEncryption`` object named ``clientEncryption2``
           const clientEncryption2 = new this.configuration.mongodbClientEncryption.ClientEncryption(
-            client1,
+            client2,
             {
               keyVaultNamespace: 'keyvault.datakeys',
               kmsProviders: getKmsProviders(),
@@ -2160,7 +2160,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect(decryptResult1).to.equal('test');
 
           // 8. Call ``clientEncryption2.decrypt`` with the ``ciphertext``. Assert the return value is "test".
-          const decryptResult2 = await clientEncryption1.decrypt(cipherText);
+          const decryptResult2 = await clientEncryption2.decrypt(cipherText);
           expect(decryptResult2).to.equal('test');
         }
       );
