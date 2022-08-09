@@ -1674,7 +1674,8 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: server
           AUTH: auth
-      - func: run custom snappy tests
+      - name: run-custom-snappy-tests
+        func: run custom snappy tests
   - name: run-bson-ext-integration
     tags:
       - run-custom-dependency-tests

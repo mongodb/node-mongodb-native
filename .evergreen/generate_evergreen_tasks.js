@@ -505,7 +505,10 @@ BUILD_VARIANTS.push({
 });
 
 const oneOffFuncs = [
-  { func: 'run custom snappy tests' },
+  {
+    name: 'run-custom-snappy-tests',
+    func: 'run custom snappy tests'
+  },
   {
     name: 'run-bson-ext-integration',
     func: 'run bson-ext test',
@@ -525,9 +528,7 @@ const oneOffFuncs = [
 ];
 
 const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
-  name: `${
-    typeof oneOffFunc.name === 'string' ? oneOffFunc.name : oneOffFunc.func.split(' ').join('-')
-  }`,
+  name: oneOffFunc.name,
   tags: ['run-custom-dependency-tests'],
   commands: [
     {
