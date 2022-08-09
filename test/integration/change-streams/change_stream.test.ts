@@ -1383,7 +1383,9 @@ describe('Change Streams', function () {
       { collection: { id: 'collection0', database: 'db0', collectionName: 'watchOpts' } }
     ])
     .test(
-      TestBuilder.it('should use maxAwaitTimeMS to send maxTimeMS on getMore commands')
+      TestBuilder.it(
+        'should use maxAwaitTimeMS option to set maxTimeMS on getMore and should not set maxTimeMS on aggregate'
+      )
         .operation({
           object: 'collection0',
           name: 'createChangeStream',
@@ -1404,7 +1406,12 @@ describe('Change Streams', function () {
         .expectEvents({
           client: 'client0',
           events: [
-            { commandStartedEvent: { commandName: 'aggregate' } },
+            {
+              commandStartedEvent: {
+                commandName: 'aggregate',
+                command: { maxTimeMS: { $$exists: false } }
+              }
+            },
             { commandStartedEvent: { commandName: 'insert' } },
             { commandStartedEvent: { commandName: 'getMore', command: { maxTimeMS: 5000 } } }
           ]
@@ -1412,7 +1419,9 @@ describe('Change Streams', function () {
         .toJSON()
     )
     .test(
-      TestBuilder.it('should send maxTimeMS on aggregate command')
+      TestBuilder.it(
+        'should use maxTimeMS option to set maxTimeMS on aggregate and not set maxTimeMS on getMore'
+      )
         .operation({
           object: 'collection0',
           name: 'createChangeStream',
@@ -1442,6 +1451,38 @@ describe('Change Streams', function () {
                 command: { maxTimeMS: { $$exists: false } }
               }
             }
+          ]
+        })
+        .toJSON()
+    )
+    .test(
+      TestBuilder.it(
+        'should use maxTimeMS option to set maxTimeMS on aggregate and maxAwaitTimeMS option to set maxTimeMS on getMore'
+      )
+        .operation({
+          object: 'collection0',
+          name: 'createChangeStream',
+          saveResultAsEntity: 'changeStreamOnClient',
+          arguments: { maxTimeMS: 5000, maxAwaitTimeMS: 6000 }
+        })
+        .operation({
+          name: 'insertOne',
+          object: 'collection0',
+          arguments: { document: { a: 1 } },
+          ignoreResultAndError: true
+        })
+        .operation({
+          object: 'changeStreamOnClient',
+          name: 'iterateUntilDocumentOrError',
+          ignoreResultAndError: true
+        })
+        .expectEvents({
+          client: 'client0',
+          ignoreExtraEvents: true, // Sharded clusters have extra getMores
+          events: [
+            { commandStartedEvent: { commandName: 'aggregate', command: { maxTimeMS: 5000 } } },
+            { commandStartedEvent: { commandName: 'insert' } },
+            { commandStartedEvent: { commandName: 'getMore', command: { maxTimeMS: 6000 } } }
           ]
         })
         .toJSON()
