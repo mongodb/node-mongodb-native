@@ -28,7 +28,7 @@
     "bson": "^4.6.5",
     "denque": "^2.0.1",
     "mongodb-connection-string-url": "^2.5.2",
-    "socks": "^2.6.2"
+    "socks": "^2.7.0"
   },
   "devDependencies": {
     "@iarna/toml": "^2.2.5",
