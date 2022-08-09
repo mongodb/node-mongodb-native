@@ -2081,9 +2081,9 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       }
     }
 
-    beforeEach(async function () {
-      client1 = await this.configuration.newClient().connect();
-      client2 = await this.configuration.newClient().connect();
+    beforeEach(function () {
+      client1 = this.configuration.newClient();
+      client2 = this.configuration.newClient();
     });
 
     afterEach(async function () {
