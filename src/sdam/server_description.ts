@@ -1,5 +1,5 @@
 import { Document, Long, ObjectId } from '../bson';
-import { MongoInvalidArgumentError, MongoServerError } from '../error';
+import { MongoInvalidArgumentError, MongoRuntimeError, MongoServerError } from '../error';
 import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
 import type { ClusterTime } from './common';
 import { ServerType } from './common';
@@ -83,9 +83,7 @@ export class ServerDescription {
     options: ServerDescriptionOptions = {}
   ) {
     if (address == null || address === '') {
-      throw new MongoInvalidArgumentError(
-        'ServerDescription must be provided with a non-empty address'
-      );
+      throw new MongoRuntimeError('ServerDescription must be provided with a non-empty address');
     }
 
     this.address =
