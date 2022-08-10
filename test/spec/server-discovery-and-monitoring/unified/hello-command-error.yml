@@ -1,0 +1,233 @@
+---
+description: hello-command-error
+
+schemaVersion: "1.10"
+
+runOnRequirements:
+    # failCommand appName requirements
+  - minServerVersion: "4.9"
+    serverless: forbid
+    topologies: [ single, replicaset, sharded ]
+
+createEntities:
+  - client:
+      id: &setupClient setupClient
+      useMultipleMongoses: false
+
+initialData: &initialData
+  - collectionName: &collectionName hello-command-error
+    databaseName: &databaseName sdam-tests
+    documents: []
+
+tests:
+  - description: Command error on Monitor handshake
+    operations:
+      # Configure the next streaming hello check to fail with a command error.
+      # Use "times: 4" to increase the probability that the Monitor check fails
+      # since the RTT hello may trigger this failpoint one or many times as
+      # well.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *setupClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 4
+            data:
+              failCommands:
+                - hello
+                - isMaster
+              appName: commandErrorHandshakeTest
+              closeConnection: false
+              errorCode: 91
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                observeEvents:
+                  - serverDescriptionChangedEvent
+                  - poolClearedEvent
+                  - commandStartedEvent
+                uriOptions:
+                  retryWrites: false
+                  connectTimeoutMS: 250
+                  heartbeatFrequencyMS: 500
+                  appname: commandErrorHandshakeTest
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      # The command error on the initial handshake should mark the server
+      # Unknown (emitting a ServerDescriptionChangedEvent) and clear the pool.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            serverDescriptionChangedEvent:
+              newDescription:
+                type: Unknown
+          count: 1
+      # Perform an operation to ensure the node is discovered.
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - _id: 1
+            - _id: 2
+      # We cannot assert the server was marked Unknown and pool was cleared an
+      # exact number of times because the RTT hello may or may not have
+      # triggered this failpoint as well.
+
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                insert: hello-command-error
+                documents:
+                  - _id: 1
+                  - _id: 2
+              commandName: insert
+              databaseName: *databaseName
+
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - _id: 1
+          - _id: 2
+
+  - description: Command error on Monitor check
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                  - serverDescriptionChangedEvent
+                  - poolClearedEvent
+                uriOptions:
+                  retryWrites: false
+                  connectTimeoutMS: 1000
+                  heartbeatFrequencyMS: 500
+                  appname: commandErrorCheckTest
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      # Perform an operation to ensure the node is discovered.
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - _id: 1
+            - _id: 2
+      # Configure the next streaming hello check to fail with a command
+      # error.
+      # Use times: 2 so that the RTT hello is blocked as well.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 2
+            data:
+              failCommands:
+                - hello
+                - isMaster
+              appName: commandErrorCheckTest
+              closeConnection: false
+              blockConnection: true
+              blockTimeMS: 750
+              errorCode: 91
+          client: *setupClient
+      # The command error on the next check should mark the server Unknown and
+      # clear the pool.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            serverDescriptionChangedEvent:
+              newDescription:
+                type: Unknown
+          count: 1
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolClearedEvent: {}
+          count: 1
+      # Perform an operation to ensure the node is rediscovered.
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - _id: 3
+            - _id: 4
+      # Assert the server was marked Unknown and pool was cleared exactly once.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            serverDescriptionChangedEvent:
+              newDescription:
+                type: Unknown
+          count: 1
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolClearedEvent: {}
+          count: 1
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                insert: hello-command-error
+                documents:
+                  - _id: 1
+                  - _id: 2
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                insert: hello-command-error
+                documents:
+                  - _id: 3
+                  - _id: 4
+              commandName: insert
+              databaseName: *databaseName
+
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - _id: 1
+          - _id: 2
+          - _id: 3
+          - _id: 4
