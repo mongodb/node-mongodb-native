@@ -379,6 +379,12 @@ export function createClientEncryption(
     tlsOptions
   };
 
+  if (process.env.CRYPT_SHARED_LIB_PATH) {
+    autoEncryptionOptions.extraOptions = {
+      cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
+    };
+  }
+
   const clientEncryption = new ClientEncryptionClass(clientEntity, autoEncryptionOptions);
   return clientEncryption;
 }
