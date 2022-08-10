@@ -423,12 +423,12 @@ functions:
         script: |
           ${PREPARE_SHELL}
           cat <<EOT > prepare_client_encryption.sh
-          export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+          export CLIENT_ENCRYPTION='${CLIENT_ENCRYPTION}'
           export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
-          export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
-          export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
-          export CSFLE_GIT_REF="${CSFLE_GIT_REF}"
-          export CDRIVER_GIT_REF="${CDRIVER_GIT_REF}"
+          export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
+          export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
+          export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
+          export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
           EOT
     - command: shell.exec
       type: test
@@ -810,19 +810,25 @@ functions:
       params:
         working_dir: "src"
         timeout_secs: 60
+        shell: bash
         script: |
           ${PREPARE_SHELL}
 
           # Disable xtrace (just in case it was accidentally set).
           set +x
-          . ./prepare_client_encryption.sh
+          source ./prepare_client_encryption.sh
           rm -f ./prepare_client_encryption.sh
 
-          VERSION=${VERSION} DRIVERS_TOOLS=${DRIVERS_TOOLS} \
-            bash ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+          export VERSION=${VERSION}
+          export DRIVERS_TOOLS=${DRIVERS_TOOLS}
 
-          MONGODB_URI="${MONGODB_URI}" CRYPT_SHARED_LIB_PATH="${CRYPT_SHARED_LIB_PATH}" \
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
+          source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+          export MONGODB_URI="${MONGODB_URI}"
+          export CRYPT_SHARED_LIB_PATH
+
+          echo "setting CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
+
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
 
   "run custom snappy tests":
     - command: subprocess.exec

@@ -84,6 +84,12 @@ function translateClientOptions(options) {
           };
         }
 
+        if (process.env.CRYPT_SHARED_LIB_PATH) {
+          options.autoEncryption.extraOptions = {
+            cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
+          };
+        }
+
         options.autoEncryption.kmsProviders = kmsProviders;
       }
 
