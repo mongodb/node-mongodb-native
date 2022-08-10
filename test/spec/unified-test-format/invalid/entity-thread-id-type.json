@@ -1,0 +1,17 @@
+{
+  "description": "entity-thread-id-type",
+  "schemaVersion": "1.10",
+  "createEntities": [
+    {
+      "thread": {
+        "id": 0
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

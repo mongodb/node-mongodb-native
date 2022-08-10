@@ -13,7 +13,6 @@ createEntities:
       id: &collection0 "collection0"
       database: *database0
       collectionName: &collection0Name "foo"
-      foo: 0
 
 initialData:
   - databaseName: *database0Name

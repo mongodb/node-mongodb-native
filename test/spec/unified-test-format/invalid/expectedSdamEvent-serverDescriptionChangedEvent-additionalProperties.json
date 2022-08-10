@@ -1,0 +1,23 @@
+{
+  "description": "expectedSdamEvent-serverDescriptionChangedEvent-additionalProperties",
+  "schemaVersion": "1.10",
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "eventType": "sdam",
+          "events": [
+            {
+              "serverDescriptionChangedEvent": {
+                "foo": "bar"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

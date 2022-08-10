@@ -1,0 +1,17 @@
+description: "collectionOrDatabaseOptions-timeoutMS-type"
+
+schemaVersion: "1.9"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+  - database:
+      id: &database0 "database0"
+      client: *client0
+      databaseName: "foo"
+      databaseOptions:
+        timeoutMS: 4.5  # Must be an integer, not a float.
+
+tests:
+  - description: "foo"
+    operations: []

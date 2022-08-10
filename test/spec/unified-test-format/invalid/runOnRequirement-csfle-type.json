@@ -1,0 +1,15 @@
+{
+  "description": "runOnRequirement-csfle-type",
+  "schemaVersion": "1.8",
+  "runOnRequirements": [
+    {
+      "csfle": "foo"
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

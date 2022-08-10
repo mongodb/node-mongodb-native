@@ -1,0 +1,29 @@
+{
+  "description": "expectedCommandEvent-commandSucceededEvent-hasServerConnectionId-type",
+  "schemaVersion": "1.6",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandSucceededEvent": {
+                "hasServerConnectionId": "foo"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

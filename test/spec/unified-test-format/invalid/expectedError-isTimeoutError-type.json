@@ -1,0 +1,25 @@
+{
+  "description": "expectedError-isTimeoutError-type",
+  "schemaVersion": "1.9",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [
+        {
+          "name": "foo",
+          "object": "client0",
+          "expectError": {
+            "isTimeoutError": 0
+          }
+        }
+      ]
+    }
+  ]
+}
