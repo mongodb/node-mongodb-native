@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 
 import {
@@ -15,7 +15,7 @@ import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
-import { getSymbolFrom } from '../../tools/utils';
+import { getSymbolFrom, sleep } from '../../tools/utils';
 import { TestConfiguration } from '../runner/config';
 import { EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
@@ -415,6 +415,12 @@ operations.set('upload', async ({ entities, operation }) => {
       resolve((file as GridFSFile)._id as ObjectId);
     });
   });
+});
+
+operations.set('wait', async ({ operation }) => {
+  expect(operation, 'Error in wait operation').to.have.nested.property('arguments.ms');
+  expect(operation.arguments!.ms).to.be.a('number', 'Error in wait operation');
+  await sleep(operation.arguments!.ms);
 });
 
 operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {
