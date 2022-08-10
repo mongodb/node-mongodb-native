@@ -1,5 +1,5 @@
 import { Document, Long, ObjectId } from '../bson';
-import { MongoInvalidArgumentError, MongoRuntimeError, MongoServerError } from '../error';
+import { MongoRuntimeError, MongoServerError } from '../error';
 import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
 import type { ClusterTime } from './common';
 import { ServerType } from './common';
