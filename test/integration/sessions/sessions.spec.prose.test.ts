@@ -25,7 +25,7 @@ describe('ServerSession', () => {
    * Note that it's possible, although rare, for greater than 1 server session to be used because the session is not released until after the connection is checked in.
    * Drivers MUST assert that the number of allocated sessions is strictly less than the number of concurrent operations in every retry of this test. In this instance it would be less than (but NOT equal to) 8.
    */
-  it('13. may reuse one server session for many operations', async () => {
+  it('14. may reuse one server session for many operations', async () => {
     const events: CommandStartedEvent[] = [];
     client.on('commandStarted', ev => events.push(ev));
 
