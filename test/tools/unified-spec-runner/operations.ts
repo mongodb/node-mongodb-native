@@ -16,6 +16,7 @@ import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
 import { getSymbolFrom } from '../../tools/utils';
+import { TestConfiguration } from '../runner/config';
 import { EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { OperationDescription } from './schema';
@@ -25,12 +26,20 @@ interface OperationFunctionParams {
   client: MongoClient;
   operation: OperationDescription;
   entities: EntitiesMap;
+  testConfig: TestConfiguration;
 }
 
 type RunOperationFn = (
   p: OperationFunctionParams
 ) => Promise<Document | boolean | number | null | void>;
 export const operations = new Map<string, RunOperationFn>();
+
+operations.set('createEntities', async ({ entities, operation, testConfig }) => {
+  if (!operation.arguments?.entities) {
+    throw new Error('encountered createEntities operation without entities argument');
+  }
+  await EntitiesMap.createEntities(testConfig, operation.arguments.entities, entities);
+});
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
@@ -408,7 +417,7 @@ operations.set('upload', async ({ entities, operation }) => {
   });
 });
 
-operations.set('withTransaction', async ({ entities, operation, client }) => {
+operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {
   const session = entities.getEntity('session', operation.object);
 
   const options = {
@@ -420,7 +429,7 @@ operations.set('withTransaction', async ({ entities, operation, client }) => {
 
   return session.withTransaction(async () => {
     for (const callbackOperation of operation.arguments!.callback) {
-      await executeOperationAndCheck(callbackOperation, entities, client);
+      await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
     }
   }, options);
 });
@@ -545,7 +554,8 @@ operations.set('getKeyByAltName', async ({ entities, operation }) => {
 export async function executeOperationAndCheck(
   operation: OperationDescription,
   entities: EntitiesMap,
-  client: MongoClient
+  client: MongoClient,
+  testConfig: TestConfiguration
 ): Promise<void> {
   const opFunc = operations.get(operation.name);
   expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
@@ -558,7 +568,7 @@ export async function executeOperationAndCheck(
   let result;
 
   try {
-    result = await opFunc!({ entities, operation, client });
+    result = await opFunc!({ entities, operation, client, testConfig });
   } catch (error) {
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);

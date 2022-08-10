@@ -351,9 +351,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
 
   static async createEntities(
     config: TestConfiguration,
-    entities?: EntityDescription[]
+    entities?: EntityDescription[],
+    entityMap?: EntitiesMap
   ): Promise<EntitiesMap> {
-    const map = new EntitiesMap();
+    const map = entityMap ?? new EntitiesMap();
     for (const entity of entities ?? []) {
       if ('client' in entity) {
         const useMultipleMongoses =

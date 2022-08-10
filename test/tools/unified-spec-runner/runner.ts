@@ -190,7 +190,7 @@ async function runUnifiedTest(
     for (const operation of test.operations) {
       trace(operation.name);
       try {
-        await executeOperationAndCheck(operation, entities, utilClient);
+        await executeOperationAndCheck(operation, entities, utilClient, ctx.configuration);
       } catch (e) {
         // clean up all sessions on failed test, and rethrow
         await terminateOpenTransactions(utilClient);
