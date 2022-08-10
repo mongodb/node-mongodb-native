@@ -6,6 +6,7 @@ import { MongoRuntimeError } from '../../src/error';
 import {
   BufferPool,
   eachAsync,
+  HostAddress,
   isHello,
   makeInterruptibleAsyncInterval,
   MongoDBNamespace,
@@ -582,6 +583,62 @@ describe('driver utils', function () {
         expect(withCollectionNamespace).to.not.equal(dbNamespace);
         expect(withCollectionNamespace).to.have.property('db', 'test');
         expect(withCollectionNamespace).to.have.property('collection', 'pets');
+      });
+    });
+  });
+
+  describe('class HostAddress', () => {
+    describe('constructor()', () => {
+      it('should freeze itself', () => {
+        const ha = new HostAddress('iLoveJavascript:22');
+        expect(ha).to.be.frozen;
+      });
+
+      const socketPath = '/tmp/mongodb-27017.sock';
+      it('should handle decoded unix socket path', () => {
+        const ha = new HostAddress(socketPath);
+        expect(ha).to.have.property('socketPath', socketPath);
+        expect(ha).to.not.have.property('port');
+      });
+
+      it('should handle encoded unix socket path', () => {
+        const ha = new HostAddress(encodeURIComponent(socketPath));
+        expect(ha).to.have.property('socketPath', socketPath);
+        expect(ha).to.not.have.property('port');
+      });
+
+      it('should handle encoded unix socket path with an unencoded space', () => {
+        const socketPathWithSpaces = '/tmp/some directory/mongodb-27017.sock';
+        const ha = new HostAddress(socketPathWithSpaces);
+        expect(ha).to.have.property('socketPath', socketPathWithSpaces);
+        expect(ha).to.not.have.property('port');
+      });
+
+      it('should handle unix socket path that does not begin with a slash', () => {
+        const socketPathWithoutSlash = 'my_local/directory/mustEndWith.sock';
+        const ha = new HostAddress(socketPathWithoutSlash);
+        expect(ha).to.have.property('socketPath', socketPathWithoutSlash);
+        expect(ha).to.not.have.property('port');
+      });
+
+      it('should only set the socketPath property on HostAddress when hostString ends in .sock', () => {
+        // We heuristically determine if we are using a domain socket solely based on .sock
+        // if someone has .sock in their hostname we will fail to connect to that host
+        const hostnameThatEndsWithSock = 'iLoveJavascript.sock';
+        const ha = new HostAddress(hostnameThatEndsWithSock);
+        expect(ha).to.have.property('socketPath', hostnameThatEndsWithSock);
+        expect(ha).to.not.have.property('port');
+        expect(ha).to.not.have.property('host');
+      });
+
+      it('should set the host and port property on HostAddress even when hostname ends in .sock if there is a port number specified', () => {
+        // "should determine unix socket usage based on .sock ending" can be worked around by putting
+        // the port number at the end of the hostname (even if it is the default)
+        const hostnameThatEndsWithSockHasPort = 'iLoveJavascript.sock:27017';
+        const ha = new HostAddress(hostnameThatEndsWithSockHasPort);
+        expect(ha).to.not.have.property('socketPath');
+        expect(ha).to.have.property('host', 'iLoveJavascript.sock'.toLowerCase());
+        expect(ha).to.have.property('port', 27017);
       });
     });
   });

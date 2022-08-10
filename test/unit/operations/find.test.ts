@@ -40,7 +40,11 @@ describe('FindOperation', function () {
   describe('#execute', function () {
     context('command construction', () => {
       const namespace = ns('db.collection');
-      const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+      const server = new Server(
+        new Topology([], {} as any),
+        new ServerDescription('a:1'),
+        {} as any
+      );
 
       it('should build basic find command with filter', async () => {
         const findOperation = new FindOperation(undefined, namespace, filter);

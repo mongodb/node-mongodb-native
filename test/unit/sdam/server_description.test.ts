@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 
+import { MongoRuntimeError } from '../../../src';
 import { Long, ObjectId } from '../../../src/bson';
 import {
   compareTopologyVersion,
@@ -8,6 +9,19 @@ import {
 } from '../../../src/sdam/server_description';
 
 describe('ServerDescription', function () {
+  describe('constructor()', () => {
+    it('should throw if given a null address', () => {
+      // @ts-expect-error: Passing nullish value to prove error will be thrown
+      expect(() => new ServerDescription(null)).to.throw(MongoRuntimeError);
+      // @ts-expect-error: Passing nullish value to prove error will be thrown
+      expect(() => new ServerDescription()).to.throw(MongoRuntimeError);
+    });
+
+    it('should throw if given an empty string for an address', () => {
+      expect(() => new ServerDescription('')).to.throw(MongoRuntimeError);
+    });
+  });
+
   describe('error equality', function () {
     const errorEqualityTests = [
       {

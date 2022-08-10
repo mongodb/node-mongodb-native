@@ -26,7 +26,7 @@ describe('GetMoreOperation', function () {
   });
 
   describe('#constructor', function () {
-    const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+    const server = new Server(new Topology([], {} as any), new ServerDescription('a:1'), {} as any);
     const operation = new GetMoreOperation(namespace, cursorId, server, options);
 
     it('sets the namespace', function () {
@@ -47,7 +47,7 @@ describe('GetMoreOperation', function () {
       it('executes a getMore on the provided server', async function () {
         const server = new Server(
           new Topology([], {} as any),
-          new ServerDescription(''),
+          new ServerDescription('a:1'),
           {} as any
         );
         const opts = { ...options, documentsReturnedIn: 'nextBatch', returnFieldSelector: null };
@@ -74,12 +74,12 @@ describe('GetMoreOperation', function () {
       it('errors in the callback', function (done) {
         const server1 = new Server(
           new Topology([], {} as any),
-          new ServerDescription(''),
+          new ServerDescription('a:1'),
           {} as any
         );
         const server2 = new Server(
           new Topology([], {} as any),
-          new ServerDescription(''),
+          new ServerDescription('a:1'),
           {} as any
         );
         const session = sinon.createStubInstance(ClientSession);
@@ -97,7 +97,11 @@ describe('GetMoreOperation', function () {
     context('command construction', () => {
       const cursorId = Long.fromBigInt(0xffff_ffffn);
       const namespace = ns('db.collection');
-      const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+      const server = new Server(
+        new Topology([], {} as any),
+        new ServerDescription('a:1'),
+        {} as any
+      );
 
       it('should build basic getMore command with cursorId and collection', async () => {
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, {});
@@ -178,7 +182,7 @@ describe('GetMoreOperation', function () {
           it(`${verb} set the comment on the command if the server wire version is ${state}`, async () => {
             const server = new Server(
               new Topology([], {} as any),
-              new ServerDescription(''),
+              new ServerDescription('a:1'),
               {} as any
             );
             server.hello = {
@@ -195,7 +199,7 @@ describe('GetMoreOperation', function () {
   });
 
   describe('#hasAspect', function () {
-    const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+    const server = new Server(new Topology([], {} as any), new ServerDescription('a:1'), {} as any);
     const operation = new GetMoreOperation(namespace, cursorId, server, options);
 
     context('when the aspect is must select same server', function () {

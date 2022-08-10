@@ -1,5 +1,5 @@
 import { Document, Long, ObjectId } from '../bson';
-import type { MongoError } from '../error';
+import { MongoRuntimeError, MongoServerError } from '../error';
 import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
 import type { ClusterTime } from './common';
 import { ServerType } from './common';
@@ -31,13 +31,10 @@ export type TagSet = { [key: string]: string };
 /** @internal */
 export interface ServerDescriptionOptions {
   /** An Error used for better reporting debugging */
-  error?: MongoError;
+  error?: MongoServerError;
 
   /** The round trip time to ping this server (in ms) */
   roundTripTime?: number;
-
-  /** The topologyVersion */
-  topologyVersion?: TopologyVersion;
 
   /** If the client is in load balancing mode. */
   loadBalanced?: boolean;
@@ -50,28 +47,25 @@ export interface ServerDescriptionOptions {
  * @public
  */
 export class ServerDescription {
-  private _hostAddress: HostAddress;
   address: string;
   type: ServerType;
   hosts: string[];
   passives: string[];
   arbiters: string[];
   tags: TagSet;
-
-  error?: MongoError;
-  topologyVersion?: TopologyVersion;
+  error: MongoServerError | null;
+  topologyVersion: TopologyVersion | null;
   minWireVersion: number;
   maxWireVersion: number;
   roundTripTime: number;
   lastUpdateTime: number;
   lastWriteDate: number;
-
-  me?: string;
-  primary?: string;
-  setName?: string;
-  setVersion?: number;
-  electionId?: ObjectId;
-  logicalSessionTimeoutMinutes?: number;
+  me: string | null;
+  primary: string | null;
+  setName: string | null;
+  setVersion: number | null;
+  electionId: ObjectId | null;
+  logicalSessionTimeoutMinutes: number | null;
 
   // NOTE: does this belong here? It seems we should gossip the cluster time at the CMAP level
   $clusterTime?: ClusterTime;
@@ -83,14 +77,19 @@ export class ServerDescription {
    * @param address - The address of the server
    * @param hello - An optional hello response for this server
    */
-  constructor(address: HostAddress | string, hello?: Document, options?: ServerDescriptionOptions) {
-    if (typeof address === 'string') {
-      this._hostAddress = new HostAddress(address);
-      this.address = this._hostAddress.toString();
-    } else {
-      this._hostAddress = address;
-      this.address = this._hostAddress.toString();
+  constructor(
+    address: HostAddress | string,
+    hello?: Document,
+    options: ServerDescriptionOptions = {}
+  ) {
+    if (address == null || address === '') {
+      throw new MongoRuntimeError('ServerDescription must be provided with a non-empty address');
     }
+
+    this.address =
+      typeof address === 'string'
+        ? HostAddress.fromString(address).toString(false) // Use HostAddress to normalize
+        : address.toString(false);
     this.type = parseServerType(hello, options);
     this.hosts = hello?.hosts?.map((host: string) => host.toLowerCase()) ?? [];
     this.passives = hello?.passives?.map((host: string) => host.toLowerCase()) ?? [];
@@ -101,50 +100,20 @@ export class ServerDescription {
     this.roundTripTime = options?.roundTripTime ?? -1;
     this.lastUpdateTime = now();
     this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? 0;
-
-    if (options?.topologyVersion) {
-      this.topologyVersion = options.topologyVersion;
-    } else if (hello?.topologyVersion) {
-      // TODO(NODE-2674): Preserve int64 sent from MongoDB
-      this.topologyVersion = hello.topologyVersion;
-    }
-
-    if (options?.error) {
-      this.error = options.error;
-    }
-
-    if (hello?.primary) {
-      this.primary = hello.primary;
-    }
-
-    if (hello?.me) {
-      this.me = hello.me.toLowerCase();
-    }
-
-    if (hello?.setName) {
-      this.setName = hello.setName;
-    }
-
-    if (hello?.setVersion) {
-      this.setVersion = hello.setVersion;
-    }
-
-    if (hello?.electionId) {
-      this.electionId = hello.electionId;
-    }
-
-    if (hello?.logicalSessionTimeoutMinutes) {
-      this.logicalSessionTimeoutMinutes = hello.logicalSessionTimeoutMinutes;
-    }
-
-    if (hello?.$clusterTime) {
-      this.$clusterTime = hello.$clusterTime;
-    }
+    this.error = options.error ?? null;
+    // TODO(NODE-2674): Preserve int64 sent from MongoDB
+    this.topologyVersion = this.error?.topologyVersion ?? hello?.topologyVersion ?? null;
+    this.setName = hello?.setName ?? null;
+    this.setVersion = hello?.setVersion ?? null;
+    this.electionId = hello?.electionId ?? null;
+    this.logicalSessionTimeoutMinutes = hello?.logicalSessionTimeoutMinutes ?? null;
+    this.primary = hello?.primary ?? null;
+    this.me = hello?.me?.toLowerCase() ?? null;
+    this.$clusterTime = hello?.$clusterTime ?? null;
   }
 
   get hostAddress(): HostAddress {
-    if (this._hostAddress) return this._hostAddress;
-    else return new HostAddress(this.address);
+    return HostAddress.fromString(this.address);
   }
 
   get allHosts(): string[] {
@@ -181,7 +150,8 @@ export class ServerDescription {
    * in the {@link https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#serverdescription|SDAM spec}
    */
   equals(other?: ServerDescription | null): boolean {
-    // TODO(NODE-4510): Check ServerDescription equality logic for nullish topologyVersion meaning "greater than"
+    // Despite using the comparator that would determine a nullish topologyVersion as greater than
+    // for equality we should only always perform direct equality comparison
     const topologyVersionsEqual =
       this.topologyVersion === other?.topologyVersion ||
       compareTopologyVersion(this.topologyVersion, other?.topologyVersion) === 0;
@@ -271,8 +241,8 @@ function tagsStrictEqual(tags: TagSet, tags2: TagSet): boolean {
  * ```
  */
 export function compareTopologyVersion(
-  currentTv?: TopologyVersion,
-  newTv?: TopologyVersion
+  currentTv?: TopologyVersion | null,
+  newTv?: TopologyVersion | null
 ): 0 | -1 | 1 {
   if (currentTv == null || newTv == null) {
     return -1;
