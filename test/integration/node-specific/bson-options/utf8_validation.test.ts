@@ -21,7 +21,8 @@ describe('class BinMsg', () => {
   });
 
   afterEach(() => {
-    deserializeSpy.restore();
+    deserializeSpy?.restore();
+    // @ts-expect-error: Allow this to be garbage collected
     deserializeSpy = null;
   });
 

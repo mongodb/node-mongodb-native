@@ -2,15 +2,7 @@
 
 const { expect } = require('chai');
 const BSON = require('../../src/bson');
-
-function isBSONExtInstalled() {
-  try {
-    require.resolve('bson-ext');
-    return true;
-  } catch (_) {
-    return false;
-  }
-}
+const { isBSONExtImported } = require('../tools/utils');
 
 describe('When importing BSON', function () {
   const types = [
@@ -57,7 +49,7 @@ describe('When importing BSON', function () {
 
   describe('bson-ext', function () {
     before(function () {
-      if (!isBSONExtInstalled()) {
+      if (!isBSONExtImported()) {
         this.skip();
       }
     });
@@ -73,7 +65,7 @@ describe('When importing BSON', function () {
 
   describe('js-bson', function () {
     before(function () {
-      if (isBSONExtInstalled()) {
+      if (isBSONExtImported()) {
         this.skip();
       }
     });

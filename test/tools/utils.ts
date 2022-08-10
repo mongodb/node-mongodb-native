@@ -489,3 +489,10 @@ export class UnifiedTestSuiteBuilder {
     return JSON.parse(JSON.stringify(this));
   }
 }
+
+/** Test whether the driver is using bson-ext */
+export function isBSONExtImported() {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const driverBSON = require('../../src/bson');
+  return driverBSON.deserialize.toString().includes('[native code]');
+}
