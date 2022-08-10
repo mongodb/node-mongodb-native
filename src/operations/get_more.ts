@@ -39,7 +39,7 @@ export class GetMoreOperation extends AbstractOperation {
   cursorId: Long;
   override options: GetMoreOptions;
 
-  constructor(ns: MongoDBNamespace, cursorId: Long, server: Server, options: GetMoreOptions = {}) {
+  constructor(ns: MongoDBNamespace, cursorId: Long, server: Server, options: GetMoreOptions) {
     super(options);
 
     this.options = options;
@@ -61,6 +61,10 @@ export class GetMoreOperation extends AbstractOperation {
       return callback(
         new MongoRuntimeError('Getmore must run on the same server operation began on')
       );
+    }
+
+    if (this.cursorId == null || this.cursorId.isZero()) {
+      return callback(new MongoRuntimeError('Unable to iterate cursor with no id'));
     }
 
     const collection = this.ns.collection;

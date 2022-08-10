@@ -1111,7 +1111,7 @@ describe('Change Streams', function () {
           changeStream.next((err, doc) => {
             expect(err).to.exist;
             expect(doc).to.not.exist;
-            expect(err.message).to.equal('ChangeStream is closed');
+            expect(err?.message).to.equal('ChangeStream is closed');
             changeStream.close(() => client.close(done));
           });
         });
@@ -1372,23 +1372,139 @@ describe('Change Streams', function () {
     )
     .run();
 
+  UnifiedTestSuiteBuilder.describe('entity.watch() server-side options')
+    .runOnRequirement({
+      topologies: ['replicaset', 'sharded-replicaset', 'sharded', 'load-balanced'],
+      minServerVersion: '4.4.0'
+    })
+    .createEntities([
+      { client: { id: 'client0', observeEvents: ['commandStartedEvent'] } },
+      { database: { id: 'db0', client: 'client0', databaseName: 'watchOpts' } },
+      { collection: { id: 'collection0', database: 'db0', collectionName: 'watchOpts' } }
+    ])
+    .test(
+      TestBuilder.it(
+        'should use maxAwaitTimeMS option to set maxTimeMS on getMore and should not set maxTimeMS on aggregate'
+      )
+        .operation({
+          object: 'collection0',
+          name: 'createChangeStream',
+          saveResultAsEntity: 'changeStreamOnClient',
+          arguments: { maxAwaitTimeMS: 5000 }
+        })
+        .operation({
+          name: 'insertOne',
+          object: 'collection0',
+          arguments: { document: { a: 1 } },
+          ignoreResultAndError: true
+        })
+        .operation({
+          object: 'changeStreamOnClient',
+          name: 'iterateUntilDocumentOrError',
+          ignoreResultAndError: true
+        })
+        .expectEvents({
+          client: 'client0',
+          events: [
+            {
+              commandStartedEvent: {
+                commandName: 'aggregate',
+                command: { maxTimeMS: { $$exists: false } }
+              }
+            },
+            { commandStartedEvent: { commandName: 'insert' } },
+            { commandStartedEvent: { commandName: 'getMore', command: { maxTimeMS: 5000 } } }
+          ]
+        })
+        .toJSON()
+    )
+    .test(
+      TestBuilder.it(
+        'should use maxTimeMS option to set maxTimeMS on aggregate and not set maxTimeMS on getMore'
+      )
+        .operation({
+          object: 'collection0',
+          name: 'createChangeStream',
+          saveResultAsEntity: 'changeStreamOnClient',
+          arguments: { maxTimeMS: 5000 }
+        })
+        .operation({
+          name: 'insertOne',
+          object: 'collection0',
+          arguments: { document: { a: 1 } },
+          ignoreResultAndError: true
+        })
+        .operation({
+          object: 'changeStreamOnClient',
+          name: 'iterateUntilDocumentOrError',
+          ignoreResultAndError: true
+        })
+        .expectEvents({
+          client: 'client0',
+          ignoreExtraEvents: true, // Sharded clusters have extra getMores
+          events: [
+            { commandStartedEvent: { commandName: 'aggregate', command: { maxTimeMS: 5000 } } },
+            { commandStartedEvent: { commandName: 'insert' } },
+            {
+              commandStartedEvent: {
+                commandName: 'getMore',
+                command: { maxTimeMS: { $$exists: false } }
+              }
+            }
+          ]
+        })
+        .toJSON()
+    )
+    .test(
+      TestBuilder.it(
+        'should use maxTimeMS option to set maxTimeMS on aggregate and maxAwaitTimeMS option to set maxTimeMS on getMore'
+      )
+        .operation({
+          object: 'collection0',
+          name: 'createChangeStream',
+          saveResultAsEntity: 'changeStreamOnClient',
+          arguments: { maxTimeMS: 5000, maxAwaitTimeMS: 6000 }
+        })
+        .operation({
+          name: 'insertOne',
+          object: 'collection0',
+          arguments: { document: { a: 1 } },
+          ignoreResultAndError: true
+        })
+        .operation({
+          object: 'changeStreamOnClient',
+          name: 'iterateUntilDocumentOrError',
+          ignoreResultAndError: true
+        })
+        .expectEvents({
+          client: 'client0',
+          ignoreExtraEvents: true, // Sharded clusters have extra getMores
+          events: [
+            { commandStartedEvent: { commandName: 'aggregate', command: { maxTimeMS: 5000 } } },
+            { commandStartedEvent: { commandName: 'insert' } },
+            { commandStartedEvent: { commandName: 'getMore', command: { maxTimeMS: 6000 } } }
+          ]
+        })
+        .toJSON()
+    )
+    .run();
+
   describe('BSON Options', function () {
     let client: MongoClient;
     let db: Db;
     let collection: Collection;
     let cs: ChangeStream;
+
     beforeEach(async function () {
       client = await this.configuration.newClient({ monitorCommands: true }).connect();
       db = client.db('db');
       collection = await db.createCollection('collection');
     });
+
     afterEach(async function () {
       await db.dropCollection('collection');
       await cs.close();
       await client.close();
-      client = undefined;
-      db = undefined;
-      collection = undefined;
     });
 
     context('promoteLongs', () => {
@@ -1452,7 +1568,7 @@ describe('Change Streams', function () {
       it('does not send invalid options on the aggregate command', {
         metadata: { requires: { topology: '!single' } },
         test: async function () {
-          const started = [];
+          const started: CommandStartedEvent[] = [];
 
           client.on('commandStarted', filterForCommands(['aggregate'], started));
           const doc = { invalidBSONOption: true };
@@ -1473,7 +1589,7 @@ describe('Change Streams', function () {
       it('does not send invalid options on the getMore command', {
         metadata: { requires: { topology: '!single' } },
         test: async function () {
-          const started = [];
+          const started: CommandStartedEvent[] = [];
 
           client.on('commandStarted', filterForCommands(['aggregate'], started));
           const doc = { invalidBSONOption: true };
@@ -1503,7 +1619,7 @@ describe('ChangeStream resumability', function () {
   const changeStreamResumeOptions: ChangeStreamOptions = {
     fullDocument: 'updateLookup',
     collation: { locale: 'en', maxVariable: 'punct' },
-    maxAwaitTimeMS: 20000,
+    maxAwaitTimeMS: 2000,
     batchSize: 200
   };
 

@@ -78,8 +78,20 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
   session?: ClientSession;
   readPreference?: ReadPreferenceLike;
   readConcern?: ReadConcernLike;
+  /**
+   * Specifies the number of documents to return in each response from MongoDB
+   */
   batchSize?: number;
+  /**
+   * When applicable `maxTimeMS` controls the amount of time the initial command
+   * that constructs a cursor should take. (ex. find, aggregate, listCollections)
+   */
   maxTimeMS?: number;
+  /**
+   * When applicable `maxAwaitTimeMS` controls the amount of time subsequent getMores
+   * that a cursor uses to fetch more data should take. (ex. cursor.next())
+   */
+  maxAwaitTimeMS?: number;
   /**
    * Comment to apply to the operation.
    *
@@ -89,7 +101,19 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    * In server versions 4.4 and above, 'comment' can be any valid BSON type.
    */
   comment?: unknown;
+  /**
+   * By default, MongoDB will automatically close a cursor when the
+   * client has exhausted all results in the cursor. However, for [capped collections](https://www.mongodb.com/docs/manual/core/capped-collections)
+   * you may use a Tailable Cursor that remains open after the client exhausts
+   * the results in the initial cursor.
+   */
   tailable?: boolean;
+  /**
+   * If awaitData is set to true, when the cursor reaches the end of the capped collection,
+   * MongoDB blocks the query thread for a period of time waiting for new data to arrive.
+   * When new data is inserted into the capped collection, the blocked thread is signaled
+   * to wake up and return the next batch to the client.
+   */
   awaitData?: boolean;
   noCursorTimeout?: boolean;
 }
@@ -155,7 +179,7 @@ export abstract class AbstractCursor<
     }
     this[kClient] = client;
     this[kNamespace] = namespace;
-    this[kDocuments] = []; // TODO: https://github.com/microsoft/TypeScript/issues/36230
+    this[kDocuments] = [];
     this[kInitialized] = false;
     this[kClosed] = false;
     this[kKilled] = false;
@@ -184,6 +208,10 @@ export abstract class AbstractCursor<
 
     if (typeof options.maxTimeMS === 'number') {
       this[kOptions].maxTimeMS = options.maxTimeMS;
+    }
+
+    if (typeof options.maxAwaitTimeMS === 'number') {
+      this[kOptions].maxAwaitTimeMS = options.maxAwaitTimeMS;
     }
 
     if (options.session instanceof ClientSession) {
@@ -617,21 +645,8 @@ export abstract class AbstractCursor<
 
   /** @internal */
   _getMore(batchSize: number, callback: Callback<Document>): void {
-    const cursorId = this[kId];
-    const cursorNs = this[kNamespace];
-    const server = this[kServer];
-
-    if (cursorId == null) {
-      callback(new MongoRuntimeError('Unable to iterate cursor with no id'));
-      return;
-    }
-
-    if (server == null) {
-      callback(new MongoRuntimeError('Unable to iterate cursor without selected server'));
-      return;
-    }
-
-    const getMoreOperation = new GetMoreOperation(cursorNs, cursorId, server, {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const getMoreOperation = new GetMoreOperation(this[kNamespace], this[kId]!, this[kServer]!, {
       ...this[kOptions],
       session: this[kSession],
       batchSize
