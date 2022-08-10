@@ -7,6 +7,7 @@ import {
   Document,
   Long,
   MongoError,
+  MongoServerError,
   ObjectId,
   OneOrMore
 } from '../../../src';
@@ -489,26 +490,32 @@ export function matchesEvents(
   }
 }
 
+function isMongoCryptError(err): boolean {
+  if (err.constructor.name === 'MongoCryptError') {
+    return true;
+  }
+  return err.stack.includes('at ClientEncryption');
+}
+
 export function expectErrorCheck(
   error: Error | MongoError,
   expected: ExpectedError,
   entities: EntitiesMap
 ): boolean {
-  if (Object.keys(expected)[0] === 'isClientError' || Object.keys(expected)[0] === 'isError') {
-    // FIXME: We cannot tell if Error arose from driver and not from server
-    return;
+  const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;
+
+  if (!isMongoCryptError(error)) {
+    expect(error, expectMessage).to.be.instanceOf(MongoError);
   }
 
-  const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;
+  if (expected.isClientError === false) {
+    expect(error).to.be.instanceOf(MongoServerError);
+  } else if (expected.isClientError === true) {
+    expect(error).not.to.be.instanceOf(MongoServerError);
+  }
 
   if (expected.errorContains != null) {
     expect(error.message, expectMessage).to.include(expected.errorContains);
-  }
-
-  if (!(error instanceof MongoError)) {
-    // if statement asserts type for TS, expect will always fail
-    expect(error, expectMessage).to.be.instanceOf(MongoError);
-    return;
   }
 
   if (expected.errorCode != null) {
@@ -520,19 +527,21 @@ export function expectErrorCheck(
   }
 
   if (expected.errorLabelsContain != null) {
+    const mongoError = error as MongoError;
     for (const errorLabel of expected.errorLabelsContain) {
       expect(
-        error.hasErrorLabel(errorLabel),
-        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}] -- ${expectMessage}`
+        mongoError.hasErrorLabel(errorLabel),
+        `Error was supposed to have label ${errorLabel}, has [${mongoError.errorLabels}] -- ${expectMessage}`
       ).to.be.true;
     }
   }
 
   if (expected.errorLabelsOmit != null) {
+    const mongoError = error as MongoError;
     for (const errorLabel of expected.errorLabelsOmit) {
       expect(
-        error.hasErrorLabel(errorLabel),
-        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}] -- ${expectMessage}`
+        mongoError.hasErrorLabel(errorLabel),
+        `Error was not supposed to have label ${errorLabel}, has [${mongoError.errorLabels}] -- ${expectMessage}`
       ).to.be.false;
     }
   }
