@@ -198,7 +198,11 @@ describe('GetMoreOperation', function () {
     });
 
     context('error cases', () => {
-      const server = new Server(new Topology([], {} as any), new ServerDescription(''), {} as any);
+      const server = new Server(
+        new Topology([], {} as any),
+        new ServerDescription('a:1'),
+        {} as any
+      );
       sinon.stub(server, 'command').yieldsRight();
 
       it('should throw if the cursorId is undefined', async () => {
