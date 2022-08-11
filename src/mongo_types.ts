@@ -470,7 +470,9 @@ export type PropertyType<
   AllowToSkipArrayIndex extends boolean
 > = Type extends unknown
   ? string extends Property
-    ? never
+    ? Type extends Map<string, infer MapType>
+      ? MapType
+      : never
     :
         | (AllowToSkipArrayIndex extends false
             ? never
@@ -489,9 +491,7 @@ export type PropertyType<
                 ? PropertyType<ArrayType, Rest, AllowToSkipArrayIndex>
                 : never
               : Key extends keyof Type
-              ? Type[Key] extends Map<string, infer MapType>
-                ? MapType
-                : PropertyType<Type[Key], Rest, AllowToSkipArrayIndex>
+              ? PropertyType<Type[Key], Rest, AllowToSkipArrayIndex>
               : never
             : never)
   : never;
