@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 
 import { ChangeStream } from '../../../src/change_stream';
@@ -179,7 +180,7 @@ export class FailPointMap extends Map<string, Document> {
     let address: string;
     if (addressOrClient instanceof MongoClient) {
       client = addressOrClient;
-      address = client.topology.s.seedlist.join(',');
+      address = client.topology!.s.seedlist.join(',');
     } else {
       // create a new client
       address = addressOrClient.toString();
@@ -300,7 +301,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'cursor', key: string, assertExists?: boolean): AbstractCursor;
   getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
   getEntity(type: 'clientEncryption', key: string, assertExists?: boolean): ClientEncryption;
-  getEntity(type: EntityTypeId, key: string, assertExists = true): Entity {
+  getEntity(type: EntityTypeId, key: string, assertExists = true): Entity | undefined {
     const entity = this.get(key);
     if (!entity) {
       if (assertExists) throw new Error(`Entity '${key}' does not exist`);
@@ -373,14 +374,14 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const client = map.getEntity('client', entity.database.client);
         const db = client.db(
           entity.database.databaseName,
-          patchDbOptions(entity.database.databaseOptions)
+          patchDbOptions(entity.database.databaseOptions!)
         );
         map.set(entity.database.id, db);
       } else if ('collection' in entity) {
         const db = map.getEntity('db', entity.collection.database);
         const collection = db.collection(
           entity.collection.collectionName,
-          patchCollectionOptions(entity.collection.collectionOptions)
+          patchCollectionOptions(entity.collection.collectionOptions!)
         );
         map.set(entity.collection.id, collection);
       } else if ('session' in entity) {

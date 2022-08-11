@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { inspect } from 'util';
 
@@ -265,11 +266,11 @@ export function specialCheck(
   entities: EntitiesMap,
   path: string[] = [],
   checkExtraKeys: boolean
-): boolean {
+): void {
   if (isUnsetOrMatchesOperator(expected)) {
     if (actual === null || actual === undefined) return;
 
-    resultCheck(actual, expected.$$unsetOrMatches, entities, path, checkExtraKeys);
+    resultCheck(actual, expected.$$unsetOrMatches as any, entities, path, checkExtraKeys);
   } else if (isMatchesEntityOperator(expected)) {
     // $$matchesEntity
     const entity = entities.get(expected.$$matchesEntity);
@@ -291,7 +292,7 @@ export function specialCheck(
     // $$sessionLsid
     const session = entities.getEntity('session', expected.$$sessionLsid, false);
     expect(session, `Session ${expected.$$sessionLsid} does not exist in entities`).to.exist;
-    const entitySessionHex = session.id.id.buffer.toString('hex').toUpperCase();
+    const entitySessionHex = session.id!.id.buffer.toString('hex').toUpperCase();
     const actualSessionHex = actual.id.buffer.toString('hex').toUpperCase();
     expect(
       entitySessionHex,
@@ -299,7 +300,7 @@ export function specialCheck(
     ).to.equal(actualSessionHex);
   } else if (isTypeOperator(expected)) {
     // $$type
-    let ok: boolean;
+    let ok = false;
     const types = Array.isArray(expected.$$type) ? expected.$$type : [expected.$$type];
     for (const type of types) {
       ok ||= TYPE_MAP.get(type)(actual);
@@ -365,19 +366,23 @@ function compareCommandStartedEvents(
   entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected.command) {
-    resultCheck(actual.command, expected.command, entities, [`${prefix}.command`]);
+  if (expected!.command) {
+    resultCheck(actual.command, expected!.command, entities, [`${prefix}.command`]);
   }
-  if (expected.commandName) {
+  if (expected!.commandName) {
     expect(
-      expected.commandName,
-      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+      expected!.commandName,
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
+      }`
     ).to.equal(actual.commandName);
   }
-  if (expected.databaseName) {
+  if (expected!.databaseName) {
     expect(
-      expected.databaseName,
-      `expected ${prefix}.databaseName to equal ${expected.databaseName} but received ${actual.databaseName}`
+      expected!.databaseName,
+      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${
+        actual.databaseName
+      }`
     ).to.equal(actual.databaseName);
   }
 }
@@ -388,13 +393,15 @@ function compareCommandSucceededEvents(
   entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected.reply) {
-    resultCheck(actual.reply, expected.reply, entities, [prefix]);
+  if (expected!.reply) {
+    resultCheck(actual.reply as Document, expected!.reply, entities, [prefix]);
   }
-  if (expected.commandName) {
+  if (expected!.commandName) {
     expect(
-      expected.commandName,
-      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+      expected!.commandName,
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
+      }`
     ).to.equal(actual.commandName);
   }
 }
@@ -405,10 +412,12 @@ function compareCommandFailedEvents(
   entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected.commandName) {
+  if (expected!.commandName) {
     expect(
-      expected.commandName,
-      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+      expected!.commandName,
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
+      }`
     ).to.equal(actual.commandName);
   }
 }
@@ -501,7 +510,7 @@ export function expectErrorCheck(
   error: Error | MongoError,
   expected: ExpectedError,
   entities: EntitiesMap
-): boolean {
+): void {
   const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;
 
   if (!isMongoCryptError(error)) {
@@ -547,6 +556,6 @@ export function expectErrorCheck(
   }
 
   if (expected.expectResult != null) {
-    resultCheck(error, expected.expectResult, entities);
+    resultCheck(error, expected.expectResult as any, entities);
   }
 }

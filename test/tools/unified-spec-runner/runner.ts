@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
@@ -65,7 +66,6 @@ async function runUnifiedTest(
       expect.fail(`Test was skipped with an empty skip reason: ${test.description}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ctx.test!.skipReason = skipReason;
 
     ctx.skip();
@@ -79,7 +79,7 @@ async function runUnifiedTest(
     utilClient = ctx.configuration.newClient();
   }
 
-  let entities: EntitiesMap;
+  let entities: EntitiesMap | undefined;
   try {
     trace('\n starting test:');
     try {
@@ -217,7 +217,7 @@ async function runUnifiedTest(
           eventType === 'cmap' ? clientCmapEvents.get(clientId) : clientCommandEvents.get(clientId);
 
         expect(actualEvents, `No client entity found with id ${clientId}`).to.exist;
-        matchesEvents(expectedEventsForClient, actualEvents, entities);
+        matchesEvents(expectedEventsForClient, actualEvents!, entities);
       }
     }
 
