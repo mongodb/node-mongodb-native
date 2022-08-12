@@ -140,6 +140,17 @@ export class UnifiedMongoClient extends MongoClient {
     return this.ignoredEvents.includes(e.commandName);
   }
 
+  getCapturedEvents(eventType: string): CommandEvent[] | CmapEvent[] {
+    switch (eventType) {
+      case 'command':
+        return this.commandEvents;
+      case 'cmap':
+        return this.cmapEvents;
+      default:
+        throw new Error(`Unknown eventType: ${eventType}`);
+    }
+  }
+
   // NOTE: pushCommandEvent must be an arrow function
   pushCommandEvent: (e: CommandEvent) => void = e => {
     if (!this.isIgnored(e)) {
@@ -152,22 +163,14 @@ export class UnifiedMongoClient extends MongoClient {
     this.cmapEvents.push(e);
   };
 
-  stopCapturingEvents(pushFn: PushFunction): void {
-    const observedEvents = [...this.observedCommandEvents, ...this.observedCmapEvents];
-    for (const eventName of observedEvents) {
-      this.off(eventName, pushFn);
-    }
-  }
-
   /** Disables command monitoring for the client and returns a list of the captured events. */
-  stopCapturingCommandEvents(): CommandEvent[] {
-    this.stopCapturingEvents(this.pushCommandEvent);
-    return this.commandEvents;
-  }
-
-  stopCapturingCmapEvents(): CmapEvent[] {
-    this.stopCapturingEvents(this.pushCmapEvent);
-    return this.cmapEvents;
+  stopCapturingEvents(): void {
+    for (const eventName of this.observedCommandEvents) {
+      this.off(eventName, this.pushCommandEvent);
+    }
+    for (const eventName of this.observedCmapEvents) {
+      this.off(eventName, this.pushCmapEvent);
+    }
   }
 }
 
