@@ -27,7 +27,7 @@
   "dependencies": {
     "bson": "^4.6.5",
     "denque": "^2.1.0",
-    "mongodb-connection-string-url": "^2.5.2",
+    "mongodb-connection-string-url": "^2.5.3",
     "socks": "^2.7.0"
   },
   "devDependencies": {
