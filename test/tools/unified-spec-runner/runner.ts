@@ -8,7 +8,7 @@ import { ReadPreference } from '../../../src/read_preference';
 import { TopologyType } from '../../../src/sdam/common';
 import { ns } from '../../../src/utils';
 import { ejson } from '../utils';
-import { CmapEvent, CommandEvent, EntitiesMap, UnifiedMongoClient } from './entities';
+import { EntitiesMap, UnifiedMongoClient } from './entities';
 import { matchesEvents } from './match';
 import { executeOperationAndCheck } from './operations';
 import * as uni from './schema';

@@ -65,8 +65,6 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
-type PushFunction = (e: any) => void;
-
 export class UnifiedMongoClient extends MongoClient {
   commandEvents: CommandEvent[];
   cmapEvents: CmapEvent[];
