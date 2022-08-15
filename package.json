@@ -101,6 +101,7 @@
     "check:lint": "npm run build:dts && npm run check:dts && npm run check:eslint && npm run check:tsd",
     "check:eslint": "eslint -v && eslint --max-warnings=0 --ext '.js,.ts' src test",
     "check:tsd": "tsd --version && tsd",
+    "check:dependencies": "mocha test/unit/dependency.test.ts",
     "check:dts": "node ./node_modules/typescript/bin/tsc --noEmit mongodb.d.ts && tsd",
     "check:test": "mocha --config test/mocha_mongodb.json test/integration",
     "check:unit": "mocha test/unit",

@@ -111,6 +111,14 @@ functions:
           - .evergreen/run-kms-servers.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+  check dependencies:
+    - command: subprocess.exec
+      params:
+        background: true
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/check-dependencies.sh
   run tests:
     - command: shell.exec
       type: test
@@ -1659,6 +1667,14 @@ tasks:
         vars:
           NODE_LTS_NAME: erbium
       - func: run typescript oldest
+  - name: check-dependencies
+    tags:
+      - check-dependencies
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: check dependencies
   - name: run-mongosh-integration-tests
     tags:
       - run-mongosh-integration-tests

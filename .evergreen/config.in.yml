@@ -131,6 +131,14 @@ functions:
           - .evergreen/run-kms-servers.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+  "check dependencies":
+    - command: subprocess.exec
+      params:
+        background: true
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/check-dependencies.sh
   "run tests":
     - command: shell.exec
       type: test

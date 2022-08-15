@@ -445,6 +445,19 @@ SINGLETON_TASKS.push(
         },
         { func: 'run typescript oldest' }
       ]
+    },
+    {
+      name: 'check-dependencies',
+      tags: ['check-dependencies'],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        { func: 'check dependencies' }
+      ]
     }
   ]
 );
