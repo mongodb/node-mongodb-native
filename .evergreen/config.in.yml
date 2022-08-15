@@ -189,6 +189,7 @@ functions:
           export SERVERLESS="1"
           export SERVERLESS_ATLAS_USER="${SERVERLESS_ATLAS_USER}"
           export SERVERLESS_ATLAS_PASSWORD="${SERVERLESS_ATLAS_PASSWORD}"
+          export SERVERLESS_URI="${SERVERLESS_URI}"
 
           export MONGODB_URI="${SERVERLESS_URI}"
           export SINGLE_MONGOS_LB_URI="${SERVERLESS_URI}"
