@@ -3,8 +3,7 @@
 source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
 
 if [ -z ${SERVERLESS+omitted} ]; then echo "SERVERLESS is unset" && exit 1; fi
-if [ -z ${MULTI_ATLASPROXY_SERVERLESS_URI+omitted} ]; then echo "MULTI_ATLASPROXY_SERVERLESS_URI is unset" && exit 1; fi
-if [ -z ${SINGLE_ATLASPROXY_SERVERLESS_URI+omitted} ]; then echo "SINGLE_ATLASPROXY_SERVERLESS_URI is unset" && exit 1; fi
+if [ -z ${SERVERLESS_URI+omitted} ]; then echo "MULTI_ATLASPROXY_SERVERLESS_URI is unset" && exit 1; fi
 if [ -z ${SINGLE_MONGOS_LB_URI+omitted} ]; then echo "SINGLE_MONGOS_LB_URI is unset" && exit 1; fi
 if [ -z ${MULTI_MONGOS_LB_URI+omitted} ]; then echo "MULTI_MONGOS_LB_URI is unset" && exit 1; fi
 if [ -z ${MONGODB_URI+omitted} ]; then echo "MONGODB_URI is unset" && exit 1; fi
