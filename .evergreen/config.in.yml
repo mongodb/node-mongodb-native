@@ -154,6 +154,7 @@ functions:
       params:
         working_dir: "src"
         timeout_secs: 300
+        shell: bash
         script: |
           ${PREPARE_SHELL}
 
@@ -163,6 +164,13 @@ functions:
             . ./prepare_client_encryption.sh
             rm -f ./prepare_client_encryption.sh
           fi
+
+          export VERSION=${VERSION}
+          export DRIVERS_TOOLS=${DRIVERS_TOOLS}
+
+          source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+
+          echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
 
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
