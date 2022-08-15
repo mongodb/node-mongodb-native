@@ -87,7 +87,10 @@ export class TestConfiguration {
       hostAddresses,
       hostAddress: hostAddresses[0],
       host: hostAddresses[0].host,
-      port: typeof hostAddresses[0].host === 'string' ? hostAddresses[0].port : undefined,
+      port:
+        typeof hostAddresses[0].host === 'string' && !this.isServerless
+          ? hostAddresses[0].port
+          : undefined,
       db: url.pathname.slice(1) ? url.pathname.slice(1) : 'integration_tests',
       replicaSet: url.searchParams.get('replicaSet'),
       proxyURIParams: url.searchParams.get('proxyHost')
@@ -112,7 +115,9 @@ export class TestConfiguration {
   }
 
   get isLoadBalanced() {
-    return !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri;
+    return (
+      !!this.singleMongosLoadBalancerUri && !!this.multiMongosLoadBalancerUri && !this.isServerless
+    );
   }
 
   writeConcern() {
@@ -194,7 +199,7 @@ export class TestConfiguration {
       delete dbOptions.writeConcern;
     }
 
-    if (this.topologyType === TopologyType.LoadBalanced) {
+    if (this.topologyType === TopologyType.LoadBalanced && !this.isServerless) {
       dbOptions.loadBalanced = true;
     }
 
@@ -203,10 +208,10 @@ export class TestConfiguration {
     }
 
     const urlOptions: url.UrlObject = {
-      protocol: 'mongodb',
+      protocol: this.isServerless ? 'mongodb+srv' : 'mongodb',
       slashes: true,
       hostname: dbHost,
-      port: dbPort,
+      port: this.isServerless ? null : dbPort,
       query: dbOptions,
       pathname: '/'
     };
@@ -267,7 +272,8 @@ export class TestConfiguration {
 
     const FILLER_HOST = 'fillerHost';
 
-    const url = new URL(`mongodb://${FILLER_HOST}`);
+    const protocol = this.isServerless ? 'mongodb+srv' : 'mongodb';
+    const url = new URL(`${protocol}://${FILLER_HOST}`);
 
     if (options.replicaSet) {
       url.searchParams.append('replicaSet', options.replicaSet);
@@ -294,7 +300,7 @@ export class TestConfiguration {
       url.password = password;
     }
 
-    if (this.isLoadBalanced) {
+    if (this.isLoadBalanced && !this.isServerless) {
       url.searchParams.append('loadBalanced', 'true');
     }
 
@@ -319,7 +325,8 @@ export class TestConfiguration {
     }
 
     let actualHostsString;
-    if (options.useMultipleMongoses) {
+    // Ignore multi mongos options in serverless testing.
+    if (options.useMultipleMongoses && !this.isServerless) {
       if (this.isLoadBalanced) {
         const multiUri = new ConnectionString(this.multiMongosLoadBalancerUri);
         if (multiUri.isSRV) {
@@ -331,7 +338,7 @@ export class TestConfiguration {
         actualHostsString = this.options.hostAddresses.map(ha => ha.toString()).join(',');
       }
     } else {
-      if (this.isLoadBalanced) {
+      if (this.isLoadBalanced || this.isServerless) {
         const singleUri = new ConnectionString(this.singleMongosLoadBalancerUri);
         actualHostsString = singleUri.hosts[0].toString();
       } else {
