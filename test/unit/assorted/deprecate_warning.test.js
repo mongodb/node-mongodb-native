@@ -1,11 +1,17 @@
 'use strict';
-const { deprecateOptions } = require('../../../src/utils');
+const {
+  deprecateOptions,
+  MONGODB_DEPRECATIONS,
+  emitWarningOnce,
+  emitWarning
+} = require('../../../src/utils');
 const {
   ClassWithLogger,
   ClassWithoutLogger,
   ClassWithUndefinedLogger,
   ensureCalledWith,
-  makeTestFunction
+  makeTestFunction,
+  processTick
 } = require('../../tools/utils');
 
 const chai = require('chai');
@@ -16,6 +22,9 @@ const sinonChai = require('sinon-chai');
 require('mocha-sinon');
 
 chai.use(sinonChai);
+
+// Made a copy of the code the driver uses here rather than importing to catch accidental modification
+const MONGODB_WARNING_CODE = 'MONGODB DRIVER';
 
 describe('Deprecation Warnings', function () {
   describe('Deprecation Warnings - unit', function () {
@@ -232,6 +241,51 @@ describe('Deprecation Warnings', function () {
       }
 
       expect(func).to.not.throw();
+    });
+  });
+
+  describe('Deprecation settings via MONGODB_DEPRECATION_FILTER', () => {
+    const originalMongoDBDeprecations = { ...MONGODB_DEPRECATIONS };
+
+    afterEach(() => {
+      MONGODB_DEPRECATIONS.emittedWarnings = new Set();
+      MONGODB_DEPRECATIONS.emitWarning = originalMongoDBDeprecations.emitWarning;
+      process.removeAllListeners('warning');
+    });
+
+    it('should export MONGODB_DEPRECATIONS that controls deprecation warnings', () => {
+      expect(MONGODB_DEPRECATIONS).to.be.sealed;
+      expect(Object.getPrototypeOf(MONGODB_DEPRECATIONS)).to.be.null;
+      expect(MONGODB_DEPRECATIONS).to.have.property('emittedWarnings').that.is.instanceOf(Set);
+      expect(MONGODB_DEPRECATIONS).to.have.property('emitWarning').that.is.a('function');
+    });
+
+    it('should emit warnings with code equal to MONGODB_WARNING_CODE', async () => {
+      const warnings = [];
+      process.on('warning', warning => warnings.push(warning));
+
+      emitWarning('hello!');
+      await processTick();
+      expect(warnings[0]).to.have.property('code', MONGODB_WARNING_CODE);
+      expect(warnings[0]).to.have.property('message', 'hello!');
+    });
+
+    it('should accept custom emitWarning function', () => {
+      const warnings = [];
+      MONGODB_DEPRECATIONS.emitWarning = warning => warnings.push(warning);
+
+      emitWarning('goodbye!');
+      emitWarning('hello!');
+      expect(warnings).to.have.lengthOf(2);
+      expect(warnings[0]).to.be.equal('goodbye!');
+      expect(warnings[1]).to.be.equal('hello!');
+    });
+
+    describe('emitWarningOnce()', () => {
+      it('should add message to emittedWarnings Set', () => {
+        emitWarningOnce('hello');
+        expect(MONGODB_DEPRECATIONS.emittedWarnings).includes('hello');
+      });
     });
   });
 });

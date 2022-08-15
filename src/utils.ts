@@ -457,6 +457,14 @@ export function maybePromise<T>(
         resolve(res);
       };
     });
+  } else {
+    const cbMsg = `\nCallback support is deprecated and will be removed in the next major version.
+If this impacts your usage of the driver there are few migration paths to consider:
+  - You can start to using async/await syntax, which works with our driver today.
+  - You can use .then/.catch at the end of any of our promise returning APIs and call you callback from within those.
+  - You can install and import 'mongodb-legacy' a package that wraps all the async driver APIs and continues to provide the optional callback support.
+You can read more about this here: LINK\n`;
+    emitWarningOnce(cbMsg);
   }
 
   wrapper((err, res) => {
@@ -1240,13 +1248,21 @@ export const DEFAULT_PK_FACTORY = {
  * ```
  */
 export const MONGODB_WARNING_CODE = 'MONGODB DRIVER' as const;
+export const MONGODB_DEPRECATIONS: {
+  emittedWarnings: Set<string>;
+  emitWarning: (message: string) => void;
+} = Object.seal(
+  Object.assign(Object.create(null), {
+    emittedWarnings: new Set<string>(),
+    emitWarning: (message: string) => process.emitWarning(message, { code: MONGODB_WARNING_CODE })
+  })
+);
 
 /** @internal */
 export function emitWarning(message: string): void {
-  return process.emitWarning(message, { code: MONGODB_WARNING_CODE } as any);
+  return MONGODB_DEPRECATIONS.emitWarning(message);
 }
 
-const emittedWarnings = new Set();
 /**
  * Will emit a warning once for the duration of the application.
  * Uses the message to identify if it has already been emitted
@@ -1254,8 +1270,8 @@ const emittedWarnings = new Set();
  * @internal
  */
 export function emitWarningOnce(message: string): void {
-  if (!emittedWarnings.has(message)) {
-    emittedWarnings.add(message);
+  if (!MONGODB_DEPRECATIONS.emittedWarnings.has(message)) {
+    MONGODB_DEPRECATIONS.emittedWarnings.add(message);
     return emitWarning(message);
   }
 }
