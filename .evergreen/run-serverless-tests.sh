@@ -3,8 +3,7 @@
 source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
 
 if [ -z ${SERVERLESS+omitted} ]; then echo "SERVERLESS is unset" && exit 1; fi
-if [ -z ${MULTI_ATLASPROXY_SERVERLESS_URI+omitted} ]; then echo "MULTI_ATLASPROXY_SERVERLESS_URI is unset" && exit 1; fi
-if [ -z ${SINGLE_ATLASPROXY_SERVERLESS_URI+omitted} ]; then echo "SINGLE_ATLASPROXY_SERVERLESS_URI is unset" && exit 1; fi
+if [ -z ${SERVERLESS_URI+omitted} ]; then echo "SERVERLESS_URI is unset" && exit 1; fi
 if [ -z ${SINGLE_MONGOS_LB_URI+omitted} ]; then echo "SINGLE_MONGOS_LB_URI is unset" && exit 1; fi
 if [ -z ${MULTI_MONGOS_LB_URI+omitted} ]; then echo "MULTI_MONGOS_LB_URI is unset" && exit 1; fi
 if [ -z ${MONGODB_URI+omitted} ]; then echo "MONGODB_URI is unset" && exit 1; fi
@@ -16,10 +15,10 @@ npx mocha \
   test/integration/crud/crud.spec.test.js \
   test/integration/crud/crud.prose.test.js \
   test/integration/retryable-reads/retryable_reads.spec.test.js \
-  test/integration/retryable-writes/retryable_writes.spec.test.js \
-  test/integration/sessions/sessions.spec.test.js \
-  test/integration/sessions/sessions.test.js \
+  test/integration/retryable-writes/retryable_writes.spec.test.ts \
+  test/integration/sessions/sessions.spec.test.ts \
+  test/integration/sessions/sessions.test.ts \
   test/integration/transactions/transactions.spec.test.js \
-  test/integration/transactions/transactions.test.js \
+  test/integration/transactions/transactions.test.ts \
   test/integration/versioned-api/versioned_api.spec.test.js \
   test/integration/load-balancers/load_balancers.spec.test.js

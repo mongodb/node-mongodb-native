@@ -231,8 +231,7 @@ The following steps will walk you through how to create and test a MongoDB Serve
    AUTH: xxx
    TOPOLOGY: xxx
    SERVERLESS: xxx
-   MULTI_ATLASPROXY_SERVERLESS_URI: xxx
-   SINGLE_ATLASPROXY_SERVERLESS_URI: xxx
+   SERVERLESS_URI: xxx
    ```
 
 1. Generate a sourceable environment file from `serverless-expansion.yml` by running the following command:
@@ -245,9 +244,9 @@ The following steps will walk you through how to create and test a MongoDB Serve
 
 1. Update the following variables in `serverless.env`, so that they are equivalent to what our Evergreen builds do:
 
-   - Change `MONGODB_URI` to have the same value as `SINGLE_ATLASPROXY_SERVERLESS_URI`.
-   - Add `SINGLE_MONGOS_LB_URI` and set it to the value of `SINGLE_ATLASPROXY_SERVERLESS_URI`.
-   - Add `MULTI_MONGOS_LB_URI` and set it to the value of `SINGLE_ATLASPROXY_SERVERLESS_URI`.
+   - Change `MONGODB_URI` to have the same value as `SERVERLESS_URI`.
+   - Add `SINGLE_MONGOS_LB_URI` and set it to the value of `SERVERLESS_URI`.
+   - Add `MULTI_MONGOS_LB_URI` and set it to the value of `SERVERLESS_URI`.
 
 1. Source the environment variables using a command like `source serverless.env`.
 
