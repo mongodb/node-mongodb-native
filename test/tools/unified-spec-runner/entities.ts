@@ -375,7 +375,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const client = map.getEntity('client', entity.database.client);
         const db = client.db(
           entity.database.databaseName,
-          patchDbOptions(entity.database.databaseOptions!)
+          patchDbOptions(entity.database.databaseOptions)
         );
         map.set(entity.database.id, db);
       } else if ('collection' in entity) {
