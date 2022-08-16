@@ -12,7 +12,6 @@ get_mongodb_download_url_for "$DISTRO" "$MONGODB_VERSION"
 # get_mongodb_download_url_for defines $MONGO_CRYPT_SHARED_DOWNLOAD_URL and $EXTRACT.
 if [ -z "$MONGO_CRYPT_SHARED_DOWNLOAD_URL" ]; then
   echo "There is no crypt_shared library for distro='$DISTRO' and version='$MONGODB_VERSION'".
-  exit 1
 else
   echo "Downloading crypt_shared package from $MONGO_CRYPT_SHARED_DOWNLOAD_URL"
   download_and_extract_crypt_shared "$MONGO_CRYPT_SHARED_DOWNLOAD_URL" "$EXTRACT"

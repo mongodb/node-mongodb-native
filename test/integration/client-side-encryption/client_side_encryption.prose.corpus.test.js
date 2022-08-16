@@ -7,6 +7,7 @@ const path = require('path');
 const BSON = require('bson');
 const { EJSON } = require('bson');
 const { expect } = require('chai');
+const { getEncryptExtraOptions } = require('../../tools/utils');
 
 describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {
@@ -214,10 +215,12 @@ describe('Client Side Encryption Prose Corpus Test', function () {
               tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
             }
           };
+          const extraOptions = getEncryptExtraOptions();
           const autoEncryption = {
             keyVaultNamespace,
             kmsProviders,
-            tlsOptions
+            tlsOptions,
+            extraOptions
           };
           if (useClientSideSchema) {
             autoEncryption.schemaMap = {
@@ -231,7 +234,8 @@ describe('Client Side Encryption Prose Corpus Test', function () {
               bson: BSON,
               keyVaultNamespace,
               kmsProviders,
-              tlsOptions
+              tlsOptions,
+              extraOptions
             });
           });
         });

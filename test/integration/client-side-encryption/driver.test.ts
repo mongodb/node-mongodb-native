@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import { Collection, CommandStartedEvent, MongoClient } from '../../../src';
 import * as BSON from '../../../src/bson';
 import { ClientEncryption } from '../../tools/unified-spec-runner/schema';
+import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata = {
   requires: {
@@ -71,6 +72,7 @@ describe('Client Side Encryption Functional', function () {
                     key: 'A'.repeat(128)
                   }
                 },
+                extraOptions: getEncryptExtraOptions(),
                 encryptedFieldsMap: {
                   'test.coll': {
                     fields: [
@@ -130,7 +132,8 @@ describe('Client Side Encryption Functional', function () {
       const encryption: ClientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
         bson: BSON,
         keyVaultNamespace,
-        kmsProviders
+        kmsProviders,
+        extraOptions: getEncryptExtraOptions()
       });
 
       const dataDb = client.db(dataDbName);
@@ -157,7 +160,13 @@ describe('Client Side Encryption Functional', function () {
 
       encryptedClient = this.configuration.newClient(
         {},
-        { autoEncryption: { keyVaultNamespace, kmsProviders } }
+        {
+          autoEncryption: {
+            keyVaultNamespace,
+            kmsProviders,
+            extraOptions: getEncryptExtraOptions()
+          }
+        }
       );
 
       await encryptedClient.connect();
@@ -221,7 +230,8 @@ describe('Client Side Encryption Functional', function () {
         monitorCommands: true,
         autoEncryption: {
           keyVaultNamespace,
-          kmsProviders: { local: { key: 'A'.repeat(128) } }
+          kmsProviders: { local: { key: 'A'.repeat(128) } },
+          extraOptions: getEncryptExtraOptions()
         }
       };
       client = this.configuration.newClient({}, encryptionOptions);

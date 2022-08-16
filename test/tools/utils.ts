@@ -143,6 +143,13 @@ export class EventCollector {
   }
 }
 
+export function getEncryptExtraOptions() {
+  if (process.env.CRYPT_SHARED_LIB_PATH) {
+    return { cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH };
+  }
+  return {};
+}
+
 export function getSymbolFrom(target: any, symbolName: any, assertExists = true) {
   const symbol = Object.getOwnPropertySymbols(target).filter(
     s => s.toString() === `Symbol(${symbolName})`

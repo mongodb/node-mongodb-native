@@ -6,6 +6,7 @@ const { dropCollection } = require('../shared');
 const util = require('util');
 const fs = require('fs');
 const path = require('path');
+const { getEncryptExtraOptions } = require('../../tools/utils');
 
 /* REFERENCE: (note commit hash) */
 /* https://github.com/mongodb/specifications/blob/b3beada72ae1c992294ae6a8eea572003a274c35/source/client-side-encryption/tests/README.rst#deadlock-tests */
@@ -56,7 +57,8 @@ function deadlockTest(options, assertions) {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: { local: { key: LOCAL_KEY } },
         bypassAutoEncryption: options.bypassAutoEncryption,
-        keyVaultClient: options.useKeyVaultClient ? this.clientKeyVault : undefined
+        keyVaultClient: options.useKeyVaultClient ? this.clientKeyVault : undefined,
+        extraOptions: getEncryptExtraOptions()
       },
       maxPoolSize: options.maxPoolSize
     };
@@ -122,7 +124,8 @@ function deadlockTests(_metadata) {
             this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.clientTest, {
               kmsProviders: { local: { key: LOCAL_KEY } },
               keyVaultNamespace: 'keyvault.datakeys',
-              keyVaultClient: this.keyVaultClient
+              keyVaultClient: this.keyVaultClient,
+              extraOptions: getEncryptExtraOptions()
             });
             this.clientEncryption.encryptPromisified = util.promisify(
               this.clientEncryption.encrypt.bind(this.clientEncryption)

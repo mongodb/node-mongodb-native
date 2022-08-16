@@ -549,114 +549,35 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
-oneOffFuncAsTasks.push({
-  name: 'run-custom-csfle-tests-mongocryptd-pinned-commit',
-  tags: ['run-custom-dependency-tests'],
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: LOWEST_LTS
-      }
-    },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: 'latest',
-        TOPOLOGY: 'replica_set'
-      }
-    },
-    { func: 'bootstrap kms servers' },
-    {
-      func: 'run custom csfle tests',
-      vars: {
-        CSFLE_GIT_REF: '41afd44ca04d246998969c53de4e0f22802b0c8a'
-      }
-    }
-  ]
-});
-
-oneOffFuncAsTasks.push({
-  name: 'run-custom-csfle-tests-mongocryptd-master',
-  tags: ['run-custom-dependency-tests'],
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: LOWEST_LTS
-      }
-    },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: 'latest',
-        TOPOLOGY: 'replica_set'
-      }
-    },
-    { func: 'bootstrap kms servers' },
-    {
-      func: 'run custom csfle tests',
-      vars: {
-        CSFLE_GIT_REF: 'master'
-      }
-    }
-  ]
-});
-
-oneOffFuncAsTasks.push({
-  name: 'run-custom-csfle-shared-lib-tests-pinned-commit',
-  tags: ['run-custom-dependency-tests'],
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: LOWEST_LTS
-      }
-    },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: 'latest',
-        TOPOLOGY: 'replica_set'
-      }
-    },
-    { func: 'bootstrap kms servers' },
-    {
-      func: 'run custom csfle shared lib tests',
-      vars: {
-        VERSION: 'latest',
-        CSFLE_GIT_REF: '41afd44ca04d246998969c53de4e0f22802b0c8a'
-      }
-    }
-  ]
-});
-
-oneOffFuncAsTasks.push({
-  name: 'run-custom-csfle-shared-lib-tests-master',
-  tags: ['run-custom-dependency-tests'],
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: LOWEST_LTS
-      }
-    },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: 'latest',
-        TOPOLOGY: 'replica_set'
-      }
-    },
-    { func: 'bootstrap kms servers' },
-    {
-      func: 'run custom csfle shared lib tests',
-      vars: {
-        VERSION: 'latest',
-        CSFLE_GIT_REF: 'master'
-      }
-    }
-  ]
+[ '5.0', 'rapid', 'latest' ].forEach(version => {
+  [ '41afd44ca04d246998969c53de4e0f22802b0c8a', 'master' ].forEach(ref => {
+    oneOffFuncAsTasks.push({
+      name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
+      tags: ['run-custom-dependency-tests'],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: version,
+            TOPOLOGY: 'replica_set'
+          }
+        },
+        { func: 'bootstrap kms servers' },
+        {
+          func: 'run custom csfle tests',
+          vars: {
+            CSFLE_GIT_REF: ref
+          }
+        }
+      ]
+    });
+  });
 });
 
 // TODO NODE-3897 - generate combined coverage report

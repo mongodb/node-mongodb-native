@@ -10,6 +10,7 @@ const { dropCollection, APMEventCollector } = require('../shared');
 const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { MongoNetworkError, MongoServerError } = require('../../../src/error');
+const { getEncryptExtraOptions } = require('../../tools/utils');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -133,7 +134,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .then(() => {
             this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
               kmsProviders: getKmsProviders(),
-              keyVaultNamespace
+              keyVaultNamespace,
+              extraOptions: getEncryptExtraOptions()
             });
           })
           .then(() => {
@@ -143,6 +145,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 autoEncryption: {
                   keyVaultNamespace,
                   kmsProviders: getKmsProviders(),
+                  extraOptions: getEncryptExtraOptions(),
                   schemaMap
                 }
               }
@@ -422,7 +425,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 const options = {
                   bson: BSON,
                   keyVaultNamespace,
-                  kmsProviders: getKmsProviders(LOCAL_KEY)
+                  kmsProviders: getKmsProviders(LOCAL_KEY),
+                  extraOptions: getEncryptExtraOptions()
                 };
 
                 if (withExternalKeyVault) {
@@ -599,7 +603,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           monitorCommands: true,
           autoEncryption: {
             keyVaultNamespace,
-            kmsProviders: getKmsProviders(LOCAL_KEY)
+            kmsProviders: getKmsProviders(LOCAL_KEY),
+            extraOptions: getEncryptExtraOptions()
           }
         }
       );
@@ -782,7 +787,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         {
           autoEncryption: {
             keyVaultNamespace,
-            kmsProviders: getKmsProviders(LOCAL_KEY)
+            kmsProviders: getKmsProviders(LOCAL_KEY),
+            extraOptions: getEncryptExtraOptions()
           }
         }
       );
@@ -855,7 +861,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               tlsCAFile: process.env.KMIP_TLS_CA_FILE,
               tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
             }
-          }
+          },
+          extraOptions: getEncryptExtraOptions()
         });
 
         this.clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(this.client, {
@@ -866,7 +873,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               tlsCAFile: process.env.KMIP_TLS_CA_FILE,
               tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
             }
-          }
+          },
+          extraOptions: getEncryptExtraOptions()
         });
       });
     });
@@ -1139,7 +1147,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const clientNoTlsOptions = {
         keyVaultNamespace,
         kmsProviders: getKmsProviders(null, null, '127.0.0.1:8002', '127.0.0.1:8002'),
-        tlsOptions: tlsCaOptions
+        tlsOptions: tlsCaOptions,
+        extraOptions: getEncryptExtraOptions()
       };
       const clientWithTlsOptions = {
         keyVaultNamespace,
@@ -1161,17 +1170,20 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             tlsCAFile: process.env.KMIP_TLS_CA_FILE,
             tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
           }
-        }
+        },
+        extraOptions: getEncryptExtraOptions()
       };
       const clientWithTlsExpiredOptions = {
         keyVaultNamespace,
         kmsProviders: getKmsProviders(null, '127.0.0.1:8000', '127.0.0.1:8000', '127.0.0.1:8000'),
-        tlsOptions: tlsCaOptions
+        tlsOptions: tlsCaOptions,
+        extraOptions: getEncryptExtraOptions()
       };
       const clientWithInvalidHostnameOptions = {
         keyVaultNamespace,
         kmsProviders: getKmsProviders(null, '127.0.0.1:8001', '127.0.0.1:8001', '127.0.0.1:8001'),
-        tlsOptions: tlsCaOptions
+        tlsOptions: tlsCaOptions,
+        extraOptions: getEncryptExtraOptions()
       };
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
 
@@ -1480,7 +1492,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       clientEncryption = new mongodbClientEncryption.ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: getKmsProviders(LOCAL_KEY),
-        bson: BSON
+        bson: BSON,
+        extraOptions: getEncryptExtraOptions()
       });
       // Create a MongoClient named ``encryptedClient`` with these ``AutoEncryptionOpts``:
       //   AutoEncryptionOpts {
@@ -1494,7 +1507,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           autoEncryption: {
             bypassQueryAnalysis: true,
             keyVaultNamespace: 'keyvault.datakeys',
-            kmsProviders: getKmsProviders(LOCAL_KEY)
+            kmsProviders: getKmsProviders(LOCAL_KEY),
+            extraOptions: getEncryptExtraOptions()
           }
         }
       );
@@ -1752,7 +1766,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       // Create a ClientEncryption object (referred to as client_encryption) with client set as the keyVaultClient.
       clientEncryption = new this.configuration.mongodbClientEncryption.ClientEncryption(client, {
         keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: getKmsProviders()
+        kmsProviders: getKmsProviders(),
+        extraOptions: getEncryptExtraOptions()
       });
 
       // Using client_encryption, create a data key with a local KMS provider and the keyAltName "def".
@@ -1854,7 +1869,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       clientEncryption = new mongodbClientEncryption.ClientEncryption(setupClient, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: getKmsProviders(LOCAL_KEY),
-        bson: BSON
+        bson: BSON,
+        extraOptions: getEncryptExtraOptions()
       });
       // Create a data key with the "local" KMS provider.
       // Storing the result in a variable named ``keyID``.
@@ -1887,7 +1903,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           monitorCommands: true,
           autoEncryption: {
             keyVaultNamespace: 'keyvault.datakeys',
-            kmsProviders: getKmsProviders(LOCAL_KEY)
+            kmsProviders: getKmsProviders(LOCAL_KEY),
+            extraOptions: getEncryptExtraOptions()
           }
         }
       );
@@ -2114,6 +2131,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                   tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
                 }
               },
+              extraOptions: getEncryptExtraOptions(),
               bson: BSON
             }
           );
@@ -2141,6 +2159,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                   tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
                 }
               },
+              extraOptions: getEncryptExtraOptions(),
               bson: BSON
             }
           );
