@@ -171,12 +171,14 @@ export function patchVersion(version: string): string {
   return `${major}.${minor ?? 0}.${patch ?? 0}`;
 }
 
-export function patchDbOptions(options: CollectionOrDatabaseOptions): DbOptions {
+export function patchDbOptions(options: CollectionOrDatabaseOptions = {}): DbOptions {
   // TODO
   return { ...options } as DbOptions;
 }
 
-export function patchCollectionOptions(options: CollectionOrDatabaseOptions): CollectionOptions {
+export function patchCollectionOptions(
+  options: CollectionOrDatabaseOptions = {}
+): CollectionOptions {
   // TODO
   return { ...options } as CollectionOptions;
 }

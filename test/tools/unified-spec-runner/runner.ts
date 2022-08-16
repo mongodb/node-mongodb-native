@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
@@ -7,7 +8,7 @@ import { ReadPreference } from '../../../src/read_preference';
 import { TopologyType } from '../../../src/sdam/common';
 import { ns } from '../../../src/utils';
 import { ejson } from '../utils';
-import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
+import { EntitiesMap, UnifiedMongoClient } from './entities';
 import { matchesEvents } from './match';
 import { executeOperationAndCheck } from './operations';
 import * as uni from './schema';
@@ -65,7 +66,6 @@ async function runUnifiedTest(
       expect.fail(`Test was skipped with an empty skip reason: ${test.description}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ctx.test!.skipReason = skipReason;
 
     ctx.skip();
@@ -79,7 +79,7 @@ async function runUnifiedTest(
     utilClient = ctx.configuration.newClient();
   }
 
-  let entities: EntitiesMap;
+  let entities: EntitiesMap | undefined;
   try {
     trace('\n starting test:');
     try {
@@ -198,13 +198,12 @@ async function runUnifiedTest(
       }
     }
 
-    const clientCommandEvents = new Map<string, CommandEvent[]>();
-    const clientCmapEvents = new Map<string, CmapEvent[]>();
+    const clientList = new Map<string, UnifiedMongoClient>();
     // If any event listeners were enabled on any client entities,
     // the test runner MUST now disable those event listeners.
     for (const [id, client] of entities.mapOf('client')) {
-      clientCommandEvents.set(id, client.stopCapturingCommandEvents());
-      clientCmapEvents.set(id, client.stopCapturingCmapEvents());
+      client.stopCapturingEvents();
+      clientList.set(id, client);
     }
 
     if (test.expectEvents) {
@@ -213,11 +212,13 @@ async function runUnifiedTest(
         const eventType = expectedEventsForClient.eventType;
         // If no event type is provided it defaults to 'command', so just
         // check for 'cmap' here for now.
-        const actualEvents =
-          eventType === 'cmap' ? clientCmapEvents.get(clientId) : clientCommandEvents.get(clientId);
-
-        expect(actualEvents, `No client entity found with id ${clientId}`).to.exist;
-        matchesEvents(expectedEventsForClient, actualEvents, entities);
+        const testClient = clientList.get(clientId);
+        expect(testClient, `No client entity found with id ${clientId}`).to.exist;
+        matchesEvents(
+          expectedEventsForClient,
+          testClient!.getCapturedEvents(eventType ?? 'command'),
+          entities
+        );
       }
     }
 

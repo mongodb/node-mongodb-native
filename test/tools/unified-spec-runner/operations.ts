@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai';
 
@@ -26,7 +27,9 @@ interface OperationFunctionParams {
   entities: EntitiesMap;
 }
 
-type RunOperationFn = (p: OperationFunctionParams) => Promise<Document | boolean | number | void>;
+type RunOperationFn = (
+  p: OperationFunctionParams
+) => Promise<Document | boolean | number | null | void>;
 export const operations = new Map<string, RunOperationFn>();
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
@@ -39,7 +42,7 @@ operations.set('aggregate', async ({ entities, operation }) => {
   if (!(dbOrCollection instanceof Db || dbOrCollection instanceof Collection)) {
     throw new Error(`Operation object '${operation.object}' must be a db or collection`);
   }
-  const { pipeline, ...opts } = operation.arguments;
+  const { pipeline, ...opts } = operation.arguments!;
   const cursor = dbOrCollection.aggregate(pipeline, opts);
   return cursor.toArray();
 });
@@ -47,35 +50,35 @@ operations.set('aggregate', async ({ entities, operation }) => {
 operations.set('assertCollectionExists', async ({ operation, client }) => {
   const collections = (
     await client
-      .db(operation.arguments.databaseName)
+      .db(operation.arguments!.databaseName)
       .listCollections({}, { nameOnly: true })
       .toArray()
   ).map(({ name }) => name);
-  expect(collections).to.include(operation.arguments.collectionName);
+  expect(collections).to.include(operation.arguments!.collectionName);
 });
 
 operations.set('assertCollectionNotExists', async ({ operation, client }) => {
   const collections = (
     await client
-      .db(operation.arguments.databaseName)
+      .db(operation.arguments!.databaseName)
       .listCollections({}, { nameOnly: true })
       .toArray()
   ).map(({ name }) => name);
-  expect(collections).to.not.include(operation.arguments.collectionName);
+  expect(collections).to.not.include(operation.arguments!.collectionName);
 });
 
 operations.set('assertIndexExists', async ({ operation, client }) => {
   const collection = client
-    .db(operation.arguments.databaseName)
-    .collection(operation.arguments.collectionName);
+    .db(operation.arguments!.databaseName)
+    .collection(operation.arguments!.collectionName);
   const indexes = (await collection.listIndexes().toArray()).map(({ name }) => name);
-  expect(indexes).to.include(operation.arguments.indexName);
+  expect(indexes).to.include(operation.arguments!.indexName);
 });
 
 operations.set('assertIndexNotExists', async ({ operation, client }) => {
   const collection = client
-    .db(operation.arguments.databaseName)
-    .collection(operation.arguments.collectionName);
+    .db(operation.arguments!.databaseName)
+    .collection(operation.arguments!.collectionName);
 
   const listIndexCursor = collection.listIndexes();
   let indexes;
@@ -88,11 +91,11 @@ operations.set('assertIndexNotExists', async ({ operation, client }) => {
     // Error will always exist here, this makes the output show what caused an issue with assertIndexNotExists
     expect(error).to.not.exist;
   }
-  expect(indexes.map(({ name }) => name)).to.not.include(operation.arguments.indexName);
+  expect(indexes.map(({ name }) => name)).to.not.include(operation.arguments!.indexName);
 });
 
 operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operation }) => {
-  const client = entities.getEntity('client', operation.arguments.client);
+  const client = entities.getEntity('client', operation.arguments!.client);
   expect(client.observedCommandEvents.includes('commandStarted')).to.be.true;
 
   const startedEvents = client.commandEvents.filter(
@@ -111,7 +114,7 @@ operations.set('assertDifferentLsidOnLastTwoCommands', async ({ entities, operat
 });
 
 operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }) => {
-  const client = entities.getEntity('client', operation.arguments.client);
+  const client = entities.getEntity('client', operation.arguments!.client);
   expect(client.observedCommandEvents.includes('commandStarted')).to.be.true;
 
   const startedEvents = client.commandEvents.filter(
@@ -130,27 +133,27 @@ operations.set('assertSameLsidOnLastTwoCommands', async ({ entities, operation }
 });
 
 operations.set('assertSessionDirty', async ({ entities, operation }) => {
-  const session = operation.arguments.session;
+  const session = operation.arguments!.session;
   expect(session.serverSession.isDirty).to.be.true;
 });
 
 operations.set('assertSessionNotDirty', async ({ entities, operation }) => {
-  const session = operation.arguments.session;
+  const session = operation.arguments!.session;
   expect(session.serverSession.isDirty).to.be.false;
 });
 
 operations.set('assertSessionPinned', async ({ entities, operation }) => {
-  const session = operation.arguments.session;
+  const session = operation.arguments!.session;
   expect(session.isPinned, 'session should be pinned').to.be.true;
 });
 
 operations.set('assertSessionUnpinned', async ({ entities, operation }) => {
-  const session = operation.arguments.session;
+  const session = operation.arguments!.session;
   expect(session.isPinned, 'session should be unpinned').to.be.false;
 });
 
 operations.set('assertSessionTransactionState', async ({ entities, operation }) => {
-  const session = operation.arguments.session;
+  const session = operation.arguments!.session;
 
   const transactionStateTranslation = {
     none: 'NO_TRANSACTION',
@@ -160,25 +163,25 @@ operations.set('assertSessionTransactionState', async ({ entities, operation }) 
     aborted: 'TRANSACTION_ABORTED'
   };
 
-  const driverTransactionStateName = transactionStateTranslation[operation.arguments.state];
+  const driverTransactionStateName = transactionStateTranslation[operation.arguments!.state];
   expect(session.transaction.state).to.equal(driverTransactionStateName);
 });
 
 operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation }) => {
-  const client = entities.getEntity('client', operation.arguments.client);
-  const servers = Array.from(client.topology.s.servers.values());
+  const client = entities.getEntity('client', operation.arguments!.client);
+  const servers = Array.from(client.topology!.s.servers.values());
   const checkedOutConnections = servers.reduce((count, server) => {
     const pool = server.s.pool;
     return count + pool.currentCheckedOutCount;
   }, 0);
 
   await Promise.resolve(); // wait one tick
-  expect(checkedOutConnections).to.equal(operation.arguments.connections);
+  expect(checkedOutConnections).to.equal(operation.arguments!.connections);
 });
 
 operations.set('bulkWrite', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { requests, ...opts } = operation.arguments;
+  const { requests, ...opts } = operation.arguments!;
   return collection.bulkWrite(requests, opts);
 });
 
@@ -206,7 +209,7 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
     throw new Error(`Entity ${operation.object} must be watchable`);
   }
 
-  const { pipeline, ...args } = operation.arguments;
+  const { pipeline, ...args } = operation.arguments!;
   const changeStream = watchable.watch(pipeline, args);
 
   return new Promise((resolve, reject) => {
@@ -220,13 +223,13 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
 
 operations.set('createCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
-  const { collection, ...opts } = operation.arguments;
+  const { collection, ...opts } = operation.arguments!;
   return await db.createCollection(collection, opts);
 });
 
 operations.set('createFindCursor', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments;
+  const { filter, ...opts } = operation.arguments!;
   const cursor = collection.find(filter, opts);
   // The spec dictates that we create the cursor and force the find command
   // to execute, but don't move the cursor forward. hasNext() accomplishes
@@ -237,25 +240,25 @@ operations.set('createFindCursor', async ({ entities, operation }) => {
 
 operations.set('createIndex', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { keys, ...opts } = operation.arguments;
+  const { keys, ...opts } = operation.arguments!;
   await collection.createIndex(keys, opts);
 });
 
 operations.set('dropIndex', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { name, ...opts } = operation.arguments;
+  const { name, ...opts } = operation.arguments!;
   await collection.dropIndex(name, opts);
 });
 
 operations.set('deleteOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...options } = operation.arguments;
+  const { filter, ...options } = operation.arguments!;
   return collection.deleteOne(filter, options);
 });
 
 operations.set('dropCollection', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
-  const { collection, ...opts } = operation.arguments;
+  const { collection, ...opts } = operation.arguments!;
 
   // TODO(NODE-4243): dropCollection should suppress namespace not found errors
   try {
@@ -274,42 +277,42 @@ operations.set('endSession', async ({ entities, operation }) => {
 
 operations.set('find', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments;
+  const { filter, ...opts } = operation.arguments!;
   return collection.find(filter, opts).toArray();
 });
 
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, replacement, ...opts } = operation.arguments;
+  const { filter, replacement, ...opts } = operation.arguments!;
   return (await collection.findOneAndReplace(filter, replacement, translateOptions(opts))).value;
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, update, ...opts } = operation.arguments;
+  const { filter, update, ...opts } = operation.arguments!;
   return (await collection.findOneAndUpdate(filter, update, translateOptions(opts))).value;
 });
 
 operations.set('findOneAndDelete', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments;
+  const { filter, ...opts } = operation.arguments!;
   return (await collection.findOneAndDelete(filter, opts)).value;
 });
 
 operations.set('failPoint', async ({ entities, operation }) => {
-  const client = entities.getEntity('client', operation.arguments.client);
-  return entities.failPoints.enableFailPoint(client, operation.arguments.failPoint);
+  const client = entities.getEntity('client', operation.arguments!.client);
+  return entities.failPoints.enableFailPoint(client, operation.arguments!.failPoint);
 });
 
 operations.set('insertOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { document, ...opts } = operation.arguments;
+  const { document, ...opts } = operation.arguments!;
   return collection.insertOne(document, opts);
 });
 
 operations.set('insertMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { documents, ...opts } = operation.arguments;
+  const { documents, ...opts } = operation.arguments!;
   return collection.insertMany(documents, opts);
 });
 
@@ -338,23 +341,23 @@ operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) =>
 
 operations.set('listCollections', async ({ entities, operation }) => {
   const db = entities.getEntity('db', operation.object);
-  const { filter, ...opts } = operation.arguments;
+  const { filter, ...opts } = operation.arguments!;
   return db.listCollections(filter, opts).toArray();
 });
 
 operations.set('listDatabases', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.object);
-  return client.db().admin().listDatabases(operation.arguments);
+  return client.db().admin().listDatabases(operation.arguments!);
 });
 
 operations.set('listIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.listIndexes(operation.arguments).toArray();
+  return collection.listIndexes(operation.arguments!).toArray();
 });
 
 operations.set('replaceOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, replacement, ...opts } = operation.arguments;
+  const { filter, replacement, ...opts } = operation.arguments!;
   return collection.replaceOne(filter, replacement, opts);
 });
 
@@ -364,26 +367,26 @@ operations.set('startTransaction', async ({ entities, operation }) => {
 });
 
 operations.set('targetedFailPoint', async ({ entities, operation }) => {
-  const session = operation.arguments.session;
+  const session = operation.arguments!.session;
   expect(session.isPinned, 'Session must be pinned for a targetedFailPoint').to.be.true;
   const address = session.transaction.isPinned
     ? session.transaction._pinnedServer.s.description.hostAddress
     : session.pinnedConnection.address;
 
-  await entities.failPoints.enableFailPoint(address, operation.arguments.failPoint);
+  await entities.failPoints.enableFailPoint(address, operation.arguments!.failPoint);
 });
 
 operations.set('delete', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
-  return bucket.delete(operation.arguments.id);
+  return bucket.delete(operation.arguments!.id);
 });
 
 operations.set('download', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
 
-  const stream = bucket.openDownloadStream(operation.arguments.id);
+  const stream = bucket.openDownloadStream(operation.arguments!.id);
   return new Promise((resolve, reject) => {
-    const chunks = [];
+    const chunks: any[] = [];
     stream.on('data', chunk => chunks.push(...chunk));
     stream.on('error', reject);
     stream.on('end', () => resolve(chunks));
@@ -393,12 +396,12 @@ operations.set('download', async ({ entities, operation }) => {
 operations.set('upload', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
 
-  const stream = bucket.openUploadStream(operation.arguments.filename, {
-    chunkSizeBytes: operation.arguments.chunkSizeBytes
+  const stream = bucket.openUploadStream(operation.arguments!.filename, {
+    chunkSizeBytes: operation.arguments!.chunkSizeBytes
   });
 
   return new Promise<ObjectId>((resolve, reject) => {
-    stream.end(Buffer.from(operation.arguments.source.$$hexBytes, 'hex'), (error, file) => {
+    stream.end(Buffer.from(operation.arguments!.source.$$hexBytes, 'hex'), (error, file) => {
       if (error) reject(error);
       resolve((file as GridFSFile)._id as ObjectId);
     });
@@ -412,11 +415,11 @@ operations.set('withTransaction', async ({ entities, operation, client }) => {
     readConcern: ReadConcern.fromOptions(operation.arguments),
     writeConcern: WriteConcern.fromOptions(operation.arguments),
     readPreference: ReadPreference.fromOptions(operation.arguments),
-    maxCommitTimeMS: operation.arguments.maxCommitTimeMS
+    maxCommitTimeMS: operation.arguments!.maxCommitTimeMS
   };
 
   return session.withTransaction(async () => {
-    for (const callbackOperation of operation.arguments.callback) {
+    for (const callbackOperation of operation.arguments!.callback) {
       await executeOperationAndCheck(callbackOperation, entities, client);
     }
   }, options);
@@ -424,61 +427,61 @@ operations.set('withTransaction', async ({ entities, operation, client }) => {
 
 operations.set('countDocuments', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments;
+  const { filter, ...opts } = operation.arguments!;
   return collection.countDocuments(filter, opts);
 });
 
 operations.set('deleteMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, ...opts } = operation.arguments;
+  const { filter, ...opts } = operation.arguments!;
   return collection.deleteMany(filter, opts);
 });
 
 operations.set('distinct', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { fieldName, filter, ...opts } = operation.arguments;
+  const { fieldName, filter, ...opts } = operation.arguments!;
   return collection.distinct(fieldName, filter, opts);
 });
 
 operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  return collection.estimatedDocumentCount(operation.arguments);
+  return collection.estimatedDocumentCount(operation.arguments!);
 });
 
 operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {
   const db = entities.getEntity('db', operation.object);
-  const { command, ...opts } = operation.arguments;
+  const { command, ...opts } = operation.arguments!;
   return db.command(command, opts);
 });
 
 operations.set('updateMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, update, ...options } = operation.arguments;
+  const { filter, update, ...options } = operation.arguments!;
   return collection.updateMany(filter, update, options);
 });
 
 operations.set('updateOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { filter, update, ...options } = operation.arguments;
+  const { filter, update, ...options } = operation.arguments!;
   return collection.updateOne(filter, update, options);
 });
 
 operations.set('rename', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
-  const { to, ...options } = operation.arguments;
+  const { to, ...options } = operation.arguments!;
   return collection.rename(to, options);
 });
 
 operations.set('createDataKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { kmsProvider, opts } = operation.arguments ?? {};
+  const { kmsProvider, opts } = operation.arguments!;
 
   return clientEncryption.createDataKey(kmsProvider, opts);
 });
 
 operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { filter, opts } = operation.arguments ?? {};
+  const { filter, opts } = operation.arguments!;
 
   const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey(filter, opts);
 
@@ -500,14 +503,14 @@ operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
 
 operations.set('deleteKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { id } = operation.arguments ?? {};
+  const { id } = operation.arguments!;
 
   return clientEncryption.deleteKey(id);
 });
 
 operations.set('getKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { id } = operation.arguments ?? {};
+  const { id } = operation.arguments!;
 
   return clientEncryption.getKey(id);
 });
@@ -520,21 +523,21 @@ operations.set('getKeys', async ({ entities, operation }) => {
 
 operations.set('addKeyAltName', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { id, keyAltName } = operation.arguments ?? {};
+  const { id, keyAltName } = operation.arguments!;
 
   return clientEncryption.addKeyAltName(id, keyAltName);
 });
 
 operations.set('removeKeyAltName', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { id, keyAltName } = operation.arguments ?? {};
+  const { id, keyAltName } = operation.arguments!;
 
   return clientEncryption.removeKeyAltName(id, keyAltName);
 });
 
 operations.set('getKeyByAltName', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { keyAltName } = operation.arguments ?? {};
+  const { keyAltName } = operation.arguments!;
 
   return clientEncryption.getKeyByAltName(keyAltName);
 });
@@ -555,7 +558,7 @@ export async function executeOperationAndCheck(
   let result;
 
   try {
-    result = await opFunc({ entities, operation, client });
+    result = await opFunc!({ entities, operation, client });
   } catch (error) {
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);
@@ -575,7 +578,7 @@ export async function executeOperationAndCheck(
   }
 
   if (operation.expectResult) {
-    resultCheck(result, operation.expectResult, entities);
+    resultCheck(result, operation.expectResult as any, entities);
   }
 
   if (operation.saveResultAsEntity) {

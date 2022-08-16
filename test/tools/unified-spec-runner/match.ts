@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { inspect } from 'util';
 
@@ -7,6 +8,7 @@ import {
   Document,
   Long,
   MongoError,
+  MongoServerError,
   ObjectId,
   OneOrMore
 } from '../../../src';
@@ -264,11 +266,11 @@ export function specialCheck(
   entities: EntitiesMap,
   path: string[] = [],
   checkExtraKeys: boolean
-): boolean {
+): void {
   if (isUnsetOrMatchesOperator(expected)) {
     if (actual === null || actual === undefined) return;
 
-    resultCheck(actual, expected.$$unsetOrMatches, entities, path, checkExtraKeys);
+    resultCheck(actual, expected.$$unsetOrMatches as any, entities, path, checkExtraKeys);
   } else if (isMatchesEntityOperator(expected)) {
     // $$matchesEntity
     const entity = entities.get(expected.$$matchesEntity);
@@ -290,7 +292,7 @@ export function specialCheck(
     // $$sessionLsid
     const session = entities.getEntity('session', expected.$$sessionLsid, false);
     expect(session, `Session ${expected.$$sessionLsid} does not exist in entities`).to.exist;
-    const entitySessionHex = session.id.id.buffer.toString('hex').toUpperCase();
+    const entitySessionHex = session.id!.id.buffer.toString('hex').toUpperCase();
     const actualSessionHex = actual.id.buffer.toString('hex').toUpperCase();
     expect(
       entitySessionHex,
@@ -298,7 +300,7 @@ export function specialCheck(
     ).to.equal(actualSessionHex);
   } else if (isTypeOperator(expected)) {
     // $$type
-    let ok: boolean;
+    let ok = false;
     const types = Array.isArray(expected.$$type) ? expected.$$type : [expected.$$type];
     for (const type of types) {
       ok ||= TYPE_MAP.get(type)(actual);
@@ -364,19 +366,23 @@ function compareCommandStartedEvents(
   entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected.command) {
-    resultCheck(actual.command, expected.command, entities, [`${prefix}.command`]);
+  if (expected!.command) {
+    resultCheck(actual.command, expected!.command, entities, [`${prefix}.command`]);
   }
-  if (expected.commandName) {
+  if (expected!.commandName) {
     expect(
-      expected.commandName,
-      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+      expected!.commandName,
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
+      }`
     ).to.equal(actual.commandName);
   }
-  if (expected.databaseName) {
+  if (expected!.databaseName) {
     expect(
-      expected.databaseName,
-      `expected ${prefix}.databaseName to equal ${expected.databaseName} but received ${actual.databaseName}`
+      expected!.databaseName,
+      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${
+        actual.databaseName
+      }`
     ).to.equal(actual.databaseName);
   }
 }
@@ -387,13 +393,15 @@ function compareCommandSucceededEvents(
   entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected.reply) {
-    resultCheck(actual.reply, expected.reply, entities, [prefix]);
+  if (expected!.reply) {
+    resultCheck(actual.reply as Document, expected!.reply, entities, [prefix]);
   }
-  if (expected.commandName) {
+  if (expected!.commandName) {
     expect(
-      expected.commandName,
-      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+      expected!.commandName,
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
+      }`
     ).to.equal(actual.commandName);
   }
 }
@@ -404,10 +412,12 @@ function compareCommandFailedEvents(
   entities: EntitiesMap,
   prefix: string
 ) {
-  if (expected.commandName) {
+  if (expected!.commandName) {
     expect(
-      expected.commandName,
-      `expected ${prefix}.commandName to equal ${expected.commandName} but received ${actual.commandName}`
+      expected!.commandName,
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
+      }`
     ).to.equal(actual.commandName);
   }
 }
@@ -489,26 +499,32 @@ export function matchesEvents(
   }
 }
 
+function isMongoCryptError(err): boolean {
+  if (err.constructor.name === 'MongoCryptError') {
+    return true;
+  }
+  return err.stack.includes('at ClientEncryption');
+}
+
 export function expectErrorCheck(
   error: Error | MongoError,
   expected: ExpectedError,
   entities: EntitiesMap
-): boolean {
-  if (Object.keys(expected)[0] === 'isClientError' || Object.keys(expected)[0] === 'isError') {
-    // FIXME: We cannot tell if Error arose from driver and not from server
-    return;
+): void {
+  const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;
+
+  if (!isMongoCryptError(error)) {
+    expect(error, expectMessage).to.be.instanceOf(MongoError);
   }
 
-  const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;
+  if (expected.isClientError === false) {
+    expect(error).to.be.instanceOf(MongoServerError);
+  } else if (expected.isClientError === true) {
+    expect(error).not.to.be.instanceOf(MongoServerError);
+  }
 
   if (expected.errorContains != null) {
     expect(error.message, expectMessage).to.include(expected.errorContains);
-  }
-
-  if (!(error instanceof MongoError)) {
-    // if statement asserts type for TS, expect will always fail
-    expect(error, expectMessage).to.be.instanceOf(MongoError);
-    return;
   }
 
   if (expected.errorCode != null) {
@@ -520,24 +536,26 @@ export function expectErrorCheck(
   }
 
   if (expected.errorLabelsContain != null) {
+    const mongoError = error as MongoError;
     for (const errorLabel of expected.errorLabelsContain) {
       expect(
-        error.hasErrorLabel(errorLabel),
-        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}] -- ${expectMessage}`
+        mongoError.hasErrorLabel(errorLabel),
+        `Error was supposed to have label ${errorLabel}, has [${mongoError.errorLabels}] -- ${expectMessage}`
       ).to.be.true;
     }
   }
 
   if (expected.errorLabelsOmit != null) {
+    const mongoError = error as MongoError;
     for (const errorLabel of expected.errorLabelsOmit) {
       expect(
-        error.hasErrorLabel(errorLabel),
-        `Error was supposed to have label ${errorLabel}, has [${error.errorLabels}] -- ${expectMessage}`
+        mongoError.hasErrorLabel(errorLabel),
+        `Error was not supposed to have label ${errorLabel}, has [${mongoError.errorLabels}] -- ${expectMessage}`
       ).to.be.false;
     }
   }
 
   if (expected.expectResult != null) {
-    resultCheck(error, expected.expectResult, entities);
+    resultCheck(error, expected.expectResult as any, entities);
   }
 }
