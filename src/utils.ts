@@ -459,10 +459,10 @@ export function maybePromise<T>(
     });
   } else {
     const cbMsg = `\nCallback support is deprecated and will be removed in the next major version.
-If this impacts your usage of the driver there are few migration paths to consider:
-  - You can start to using async/await syntax, which works with our driver today.
+If this impacts your usage of the driver there are a few migration paths to consider:
+  - You can start using async/await syntax, which works with our driver today.
   - You can use .then/.catch at the end of any of our promise returning APIs and call you callback from within those.
-  - You can install and import 'mongodb-legacy' a package that wraps all the async driver APIs and continues to provide the optional callback support.
+  - You can install and import 'mongodb-legacy': a package that wraps all the currently existing async driver APIs and continues to provide the optional callback support.
 You can read more about this here: LINK\n`;
     emitWarningOnce(cbMsg);
   }
