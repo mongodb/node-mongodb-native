@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { deserialize, serialize } from './bson';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
@@ -56,12 +55,6 @@ export class Encrypter {
         proxyPassword: options.proxyPassword
       };
     }
-
-    options.autoEncryption.bson = Object.create(null);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    options.autoEncryption.bson!.serialize = serialize;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    options.autoEncryption.bson!.deserialize = deserialize;
 
     this.autoEncrypter = new AutoEncrypterClass(client, options.autoEncryption);
   }
