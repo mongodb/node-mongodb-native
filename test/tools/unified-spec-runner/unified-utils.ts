@@ -176,7 +176,9 @@ export function patchDbOptions(options: CollectionOrDatabaseOptions): DbOptions 
   return { ...options } as DbOptions;
 }
 
-export function patchCollectionOptions(options: CollectionOrDatabaseOptions): CollectionOptions {
+export function patchCollectionOptions(
+  options: CollectionOrDatabaseOptions = {}
+): CollectionOptions {
   // TODO
   return { ...options } as CollectionOptions;
 }

@@ -382,7 +382,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         const db = map.getEntity('db', entity.collection.database);
         const collection = db.collection(
           entity.collection.collectionName,
-          patchCollectionOptions(entity.collection.collectionOptions!)
+          patchCollectionOptions(entity.collection.collectionOptions)
         );
         map.set(entity.collection.id, collection);
       } else if ('session' in entity) {
