@@ -522,7 +522,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         })
         .then(() => {
           if (this.topology == null) {
-            return callback();
+            return;
           }
           // clear out references to old topology
           const topology = this.topology;
