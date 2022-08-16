@@ -508,7 +508,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
           const serverDescriptions = Array.from(topologyDescription.servers.values());
           const servers = selector(topologyDescription, serverDescriptions);
           if (servers.length === 0) {
-            return callback();
+            return;
           }
 
           const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);

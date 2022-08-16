@@ -668,6 +668,7 @@ describe('class MongoClient', function () {
         await client.close();
 
         expect(startedEvents).to.be.empty;
+        expect(client.s.sessionPool.sessions).to.have.lengthOf(1);
       });
     });
   });
