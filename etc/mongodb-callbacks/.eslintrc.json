@@ -1,0 +1,29 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./etc/mongodb-callbacks/jsconfig.json",
+    "ecmaVersion": 2019
+  },
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "plugins": ["prettier", "@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "rules": {
+    "strict": "error",
+    "prettier/prettier": "error",
+    "no-console": "error",
+    "valid-typeof": "error",
+    "eqeqeq": [
+      "error",
+      "always",
+      {
+        "null": "ignore"
+      }
+    ],
+    "no-implicit-coercion": "error",
+    "@typescript-eslint/strict-boolean-expressions": "error"
+  }
+}

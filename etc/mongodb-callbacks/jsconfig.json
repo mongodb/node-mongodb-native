@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "target": "es2020",
+        "allowJs": true,
+        "checkJs": true,
+        "strict": false,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
+        "noEmit": true
+    }
+}

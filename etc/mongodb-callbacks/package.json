@@ -1,0 +1,39 @@
+{
+  "name": "mongodb-callbacks",
+  "description": "The legacy MongoDB driver with callback support for Node.js",
+  "version": "4.9.0-alpha",
+  "main": "src/index.js",
+  "types": "mongodb-legacy.d.ts",
+  "dependencies": {
+    "mongodb": "../.."
+  },
+  "bundledDependencies": [
+    "mongodb"
+  ],
+  "scripts": {
+    "check:test": "mocha test/unit",
+    "check:ts": "tsc",
+    "check:lint": "eslint --max-warnings=0 src"
+  },
+  "bugs": {
+    "url": "https://jira.mongodb.org/projects/NODE/issues/"
+  },
+  "homepage": "https://github.com/mongodb/node-mongodb-native",
+  "keywords": [
+    "mongodb",
+    "driver",
+    "legacy",
+    "callbacks"
+  ],
+  "author": {
+    "name": "The MongoDB NodeJS Team",
+    "email": "dbx-node@mongodb.com"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.33.0",
+    "@typescript-eslint/parser": "^5.33.0",
+    "chai": "^4.3.6",
+    "mocha": "^10.0.0"
+  }
+}
