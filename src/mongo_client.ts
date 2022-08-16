@@ -21,6 +21,7 @@ import { PromiseProvider } from './promise_provider';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
+import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import type { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
@@ -500,6 +501,17 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
       Promise.all(activeSessionEnds)
         .then(() => {
+          // If we would attempt to select a server and get nothing back when using a direct
+          // connection (which is always topology type single and cannot transition to unknown)
+          // we short circuit.
+          const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
+          const topologyDescription = this.topology.description;
+          const serverDescriptions = Array.from(topologyDescription.servers.values());
+          const servers = selector(topologyDescription, serverDescriptions);
+          if (servers.length === 0) {
+            return callback();
+          }
+
           const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
           if (endSessions.length === 0) return;
           return this.db('admin')
