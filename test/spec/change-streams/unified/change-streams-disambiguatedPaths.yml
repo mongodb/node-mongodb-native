@@ -1,5 +1,5 @@
 description: "disambiguatedPaths"
-schemaVersion: "1.9" # todo - choose schema version
+schemaVersion: "1.9"
 createEntities:
   - client:
       id: &client0 client0
@@ -12,6 +12,10 @@ createEntities:
       id: &collection0 collection0
       database: *database0
       collectionName: *collection0
+
+runOnRequirements:
+  - minServerVersion: "6.1.0"
+    topologies: [ replicaset, sharded-replicaset, load-balanced ]
 
 initialData:
   - collectionName: *collection0
