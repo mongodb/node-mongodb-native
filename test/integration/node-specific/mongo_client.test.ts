@@ -13,6 +13,7 @@ import {
 } from '../../../src';
 import { Connection } from '../../../src/cmap/connection';
 import { Db } from '../../../src/db';
+import { ServerDescription } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
 import { getTopology, isHello } from '../../../src/utils';
 import { runLater } from '../../tools/utils';
@@ -648,6 +649,27 @@ describe('class MongoClient', function () {
       expect(startedEvents[0]).to.have.property('commandName', 'endSessions');
       expect(endEvents).to.have.lengthOf(1);
       expect(endEvents[0]).to.have.property('reply', undefined); // noReponse: true
+    });
+
+    context('when server selection would return no servers', () => {
+      const serverDescription = new ServerDescription('a:1');
+
+      it('short circuits and does not end sessions', async () => {
+        const session = client.startSession(); // make a session to be ended
+        await client.db('test').command({ ping: 1 }, { session });
+        await session.endSession();
+
+        const startedEvents: CommandStartedEvent[] = [];
+        client.on('commandStarted', event => startedEvents.push(event));
+
+        const servers = new Map<string, ServerDescription>();
+        servers.set(serverDescription.address, serverDescription);
+        client.topology.description.servers = servers;
+        await client.close();
+
+        expect(startedEvents).to.be.empty;
+        expect(client.s.sessionPool.sessions).to.have.lengthOf(1);
+      });
     });
   });
 });

@@ -21,6 +21,7 @@ import { PromiseProvider } from './promise_provider';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
+import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import type { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
@@ -500,6 +501,19 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
       Promise.all(activeSessionEnds)
         .then(() => {
+          if (this.topology == null) {
+            return;
+          }
+          // If we would attempt to select a server and get nothing back we short circuit
+          // to avoid the server selection timeout.
+          const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
+          const topologyDescription = this.topology.description;
+          const serverDescriptions = Array.from(topologyDescription.servers.values());
+          const servers = selector(topologyDescription, serverDescriptions);
+          if (servers.length === 0) {
+            return;
+          }
+
           const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
           if (endSessions.length === 0) return;
           return this.db('admin')
@@ -511,7 +525,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         })
         .then(() => {
           if (this.topology == null) {
-            return callback();
+            return;
           }
           // clear out references to old topology
           const topology = this.topology;
