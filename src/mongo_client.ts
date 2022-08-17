@@ -501,6 +501,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
       Promise.all(activeSessionEnds)
         .then(() => {
+          if (this.topology == null) {
+            return;
+          }
           // If we would attempt to select a server and get nothing back we short circuit
           // to avoid the server selection timeout.
           const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
