@@ -3,6 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';
+import { deserialize, serialize } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
@@ -221,10 +222,25 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   static readonly TIMEOUT = TIMEOUT;
 
   /**
+   * @internal
+   *
+   * @privateRemarks
+   * mongodb-client-encryption's class ClientEncryption falls back to finding the bson lib
+   * defined on client.topology.bson, in order to maintain compatibility with any version
+   * of mongodb-client-encryption we keep a reference to serialize and deserialize here.
+   */
+  bson: { serialize: typeof serialize; deserialize: typeof deserialize };
+
+  /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
   constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
     super();
+
+    // Legacy CSFLE support
+    this.bson = Object.create(null);
+    this.bson.serialize = serialize;
+    this.bson.deserialize = deserialize;
 
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
