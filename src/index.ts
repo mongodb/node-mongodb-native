@@ -13,6 +13,8 @@ import { MongoClient } from './mongo_client';
 import { CancellationToken } from './mongo_types';
 import { PromiseProvider } from './promise_provider';
 
+/** @internal */
+export { BSON } from './bson';
 export {
   Binary,
   BSONRegExp,

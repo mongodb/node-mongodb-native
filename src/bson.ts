@@ -6,6 +6,7 @@ import type {
   SerializeOptions
 } from 'bson';
 
+/** @internal */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 let BSON = require('bson');
 
@@ -38,6 +39,9 @@ export {
   ObjectId,
   Timestamp
 } from 'bson';
+
+/** @internal */
+export { BSON };
 
 /**
  * BSON Serialization options.
