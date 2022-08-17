@@ -282,7 +282,6 @@ export type WithSessionCallback = (session: ClientSession) => Promise<any>;
 /** @internal */
 export interface MongoClientPrivate {
   url: string;
-  readonly userOptions: MongoClientOptions | undefined;
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
   hasBeenClosed: boolean;
@@ -374,7 +373,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     // The internal state
     this.s = {
       url,
-      userOptions: options,
       bsonOptions: resolveBSONOptions(this[kOptions]),
       namespace: ns('admin'),
       hasBeenClosed: false,
