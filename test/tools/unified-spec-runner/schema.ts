@@ -239,8 +239,8 @@ export interface Test {
 }
 export interface ExpectedEventsForClient {
   client: string;
-  eventType?: string;
-  events: (ExpectedCommandEvent | ExpectedCmapEvent)[];
+  eventType?: 'command' | 'cmap' | 'sdam';
+  events: (ExpectedCommandEvent | ExpectedCmapEvent | ExpectedSdamEvent)[];
   ignoreExtraEvents?: boolean;
 }
 export interface ExpectedCommandEvent {
@@ -275,6 +275,16 @@ export interface ExpectedCmapEvent {
   connectionCheckOutFailedEvent?: Record<string, never>;
   connectionCheckedOutEvent?: Record<string, never>;
   connectionCheckedInEvent?: Record<string, never>;
+}
+export interface ExpectedSdamEvent {
+  serverDescriptionChangedEvent?: {
+    previousDescription?: {
+      type?: string;
+    };
+    newDescription?: {
+      type?: string;
+    };
+  };
 }
 export interface ExpectedError {
   isError?: true;

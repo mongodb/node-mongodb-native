@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
+import { EventEmitter } from 'stream';
 
 import { ChangeStream } from '../../../src/change_stream';
 import {
@@ -27,7 +28,8 @@ import {
   GridFSBucket,
   HostAddress,
   MongoClient,
-  MongoCredentials
+  MongoCredentials,
+  ServerDescriptionChangedEvent
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
@@ -60,15 +62,17 @@ export type CmapEvent =
   | ConnectionCheckedOutEvent
   | ConnectionCheckedInEvent
   | ConnectionPoolClearedEvent;
+export type SdamEvent = ServerDescriptionChangedEvent;
 
 function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
 export class UnifiedMongoClient extends MongoClient {
-  commandEvents: CommandEvent[];
-  cmapEvents: CmapEvent[];
-  failPoints: Document[];
+  commandEvents: CommandEvent[] = [];
+  cmapEvents: CmapEvent[] = [];
+  sdamEvents: SdamEvent[] = [];
+  failPoints: Document[] = [];
   ignoredEvents: string[];
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
@@ -83,6 +87,8 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedOut'
     | 'connectionCheckedIn'
   )[];
+  observedSdamEvents: 'serverDescriptionChangedEvent'[];
+  observedEventEmitter = new EventEmitter();
   _credentials: MongoCredentials | null;
 
   static COMMAND_EVENT_NAME_LOOKUP = {
@@ -104,6 +110,10 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
+  static SDAM_EVENT_NAME_LOOKUP = {
+    serverDescriptionChangedEvent: 'serverDescriptionChanged'
+  } as const;
+
   constructor(uri: string, description: ClientEntity) {
     super(uri, {
       monitorCommands: true,
@@ -112,9 +122,6 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
 
-    this.commandEvents = [];
-    this.cmapEvents = [];
-    this.failPoints = [];
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
@@ -126,11 +133,17 @@ export class UnifiedMongoClient extends MongoClient {
     this.observedCmapEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.CMAP_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);
+    this.observedSdamEvents = (description.observeEvents ?? [])
+      .map(e => UnifiedMongoClient.SDAM_EVENT_NAME_LOOKUP[e])
+      .filter(e => !!e);
     for (const eventName of this.observedCommandEvents) {
       this.on(eventName, this.pushCommandEvent);
     }
     for (const eventName of this.observedCmapEvents) {
       this.on(eventName, this.pushCmapEvent);
+    }
+    for (const eventName of this.observedSdamEvents) {
+      this.on(eventName, this.pushSdamEvent);
     }
   }
 
@@ -138,12 +151,22 @@ export class UnifiedMongoClient extends MongoClient {
     return this.ignoredEvents.includes(e.commandName);
   }
 
-  getCapturedEvents(eventType: string): CommandEvent[] | CmapEvent[] {
+  getCapturedEvents(
+    eventType: 'command' | 'cmap' | 'sdam'
+  ): CommandEvent[] | CmapEvent[] | SdamEvent[];
+  getCapturedEvents(eventType: 'all'): (CommandEvent | CmapEvent)[];
+  getCapturedEvents(
+    eventType: 'command' | 'cmap' | 'sdam' | 'all'
+  ): (CommandEvent | CmapEvent | SdamEvent)[] {
     switch (eventType) {
       case 'command':
         return this.commandEvents;
       case 'cmap':
         return this.cmapEvents;
+      case 'sdam':
+        return this.sdamEvents;
+      case 'all':
+        return [...this.commandEvents, ...this.cmapEvents, ...this.sdamEvents];
       default:
         throw new Error(`Unknown eventType: ${eventType}`);
     }
@@ -153,12 +176,20 @@ export class UnifiedMongoClient extends MongoClient {
   pushCommandEvent: (e: CommandEvent) => void = e => {
     if (!this.isIgnored(e)) {
       this.commandEvents.push(e);
+      this.observedEventEmitter.emit('observedEvent');
     }
   };
 
   // NOTE: pushCmapEvent must be an arrow function
   pushCmapEvent: (e: CmapEvent) => void = e => {
     this.cmapEvents.push(e);
+    this.observedEventEmitter.emit('observedEvent');
+  };
+
+  // NOTE: pushSdamEvent must be an arrow function
+  pushSdamEvent: (e: SdamEvent) => void = e => {
+    this.sdamEvents.push(e);
+    this.observedEventEmitter.emit('observedEvent');
   };
 
   /** Disables command monitoring for the client and returns a list of the captured events. */
@@ -168,6 +199,9 @@ export class UnifiedMongoClient extends MongoClient {
     }
     for (const eventName of this.observedCmapEvents) {
       this.off(eventName, this.pushCmapEvent);
+    }
+    for (const eventName of this.observedSdamEvents) {
+      this.off(eventName, this.pushSdamEvent);
     }
   }
 }

@@ -17,9 +17,14 @@ import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
 import { getSymbolFrom, sleep } from '../../tools/utils';
 import { TestConfiguration } from '../runner/config';
-import { EntitiesMap, UnifiedChangeStream } from './entities';
-import { expectErrorCheck, resultCheck } from './match';
-import type { OperationDescription } from './schema';
+import { CmapEvent, CommandEvent, EntitiesMap, UnifiedChangeStream } from './entities';
+import { expectErrorCheck, matchesEvents, resultCheck } from './match';
+import type {
+  ExpectedCmapEvent,
+  ExpectedCommandEvent,
+  ExpectedEventsForClient,
+  OperationDescription
+} from './schema';
 import { translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {
@@ -421,6 +426,58 @@ operations.set('wait', async ({ operation }) => {
   expect(operation, 'Error in wait operation').to.have.nested.property('arguments.ms');
   expect(operation.arguments!.ms).to.be.a('number', 'Error in wait operation');
   await sleep(operation.arguments!.ms);
+});
+
+operations.set('waitForEvent', async ({ entities, operation }) => {
+  expect(operation, 'Error in waitForEvent operation').to.have.property('arguments');
+  const {
+    client,
+    event,
+    count
+  }: { client: string; event: ExpectedCmapEvent | ExpectedCommandEvent; count: number } =
+    operation.arguments!;
+  expect(count).to.be.a('number', 'Error in waitForEvent operation, invalid count');
+
+  const mongoClient = entities.getEntity('client', client, true);
+  expect(mongoClient, `Failed to retrieve cleint entity: ${client}`).to.exist;
+
+  const eventName = Object.keys(event)[0];
+  const eventPromise = new Promise<void>(resolve => {
+    function checkForEvent() {
+      if (
+        mongoClient.getCapturedEvents('all').filter(capturedEvent => {
+          try {
+            matchesEvents(
+              { events: [event] } as ExpectedEventsForClient,
+              [capturedEvent] as CommandEvent[] | CmapEvent[],
+              entities
+            );
+            return true;
+          } catch (e) {
+            return false;
+          }
+        }).length >= count
+      ) {
+        return resolve();
+      }
+
+      mongoClient.observedEventEmitter.once('observedEvent', checkForEvent);
+    }
+    checkForEvent();
+  });
+  await Promise.race([
+    eventPromise,
+    sleep(10000).then(() =>
+      Promise.reject(
+        new Error(
+          `Timed out waiting for ${eventName}; captured [${mongoClient
+            .getCapturedEvents('all')
+            .map(e => e.constructor.name)
+            .join(', ')}]`
+        )
+      )
+    )
+  ]);
 });
 
 operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {

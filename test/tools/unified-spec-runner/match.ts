@@ -10,7 +10,8 @@ import {
   MongoError,
   MongoServerError,
   ObjectId,
-  OneOrMore
+  OneOrMore,
+  ServerDescriptionChangedEvent
 } from '../../../src';
 import {
   CommandFailedEvent,
@@ -30,12 +31,13 @@ import {
   ConnectionReadyEvent
 } from '../../../src/cmap/connection_pool_events';
 import { ejson } from '../utils';
-import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
+import { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import {
   ExpectedCmapEvent,
   ExpectedCommandEvent,
   ExpectedError,
-  ExpectedEventsForClient
+  ExpectedEventsForClient,
+  ExpectedSdamEvent
 } from './schema';
 
 export interface ExistsOperator {
@@ -348,8 +350,8 @@ function validEmptyCmapEvent(
 }
 
 function failOnMismatchedCount(
-  actual: CommandEvent[] | CmapEvent[],
-  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[]
+  actual: CommandEvent[] | CmapEvent[] | SdamEvent[],
+  expected: (ExpectedCommandEvent & ExpectedCmapEvent & ExpectedSdamEvent)[]
 ) {
   const actualNames = actual.map(a => a.constructor.name);
   const expectedNames = expected.map(e => Object.keys(e)[0]);
@@ -423,8 +425,8 @@ function compareCommandFailedEvents(
 }
 
 function compareEvents(
-  actual: CommandEvent[] | CmapEvent[],
-  expected: (ExpectedCommandEvent & ExpectedCmapEvent)[],
+  actual: CommandEvent[] | CmapEvent[] | SdamEvent[],
+  expected: (ExpectedCommandEvent & ExpectedCmapEvent & ExpectedSdamEvent)[],
   entities: EntitiesMap
 ) {
   if (actual.length !== expected.length) {
@@ -467,7 +469,25 @@ function compareEvents(
       if (expectedEvent.poolClearedEvent.hasServiceId) {
         expect(actualEvent).property('serviceId').to.exist;
       }
-    } else if (validEmptyCmapEvent(expectedEvent, actualEvent)) {
+    } else if (validEmptyCmapEvent(expectedEvent as ExpectedCmapEvent, actualEvent as CmapEvent)) {
+      return;
+    } else if (expectedEvent.serverDescriptionChangedEvent) {
+      expect(actualEvent).to.be.instanceOf(ServerDescriptionChangedEvent);
+      const expectedServerDescriptionKeys = ['previousDescription', 'newDescription'];
+      expect(expectedServerDescriptionKeys).to.include.all.members(
+        Object.keys(expectedEvent.serverDescriptionChangedEvent)
+      );
+      for (const descriptionKey of expectedServerDescriptionKeys) {
+        expect(actualEvent).to.have.property(descriptionKey);
+        const expectedDescription =
+          expectedEvent.serverDescriptionChangedEvent[descriptionKey] || {};
+        for (const nestedKey of Object.keys(expectedDescription)) {
+          expect(actualEvent[descriptionKey]).to.have.property(
+            nestedKey,
+            expectedDescription[nestedKey]
+          );
+        }
+      }
       return;
     } else {
       expect.fail(`Encountered unexpected event - ${inspect(actualEvent)}`);
@@ -477,7 +497,7 @@ function compareEvents(
 
 export function matchesEvents(
   { events: expected, ignoreExtraEvents }: ExpectedEventsForClient,
-  actual: CommandEvent[] | CmapEvent[],
+  actual: CommandEvent[] | CmapEvent[] | SdamEvent[],
   entities: EntitiesMap
 ): void {
   ignoreExtraEvents = ignoreExtraEvents ?? false;
