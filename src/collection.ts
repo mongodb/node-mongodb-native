@@ -1610,13 +1610,13 @@ export class Collection<TSchema extends Document = Document> {
    * Updates documents.
    *
    * @deprecated use updateOne, updateMany or bulkWrite
-   * @param selector - The selector for the update operation.
+   * @param filter - The filter for the update operation.
    * @param update - The update operations to be applied to the documents
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   update(
-    selector: Filter<TSchema>,
+    filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
     options: UpdateOptions,
     callback: Callback<Document>
@@ -1627,19 +1627,19 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ?? {};
 
-    return this.updateMany(selector, update, options, callback);
+    return this.updateMany(filter, update, options, callback);
   }
 
   /**
    * Remove documents.
    *
    * @deprecated use deleteOne, deleteMany or bulkWrite
-   * @param selector - The selector for the update operation.
+   * @param filter - The filter for the remove operation.
    * @param options - Optional settings for the command
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   remove(
-    selector: Filter<TSchema>,
+    filter: Filter<TSchema>,
     options: DeleteOptions,
     callback: Callback
   ): Promise<DeleteResult> | void {
@@ -1649,7 +1649,7 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ?? {};
 
-    return this.deleteMany(selector, options, callback);
+    return this.deleteMany(filter, options, callback);
   }
 
   /**

@@ -1,5 +1,6 @@
 import { Admin } from './admin';
 import { ObjectId } from './bson';
+import { ChangeStream } from './change_stream';
 import { Collection } from './collection';
 import { AbstractCursor } from './cursor/abstract_cursor';
 import { AggregationCursor } from './cursor/aggregation_cursor';
@@ -78,6 +79,7 @@ export {
   Admin,
   AggregationCursor,
   CancellationToken,
+  ChangeStream,
   Collection,
   Db,
   FindCursor,
@@ -172,7 +174,6 @@ export type {
 export type { OrderedBulkOperation } from './bulk/ordered';
 export type { UnorderedBulkOperation } from './bulk/unordered';
 export type {
-  ChangeStream,
   ChangeStreamCollModDocument,
   ChangeStreamCreateDocument,
   ChangeStreamCreateIndexDocument,
