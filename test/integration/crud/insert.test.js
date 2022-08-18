@@ -665,9 +665,12 @@ describe('crud - insert', function () {
 
                   // Generate a binary id
                   var binaryUUID = new Binary(
-                    '00000078123456781234567812345678',
+                    Buffer.from('00000078123456781234567812345678', 'hex'),
                     Binary.SUBTYPE_UUID
                   );
+
+                  // UUID must be 16 bytes
+                  expect(binaryUUID.buffer).to.have.property('byteLength', 16);
 
                   collection.insert(
                     { _id: binaryUUID, field: '2' },
