@@ -242,6 +242,44 @@ for (const compressor of ['zstd', 'snappy']) {
   });
 }
 
+// Add task for testing lambda example without aws auth.
+TASKS.push({
+  name: 'test-lambda-example',
+  tags: ['latest', 'lambda'],
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'latest',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'run lambda tests' }
+  ]
+});
+
+// Add task for testing lambda example with aws auth.
+TASKS.push({
+  name: 'test-lambda-aws-auth-example',
+  tags: ['latest', 'lambda'],
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'latest',
+        AUTH: 'auth',
+        ORCHESTRATION_FILE: 'auth-aws.json',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'add aws auth variables to file' },
+    { func: 'setup aws env' },
+    { func: 'run lambda tests with aws auth' }
+  ]
+});
+
 TLS_VERSIONS.forEach(VERSION => {
   TASKS.push({
     name: `test-tls-support-${VERSION}`,
