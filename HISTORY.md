@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.9.0](https://github.com/mongodb/node-mongodb-native/compare/v4.8.1...v4.9.0) (2022-08-18)
+
+
+### Features
+
+* **NODE-3517:** improve index spec handling and type definitions ([#3315](https://github.com/mongodb/node-mongodb-native/issues/3315)) ([0754bf9](https://github.com/mongodb/node-mongodb-native/commit/0754bf9c322b3a6e0200968ed31b95dd39e76c4b))
+* **NODE-4336:** deprecate old write concern options and add missing writeConcern to MongoClientOptions ([#3340](https://github.com/mongodb/node-mongodb-native/issues/3340)) ([d2b6ad8](https://github.com/mongodb/node-mongodb-native/commit/d2b6ad8da39d2dd5c01ee7e7ad9622ad65e515f0))
+* **NODE-4548:** export ChangeStream class from top-level ([#3357](https://github.com/mongodb/node-mongodb-native/issues/3357)) ([48f295a](https://github.com/mongodb/node-mongodb-native/commit/48f295a2ab38e284c9437300aab35a4678650c87))
+
+
+### Bug Fixes
+
+* **NODE-4159,NODE-4512:** remove servers with incorrect setName from topology and fix unix socket parsing ([#3348](https://github.com/mongodb/node-mongodb-native/issues/3348)) ([00dcf2d](https://github.com/mongodb/node-mongodb-native/commit/00dcf2d51fb27c2b259f8dbf6aedf81196c5f98c))
+* **NODE-4273:** pass 'comment' option through to distinct command ([#3339](https://github.com/mongodb/node-mongodb-native/issues/3339)) ([753ecfe](https://github.com/mongodb/node-mongodb-native/commit/753ecfed437138808f21e31d436a58a44f3513b9))
+* **NODE-4413:** set maxTimeMS on getMores when maxAwaitTimeMS is specified ([#3319](https://github.com/mongodb/node-mongodb-native/issues/3319)) ([dcbfd6e](https://github.com/mongodb/node-mongodb-native/commit/dcbfd6e943c2db2fbc223e221a6661996df25fe0))
+* **NODE-4429:** select server sync for endSessions during close ([#3363](https://github.com/mongodb/node-mongodb-native/issues/3363)) ([5086ead](https://github.com/mongodb/node-mongodb-native/commit/5086eadf52e13369f584b9bd64477ab7f3522ff6))
+* **NODE-4467:** Add back support for `oplogReplay` option as deprecated ([#3337](https://github.com/mongodb/node-mongodb-native/issues/3337)) ([6c69b7d](https://github.com/mongodb/node-mongodb-native/commit/6c69b7d51d98cf858607b0fdcad41d26691f97db))
+* **NODE-4496:** counter values incorrecly compared when instance of Long ([#3342](https://github.com/mongodb/node-mongodb-native/issues/3342)) ([d29eb8c](https://github.com/mongodb/node-mongodb-native/commit/d29eb8c2b683f0044accfdb2bb3c1770034f28f3))
+* **NODE-4513:** type for nested objects in query & update ([#3349](https://github.com/mongodb/node-mongodb-native/issues/3349)) ([ec1a68f](https://github.com/mongodb/node-mongodb-native/commit/ec1a68f8cdf34763ad3797c3d2b663b55ede3e4e))
+* **NODE-4533:** session support error message and unified test runner ([#3355](https://github.com/mongodb/node-mongodb-native/issues/3355)) ([6a0e502](https://github.com/mongodb/node-mongodb-native/commit/6a0e502139bb09d1eeadf01eb20461cf88d538b0))
+* **NODE-4555:** export BSON internally ([#3367](https://github.com/mongodb/node-mongodb-native/issues/3367)) ([4ce6e4c](https://github.com/mongodb/node-mongodb-native/commit/4ce6e4cceea9117048d87af36c18da538f96a20f))
+
 ### [4.8.1](https://github.com/mongodb/node-mongodb-native/compare/v4.8.0...v4.8.1) (2022-07-26)
 
 
