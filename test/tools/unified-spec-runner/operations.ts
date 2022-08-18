@@ -428,6 +428,21 @@ operations.set('wait', async ({ operation }) => {
   await sleep(operation.arguments!.ms);
 });
 
+function getMatchingEventCount(event, client, entities): number {
+  return client.getCapturedEvents('all').filter(capturedEvent => {
+    try {
+      matchesEvents(
+        { events: [event] } as ExpectedEventsForClient,
+        [capturedEvent] as CommandEvent[] | CmapEvent[],
+        entities
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }).length;
+}
+
 operations.set('waitForEvent', async ({ entities, operation }) => {
   expect(operation, 'Error in waitForEvent operation').to.have.property('arguments');
   const {
@@ -444,20 +459,7 @@ operations.set('waitForEvent', async ({ entities, operation }) => {
   const eventName = Object.keys(event)[0];
   const eventPromise = new Promise<void>(resolve => {
     function checkForEvent() {
-      if (
-        mongoClient.getCapturedEvents('all').filter(capturedEvent => {
-          try {
-            matchesEvents(
-              { events: [event] } as ExpectedEventsForClient,
-              [capturedEvent] as CommandEvent[] | CmapEvent[],
-              entities
-            );
-            return true;
-          } catch (e) {
-            return false;
-          }
-        }).length >= count
-      ) {
+      if (getMatchingEventCount(event, mongoClient, entities) >= count) {
         return resolve();
       }
 
@@ -478,6 +480,24 @@ operations.set('waitForEvent', async ({ entities, operation }) => {
       )
     )
   ]);
+});
+
+operations.set('assertEventCount', async ({ entities, operation }) => {
+  expect(operation, 'Error in assertEventCount operation').to.have.property('arguments');
+  const {
+    client,
+    event,
+    count
+  }: { client: string; event: ExpectedCmapEvent | ExpectedCommandEvent; count: number } =
+    operation.arguments!;
+  expect(count).to.be.a('number', 'Error in assertEventCount operation, invalid count');
+
+  const mongoClient = entities.getEntity('client', client, true);
+  expect(mongoClient, `Failed to retrieve cleint entity: ${client}`).to.exist;
+
+  const eventName = Object.keys(event)[0];
+  const actualEventCount = getMatchingEventCount(event, mongoClient, entities);
+  expect(actualEventCount, `Error in assertEventCount for ${eventName}`).to.equal(count);
 });
 
 operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {
