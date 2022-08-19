@@ -452,7 +452,6 @@ operations.set('waitForEvent', async ({ entities, operation }) => {
   expect(count).to.be.a('number', 'Error in waitForEvent operation, invalid count');
 
   const mongoClient = entities.getEntity('client', client, true);
-  expect(mongoClient, `Failed to retrieve cleint entity: ${client}`).to.exist;
 
   const eventName = Object.keys(event)[0];
   const eventPromise = new Promise<void>(resolve => {
@@ -494,7 +493,6 @@ operations.set('assertEventCount', async ({ entities, operation }) => {
   expect(count).to.be.a('number', 'Error in assertEventCount operation, invalid count');
 
   const mongoClient = entities.getEntity('client', client, true);
-  expect(mongoClient, `Failed to retrieve cleint entity: ${client}`).to.exist;
 
   const eventName = Object.keys(event)[0];
   const actualEventCount = getMatchingEventCount(event, mongoClient, entities);
