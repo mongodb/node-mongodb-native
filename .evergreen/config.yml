@@ -809,7 +809,6 @@ functions:
   download and merge coverage:
     - command: shell.exec
       params:
-        silent: true
         working_dir: src
         script: |
           ${PREPARE_SHELL}
@@ -2061,6 +2060,15 @@ tasks:
         vars:
           NODE_LTS_NAME: gallium
       - func: run mongosh integration tests
+  - name: download-and-merge-coverage
+    tags: []
+    commands:
+      - func: download and merge coverage
+    depends_on:
+      - name: '*'
+        variant: '*'
+        status: '*'
+        patch_optional: true
   - name: run-custom-snappy-tests
     tags:
       - run-custom-dependency-tests
@@ -2974,6 +2982,11 @@ buildvariants:
       - run-typescript-current
       - run-typescript-oldest
       - run-typescript-next
+  - name: generate-combined-coverage
+    display_name: Generate Combined Coverage
+    run_on: ubuntu1804-large
+    tasks:
+      - download-and-merge-coverage
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-large

@@ -861,7 +861,6 @@ functions:
   "download and merge coverage":
     - command: shell.exec
       params:
-        silent: true
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
