@@ -48,7 +48,7 @@ const failpointTests = [
   'Reset server and pool after network timeout error during authentication',
   'Reset server and pool after shutdown error during authentication'
 ];
-const skippedTests = isAuthEnabled ? failpointTests : [];
+const skippedTests = [...(isAuthEnabled ? failpointTests : []), 'Network error on Monitor check'];
 
 function sdamDisabledTestFilter(test) {
   const { description } = test;
