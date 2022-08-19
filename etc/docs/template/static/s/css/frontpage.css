@@ -2,11 +2,11 @@ body {
   font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
-  color: #494747;
+  color: black;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
-  background-color: #f3f4eb;
-  color: #4c3a2c;
+  background-color: white;
+  color: black;
   padding-top: 50px;
 }
 
@@ -40,7 +40,7 @@ dt {
     left: 0;
     width: 100%;
     font-size: 31px;
-    background-color: #3b291f;
+    background-color: black;
     color: white;
     margin: 0;
     padding: 0;
@@ -109,7 +109,7 @@ div.gsc-input-box,
 .gsc-input input.gsc-input:-moz-input-placeholder,
 .gsc-input input.gsc-input::-moz-input-placeholder,
 .gsc-input input.gsc-input:-ms-input-placeholder {
-    color: #CCC;
+    color: black;
 }
 
 /* Clear search button */
@@ -168,7 +168,7 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 }
 
 .footer a {
-    color: #989898;
+    color: black;
     text-decoration: underline;
 }
 
@@ -178,7 +178,7 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 }
 
 .footer .box {
-    background-color: #f5f6f7;
+    background-color: white;
     min-height: 20px;
     padding: 15px;
     margin-bottom: 20px;
@@ -186,7 +186,7 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 }
 
 .footer .box a {
-    color: #333;
+    color: black;
     text-decoration: none;
 }
 
@@ -219,8 +219,8 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 /* Hero Styles */
 
 #hero {
-  background-color: #666;
-  color: #f3f4eb;
+  background-color: #023430;
+  color: white ;
   border-bottom: 1px solid #313030;
   padding: 12px 0px;
 }
@@ -257,14 +257,14 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 
 .btn-mongo:hover {
   color: white;
-  border-color:#34302d;
+  border-color:black;
   box-shadow:none;
   text-decoration:none;
 }
 
 .btn-dark {
-  border: 2px solid #3b291f;
-  background-color: #3b291f;
+  border: 2px solid black;
+  background-color: black;
   color: white;
   border-radius: 0;
 }
