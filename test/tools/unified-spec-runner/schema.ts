@@ -240,9 +240,12 @@ export interface Test {
 export interface ExpectedEventsForClient {
   client: string;
   eventType?: 'command' | 'cmap' | 'sdam';
-  events: (ExpectedCommandEvent | ExpectedCmapEvent | ExpectedSdamEvent)[];
+  events: ExpectedEvent[];
   ignoreExtraEvents?: boolean;
 }
+
+export type ExpectedEvent = ExpectedCommandEvent | ExpectedCmapEvent | ExpectedSdamEvent;
+
 export interface ExpectedCommandEvent {
   commandStartedEvent?: {
     command?: Document;

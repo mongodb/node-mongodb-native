@@ -19,12 +19,7 @@ import { getSymbolFrom, sleep } from '../../tools/utils';
 import { TestConfiguration } from '../runner/config';
 import { CmapEvent, CommandEvent, EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, matchesEvents, resultCheck } from './match';
-import type {
-  ExpectedCmapEvent,
-  ExpectedCommandEvent,
-  ExpectedEventsForClient,
-  OperationDescription
-} from './schema';
+import type { ExpectedEvent, ExpectedEventsForClient, OperationDescription } from './schema';
 import { translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {
@@ -449,8 +444,11 @@ operations.set('waitForEvent', async ({ entities, operation }) => {
     client,
     event,
     count
-  }: { client: string; event: ExpectedCmapEvent | ExpectedCommandEvent; count: number } =
-    operation.arguments!;
+  }: {
+    client: string;
+    event: ExpectedEvent;
+    count: number;
+  } = operation.arguments! as any;
   expect(count).to.be.a('number', 'Error in waitForEvent operation, invalid count');
 
   const mongoClient = entities.getEntity('client', client, true);
@@ -488,8 +486,11 @@ operations.set('assertEventCount', async ({ entities, operation }) => {
     client,
     event,
     count
-  }: { client: string; event: ExpectedCmapEvent | ExpectedCommandEvent; count: number } =
-    operation.arguments!;
+  }: {
+    client: string;
+    event: ExpectedEvent;
+    count: number;
+  } = operation.arguments! as any;
   expect(count).to.be.a('number', 'Error in assertEventCount operation, invalid count');
 
   const mongoClient = entities.getEntity('client', client, true);
