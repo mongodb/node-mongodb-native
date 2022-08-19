@@ -19,7 +19,7 @@ const failPoint = {
 
 const POOL_SIZE = 100;
 
-async function runTaskGroup(collection: Collection, count: 10 | 100 | 500) {
+async function runTaskGroup(collection: Collection, count: 10 | 100 | 1000) {
   for (let i = 0; i < count; ++i) {
     await collection.findOne({});
   }
@@ -148,7 +148,7 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
     const collection = client.db('test-db').collection('collection0');
 
     const numberTaskGroups = 10;
-    const numberOfTasks = 500;
+    const numberOfTasks = 1000;
     const totalNumberOfTasks = numberTaskGroups * numberOfTasks;
 
     // Step 8: Start 10 concurrent threads / tasks that each run 100 findOne operations with empty filters using that client.
