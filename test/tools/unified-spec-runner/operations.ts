@@ -9,9 +9,13 @@ import {
   Document,
   GridFSFile,
   MongoClient,
-  ObjectId
+  ObjectId,
+  ServerType,
+  TopologyDescription,
+  TopologyType
 } from '../../../src';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { SERVER_DESCRIPTION_CHANGED } from '../../../src/constants';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
@@ -497,6 +501,75 @@ operations.set('assertEventCount', async ({ entities, operation }) => {
   const eventName = Object.keys(event)[0];
   const actualEventCount = getMatchingEventCount(event, mongoClient, entities);
   expect(actualEventCount, `Error in assertEventCount for ${eventName}`).to.equal(count);
+});
+
+operations.set('recordTopologyDescription', async ({ entities, operation }) => {
+  const { client, id }: { client: string; id: string } = operation.arguments! as any;
+  expect(id).to.be.a('string');
+  const mongoClient = entities.getEntity('client', client, true);
+  const description = mongoClient.topology?.description;
+  expect(description, `Undefined topology description for client ${client}`).to.exist;
+
+  entities.set(id, description!);
+});
+
+operations.set('assertTopologyType', async ({ entities, operation }) => {
+  const {
+    topologyDescription,
+    topologyType
+  }: { topologyDescription: string; topologyType: TopologyType } = operation.arguments! as any;
+  expect(topologyDescription).to.be.a('string');
+  const actualDescription = entities.get(topologyDescription) as TopologyDescription;
+  expect(actualDescription, `Failed to retrieve description for topology ${topologyDescription}`).to
+    .exist;
+  expect(actualDescription).to.have.property('type', topologyType);
+});
+
+operations.set('waitForPrimaryChange', async ({ entities, operation }) => {
+  const {
+    client,
+    priorTopologyDescription,
+    timeoutMS
+  }: { client: string; priorTopologyDescription: TopologyType; timeoutMS?: number } =
+    operation.arguments! as any;
+
+  const mongoClient = entities.getEntity('client', client, true);
+
+  expect(priorTopologyDescription).to.be.a('string');
+  const priorTopologyDescriptionObject = entities.get(
+    priorTopologyDescription
+  ) as TopologyDescription;
+  expect(
+    priorTopologyDescriptionObject,
+    `Failed to retrieve description for topology ${priorTopologyDescription}`
+  ).to.exist;
+
+  const priorPrimary = Array.from(priorTopologyDescriptionObject.servers.values()).find(
+    serverDescription => serverDescription.type === ServerType.RSPrimary
+  );
+
+  const newPrimaryPromise = new Promise<void>(resolve => {
+    function checkForNewPrimary() {
+      const currentPrimary = Array.from(mongoClient.topology!.description.servers.values()).find(
+        serverDescription => serverDescription.type === ServerType.RSPrimary
+      );
+      if (
+        (!priorPrimary && currentPrimary) ||
+        (currentPrimary && !currentPrimary.equals(priorPrimary))
+      ) {
+        return resolve();
+      }
+
+      mongoClient.once(SERVER_DESCRIPTION_CHANGED, checkForNewPrimary);
+    }
+    checkForNewPrimary();
+  });
+  await Promise.race([
+    newPrimaryPromise,
+    sleep(timeoutMS ?? 10000).then(() =>
+      Promise.reject(new Error(`Timed out waiting for primary change on ${client}`))
+    )
+  ]);
 });
 
 operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {

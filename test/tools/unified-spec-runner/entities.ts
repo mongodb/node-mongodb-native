@@ -29,7 +29,8 @@ import {
   HostAddress,
   MongoClient,
   MongoCredentials,
-  ServerDescriptionChangedEvent
+  ServerDescriptionChangedEvent,
+  TopologyDescription
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
@@ -273,6 +274,7 @@ export type Entity =
   | UnifiedChangeStream
   | GridFSBucket
   | ClientEncryption
+  | TopologyDescription // From recordTopologyDescription operation
   | Document; // Results from operations
 
 export type EntityCtor =
