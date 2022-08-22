@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+
+code, pre, kbd, samp {
+  font-family: 'Source Code Pro', Monaco, Menlo, Consolas, "Courier New", monospace;
+}
 
 body {
   font-family: "Lexend Deca", "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
