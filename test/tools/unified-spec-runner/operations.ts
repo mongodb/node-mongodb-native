@@ -21,10 +21,10 @@ import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
 import { getSymbolFrom, sleep } from '../../tools/utils';
 import { TestConfiguration } from '../runner/config';
-import { CmapEvent, CommandEvent, EntitiesMap, UnifiedChangeStream } from './entities';
-import { expectErrorCheck, matchesEvents, resultCheck } from './match';
-import type { ExpectedEvent, ExpectedEventsForClient, OperationDescription } from './schema';
-import { translateOptions } from './unified-utils';
+import { EntitiesMap, UnifiedChangeStream } from './entities';
+import { expectErrorCheck, resultCheck } from './match';
+import type { ExpectedEvent, OperationDescription } from './schema';
+import { getMatchingEventCount, translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {
   client: MongoClient;
@@ -42,7 +42,7 @@ operations.set('createEntities', async ({ entities, operation, testConfig }) => 
   if (!operation.arguments?.entities) {
     throw new Error('encountered createEntities operation without entities argument');
   }
-  await EntitiesMap.createEntities(testConfig, operation.arguments.entities, entities);
+  await EntitiesMap.createEntities(testConfig, operation.arguments.entities!, entities);
 });
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
@@ -426,21 +426,6 @@ operations.set('wait', async ({ operation }) => {
   expect(operation.arguments!.ms).to.be.a('number', 'Error in wait operation');
   await sleep(operation.arguments!.ms);
 });
-
-function getMatchingEventCount(event, client, entities): number {
-  return client.getCapturedEvents('all').filter(capturedEvent => {
-    try {
-      matchesEvents(
-        { events: [event] } as ExpectedEventsForClient,
-        [capturedEvent] as CommandEvent[] | CmapEvent[],
-        entities
-      );
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }).length;
-}
 
 operations.set('waitForEvent', async ({ entities, operation }) => {
   expect(operation, 'Error in waitForEvent operation').to.have.property('arguments');

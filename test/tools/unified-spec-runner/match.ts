@@ -480,7 +480,7 @@ function compareEvents(
       for (const descriptionKey of expectedServerDescriptionKeys) {
         expect(actualEvent).to.have.property(descriptionKey);
         const expectedDescription =
-          expectedEvent.serverDescriptionChangedEvent[descriptionKey] || {};
+          expectedEvent.serverDescriptionChangedEvent[descriptionKey] ?? {};
         for (const nestedKey of Object.keys(expectedDescription)) {
           expect(actualEvent[descriptionKey]).to.have.property(
             nestedKey,

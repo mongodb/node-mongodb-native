@@ -58,7 +58,7 @@ function collectTests(): Record<string, SDAMTest[]> {
   const testTypes = fs
     .readdirSync(specDir)
     .filter(d => fs.statSync(path.resolve(specDir, d)).isDirectory())
-    .filter(d => d !== 'integration');
+    .filter(d => d !== 'unified');
 
   const tests = {};
   for (const testType of testTypes) {

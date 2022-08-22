@@ -21,6 +21,8 @@ const filter = ({ description }) => {
     case 'Network timeout on Monitor check':
     case 'Driver extends timeout while streaming':
       return 'TODO(NODE-4573): fix socket leaks';
+    case 'Network error on minPoolSize background creation':
+      return 'TODO(NODE-4385): implement pool pausing and pool ready event';
     default:
       return false;
   }

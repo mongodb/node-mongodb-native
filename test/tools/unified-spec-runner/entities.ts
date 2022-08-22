@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
-import { EventEmitter } from 'stream';
+import { EventEmitter } from 'events';
 
 import { ChangeStream } from '../../../src/change_stream';
 import {
@@ -184,7 +184,7 @@ export class UnifiedMongoClient extends MongoClient {
   getCapturedEvents(
     eventType: 'command' | 'cmap' | 'sdam'
   ): CommandEvent[] | CmapEvent[] | SdamEvent[];
-  getCapturedEvents(eventType: 'all'): (CommandEvent | CmapEvent)[];
+  getCapturedEvents(eventType: 'all'): (CommandEvent | CmapEvent | SdamEvent)[];
   getCapturedEvents(
     eventType: 'command' | 'cmap' | 'sdam' | 'all'
   ): (CommandEvent | CmapEvent | SdamEvent)[] {
