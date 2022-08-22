@@ -2180,7 +2180,40 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
-    tasks: *ref_0
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-connectivity
+      - test-atlas-data-lake
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-socks5
+      - test-socks5-tls
+      - test-tls-support-latest
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: ubuntu-18.04-erbium
     display_name: Ubuntu 18.04 Node Erbium
     run_on: ubuntu1804-large
@@ -2239,7 +2272,43 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
-    tasks: *ref_1
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-connectivity
+      - test-atlas-data-lake
+      - test-5.0-load-balanced
+      - test-6.0-load-balanced
+      - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-socks5
+      - test-socks5-tls
+      - test-tls-support-latest
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: windows-64-vs2019-erbium
     display_name: Windows (VS2019) Node Erbium
     run_on: windows-64-vs2019-large
@@ -2292,7 +2361,37 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: gallium
       MSVS_VERSION: 2019
-    tasks: *ref_2
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-data-lake
+      - test-socks5
+      - test-socks5-tls
+      - test-tls-support-latest
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: lint
     display_name: lint
     run_on: ubuntu1804-large
