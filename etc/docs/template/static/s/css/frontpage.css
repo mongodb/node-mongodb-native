@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP&display=swap');
+
 body {
-  font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Lexend Deca", "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
   color: black;
@@ -40,8 +43,8 @@ dt {
     left: 0;
     width: 100%;
     font-size: 31px;
-    background-color: black;
-    color: white;
+    background-color: white;
+    color: black;
     margin: 0;
     padding: 0;
     z-index: 100;
@@ -65,7 +68,7 @@ dt {
 }
 
 #header-db a {
-    color: white;
+    color: black;
 }
 
 #header-db .logo img {
@@ -237,6 +240,7 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 }
 
 #hero h2 {
+  font-family: "Noto Serif JP", "Lexend Deca", "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;;
   border-top: 3px solid #6ca439;
   color: #f3f4eb;
   padding: 10px 0;
