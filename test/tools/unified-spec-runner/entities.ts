@@ -51,6 +51,35 @@ export interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
 }
 
+export class UnifiedThread {
+  #promise: Promise<void>;
+  #error: Error;
+  #killed = false;
+
+  id: string;
+
+  constructor(id) {
+    this.id = id;
+    this.#promise = Promise.resolve();
+  }
+
+  queue(functionToQueue: () => Promise<any>) {
+    if (this.#killed || this.#error) {
+      return;
+    }
+
+    this.#promise = this.#promise.then(functionToQueue).catch(e => (this.#error = e));
+  }
+
+  async finish() {
+    this.#killed = true;
+    await this.#promise;
+    if (this.#error) {
+      throw this.#error;
+    }
+  }
+}
+
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 export type CmapEvent =
   | ConnectionPoolCreatedEvent
@@ -285,6 +314,7 @@ export type EntityCtor =
   | typeof ChangeStream
   | typeof AbstractCursor
   | typeof GridFSBucket
+  | typeof UnifiedThread
   | ClientEncryption;
 
 export type EntityTypeId =
@@ -293,6 +323,7 @@ export type EntityTypeId =
   | 'collection'
   | 'session'
   | 'bucket'
+  | 'thread'
   | 'cursor'
   | 'stream'
   | 'clientEncryption';
@@ -303,6 +334,7 @@ ENTITY_CTORS.set('db', Db);
 ENTITY_CTORS.set('collection', Collection);
 ENTITY_CTORS.set('session', ClientSession);
 ENTITY_CTORS.set('bucket', GridFSBucket);
+ENTITY_CTORS.set('thread', UnifiedThread);
 ENTITY_CTORS.set('cursor', AbstractCursor);
 ENTITY_CTORS.set('stream', ChangeStream);
 
@@ -335,6 +367,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'collection', key: string, assertExists?: boolean): Collection;
   getEntity(type: 'session', key: string, assertExists?: boolean): ClientSession;
   getEntity(type: 'bucket', key: string, assertExists?: boolean): GridFSBucket;
+  getEntity(type: 'thread', key: string, assertExists?: boolean): UnifiedThread;
   getEntity(type: 'cursor', key: string, assertExists?: boolean): AbstractCursor;
   getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
   getEntity(type: 'clientEncryption', key: string, assertExists?: boolean): ClientEncryption;
@@ -474,6 +507,8 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         }
 
         map.set(entity.bucket.id, new GridFSBucket(db, options));
+      } else if ('thread' in entity) {
+        map.set(entity.thread.id, new UnifiedThread(entity.thread.id));
       } else if ('stream' in entity) {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
       } else if ('clientEncryption' in entity) {

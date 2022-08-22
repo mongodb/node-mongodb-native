@@ -5,6 +5,7 @@ import type { ReadPreferenceMode } from '../../../src/read_preference';
 import type { TagSet } from '../../../src/sdam/server_description';
 import type { W } from '../../../src/write_concern';
 import { TestConfiguration } from '../runner/config';
+import { UnifiedThread } from './entities';
 
 export const SupportedVersion = '^1.0';
 
@@ -199,6 +200,7 @@ export type EntityDescription =
   | { database: DatabaseEntity }
   | { collection: CollectionEntity }
   | { bucket: BucketEntity }
+  | { thread: UnifiedThread }
   | { stream: StreamEntity }
   | { session: SessionEntity }
   | { clientEncryption: ClientEncryptionEntity };

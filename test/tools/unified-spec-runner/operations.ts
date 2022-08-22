@@ -572,6 +572,31 @@ operations.set('waitForPrimaryChange', async ({ entities, operation }) => {
   ]);
 });
 
+operations.set('runOnThread', async ({ entities, operation, client, testConfig }) => {
+  const threadId: string = operation.arguments!.thread;
+  expect(threadId).to.be.a('string');
+  const thread = entities.getEntity('thread', threadId, true);
+  const operationToQueue = operation.arguments!.operation;
+  const executeFn = executeOperationAndCheck.bind(
+    null,
+    operationToQueue,
+    entities,
+    client,
+    testConfig
+  );
+  thread.queue(executeFn);
+});
+
+operations.set('waitForThread', async ({ entities, operation }) => {
+  const threadId: string = operation.arguments!.thread;
+  expect(threadId).to.be.a('string');
+  const thread = entities.getEntity('thread', threadId, true);
+  await Promise.race([
+    thread.finish(),
+    sleep(10000).then(() => Promise.reject(new Error(`Timed out waiting for thread: ${threadId}`)))
+  ]);
+});
+
 operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {
   const session = entities.getEntity('session', operation.object);
 
