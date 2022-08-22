@@ -210,7 +210,7 @@ export interface ChangeStreamDocumentCollectionUUID {
    * **NOTE:** collectionUUID will be converted to a NodeJS Buffer if the promoteBuffers
    *    flag is enabled.
    *
-   * @since 6.1.0
+   * @sinceServerVersion 6.1.0
    */
   collectionUUID: Binary;
 }
@@ -222,7 +222,7 @@ export interface ChangeStreamDocumentOperationDescription {
    *
    * Only present when the `showExpandedEvents` flag is enabled.
    *
-   * @since 6.1.0
+   * @sinceServerVersion 6.1.0
    */
   operationDescription?: Document;
 }
@@ -509,9 +509,9 @@ export interface UpdateDescription<TSchema extends Document = Document> {
    *   }
    * ```
    *
-   * This field is only present when there are ambiguous paths are updated as a part of the update event and `showExpandedEvents`
+   * This field is only present when there are ambiguous paths that are updated as a part of the update event and `showExpandedEvents`
    * is enabled for the change stream.
-   * @since 6.1.0
+   * @sinceServerVersion 6.1.0
    * @experimental
    */
   disambiguatedPaths?: Document;
