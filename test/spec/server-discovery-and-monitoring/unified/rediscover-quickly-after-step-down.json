@@ -117,7 +117,7 @@
               "replSetFreeze": 0
             },
             "readPreference": {
-              "mode": "Secondary"
+              "mode": "secondary"
             },
             "commandName": "replSetFreeze"
           }
