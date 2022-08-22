@@ -1,12 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+
+code, pre, kbd, samp {
+  font-family: 'Source Code Pro', Monaco, Menlo, Consolas, "Courier New", monospace;
+}
+
 body {
-  font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Lexend Deca", "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
-  color: #494747;
+  color: black;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
-  background-color: #f3f4eb;
-  color: #4c3a2c;
+  background-color: white;
+  color: black;
   padding-top: 50px;
 }
 
@@ -40,8 +48,8 @@ dt {
     left: 0;
     width: 100%;
     font-size: 31px;
-    background-color: #3b291f;
-    color: white;
+    background-color: white;
+    color: black;
     margin: 0;
     padding: 0;
     z-index: 100;
@@ -65,7 +73,7 @@ dt {
 }
 
 #header-db a {
-    color: white;
+    color: black;
 }
 
 #header-db .logo img {
@@ -109,7 +117,7 @@ div.gsc-input-box,
 .gsc-input input.gsc-input:-moz-input-placeholder,
 .gsc-input input.gsc-input::-moz-input-placeholder,
 .gsc-input input.gsc-input:-ms-input-placeholder {
-    color: #CCC;
+    color: black;
 }
 
 /* Clear search button */
@@ -168,7 +176,7 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 }
 
 .footer a {
-    color: #989898;
+    color: black;
     text-decoration: underline;
 }
 
@@ -178,7 +186,7 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 }
 
 .footer .box {
-    background-color: #f5f6f7;
+    background-color: white;
     min-height: 20px;
     padding: 15px;
     margin-bottom: 20px;
@@ -186,7 +194,7 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 }
 
 .footer .box a {
-    color: #333;
+    color: black;
     text-decoration: none;
 }
 
@@ -219,8 +227,8 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 /* Hero Styles */
 
 #hero {
-  background-color: #666;
-  color: #f3f4eb;
+  background-color: #023430;
+  color: white ;
   border-bottom: 1px solid #313030;
   padding: 12px 0px;
 }
@@ -237,6 +245,7 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 }
 
 #hero h2 {
+  font-family: "Noto Serif JP", "Lexend Deca", "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;;
   border-top: 3px solid #6ca439;
   color: #f3f4eb;
   padding: 10px 0;
@@ -257,14 +266,14 @@ input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-
 
 .btn-mongo:hover {
   color: white;
-  border-color:#34302d;
+  border-color:black;
   box-shadow:none;
   text-decoration:none;
 }
 
 .btn-dark {
-  border: 2px solid #3b291f;
-  background-color: #3b291f;
+  border: 2px solid black;
+  background-color: black;
   color: white;
   border-radius: 0;
 }
