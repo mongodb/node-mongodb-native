@@ -52,8 +52,10 @@ export interface UnifiedChangeStream extends ChangeStream {
 }
 
 export class UnifiedThread {
+  // Every function queued will have a catch handler attached to it, whitch will prevent `await this.#promise` from throwing
+  // The potential error thrown by the functionToQueue can still be inspected on the `this.#error` property
   #promise: Promise<void>;
-  #error: Error;
+  #error: Error | null = null;
   #killed = false;
 
   id: string;

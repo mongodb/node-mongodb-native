@@ -213,7 +213,7 @@ export function getMatchingEventCount(event, client, entities): number {
         entities
       );
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }).length;

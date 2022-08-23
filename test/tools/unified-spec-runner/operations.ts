@@ -562,13 +562,7 @@ operations.set('runOnThread', async ({ entities, operation, client, testConfig }
   expect(threadId).to.be.a('string');
   const thread = entities.getEntity('thread', threadId, true);
   const operationToQueue = operation.arguments!.operation;
-  const executeFn = executeOperationAndCheck.bind(
-    null,
-    operationToQueue,
-    entities,
-    client,
-    testConfig
-  );
+  const executeFn = () => executeOperationAndCheck(operationToQueue, entities, client, testConfig);
   thread.queue(executeFn);
 });
 

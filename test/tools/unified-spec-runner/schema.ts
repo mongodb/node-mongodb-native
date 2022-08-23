@@ -200,7 +200,7 @@ export type EntityDescription =
   | { database: DatabaseEntity }
   | { collection: CollectionEntity }
   | { bucket: BucketEntity }
-  | { thread: UnifiedThread }
+  | { thread: Pick<UnifiedThread, 'id'> }
   | { stream: StreamEntity }
   | { session: SessionEntity }
   | { clientEncryption: ClientEncryptionEntity };
