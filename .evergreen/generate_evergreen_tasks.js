@@ -251,11 +251,11 @@ TASKS.push({
     {
       func: 'bootstrap mongo-orchestration',
       vars: {
-        VERSION: 'latest',
+        VERSION: 'rapid',
         TOPOLOGY: 'server'
       }
     },
-    { func: 'run lambda tests' }
+    { func: 'run lambda handler example tests' }
   ]
 });
 
@@ -276,7 +276,7 @@ TASKS.push({
     },
     { func: 'add aws auth variables to file' },
     { func: 'setup aws env' },
-    { func: 'run lambda tests with aws auth' }
+    { func: 'run lambda handler example tests with aws auth' }
   ]
 });
 

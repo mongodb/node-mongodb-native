@@ -817,7 +817,7 @@ functions:
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh"
 
-  "run lambda tests":
+  "run lambda handler example tests":
     - command: subprocess.exec
       params:
         working_dir: "src"
@@ -829,7 +829,7 @@ functions:
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-lambda-tests.sh"
 
-  "run lambda tests with aws auth":
+  "run lambda handler example tests with aws auth":
     - command: shell.exec
       type: test
       params:

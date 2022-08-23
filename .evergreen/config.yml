@@ -781,7 +781,7 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh
-  run lambda tests:
+  run lambda handler example tests:
     - command: subprocess.exec
       params:
         working_dir: src
@@ -792,7 +792,7 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-lambda-tests.sh
-  run lambda tests with aws auth:
+  run lambda handler example tests with aws auth:
     - command: shell.exec
       type: test
       params:
@@ -1331,9 +1331,9 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: latest
+          VERSION: rapid
           TOPOLOGY: server
-      - func: run lambda tests
+      - func: run lambda handler example tests
   - name: test-lambda-aws-auth-example
     tags:
       - latest
@@ -1348,7 +1348,7 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run lambda tests with aws auth
+      - func: run lambda handler example tests with aws auth
   - name: test-tls-support-latest
     tags:
       - tls-support
@@ -2303,7 +2303,6 @@ buildvariants:
       - test-socks5-tls
       - test-zstd-compression
       - test-snappy-compression
-      - test-lambda-example
       - test-lambda-aws-auth-example
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -2359,7 +2358,6 @@ buildvariants:
 =======
       - test-zstd-compression
       - test-snappy-compression
-      - test-lambda-example
       - test-lambda-aws-auth-example
 >>>>>>> test(NODE-4160): add evg run for lambda example
       - test-tls-support-latest
@@ -2401,7 +2399,6 @@ buildvariants:
       - test-socks5-tls
       - test-zstd-compression
       - test-snappy-compression
-      - test-lambda-example
       - test-lambda-aws-auth-example
       - test-tls-support-latest
       - test-tls-support-6.0
