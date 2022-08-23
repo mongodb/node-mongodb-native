@@ -340,13 +340,9 @@ const EMPTY_CMAP_EVENTS = {
   connectionCheckedInEvent: ConnectionCheckedInEvent
 };
 
-function validEmptyCmapEvent(
-  expected: ExpectedCommandEvent | ExpectedCmapEvent,
-  actual: CommandEvent | CmapEvent
-) {
-  return Object.values(EMPTY_CMAP_EVENTS).some(value => {
-    return actual instanceof value;
-  });
+function validEmptyCmapEvent(expected: ExpectedCommandEvent | ExpectedCmapEvent) {
+  const expectedEventName = Object.keys(expected)[0];
+  return !!EMPTY_CMAP_EVENTS[expectedEventName];
 }
 
 function failOnMismatchedCount(
@@ -469,8 +465,10 @@ function compareEvents(
       if (expectedEvent.poolClearedEvent.hasServiceId) {
         expect(actualEvent).property('serviceId').to.exist;
       }
-    } else if (validEmptyCmapEvent(expectedEvent as ExpectedCmapEvent, actualEvent as CmapEvent)) {
-      return;
+    } else if (validEmptyCmapEvent(expectedEvent as ExpectedCmapEvent)) {
+      const expectedEventName = Object.keys(expectedEvent)[0];
+      const expectedEventInstance = EMPTY_CMAP_EVENTS[expectedEventName];
+      expect(actualEvent).to.be.instanceOf(expectedEventInstance);
     } else if (expectedEvent.serverDescriptionChangedEvent) {
       expect(actualEvent).to.be.instanceOf(ServerDescriptionChangedEvent);
       const expectedServerDescriptionKeys = ['previousDescription', 'newDescription'];
