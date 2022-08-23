@@ -1,6 +1,9 @@
 description: "poc-change-streams"
 
-schemaVersion: "1.0"
+schemaVersion: "1.4"
+
+runOnRequirements:
+  - serverless: forbid
 
 createEntities:
   # Entities for creating changeStreams
