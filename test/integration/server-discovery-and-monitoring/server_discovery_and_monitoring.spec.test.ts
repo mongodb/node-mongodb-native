@@ -1,11 +1,13 @@
-'use strict';
-const { loadSpecTests } = require('../../spec');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
-const path = require('path');
-const net = require('net');
-const { sleep } = require('../../tools/utils');
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Socket } from 'net';
+import * as path from 'path';
 
-const filter = ({ description }) => {
+import { loadSpecTests } from '../../spec';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
+import { TestFilter } from '../../tools/unified-spec-runner/schema';
+import { sleep } from '../../tools/utils';
+
+const filter: TestFilter = ({ description }) => {
   const isAuthEnabled = process.env.AUTH === 'auth';
   switch (description) {
     case 'Reset server and pool after AuthenticationFailure error':
@@ -34,9 +36,9 @@ describe('SDAM Unified Tests', function () {
     ];
 
     await sleep(250);
-    const sockArray = process._getActiveHandles().filter(handle => {
+    const sockArray = (process as any)._getActiveHandles().filter(handle => {
       // Stdio are instanceof Socket so look for fd to be null
-      return handle.fd == null && handle instanceof net.Socket && handle.destroyed !== true;
+      return handle.fd == null && handle instanceof Socket && handle.destroyed !== true;
     });
     if (!sockArray.length) {
       return;
@@ -44,8 +46,8 @@ describe('SDAM Unified Tests', function () {
     for (const sock of sockArray) {
       sock.destroy();
     }
-    if (!LEAKY_TESTS.some(test => test === this.currentTest.title)) {
-      this.test.error(new Error(`Test failed to clean up ${sockArray.length} socket(s)`));
+    if (!LEAKY_TESTS.some(test => test === this.currentTest!.title)) {
+      this.test!.error(new Error(`Test failed to clean up ${sockArray.length} socket(s)`));
     }
   });
   runUnifiedSuite(loadSpecTests(path.join('server-discovery-and-monitoring', 'unified')), filter);
