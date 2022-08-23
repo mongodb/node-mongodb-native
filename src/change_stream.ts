@@ -210,7 +210,7 @@ export interface ChangeStreamDocumentCollectionUUID {
    * **NOTE:** collectionUUID will be converted to a NodeJS Buffer if the promoteBuffers
    *    flag is enabled.
    *
-   * @since 6.1.0
+   * @sinceServerVersion 6.1.0
    */
   collectionUUID: Binary;
 }
@@ -222,7 +222,7 @@ export interface ChangeStreamDocumentOperationDescription {
    *
    * Only present when the `showExpandedEvents` flag is enabled.
    *
-   * @since 6.1.0
+   * @sinceServerVersion 6.1.0
    */
   operationDescription?: Document;
 }
@@ -496,6 +496,25 @@ export interface UpdateDescription<TSchema extends Document = Document> {
     /** The number of elements in the truncated array. */
     newSize: number;
   }>;
+
+  /**
+   * A document containing additional information about any ambiguous update paths from the update event.  The document
+   * maps the full ambiguous update path to an array containing the actual resolved components of the path.  For example,
+   * given a document shaped like `{ a: { '0': 0 } }`, and an update of `{ $inc: 'a.0' }`, disambiguated paths would look like
+   * the following:
+   *
+   * ```
+   *   {
+   *     'a.0': ['a', '0']
+   *   }
+   * ```
+   *
+   * This field is only present when there are ambiguous paths that are updated as a part of the update event and `showExpandedEvents`
+   * is enabled for the change stream.
+   * @sinceServerVersion 6.1.0
+   * @experimental
+   */
+  disambiguatedPaths?: Document;
 }
 
 /** @public */

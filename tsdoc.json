@@ -11,6 +11,10 @@
         },
         {
             "syntaxKind": "block",
+            "tagName": "@sinceServerVersion"
+        },
+        {
+            "syntaxKind": "block",
             "tagName": "@category"
         }
     ]

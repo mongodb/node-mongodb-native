@@ -1,0 +1,251 @@
+{
+  "description": "disambiguatedPaths",
+  "schemaVersion": "1.3",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    }
+  ],
+  "runOnRequirements": [
+    {
+      "minServerVersion": "6.1.0",
+      "topologies": [
+        "replicaset",
+        "sharded-replicaset",
+        "load-balanced",
+        "sharded"
+      ]
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "collection0",
+      "databaseName": "database0",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "disambiguatedPaths is not present when showExpandedEvents is false/unset",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": {
+                "1": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "a.1": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "updateDescription": {
+              "updatedFields": {
+                "$$exists": true
+              },
+              "removedFields": {
+                "$$exists": true
+              },
+              "truncatedArrays": {
+                "$$exists": true
+              },
+              "disambiguatedPaths": {
+                "$$exists": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "disambiguatedPaths is present on updateDescription when an ambiguous path is present",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": {
+                "1": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "showExpandedEvents": true
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "a.1": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "updateDescription": {
+              "updatedFields": {
+                "$$exists": true
+              },
+              "removedFields": {
+                "$$exists": true
+              },
+              "truncatedArrays": {
+                "$$exists": true
+              },
+              "disambiguatedPaths": {
+                "a.1": [
+                  "a",
+                  "1"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "disambiguatedPaths returns array indices as integers",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "a": [
+                {
+                  "1": 1
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": [],
+            "showExpandedEvents": true
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$set": {
+                "a.0.1": 2
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "operationType": "update",
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "updateDescription": {
+              "updatedFields": {
+                "$$exists": true
+              },
+              "removedFields": {
+                "$$exists": true
+              },
+              "truncatedArrays": {
+                "$$exists": true
+              },
+              "disambiguatedPaths": {
+                "a.0.1": [
+                  "a",
+                  {
+                    "$$type": "int"
+                  },
+                  "1"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
