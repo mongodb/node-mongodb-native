@@ -227,7 +227,7 @@ TASKS.push(
   ]
 );
 
-['zstd', 'snappy'].forEach(compressor => {
+for (const compressor of ['zstd', 'snappy']) {
   TASKS.push({
     name: `test-${compressor}-compression`,
     tags: ['latest', compressor],
@@ -245,7 +245,7 @@ TASKS.push(
       { func: 'run-compression-tests' }
     ]
   });
-});
+}
 
 TLS_VERSIONS.forEach(VERSION => {
   TASKS.push({
@@ -549,8 +549,8 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
-[ '5.0', 'rapid', 'latest' ].forEach(version => {
-  [ 'c071d5a8d59ddcad40f22887a12bdb374c2f86af', 'master' ].forEach(ref => {
+['5.0', 'rapid', 'latest'].forEach(version => {
+  ['c071d5a8d59ddcad40f22887a12bdb374c2f86af', 'master'].forEach(ref => {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests'],
@@ -621,6 +621,15 @@ BUILD_VARIANTS.push({
   },
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
 });
+
+// TODO(NODE-4575): unskip zstd and snappy on node 16
+for (const variant of BUILD_VARIANTS.filter(
+  variant => variant.expansions && variant.expansions.NODE_LTS_NAME === 'gallium'
+)) {
+  variant.tasks = variant.tasks.filter(
+    name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
+  );
+}
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.in.yml`, 'utf8'));
 fileData.tasks = (fileData.tasks || [])
