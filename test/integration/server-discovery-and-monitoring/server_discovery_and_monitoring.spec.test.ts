@@ -19,6 +19,8 @@ const filter: TestFilter = ({ description }) => {
       return isAuthEnabled ? 'TODO(NODE-3891): fix tests broken when AUTH enabled' : false;
     case 'Network error on minPoolSize background creation':
       return 'TODO(NODE-4385): implement pool pausing and pool ready event';
+    case 'PoolClearedError does not mark server unknown':
+      return 'TODO(NODE-3135): make CMAP SDAM-aware and ensure PoolClearError is retryable';
     default:
       return false;
   }
