@@ -19,7 +19,7 @@ const failPoint = {
 
 const POOL_SIZE = 100;
 
-async function runTaskGroup(collection: Collection, count: 10 | 100) {
+async function runTaskGroup(collection: Collection, count: 10 | 100 | 1000) {
   for (let i = 0; i < count; ++i) {
     await collection.findOne({});
   }
@@ -147,13 +147,21 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
   it('equally distributes operations with both hosts are fine', TEST_METADATA, async function () {
     const collection = client.db('test-db').collection('collection0');
 
+    const numberTaskGroups = 10;
+    const numberOfTasks = 1000;
+    const totalNumberOfTasks = numberTaskGroups * numberOfTasks;
+
+    // This test has proved flakey, not just for Node.  The number of iterations for the test has been increased,
+    // to prevent the test from failing.
     // Step 8: Start 10 concurrent threads / tasks that each run 100 findOne operations with empty filters using that client.
-    await Promise.all(Array.from({ length: 10 }, () => runTaskGroup(collection, 100)));
+    await Promise.all(
+      Array.from({ length: numberTaskGroups }, () => runTaskGroup(collection, numberOfTasks))
+    );
 
     // Step 9: Using command monitoring events, assert that each mongos was selected roughly 50% of the time (within +/- 10%).
     const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
-    const percentageToHost1 = (counts[host1] / 1000) * 100;
-    const percentageToHost2 = (counts[host2] / 1000) * 100;
+    const percentageToHost1 = (counts[host1] / totalNumberOfTasks) * 100;
+    const percentageToHost2 = (counts[host2] / totalNumberOfTasks) * 100;
     expect(percentageToHost1).to.be.greaterThan(40).and.lessThan(60);
     expect(percentageToHost2).to.be.greaterThan(40).and.lessThan(60);
   });
