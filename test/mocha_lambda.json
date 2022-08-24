@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json",
   "require": [
-    "test/examples/setup.js"
+    "test/integration/node-specific/examples/setup.js"
   ],
   "extension": ["js"],
   "ui": "test/tools/runner/metadata_ui.js",

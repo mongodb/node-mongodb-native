@@ -8,7 +8,7 @@ const loader = Module._load;
 // const { MongoClient } = require('mongodb');
 Module._load = function (request) {
   if (request === 'mongodb') {
-    arguments[0] = path.join(__dirname, '..', '..', 'lib');
+    arguments[0] = path.join(__dirname, '..', '..', '..', '..', 'lib');
   }
   return loader.apply(this, arguments);
 };
