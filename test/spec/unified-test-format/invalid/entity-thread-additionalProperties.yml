@@ -1,0 +1,12 @@
+description: "entity-thread-additionalProperties"
+
+schemaVersion: "1.10"
+
+createEntities:
+  - thread:
+      id: &thread0 "thread0"
+      foo: "bar"
+
+tests:
+  - description: "foo"
+    operations: []

@@ -14,11 +14,13 @@ import {
 } from '../../../src';
 import { getMongoDBClientEncryption } from '../../../src/utils';
 import { shouldRunServerlessTest } from '../../tools/utils';
-import { EntitiesMap } from './entities';
+import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
+import { matchesEvents } from './match';
 import type {
   ClientEncryption,
   ClientEncryptionEntity,
   CollectionOrDatabaseOptions,
+  ExpectedEventsForClient,
   KMSProvidersEntity,
   RunOnRequirement,
   StringOrPlaceholder
@@ -75,7 +77,7 @@ export async function topologySatisfies(
       if (!topologyType) throw new Error(`Topology undiscovered: ${config.topologyType}`);
       ok &&= r.topologies.includes(topologyType);
       if (!ok && skipReason == null) {
-        skipReason = `requires ${r.topologies} but against a ${topologyType} topology`;
+        skipReason = `requires ${r.topologies} but discovered a ${topologyType} topology`;
       }
     }
   }
@@ -200,6 +202,21 @@ export function makeConnectionString(
     connectionString.searchParams.set(name, String(value));
   }
   return connectionString.toString();
+}
+
+export function getMatchingEventCount(event, client, entities): number {
+  return client.getCapturedEvents('all').filter(capturedEvent => {
+    try {
+      matchesEvents(
+        { events: [event] } as ExpectedEventsForClient,
+        [capturedEvent] as CommandEvent[] | CmapEvent[],
+        entities
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }).length;
 }
 
 /**

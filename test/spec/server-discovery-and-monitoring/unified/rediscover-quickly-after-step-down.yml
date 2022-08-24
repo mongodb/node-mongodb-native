@@ -1,0 +1,144 @@
+---
+description: rediscover-quickly-after-step-down
+
+schemaVersion: "1.10"
+
+runOnRequirements:
+    # 4.4 is required for streaming.
+    # A replica set is required for replSetStepDown.
+  - minServerVersion: "4.4"
+    serverless: forbid
+    topologies:
+      - replicaset
+
+createEntities:
+  - client:
+      id: &setupClient setupClient
+  - database:
+      id: &adminDatabase adminDatabase
+      client: *setupClient
+      databaseName: admin
+
+initialData: &initialData
+  - collectionName: &collectionName test-replSetStepDown
+    databaseName: &databaseName sdam-tests
+    documents:
+      - _id: 1
+      - _id: 2
+
+tests:
+  - description: Rediscover quickly after replSetStepDown
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - poolClearedEvent
+                  - commandStartedEvent
+                uriOptions:
+                  appname: replSetStepDownTest
+                  # Configure a large heartbeatFrequencyMS
+                  heartbeatFrequencyMS: 60000
+                  # Configure a much smaller server selection timeout so that the test
+                  # will error when it cannot discover the new primary soon.
+                  serverSelectionTimeoutMS: 5000
+                  w: majority
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      # Discover the primary.
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - _id: 3
+            - _id: 4
+      - name: recordTopologyDescription
+        object: testRunner
+        arguments:
+          client: *client
+          id: &topologyDescription topologyDescription
+      - name: assertTopologyType
+        object: testRunner
+        arguments:
+          topologyDescription: *topologyDescription
+          topologyType: ReplicaSetWithPrimary
+      # Unfreeze a secondary with replSetFreeze:0 to ensure a speedy election.
+      - name: runCommand
+        object: *adminDatabase
+        arguments:
+          command:
+            replSetFreeze: 0
+          readPreference:
+            mode: secondary
+          commandName: replSetFreeze
+      # Run replSetStepDown on the meta client.
+      - name: runCommand
+        object: *adminDatabase
+        arguments:
+          command:
+            replSetStepDown: 30
+            secondaryCatchUpPeriodSecs: 30
+            force: false
+          commandName: replSetStepDown
+      - name: waitForPrimaryChange
+        object: testRunner
+        arguments:
+          client: *client
+          priorTopologyDescription: *topologyDescription
+          # We use a relatively large timeout here to workaround slow
+          # elections on Windows, possibly caused by SERVER-48154.
+          timeoutMS: 15000
+      # Rediscover the new primary.
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - _id: 5
+            - _id: 6
+      # Assert that no pools were cleared.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolClearedEvent: {}
+          count: 0
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                insert: test-replSetStepDown
+                documents:
+                  - _id: 3
+                  - _id: 4
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                insert: test-replSetStepDown
+                documents:
+                  - _id: 5
+                  - _id: 6
+              commandName: insert
+              databaseName: *databaseName
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - _id: 1
+          - _id: 2
+          - _id: 3
+          - _id: 4
+          - _id: 5
+          - _id: 6

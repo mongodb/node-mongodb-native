@@ -1,0 +1,130 @@
+---
+description: connectTimeoutMS
+
+schemaVersion: "1.10"
+
+runOnRequirements:
+    # failCommand appName requirements
+  - minServerVersion: "4.4"
+    serverless: forbid
+    topologies: [ single, replicaset, sharded ]
+
+createEntities:
+  - client:
+      id: &setupClient setupClient
+      useMultipleMongoses: false
+
+initialData: &initialData
+  - collectionName: &collectionName connectTimeoutMS
+    databaseName: &databaseName sdam-tests
+    documents: []
+
+tests:
+  - description: connectTimeoutMS=0
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - commandStartedEvent
+                  - serverDescriptionChangedEvent
+                  - poolClearedEvent
+                uriOptions:
+                  retryWrites: false
+                  connectTimeoutMS: 0
+                  heartbeatFrequencyMS: 500
+                  appname: connectTimeoutMS=0
+                useMultipleMongoses: false
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      # Perform an operation to ensure the node is discovered.
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - _id: 1
+            - _id: 2
+      # Block the next streaming hello check for longer than
+      # heartbeatFrequencyMS to ensure that the connection timeout remains
+      # unlimited.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 2
+            data:
+              failCommands:
+                - hello
+                - isMaster
+              appName: connectTimeoutMS=0
+              blockConnection: true
+              blockTimeMS: 550
+          client: *setupClient
+      - name: wait
+        object: testRunner
+        arguments:
+          ms: 750
+      # Perform an operation to ensure the node is still selectable.
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - _id: 3
+            - _id: 4
+      # Assert that the server was never marked Unknown and the pool was never
+      # cleared.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            serverDescriptionChangedEvent:
+              newDescription:
+                type: Unknown
+          count: 0
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolClearedEvent: {}
+          count: 0
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                insert: connectTimeoutMS
+                documents:
+                  - _id: 1
+                  - _id: 2
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                insert: connectTimeoutMS
+                documents:
+                  - _id: 3
+                  - _id: 4
+              commandName: insert
+              databaseName: *databaseName
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - _id: 1
+          - _id: 2
+          - _id: 3
+          - _id: 4

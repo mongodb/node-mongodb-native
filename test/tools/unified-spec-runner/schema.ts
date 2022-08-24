@@ -5,6 +5,7 @@ import type { ReadPreferenceMode } from '../../../src/read_preference';
 import type { TagSet } from '../../../src/sdam/server_description';
 import type { W } from '../../../src/write_concern';
 import { TestConfiguration } from '../runner/config';
+import { UnifiedThread } from './entities';
 
 export const SupportedVersion = '^1.0';
 
@@ -199,6 +200,7 @@ export type EntityDescription =
   | { database: DatabaseEntity }
   | { collection: CollectionEntity }
   | { bucket: BucketEntity }
+  | { thread: Pick<UnifiedThread, 'id'> }
   | { stream: StreamEntity }
   | { session: SessionEntity }
   | { clientEncryption: ClientEncryptionEntity };
@@ -239,10 +241,13 @@ export interface Test {
 }
 export interface ExpectedEventsForClient {
   client: string;
-  eventType?: string;
-  events: (ExpectedCommandEvent | ExpectedCmapEvent)[];
+  eventType?: 'command' | 'cmap' | 'sdam';
+  events: ExpectedEvent[];
   ignoreExtraEvents?: boolean;
 }
+
+export type ExpectedEvent = ExpectedCommandEvent | ExpectedCmapEvent | ExpectedSdamEvent;
+
 export interface ExpectedCommandEvent {
   commandStartedEvent?: {
     command?: Document;
@@ -275,6 +280,16 @@ export interface ExpectedCmapEvent {
   connectionCheckOutFailedEvent?: Record<string, never>;
   connectionCheckedOutEvent?: Record<string, never>;
   connectionCheckedInEvent?: Record<string, never>;
+}
+export interface ExpectedSdamEvent {
+  serverDescriptionChangedEvent?: {
+    previousDescription?: {
+      type?: string;
+    };
+    newDescription?: {
+      type?: string;
+    };
+  };
 }
 export interface ExpectedError {
   isError?: true;

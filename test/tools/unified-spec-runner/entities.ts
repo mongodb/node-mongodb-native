@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
+import { EventEmitter } from 'events';
 
 import { ChangeStream } from '../../../src/change_stream';
 import {
@@ -27,7 +28,9 @@ import {
   GridFSBucket,
   HostAddress,
   MongoClient,
-  MongoCredentials
+  MongoCredentials,
+  ServerDescriptionChangedEvent,
+  TopologyDescription
 } from '../../../src/index';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
@@ -48,6 +51,37 @@ export interface UnifiedChangeStream extends ChangeStream {
   eventCollector: InstanceType<typeof import('../../tools/utils')['EventCollector']>;
 }
 
+export class UnifiedThread {
+  // Every function queued will have a catch handler attached to it, which will prevent `await this.#promise` from throwing
+  // The potential error thrown by the functionToQueue can still be inspected on the `this.#error` property
+  #promise: Promise<void>;
+  #error: Error | null = null;
+  #killed = false;
+
+  id: string;
+
+  constructor(id) {
+    this.id = id;
+    this.#promise = Promise.resolve();
+  }
+
+  queue(functionToQueue: () => Promise<any>) {
+    if (this.#killed || this.#error) {
+      return;
+    }
+
+    this.#promise = this.#promise.then(functionToQueue).catch(e => (this.#error = e));
+  }
+
+  async finish() {
+    this.#killed = true;
+    await this.#promise;
+    if (this.#error) {
+      throw this.#error;
+    }
+  }
+}
+
 export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent;
 export type CmapEvent =
   | ConnectionPoolCreatedEvent
@@ -60,15 +94,17 @@ export type CmapEvent =
   | ConnectionCheckedOutEvent
   | ConnectionCheckedInEvent
   | ConnectionPoolClearedEvent;
+export type SdamEvent = ServerDescriptionChangedEvent;
 
 function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
 export class UnifiedMongoClient extends MongoClient {
-  commandEvents: CommandEvent[];
-  cmapEvents: CmapEvent[];
-  failPoints: Document[];
+  commandEvents: CommandEvent[] = [];
+  cmapEvents: CmapEvent[] = [];
+  sdamEvents: SdamEvent[] = [];
+  failPoints: Document[] = [];
   ignoredEvents: string[];
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
@@ -83,6 +119,8 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedOut'
     | 'connectionCheckedIn'
   )[];
+  observedSdamEvents: 'serverDescriptionChangedEvent'[];
+  observedEventEmitter = new EventEmitter();
   _credentials: MongoCredentials | null;
 
   static COMMAND_EVENT_NAME_LOOKUP = {
@@ -104,6 +142,10 @@ export class UnifiedMongoClient extends MongoClient {
     connectionCheckedInEvent: 'connectionCheckedIn'
   } as const;
 
+  static SDAM_EVENT_NAME_LOOKUP = {
+    serverDescriptionChangedEvent: 'serverDescriptionChanged'
+  } as const;
+
   constructor(uri: string, description: ClientEntity) {
     super(uri, {
       monitorCommands: true,
@@ -112,9 +154,6 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
 
-    this.commandEvents = [];
-    this.cmapEvents = [];
-    this.failPoints = [];
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
@@ -126,11 +165,17 @@ export class UnifiedMongoClient extends MongoClient {
     this.observedCmapEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.CMAP_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);
+    this.observedSdamEvents = (description.observeEvents ?? [])
+      .map(e => UnifiedMongoClient.SDAM_EVENT_NAME_LOOKUP[e])
+      .filter(e => !!e);
     for (const eventName of this.observedCommandEvents) {
       this.on(eventName, this.pushCommandEvent);
     }
     for (const eventName of this.observedCmapEvents) {
       this.on(eventName, this.pushCmapEvent);
+    }
+    for (const eventName of this.observedSdamEvents) {
+      this.on(eventName, this.pushSdamEvent);
     }
   }
 
@@ -138,12 +183,22 @@ export class UnifiedMongoClient extends MongoClient {
     return this.ignoredEvents.includes(e.commandName);
   }
 
-  getCapturedEvents(eventType: string): CommandEvent[] | CmapEvent[] {
+  getCapturedEvents(
+    eventType: 'command' | 'cmap' | 'sdam'
+  ): CommandEvent[] | CmapEvent[] | SdamEvent[];
+  getCapturedEvents(eventType: 'all'): (CommandEvent | CmapEvent | SdamEvent)[];
+  getCapturedEvents(
+    eventType: 'command' | 'cmap' | 'sdam' | 'all'
+  ): (CommandEvent | CmapEvent | SdamEvent)[] {
     switch (eventType) {
       case 'command':
         return this.commandEvents;
       case 'cmap':
         return this.cmapEvents;
+      case 'sdam':
+        return this.sdamEvents;
+      case 'all':
+        return [...this.commandEvents, ...this.cmapEvents, ...this.sdamEvents];
       default:
         throw new Error(`Unknown eventType: ${eventType}`);
     }
@@ -153,12 +208,20 @@ export class UnifiedMongoClient extends MongoClient {
   pushCommandEvent: (e: CommandEvent) => void = e => {
     if (!this.isIgnored(e)) {
       this.commandEvents.push(e);
+      this.observedEventEmitter.emit('observedEvent');
     }
   };
 
   // NOTE: pushCmapEvent must be an arrow function
   pushCmapEvent: (e: CmapEvent) => void = e => {
     this.cmapEvents.push(e);
+    this.observedEventEmitter.emit('observedEvent');
+  };
+
+  // NOTE: pushSdamEvent must be an arrow function
+  pushSdamEvent: (e: SdamEvent) => void = e => {
+    this.sdamEvents.push(e);
+    this.observedEventEmitter.emit('observedEvent');
   };
 
   /** Disables command monitoring for the client and returns a list of the captured events. */
@@ -168,6 +231,9 @@ export class UnifiedMongoClient extends MongoClient {
     }
     for (const eventName of this.observedCmapEvents) {
       this.off(eventName, this.pushCmapEvent);
+    }
+    for (const eventName of this.observedSdamEvents) {
+      this.off(eventName, this.pushSdamEvent);
     }
   }
 }
@@ -239,6 +305,7 @@ export type Entity =
   | UnifiedChangeStream
   | GridFSBucket
   | ClientEncryption
+  | TopologyDescription // From recordTopologyDescription operation
   | Document; // Results from operations
 
 export type EntityCtor =
@@ -249,6 +316,7 @@ export type EntityCtor =
   | typeof ChangeStream
   | typeof AbstractCursor
   | typeof GridFSBucket
+  | typeof UnifiedThread
   | ClientEncryption;
 
 export type EntityTypeId =
@@ -257,6 +325,7 @@ export type EntityTypeId =
   | 'collection'
   | 'session'
   | 'bucket'
+  | 'thread'
   | 'cursor'
   | 'stream'
   | 'clientEncryption';
@@ -267,6 +336,7 @@ ENTITY_CTORS.set('db', Db);
 ENTITY_CTORS.set('collection', Collection);
 ENTITY_CTORS.set('session', ClientSession);
 ENTITY_CTORS.set('bucket', GridFSBucket);
+ENTITY_CTORS.set('thread', UnifiedThread);
 ENTITY_CTORS.set('cursor', AbstractCursor);
 ENTITY_CTORS.set('stream', ChangeStream);
 
@@ -299,6 +369,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'collection', key: string, assertExists?: boolean): Collection;
   getEntity(type: 'session', key: string, assertExists?: boolean): ClientSession;
   getEntity(type: 'bucket', key: string, assertExists?: boolean): GridFSBucket;
+  getEntity(type: 'thread', key: string, assertExists?: boolean): UnifiedThread;
   getEntity(type: 'cursor', key: string, assertExists?: boolean): AbstractCursor;
   getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
   getEntity(type: 'clientEncryption', key: string, assertExists?: boolean): ClientEncryption;
@@ -351,9 +422,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
 
   static async createEntities(
     config: TestConfiguration,
-    entities?: EntityDescription[]
+    entities?: EntityDescription[],
+    entityMap?: EntitiesMap
   ): Promise<EntitiesMap> {
-    const map = new EntitiesMap();
+    const map = entityMap ?? new EntitiesMap();
     for (const entity of entities ?? []) {
       if ('client' in entity) {
         const useMultipleMongoses =
@@ -437,6 +509,8 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
         }
 
         map.set(entity.bucket.id, new GridFSBucket(db, options));
+      } else if ('thread' in entity) {
+        map.set(entity.thread.id, new UnifiedThread(entity.thread.id));
       } else if ('stream' in entity) {
         throw new Error(`Unsupported Entity ${JSON.stringify(entity)}`);
       } else if ('clientEncryption' in entity) {

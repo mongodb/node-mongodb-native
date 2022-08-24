@@ -1,0 +1,27 @@
+{
+  "description": "collectionOrDatabaseOptions-timeoutMS-type",
+  "schemaVersion": "1.9",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "foo",
+        "databaseOptions": {
+          "timeoutMS": 4.5
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

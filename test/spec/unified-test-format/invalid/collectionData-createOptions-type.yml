@@ -1,0 +1,25 @@
+description: "collectionData-createOptions-type"
+
+schemaVersion: "1.9"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+  - database:
+      id: &database0 "database0"
+      client: *client0
+      databaseName: &database0Name "foo"
+  - collection:
+      id: &collection0 "collection0"
+      database: *database0
+      collectionName: &collection0Name "foo"
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    createOptions: 0
+    documents: []
+
+tests:
+  - description: "foo"
+    operations: []

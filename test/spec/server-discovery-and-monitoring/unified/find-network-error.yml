@@ -1,0 +1,135 @@
+---
+description: find-network-error
+
+schemaVersion: "1.10"
+
+runOnRequirements:
+  # failCommand appName requirements
+  - minServerVersion: "4.4"
+    serverless: forbid
+    topologies: [ single, replicaset, sharded ]
+
+createEntities:
+  - client:
+      id: &setupClient setupClient
+      useMultipleMongoses: false
+
+initialData: &initialData
+  - collectionName: &collectionName find-network-error
+    databaseName: &databaseName sdam-tests
+    documents:
+      - _id: 1
+      - _id: 2
+
+tests:
+  - description: Reset server and pool after network error on find
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *setupClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 1
+            data:
+              failCommands:
+                - find
+              closeConnection: true
+              appName: findNetworkErrorTest
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                  - serverDescriptionChangedEvent
+                  - poolClearedEvent
+                uriOptions:
+                  retryWrites: false
+                  retryReads: false
+                  appname: findNetworkErrorTest
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: find
+        object: *collection
+        arguments:
+          filter:
+            _id: 1
+        expectError:
+          isError: true
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            serverDescriptionChangedEvent:
+              newDescription:
+                type: Unknown
+          count: 1
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolClearedEvent: {}
+          count: 1
+      # Perform another operation to ensure the node is rediscovered.
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - _id: 5
+            - _id: 6
+      # Assert the server was marked Unknown and pool was cleared exactly once.
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            serverDescriptionChangedEvent:
+              newDescription:
+                type: Unknown
+          count: 1
+      - name: assertEventCount
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolClearedEvent: {}
+          count: 1
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                find: find-network-error
+              commandName: find
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                insert: find-network-error
+                documents:
+                  - _id: 5
+                  - _id: 6
+              commandName: insert
+              databaseName: *databaseName
+
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - _id: 1
+          - _id: 2
+          - _id: 5
+          - _id: 6

@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 
 import {
@@ -9,28 +9,41 @@ import {
   Document,
   GridFSFile,
   MongoClient,
-  ObjectId
+  ObjectId,
+  ServerType,
+  TopologyDescription,
+  TopologyType
 } from '../../../src';
 import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
+import { SERVER_DESCRIPTION_CHANGED } from '../../../src/constants';
 import { ReadConcern } from '../../../src/read_concern';
 import { ReadPreference } from '../../../src/read_preference';
 import { WriteConcern } from '../../../src/write_concern';
-import { getSymbolFrom } from '../../tools/utils';
+import { getSymbolFrom, sleep } from '../../tools/utils';
+import { TestConfiguration } from '../runner/config';
 import { EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
-import type { OperationDescription } from './schema';
-import { translateOptions } from './unified-utils';
+import type { ExpectedEvent, OperationDescription } from './schema';
+import { getMatchingEventCount, translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {
   client: MongoClient;
   operation: OperationDescription;
   entities: EntitiesMap;
+  testConfig: TestConfiguration;
 }
 
 type RunOperationFn = (
   p: OperationFunctionParams
 ) => Promise<Document | boolean | number | null | void>;
 export const operations = new Map<string, RunOperationFn>();
+
+operations.set('createEntities', async ({ entities, operation, testConfig }) => {
+  if (!operation.arguments?.entities) {
+    throw new Error('encountered createEntities operation without entities argument');
+  }
+  await EntitiesMap.createEntities(testConfig, operation.arguments.entities!, entities);
+});
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
@@ -408,7 +421,162 @@ operations.set('upload', async ({ entities, operation }) => {
   });
 });
 
-operations.set('withTransaction', async ({ entities, operation, client }) => {
+operations.set('wait', async ({ operation }) => {
+  expect(operation, 'Error in wait operation').to.have.nested.property('arguments.ms');
+  expect(operation.arguments!.ms).to.be.a('number', 'Error in wait operation');
+  await sleep(operation.arguments!.ms);
+});
+
+operations.set('waitForEvent', async ({ entities, operation }) => {
+  expect(operation, 'Error in waitForEvent operation').to.have.property('arguments');
+  const {
+    client,
+    event,
+    count
+  }: {
+    client: string;
+    event: ExpectedEvent;
+    count: number;
+  } = operation.arguments! as any;
+  expect(count).to.be.a('number', 'Error in waitForEvent operation, invalid count');
+
+  const mongoClient = entities.getEntity('client', client, true);
+
+  const eventName = Object.keys(event)[0];
+  const eventPromise = new Promise<void>(resolve => {
+    function checkForEvent() {
+      if (getMatchingEventCount(event, mongoClient, entities) >= count) {
+        return resolve();
+      }
+
+      mongoClient.observedEventEmitter.once('observedEvent', checkForEvent);
+    }
+    checkForEvent();
+  });
+  await Promise.race([
+    eventPromise,
+    sleep(10000).then(() =>
+      Promise.reject(
+        new Error(
+          `Timed out waiting for ${eventName}; captured [${mongoClient
+            .getCapturedEvents('all')
+            .map(e => e.constructor.name)
+            .join(', ')}]`
+        )
+      )
+    )
+  ]);
+});
+
+operations.set('assertEventCount', async ({ entities, operation }) => {
+  expect(operation, 'Error in assertEventCount operation').to.have.property('arguments');
+  const {
+    client,
+    event,
+    count
+  }: {
+    client: string;
+    event: ExpectedEvent;
+    count: number;
+  } = operation.arguments! as any;
+  expect(count).to.be.a('number', 'Error in assertEventCount operation, invalid count');
+
+  const mongoClient = entities.getEntity('client', client, true);
+
+  const eventName = Object.keys(event)[0];
+  const actualEventCount = getMatchingEventCount(event, mongoClient, entities);
+  expect(actualEventCount, `Error in assertEventCount for ${eventName}`).to.equal(count);
+});
+
+operations.set('recordTopologyDescription', async ({ entities, operation }) => {
+  const { client, id }: { client: string; id: string } = operation.arguments! as any;
+  expect(id).to.be.a('string');
+  const mongoClient = entities.getEntity('client', client, true);
+  const description = mongoClient.topology?.description;
+  expect(description, `Undefined topology description for client ${client}`).to.exist;
+
+  entities.set(id, description!);
+});
+
+operations.set('assertTopologyType', async ({ entities, operation }) => {
+  const {
+    topologyDescription,
+    topologyType
+  }: { topologyDescription: string; topologyType: TopologyType } = operation.arguments! as any;
+  expect(topologyDescription).to.be.a('string');
+  const actualDescription = entities.get(topologyDescription) as TopologyDescription;
+  expect(actualDescription, `Failed to retrieve description for topology ${topologyDescription}`).to
+    .exist;
+  expect(actualDescription).to.have.property('type', topologyType);
+});
+
+operations.set('waitForPrimaryChange', async ({ entities, operation }) => {
+  const {
+    client,
+    priorTopologyDescription,
+    timeoutMS
+  }: { client: string; priorTopologyDescription: TopologyType; timeoutMS?: number } =
+    operation.arguments! as any;
+
+  const mongoClient = entities.getEntity('client', client, true);
+
+  expect(priorTopologyDescription).to.be.a('string');
+  const priorTopologyDescriptionObject = entities.get(
+    priorTopologyDescription
+  ) as TopologyDescription;
+  expect(
+    priorTopologyDescriptionObject,
+    `Failed to retrieve description for topology ${priorTopologyDescription}`
+  ).to.exist;
+
+  const priorPrimary = Array.from(priorTopologyDescriptionObject.servers.values()).find(
+    serverDescription => serverDescription.type === ServerType.RSPrimary
+  );
+
+  const newPrimaryPromise = new Promise<void>(resolve => {
+    function checkForNewPrimary() {
+      const currentPrimary = Array.from(mongoClient.topology!.description.servers.values()).find(
+        serverDescription => serverDescription.type === ServerType.RSPrimary
+      );
+      if (
+        (!priorPrimary && currentPrimary) ||
+        (currentPrimary && !currentPrimary.equals(priorPrimary))
+      ) {
+        return resolve();
+      }
+
+      mongoClient.once(SERVER_DESCRIPTION_CHANGED, checkForNewPrimary);
+    }
+    checkForNewPrimary();
+  });
+  await Promise.race([
+    newPrimaryPromise,
+    sleep(timeoutMS ?? 10000).then(() =>
+      Promise.reject(new Error(`Timed out waiting for primary change on ${client}`))
+    )
+  ]);
+});
+
+operations.set('runOnThread', async ({ entities, operation, client, testConfig }) => {
+  const threadId: string = operation.arguments!.thread;
+  expect(threadId).to.be.a('string');
+  const thread = entities.getEntity('thread', threadId, true);
+  const operationToQueue = operation.arguments!.operation;
+  const executeFn = () => executeOperationAndCheck(operationToQueue, entities, client, testConfig);
+  thread.queue(executeFn);
+});
+
+operations.set('waitForThread', async ({ entities, operation }) => {
+  const threadId: string = operation.arguments!.thread;
+  expect(threadId).to.be.a('string');
+  const thread = entities.getEntity('thread', threadId, true);
+  await Promise.race([
+    thread.finish(),
+    sleep(10000).then(() => Promise.reject(new Error(`Timed out waiting for thread: ${threadId}`)))
+  ]);
+});
+
+operations.set('withTransaction', async ({ entities, operation, client, testConfig }) => {
   const session = entities.getEntity('session', operation.object);
 
   const options = {
@@ -420,7 +588,7 @@ operations.set('withTransaction', async ({ entities, operation, client }) => {
 
   return session.withTransaction(async () => {
     for (const callbackOperation of operation.arguments!.callback) {
-      await executeOperationAndCheck(callbackOperation, entities, client);
+      await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
     }
   }, options);
 });
@@ -545,7 +713,8 @@ operations.set('getKeyByAltName', async ({ entities, operation }) => {
 export async function executeOperationAndCheck(
   operation: OperationDescription,
   entities: EntitiesMap,
-  client: MongoClient
+  client: MongoClient,
+  testConfig: TestConfiguration
 ): Promise<void> {
   const opFunc = operations.get(operation.name);
   expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
@@ -558,7 +727,7 @@ export async function executeOperationAndCheck(
   let result;
 
   try {
-    result = await opFunc!({ entities, operation, client });
+    result = await opFunc!({ entities, operation, client, testConfig });
   } catch (error) {
     if (operation.expectError) {
       expectErrorCheck(error, operation.expectError, entities);
