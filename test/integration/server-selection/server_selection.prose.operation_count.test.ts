@@ -150,7 +150,9 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
     const numberTaskGroups = 10;
     const numberOfTasks = 1000;
     const totalNumberOfTasks = numberTaskGroups * numberOfTasks;
-
+    
+    // This test has proved flakey, not just for Node.  The number of iterations for the test has been increased,
+    // to prevent the test from failing.
     // Step 8: Start 10 concurrent threads / tasks that each run 100 findOne operations with empty filters using that client.
     await Promise.all(
       Array.from({ length: numberTaskGroups }, () => runTaskGroup(collection, numberOfTasks))
