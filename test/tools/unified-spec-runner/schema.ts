@@ -114,6 +114,7 @@ export type ObservableCommandEventId =
 export type ObservableCmapEventId =
   | 'connectionPoolCreatedEvent'
   | 'connectionPoolClosedEvent'
+  | 'connectionPoolReadyEvent'
   | 'connectionPoolClearedEvent'
   | 'connectionCreatedEvent'
   | 'connectionReadyEvent'
