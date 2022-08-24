@@ -78,7 +78,7 @@ tests:
           command:
             replSetFreeze: 0
           readPreference:
-            mode: Secondary
+            mode: secondary
           commandName: replSetFreeze
       # Run replSetStepDown on the meta client.
       - name: runCommand
