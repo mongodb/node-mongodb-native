@@ -1,9 +1,13 @@
 # Tests for resume behavior on server versions that support the ResumableChangeStreamError label
 description: "change-streams-resume-errorlabels"
+
 schemaVersion: "1.7"
+
 runOnRequirements:
   - minServerVersion: "4.3.1"
     topologies: [ replicaset, sharded-replicaset, load-balanced ]
+    serverless: forbid
+
 createEntities:
   - client:
       id: &client0 client0
