@@ -1,6 +1,6 @@
 {
   "description": "change-streams-pre_and_post_images",
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
       "minServerVersion": "6.0.0",
@@ -8,7 +8,8 @@
         "replicaset",
         "sharded-replicaset",
         "load-balanced"
-      ]
+      ],
+      "serverless": "forbid"
     }
   ],
   "createEntities": [
