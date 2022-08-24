@@ -1,10 +1,11 @@
 description: "change-streams-pre_and_post_images"
 
-schemaVersion: "1.3"
+schemaVersion: "1.4"
 
 runOnRequirements:
   - minServerVersion: "6.0.0"
     topologies: [ replicaset, sharded-replicaset, load-balanced ]
+    serverless: forbid
 
 createEntities:
   - client:

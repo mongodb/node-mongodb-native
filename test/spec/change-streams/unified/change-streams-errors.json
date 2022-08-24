@@ -1,6 +1,11 @@
 {
   "description": "change-streams-errors",
   "schemaVersion": "1.7",
+  "runOnRequirements": [
+    {
+      "serverless": "forbid"
+    }
+  ],
   "createEntities": [
     {
       "client": {

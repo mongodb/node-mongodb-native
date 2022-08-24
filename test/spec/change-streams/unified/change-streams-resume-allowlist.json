@@ -8,7 +8,8 @@
         "replicaset",
         "sharded-replicaset",
         "load-balanced"
-      ]
+      ],
+      "serverless": "forbid"
     }
   ],
   "createEntities": [
