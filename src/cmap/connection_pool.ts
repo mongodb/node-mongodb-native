@@ -405,6 +405,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * previous generation will eventually be pruned during subsequent checkouts.
    */
   clear(serviceId?: ObjectId): void {
+    // TODO: confirm that clearing a paused pool should still increment the generation
+    if (this.closed) {
+      return;
+    }
+
     // handle load balanced case
     if (this.loadBalanced && serviceId) {
       const sid = serviceId.toHexString();
@@ -666,7 +671,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   private ensureMinPoolSize() {
     const minPoolSize = this.options.minPoolSize;
-    if (this.closed || minPoolSize === 0) {
+    // TODO: combine into ready check
+    // TODO: add extra guards to not do setTimeout at all if it's not ready?
+    if (this.closed || this[kPoolState] === PoolState.paused || minPoolSize === 0) {
       return;
     }
 
