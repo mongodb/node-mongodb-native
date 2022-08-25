@@ -379,7 +379,7 @@ BUILD_VARIANTS.push({
     NODE_LTS_NAME: LATEST_LTS,
     CLIENT_ENCRYPTION: true
   },
-  tasks: ['test-rapid-replica_set']
+  tasks: ['test-rapid-server']
 });
 
 // singleton build variant for linting
