@@ -12,7 +12,7 @@ import {
 } from 'bson';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
-import { Collection, Filter, MongoClient, WithId } from '../../../../src';
+import { Collection, Filter, MongoClient, UpdateFilter, WithId } from '../../../../src';
 
 /**
  * test the Filter type using collection.find<T>() method
@@ -405,4 +405,37 @@ nonSpecifiedCollection.find({
   otherField: {
     hello: 'world'
   }
+});
+
+type MyArraySchema = {
+  nested: { array: { a: number; b: boolean }[] };
+  something: { a: number } | { b: boolean };
+};
+
+// "element" now refers to the name used in arrayFilters, it can be any string
+expectAssignable<UpdateFilter<MyArraySchema>>({
+  $set: { 'nested.array.$[element]': { a: 2, b: false } }
+});
+expectAssignable<Filter<MyArraySchema>>({
+  $set: { 'nested.array.$[element]': { a: 2, b: false } }
+});
+
+// Specifying an identifier in the brackets is optional
+expectAssignable<UpdateFilter<MyArraySchema>>({
+  $set: { 'nested.array.$[].a': 2 }
+});
+expectAssignable<Filter<MyArraySchema>>({
+  $set: { 'nested.array.$[].a': 2 }
+});
+
+// Union usage examples
+expectAssignable<Filter<MyArraySchema>>({
+  'something.a': 2
+});
+//  TODO: NODE-4513: Nested union types don't error in this case.
+// expectError<Filter<MyArraySchema>>({
+//   'something.a': false
+// });
+expectAssignable<Filter<MyArraySchema>>({
+  'something.b': false
 });
