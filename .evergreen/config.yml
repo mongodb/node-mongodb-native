@@ -2391,7 +2391,7 @@ buildvariants:
       NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
     tasks:
-      - test-rapid-server
+      - test-rapid-replica_set
   - name: lint
     display_name: lint
     run_on: ubuntu1804-large

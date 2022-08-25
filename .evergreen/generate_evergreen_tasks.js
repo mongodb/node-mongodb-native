@@ -38,7 +38,6 @@ const OPERATING_SYSTEMS = [
 
 // TODO: NODE-3060: enable skipped tests on windows
 const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
-const MACOS_SKIP_TAGS = new Set(['load_balancer']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -315,11 +314,9 @@ const getTaskList = (() => {
       .filter(task => {
         if (task.name.match(/^aws/)) return false;
 
-        // skip unsupported tasks on windows or macos
         if (
           task.tags &&
-          ((os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length) ||
-            (os.match(/^macos/) && task.tags.filter(tag => MACOS_SKIP_TAGS.has(tag)).length))
+          (os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length)
         ) {
           return false;
         }
@@ -382,7 +379,7 @@ BUILD_VARIANTS.push({
     NODE_LTS_NAME: LATEST_LTS,
     CLIENT_ENCRYPTION: true
   },
-  tasks: ['test-rapid-server']
+  tasks: ['test-rapid-replica_set']
 });
 
 // singleton build variant for linting
