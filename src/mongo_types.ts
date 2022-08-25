@@ -68,8 +68,8 @@ export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 export type Filter<TSchema> =
   | Partial<TSchema>
   | ({
-      [Property in Join<NestedPaths<WithId<TSchema>, true>, '.'>]?: Condition<
-        PropertyType<WithId<TSchema>, Property, true>
+      [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
+        PropertyType<WithId<TSchema>, Property>
       >;
     } & RootFilterOperators<WithId<TSchema>>);
 
@@ -261,9 +261,19 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
 >;
 
 /** @public */
-export type MatchKeysAndValues<TSchema> = Readonly<{
-  [Property in Join<NestedPaths<TSchema, false>, '.'>]?: PropertyType<TSchema, Property, false>;
-}>;
+export type MatchKeysAndValues<TSchema> = Readonly<
+  {
+    [Property in Join<NestedPaths<TSchema>, '.'>]?: PropertyType<TSchema, Property>;
+  } & {
+    [Property in `${NestedPathsOfType<TSchema, any[]>}.$${`[${string}]` | ''}`]?: ArrayElement<
+      PropertyType<TSchema, Property extends `${infer Key}.$${string}` ? Key : never>
+    >;
+  } & {
+    [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
+      | `[${string}]`
+      | ''}.${string}`]?: any; // Could be further narrowed
+  }
+>;
 
 /** @public */
 export type AddToSetOperators<Type> = {
@@ -464,83 +474,75 @@ export type Join<T extends unknown[], D extends string> = T extends []
   : string;
 
 /** @public */
-export type PropertyType<
-  Type,
-  Property extends string,
-  AllowToSkipArrayIndex extends boolean
-> = Type extends unknown
-  ? string extends Property
-    ? Type extends Map<string, infer MapType>
+export type PropertyType<Type, Property extends string> = string extends Property
+  ? unknown
+  : Property extends keyof Type
+  ? Type[Property]
+  : Property extends `${number}`
+  ? Type extends ReadonlyArray<infer ArrayType>
+    ? ArrayType
+    : unknown
+  : Property extends `${infer Key}.${infer Rest}`
+  ? Key extends `${number}`
+    ? Type extends ReadonlyArray<infer ArrayType>
+      ? PropertyType<ArrayType, Rest>
+      : unknown
+    : Key extends keyof Type
+    ? Type[Key] extends Map<string, infer MapType>
       ? MapType
-      : never
-    :
-        | (AllowToSkipArrayIndex extends false
-            ? never
-            : Type extends ReadonlyArray<infer ArrayType>
-            ? PropertyType<ArrayType, Property, AllowToSkipArrayIndex>
-            : never)
-        | (Property extends keyof Type
-            ? Type[Property]
-            : Property extends `${number | `$${'' | `[${string}]`}`}`
-            ? Type extends ReadonlyArray<infer ArrayType>
-              ? ArrayType
-              : never
-            : Property extends `${infer Key}.${infer Rest}`
-            ? Key extends `${number | `$${'' | `[${string}]`}`}`
-              ? Type extends ReadonlyArray<infer ArrayType>
-                ? PropertyType<ArrayType, Rest, AllowToSkipArrayIndex>
-                : never
-              : Key extends keyof Type
-              ? PropertyType<Type[Key], Rest, AllowToSkipArrayIndex>
-              : never
-            : never)
-  : never;
+      : PropertyType<Type[Key], Rest>
+    : unknown
+  : unknown;
 
 /**
  * @public
  * returns tuple of strings (keys to be joined on '.') that represent every path into a schema
  * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
  */
-export type NestedPaths<Type, AllowToSkipArrayIndex extends boolean> = Type extends unknown
-  ? Type extends
-      | string
-      | number
-      | boolean
-      | Date
-      | RegExp
-      | Buffer
-      | Uint8Array
-      | ((...args: any[]) => any)
-      | { _bsontype: string }
-    ? never
-    : Type extends ReadonlyArray<infer ArrayType>
-    ? [
-        ...(
-          | (AllowToSkipArrayIndex extends true ? [] : never)
-          | [number | `$${'' | `[${string}]`}`]
-        ),
-        ...([] | NestedPaths<ArrayType, AllowToSkipArrayIndex>)
-      ]
-    : Type extends Map<string, any>
-    ? [string]
-    : Type extends object
-    ? {
-        [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
-          ? [Key]
-          : // for a recursive union type, the child will never extend the parent type.
-          // but the parent will still extend the child
-          Type extends Type[Key]
-          ? [Key]
-          : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
-          ? Type extends ArrayType // is the type of the parent the same as the type of the array?
-            ? [Key] // yes, it's a recursive array type
-            : // for unions, the child type extends the parent
-            ArrayType extends Type
-            ? [Key] // we have a recursive array union
-            : // child is an array, but it's not a recursive array
-              [Key, ...([] | NestedPaths<Type[Key], AllowToSkipArrayIndex>)]
-          : // child is not structured the same as the parent
-            [Key, ...([] | NestedPaths<Type[Key], AllowToSkipArrayIndex>)];
-      }[Extract<keyof Type, string>]
-    : never
-  : never;
+export type NestedPaths<Type> = Type extends
+  | string
+  | number
+  | boolean
+  | Date
+  | RegExp
+  | Buffer
+  | Uint8Array
+  | ((...args: any[]) => any)
+  | { _bsontype: string }
+  ? []
+  : Type extends ReadonlyArray<infer ArrayType>
+  ? [] | [number, ...NestedPaths<ArrayType>]
+  : Type extends Map<string, any>
+  ? [string]
+  : Type extends object
+  ? {
+      [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
+        ? [Key]
+        : // for a recursive union type, the child will never extend the parent type.
+        // but the parent will still extend the child
+        Type extends Type[Key]
+        ? [Key]
+        : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
+        ? Type extends ArrayType // is the type of the parent the same as the type of the array?
+          ? [Key] // yes, it's a recursive array type
+          : // for unions, the child type extends the parent
+          ArrayType extends Type
+          ? [Key] // we have a recursive array union
+          : // child is an array, but it's not a recursive array
+            [Key, ...NestedPaths<Type[Key]>]
+        : // child is not structured the same as the parent
+          [Key, ...NestedPaths<Type[Key]>] | [Key];
+    }[Extract<keyof Type, string>]
+  : [];
+
+/**
+ * @public
+ * returns keys (strings) for every path into a schema with a value of type
+ * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
+ */
+export type NestedPathsOfType<TSchema, Type> = KeysOfAType<
+  {
+    [Property in Join<NestedPaths<TSchema>, '.'>]: PropertyType<TSchema, Property>;
+  },
+  Type
+>;
