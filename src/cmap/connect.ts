@@ -217,7 +217,15 @@ export interface HandshakeDocument extends Document {
   loadBalanced?: boolean;
 }
 
-function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<HandshakeDocument>) {
+/**
+ * @internal
+ *
+ * This function is only exposed for testing purposes.
+ */
+export function prepareHandshakeDocument(
+  authContext: AuthContext,
+  callback: Callback<HandshakeDocument>
+) {
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
   const { serverApi } = authContext.connection;
@@ -229,7 +237,7 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
     compression: compressors
   };
 
-  if (typeof options.loadBalanced === 'boolean' && Boolean(options.loadBalanced) === true) {
+  if (options.loadBalanced === true) {
     handshakeDoc.loadBalanced = true;
   }
 
