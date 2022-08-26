@@ -214,7 +214,7 @@ export interface HandshakeDocument extends Document {
   client: ClientMetadata;
   compression: string[];
   saslSupportedMechs?: string;
-  loadBalanced: boolean;
+  loadBalanced?: boolean;
 }
 
 function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<HandshakeDocument>) {
@@ -226,9 +226,12 @@ function prepareHandshakeDocument(authContext: AuthContext, callback: Callback<H
     [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: true,
     helloOk: true,
     client: options.metadata || makeClientMetadata(options),
-    compression: compressors,
-    loadBalanced: options.loadBalanced
+    compression: compressors
   };
+
+  if (typeof options.loadBalanced === 'boolean' && Boolean(options.loadBalanced) === true) {
+    handshakeDoc.loadBalanced = true;
+  }
 
   const credentials = authContext.credentials;
   if (credentials) {
