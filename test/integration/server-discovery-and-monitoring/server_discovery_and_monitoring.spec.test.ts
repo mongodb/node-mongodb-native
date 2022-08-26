@@ -19,8 +19,6 @@ const filter: TestFilter = ({ description }) => {
       return isAuthEnabled
         ? 'TODO(NODE-3135): handle auth errors, also see NODE-3891: fix tests broken when AUTH enabled'
         : false;
-    case 'PoolClearedError does not mark server unknown':
-      return 'TODO(NODE-3135): make CMAP SDAM-aware and ensure PoolClearError is retryable';
     default:
       return false;
   }

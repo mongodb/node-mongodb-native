@@ -5,6 +5,7 @@ import {
   ConnectionPoolEvents,
   ConnectionPoolOptions
 } from '../cmap/connection_pool';
+import { PoolClearedError } from '../cmap/errors';
 import {
   APM_EVENTS,
   CLOSED,
@@ -358,7 +359,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       (err, conn, cb) => {
         if (err || !conn) {
           this.s.operationCount -= 1;
-          markServerUnknown(this, err);
+          if (!(err instanceof PoolClearedError)) {
+            markServerUnknown(this, err);
+          } else {
+            err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+          }
           return cb(err);
         }
 

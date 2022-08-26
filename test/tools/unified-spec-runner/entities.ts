@@ -78,6 +78,7 @@ export class UnifiedThread {
     this.#killed = true;
     await this.#promise;
     if (this.#error) {
+      this.#error.message = `<Thread(${this.id})>: ${this.#error.message}`;
       throw this.#error;
     }
   }

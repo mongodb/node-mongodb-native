@@ -1,3 +1,5 @@
+import { setTimeout } from 'timers';
+
 import type { Document } from '../bson';
 import {
   isRetryableReadError,
@@ -224,23 +226,25 @@ function executeWithServerSelection<TResult>(
     }
 
     // select a new server, and attempt to retry the operation
-    topology.selectServer(selector, serverSelectionOptions, (error?: Error, server?: Server) => {
-      if (!error && isWriteOperation && !supportsRetryableWrites(server)) {
-        return callback(
-          new MongoUnexpectedServerResponseError(
-            'Selected server does not support retryable writes'
-          )
-        );
-      }
+    setTimeout(() => {
+      topology.selectServer(selector, serverSelectionOptions, (error?: Error, server?: Server) => {
+        if (!error && isWriteOperation && !supportsRetryableWrites(server)) {
+          return callback(
+            new MongoUnexpectedServerResponseError(
+              'Selected server does not support retryable writes'
+            )
+          );
+        }
 
-      if (error || !server) {
-        return callback(
-          error ?? new MongoUnexpectedServerResponseError('Server selection failed without error')
-        );
-      }
+        if (error || !server) {
+          return callback(
+            error ?? new MongoUnexpectedServerResponseError('Server selection failed without error')
+          );
+        }
 
-      operation.execute(server, session, callback);
-    });
+        operation.execute(server, session, callback);
+      });
+    }, 1);
   }
 
   if (
