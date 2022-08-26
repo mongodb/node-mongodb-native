@@ -334,8 +334,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCheckOutStartedEvent(this)
     );
 
-    // TODO: combine these into check for !ready?
-    if (this.closed || this[kPoolState] === PoolState.paused) {
+    if (this[kPoolState] !== PoolState.ready) {
       const reason = this.closed ? 'poolClosed' : 'connectionError';
       const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
       this.emit(
@@ -417,7 +416,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // Only need to worry if the generation exists, since it should
       // always be there but typescript needs the check.
       if (generation == null) {
-        // TODO(NODE-3483)
         throw new MongoRuntimeError('Service generations are required in load balancer mode.');
       } else {
         // Increment the generation for the service id.
@@ -437,7 +435,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this.clearWaitQueue();
     this.clearMinPoolSizeTimer();
-    // TODO: should we also cancel in-flight connections?
 
     if (!alreadyPaused) {
       this.emit(ConnectionPool.CONNECTION_POOL_CLEARED, new ConnectionPoolClearedEvent(this));
@@ -556,7 +553,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
               ? 'Connection pool cleared'
               : 'Connection pool closed';
           const reason = this.closed ? 'poolClosed' : 'connectionError';
-          // TODO(NODE-3483): Replace with more specific error type
           this.emit(
             ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
             new ConnectionCheckOutFailedEvent(this, reason)
@@ -706,7 +702,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   private processWaitQueue() {
     // TODO: combine into ready check
-    if (this.closed || this[kProcessingWaitQueue] || this[kPoolState] === PoolState.paused) {
+    // actually, need to adjust this behavior to return the appropriate error
+    if (this.closed || this[kProcessingWaitQueue] || this[kPoolState] !== PoolState.ready) {
       return;
     }
 
