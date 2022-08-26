@@ -422,8 +422,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     const alreadyPaused = this[kPoolState] === PoolState.paused;
     this[kPoolState] = PoolState.paused;
 
-    this.clearWaitQueue();
     this.clearMinPoolSizeTimer();
+    this.processWaitQueue();
 
     if (!alreadyPaused) {
       this.emit(ConnectionPool.CONNECTION_POOL_CLEARED, new ConnectionPoolClearedEvent(this));
@@ -449,8 +449,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kCancellationToken].emit('cancel');
 
     this[kPoolState] = PoolState.closed;
-    this.clearWaitQueue();
     this.clearMinPoolSizeTimer();
+    this.processWaitQueue();
 
     // end the connection counter
     if (typeof this[kConnectionCounter].return === 'function') {
@@ -526,30 +526,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         }
       });
     });
-  }
-
-  /** Clear the waitqueue */
-  private clearWaitQueue(): void {
-    while (this.waitQueueSize) {
-      const waitQueueMember = this[kWaitQueue].pop();
-      if (waitQueueMember) {
-        if (waitQueueMember.timer) {
-          clearTimeout(waitQueueMember.timer);
-        }
-        if (!waitQueueMember[kCancelled]) {
-          const errorMessage =
-            this[kPoolState] === PoolState.paused
-              ? 'Connection pool cleared'
-              : 'Connection pool closed';
-          const reason = this.closed ? 'poolClosed' : 'connectionError';
-          this.emit(
-            ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-            new ConnectionCheckOutFailedEvent(this, reason)
-          );
-          waitQueueMember.callback(new MongoRuntimeError(errorMessage));
-        }
-      }
-    }
   }
 
   /** Clear the min pool size timer */
