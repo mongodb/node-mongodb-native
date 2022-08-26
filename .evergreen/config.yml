@@ -880,6 +880,45 @@ tasks:
           AUTH: auth
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-rapid-server
+    tags:
+      - rapid
+      - server
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: server
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-rapid-replica_set
+    tags:
+      - rapid
+      - replica_set
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: replica_set
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-rapid-sharded_cluster
+    tags:
+      - rapid
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-6.0-server
     tags:
       - '6.0'
@@ -1825,6 +1864,48 @@ tasks:
           AUTH: noauth
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-rapid-server-noauth
+    tags:
+      - rapid
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-rapid-replica_set-noauth
+    tags:
+      - rapid
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-rapid-sharded_cluster-noauth
+    tags:
+      - rapid
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-6.0-server-noauth
     tags:
       - '6.0'
@@ -2125,102 +2206,13 @@ post:
 ignore:
   - '*.md'
 buildvariants:
-  - name: macos-1014-erbium
-    display_name: macOS 10.14 Node Erbium
-    run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: erbium
-      CLIENT_ENCRYPTION: true
-    tasks: &ref_0
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-socks5
-      - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
-  - name: macos-1014-fermium
-    display_name: macOS 10.14 Node Fermium
-    run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: fermium
-      CLIENT_ENCRYPTION: true
-    tasks: *ref_0
-  - name: macos-1014-gallium
-    display_name: macOS 10.14 Node Gallium
-    run_on: macos-1014
-    expansions:
-      NODE_LTS_NAME: gallium
-      CLIENT_ENCRYPTION: true
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-socks5
-      - test-socks5-tls
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: ubuntu-18.04-erbium
     display_name: Ubuntu 18.04 Node Erbium
     run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
-    tasks: &ref_1
+    tasks: &ref_0
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
@@ -2265,7 +2257,7 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: fermium
       CLIENT_ENCRYPTION: true
-    tasks: *ref_1
+    tasks: *ref_0
   - name: ubuntu-18.04-gallium
     display_name: Ubuntu 18.04 Node Gallium
     run_on: ubuntu1804-large
@@ -2315,7 +2307,7 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: erbium
       MSVS_VERSION: 2019
-    tasks: &ref_2
+    tasks: &ref_1
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
@@ -2354,7 +2346,7 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: fermium
       MSVS_VERSION: 2019
-    tasks: *ref_2
+    tasks: *ref_1
   - name: windows-64-vs2019-gallium
     display_name: Windows (VS2019) Node Gallium
     run_on: windows-64-vs2019-large
@@ -2392,6 +2384,14 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: macos-1100
+    display_name: MacOS 11 Node Gallium
+    run_on: macos-1100
+    expansions:
+      NODE_LTS_NAME: gallium
+      CLIENT_ENCRYPTION: true
+    tasks:
+      - test-rapid-server
   - name: lint
     display_name: lint
     run_on: ubuntu1804-large
@@ -2465,6 +2465,9 @@ buildvariants:
       - test-latest-server-noauth
       - test-latest-replica_set-noauth
       - test-latest-sharded_cluster-noauth
+      - test-rapid-server-noauth
+      - test-rapid-replica_set-noauth
+      - test-rapid-sharded_cluster-noauth
       - test-6.0-server-noauth
       - test-6.0-replica_set-noauth
       - test-6.0-sharded_cluster-noauth
