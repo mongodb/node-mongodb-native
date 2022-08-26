@@ -334,17 +334,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCheckOutStartedEvent(this)
     );
 
-    if (this[kPoolState] !== PoolState.ready) {
-      const reason = this.closed ? 'poolClosed' : 'connectionError';
-      const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
-      this.emit(
-        ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-        new ConnectionCheckOutFailedEvent(this, reason)
-      );
-      callback(error);
-      return;
-    }
-
     const waitQueueMember: WaitQueueMember = { callback };
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
     if (waitQueueTimeoutMS) {
@@ -701,12 +690,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   private processWaitQueue() {
-    // TODO: combine into ready check
-    // actually, need to adjust this behavior to return the appropriate error
-    if (this.closed || this[kProcessingWaitQueue] || this[kPoolState] !== PoolState.ready) {
+    if (this[kProcessingWaitQueue]) {
       return;
     }
-
     this[kProcessingWaitQueue] = true;
 
     while (this.waitQueueSize) {
@@ -718,6 +704,21 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
       if (waitQueueMember[kCancelled]) {
         this[kWaitQueue].shift();
+        continue;
+      }
+
+      if (this[kPoolState] !== PoolState.ready) {
+        const reason = this.closed ? 'poolClosed' : 'connectionError';
+        const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
+        this.emit(
+          ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+          new ConnectionCheckOutFailedEvent(this, reason)
+        );
+        if (waitQueueMember.timer) {
+          clearTimeout(waitQueueMember.timer);
+        }
+        this[kWaitQueue].shift();
+        waitQueueMember.callback(error);
         continue;
       }
 
