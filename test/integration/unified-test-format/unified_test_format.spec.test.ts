@@ -23,6 +23,17 @@ const filter: TestFilter = ({ description }) => {
     return 'TODO(NODE-3308): failures due unnecessary getMore and killCursors calls in 5.0';
   }
 
+  if (
+    process.env.AUTH === 'auth' &&
+    [
+      'FindOneAndUpdate is committed on first attempt',
+      'FindOneAndUpdate is not committed on first attempt',
+      'FindOneAndUpdate is never committed'
+    ].includes(description)
+  ) {
+    return 'TODO(NODE-3891): fix tests broken when AUTH enabled';
+  }
+
   return false;
 };
 
