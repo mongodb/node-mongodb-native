@@ -5,12 +5,16 @@ const { expect } = require('chai');
 const EventEmitter = require('events');
 const { setTimeout } = require('timers');
 
-const { connect } = require('../../../src/cmap/connect');
+const {
+  connect,
+  prepareHandshakeDocument: prepareHandshakeDocumentCb
+} = require('../../../src/cmap/connect');
 const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
 const { genClusterTime } = require('../../tools/common');
 const { MongoNetworkError } = require('../../../src/error');
 const { HostAddress, isHello } = require('../../../src/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { promisify } = require('util');
 
 describe('Connect Tests', function () {
   const test = {};
@@ -112,4 +116,50 @@ describe('Connect Tests', function () {
       done();
     });
   }).skipReason = 'TODO(NODE-2941): stop using 240.0.0.1 in tests';
+
+  context('prepareHandshakeDocument', () => {
+    const prepareHandshakeDocument = promisify(prepareHandshakeDocumentCb);
+
+    context('loadBalanced option', () => {
+      context('when loadBalanced is not set as an option', () => {
+        it('does not set loadBalanced on the handshake document', async () => {
+          const options = {};
+          const authContext = {
+            connection: {},
+            options
+          };
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).not.to.have.property('loadBalanced');
+        });
+      });
+
+      context('when loadBalanced is set to false', () => {
+        it('does not set loadBalanced on the handshake document', async () => {
+          const options = {
+            loadBalanced: false
+          };
+          const authContext = {
+            connection: {},
+            options
+          };
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).not.to.have.property('loadBalanced');
+        });
+      });
+
+      context('when loadBalanced is set to true', () => {
+        it('does set loadBalanced on the handshake document', async () => {
+          const options = {
+            loadBalanced: true
+          };
+          const authContext = {
+            connection: {},
+            options
+          };
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).to.have.property('loadBalanced', true);
+        });
+      });
+    });
+  });
 });
