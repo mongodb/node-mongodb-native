@@ -393,7 +393,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * previous generation will eventually be pruned during subsequent checkouts.
    */
   clear(serviceId?: ObjectId): void {
-    // TODO: confirm that clearing a paused pool should still increment the generation
     if (this.closed) {
       return;
     }
