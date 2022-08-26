@@ -3,10 +3,11 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const LATEST_EFFECTIVE_VERSION = '6.0';
-const MONGODB_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
+const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
 const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
 NODE_VERSIONS.sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
+const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
 
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '6.0', '5.0', '4.4'];
@@ -15,11 +16,6 @@ const TLS_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2'];
 const DEFAULT_OS = 'ubuntu1804-large';
 
 const OPERATING_SYSTEMS = [
-  {
-    name: 'macos-1014',
-    display_name: 'macOS 10.14',
-    run_on: 'macos-1014'
-  },
   {
     name: 'ubuntu-18.04',
     display_name: 'Ubuntu 18.04',
@@ -42,7 +38,6 @@ const OPERATING_SYSTEMS = [
 
 // TODO: NODE-3060: enable skipped tests on windows
 const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
-const MACOS_SKIP_TAGS = new Set(['load_balancer']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -319,11 +314,9 @@ const getTaskList = (() => {
       .filter(task => {
         if (task.name.match(/^aws/)) return false;
 
-        // skip unsupported tasks on windows or macos
         if (
           task.tags &&
-          ((os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length) ||
-            (os.match(/^macos/) && task.tags.filter(tag => MACOS_SKIP_TAGS.has(tag)).length))
+          (os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length)
         ) {
           return false;
         }
@@ -361,7 +354,7 @@ OPERATING_SYSTEMS.forEach(
     const tasks = getTaskList(mongoVersion, osName.split('-')[0]);
 
     testedNodeVersions.forEach(NODE_LTS_NAME => {
-      const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.substr(1)}`;
+      const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.slice(1)}`;
       const name = `${osName}-${NODE_LTS_NAME}`;
       const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
       const expansions = { NODE_LTS_NAME };
@@ -377,6 +370,17 @@ OPERATING_SYSTEMS.forEach(
     });
   }
 );
+
+BUILD_VARIANTS.push({
+  name: 'macos-1100',
+  display_name: `MacOS 11 Node ${LATEST_LTS[0].toUpperCase()}${LATEST_LTS.slice(1)}`,
+  run_on: 'macos-1100',
+  expansions: {
+    NODE_LTS_NAME: LATEST_LTS,
+    CLIENT_ENCRYPTION: true
+  },
+  tasks: ['test-rapid-server']
+});
 
 // singleton build variant for linting
 SINGLETON_TASKS.push(
