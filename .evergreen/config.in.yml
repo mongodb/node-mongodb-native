@@ -880,11 +880,42 @@ functions:
 
           aws s3 cp output/lcov-report s3://mciuploads/mongo-node-driver/${revision}/${version_id}//lcov-report/
 
+  "run spec driver benchmarks":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          MONGODB_URI: ${MONGODB_URI}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
+
 tasks:
-    - name: "test-serverless"
-      tags: ["serverless"]
-      commands:
-        - func: "run serverless tests"
+  - name: "test-serverless"
+    tags: ["serverless"]
+    commands:
+      - func: "run serverless tests"
+
+  - name: run-spec-benchmark-tests
+    tags:
+      - run-spec-benchmark-tests
+      - performance
+    exec_timeout_secs: 3600
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: run spec driver benchmarks
+      - command: perf.send
+        params:
+          file: src/results.json
 
 task_groups:
   - name: serverless_task_group
@@ -936,3 +967,9 @@ post:
 
 ignore:
   - '*.md'
+buildvariants:
+  - name: performance-tests
+    display_name: Performance Test
+    run_on: ubuntu1804-large
+    tasks:
+      - run-spec-benchmark-tests
