@@ -448,17 +448,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     // immediately cancel any in-flight connections
     this[kCancellationToken].emit('cancel');
 
-    this[kPoolState] = PoolState.closed;
-    this.clearMinPoolSizeTimer();
-    this.processWaitQueue();
-
     // end the connection counter
     if (typeof this[kConnectionCounter].return === 'function') {
       this[kConnectionCounter].return(undefined);
     }
 
-    // mark the pool as closed immediately
     this[kPoolState] = PoolState.closed;
+    this.clearMinPoolSizeTimer();
+    this.processWaitQueue();
+
     eachAsync<Connection>(
       this[kConnections].toArray(),
       (conn, cb) => {
