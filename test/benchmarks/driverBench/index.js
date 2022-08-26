@@ -1,6 +1,7 @@
 'use strict';
 
 const MongoBench = require('../mongoBench');
+const { writeFile } = require('fs/promises');
 
 const Runner = MongoBench.Runner;
 const commonHelpers = require('./common');
@@ -16,6 +17,7 @@ try {
 }
 
 const { EJSON } = require('bson');
+const { inspect } = require('util');
 
 const makeClient = commonHelpers.makeClient;
 const connectClient = commonHelpers.connectClient;
@@ -333,6 +335,8 @@ const benchmarkRunner = new Runner()
 benchmarkRunner
   .run()
   .then(microBench => {
+    // TODO - test against different BSON versions in CI
+    // const bsonType = BSON.serialize.toString().includes('native code') ? 'bson-ext' : 'js-bson';
     const bsonBench = average(Object.values(microBench.bsonBench));
     const singleBench = average([
       microBench.singleBench.findOne,
@@ -357,21 +361,31 @@ benchmarkRunner
       microBench.multiBench.gridFsUpload
       // TODO: Add parallelBench write benchmarks
     ]);
-    const driverBench = average([readBench, writeBench]);
 
-    return {
-      microBench,
+    const benchmarkResults = {
       bsonBench,
       singleBench,
       multiBench,
       parallelBench,
       readBench,
       writeBench,
-      driverBench
+      ...microBench.bsonBench,
+      ...microBench.singleBench,
+      ...microBench.multiBench
     };
+
+    return Object.entries(benchmarkResults).map(([benchmarkName, result]) => {
+      return {
+        info: {
+          test_name: benchmarkName
+        },
+        metrics: [{ name: 'megabytes_per_second', value: result }]
+      };
+    });
   })
   .then(data => {
-    data.bsonType = BSON.serialize.toString().includes('native code') ? 'bson-ext' : 'js-bson';
-    console.log(data);
+    const results = JSON.stringify(data, undefined, 2);
+    console.error(inspect(results, { depth: Infinity }));
+    return writeFile('results.json', results);
   })
   .catch(err => console.error(err));
