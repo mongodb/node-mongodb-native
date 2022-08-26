@@ -671,9 +671,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   private ensureMinPoolSize() {
     const minPoolSize = this.options.minPoolSize;
-    // TODO: combine into ready check
-    // TODO: add extra guards to not do setTimeout at all if it's not ready?
-    if (this.closed || this[kPoolState] === PoolState.paused || minPoolSize === 0) {
+    if (this[kPoolState] !== PoolState.ready || minPoolSize === 0) {
       return;
     }
 
@@ -697,7 +695,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           this[kConnections].push(connection);
           process.nextTick(() => this.processWaitQueue());
         }
-        this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
+        if (this[kPoolState] === PoolState.ready) {
+          this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
+        }
       });
     } else {
       this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 100);
