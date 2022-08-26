@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-this-alias */
 import { expect } from 'chai';
 import * as chalk from 'chalk';

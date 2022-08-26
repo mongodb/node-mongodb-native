@@ -301,7 +301,6 @@ functions:
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: "next"
-          TRY_COMPILING_DRIVER: "false" # TODO(NODE-4293): Unskip compiling against next and fix 4.8 issues
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
