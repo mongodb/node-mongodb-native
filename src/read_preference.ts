@@ -156,7 +156,7 @@ export class ReadPreference {
     }
 
     if (typeof readPreference === 'string') {
-      return new ReadPreference(readPreference as ReadPreferenceMode, readPreferenceTags, {
+      return new ReadPreference(readPreference, readPreferenceTags, {
         maxStalenessSeconds: options.maxStalenessSeconds,
         hedge: options.hedge
       });
@@ -185,7 +185,7 @@ export class ReadPreference {
     const r = options.readPreference;
 
     if (typeof r === 'string') {
-      options.readPreference = new ReadPreference(r as ReadPreferenceMode);
+      options.readPreference = new ReadPreference(r);
     } else if (r && !(r instanceof ReadPreference) && typeof r === 'object') {
       const mode = r.mode || r.preference;
       if (mode && typeof mode === 'string') {
