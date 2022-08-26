@@ -10,8 +10,6 @@ const COLLECTION_NAME = 'corpus';
 
 const SPEC_DIRECTORY = path.resolve(__dirname, 'spec');
 
-const MONGODB_URL = process.env.MONGODB_URL || 'mongodb://localhost:27017';
-
 function loadSpecFile(filePath, encoding) {
   const fp = [SPEC_DIRECTORY].concat(filePath);
   return fs.readFileSync(path.join.apply(path, fp), encoding);
@@ -22,7 +20,7 @@ function loadSpecString(filePath) {
 }
 
 function makeClient() {
-  this.client = new MongoClient(MONGODB_URL);
+  this.client = new MongoClient(process.env.MONGODB_URI || 'mongodb://localhost:27017');
 }
 
 function connectClient() {

@@ -5,7 +5,7 @@ const MongoBench = require('../mongoBench');
 const Runner = MongoBench.Runner;
 const commonHelpers = require('./common');
 
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const LEGACY_HELLO_COMMAND = 'ismaster';
 
 let BSON = require('bson');
 
