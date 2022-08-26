@@ -315,7 +315,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * Set the pool state to "ready"
    */
   ready(): void {
-    if (this[kPoolState] === PoolState.ready) {
+    if (this[kPoolState] !== PoolState.paused) {
       return;
     }
     this[kPoolState] = PoolState.ready;

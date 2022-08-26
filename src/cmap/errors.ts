@@ -24,12 +24,12 @@ export class PoolClosedError extends MongoDriverError {
  * @category Error
  */
 export class PoolClearedError extends MongoNetworkError {
-  // TODO: needs to extend RetryableError or be marked retryable in some other way per spec
+  // TODO(NODE-3144): needs to extend RetryableError or be marked retryable in some other way per spec
   /** The address of the connection pool */
   address: string;
 
   constructor(pool: ConnectionPool) {
-    // TODO: pass in original pool-clearing error and use in message
+    // TODO(NODE-3135): pass in original pool-clearing error and use in message
     // "failed with: <original error which cleared the pool>"
     super(`Connection pool for ${pool.address} was cleared because another operation failed`);
     this.address = pool.address;
