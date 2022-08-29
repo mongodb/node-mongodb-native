@@ -26,6 +26,9 @@ const filter: TestFilter = ({ description }) => {
 
 describe('SDAM Unified Tests', function () {
   afterEach(async function () {
+    if (this.currentTest!.pending) {
+      return;
+    }
     // TODO(NODE-4573): fix socket leaks
     const LEAKY_TESTS = [
       'Command error on Monitor handshake',
