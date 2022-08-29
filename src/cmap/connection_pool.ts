@@ -586,6 +586,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     connect(connectOptions, (err, connection) => {
       if (err || !connection) {
         this[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
+        this[kPending]--;
         callback(err);
         return;
       }
@@ -622,6 +623,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       connection.markAvailable();
       this.emit(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(this, connection));
 
+      this[kPending]--;
       callback(undefined, connection);
       return;
     });
@@ -648,7 +650,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // connection permits because that potentially delays the availability of
       // the connection to a checkout request
       this.createConnection((err, connection) => {
-        this[kPending]--;
         if (!err && connection) {
           this[kConnections].push(connection);
           process.nextTick(() => this.processWaitQueue());
@@ -656,6 +657,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         if (this[kPoolState] === PoolState.ready) {
           this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
         }
+        // TODO: destroy connection if pool paused? => this.connectionIsPerished(...)
       });
     } else {
       this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 100);
@@ -730,7 +732,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         continue;
       }
       this.createConnection((err, connection) => {
-        this[kPending]--;
         if (waitQueueMember[kCancelled]) {
           if (!err && connection) {
             this[kConnections].push(connection);
