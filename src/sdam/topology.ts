@@ -816,16 +816,15 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
       server.s.description = incomingServerDescription;
       if (incomingServerDescription.error) {
         server.s.pool.clear();
-        return;
-      }
-
-      const newTopologyType = topology.s.description.type;
-      const shouldMarkPoolReady =
-        incomingServerDescription.isDataBearing ||
-        (incomingServerDescription.type !== ServerType.Unknown &&
-          newTopologyType === TopologyType.Single);
-      if (shouldMarkPoolReady) {
-        server.s.pool.ready();
+      } else {
+        const newTopologyType = topology.s.description.type;
+        const shouldMarkPoolReady =
+          incomingServerDescription.isDataBearing ||
+          (incomingServerDescription.type !== ServerType.Unknown &&
+            newTopologyType === TopologyType.Single);
+        if (shouldMarkPoolReady) {
+          server.s.pool.ready();
+        }
       }
     }
   }
