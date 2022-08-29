@@ -145,6 +145,7 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
    * @param callback - called when chunks are successfully removed or error occurred
    */
   abort(): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   abort(callback: Callback<void>): void;
   abort(callback?: Callback<void>): Promise<void> | void {
     return maybePromise(callback, callback => {

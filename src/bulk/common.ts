@@ -1247,7 +1247,9 @@ export abstract class BulkOperationBase {
   }
 
   execute(options?: BulkWriteOptions): Promise<BulkWriteResult>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   execute(callback: Callback<BulkWriteResult>): void;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   execute(options: BulkWriteOptions | undefined, callback: Callback<BulkWriteResult>): void;
   execute(
     options?: BulkWriteOptions | Callback<BulkWriteResult>,

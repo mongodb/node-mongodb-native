@@ -71,8 +71,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   command(command: Document): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   command(command: Document, callback: Callback<Document>): void;
   command(command: Document, options: RunCommandOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   command(command: Document, options: RunCommandOptions, callback: Callback<Document>): void;
   command(
     command: Document,
@@ -96,8 +98,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   buildInfo(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   buildInfo(callback: Callback<Document>): void;
   buildInfo(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   buildInfo(options: CommandOperationOptions, callback: Callback<Document>): void;
   buildInfo(
     options?: CommandOperationOptions | Callback<Document>,
@@ -115,8 +119,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   serverInfo(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   serverInfo(callback: Callback<Document>): void;
   serverInfo(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   serverInfo(options: CommandOperationOptions, callback: Callback<Document>): void;
   serverInfo(
     options?: CommandOperationOptions | Callback<Document>,
@@ -134,8 +140,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   serverStatus(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   serverStatus(callback: Callback<Document>): void;
   serverStatus(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   serverStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
   serverStatus(
     options?: CommandOperationOptions | Callback<Document>,
@@ -153,8 +161,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   ping(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   ping(callback: Callback<Document>): void;
   ping(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   ping(options: CommandOperationOptions, callback: Callback<Document>): void;
   ping(
     options?: CommandOperationOptions | Callback<Document>,
@@ -174,12 +184,16 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   addUser(username: string): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   addUser(username: string, callback: Callback<Document>): void;
   addUser(username: string, password: string): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   addUser(username: string, password: string, callback: Callback<Document>): void;
   addUser(username: string, options: AddUserOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   addUser(username: string, options: AddUserOptions, callback: Callback<Document>): void;
   addUser(username: string, password: string, options: AddUserOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   addUser(
     username: string,
     password: string,
@@ -247,8 +261,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   validateCollection(collectionName: string): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   validateCollection(collectionName: string, callback: Callback<Document>): void;
   validateCollection(collectionName: string, options: ValidateCollectionOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   validateCollection(
     collectionName: string,
     options: ValidateCollectionOptions,
@@ -276,8 +292,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   listDatabases(): Promise<ListDatabasesResult>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   listDatabases(callback: Callback<ListDatabasesResult>): void;
   listDatabases(options: ListDatabasesOptions): Promise<ListDatabasesResult>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   listDatabases(options: ListDatabasesOptions, callback: Callback<ListDatabasesResult>): void;
   listDatabases(
     options?: ListDatabasesOptions | Callback<ListDatabasesResult>,
@@ -300,8 +318,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   replSetGetStatus(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   replSetGetStatus(callback: Callback<Document>): void;
   replSetGetStatus(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   replSetGetStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
   replSetGetStatus(
     options?: CommandOperationOptions | Callback<Document>,
