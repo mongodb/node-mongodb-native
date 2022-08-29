@@ -2354,12 +2354,7 @@ buildvariants:
       - test-auth-ldap
       - test-socks5
       - test-socks5-tls
-<<<<<<< HEAD
-=======
-      - test-zstd-compression
-      - test-snappy-compression
       - test-lambda-aws-auth-example
->>>>>>> test(NODE-4160): add evg run for lambda example
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2444,6 +2439,7 @@ buildvariants:
       - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
+      - test-lambda-aws-auth-example
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
