@@ -586,12 +586,14 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     connect(connectOptions, (err, connection) => {
       if (err || !connection) {
         this[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
+        this[kPending]--;
         callback(err);
         return;
       }
 
       // The pool might have closed since we started trying to create a connection
-      if (this.closed) {
+      // TODO: unit test
+      if (this[kPoolState] !== PoolState.ready) {
         this[kPending]--;
         connection.destroy({ force: true });
         return;
@@ -622,6 +624,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       connection.markAvailable();
       this.emit(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(this, connection));
 
+      this[kPending]--;
       callback(undefined, connection);
       return;
     });
@@ -648,14 +651,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // connection permits because that potentially delays the availability of
       // the connection to a checkout request
       this.createConnection((err, connection) => {
-        this[kPending]--;
+        // NOTE: createConnection guarantees that we cannot enter this block unless the pool is ready
         if (!err && connection) {
           this[kConnections].push(connection);
           process.nextTick(() => this.processWaitQueue());
         }
-        if (this[kPoolState] === PoolState.ready) {
-          this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
-        }
+        this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
       });
     } else {
       this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 100);
@@ -730,7 +731,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         continue;
       }
       this.createConnection((err, connection) => {
-        this[kPending]--;
         if (waitQueueMember[kCancelled]) {
           if (!err && connection) {
             this[kConnections].push(connection);
