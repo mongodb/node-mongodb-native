@@ -178,10 +178,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       monitor.on(event, (e: any) => this.emit(event, e));
     }
 
-    monitor.on('resetConnectionPool', () => {
-      this.s.pool.clear();
-    });
-
     monitor.on('resetServer', (error: MongoError) => markServerUnknown(this, error));
     monitor.on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
       this.emit(

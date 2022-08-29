@@ -227,7 +227,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     );
 
     monitor.emit('resetServer', err);
-    monitor.emit('resetConnectionPool');
     callback(err);
   }
 
@@ -305,11 +304,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   connect(monitor.connectOptions, (err, conn) => {
     if (err) {
       monitor[kConnection] = undefined;
-
-      // we already reset the connection pool on network errors in all cases
-      if (!(err instanceof MongoNetworkError)) {
-        monitor.emit('resetConnectionPool');
-      }
 
       failureHandler(err);
       return;
