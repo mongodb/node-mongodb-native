@@ -80,6 +80,13 @@ class Runner {
     this.children = {};
   }
 
+  /**
+   * Adds a new test suite to the runner
+   * @param {string} name - the name of the test suite
+   * @param {(suite: Suite) => void} fn a function that registers a set of benchmarks onto the
+   *  parameter `suite`
+   * @returns {this} this
+   */
   suite(name, fn) {
     if (typeof name !== 'string' || !name) {
       throw new TypeError(`Argument "name" (${name}) must be a non-zero length string`);

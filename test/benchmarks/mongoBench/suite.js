@@ -7,6 +7,12 @@ class Suite {
     this.children = {};
   }
 
+  /**
+   *
+   * @param {string} name the name of the benchmark
+   * @param {(benchmark: Benchmark) => void} fn a function that configures the `benchmark` parameter
+   * @returns {this} this
+   */
   benchmark(name, fn) {
     if (typeof name !== 'string' || !name) {
       throw new TypeError(`Argument "name" (${name}) must be a non-zero length string`);
