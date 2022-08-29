@@ -813,12 +813,17 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   if (incomingServerDescription && topology.s.servers.has(incomingServerDescription.address)) {
     const server = topology.s.servers.get(incomingServerDescription.address);
     if (server) {
+      server.s.description = incomingServerDescription;
+      if (incomingServerDescription.error) {
+        server.s.pool.clear();
+        return;
+      }
+
       const newTopologyType = topology.s.description.type;
       const shouldMarkPoolReady =
         incomingServerDescription.isDataBearing ||
         (incomingServerDescription.type !== ServerType.Unknown &&
           newTopologyType === TopologyType.Single);
-      server.s.description = incomingServerDescription;
       if (shouldMarkPoolReady) {
         server.s.pool.ready();
       }

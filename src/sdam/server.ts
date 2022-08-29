@@ -499,9 +499,10 @@ function makeOperationHandler(
         // In load balanced mode we never mark the server as unknown and always
         // clear for the specific service id.
 
-        server.s.pool.clear(connection.serviceId);
         if (!server.loadBalanced) {
           markServerUnknown(server, error);
+        } else {
+          server.s.pool.clear(connection.serviceId);
         }
       }
     } else {
@@ -516,7 +517,9 @@ function makeOperationHandler(
       if (isSDAMUnrecoverableError(error)) {
         if (shouldHandleStateChangeError(server, error)) {
           if (maxWireVersion(server) <= 7 || isNodeShuttingDownError(error)) {
-            server.s.pool.clear(connection.serviceId);
+            if (server.loadBalanced) {
+              server.s.pool.clear(connection.serviceId);
+            }
           }
 
           if (!server.loadBalanced) {
