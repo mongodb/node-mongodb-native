@@ -14,5 +14,12 @@
   "failZero": true,
   "reporter": "test/tools/reporter/mongodb_reporter.js",
   "sort": true,
-  "color": true
+  "color": true,
+  "ignore": [
+    "test/integration/node-specific/examples/handler.js",
+    "test/integration/node-specific/examples/handler.test.js",
+    "test/integration/node-specific/examples/aws_handler.js",
+    "test/integration/node-specific/examples/aws_handler.test.js",
+    "test/integration/node-specific/examples/setup.js"
+  ]
 }
