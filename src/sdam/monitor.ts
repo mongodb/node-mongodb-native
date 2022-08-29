@@ -4,7 +4,6 @@ import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
-import { MongoNetworkError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, InterruptibleAsyncInterval } from '../utils';
 import {

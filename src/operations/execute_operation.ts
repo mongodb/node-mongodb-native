@@ -1,5 +1,3 @@
-import { setTimeout } from 'timers';
-
 import type { Document } from '../bson';
 import {
   isRetryableReadError,
