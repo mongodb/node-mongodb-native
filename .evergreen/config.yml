@@ -2543,3 +2543,9 @@ buildvariants:
       - test-3.6-server-noauth
       - test-3.6-replica_set-noauth
       - test-3.6-sharded_cluster-noauth
+  - name: ubuntu1804-test-lambda
+    display_name: AWS Lambda handler tests
+    run_on: ubuntu1804-test
+    tasks:
+      - test-lambda-example
+      - test-lambda-aws-auth-example

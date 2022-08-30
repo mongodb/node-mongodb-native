@@ -664,6 +664,13 @@ BUILD_VARIANTS.push({
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
 });
 
+BUILD_VARIANTS.push({
+  name: 'ubuntu1804-test-lambda',
+  display_name: 'AWS Lambda handler tests',
+  run_on: 'ubuntu1804-test',
+  tasks: ['test-lambda-example', 'test-lambda-aws-auth-example']
+});
+
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && variant.expansions.NODE_LTS_NAME === 'gallium'
