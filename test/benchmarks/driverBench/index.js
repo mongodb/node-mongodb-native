@@ -6,8 +6,6 @@ const { writeFile } = require('fs/promises');
 const Runner = MongoBench.Runner;
 const commonHelpers = require('./common');
 
-const LEGACY_HELLO_COMMAND = 'ismaster';
-
 let BSON = require('bson');
 
 try {
@@ -114,9 +112,7 @@ function runCommand(done) {
     if (_id > 10000) {
       return done();
     }
-    return this.db.command({ [LEGACY_HELLO_COMMAND]: true }, err =>
-      err ? done(err) : loop(_id + 1)
-    );
+    return this.db.command({ hello: true }, err => (err ? done(err) : loop(_id + 1)));
   };
 
   return loop(1);
