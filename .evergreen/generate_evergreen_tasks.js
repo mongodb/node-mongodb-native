@@ -268,7 +268,7 @@ TASKS.push({
     {
       func: 'bootstrap mongo-orchestration',
       vars: {
-        VERSION: 'latest',
+        VERSION: 'rapid',
         AUTH: 'auth',
         ORCHESTRATION_FILE: 'auth-aws.json',
         TOPOLOGY: 'server'

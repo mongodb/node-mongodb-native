@@ -1342,7 +1342,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: latest
+          VERSION: rapid
           AUTH: auth
           ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: server
@@ -2303,7 +2303,6 @@ buildvariants:
       - test-socks5-tls
       - test-zstd-compression
       - test-snappy-compression
-      - test-lambda-aws-auth-example
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2354,7 +2353,6 @@ buildvariants:
       - test-auth-ldap
       - test-socks5
       - test-socks5-tls
-      - test-lambda-aws-auth-example
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2394,7 +2392,6 @@ buildvariants:
       - test-socks5-tls
       - test-zstd-compression
       - test-snappy-compression
-      - test-lambda-aws-auth-example
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2439,7 +2436,6 @@ buildvariants:
       - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
-      - test-lambda-aws-auth-example
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
