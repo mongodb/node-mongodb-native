@@ -483,7 +483,7 @@ SINGLETON_TASKS.push({
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: 'fermium'
+        NODE_LTS_NAME: 'gallium'
       }
     },
     { func: 'run mongosh integration tests' }
