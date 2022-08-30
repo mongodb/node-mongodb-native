@@ -174,7 +174,7 @@ class Runner {
   async _loopTask(benchmark, ctx) {
     const start = performance.now();
     const rawData = [];
-    const minExecutionCount = 1;
+    const minExecutionCount = this.minExecutionCount;
     const minExecutionTime = this.minExecutionTime;
     const maxExecutionTime = this.maxExecutionTime;
     let time = performance.now() - start;
