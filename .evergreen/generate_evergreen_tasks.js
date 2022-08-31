@@ -242,6 +242,44 @@ for (const compressor of ['zstd', 'snappy']) {
   });
 }
 
+// Add task for testing lambda example without aws auth.
+TASKS.push({
+  name: 'test-lambda-example',
+  tags: ['latest', 'lambda'],
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'rapid',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'run lambda handler example tests' }
+  ]
+});
+
+// Add task for testing lambda example with aws auth.
+TASKS.push({
+  name: 'test-lambda-aws-auth-example',
+  tags: ['latest', 'lambda'],
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'rapid',
+        AUTH: 'auth',
+        ORCHESTRATION_FILE: 'auth-aws.json',
+        TOPOLOGY: 'server'
+      }
+    },
+    { func: 'add aws auth variables to file' },
+    { func: 'setup aws env' },
+    { func: 'run lambda handler example tests with aws auth' }
+  ]
+});
+
 TLS_VERSIONS.forEach(VERSION => {
   TASKS.push({
     name: `test-tls-support-${VERSION}`,
@@ -624,6 +662,13 @@ BUILD_VARIANTS.push({
     CLIENT_ENCRYPTION: true
   },
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
+});
+
+BUILD_VARIANTS.push({
+  name: 'ubuntu1804-test-lambda',
+  display_name: 'AWS Lambda handler tests',
+  run_on: 'ubuntu1804-test',
+  tasks: ['test-lambda-example', 'test-lambda-aws-auth-example']
 });
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16

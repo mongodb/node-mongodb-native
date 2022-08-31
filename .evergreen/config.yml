@@ -781,6 +781,38 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh
+  run lambda handler example tests:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          MONGODB_URI: ${MONGODB_URI}
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-lambda-tests.sh
+  run lambda handler example tests with aws auth:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        silent: true
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          ${MONGODB_BINARIES}/mongo --verbose aws_e2e_regular_aws.js
+          cd -
+          cat <<EOF > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
+            export AWS_ACCESS_KEY_ID=${iam_auth_ecs_account}
+            export AWS_SECRET_ACCESS_KEY=${iam_auth_ecs_secret_access_key}
+          EOF
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          ${PROJECT_DIRECTORY}/.evergreen/run-lambda-aws-tests.sh
   run bson-ext test:
     - command: subprocess.exec
       type: test
@@ -1320,6 +1352,32 @@ tasks:
           AUTH: auth
           COMPRESSOR: snappy
       - func: run-compression-tests
+  - name: test-lambda-example
+    tags:
+      - latest
+      - lambda
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: server
+      - func: run lambda handler example tests
+  - name: test-lambda-aws-auth-example
+    tags:
+      - latest
+      - lambda
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run lambda handler example tests with aws auth
   - name: test-tls-support-latest
     tags:
       - tls-support
@@ -2519,3 +2577,9 @@ buildvariants:
       - test-3.6-server-noauth
       - test-3.6-replica_set-noauth
       - test-3.6-sharded_cluster-noauth
+  - name: ubuntu1804-test-lambda
+    display_name: AWS Lambda handler tests
+    run_on: ubuntu1804-test
+    tasks:
+      - test-lambda-example
+      - test-lambda-aws-auth-example
