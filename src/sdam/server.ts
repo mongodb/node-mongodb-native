@@ -496,6 +496,7 @@ function makeOperationHandler(
         // clear for the specific service id.
 
         if (!server.loadBalanced) {
+          error.addErrorLabel(MongoErrorLabel.ResetPool);
           markServerUnknown(server, error);
         } else {
           server.s.pool.clear(connection.serviceId);
