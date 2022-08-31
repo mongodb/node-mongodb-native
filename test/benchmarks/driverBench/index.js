@@ -1,11 +1,10 @@
 'use strict';
 
 const MongoBench = require('../mongoBench');
+const { writeFile } = require('fs/promises');
 
 const Runner = MongoBench.Runner;
 const commonHelpers = require('./common');
-
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
 let BSON = require('bson');
 
@@ -16,6 +15,7 @@ try {
 }
 
 const { EJSON } = require('bson');
+const { inspect } = require('util');
 
 const makeClient = commonHelpers.makeClient;
 const connectClient = commonHelpers.connectClient;
@@ -112,9 +112,7 @@ function runCommand(done) {
     if (_id > 10000) {
       return done();
     }
-    return this.db.command({ [LEGACY_HELLO_COMMAND]: true }, err =>
-      err ? done(err) : loop(_id + 1)
-    );
+    return this.db.command({ hello: true }, err => (err ? done(err) : loop(_id + 1)));
   };
 
   return loop(1);
@@ -333,6 +331,8 @@ const benchmarkRunner = new Runner()
 benchmarkRunner
   .run()
   .then(microBench => {
+    // TODO - test against different BSON versions in CI
+    // const bsonType = BSON.serialize.toString().includes('native code') ? 'bson-ext' : 'js-bson';
     const bsonBench = average(Object.values(microBench.bsonBench));
     const singleBench = average([
       microBench.singleBench.findOne,
@@ -357,21 +357,31 @@ benchmarkRunner
       microBench.multiBench.gridFsUpload
       // TODO: Add parallelBench write benchmarks
     ]);
-    const driverBench = average([readBench, writeBench]);
 
-    return {
-      microBench,
+    const benchmarkResults = {
       bsonBench,
       singleBench,
       multiBench,
       parallelBench,
       readBench,
       writeBench,
-      driverBench
+      ...microBench.bsonBench,
+      ...microBench.singleBench,
+      ...microBench.multiBench
     };
+
+    return Object.entries(benchmarkResults).map(([benchmarkName, result]) => {
+      return {
+        info: {
+          test_name: benchmarkName
+        },
+        metrics: [{ name: 'megabytes_per_second', value: result }]
+      };
+    });
   })
   .then(data => {
-    data.bsonType = BSON.serialize.toString().includes('native code') ? 'bson-ext' : 'js-bson';
-    console.log(data);
+    const results = JSON.stringify(data, undefined, 2);
+    console.error(inspect(results, { depth: Infinity }));
+    return writeFile('results.json', results);
   })
   .catch(err => console.error(err));

@@ -1,10 +1,8 @@
 'use strict';
 
 const CONSTANTS = require('./constants');
-
-function hrtimeToSeconds(hrtime) {
-  return hrtime[0] + hrtime[1] / CONSTANTS.SECOND_TO_NS;
-}
+const { performance } = require('perf_hooks');
+const Suite = require('./suite');
 
 const PERCENTILES = [10, 25, 50, 75, 95, 98, 99];
 function percentileIndex(percentile, total) {
@@ -14,40 +12,44 @@ function percentileIndex(percentile, total) {
 function timeDoneTask(task, ctx) {
   return new Promise((resolve, reject) => {
     let called = false;
-    const start = process.hrtime();
+    const start = performance.now();
     task.call(ctx, err => {
-      const time = process.hrtime(start);
+      const end = performance.now(start);
       if (called) return;
       if (err) return reject(err);
-      return resolve(hrtimeToSeconds(time));
+      return resolve((end - start) / 1000);
     });
   });
 }
 
-function timeTask(task, ctx) {
+async function timeTask(task, ctx) {
+  // Some tasks are async, so they take callbacks.
   if (task.length) {
     return timeDoneTask(task, ctx);
   }
 
-  return new Promise((resolve, reject) => {
-    try {
-      const start = process.hrtime();
-      const ret = task.call(ctx);
-      let time = process.hrtime(start);
-      if (ret && ret.then) {
-        ret.then(() => {
-          let time = process.hrtime(start);
-          resolve(hrtimeToSeconds(time));
-        }, reject);
-      } else {
-        resolve(hrtimeToSeconds(time));
-      }
-    } catch (e) {
-      reject(e);
-    }
-  });
+  const start = performance.now();
+  const ret = task.call(ctx);
+  let end = performance.now();
+
+  if (ret && ret.then) {
+    await ret;
+    end = performance.now();
+  }
+
+  return (end - start) / 1000;
 }
 
+/**
+ * Returns the execution time for the benchmarks in mb/second
+ *
+ * This function internally calculates the 50th percentile execution time and uses
+ * that as the median.
+ *
+ * @param {Benchmark} benchmark
+ * @param {{ rawData: number[], count: number}} data
+ * @returns number
+ */
 function calculateMicroBench(benchmark, data) {
   const rawData = data.rawData;
   const count = data.count;
@@ -64,8 +66,6 @@ function calculateMicroBench(benchmark, data) {
   return benchmark.taskSize / medianExecution;
 }
 
-const Suite = require('./suite');
-
 class Runner {
   constructor(options) {
     options = options || {};
@@ -80,6 +80,13 @@ class Runner {
     this.children = {};
   }
 
+  /**
+   * Adds a new test suite to the runner
+   * @param {string} name - the name of the test suite
+   * @param {(suite: Suite) => void} fn a function that registers a set of benchmarks onto the
+   *  parameter `suite`
+   * @returns {this} this
+   */
   suite(name, fn) {
     if (typeof name !== 'string' || !name) {
       throw new TypeError(`Argument "name" (${name}) must be a non-zero length string`);
@@ -105,75 +112,86 @@ class Runner {
     return this;
   }
 
-  run() {
+  async run() {
     this.reporter(`Running Benchmarks`);
-    return Object.keys(this.children)
-      .map(name => ({ name, suite: this.children[name] }))
-      .reduce(
-        (p, data) =>
-          p.then(results => {
-            this.reporter(`  Executing suite "${data.name}"`);
-            return this._runSuite(data.suite).then(microBench => {
-              results[data.name] = microBench;
-              return results;
-            });
-          }),
-        Promise.resolve({})
-      );
+    const result = {};
+
+    for (const [suiteName, suite] of Object.entries(this.children)) {
+      this.reporter(`  Executing suite "${suiteName}"`);
+      result[suiteName] = await this._runSuite(suite);
+    }
+
+    return result;
   }
 
-  _runSuite(suite) {
-    const benchmarks = suite.getBenchmarks();
-    return Object.keys(benchmarks)
-      .map(name => ({ name, benchmark: benchmarks[name].toObj() }))
-      .reduce((p, data) => {
-        return p.then(results => {
-          this.reporter(`    Executing Benchmark "${data.name}"`);
-          return this._runBenchmark(data.benchmark).then(score => {
-            results[data.name] = score;
-            return results;
-          });
-        });
-      }, Promise.resolve({}));
+  /**
+   *
+   * @param {Suite} suite
+   *
+   * @returns {{string: number | undefined}}
+   */
+  async _runSuite(suite) {
+    const benchmarks = Object.entries(suite.getBenchmarks()).map(([name, benchmark]) => [
+      name,
+      benchmark.toObj()
+    ]);
+
+    const result = {};
+
+    for (const [name, benchmark] of benchmarks) {
+      this.reporter(`    Executing Benchmark "${name}"`);
+      result[name] = await this._runBenchmark(benchmark);
+    }
+
+    return result;
   }
 
-  _runBenchmark(benchmark) {
+  /**
+   * Runs a single benchmark.
+   *
+   * @param {Benchmark} benchmark
+   * @returns {Promise<number>} A promise containing the mb/s for the benchmark.  This function never rejects,
+   * it instead returns Promise<NaN> if there is an error.
+   */
+  async _runBenchmark(benchmark) {
     const ctx = {};
-
-    return Promise.resolve()
-      .then(() => benchmark.setup.call(ctx))
-      .then(() => this._loopTask(benchmark, ctx))
-      .then(rawData =>
-        Promise.resolve()
-          .then(() => benchmark.teardown.call(ctx))
-          .then(() => calculateMicroBench(benchmark, rawData))
-      )
-      .catch(err => this._errorHandler(err));
+    try {
+      await benchmark.setup.call(ctx);
+      const result = await this._loopTask(benchmark, ctx);
+      await benchmark.teardown.call(ctx);
+      return calculateMicroBench(benchmark, result);
+    } catch (error) {
+      return this._errorHandler(error);
+    }
   }
 
-  _loopTask(benchmark, ctx) {
-    const start = Date.now();
+  /**
+   *
+   * @param {Benchmark} benchmark
+   * @param {any} ctx
+   * @returns {{ rawData: number[], count: number}}
+   */
+  async _loopTask(benchmark, ctx) {
+    const start = performance.now();
     const rawData = [];
     const minExecutionCount = this.minExecutionCount;
     const minExecutionTime = this.minExecutionTime;
     const maxExecutionTime = this.maxExecutionTime;
+    let time = performance.now() - start;
+    let count = 1;
 
-    function iterate(count) {
-      const time = Date.now() - start;
-
-      if (time >= maxExecutionTime || (time >= minExecutionTime && count >= minExecutionCount)) {
-        return Promise.resolve({ rawData, count });
-      }
-
-      return Promise.resolve()
-        .then(() => benchmark.beforeTask.call(ctx))
-        .then(() => timeTask(benchmark.task, ctx))
-        .then(singleExecution => rawData.push(singleExecution))
-        .then(() => benchmark.afterTask.call(ctx))
-        .then(() => iterate(count + 1));
+    while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
+      await benchmark.beforeTask.call(ctx);
+      const executionTime = await timeTask(benchmark.task, ctx);
+      rawData.push(executionTime);
+      count++;
+      time = performance.now();
     }
 
-    return iterate(0);
+    return {
+      rawData,
+      count
+    };
   }
 
   _errorHandler(e) {

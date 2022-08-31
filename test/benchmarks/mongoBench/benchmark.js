@@ -1,7 +1,5 @@
 'use strict';
 
-const util = require('./util');
-
 class Benchmark {
   constructor() {
     // The Task itself
@@ -165,10 +163,24 @@ class Benchmark {
   }
 
   /**
+   * Converts an array of task functions into a single async function, that awaits each
+   * task function and resolves once all are completed.
+   *
+   * The returned function will reject if any of the task functions fails.
+   *
    * @param {any} arr
+   * @return {() => Promise<void>}
    */
   _convertArrayToAsyncPipeFn(arr) {
-    return arr.length ? util.asyncChain(arr) : util.noop;
+    const array = arr.length ? arr : [];
+    return async function () {
+      // copy the array to guard against modification
+      const chain = [].concat(array);
+      const context = this;
+      for (const fn of chain) {
+        await fn.call(context);
+      }
+    };
   }
 }
 
