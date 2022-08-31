@@ -325,6 +325,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
     this[kPoolState] = PoolState.ready;
     this.emit(ConnectionPool.CONNECTION_POOL_READY, new ConnectionPoolReadyEvent(this));
+    clearTimeout(this[kMinPoolSizeTimer]);
     this.ensureMinPoolSize();
   }
 
@@ -594,7 +595,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       if (err || !connection) {
         this[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
         this[kPending]--;
-        callback(err);
+        callback(err ?? new MongoRuntimeError('Connection creation failed without error'));
         return;
       }
 
@@ -662,11 +663,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           process.nextTick(() => this.processWaitQueue());
         }
         if (this[kPoolState] === PoolState.ready) {
+          clearTimeout(this[kMinPoolSizeTimer]);
           this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
         }
-        // TODO: destroy connection if pool paused? => this.connectionIsPerished(...)
       });
     } else {
+      clearTimeout(this[kMinPoolSizeTimer]);
       this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 100);
     }
   }
