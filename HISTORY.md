@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.9.1](https://github.com/mongodb/node-mongodb-native/compare/v4.9.0...v4.9.1) (2022-08-31)
+
+
+### Bug Fixes
+
+* **NODE-4583:** revert nested union type support ([#3383](https://github.com/mongodb/node-mongodb-native/issues/3383)) ([014d0b3](https://github.com/mongodb/node-mongodb-native/commit/014d0b30c26f8aff0cfeda7f51b0431ada5a1190))
+* **NODE-4591:** only set loadBalanced on handshake when explicitly set ([#3386](https://github.com/mongodb/node-mongodb-native/issues/3386)) ([861d465](https://github.com/mongodb/node-mongodb-native/commit/861d465e234b4617f7d73d7421d2e0a9fd370c2f))
+
 ## [4.9.0](https://github.com/mongodb/node-mongodb-native/compare/v4.8.1...v4.9.0) (2022-08-18)
 
 
