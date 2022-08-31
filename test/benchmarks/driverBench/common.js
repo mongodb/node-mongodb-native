@@ -65,6 +65,27 @@ function makeLoadJSON(name) {
   };
 }
 
+function makeLoadTweets(makeId) {
+  return function () {
+    const doc = this.doc;
+    const tweets = [];
+    for (let _id = 1; _id <= 10000; _id += 1) {
+      tweets.push(Object.assign({}, doc, makeId ? { _id } : {}));
+    }
+
+    return this.collection.insertMany(tweets);
+  };
+}
+
+function makeLoadInsertDocs(numberOfOperations) {
+  return function () {
+    this.docs = [];
+    for (let i = 0; i < numberOfOperations; i += 1) {
+      this.docs.push(Object.assign({}, this.doc));
+    }
+  };
+}
+
 module.exports = {
   makeClient,
   connectClient,
@@ -78,5 +99,7 @@ module.exports = {
   loadSpecFile,
   loadSpecString,
   initBucket,
-  dropBucket
+  dropBucket,
+  makeLoadTweets,
+  makeLoadInsertDocs
 };
