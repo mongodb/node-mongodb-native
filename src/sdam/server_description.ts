@@ -53,6 +53,7 @@ export class ServerDescription {
   passives: string[];
   arbiters: string[];
   tags: TagSet;
+  // TODO: this error type is not actually guaranteed
   error: MongoServerError | null;
   topologyVersion: TopologyVersion | null;
   minWireVersion: number;

@@ -26,6 +26,7 @@ import {
 import {
   MongoCompatibilityError,
   MongoDriverError,
+  MongoError,
   MongoErrorLabel,
   MongoRuntimeError,
   MongoServerSelectionError,
@@ -815,7 +816,10 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
     const server = topology.s.servers.get(incomingServerDescription.address);
     if (server) {
       server.s.description = incomingServerDescription;
-      if (incomingServerDescription.error?.hasErrorLabel(MongoErrorLabel.ResetPool)) {
+      if (
+        incomingServerDescription.error instanceof MongoError &&
+        incomingServerDescription.error.hasErrorLabel(MongoErrorLabel.ResetPool)
+      ) {
         server.s.pool.clear();
       } else {
         const newTopologyType = topology.s.description.type;
