@@ -66,8 +66,6 @@ const kMetrics = Symbol('metrics');
 const kProcessingWaitQueue = Symbol('processingWaitQueue');
 /** @internal */
 const kPoolState = Symbol('poolState');
-/** @internal */
-const kWaitQueuePending = Symbol('waitQueuePending');
 
 /** @public */
 export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'generation'> {
@@ -156,8 +154,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   [kMetrics]: ConnectionPoolMetrics;
   /** @internal */
   [kProcessingWaitQueue]: boolean;
-  /** @internal */
-  [kWaitQueuePending]: number;
 
   /**
    * Emitted when the connection pool is created.
@@ -249,7 +245,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kCancellationToken] = new CancellationToken();
     this[kCancellationToken].setMaxListeners(Infinity);
     this[kWaitQueue] = new Denque();
-    this[kWaitQueuePending] = 0;
     this[kMetrics] = new ConnectionPoolMetrics();
     this[kProcessingWaitQueue] = false;
 
@@ -402,7 +397,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     if (this.closed) {
       return;
     }
-    this[kWaitQueuePending] = 0;
 
     // handle load balanced case
     if (this.loadBalanced && serviceId) {
@@ -460,7 +454,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     this[kPoolState] = PoolState.closed;
-    this[kWaitQueuePending] = 0;
     this.clearMinPoolSizeTimer();
     this.processWaitQueue();
 
@@ -599,8 +592,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         return;
       }
 
-      // The pool might have been cleared or closed since we started trying to create a connection
-      if (this[kPoolState] !== PoolState.ready) {
+      // The pool might have closed since we started trying to create a connection
+      if (this.closed) {
         this[kPending]--;
         connection.destroy({ force: true });
         return;
@@ -731,29 +724,17 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     const { maxPoolSize, maxConnecting } = this.options;
-    for (
-      let waitQueueIndex = this[kWaitQueuePending];
-      waitQueueIndex < this.waitQueueSize;
-      waitQueueIndex++
+    while (
+      this.waitQueueSize > 0 &&
+      this.pendingConnectionCount < maxConnecting &&
+      (maxPoolSize === 0 || this.totalConnectionCount < maxPoolSize)
     ) {
-      if (
-        this.pendingConnectionCount >= maxConnecting ||
-        (maxPoolSize > 0 && this.totalConnectionCount >= maxPoolSize)
-      ) {
-        break;
+      const waitQueueMember = this[kWaitQueue].shift();
+      if (!waitQueueMember || waitQueueMember[kCancelled]) {
+        continue;
       }
-      this[kWaitQueuePending]++;
       this.createConnection((err, connection) => {
-        // The > 0 guard is just a precaution against future refactors
-        // Currently, the callback is invoked sync from createConnection
-        // so we are guaranteed the pool is still ready at this point
-        // however, if this changes to async, then it will be possible for the
-        // queue to get cleared before we get here
-        if (this[kWaitQueuePending] > 0) {
-          this[kWaitQueuePending]--;
-        }
-        const waitQueueMember = this[kWaitQueue].shift();
-        if (!waitQueueMember || waitQueueMember[kCancelled]) {
+        if (waitQueueMember[kCancelled]) {
           if (!err && connection) {
             this[kConnections].push(connection);
           }
