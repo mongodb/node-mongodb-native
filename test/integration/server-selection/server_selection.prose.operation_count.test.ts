@@ -167,8 +167,12 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
   });
 
   it(
-    'equally distributes operations with both hosts when requests are in parallel',
+    'equally distributes operations with both hosts when requests are in sequence',
     TEST_METADATA,
+    /**
+     * note that this test is NOT a prose test, but it lives in this file because it uses the
+     * same setup as the operation count prose tests
+     */
     async function () {
       const collection = client.db('test-db').collection('collection0');
 
@@ -180,7 +184,6 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
         await collection.findOne({ _id: insertedId });
       }
 
-      // Step 9: Using command monitoring events, assert that each mongos was selected roughly 50% of the time (within +/- 10%).
       const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
       const percentageToHost1 = (counts[host1] / n) * 100;
       const percentageToHost2 = (counts[host2] / n) * 100;
