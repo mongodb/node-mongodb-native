@@ -903,6 +903,20 @@ function processWaitQueue(topology: Topology) {
       continue;
     } else if (selectedDescriptions.length === 1) {
       selectedServer = topology.s.servers.get(selectedDescriptions[0].address);
+    } else if (selectedDescriptions.length === 2) {
+      // If there are only two servers, we avoid shuffling the array of
+      // server descriptions
+      const server1 = topology.s.servers.get(selectedDescriptions[0].address);
+      const server2 = topology.s.servers.get(selectedDescriptions[1].address);
+
+      if (server1?.s.operationCount === server2?.s.operationCount) {
+        selectedServer = Math.floor(Math.random() * 2) === 0 ? server1 : server2;
+      } else {
+        selectedServer =
+          server1 && server2 && server1.s.operationCount < server2.s.operationCount
+            ? server1
+            : server2;
+      }
     } else {
       const descriptions = shuffle(selectedDescriptions, 2);
       const server1 = topology.s.servers.get(descriptions[0].address);
