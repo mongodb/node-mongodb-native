@@ -4,6 +4,7 @@ import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
+import { MongoError, MongoErrorLabel } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, InterruptibleAsyncInterval } from '../utils';
 import {
@@ -225,7 +226,15 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err)
     );
 
-    monitor.emit('resetServer', err);
+    let error: MongoError;
+    if (!(err instanceof MongoError)) {
+      error = new MongoError(err);
+    } else {
+      error = err;
+    }
+    error.addErrorLabel(MongoErrorLabel.ResetPool);
+
+    monitor.emit('resetServer', error);
     callback(err);
   }
 

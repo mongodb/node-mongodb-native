@@ -89,7 +89,8 @@ export const MongoErrorLabel = Object.freeze({
   TransientTransactionError: 'TransientTransactionError',
   UnknownTransactionCommitResult: 'UnknownTransactionCommitResult',
   ResumableChangeStreamError: 'ResumableChangeStreamError',
-  HandshakeError: 'HandshakeError'
+  HandshakeError: 'HandshakeError',
+  ResetPool: 'ResetPool'
 } as const);
 
 /** @public */

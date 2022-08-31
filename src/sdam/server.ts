@@ -512,13 +512,15 @@ function makeOperationHandler(
 
       if (isSDAMUnrecoverableError(error)) {
         if (shouldHandleStateChangeError(server, error)) {
-          if (maxWireVersion(server) <= 7 || isNodeShuttingDownError(error)) {
-            if (server.loadBalanced) {
-              server.s.pool.clear(connection.serviceId);
-            }
+          const shouldClearPool = maxWireVersion(server) <= 7 || isNodeShuttingDownError(error);
+          if (server.loadBalanced && shouldClearPool) {
+            server.s.pool.clear(connection.serviceId);
           }
 
           if (!server.loadBalanced) {
+            if (shouldClearPool) {
+              error.addErrorLabel(MongoErrorLabel.ResetPool);
+            }
             markServerUnknown(server, error);
             process.nextTick(() => server.requestCheck());
           }
