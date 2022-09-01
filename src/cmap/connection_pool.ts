@@ -593,9 +593,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
 
       // The pool might have closed since we started trying to create a connection
-      if (this.closed) {
+      if (this[kPoolState] !== PoolState.ready) {
         this[kPending]--;
         connection.destroy({ force: true });
+        callback(this.closed ? new PoolClosedError(this) : new PoolClearedError(this));
         return;
       }
 
@@ -742,7 +743,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           if (err) {
             this.emit(
               ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-              new ConnectionCheckOutFailedEvent(this, err)
+              // TODO: this should be connectionError in the reason, not err
+              new ConnectionCheckOutFailedEvent(this, 'connectionError')
             );
           } else if (connection) {
             this[kCheckedOut]++;
