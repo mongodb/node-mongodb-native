@@ -19,6 +19,9 @@ const filter: TestFilter = ({ description }) => {
       return isAuthEnabled
         ? 'TODO(NODE-3135): handle auth errors, also see NODE-3891: fix tests broken when AUTH enabled'
         : false;
+    case 'Network error on Monitor check':
+    case 'Network timeout on Monitor check':
+      return 'TODO(NODE-4608): Disallow parallel monitor checks';
     default:
       return false;
   }
