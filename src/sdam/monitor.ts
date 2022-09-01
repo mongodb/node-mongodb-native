@@ -353,7 +353,6 @@ function monitorServer(monitor: Monitor) {
       if (err) {
         // otherwise an error occurred on initial discovery, also bail
         if (monitor[kServer].description.type === ServerType.Unknown) {
-          monitor.emit('resetServer', err);
           return done();
         }
       }
