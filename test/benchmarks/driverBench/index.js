@@ -10,8 +10,7 @@ let bsonType = 'js-bson';
 try {
   BSON = require('bson-ext');
 
-  //github.com/mongodb/specifications/blob/master/source/benchmarking/benchmarking.rst#gridfs-multi-file-download
-  // TODO(NODE-xxxx): test against bson-ext in CI
+  // TODO(NODE-4606): test against different driver configurations in CI
   bsonType = 'bson-ext';
 } catch (_) {
   // do not care
