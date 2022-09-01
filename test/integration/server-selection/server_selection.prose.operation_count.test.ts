@@ -165,4 +165,30 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
     expect(percentageToHost1).to.be.greaterThan(40).and.lessThan(60);
     expect(percentageToHost2).to.be.greaterThan(40).and.lessThan(60);
   });
+
+  it(
+    'equally distributes operations with both hosts when requests are in sequence',
+    TEST_METADATA,
+    /**
+     * note that this test is NOT a prose test, but it lives in this file because it uses the
+     * same setup as the operation count prose tests
+     */
+    async function () {
+      const collection = client.db('test-db').collection('collection0');
+
+      const { insertedId } = await collection.insertOne({ name: 'bumpy' });
+
+      const n = 1000;
+
+      for (let i = 0; i < n; ++i) {
+        await collection.findOne({ _id: insertedId });
+      }
+
+      const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
+      const percentageToHost1 = (counts[host1] / n) * 100;
+      const percentageToHost2 = (counts[host2] / n) * 100;
+      expect(percentageToHost1).to.be.greaterThan(40).and.lessThan(60);
+      expect(percentageToHost2).to.be.greaterThan(40).and.lessThan(60);
+    }
+  );
 });
