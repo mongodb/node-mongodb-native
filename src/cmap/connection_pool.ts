@@ -267,6 +267,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return this[kPoolState] === PoolState.closed;
   }
 
+  get state() {
+    return this[kPoolState];
+  }
+
   /** An integer representing the SDAM generation of the pool */
   get generation(): number {
     return this[kGeneration];
@@ -394,6 +398,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * previous generation will eventually be pruned during subsequent checkouts.
    */
   clear(serviceId?: ObjectId): void {
+    console.log('CLEARING POOL!');
     if (this.closed) {
       return;
     }
@@ -584,6 +589,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
     );
 
+    console.log('createConnection connect', this.state);
     connect(connectOptions, (err, connection) => {
       if (err || !connection) {
         this[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
@@ -594,6 +600,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
       // The pool might have closed since we started trying to create a connection
       if (this[kPoolState] !== PoolState.ready) {
+        console.log('createConnection connect calling back', this.state);
         this[kPending]--;
         connection.destroy({ force: true });
         callback(this.closed ? new PoolClosedError(this) : new PoolClearedError(this));
@@ -686,6 +693,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
 
       if (this[kPoolState] !== PoolState.ready) {
+        console.log('clearing waitqueue members', this.state);
         const reason = this.closed ? 'poolClosed' : 'connectionError';
         const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
         this.emit(

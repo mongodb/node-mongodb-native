@@ -180,6 +180,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     monitor.on('resetServer', (error: MongoError) => markServerUnknown(this, error));
     monitor.on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
+      console.log('HEARTBEAT SUCCEEDED', monitor.address);
       this.emit(
         Server.DESCRIPTION_RECEIVED,
         new ServerDescription(this.description.hostAddress, event.reply, {
@@ -496,6 +497,7 @@ function makeOperationHandler(
         // clear for the specific service id.
 
         if (!server.loadBalanced) {
+          console.log('TWO - Adding reset pool label to error', error);
           error.addErrorLabel(MongoErrorLabel.ResetPool);
           markServerUnknown(server, error);
         } else {
@@ -520,6 +522,7 @@ function makeOperationHandler(
 
           if (!server.loadBalanced) {
             if (shouldClearPool) {
+              console.log('THREE - Adding reset pool label to error', error);
               error.addErrorLabel(MongoErrorLabel.ResetPool);
             }
             markServerUnknown(server, error);

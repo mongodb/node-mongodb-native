@@ -24,7 +24,7 @@ const filter: TestFilter = ({ description }) => {
   }
 };
 
-describe('SDAM Unified Tests', function () {
+describe.only('SDAM Unified Tests', function () {
   afterEach(async function () {
     if (this.currentTest!.pending) {
       return;

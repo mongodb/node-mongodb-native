@@ -223,6 +223,7 @@ function executeWithServerSelection<TResult>(
       session.unpin({ force: true, forceClear: true });
     }
 
+    console.log('retrying operation', operation.constructor.name);
     // select a new server, and attempt to retry the operation
     topology.selectServer(selector, serverSelectionOptions, (error?: Error, server?: Server) => {
       if (!error && isWriteOperation && !supportsRetryableWrites(server)) {
@@ -239,6 +240,7 @@ function executeWithServerSelection<TResult>(
         );
       }
 
+      console.log('retrying operation callback', operation.constructor.name, server.s.pool.state);
       operation.execute(server, session, callback);
     });
   }
@@ -257,8 +259,10 @@ function executeWithServerSelection<TResult>(
     return;
   }
 
+  console.log('selecting initial server for operation', operation.constructor.name);
   // select a server, and execute the operation against it
   topology.selectServer(selector, serverSelectionOptions, (error, server) => {
+    console.log('selected server for operation', operation.constructor.name, server?.s.pool.state);
     if (error || !server) {
       return callback(error);
     }
@@ -282,7 +286,9 @@ function executeWithServerSelection<TResult>(
           session.incrementTransactionNumber();
         }
 
+        console.log('executing operation with retry', operation.constructor.name);
         return operation.execute(server, session, (error, result) => {
+          console.log('executed operation with retry', operation.constructor.name, error);
           if (error instanceof MongoError) {
             return retryOperation(error);
           } else if (error) {
@@ -293,6 +299,10 @@ function executeWithServerSelection<TResult>(
       }
     }
 
-    return operation.execute(server, session, callback);
+    console.log('executing operation without retry', operation.constructor.name);
+    return operation.execute(server, session, (error, result) => {
+      console.log('executed operation without retry', operation.constructor.name, error);
+      callback(error, result);
+    });
   });
 }

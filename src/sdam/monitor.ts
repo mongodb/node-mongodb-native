@@ -215,6 +215,7 @@ function resetMonitorState(monitor: Monitor) {
 
 function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let start = now();
+  console.log('ONE - heartbeat started', monitor.address, start);
   monitor.emit(Server.SERVER_HEARTBEAT_STARTED, new ServerHeartbeatStartedEvent(monitor.address));
 
   function failureHandler(err: Error) {
@@ -232,6 +233,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     } else {
       error = err;
     }
+    console.log('ONE - Adding reset pool label to error', monitor.address, error);
     error.addErrorLabel(MongoErrorLabel.ResetPool);
 
     monitor.emit('resetServer', error);
@@ -240,6 +242,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
   const connection = monitor[kConnection];
   if (connection && !connection.closed) {
+    // TODO: should we be checking if connection is stale?
     const { serverApi, helloOk } = connection;
     const connectTimeoutMS = monitor.options.connectTimeoutMS;
     const maxAwaitTimeMS = monitor.options.heartbeatFrequencyMS;
@@ -247,7 +250,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     const isAwaitable = topologyVersion != null;
 
     const cmd = {
-      [serverApi?.version || helloOk ? 'hello' : LEGACY_HELLO_COMMAND]: true,
+      [serverApi?.version || helloOk ? 'hello' : LEGACY_HELLO_COMMAND]: true, // TODO: does the capitalization matter in failpoint?? ismaster <> isMaster
       ...(isAwaitable && topologyVersion
         ? { maxAwaitTimeMS, topologyVersion: makeTopologyVersion(topologyVersion) }
         : {})
@@ -270,7 +273,9 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       );
     }
 
+    console.log('HEARTBEAT USING EXISTING CONNECTION', monitor.address, start);
     connection.command(ns('admin.$cmd'), cmd, options, (err, hello) => {
+      console.log('HEARTBEAT RETURNED FROM EXISTING CONNECTION', monitor.address, start, err);
       if (err) {
         return failureHandler(err);
       }
@@ -292,6 +297,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
       if (isAwaitable && hello.topologyVersion) {
+        console.log('TWO - awaitable heartbeat started', monitor.address, start, now());
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address)
@@ -308,8 +314,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     return;
   }
 
+  console.log('HEARTBEAT NEW CONNECTION', monitor.address, start, monitor.connectOptions);
   // connecting does an implicit `hello`
   connect(monitor.connectOptions, (err, conn) => {
+    console.log('HEARTBEAT RETURNED FROM NEW CONNECTION', monitor.address, start, err);
     if (err) {
       monitor[kConnection] = undefined;
 
@@ -328,6 +336,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       }
 
       monitor[kConnection] = conn;
+      // TODO: this is not covered by the failpoint?, so we mark the server ready but then monitoring fails again
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(monitor.address, calculateDurationInMs(start), conn.hello)
@@ -353,7 +362,7 @@ function monitorServer(monitor: Monitor) {
       if (err) {
         // otherwise an error occurred on initial discovery, also bail
         if (monitor[kServer].description.type === ServerType.Unknown) {
-          monitor.emit('resetServer', err);
+          // monitor.emit('resetServer', err); // TODO: we already do this in check server, so we should not need to do it again
           return done();
         }
       }

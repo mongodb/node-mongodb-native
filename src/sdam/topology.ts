@@ -820,6 +820,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
         incomingServerDescription.error instanceof MongoError &&
         incomingServerDescription.error.hasErrorLabel(MongoErrorLabel.ResetPool)
       ) {
+        console.log('CALLING clear for error', incomingServerDescription.error);
         server.s.pool.clear();
       } else {
         const newTopologyType = topology.s.description.type;
