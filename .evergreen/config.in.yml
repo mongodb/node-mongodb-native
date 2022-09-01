@@ -619,6 +619,9 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
+          # Write an empty prepare_mongodb_aws so no auth environment variables
+          # are set.
+          echo "" > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           . ./activate_venv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
