@@ -1,5 +1,7 @@
 import { Admin } from './admin';
 import { ObjectId } from './bson';
+import { OrderedBulkOperation } from './bulk/ordered';
+import { UnorderedBulkOperation } from './bulk/unordered';
 import { ChangeStream } from './change_stream';
 import { Collection } from './collection';
 import { AbstractCursor } from './cursor/abstract_cursor';
@@ -9,10 +11,13 @@ import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import { Db } from './db';
 import { GridFSBucket } from './gridfs';
+import { GridFSBucketReadStream } from './gridfs/download';
+import { GridFSBucketWriteStream } from './gridfs/upload';
 import { Logger } from './logger';
 import { MongoClient } from './mongo_client';
 import { CancellationToken } from './mongo_types';
 import { PromiseProvider } from './promise_provider';
+import { ClientSession } from './sessions';
 
 /** @internal */
 export { BSON } from './bson';
@@ -80,16 +85,21 @@ export {
   AggregationCursor,
   CancellationToken,
   ChangeStream,
+  ClientSession,
   Collection,
   Db,
   FindCursor,
   GridFSBucket,
+  GridFSBucketReadStream,
+  GridFSBucketWriteStream,
   ListCollectionsCursor,
   ListIndexesCursor,
   Logger,
   MongoClient,
+  OrderedBulkOperation,
   // Utils
-  PromiseProvider as Promise
+  PromiseProvider as Promise,
+  UnorderedBulkOperation
 };
 
 // enums
@@ -171,8 +181,6 @@ export type {
   FindOperators,
   WriteConcernErrorData
 } from './bulk/common';
-export type { OrderedBulkOperation } from './bulk/ordered';
-export type { UnorderedBulkOperation } from './bulk/unordered';
 export type {
   ChangeStreamCollModDocument,
   ChangeStreamCreateDocument,
@@ -268,18 +276,13 @@ export type { Encrypter, EncrypterOptions } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
 export type {
-  GridFSBucketReadStream,
   GridFSBucketReadStreamOptions,
   GridFSBucketReadStreamOptionsWithRevision,
   GridFSBucketReadStreamPrivate,
   GridFSFile
 } from './gridfs/download';
 export type { GridFSBucketEvents, GridFSBucketOptions, GridFSBucketPrivate } from './gridfs/index';
-export type {
-  GridFSBucketWriteStream,
-  GridFSBucketWriteStreamOptions,
-  GridFSChunk
-} from './gridfs/upload';
+export type { GridFSBucketWriteStreamOptions, GridFSChunk } from './gridfs/upload';
 export type { LoggerFunction, LoggerOptions } from './logger';
 export type {
   Auth,
@@ -453,7 +456,6 @@ export type {
 } from './sdam/topology';
 export type { TopologyDescription, TopologyDescriptionOptions } from './sdam/topology_description';
 export type {
-  ClientSession,
   ClientSessionEvents,
   ClientSessionOptions,
   EndSessionOptions,
