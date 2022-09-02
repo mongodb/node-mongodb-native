@@ -69,10 +69,11 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
    */
   static readonly FINISH = 'finish';
 
-  /** @internal
+  /**
    * @param bucket - Handle for this stream's corresponding bucket
    * @param filename - The value of the 'filename' key in the files doc
    * @param options - Optional settings.
+   * @internal
    */
   constructor(bucket: GridFSBucket, filename: string, options?: GridFSBucketWriteStreamOptions) {
     super();

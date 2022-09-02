@@ -9,6 +9,7 @@ import { Batch, BatchType, BulkOperationBase, BulkWriteOptions, BulkWriteResult 
 
 /** @public */
 export class UnorderedBulkOperation extends BulkOperationBase {
+  /** @internal */
   constructor(collection: Collection, options: BulkWriteOptions) {
     super(collection, options, false);
   }

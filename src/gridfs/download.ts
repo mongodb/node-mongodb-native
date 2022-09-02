@@ -103,11 +103,12 @@ export class GridFSBucketReadStream extends Readable implements NodeJS.ReadableS
    */
   static readonly CLOSE = 'close' as const;
 
-  /** @internal
+  /**
    * @param chunks - Handle for chunks collection
    * @param files - Handle for files collection
    * @param readPreference - The read preference to use
    * @param filter - The filter to use to find the file document
+   * @internal
    */
   constructor(
     chunks: Collection<GridFSChunk>,
