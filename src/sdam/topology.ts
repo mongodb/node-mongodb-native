@@ -821,7 +821,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
         incomingServerDescription.error.hasErrorLabel(MongoErrorLabel.ResetPool)
       ) {
         server.s.pool.clear();
-      } else {
+      } else if (incomingServerDescription.error == null) {
         const newTopologyType = topology.s.description.type;
         const shouldMarkPoolReady =
           incomingServerDescription.isDataBearing ||
