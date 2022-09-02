@@ -122,7 +122,9 @@ export class MongoError extends Error {
    */
   code?: number | string;
   topologyVersion?: TopologyVersion;
-  cause?: Error;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  cause?: Error; // depending on the node version, this may or may not exist on the base
 
   constructor(message: string | Error) {
     if (message instanceof Error) {
