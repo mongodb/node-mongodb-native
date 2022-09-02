@@ -1,7 +1,6 @@
 import { expect } from 'chai';
-import { inspect } from 'util';
 
-import * as mongodb from '../../lib/index';
+import * as mongodb from '../../src/index';
 import { setDifference } from '../../src/utils';
 import { byStrings, sorted } from '../tools/utils';
 
@@ -126,6 +125,10 @@ const expectedExports = new Map([
   ['GridFSBucketWriteStream',            'reason'],
   ['OrderedBulkOperation',               'reason'],
   ['UnorderedBulkOperation',             'reason'],
+
+  // TS-NODE Adds these keys but they are undefined... weird
+  ['AnyBulkWriteOperation',              'ts-node'],
+  ['BulkWriteOptions',                   'ts-node'],
 ]);
 
 describe('mongodb entrypoint', () => {
@@ -138,6 +141,21 @@ describe('mongodb entrypoint', () => {
   it('should export only keys in our exports list', () => {
     const currentExports = Object.keys(mongodb);
     const difference = setDifference(currentExports, expectedExports.keys());
-    expect(difference, inspect(difference, { breakLength: Infinity })).to.have.lengthOf(0);
+    expect(
+      difference,
+      `Found extra exports [${Array.from(difference).join(
+        ', '
+      )}], if these are expected, just add them to the list in this file`
+    ).to.have.lengthOf(0);
+  });
+
+  it('meta test: ts-node adds keys to the module that point to undefined', () => {
+    const tsNodeKeys = Array.from(expectedExports.entries()).filter(
+      ([, value]) => value === 'ts-node'
+    );
+
+    for (const [tsNodeKey] of tsNodeKeys) {
+      expect(mongodb).to.have.property(tsNodeKey, undefined);
+    }
   });
 });
