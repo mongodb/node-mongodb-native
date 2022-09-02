@@ -32,7 +32,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
     */
 
     let client: MongoClient;
-    const events = [];
+    const events: string[] = [];
     beforeEach(async function () {
       client = this.configuration.newClient({
         directConnection: true,
