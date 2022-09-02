@@ -743,7 +743,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           if (err) {
             this.emit(
               ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-              // TODO: this should be connectionError in the reason, not err
               new ConnectionCheckOutFailedEvent(this, 'connectionError')
             );
           } else if (connection) {
