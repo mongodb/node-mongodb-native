@@ -1,5 +1,5 @@
 import { Document, Long, ObjectId } from '../bson';
-import { MongoRuntimeError, MongoServerError } from '../error';
+import { MongoError, MongoRuntimeError, MongoServerError } from '../error';
 import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
 import type { ClusterTime } from './common';
 import { ServerType } from './common';
@@ -53,8 +53,7 @@ export class ServerDescription {
   passives: string[];
   arbiters: string[];
   tags: TagSet;
-  // TODO: this error type is not actually guaranteed
-  error: MongoServerError | null;
+  error: MongoError | null;
   topologyVersion: TopologyVersion | null;
   minWireVersion: number;
   maxWireVersion: number;

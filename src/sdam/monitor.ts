@@ -69,7 +69,7 @@ export type MonitorEvents = {
   serverHeartbeatStarted(event: ServerHeartbeatStartedEvent): void;
   serverHeartbeatSucceeded(event: ServerHeartbeatSucceededEvent): void;
   serverHeartbeatFailed(event: ServerHeartbeatFailedEvent): void;
-  resetServer(error?: Error): void;
+  resetServer(error?: MongoError): void;
   resetConnectionPool(): void;
   close(): void;
 } & EventEmitterWithState;
@@ -226,12 +226,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err)
     );
 
-    let error: MongoError;
-    if (!(err instanceof MongoError)) {
-      error = new MongoError(err);
-    } else {
-      error = err;
-    }
+    const error = !(err instanceof MongoError) ? new MongoError(err) : err;
     error.addErrorLabel(MongoErrorLabel.ResetPool);
 
     monitor.emit('resetServer', error);
