@@ -122,10 +122,12 @@ export class MongoError extends Error {
    */
   code?: number | string;
   topologyVersion?: TopologyVersion;
+  cause?: Error;
 
   constructor(message: string | Error) {
     if (message instanceof Error) {
       super(message.message);
+      this.cause = message;
     } else {
       super(message);
     }
