@@ -407,6 +407,12 @@ export function parseOptions(
       });
     }
 
+    if (isAws && mongoOptions.credentials.username && !mongoOptions.credentials.password) {
+      throw new MongoParseError(
+        `${mongoOptions.credentials} must receive a password when a username is specified`
+      );
+    }
+
     mongoOptions.credentials.validate();
 
     // Check if the only auth related option provided was authSource, if so we can remove credentials
