@@ -7,14 +7,13 @@ const Runner = MongoBench.Runner;
 let BSON = require('bson');
 
 let bsonType = 'js-bson';
-try {
-  BSON = require('bson-ext');
-
-  // TODO(NODE-4606): test against different driver configurations in CI
-  bsonType = 'bson-ext';
-} catch (_) {
-  // do not care
-}
+// TODO(NODE-4606): test against different driver configurations in CI
+// try {
+//   BSON = require('bson-ext');
+//   bsonType = 'bson-ext';
+// } catch (_) {
+//   // do not care
+// }
 
 const { inspect } = require('util');
 const { writeFile } = require('fs/promises');
