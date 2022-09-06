@@ -224,8 +224,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   removeUser(username: string): Promise<boolean>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   removeUser(username: string, callback: Callback<boolean>): void;
   removeUser(username: string, options: RemoveUserOptions): Promise<boolean>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   removeUser(username: string, options: RemoveUserOptions, callback: Callback<boolean>): void;
   removeUser(
     username: string,

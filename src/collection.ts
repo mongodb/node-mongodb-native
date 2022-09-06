@@ -155,7 +155,7 @@ export interface CollectionPrivate {
  *
  * const petCursor = pets.find();
  *
- * for (const pet of petCursor) {
+ * for await (const pet of petCursor) {
  *   console.log(`${pet.name} is a ${pet.kind}!`);
  * }
  * ```
