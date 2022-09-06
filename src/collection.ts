@@ -136,30 +136,28 @@ export interface CollectionPrivate {
 
 /**
  * The **Collection** class is an internal class that embodies a MongoDB collection
- * allowing for insert/update/remove/find and other command operation on that MongoDB collection.
+ * allowing for insert/find/update/delete and other command operation on that MongoDB collection.
  *
  * **COLLECTION Cannot directly be instantiated**
  * @public
  *
  * @example
- * ```js
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Create a collection we want to drop later
- *   const col = client.db(dbName).collection('createIndexExample1');
- *   // Show that duplicate records got dropped
- *   col.find({}).toArray(function(err, items) {
- *     expect(err).to.not.exist;
- *     test.equal(4, items.length);
- *     client.close();
- *   });
- * });
+ * ```ts
+ * import { MongoClient } from 'mongodb';
+ *
+ * interface Pet {
+ *   name: string;
+ *   kind: 'dog' | 'cat' | 'fish';
+ * }
+ *
+ * const client = new MongoClient('mongodb://localhost:27017');
+ * const pets = client.db().collection<Pet>('pets');
+ *
+ * const petCursor = pets.find();
+ *
+ * for (const pet of petCursor) {
+ *   console.log(`${pet.name} is a ${pet.kind}!`);
+ * }
  * ```
  */
 export class Collection<TSchema extends Document = Document> {
@@ -356,20 +354,22 @@ export class Collection<TSchema extends Document = Document> {
    *
    * Legal operation types are
    *
-   * ```js
-   *  { insertOne: { document: { a: 1 } } }
+   * ```ts
+   * [
+   *   { insertOne: { document: { a: 1 } } },
    *
-   *  { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+   *   { updateOne: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
    *
-   *  { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+   *   { updateMany: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
    *
-   *  { updateMany: { filter: {}, update: {$set: {"a.$[i].x": 5}}, arrayFilters: [{ "i.x": 5 }]} }
+   *   { updateMany: { filter: {}, update: { $set: { 'a.$[i].x': 5 } }, arrayFilters: [{ 'i.x': 5 }] } },
    *
-   *  { deleteOne: { filter: {c:1} } }
+   *   { deleteOne: { filter: { c: 1 } } },
    *
-   *  { deleteMany: { filter: {c:1} } }
+   *   { deleteMany: { filter: { c: 1 } } },
    *
-   *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true} }
+   *   { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } },
+   * ]
    *```
    * Please note that raw operations are no longer accepted as of driver version 4.0.
    *
@@ -848,7 +848,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @example
-   * ```js
+   * ```ts
    * const collection = client.db('foo').collection('bar');
    *
    * await collection.createIndex({ a: 1, b: -1 });
@@ -911,7 +911,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    *
    * @example
-   * ```js
+   * ```ts
    * const collection = client.db('foo').collection('bar');
    * await collection.createIndexes([
    *   // Simple index on field fizz

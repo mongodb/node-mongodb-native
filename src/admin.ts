@@ -29,26 +29,15 @@ export interface AdminPrivate {
  * @public
  *
  * @example
- * ```js
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
+ * ```ts
+ * import { MongoClient } from 'mongodb';
  *
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Use the admin database for the operation
- *   const adminDb = client.db(dbName).admin();
- *
- *   // List all the available databases
- *   adminDb.listDatabases(function(err, dbs) {
- *     expect(err).to.not.exist;
- *     test.ok(dbs.databases.length > 0);
- *     client.close();
- *   });
- * });
+ * const client = new MongoClient('mongodb://localhost:27017');
+ * const admin = client.db().admin();
+ * const dbInfo = await admin.listDatabases();
+ * for (const db of dbInfo.databases) {
+ *   console.dir(db.name);
+ * }
  * ```
  */
 export class Admin {

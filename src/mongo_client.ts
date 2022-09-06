@@ -318,36 +318,15 @@ const kOptions = Symbol('options');
  * The programmatically provided options take precedence over the URI options.
  *
  * @example
- * ```js
- * // Connect using a MongoClient instance
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * const mongoClient = new MongoClient(url);
- * mongoClient.connect(function(err, client) {
- *   const db = client.db(dbName);
- *   client.close();
- * });
- * ```
+ * ```ts
+ * import { MongoClient } from 'mongodb';
  *
- * @example
- * ```js
- * // Connect using the MongoClient.connect static method
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   const db = client.db(dbName);
- *   client.close();
- * });
+ * // Enable command monitoring for debugging
+ * const client = new MongoClient('mongodb://localhost:27017', { monitorCommands: true });
+ *
+ * client.on('commandStarted', started => console.log(started));
+ * client.db().collection('pets');
+ * await client.insertOne({ name: 'spot', kind: 'dog' });
  * ```
  */
 export class MongoClient extends TypedEventEmitter<MongoClientEvents> {

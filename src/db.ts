@@ -110,18 +110,21 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, Lo
  * @public
  *
  * @example
- * ```js
- * const { MongoClient } = require('mongodb');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Select the database by name
- *   const testDb = client.db(dbName);
- *   client.close();
- * });
+ * ```ts
+ * import { MongoClient } from 'mongodb';
+ *
+ * interface Pet {
+ *   name: string;
+ *   kind: 'dog' | 'cat' | 'fish';
+ * }
+ *
+ * const client = new MongoClient('mongodb://localhost:27017');
+ * const db = client.db();
+ *
+ * // Create a collection that validates our union
+ * await db.createCollection<Pet>('pets', {
+ *   validator: { $expr: { $in: ['$kind', ['dog', 'cat', 'fish']] } }
+ * })
  * ```
  */
 export class Db {

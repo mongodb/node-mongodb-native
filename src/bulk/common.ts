@@ -1065,7 +1065,7 @@ export abstract class BulkOperationBase {
    * Add a single insert document to the bulk operation
    *
    * @example
-   * ```js
+   * ```ts
    * const bulkOp = collection.initializeOrderedBulkOp();
    *
    * // Adds three inserts to the bulkOp.
@@ -1089,7 +1089,7 @@ export abstract class BulkOperationBase {
    * Returns a builder object used to complete the definition of the operation.
    *
    * @example
-   * ```js
+   * ```ts
    * const bulkOp = collection.initializeOrderedBulkOp();
    *
    * // Add an updateOne to the bulkOp
