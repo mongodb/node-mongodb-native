@@ -409,7 +409,7 @@ export function parseOptions(
 
     if (isAws && mongoOptions.credentials.username && !mongoOptions.credentials.password) {
       throw new MongoParseError(
-        `${mongoOptions.credentials.mechanism} must receive a password when a username is specified`
+        `When using ${mongoOptions.credentials.mechanism} password must be set when a username is specified`
       );
     }
 
