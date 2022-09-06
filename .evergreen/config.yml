@@ -1355,32 +1355,6 @@ tasks:
           AUTH: auth
           COMPRESSOR: snappy
       - func: run-compression-tests
-  - name: test-lambda-example
-    tags:
-      - latest
-      - lambda
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: server
-      - func: run lambda handler example tests
-  - name: test-lambda-aws-auth-example
-    tags:
-      - latest
-      - lambda
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-          TOPOLOGY: server
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run lambda handler example tests with aws auth
   - name: test-tls-support-latest
     tags:
       - tls-support
@@ -2247,6 +2221,32 @@ tasks:
           AUTH: noauth
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-lambda-example
+    tags:
+      - latest
+      - lambda
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: server
+      - func: run lambda handler example tests
+  - name: test-lambda-aws-auth-example
+    tags:
+      - latest
+      - lambda
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run lambda handler example tests with aws auth
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -2310,6 +2310,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -2355,6 +2358,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -2400,6 +2406,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -2443,6 +2452,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -2482,6 +2494,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -2521,6 +2536,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster

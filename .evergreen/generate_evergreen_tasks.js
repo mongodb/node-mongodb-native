@@ -1,8 +1,6 @@
-const semver = require('semver');
 const fs = require('fs');
 const yaml = require('js-yaml');
 
-const LATEST_EFFECTIVE_VERSION = '6.0';
 const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
 const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
 NODE_VERSIONS.sort();
@@ -29,7 +27,6 @@ const OPERATING_SYSTEMS = [
     clientEncryption: false // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
   }
 ].map(osConfig => ({
-  mongoVersion: '>=3.6',
   nodeVersion: LOWEST_LTS,
   auth: 'auth',
   clientEncryption: true,
@@ -242,8 +239,9 @@ for (const compressor of ['zstd', 'snappy']) {
   });
 }
 
+const AWS_LAMBDA_HANDLER_TASKS = [];
 // Add task for testing lambda example without aws auth.
-TASKS.push({
+AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-example',
   tags: ['latest', 'lambda'],
   commands: [
@@ -260,7 +258,7 @@ TASKS.push({
 });
 
 // Add task for testing lambda example with aws auth.
-TASKS.push({
+AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-aws-auth-example',
   tags: ['latest', 'lambda'],
   commands: [
@@ -344,7 +342,6 @@ for (const
     name: osName,
     display_name: osDisplayName,
     run_on,
-    mongoVersion = '>=3.6',
     nodeVersions = NODE_VERSIONS,
     clientEncryption,
     msvsVersion
@@ -356,21 +353,7 @@ for (const
       const isAWSTask = task.name.match(/^aws/);
       const isSkippedTaskOnWindows = task.tags && os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length
 
-      if (isAWSTask || isSkippedTaskOnWindows) {
-        return false
-      }
-
-      const tasksWithVars = task.commands.filter(task => !!task.vars);
-      if (!tasksWithVars.length) {
-        return true;
-      }
-
-      const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
-      if (VERSION === 'latest') {
-        return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
-      }
-
-      return semver.satisfies(semver.coerce(VERSION), mongoVersion);
+      return !isAWSTask && !isSkippedTaskOnWindows;
     });
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
@@ -378,6 +361,7 @@ for (const
     const name = `${osName}-${NODE_LTS_NAME}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_NAME };
+    const taskNames = tasks.map(({ name }) => name);
 
     if (clientEncryption) {
       expansions.CLIENT_ENCRYPTION = true;
@@ -386,7 +370,7 @@ for (const
       expansions.MSVS_VERSION = msvsVersion;
     }
 
-    BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: tasks.map(({ name }) => name) });
+    BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
   };
 }
 
@@ -666,7 +650,8 @@ fileData.tasks = (fileData.tasks || [])
   .concat(BASE_TASKS)
   .concat(TASKS)
   .concat(SINGLETON_TASKS)
-  .concat(AUTH_DISABLED_TASKS);
+  .concat(AUTH_DISABLED_TASKS)
+  .concat(AWS_LAMBDA_HANDLER_TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.dump(fileData, { lineWidth: 120 }), 'utf8');
