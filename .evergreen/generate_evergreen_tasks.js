@@ -339,45 +339,6 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
 
 const BUILD_VARIANTS = [];
 
-const getTaskList = (() => {
-  const memo = {};
-  return function (mongoVersion, os) {
-    const key = mongoVersion + os;
-
-    if (memo[key]) {
-      return memo[key];
-    }
-    const taskList = BASE_TASKS.concat(TASKS);
-    const ret = taskList
-      .filter(task => {
-        if (task.name.match(/^aws/)) return false;
-
-        if (
-          task.tags &&
-          (os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length)
-        ) {
-          return false;
-        }
-
-        const tasksWithVars = task.commands.filter(task => !!task.vars);
-        if (!tasksWithVars.length) {
-          return true;
-        }
-
-        const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
-        if (VERSION === 'latest') {
-          return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
-        }
-
-        return semver.satisfies(semver.coerce(VERSION), mongoVersion);
-      })
-      .map(x => x.name);
-
-    memo[key] = ret;
-    return ret;
-  };
-})();
-
 for (const
   {
     name: osName,
@@ -389,7 +350,28 @@ for (const
     msvsVersion
   } of OPERATING_SYSTEMS) {
   const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
-  const tasks = getTaskList(mongoVersion, osName.split('-')[0]);
+  const os = osName.split('-')[0];
+  const tasks = BASE_TASKS.concat(TASKS)
+    .filter(task => {
+      const isAWSTask = task.name.match(/^aws/);
+      const isSkippedTaskOnWindows = task.tags && os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length
+
+      if (isAWSTask || isSkippedTaskOnWindows) {
+        return false
+      }
+
+      const tasksWithVars = task.commands.filter(task => !!task.vars);
+      if (!tasksWithVars.length) {
+        return true;
+      }
+
+      const { VERSION } = task.commands.filter(task => !!task.vars)[0].vars;
+      if (VERSION === 'latest') {
+        return semver.satisfies(semver.coerce(LATEST_EFFECTIVE_VERSION), mongoVersion);
+      }
+
+      return semver.satisfies(semver.coerce(VERSION), mongoVersion);
+    });
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
     const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.slice(1)}`;
@@ -404,7 +386,7 @@ for (const
       expansions.MSVS_VERSION = msvsVersion;
     }
 
-    BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks });
+    BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: tasks.map(({ name }) => name) });
   };
 }
 
