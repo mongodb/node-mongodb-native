@@ -36,7 +36,7 @@ export interface AdminPrivate {
  * const admin = client.db().admin();
  * const dbInfo = await admin.listDatabases();
  * for (const db of dbInfo.databases) {
- *   console.dir(db.name);
+ *   console.log(db.name);
  * }
  * ```
  */
