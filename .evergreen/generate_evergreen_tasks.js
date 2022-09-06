@@ -280,7 +280,7 @@ TASKS.push({
   ]
 });
 
-TLS_VERSIONS.forEach(VERSION => {
+for (const VERSION of TLS_VERSIONS) {
   TASKS.push({
     name: `test-tls-support-${VERSION}`,
     tags: ['tls-support'],
@@ -299,11 +299,11 @@ TLS_VERSIONS.forEach(VERSION => {
       { func: 'run tls tests' }
     ]
   });
-});
+}
 
 const AWS_AUTH_TASKS = [];
 
-AWS_AUTH_VERSIONS.forEach(VERSION => {
+for (const VERSION of AWS_AUTH_VERSIONS) {
   const name = ex => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
   const aws_funcs = [
     { func: 'run aws auth test with regular aws credentials' },
@@ -335,7 +335,7 @@ AWS_AUTH_VERSIONS.forEach(VERSION => {
 
   TASKS.push(...aws_tasks);
   AWS_AUTH_TASKS.push(...aws_tasks.map(t => t.name));
-});
+}
 
 const BUILD_VARIANTS = [];
 
@@ -378,8 +378,8 @@ const getTaskList = (() => {
   };
 })();
 
-OPERATING_SYSTEMS.forEach(
-  ({
+for (const
+  {
     name: osName,
     display_name: osDisplayName,
     run_on,
@@ -387,27 +387,26 @@ OPERATING_SYSTEMS.forEach(
     nodeVersions = NODE_VERSIONS,
     clientEncryption,
     msvsVersion
-  }) => {
-    const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
-    const tasks = getTaskList(mongoVersion, osName.split('-')[0]);
+  } of OPERATING_SYSTEMS) {
+  const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
+  const tasks = getTaskList(mongoVersion, osName.split('-')[0]);
 
-    testedNodeVersions.forEach(NODE_LTS_NAME => {
-      const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.slice(1)}`;
-      const name = `${osName}-${NODE_LTS_NAME}`;
-      const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-      const expansions = { NODE_LTS_NAME };
+  for (const NODE_LTS_NAME of testedNodeVersions) {
+    const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.slice(1)}`;
+    const name = `${osName}-${NODE_LTS_NAME}`;
+    const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
+    const expansions = { NODE_LTS_NAME };
 
-      if (clientEncryption) {
-        expansions.CLIENT_ENCRYPTION = true;
-      }
-      if (msvsVersion) {
-        expansions.MSVS_VERSION = msvsVersion;
-      }
+    if (clientEncryption) {
+      expansions.CLIENT_ENCRYPTION = true;
+    }
+    if (msvsVersion) {
+      expansions.MSVS_VERSION = msvsVersion;
+    }
 
-      BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks });
-    });
-  }
-);
+    BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks });
+  };
+}
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
@@ -591,8 +590,8 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
-['5.0', 'rapid', 'latest'].forEach(version => {
-  ['c071d5a8d59ddcad40f22887a12bdb374c2f86af', 'master'].forEach(ref => {
+for (const version of ['5.0', 'rapid', 'latest']) {
+  for (const ref of ['c071d5a8d59ddcad40f22887a12bdb374c2f86af', 'master']) {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests'],
@@ -619,8 +618,8 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
         }
       ]
     });
-  });
-});
+  }
+}
 
 // TODO NODE-3897 - generate combined coverage report
 const coverageTask = {
