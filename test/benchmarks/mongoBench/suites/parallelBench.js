@@ -1,7 +1,9 @@
+'use strict';
+
 const { createReadStream, createWriteStream } = require('fs');
 const { rm, mkdir, readdir } = require('fs/promises');
 const { resolve } = require('path');
-const { Readable, once } = require('stream');
+const { Readable } = require('stream');
 const readline = require('readline');
 const {
   makeClient,
@@ -12,7 +14,8 @@ const {
   initCollection,
   initDb,
   connectClient,
-  createCollection
+  createCollection,
+  dropCollection
 } = require('../../driverBench/common');
 const { pipeline } = require('stream/promises');
 const { EJSON } = require('bson');
@@ -50,16 +53,20 @@ async function ldjsonMultiUpload() {
       input: stream
     });
 
-    const bulkWrite = this.collection.initializeUnorderedBulkOp();
+    const operations = [];
 
     for await (const line of lineReader) {
-      bulkWrite.insert(JSON.parse(line));
+      operations.push({
+        insertOne: {
+          document: JSON.parse(line)
+        }
+      });
     }
 
     stream.close();
     lineReader.close();
 
-    return bulkWrite.execute();
+    return this.collection.bulkWrite(operations);
   });
 
   await Promise.all(uploads);
@@ -67,13 +74,11 @@ async function ldjsonMultiUpload() {
 
 async function ldjsonMultiExport() {
   const skips = Array.from({ length: 100 }, (_, index) => index * 5000);
-  const collection = this.collection;
-  const temporaryDirectory = this.temporaryDirectory;
 
-  const promises = skips.map(async function (skip) {
-    const documentCursor = collection.find({}, { skip, limit: 5000 });
+  const promises = skips.map(async skip => {
+    const documentCursor = this.collection.find({}, { skip, limit: 5000 });
     documentCursor.map(doc => EJSON.stringify(doc));
-    const outputStream = createWriteStream(resolve(temporaryDirectory, `tmp-${skip}.txt`));
+    const outputStream = createWriteStream(resolve(this.temporaryDirectory, `tmp-${skip}.txt`));
     return pipeline(documentCursor.stream(), outputStream);
   });
 
@@ -83,27 +88,25 @@ async function ldjsonMultiExport() {
 async function gridfsMultiFileUpload() {
   const directory = resolve(benchmarkFileDirectory, 'gridfs_multi');
   const files = await readdir(directory);
-  const bucket = this.bucket;
   const uploadPromises = files.map(async filename => {
     const file = resolve(directory, filename);
     const fileStream = createReadStream(file);
-    const uploadStream = bucket.openUploadStream(file);
+    const uploadStream = this.bucket.openUploadStream(file);
     return pipeline(fileStream, uploadStream);
   });
   await Promise.all(uploadPromises);
 }
 
 async function gridfsMultiFileDownload() {
-  const temporaryDirectory = this.temporaryDirectory;
-  const files2 = await this.bucket
+  const files = await this.bucket
     .find()
     .map(({ _id }) => ({
-      path: resolve(temporaryDirectory, `${_id}.txt`),
+      path: resolve(this.temporaryDirectory, `${_id}.txt`),
       _id
     }))
     .toArray();
 
-  const downloads = files2.map(async ({ _id, path }) => {
+  const downloads = files.map(async ({ _id, path }) => {
     const fileStream = createWriteStream(path);
     const downloadStream = this.bucket.openDownloadStream(_id);
     return pipeline(downloadStream, fileStream);
@@ -129,7 +132,7 @@ function makeParallelBenchmarks(suite) {
         .setup(dropDb)
         .beforeTask(initCollection)
         .beforeTask(function () {
-          return this.collection.drop().catch(e => e);
+          return dropCollection.call(this).catch(e => e);
         })
         .beforeTask(createCollection)
         .task(ldjsonMultiUpload)
@@ -146,7 +149,7 @@ function makeParallelBenchmarks(suite) {
         .setup(dropDb)
         .beforeTask(initCollection)
         .beforeTask(function () {
-          return this.collection.drop().catch(e => e);
+          return dropCollection.call(this).catch(e => e);
         })
         .beforeTask(createCollection)
         .beforeTask(ldjsonMultiUpload)
@@ -172,9 +175,7 @@ function makeParallelBenchmarks(suite) {
         .beforeTask(async function () {
           const stream = this.bucket.openUploadStream('setup-file.txt');
           const oneByteFile = Readable.from('a');
-          const done = once(stream, 'close');
-          oneByteFile.pipe(stream);
-          return done;
+          return pipeline(oneByteFile, stream);
         })
         .task(gridfsMultiFileUpload)
         .teardown(dropDb)

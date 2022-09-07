@@ -4,10 +4,10 @@ const MongoBench = require('../mongoBench');
 
 const Runner = MongoBench.Runner;
 
-let BSON = require('bson');
-
 let bsonType = 'js-bson';
 // TODO(NODE-4606): test against different driver configurations in CI
+
+const BSON = require('bson');
 // try {
 //   BSON = require('bson-ext');
 //   bsonType = 'bson-ext';
@@ -96,7 +96,7 @@ benchmarkRunner
   })
   .then(data => {
     const results = JSON.stringify(data, undefined, 2);
-    console.error(inspect(data, { depth: Infinity, colors: true }));
+    console.log(inspect(data, { depth: Infinity, colors: true }));
     return writeFile('results.json', results);
   })
   .catch(err => console.error(err));
