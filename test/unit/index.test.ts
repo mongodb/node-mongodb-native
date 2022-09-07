@@ -1,161 +1,141 @@
 import { expect } from 'chai';
 
 import * as mongodb from '../../src/index';
-import { setDifference } from '../../src/utils';
 import { byStrings, sorted } from '../tools/utils';
 
-// prettier-ignore
-const expectedExports = new Map([
-  // BSON
-  ['BSON',                               'reason'],
-  ['Binary',                             'reason'],
-  ['BSONRegExp',                         'reason'],
-  ['BSONSymbol',                         'reason'],
-  ['Code',                               'reason'],
-  ['DBRef',                              'reason'],
-  ['Decimal128',                         'reason'],
-  ['Double',                             'reason'],
-  ['Int32',                              'reason'],
-  ['Long',                               'reason'],
-  ['Map',                                'reason'],
-  ['MaxKey',                             'reason'],
-  ['MinKey',                             'reason'],
-  ['ObjectId',                           'reason'],
-  ['Timestamp',                          'reason'],
-  ['ChangeStreamCursor',                 'reason'],
-  ['ObjectID',                           'reason'],
-  // errors
-  ['MongoBulkWriteError',                'reason'],
-  ['MongoAPIError',                      'reason'],
-  ['MongoAWSError',                      'reason'],
-  ['MongoBatchReExecutionError',         'reason'],
-  ['MongoChangeStreamError',             'reason'],
-  ['MongoCompatibilityError',            'reason'],
-  ['MongoCursorExhaustedError',          'reason'],
-  ['MongoCursorInUseError',              'reason'],
-  ['MongoDecompressionError',            'reason'],
-  ['MongoDriverError',                   'reason'],
-  ['MongoError',                         'reason'],
-  ['MongoExpiredSessionError',           'reason'],
-  ['MongoGridFSChunkError',              'reason'],
-  ['MongoGridFSStreamError',             'reason'],
-  ['MongoInvalidArgumentError',          'reason'],
-  ['MongoKerberosError',                 'reason'],
-  ['MongoMissingCredentialsError',       'reason'],
-  ['MongoMissingDependencyError',        'reason'],
-  ['MongoNetworkError',                  'reason'],
-  ['MongoNetworkTimeoutError',           'reason'],
-  ['MongoNotConnectedError',             'reason'],
-  ['MongoParseError',                    'reason'],
-  ['MongoRuntimeError',                  'reason'],
-  ['MongoServerClosedError',             'reason'],
-  ['MongoServerError',                   'reason'],
-  ['MongoServerSelectionError',          'reason'],
-  ['MongoSystemError',                   'reason'],
-  ['MongoTailableCursorError',           'reason'],
-  ['MongoTopologyClosedError',           'reason'],
-  ['MongoTransactionError',              'reason'],
-  ['MongoUnexpectedServerResponseError', 'reason'],
-  ['MongoWriteConcernError',             'reason'],
-  // classes
-  ['AbstractCursor',                     'reason'],
-  ['Admin',                              'reason'],
-  ['AggregationCursor',                  'reason'],
-  ['CancellationToken',                  'reason'],
-  ['ChangeStream',                       'reason'],
-  ['ClientSession',                      'reason'],
-  ['Collection',                         'reason'],
-  ['Db',                                 'reason'],
-  ['FindCursor',                         'reason'],
-  ['GridFSBucket',                       'reason'],
-  ['ListCollectionsCursor',              'reason'],
-  ['ListIndexesCursor',                  'reason'],
-  ['Logger',                             'reason'],
-  ['MongoClient',                        'reason'],
-  // global promise setter
-  ['Promise',                            'global promise setter'],
-  // enums
-  ['BatchType',                          'reason'],
-  ['GSSAPICanonicalizationValue',        'reason'],
-  ['AuthMechanism',                      'reason'],
-  ['Compressor',                         'reason'],
-  ['CURSOR_FLAGS',                       'reason'],
-  ['AutoEncryptionLoggerLevel',          'reason'],
-  ['MongoErrorLabel',                    'reason'],
-  ['ExplainVerbosity',                   'reason'],
-  ['LoggerLevel',                        'reason'],
-  ['ServerApiVersion',                   'reason'],
-  ['BSONType',                           'reason'],
-  ['ReturnDocument',                     'reason'],
-  ['ProfilingLevel',                     'reason'],
-  ['ReadConcernLevel',                   'reason'],
-  ['ReadPreferenceMode',                 'reason'],
-  ['ServerType',                         'reason'],
-  ['TopologyType',                       'reason'],
-  ['ReadConcern',                        'reason'],
-  ['ReadPreference',                     'reason'],
-  ['WriteConcern',                       'reason'],
-  // events
-  ['CommandFailedEvent',                 'reason'],
-  ['CommandStartedEvent',                'reason'],
-  ['CommandSucceededEvent',              'reason'],
-  ['ConnectionCheckedInEvent',           'reason'],
-  ['ConnectionCheckedOutEvent',          'reason'],
-  ['ConnectionCheckOutFailedEvent',      'reason'],
-  ['ConnectionCheckOutStartedEvent',     'reason'],
-  ['ConnectionClosedEvent',              'reason'],
-  ['ConnectionCreatedEvent',             'reason'],
-  ['ConnectionPoolClearedEvent',         'reason'],
-  ['ConnectionPoolClosedEvent',          'reason'],
-  ['ConnectionPoolCreatedEvent',         'reason'],
-  ['ConnectionPoolMonitoringEvent',      'reason'],
-  ['ConnectionReadyEvent',               'reason'],
-  ['ServerClosedEvent',                  'reason'],
-  ['ServerDescriptionChangedEvent',      'reason'],
-  ['ServerHeartbeatFailedEvent',         'reason'],
-  ['ServerHeartbeatStartedEvent',        'reason'],
-  ['ServerHeartbeatSucceededEvent',      'reason'],
-  ['ServerOpeningEvent',                 'reason'],
-  ['TopologyClosedEvent',                'reason'],
-  ['TopologyDescriptionChangedEvent',    'reason'],
-  ['TopologyOpeningEvent',               'reason'],
-  ['SrvPollingEvent',                    'reason'],
+/**
+ * TS-NODE Adds these keys but they are undefined, they are not present when you import from lib
+ * We did not think this strangeness was worth investigating so we just make sure they remain set to undefined
+ */
+const TS_NODE_EXPORTS = ['AnyBulkWriteOperation', 'BulkWriteOptions'];
 
-  ['GridFSBucketReadStream',             'reason'],
-  ['GridFSBucketWriteStream',            'reason'],
-  ['OrderedBulkOperation',               'reason'],
-  ['UnorderedBulkOperation',             'reason'],
-
-  // TS-NODE Adds these keys but they are undefined... weird
-  ['AnyBulkWriteOperation',              'ts-node'],
-  ['BulkWriteOptions',                   'ts-node'],
-]);
+const EXPECTED_EXPORTS = [
+  ...TS_NODE_EXPORTS,
+  'BSON',
+  'Binary',
+  'BSONRegExp',
+  'BSONSymbol',
+  'Code',
+  'DBRef',
+  'Decimal128',
+  'Double',
+  'Int32',
+  'Long',
+  'Map',
+  'MaxKey',
+  'MinKey',
+  'ObjectId',
+  'Timestamp',
+  'ChangeStreamCursor',
+  'ObjectID',
+  'MongoBulkWriteError',
+  'MongoAPIError',
+  'MongoAWSError',
+  'MongoBatchReExecutionError',
+  'MongoChangeStreamError',
+  'MongoCompatibilityError',
+  'MongoCursorExhaustedError',
+  'MongoCursorInUseError',
+  'MongoDecompressionError',
+  'MongoDriverError',
+  'MongoError',
+  'MongoExpiredSessionError',
+  'MongoGridFSChunkError',
+  'MongoGridFSStreamError',
+  'MongoInvalidArgumentError',
+  'MongoKerberosError',
+  'MongoMissingCredentialsError',
+  'MongoMissingDependencyError',
+  'MongoNetworkError',
+  'MongoNetworkTimeoutError',
+  'MongoNotConnectedError',
+  'MongoParseError',
+  'MongoRuntimeError',
+  'MongoServerClosedError',
+  'MongoServerError',
+  'MongoServerSelectionError',
+  'MongoSystemError',
+  'MongoTailableCursorError',
+  'MongoTopologyClosedError',
+  'MongoTransactionError',
+  'MongoUnexpectedServerResponseError',
+  'MongoWriteConcernError',
+  'AbstractCursor',
+  'Admin',
+  'AggregationCursor',
+  'CancellationToken',
+  'ChangeStream',
+  'ClientSession',
+  'Collection',
+  'Db',
+  'FindCursor',
+  'GridFSBucket',
+  'ListCollectionsCursor',
+  'ListIndexesCursor',
+  'Logger',
+  'MongoClient',
+  'Promise',
+  'BatchType',
+  'GSSAPICanonicalizationValue',
+  'AuthMechanism',
+  'Compressor',
+  'CURSOR_FLAGS',
+  'AutoEncryptionLoggerLevel',
+  'MongoErrorLabel',
+  'ExplainVerbosity',
+  'LoggerLevel',
+  'ServerApiVersion',
+  'BSONType',
+  'ReturnDocument',
+  'ProfilingLevel',
+  'ReadConcernLevel',
+  'ReadPreferenceMode',
+  'ServerType',
+  'TopologyType',
+  'ReadConcern',
+  'ReadPreference',
+  'WriteConcern',
+  'CommandFailedEvent',
+  'CommandStartedEvent',
+  'CommandSucceededEvent',
+  'ConnectionCheckedInEvent',
+  'ConnectionCheckedOutEvent',
+  'ConnectionCheckOutFailedEvent',
+  'ConnectionCheckOutStartedEvent',
+  'ConnectionClosedEvent',
+  'ConnectionCreatedEvent',
+  'ConnectionPoolClearedEvent',
+  'ConnectionPoolClosedEvent',
+  'ConnectionPoolCreatedEvent',
+  'ConnectionPoolMonitoringEvent',
+  'ConnectionReadyEvent',
+  'ServerClosedEvent',
+  'ServerDescriptionChangedEvent',
+  'ServerHeartbeatFailedEvent',
+  'ServerHeartbeatStartedEvent',
+  'ServerHeartbeatSucceededEvent',
+  'ServerOpeningEvent',
+  'TopologyClosedEvent',
+  'TopologyDescriptionChangedEvent',
+  'TopologyOpeningEvent',
+  'SrvPollingEvent',
+  'GridFSBucketReadStream',
+  'GridFSBucketWriteStream',
+  'OrderedBulkOperation',
+  'UnorderedBulkOperation'
+];
 
 describe('mongodb entrypoint', () => {
-  it('should export all keys in our exports list', () => {
+  it('should export all and only the expected keys in expected_exports', () => {
     expect(sorted(Object.keys(mongodb), byStrings)).to.deep.equal(
-      sorted(expectedExports.keys(), byStrings)
+      sorted(EXPECTED_EXPORTS, byStrings)
     );
   });
 
-  it('should export only keys in our exports list', () => {
-    const currentExports = Object.keys(mongodb);
-    const difference = setDifference(currentExports, expectedExports.keys());
-    expect(
-      difference,
-      `Found extra exports [${Array.from(difference).join(
-        ', '
-      )}], if these are expected, just add them to the list in this file`
-    ).to.have.lengthOf(0);
-  });
-
-  it('meta test: ts-node adds keys to the module that point to undefined', () => {
-    const tsNodeKeys = Array.from(expectedExports.entries()).filter(
-      ([, value]) => value === 'ts-node'
-    );
-
-    for (const [tsNodeKey] of tsNodeKeys) {
-      expect(mongodb).to.have.property(tsNodeKey, undefined);
+  it('should export keys added by ts-node as undefined', () => {
+    expect(TS_NODE_EXPORTS).to.have.length.greaterThan(0); // Are there no longer fake ts-node exports?
+    for (const tsNodeExportKey of TS_NODE_EXPORTS) {
+      expect(mongodb).to.have.property(tsNodeExportKey, undefined);
     }
   });
 });
