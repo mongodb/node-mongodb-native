@@ -1251,6 +1251,7 @@ export abstract class BulkOperationBase {
   execute(callback: Callback<BulkWriteResult>): void;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   execute(options: BulkWriteOptions | undefined, callback: Callback<BulkWriteResult>): void;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
   execute(
     options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>

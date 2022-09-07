@@ -353,24 +353,13 @@ export class Collection<TSchema extends Document = Document> {
    * Perform a bulkWrite operation without a fluent API
    *
    * Legal operation types are
+   * - `insertOne`
+   * - `replaceOne`
+   * - `updateOne`
+   * - `updateMany`
+   * - `deleteOne`
+   * - `deleteMany`
    *
-   * ```ts
-   * [
-   *   { insertOne: { document: { a: 1 } } },
-   *
-   *   { updateOne: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
-   *
-   *   { updateMany: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
-   *
-   *   { updateMany: { filter: {}, update: { $set: { 'a.$[i].x': 5 } }, arrayFilters: [{ 'i.x': 5 }] } },
-   *
-   *   { deleteOne: { filter: { c: 1 } } },
-   *
-   *   { deleteMany: { filter: { c: 1 } } },
-   *
-   *   { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } },
-   * ]
-   *```
    * Please note that raw operations are no longer accepted as of driver version 4.0.
    *
    * If documents passed in do not contain the **_id** field,
