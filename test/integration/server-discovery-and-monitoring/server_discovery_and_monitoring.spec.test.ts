@@ -16,9 +16,12 @@ const filter: TestFilter = ({ description }) => {
     case 'Reset server and pool after network timeout error during authentication':
     case 'Reset server and pool after shutdown error during authentication':
       // These tests time out waiting for the PoolCleared event
-      return isAuthEnabled ? 'TODO(NODE-3891): fix tests broken when AUTH enabled' : false;
-    case 'Network error on minPoolSize background creation':
-      return 'TODO(NODE-4385): implement pool pausing and pool ready event';
+      return isAuthEnabled
+        ? 'TODO(NODE-3135): handle auth errors, also see NODE-3891: fix tests broken when AUTH enabled'
+        : false;
+    case 'Network error on Monitor check':
+    case 'Network timeout on Monitor check':
+      return 'TODO(NODE-4608): Disallow parallel monitor checks';
     default:
       return false;
   }
@@ -26,6 +29,9 @@ const filter: TestFilter = ({ description }) => {
 
 describe('SDAM Unified Tests', function () {
   afterEach(async function () {
+    if (this.currentTest!.pending) {
+      return;
+    }
     // TODO(NODE-4573): fix socket leaks
     const LEAKY_TESTS = [
       'Command error on Monitor handshake',

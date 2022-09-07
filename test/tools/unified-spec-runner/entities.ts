@@ -18,6 +18,7 @@ import {
   ConnectionPoolClearedEvent,
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
+  ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from '../../../src/cmap/connection_pool_events';
 import {
@@ -77,6 +78,7 @@ export class UnifiedThread {
     this.#killed = true;
     await this.#promise;
     if (this.#error) {
+      this.#error.message = `<Thread(${this.id})>: ${this.#error.message}`;
       throw this.#error;
     }
   }
@@ -86,6 +88,7 @@ export type CommandEvent = CommandStartedEvent | CommandSucceededEvent | Command
 export type CmapEvent =
   | ConnectionPoolCreatedEvent
   | ConnectionPoolClosedEvent
+  | ConnectionPoolReadyEvent
   | ConnectionCreatedEvent
   | ConnectionReadyEvent
   | ConnectionClosedEvent
@@ -110,6 +113,7 @@ export class UnifiedMongoClient extends MongoClient {
   observedCmapEvents: (
     | 'connectionPoolCreated'
     | 'connectionPoolClosed'
+    | 'connectionPoolReady'
     | 'connectionPoolCleared'
     | 'connectionCreated'
     | 'connectionReady'
@@ -132,6 +136,7 @@ export class UnifiedMongoClient extends MongoClient {
   static CMAP_EVENT_NAME_LOOKUP = {
     poolCreatedEvent: 'connectionPoolCreated',
     poolClosedEvent: 'connectionPoolClosed',
+    poolReadyEvent: 'connectionPoolReady',
     poolClearedEvent: 'connectionPoolCleared',
     connectionCreatedEvent: 'connectionCreated',
     connectionReadyEvent: 'connectionReady',

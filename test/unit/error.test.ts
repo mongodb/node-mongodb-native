@@ -90,10 +90,12 @@ describe('MongoErrors', () => {
 
     it('should accept an Error object', () => {
       const errorMessage = 'A test error';
-      const err = new MongoError(new Error(errorMessage));
+      const inputError = new Error(errorMessage);
+      const err = new MongoError(inputError);
       expect(err).to.be.an.instanceof(Error);
       expect(err.name).to.equal('MongoError');
       expect(err.message).to.equal(errorMessage);
+      expect(err).to.have.property('cause', inputError);
     });
   });
 

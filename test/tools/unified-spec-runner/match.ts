@@ -28,6 +28,7 @@ import {
   ConnectionPoolClearedEvent,
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
+  ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from '../../../src/cmap/connection_pool_events';
 import { ejson } from '../utils';
@@ -331,6 +332,7 @@ export function specialCheck(
 // CMAP events where the payload does not matter.
 const EMPTY_CMAP_EVENTS = {
   poolCreatedEvent: ConnectionPoolCreatedEvent,
+  poolReadyEvent: ConnectionPoolReadyEvent,
   poolClosedEvent: ConnectionPoolClosedEvent,
   connectionCreatedEvent: ConnectionCreatedEvent,
   connectionReadyEvent: ConnectionReadyEvent,

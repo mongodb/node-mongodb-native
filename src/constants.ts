@@ -26,6 +26,7 @@ export const TOPOLOGY_DESCRIPTION_CHANGED = 'topologyDescriptionChanged' as cons
 export const CONNECTION_POOL_CREATED = 'connectionPoolCreated' as const;
 export const CONNECTION_POOL_CLOSED = 'connectionPoolClosed' as const;
 export const CONNECTION_POOL_CLEARED = 'connectionPoolCleared' as const;
+export const CONNECTION_POOL_READY = 'connectionPoolReady' as const;
 export const CONNECTION_CREATED = 'connectionCreated' as const;
 export const CONNECTION_READY = 'connectionReady' as const;
 export const CONNECTION_CLOSED = 'connectionClosed' as const;
@@ -57,6 +58,8 @@ export const HEARTBEAT_EVENTS = Object.freeze([
 /** @public */
 export const CMAP_EVENTS = Object.freeze([
   CONNECTION_POOL_CREATED,
+  CONNECTION_POOL_READY,
+  CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_CLOSED,
   CONNECTION_CREATED,
   CONNECTION_READY,
@@ -64,8 +67,7 @@ export const CMAP_EVENTS = Object.freeze([
   CONNECTION_CHECK_OUT_STARTED,
   CONNECTION_CHECK_OUT_FAILED,
   CONNECTION_CHECKED_OUT,
-  CONNECTION_CHECKED_IN,
-  CONNECTION_POOL_CLEARED
+  CONNECTION_CHECKED_IN
 ] as const);
 
 /** @public */

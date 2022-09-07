@@ -89,7 +89,8 @@ export const MongoErrorLabel = Object.freeze({
   TransientTransactionError: 'TransientTransactionError',
   UnknownTransactionCommitResult: 'UnknownTransactionCommitResult',
   ResumableChangeStreamError: 'ResumableChangeStreamError',
-  HandshakeError: 'HandshakeError'
+  HandshakeError: 'HandshakeError',
+  ResetPool: 'ResetPool'
 } as const);
 
 /** @public */
@@ -121,10 +122,14 @@ export class MongoError extends Error {
    */
   code?: number | string;
   topologyVersion?: TopologyVersion;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  cause?: Error; // depending on the node version, this may or may not exist on the base
 
   constructor(message: string | Error) {
     if (message instanceof Error) {
       super(message.message);
+      this.cause = message;
     } else {
       super(message);
     }

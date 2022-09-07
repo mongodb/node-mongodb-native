@@ -38,6 +38,18 @@ export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
 }
 
 /**
+ * An event published when a connection pool is ready
+ * @public
+ * @category Event
+ */
+export class ConnectionPoolReadyEvent extends ConnectionPoolMonitoringEvent {
+  /** @internal */
+  constructor(pool: ConnectionPool) {
+    super(pool);
+  }
+}
+
+/**
  * An event published when a connection pool is closed
  * @public
  * @category Event

@@ -1,22 +1,25 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
+import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import { Connection, HostAddress, MongoClient } from '../../src';
 import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
-import { shuffle } from '../../src/utils';
+import { CMAP_EVENTS } from '../../src/constants';
+import { makeClientMetadata, shuffle } from '../../src/utils';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { FailPoint, sleep } from './utils';
 
 type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }
   | { name: 'wait'; ms: number }
-  | { name: 'waitForEvent'; event: string; count: number }
+  | { name: 'waitForEvent'; event: string; count: number; timeout?: number }
   | { name: 'checkOut'; thread: string; label: string }
   | { name: 'checkIn'; connection: string }
   | { name: 'clear' | 'close' | 'ready' };
 
 const CMAP_POOL_OPTION_NAMES: Array<keyof CmapPoolOptions> = [
+  'appName',
   'backgroundThreadIntervalMS',
   'maxPoolSize',
   'minPoolSize',
@@ -26,6 +29,7 @@ const CMAP_POOL_OPTION_NAMES: Array<keyof CmapPoolOptions> = [
 ];
 
 type CmapPoolOptions = {
+  appName?: string;
   backgroundThreadIntervalMS?: number;
   maxPoolSize?: number;
   minPoolSize?: number;
@@ -77,18 +81,7 @@ export type CmapTest = {
   failPoint?: FailPoint;
 };
 
-const ALL_POOL_EVENTS = new Set([
-  ConnectionPool.CONNECTION_POOL_CREATED,
-  ConnectionPool.CONNECTION_POOL_CLOSED,
-  ConnectionPool.CONNECTION_POOL_CLEARED,
-  ConnectionPool.CONNECTION_CREATED,
-  ConnectionPool.CONNECTION_READY,
-  ConnectionPool.CONNECTION_CLOSED,
-  ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
-  ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-  ConnectionPool.CONNECTION_CHECKED_OUT,
-  ConnectionPool.CONNECTION_CHECKED_IN
-]);
+const ALL_POOL_EVENTS = new Set(CMAP_EVENTS);
 
 function getEventType(event) {
   const eventName = event.constructor.name;
@@ -210,8 +203,7 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
     return await promisify(ConnectionPool.prototype.close).call(threadContext.pool);
   },
   ready: function () {
-    // This is a no-op until pool pausing is implemented
-    return;
+    return threadContext.pool.ready();
   },
   wait: async function (options) {
     const ms = options.ms;
@@ -237,9 +229,15 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   waitForEvent: function (options): Promise<void> {
     const event = options.event;
     const count = options.count;
-    return new Promise(resolve => {
+    const timeout = options.timeout ?? 15000;
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error(`Timed out while waiting for event ${event}`));
+      }, timeout);
+
       function run() {
         if (threadContext.poolEvents.filter(ev => getEventType(ev) === event).length >= count) {
+          clearTimeout(timeoutId);
           return resolve();
         }
 
@@ -351,12 +349,15 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     delete poolOptions.backgroundThreadIntervalMS;
   }
 
+  let metadata;
+  if (poolOptions.appName) {
+    metadata = makeClientMetadata({ appName: poolOptions.appName });
+    delete poolOptions.appName;
+  }
+
   const operations = test.operations;
   const expectedError = test.error;
-  const expectedEvents = test.events
-    ? // TODO(NODE-2994): remove filter once ready is implemented
-      test.events.filter(event => event.type !== 'ConnectionPoolReady')
-    : [];
+  const expectedEvents = test.events;
   const ignoreEvents = test.ignore || [];
 
   let actualError;
@@ -365,7 +366,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   const mainThread = threadContext.getThread(MAIN_THREAD_KEY);
   mainThread.start();
 
-  threadContext.createPool(poolOptions);
+  threadContext.createPool({ ...poolOptions, metadata });
   // yield control back to the event loop so that the ConnectionPoolCreatedEvent
   // has a chance to be fired before any synchronously-emitted events from
   // the queued operations

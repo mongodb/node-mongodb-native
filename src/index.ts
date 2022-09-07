@@ -132,6 +132,7 @@ export {
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
   ConnectionPoolMonitoringEvent,
+  ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
 export {

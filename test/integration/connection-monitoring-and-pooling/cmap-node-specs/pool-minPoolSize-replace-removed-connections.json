@@ -7,6 +7,9 @@
   },
   "operations": [
     {
+      "name": "ready"
+    },
+    {
       "name": "waitForEvent",
       "event": "ConnectionReady",
       "count": 2
@@ -27,9 +30,12 @@
       "connection": "conn"
     },
     {
+      "name": "ready"
+    },
+    {
       "name": "waitForEvent",
       "event": "ConnectionReady",
-      "count": 3
+      "count": 4
     }
   ],
   "events": [
@@ -54,11 +60,10 @@
       "address": 42
     },
     {
-      "type": "ConnectionClosed",
-      "reason": "stale",
+      "type": "ConnectionReady",
       "address": 42,
-      "availableConnectionCount": 1,
-      "pendingConnectionCount": 0,
+      "availableConnectionCount": 0,
+      "pendingConnectionCount": 1,
       "totalConnectionCount": 1
     },
     {
@@ -70,8 +75,10 @@
     }
   ],
   "ignore": [
+    "ConnectionPoolReady",
     "ConnectionPoolCreated",
     "ConnectionCreated",
+    "ConnectionClosed",
     "ConnectionCheckOutStarted"
   ]
 }

@@ -5,6 +5,7 @@ import {
   ConnectionPoolEvents,
   ConnectionPoolOptions
 } from '../cmap/connection_pool';
+import { PoolClearedError } from '../cmap/errors';
 import {
   APM_EVENTS,
   CLOSED,
@@ -176,10 +177,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     for (const event of HEARTBEAT_EVENTS) {
       monitor.on(event, (e: any) => this.emit(event, e));
     }
-
-    monitor.on('resetConnectionPool', () => {
-      this.s.pool.clear();
-    });
 
     monitor.on('resetServer', (error: MongoError) => markServerUnknown(this, error));
     monitor.on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
@@ -358,7 +355,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       (err, conn, cb) => {
         if (err || !conn) {
           this.s.operationCount -= 1;
-          markServerUnknown(this, err);
+          if (!(err instanceof PoolClearedError)) {
+            markServerUnknown(this, err);
+          } else {
+            err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+          }
           return cb(err);
         }
 
@@ -494,9 +495,11 @@ function makeOperationHandler(
         // In load balanced mode we never mark the server as unknown and always
         // clear for the specific service id.
 
-        server.s.pool.clear(connection.serviceId);
         if (!server.loadBalanced) {
+          error.addErrorLabel(MongoErrorLabel.ResetPool);
           markServerUnknown(server, error);
+        } else {
+          server.s.pool.clear(connection.serviceId);
         }
       }
     } else {
@@ -510,11 +513,15 @@ function makeOperationHandler(
 
       if (isSDAMUnrecoverableError(error)) {
         if (shouldHandleStateChangeError(server, error)) {
-          if (maxWireVersion(server) <= 7 || isNodeShuttingDownError(error)) {
+          const shouldClearPool = maxWireVersion(server) <= 7 || isNodeShuttingDownError(error);
+          if (server.loadBalanced && shouldClearPool) {
             server.s.pool.clear(connection.serviceId);
           }
 
           if (!server.loadBalanced) {
+            if (shouldClearPool) {
+              error.addErrorLabel(MongoErrorLabel.ResetPool);
+            }
             markServerUnknown(server, error);
             process.nextTick(() => server.requestCheck());
           }

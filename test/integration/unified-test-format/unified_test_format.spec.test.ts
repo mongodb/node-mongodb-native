@@ -28,10 +28,7 @@ const filter: TestFilter = ({ description }) => {
     [
       'FindOneAndUpdate is committed on first attempt',
       'FindOneAndUpdate is not committed on first attempt',
-      'FindOneAndUpdate is never committed',
-      'eventType defaults to command if unset',
-      'events are captured during an operation',
-      'eventType can be set to command and cmap'
+      'FindOneAndUpdate is never committed'
     ].includes(description)
   ) {
     return 'TODO(NODE-3891): fix tests broken when AUTH enabled';

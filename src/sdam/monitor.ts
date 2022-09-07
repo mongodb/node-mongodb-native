@@ -4,7 +4,7 @@ import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
-import { MongoNetworkError } from '../error';
+import { MongoError, MongoErrorLabel } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, InterruptibleAsyncInterval } from '../utils';
 import {
@@ -69,7 +69,7 @@ export type MonitorEvents = {
   serverHeartbeatStarted(event: ServerHeartbeatStartedEvent): void;
   serverHeartbeatSucceeded(event: ServerHeartbeatSucceededEvent): void;
   serverHeartbeatFailed(event: ServerHeartbeatFailedEvent): void;
-  resetServer(error?: Error): void;
+  resetServer(error?: MongoError): void;
   resetConnectionPool(): void;
   close(): void;
 } & EventEmitterWithState;
@@ -226,8 +226,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err)
     );
 
-    monitor.emit('resetServer', err);
-    monitor.emit('resetConnectionPool');
+    const error = !(err instanceof MongoError) ? new MongoError(err) : err;
+    error.addErrorLabel(MongoErrorLabel.ResetPool);
+
+    monitor.emit('resetServer', error);
     callback(err);
   }
 
@@ -306,11 +308,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     if (err) {
       monitor[kConnection] = undefined;
 
-      // we already reset the connection pool on network errors in all cases
-      if (!(err instanceof MongoNetworkError)) {
-        monitor.emit('resetConnectionPool');
-      }
-
       failureHandler(err);
       return;
     }
@@ -351,7 +348,6 @@ function monitorServer(monitor: Monitor) {
       if (err) {
         // otherwise an error occurred on initial discovery, also bail
         if (monitor[kServer].description.type === ServerType.Unknown) {
-          monitor.emit('resetServer', err);
           return done();
         }
       }

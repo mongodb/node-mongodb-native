@@ -8,7 +8,12 @@ const { EJSON } = require('bson');
 const { isRecord } = require('../../../src/utils');
 const TestRunnerContext = require('./context').TestRunnerContext;
 const resolveConnectionString = require('./utils').resolveConnectionString;
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const {
+  LEGACY_HELLO_COMMAND,
+  CMAP_EVENTS: SOURCE_CMAP_EVENTS,
+  TOPOLOGY_EVENTS,
+  HEARTBEAT_EVENTS
+} = require('../../../src/constants');
 const { isAnyRequirementSatisfied } = require('../unified-spec-runner/unified-utils');
 const ClientSideEncryptionFilter = require('../runner/filters/client_encryption_filter');
 
@@ -163,17 +168,6 @@ function generateTopologyTests(testSuites, testContext, filter) {
       let shouldRun = someRequirementMet;
 
       const { spec } = this.currentTest;
-
-      if (
-        shouldRun &&
-        spec.operations.some(
-          op => op.name === 'waitForEvent' && op.arguments.event === 'PoolReadyEvent'
-        )
-      ) {
-        this.currentTest.skipReason =
-          'TODO(NODE-2994): Connection storms work will add new events to connection pool';
-        shouldRun = false;
-      }
 
       if (shouldRun && spec.skipReason) {
         this.currentTest.skipReason = spec.skipReason;
@@ -335,29 +329,11 @@ function parseSessionOptions(options) {
 
 const IGNORED_COMMANDS = new Set([LEGACY_HELLO_COMMAND, 'configureFailPoint', 'endSessions']);
 const SDAM_EVENTS = new Set([
-  'serverOpening',
-  'serverClosed',
-  'serverDescriptionChanged',
-  'topologyOpening',
-  'topologyClosed',
-  'topologyDescriptionChanged',
-  'serverHeartbeatStarted',
-  'serverHeartbeatSucceeded',
-  'serverHeartbeatFailed'
+  ...TOPOLOGY_EVENTS.filter(ev => !['error', 'timeout', 'close'].includes(ev)),
+  ...HEARTBEAT_EVENTS
 ]);
 
-const CMAP_EVENTS = new Set([
-  'connectionPoolCreated',
-  'connectionPoolClosed',
-  'connectionCreated',
-  'connectionReady',
-  'connectionClosed',
-  'connectionCheckOutStarted',
-  'connectionCheckOutFailed',
-  'connectionCheckedOut',
-  'connectionCheckedIn',
-  'connectionPoolCleared'
-]);
+const CMAP_EVENTS = new Set(SOURCE_CMAP_EVENTS);
 
 function runTestSuiteTest(configuration, spec, context) {
   context.commandEvents = [];
