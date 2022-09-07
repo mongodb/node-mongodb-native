@@ -36,12 +36,6 @@ async function clearTemporaryDirectory() {
   await Promise.all(files.map(file => rm(file)));
 }
 
-async function removeTemporaryDirectory() {
-  await rm(this.temporaryDirectory, { recursive: true, force: true }).catch(() => {
-    // ignore errors, specifically directory not found
-  });
-}
-
 async function ldjsonMultiUpload() {
   const directory = resolve(benchmarkFileDirectory, 'ldjson_multi');
   const files = await readdir(directory);

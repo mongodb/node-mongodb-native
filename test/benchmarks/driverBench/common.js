@@ -2,8 +2,13 @@
 
 const fs = require('fs');
 const path = require('path');
+const { Readable } = require('stream');
+const { pipeline } = require('stream/promises');
 const { MongoClient } = require('../../..');
 const { GridFSBucket } = require('../../..');
+
+// eslint-disable-next-line no-restricted-modules
+const { MONGODB_ERROR_CODES } = require('../../../lib/error');
 
 const DB_NAME = 'perftest';
 const COLLECTION_NAME = 'corpus';
@@ -48,7 +53,11 @@ function initCollection() {
 }
 
 function dropCollection() {
-  return this.collection.drop();
+  return this.collection.drop().catch(e => {
+    if (e.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+      throw e;
+    }
+  });
 }
 
 function initBucket() {
@@ -86,6 +95,12 @@ function makeLoadInsertDocs(numberOfOperations) {
   };
 }
 
+async function writeSingleByteFileToBucket() {
+  const stream = this.bucket.openUploadStream('setup-file.txt');
+  const oneByteFile = Readable.from('a');
+  return pipeline(oneByteFile, stream);
+}
+
 module.exports = {
   makeClient,
   connectClient,
@@ -101,5 +116,6 @@ module.exports = {
   initBucket,
   dropBucket,
   makeLoadTweets,
-  makeLoadInsertDocs
+  makeLoadInsertDocs,
+  writeSingleByteFileToBucket
 };
