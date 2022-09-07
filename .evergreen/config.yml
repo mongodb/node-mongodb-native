@@ -1355,32 +1355,6 @@ tasks:
           AUTH: auth
           COMPRESSOR: snappy
       - func: run-compression-tests
-  - name: test-lambda-example
-    tags:
-      - latest
-      - lambda
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: server
-      - func: run lambda handler example tests
-  - name: test-lambda-aws-auth-example
-    tags:
-      - latest
-      - lambda
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-          TOPOLOGY: server
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run lambda handler example tests with aws auth
   - name: test-tls-support-latest
     tags:
       - tls-support
@@ -2247,6 +2221,32 @@ tasks:
           AUTH: noauth
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-lambda-example
+    tags:
+      - latest
+      - lambda
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: server
+      - func: run lambda handler example tests
+  - name: test-lambda-aws-auth-example
+    tags:
+      - latest
+      - lambda
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - func: run lambda handler example tests with aws auth
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -2306,10 +2306,13 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
-    tasks: &ref_0
+    tasks:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -2351,7 +2354,48 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: fermium
       CLIENT_ENCRYPTION: true
-    tasks: *ref_0
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-connectivity
+      - test-atlas-data-lake
+      - test-5.0-load-balanced
+      - test-6.0-load-balanced
+      - test-latest-load-balanced
+      - test-auth-kerberos
+      - test-auth-ldap
+      - test-socks5
+      - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
+      - test-tls-support-latest
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: ubuntu-18.04-gallium
     display_name: Ubuntu 18.04 Node Gallium
     run_on: ubuntu1804-large
@@ -2362,6 +2406,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -2401,10 +2448,13 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: erbium
       MSVS_VERSION: 2019
-    tasks: &ref_1
+    tasks:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -2440,7 +2490,42 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: fermium
       MSVS_VERSION: 2019
-    tasks: *ref_1
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-data-lake
+      - test-socks5
+      - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
+      - test-tls-support-latest
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: windows-64-vs2019-gallium
     display_name: Windows (VS2019) Node Gallium
     run_on: windows-64-vs2019-large
@@ -2451,6 +2536,9 @@ buildvariants:
       - test-latest-server
       - test-latest-replica_set
       - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
