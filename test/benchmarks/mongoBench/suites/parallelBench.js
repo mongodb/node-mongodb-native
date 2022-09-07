@@ -24,9 +24,7 @@ const benchmarkFileDirectory = resolve(__dirname, '..', '..', 'driverBench', 'sp
 
 async function initTemporaryDirectory() {
   const temporaryDirectory = resolve(benchmarkFileDirectory, 'downloads');
-  await rm(temporaryDirectory, { recursive: true, force: true }).catch(() => {
-    // ignore errors, specifically directory not found
-  });
+  await rm(temporaryDirectory, { recursive: true, force: true });
   await mkdir(temporaryDirectory);
   this.temporaryDirectory = temporaryDirectory;
 }
@@ -131,9 +129,7 @@ function makeParallelBenchmarks(suite) {
         .setup(initDb)
         .setup(dropDb)
         .beforeTask(initCollection)
-        .beforeTask(function () {
-          return dropCollection.call(this).catch(e => e);
-        })
+        .beforeTask(dropCollection)
         .beforeTask(createCollection)
         .task(ldjsonMultiUpload)
         .teardown(dropDb)
@@ -148,16 +144,16 @@ function makeParallelBenchmarks(suite) {
         .setup(initDb)
         .setup(dropDb)
         .beforeTask(initCollection)
-        .beforeTask(function () {
-          return dropCollection.call(this).catch(e => e);
-        })
+        .beforeTask(dropCollection)
         .beforeTask(createCollection)
         .beforeTask(ldjsonMultiUpload)
         .beforeTask(initTemporaryDirectory)
         .task(ldjsonMultiExport)
         .afterTask(clearTemporaryDirectory)
         .teardown(dropDb)
-        .teardown(removeTemporaryDirectory)
+        .teardown(async function () {
+          await rm(this.temporaryDirectory, { recursive: true, force: true });
+        })
         .teardown(disconnectClient)
     )
     .benchmark('gridfsMultiFileUpload', benchmark =>
@@ -199,7 +195,9 @@ function makeParallelBenchmarks(suite) {
         .setup(initBucket)
         .task(gridfsMultiFileDownload)
         .teardown(dropDb)
-        .teardown(removeTemporaryDirectory)
+        .teardown(async function () {
+          await rm(this.temporaryDirectory, { recursive: true, force: true });
+        })
         .teardown(disconnectClient)
     );
 }
