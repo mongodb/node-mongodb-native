@@ -133,7 +133,8 @@ describe('mongodb entrypoint', () => {
   });
 
   it('should export keys added by ts-node as undefined', () => {
-    expect(TS_NODE_EXPORTS).to.have.length.greaterThan(0); // Are there no longer fake ts-node exports?
+    // If the array is empty, this test would be a no-op so we should remove it
+    expect(TS_NODE_EXPORTS).to.have.length.greaterThan(0);
     for (const tsNodeExportKey of TS_NODE_EXPORTS) {
       expect(mongodb).to.have.property(tsNodeExportKey, undefined);
     }
