@@ -8,7 +8,12 @@ import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
 import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
-import { MongoAPIError, MongoInvalidArgumentError, MongoParseError } from './error';
+import {
+  MongoAPIError,
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError,
+  MongoParseError
+} from './error';
 import { Logger, LoggerLevel } from './logger';
 import {
   DriverInfo,
@@ -405,6 +410,12 @@ export function parseOptions(
       mongoOptions.credentials = MongoCredentials.merge(mongoOptions.credentials, {
         source: mongoOptions.dbName
       });
+    }
+
+    if (isAws && mongoOptions.credentials.username && !mongoOptions.credentials.password) {
+      throw new MongoMissingCredentialsError(
+        `When using ${mongoOptions.credentials.mechanism} password must be set when a username is specified`
+      );
     }
 
     mongoOptions.credentials.validate();
