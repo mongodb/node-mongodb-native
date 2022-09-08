@@ -212,6 +212,84 @@ export interface AutoEncryptionTlsOptions {
 }
 
 /** @public */
+export interface AwsKmsOptions {
+  /** The access key used for the AWS KMS provider */
+  accessKeyId: string;
+  /** The secret access key used for the AWS KMS provider */
+  secretAccessKey: string;
+  /**
+   * An optional AWS session token that will be used as the
+   * X-Amz-Security-Token header for AWS requests.
+   */
+  sessionToken?: string;
+}
+
+/** @public */
+export interface LocalKmsOptions {
+  /**
+   * The master key used to encrypt/decrypt data keys.
+   * A 96-byte long Buffer or base64 encoded string.
+   */
+  key: Buffer | string;
+}
+
+/** @public */
+export interface AzureKmsOptions {
+  /** The tenant ID identifies the organization for the account */
+  tenantId: string;
+  /** The client ID to authenticate a registered application */
+  clientId: string;
+  /** The client secret to authenticate a registered application */
+  clientSecret: string;
+  /**
+   * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+   * This is optional, and only needed if customer is using a non-commercial Azure instance
+   * (e.g. a government or China account, which use different URLs).
+   * Defaults to "login.microsoftonline.com"
+   */
+  identityPlatformEndpoint?: string | undefined;
+}
+
+/** @public */
+export interface GcpKmsOptions {
+  /** The service account email to authenticate */
+  email: string;
+  /** A PKCS#8 encrypted key. This can either be a base64 string or a binary representation */
+  privateKey: string | Buffer;
+  /**
+   * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+   * Defaults to "oauth2.googleapis.com"
+   */
+  endpoint?: string | undefined;
+}
+
+/** @public */
+export interface KmipKmsOptions {
+  /**
+   * The output endpoint string.
+   * The endpoint consists of a hostname and port separated by a colon.
+   * E.g. "example.com:123". A port is always present.
+   */
+  endpoint?: string;
+}
+
+/** @public */
+export interface KmsProviders {
+  /** Configuration options for using 'aws' as your KMS provider */
+  aws?: AwsKmsOptions;
+  /** Configuration options for using 'local' as your KMS provider */
+  local?: LocalKmsOptions;
+  /** Configuration options for using 'azure' as your KMS provider */
+  azure?: AzureKmsOptions;
+  /** Configuration options for using 'gcp' as your KMS provider */
+  gcp?: GcpKmsOptions;
+  /**
+   * Configuration options for using 'kmip' as your KMS provider
+   */
+  kmip?: KmipKmsOptions;
+}
+
+/** @public */
 export interface AutoEncryptionOptions {
   /** @internal */
   bson?: { serialize: typeof serialize; deserialize: typeof deserialize };
@@ -222,67 +300,11 @@ export interface AutoEncryptionOptions {
   /** The namespace where keys are stored in the key vault */
   keyVaultNamespace?: string;
   /** Configuration options that are used by specific KMS providers during key generation, encryption, and decryption. */
-  kmsProviders?: {
-    /** Configuration options for using 'aws' as your KMS provider */
-    aws?: {
-      /** The access key used for the AWS KMS provider */
-      accessKeyId: string;
-      /** The secret access key used for the AWS KMS provider */
-      secretAccessKey: string;
-      /**
-       * An optional AWS session token that will be used as the
-       * X-Amz-Security-Token header for AWS requests.
-       */
-      sessionToken?: string;
-    };
-    /** Configuration options for using 'local' as your KMS provider */
-    local?: {
-      /**
-       * The master key used to encrypt/decrypt data keys.
-       * A 96-byte long Buffer or base64 encoded string.
-       */
-      key: Buffer | string;
-    };
-    /** Configuration options for using 'azure' as your KMS provider */
-    azure?: {
-      /** The tenant ID identifies the organization for the account */
-      tenantId: string;
-      /** The client ID to authenticate a registered application */
-      clientId: string;
-      /** The client secret to authenticate a registered application */
-      clientSecret: string;
-      /**
-       * If present, a host with optional port. E.g. "example.com" or "example.com:443".
-       * This is optional, and only needed if customer is using a non-commercial Azure instance
-       * (e.g. a government or China account, which use different URLs).
-       * Defaults to "login.microsoftonline.com"
-       */
-      identityPlatformEndpoint?: string | undefined;
-    };
-    /** Configuration options for using 'gcp' as your KMS provider */
-    gcp?: {
-      /** The service account email to authenticate */
-      email: string;
-      /** A PKCS#8 encrypted key. This can either be a base64 string or a binary representation */
-      privateKey: string | Buffer;
-      /**
-       * If present, a host with optional port. E.g. "example.com" or "example.com:443".
-       * Defaults to "oauth2.googleapis.com"
-       */
-      endpoint?: string | undefined;
-    };
-    /**
-     * Configuration options for using 'kmip' as your KMS provider
-     */
-    kmip?: {
-      /**
-       * The output endpoint string.
-       * The endpoint consists of a hostname and port separated by a colon.
-       * E.g. "example.com:123". A port is always present.
-       */
-      endpoint?: string;
-    };
-  };
+  kmsProviders?: KmsProviders;
+  /**
+   * Optional callback to override KMS providers per-context.
+   */
+  onKmsProviderRefresh?: () => Promise<KmsProviders>;
   /**
    * A map of namespaces to a local JSON schema for encryption
    *

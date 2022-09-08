@@ -167,7 +167,11 @@ interface AWSTempCredentials {
   Expiration?: Date;
 }
 
-function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
+/** @internal */
+export function makeTempCredentials(
+  credentials: MongoCredentials,
+  callback: Callback<MongoCredentials>
+) {
   function done(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
       callback(

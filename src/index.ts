@@ -273,7 +273,17 @@ export type {
   ChangeStreamCursorOptions
 } from './cursor/change_stream_cursor';
 export type { DbOptions, DbPrivate } from './db';
-export type { AutoEncrypter, AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
+export type {
+  AutoEncrypter,
+  AutoEncryptionOptions,
+  AutoEncryptionTlsOptions,
+  AwsKmsOptions,
+  AzureKmsOptions,
+  GcpKmsOptions,
+  KmipKmsOptions,
+  KmsProviders,
+  LocalKmsOptions
+} from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
