@@ -22,9 +22,7 @@ export interface EncrypterOptions {
 // the KMS providers. This currently only supports AWS.
 async function driverOnKmsProviderRefresh(client: MongoClient) {
   const credentials = client.options.credentials;
-  // if MONGODB-AWS is the auth mechanism check the MongoCredentials
-  // for the environment variables that were set by the URI or pulled
-  // from the environment.
+  // if MONGODB-AWS is the auth mechanism then attempt to load them.
   if (credentials?.mechanism.match(/MONGODB-AWS/i)) {
     return await findAwsKmsOptions();
   }

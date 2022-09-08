@@ -251,14 +251,6 @@ export interface AzureKmsOptions {
 }
 
 /** @public */
-export interface AzureKmsAccessOptions {
-  /**
-   * If present, an access token to authenticate with Azure.
-   */
-  accessToken: string;
-}
-
-/** @public */
 export interface GcpKmsOptions {
   /** The service account email to authenticate */
   email: string;
@@ -269,14 +261,6 @@ export interface GcpKmsOptions {
    * Defaults to "oauth2.googleapis.com"
    */
   endpoint?: string | undefined;
-}
-
-/** @public */
-export interface GcpKmsAccessOptions {
-  /**
-   * If present, an access token to authenticate with Azure.
-   */
-  accessToken: string;
 }
 
 /** @public */
@@ -296,9 +280,9 @@ export interface KmsProviders {
   /** Configuration options for using 'local' as your KMS provider */
   local?: LocalKmsOptions;
   /** Configuration options for using 'azure' as your KMS provider */
-  azure?: AzureKmsOptions | AzureKmsAccessOptions;
+  azure?: AzureKmsOptions;
   /** Configuration options for using 'gcp' as your KMS provider */
-  gcp?: GcpKmsOptions | GcpKmsAccessOptions;
+  gcp?: GcpKmsOptions;
   /**
    * Configuration options for using 'kmip' as your KMS provider
    */
