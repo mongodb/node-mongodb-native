@@ -503,3 +503,17 @@ export function isBSONExtImported() {
   const driverBSON = require('../../src/bson');
   return driverBSON.deserialize.toString().includes('[native code]');
 }
+
+export const byStrings = (a: any, b: any) => {
+  const res = `${a}`.localeCompare(`${b}`);
+  return res < 0 ? -1 : res > 0 ? 1 : 0;
+};
+
+export const sorted = <T>(iterable: Iterable<T>, how: (a: T, b: T) => 0 | 1 | -1) => {
+  if (typeof how !== 'function') {
+    throw new TypeError('must provide a "how" function to sorted');
+  }
+  const items = Array.from(iterable);
+  items.sort(how);
+  return items;
+};

@@ -8,6 +8,7 @@ import { Batch, BatchType, BulkOperationBase, BulkWriteOptions } from './common'
 
 /** @public */
 export class OrderedBulkOperation extends BulkOperationBase {
+  /** @internal */
   constructor(collection: Collection, options: BulkWriteOptions) {
     super(collection, options, true);
   }
