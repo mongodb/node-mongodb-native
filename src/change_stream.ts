@@ -645,7 +645,7 @@ export class ChangeStream<
 
   /** Check if there is any document still available in the Change Stream */
   hasNext(): Promise<boolean>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   hasNext(callback: Callback<boolean>): void;
   hasNext(callback?: Callback): Promise<boolean> | void {
     this._setIsIterator();
@@ -676,7 +676,7 @@ export class ChangeStream<
 
   /** Get the next available document from the Change Stream. */
   next(): Promise<TChange>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   next(callback: Callback<TChange>): void;
   next(callback?: Callback<TChange>): Promise<TChange> | void {
     this._setIsIterator();
@@ -711,7 +711,7 @@ export class ChangeStream<
    * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
    */
   tryNext(): Promise<Document | null>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   tryNext(callback: Callback<Document | null>): void;
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
     this._setIsIterator();
@@ -747,7 +747,7 @@ export class ChangeStream<
 
   /** Close the Change Stream */
   close(): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   close(callback: Callback): void;
   close(callback?: Callback): Promise<void> | void {
     this[kClosed] = true;

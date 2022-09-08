@@ -1247,11 +1247,11 @@ export abstract class BulkOperationBase {
   }
 
   execute(options?: BulkWriteOptions): Promise<BulkWriteResult>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   execute(callback: Callback<BulkWriteResult>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   execute(options: BulkWriteOptions | undefined, callback: Callback<BulkWriteResult>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   execute(
     options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>

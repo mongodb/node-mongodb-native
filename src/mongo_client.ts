@@ -427,7 +427,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   connect(): Promise<this>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   connect(callback: Callback<this>): void;
   connect(callback?: Callback<this>): Promise<this> | void {
     if (callback && typeof callback !== 'function') {
@@ -449,10 +449,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   close(): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   close(callback: Callback<void>): void;
   close(force: boolean): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   close(force: boolean, callback: Callback<void>): void;
   close(
     forceOrCallback?: boolean | Callback<void>,
@@ -567,10 +567,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @see https://docs.mongodb.org/manual/reference/connection-string/
    */
   static connect(url: string): Promise<MongoClient>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   static connect(url: string, callback: Callback<MongoClient>): void;
   static connect(url: string, options: MongoClientOptions): Promise<MongoClient>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   static connect(url: string, options: MongoClientOptions, callback: Callback<MongoClient>): void;
   static connect(
     url: string,
