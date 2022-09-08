@@ -4,6 +4,7 @@ import * as url from 'url';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
+import type { AwsKmsOptions, KmsProviders } from '../../deps';
 import { aws4 } from '../../deps';
 import {
   MongoAWSError,
@@ -167,9 +168,65 @@ interface AWSTempCredentials {
   Expiration?: Date;
 }
 
+/**
+ * Get the AWS KMS provider options.
+ */
+export function findAwsKmsOptions(): Promise<KmsProviders> {
+  return new Promise(resolve => {
+    const options = awsKmsOptionsFromEnvironment();
+    if (!options.aws) {
+      makeTempCredentials(null, (err, tempCredentials) => {
+        if (err || !tempCredentials) return resolve({});
+        return resolve(
+          awsKmsOptions(
+            tempCredentials.username,
+            tempCredentials.password,
+            tempCredentials.mechanismProperties.AWS_SESSION_TOKEN
+          )
+        );
+      });
+    }
+    resolve(options);
+  });
+}
+
+/**
+ * Get the KMS providers object with AWS populated.
+ */
+function awsKmsOptions(
+  accessKeyId?: string,
+  secretAccessKey?: string,
+  sessionToken?: string
+): KmsProviders {
+  // Only attempt if both set - otherwise env isn't set up properly.
+  if (accessKeyId && secretAccessKey) {
+    // Set the required aws kms options.
+    const aws: AwsKmsOptions = {
+      accessKeyId: accessKeyId,
+      secretAccessKey: secretAccessKey
+    };
+    // If there is also a session token present, add that as well.
+    if (sessionToken) {
+      aws.sessionToken = sessionToken;
+    }
+    return { aws: aws };
+  }
+  return {};
+}
+
+/**
+ * Generate the AWS KMS options from a set of MongoCredentials.
+ */
+function awsKmsOptionsFromEnvironment(): KmsProviders {
+  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const sessionToken = process.env.AWS_SESSION_TOKEN;
+  return awsKmsOptions(accessKeyId, secretAccessKey, sessionToken);
+}
+
 /** @internal */
-export function makeTempCredentials(
-  credentials: MongoCredentials,
+function makeTempCredentials(
+  credentials: MongoCredentials | null,
   callback: Callback<MongoCredentials>
 ) {
   function done(creds: AWSTempCredentials) {
@@ -185,7 +242,7 @@ export function makeTempCredentials(
       new MongoCredentials({
         username: creds.AccessKeyId,
         password: creds.SecretAccessKey,
-        source: credentials.source,
+        source: credentials?.source || '$external',
         mechanism: AuthMechanism.MONGODB_AWS,
         mechanismProperties: {
           AWS_SESSION_TOKEN: creds.Token

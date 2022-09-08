@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { deserialize, serialize } from './bson';
-import type { MongoCredentials } from './cmap/auth/mongo_credentials';
-import { makeTempCredentials } from './cmap/auth/mongodb_aws';
+import { findAwsKmsOptions } from './cmap/auth/mongodb_aws';
 import { MONGO_CLIENT_EVENTS } from './constants';
-import type { AutoEncrypter, AutoEncryptionOptions, AwsKmsOptions, KmsProviders } from './deps';
+import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
 import { MongoClient, MongoClientOptions } from './mongo_client';
 import { Callback, getMongoDBClientEncryption } from './utils';
@@ -19,39 +18,15 @@ export interface EncrypterOptions {
   maxPoolSize?: number;
 }
 
-/**
- * Generate the AWS KMS options from a set of MongoCredentials.
- */
-function generateAwsKmsOptions(credentials: MongoCredentials): KmsProviders {
-  // Set the required aws kms options.
-  const aws: AwsKmsOptions = {
-    accessKeyId: credentials.username,
-    secretAccessKey: credentials.password
-  };
-  // If there is also a session token present, add that as well.
-  if (credentials.mechanismProperties.AWS_SESSION_TOKEN) {
-    aws.sessionToken = credentials.mechanismProperties.AWS_SESSION_TOKEN;
-  }
-  return { aws: aws };
-}
-
-// Get the credentials from the URI or the environment for
+// Get the credentials from the environment for
 // the KMS providers. This currently only supports AWS.
 async function driverOnKmsProviderRefresh(client: MongoClient) {
+  const credentials = client.options.credentials;
   // if MONGODB-AWS is the auth mechanism check the MongoCredentials
   // for the environment variables that were set by the URI or pulled
   // from the environment.
-  const credentials = client.options.credentials;
   if (credentials?.mechanism.match(/MONGODB-AWS/i)) {
-    // If those credentials do not exist, try and set them from the endpoint.
-    if (credentials.username) {
-      return generateAwsKmsOptions(credentials);
-    } else {
-      makeTempCredentials(credentials, (err, tempCredentials) => {
-        if (err || !tempCredentials) return {};
-        return generateAwsKmsOptions(tempCredentials);
-      });
-    }
+    return await findAwsKmsOptions();
   }
   return {};
 }
@@ -79,11 +54,9 @@ export class Encrypter {
       async onKmsProviderRefresh() {
         // First attempt to use the user provided refresh function if it exists.
         let creds = (await userOnKmsProviderRefresh?.()) ?? {};
-        // Check if AWS credentials have been populated. If not, attempt to get
-        // them via the environment. We specifically check for AWS here as it is
-        // the only external cloud auth mechanism the driver currently supports.
-        // This could be expanded in the future.
-        if (!creds.aws) {
+        // Fallback to the driver getting the credentials if the user callback
+        // is empty or doesn't exist.
+        if (Object.keys(creds).length === 0) {
           creds = await driverOnKmsProviderRefresh(client);
         }
         return creds;
