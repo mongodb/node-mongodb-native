@@ -170,6 +170,7 @@ interface AWSTempCredentials {
 
 /**
  * Get the AWS KMS provider options.
+ * @internal
  */
 export function findAwsKmsOptions(): Promise<KmsProviders> {
   return new Promise(resolve => {
@@ -185,8 +186,9 @@ export function findAwsKmsOptions(): Promise<KmsProviders> {
           )
         );
       });
+    } else {
+      resolve(options);
     }
-    resolve(options);
   });
 }
 
@@ -225,7 +227,7 @@ function awsKmsOptionsFromEnvironment(): KmsProviders {
 }
 
 /** @internal */
-function makeTempCredentials(
+export function makeTempCredentials(
   credentials: MongoCredentials | null,
   callback: Callback<MongoCredentials>
 ) {
@@ -242,7 +244,7 @@ function makeTempCredentials(
       new MongoCredentials({
         username: creds.AccessKeyId,
         password: creds.SecretAccessKey,
-        source: credentials?.source || '$external',
+        source: credentials?.source ?? '$external',
         mechanism: AuthMechanism.MONGODB_AWS,
         mechanismProperties: {
           AWS_SESSION_TOKEN: creds.Token

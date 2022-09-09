@@ -22,11 +22,11 @@ describe('mongodb_aws', function () {
   afterEach(resetEnvironment);
 
   describe('#findAwsKmsOptions', function () {
-    context('when the environment has variables set', function () {
-      const accessKeyId = 'accessKeyId';
-      const secretAccessKey = 'secretAccessKey';
-      const sessionToken = 'sessionToken';
+    const accessKeyId = 'accessKeyId';
+    const secretAccessKey = 'secretAccessKey';
+    const sessionToken = 'sessionToken';
 
+    context('when the environment has variables set', function () {
       context('when accessKeyId and secretAccessKey are set', function () {
         beforeEach(function () {
           process.env.AWS_ACCESS_KEY_ID = accessKeyId;
@@ -58,6 +58,26 @@ describe('mongodb_aws', function () {
               }
             });
           });
+        });
+      });
+    });
+
+    context('when the environment has no variables set', function () {
+      context.skip('when the endpoint returns credentials', function () {
+        it('returns the kms providers with sessionToken', async function () {
+          expect(await findAwsKmsOptions()).to.deep.equal({
+            aws: {
+              accessKeyId: 'accessKeyId',
+              secretAccessKey: 'secretAccessKey',
+              sessionToken: 'sessionToken'
+            }
+          });
+        });
+      });
+
+      context.skip('when the endpoint does not return credentials', function () {
+        it('returns an empty object', async function () {
+          expect(await findAwsKmsOptions()).to.deep.equal({});
         });
       });
     });
