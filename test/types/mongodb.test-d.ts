@@ -27,6 +27,7 @@ declare const options: MongoDBDriver.MongoClientOptions;
 expectDeprecated(options.w);
 expectDeprecated(options.journal);
 expectDeprecated(options.wtimeoutMS);
+expectDeprecated(options.promiseLibrary);
 expectNotDeprecated(options.writeConcern);
 expectType<WriteConcernSettings | WriteConcern | undefined>(options.writeConcern);
 
