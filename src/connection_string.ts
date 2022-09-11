@@ -29,7 +29,6 @@ import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
 import {
-  AnyOptions,
   Callback,
   DEFAULT_PK_FACTORY,
   emitWarning,
@@ -166,14 +165,14 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
 /**
  * Checks if TLS options are valid
  *
- * @param options - The options used for options parsing
- * @throws MongoParseError if TLS options are invalid
+ * @param allOptions - all options provided by user
+ * @throws MongoAPIError if TLS options are invalid
  */
-export function checkTLSOptions(allOptions: CaseInsensitiveMap): void {
+function checkTLSOptions(allOptions: CaseInsensitiveMap): void {
   if (!allOptions) return;
   const check = (a: string, b: string) => {
     if (allOptions.has(a) && allOptions.has(b)) {
-      throw new MongoParseError(`The '${a}' option cannot be used with '${b}'`);
+      throw new MongoAPIError(`The '${a}' option cannot be used with the '${b}' option`);
     }
   };
   check('tlsInsecure', 'tlsAllowInvalidCertificates');
@@ -369,6 +368,8 @@ export function parseOptions(
     }
   }
 
+  checkTLSOptions(allOptions);
+
   const unsupportedOptions = setDifference(
     allKeys,
     Array.from(Object.keys(OPTIONS)).map(s => s.toLowerCase())
@@ -435,8 +436,6 @@ export function parseOptions(
     // dbName default is applied here because of the credential validation above
     mongoOptions.dbName = 'test';
   }
-
-  checkTLSOptions(allOptions);
 
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
