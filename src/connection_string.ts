@@ -165,7 +165,7 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
 /**
  * Checks if TLS options are valid
  *
- * @param allOptions - all options provided by user
+ * @param allOptions - All options provided by user or included in default options map
  * @throws MongoAPIError if TLS options are invalid
  */
 function checkTLSOptions(allOptions: CaseInsensitiveMap): void {
