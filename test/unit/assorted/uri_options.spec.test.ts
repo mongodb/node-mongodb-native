@@ -10,16 +10,6 @@ describe('URI option spec tests', function () {
     // Skipped because this does not apply to Node
     'Valid options specific to single-threaded drivers are parsed correctly',
 
-    // TODO(NODE-3921): fix tls option validation
-    'tlsInsecure and tlsAllowInvalidCertificates both present (and true) raises an error',
-    'tlsInsecure and tlsAllowInvalidCertificates both present (and false) raises an error',
-    'tlsAllowInvalidCertificates and tlsInsecure both present (and true) raises an error',
-    'tlsAllowInvalidCertificates and tlsInsecure both present (and false) raises an error',
-    'tlsAllowInvalidHostnames and tlsInsecure both present (and true) raises an error',
-    'tlsAllowInvalidHostnames and tlsInsecure both present (and false) raises an error',
-    'tlsInsecure and tlsAllowInvalidHostnames both present (and true) raises an error',
-    'tlsInsecure and tlsAllowInvalidHostnames both present (and false) raises an error',
-
     // TODO(NODE-3922): have not implemented option support
     'tlsDisableCertificateRevocationCheck can be set to true',
     'tlsDisableCertificateRevocationCheck can be set to false',

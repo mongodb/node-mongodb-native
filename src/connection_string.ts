@@ -169,10 +169,10 @@ export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostA
  * @param options - The options used for options parsing
  * @throws MongoParseError if TLS options are invalid
  */
-export function checkTLSOptions(options: AnyOptions): void {
-  if (!options) return;
+export function checkTLSOptions(allOptions: CaseInsensitiveMap): void {
+  if (!allOptions) return;
   const check = (a: string, b: string) => {
-    if (Reflect.has(options, a) && Reflect.has(options, b)) {
+    if (allOptions.has(a) && allOptions.has(b)) {
       throw new MongoParseError(`The '${a}' option cannot be used with '${b}'`);
     }
   };
@@ -436,7 +436,7 @@ export function parseOptions(
     mongoOptions.dbName = 'test';
   }
 
-  checkTLSOptions(mongoOptions);
+  checkTLSOptions(allOptions);
 
   if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
 
