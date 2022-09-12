@@ -160,7 +160,15 @@ tests:
       - name: createChangeStream
         object: *collection0
         arguments:
-          pipeline: []
+          pipeline:
+            # On sharded clusters, the create command run when loading initial
+            # data sometimes is still reported in the change stream. To avoid
+            # this, we exclude the create command when creating the change
+            # stream, but specifically don't exclude other events to still catch
+            # driver errors.
+            - $match:
+                operationType:
+                  $ne: create
           showExpandedEvents: true
         saveResultAsEntity: &changeStream0 changeStream0
       - name: createIndex

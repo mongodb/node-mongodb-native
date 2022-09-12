@@ -1,5 +1,5 @@
 description: "disambiguatedPaths"
-schemaVersion: "1.3"
+schemaVersion: "1.4"
 createEntities:
   - client:
       id: &client0 client0
@@ -16,6 +16,7 @@ createEntities:
 runOnRequirements:
   - minServerVersion: "6.1.0"
     topologies: [ replicaset, sharded-replicaset, load-balanced, sharded ]
+    serverless: forbid
 
 initialData:
   - collectionName: *collection0

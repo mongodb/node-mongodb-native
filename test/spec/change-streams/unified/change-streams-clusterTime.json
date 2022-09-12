@@ -1,0 +1,81 @@
+{
+  "description": "change-streams-clusterTime",
+  "schemaVersion": "1.3",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    }
+  ],
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0.0",
+      "topologies": [
+        "replicaset",
+        "sharded-replicaset",
+        "load-balanced",
+        "sharded"
+      ]
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "collection0",
+      "databaseName": "database0",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "clusterTime is present",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection0",
+          "arguments": {
+            "pipeline": []
+          },
+          "saveResultAsEntity": "changeStream0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "document": {
+              "_id": 1
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream0",
+          "expectResult": {
+            "ns": {
+              "db": "database0",
+              "coll": "collection0"
+            },
+            "clusterTime": {
+              "$$exists": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
