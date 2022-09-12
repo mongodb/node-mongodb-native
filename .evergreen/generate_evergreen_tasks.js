@@ -616,6 +616,47 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         }
       ]
     });
+
+    const name = ex => `aws-${version}-csfle-${ex.split(' ').join('-')}`;
+    const aws_funcs = [
+      { func: 'prepare aws with aws EC2 credentials' },
+      { func: 'prepare aws with aws credentials as environment variables' },
+      { func: 'prepare aws with aws credentials and session token as environment variables' }
+    ];
+
+    for (const fn of aws_funcs) {
+      oneOffFuncAsTasks.push({
+        name: name(fn.func.replace('prepare', 'refresh')),
+        commands: [
+          { func: 'install dependencies' },
+          {
+            func: 'bootstrap mongo-orchestration',
+            vars: {
+              VERSION: version,
+              AUTH: 'auth',
+              ORCHESTRATION_FILE: 'auth-aws.json',
+              TOPOLOGY: 'replica_set'
+            }
+          },
+          { func: 'add aws auth variables to file' },
+          { func: 'setup aws env' },
+          { func: 'bootstrap kms servers' },
+          fn,
+          {
+            func: 'prepare csfle environment',
+            vars: {
+              CSFLE_GIT_REF: ref
+            }
+          },
+          {
+            func: 'run custom csfle tests',
+            vars: {
+              CSFLE_GIT_REF: ref
+            }
+          }
+        ]
+      });
+    }
   }
 }
 
