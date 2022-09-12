@@ -97,10 +97,11 @@ export {
   Logger,
   MongoClient,
   OrderedBulkOperation,
-  // Utils
-  PromiseProvider as Promise,
   UnorderedBulkOperation
 };
+
+/** @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only. */
+export const Promise = PromiseProvider;
 
 // enums
 export { BatchType } from './bulk/common';

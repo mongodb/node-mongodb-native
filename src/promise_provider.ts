@@ -13,6 +13,7 @@ const store: PromiseStore = {
 
 /**
  * Global promise store allowing user-provided promises
+ * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
  * @public
  */
 export class PromiseProvider {

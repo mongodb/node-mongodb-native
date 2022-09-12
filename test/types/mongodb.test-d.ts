@@ -21,6 +21,7 @@ expectDeprecated(FindCursor.prototype.count);
 expectDeprecated(Topology.prototype.unref);
 expectDeprecated(Db.prototype.unref);
 expectDeprecated(MongoDBDriver.ObjectID);
+expectDeprecated(MongoDBDriver.Promise);
 expectNotDeprecated(MongoDBDriver.ObjectId);
 
 declare const options: MongoDBDriver.MongoClientOptions;
