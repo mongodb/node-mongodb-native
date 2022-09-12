@@ -689,7 +689,7 @@ functions:
             -p 8100 \
             -v \
             --fault revoked
-  run custom csfle tests:
+  prepare csfle environment:
     - command: shell.exec
       type: test
       params:
@@ -705,6 +705,7 @@ functions:
           export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
           export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
           EOT
+  run custom csfle tests:
     - command: shell.exec
       type: test
       params:
@@ -1758,6 +1759,9 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: replica_set
       - func: bootstrap kms servers
+      - func: prepare csfle environment
+        vars:
+          CSFLE_GIT_REF: c071d5a8d59ddcad40f22887a12bdb374c2f86af
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c071d5a8d59ddcad40f22887a12bdb374c2f86af
@@ -1773,6 +1777,9 @@ tasks:
           VERSION: '5.0'
           TOPOLOGY: replica_set
       - func: bootstrap kms servers
+      - func: prepare csfle environment
+        vars:
+          CSFLE_GIT_REF: master
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: master
@@ -1788,6 +1795,9 @@ tasks:
           VERSION: rapid
           TOPOLOGY: replica_set
       - func: bootstrap kms servers
+      - func: prepare csfle environment
+        vars:
+          CSFLE_GIT_REF: c071d5a8d59ddcad40f22887a12bdb374c2f86af
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c071d5a8d59ddcad40f22887a12bdb374c2f86af
@@ -1803,6 +1813,9 @@ tasks:
           VERSION: rapid
           TOPOLOGY: replica_set
       - func: bootstrap kms servers
+      - func: prepare csfle environment
+        vars:
+          CSFLE_GIT_REF: master
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: master
@@ -1818,6 +1831,9 @@ tasks:
           VERSION: latest
           TOPOLOGY: replica_set
       - func: bootstrap kms servers
+      - func: prepare csfle environment
+        vars:
+          CSFLE_GIT_REF: c071d5a8d59ddcad40f22887a12bdb374c2f86af
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c071d5a8d59ddcad40f22887a12bdb374c2f86af
@@ -1833,6 +1849,9 @@ tasks:
           VERSION: latest
           TOPOLOGY: replica_set
       - func: bootstrap kms servers
+      - func: prepare csfle environment
+        vars:
+          CSFLE_GIT_REF: master
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: master

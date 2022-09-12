@@ -584,6 +584,12 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         },
         { func: 'bootstrap kms servers' },
         {
+          func: 'prepare csfle environment',
+          vars: {
+            CSFLE_GIT_REF: ref
+          }
+        },
+        {
           func: 'run custom csfle tests',
           vars: {
             CSFLE_GIT_REF: ref

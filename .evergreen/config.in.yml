@@ -729,7 +729,7 @@ functions:
             -v \
             --fault revoked
 
-  "run custom csfle tests":
+  "prepare csfle environment":
     - command: shell.exec
       type: test
       params:
@@ -745,6 +745,7 @@ functions:
           export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
           export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
           EOT
+  "run custom csfle tests":
     - command: shell.exec
       type: test
       params:
