@@ -23,8 +23,14 @@ expectDeprecated(Db.prototype.unref);
 expectDeprecated(MongoDBDriver.ObjectID);
 expectNotDeprecated(MongoDBDriver.ObjectId);
 
-// Unfortunately we cannot deprecate the export will also satisfying our tooling that requires every public symbol be exported
+// We cannot attach a deprecation tag to an export
+// We tried export const Promise = PromiseProvider;
+// but then api-extractor claims PromiseProvider is not exported
+// Instead we've deprecated all the methods on the class
 expectNotDeprecated(MongoDBDriver.Promise);
+expectDeprecated(MongoDBDriver.Promise.validate);
+expectDeprecated(MongoDBDriver.Promise.get);
+expectDeprecated(MongoDBDriver.Promise.set);
 
 declare const options: MongoDBDriver.MongoClientOptions;
 expectDeprecated(options.w);
