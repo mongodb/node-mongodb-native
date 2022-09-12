@@ -1233,7 +1233,7 @@ export const DEFAULT_PK_FACTORY = {
  * @public
  *
  * @example
- * ```js
+ * ```ts
  * process.on('warning', (warning) => {
  *  if (warning.code === MONGODB_WARNING_CODE) console.error('Ah an important warning! :)')
  * })

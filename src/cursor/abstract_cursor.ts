@@ -317,6 +317,7 @@ export abstract class AbstractCursor<
   }
 
   hasNext(): Promise<boolean>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   hasNext(callback: Callback<boolean>): void;
   hasNext(callback?: Callback<boolean>): Promise<boolean> | void {
     return maybePromise(callback, done => {
@@ -344,7 +345,9 @@ export abstract class AbstractCursor<
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
   next(): Promise<TSchema | null>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   next(callback: Callback<TSchema | null>): void;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void;
   next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
     return maybePromise(callback, done => {
@@ -360,6 +363,7 @@ export abstract class AbstractCursor<
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
   tryNext(): Promise<TSchema | null>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   tryNext(callback: Callback<TSchema | null>): void;
   tryNext(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
     return maybePromise(callback, done => {
@@ -378,6 +382,7 @@ export abstract class AbstractCursor<
    * @param callback - The end callback.
    */
   forEach(iterator: (doc: TSchema) => boolean | void): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   forEach(iterator: (doc: TSchema) => boolean | void, callback: Callback<void>): void;
   forEach(
     iterator: (doc: TSchema) => boolean | void,
@@ -423,13 +428,14 @@ export abstract class AbstractCursor<
   }
 
   close(): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   close(callback: Callback): void;
   /**
    * @deprecated options argument is deprecated
    */
   close(options: CursorCloseOptions): Promise<void>;
   /**
-   * @deprecated options argument is deprecated
+   * @deprecated options argument is deprecated. Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance
    */
   close(options: CursorCloseOptions, callback: Callback): void;
   close(options?: CursorCloseOptions | Callback, callback?: Callback): Promise<void> | void {
@@ -451,6 +457,7 @@ export abstract class AbstractCursor<
    * @param callback - The result callback.
    */
   toArray(): Promise<TSchema[]>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   toArray(callback: Callback<TSchema[]>): void;
   toArray(callback?: Callback<TSchema[]>): Promise<TSchema[]> | void {
     return maybePromise(callback, done => {
