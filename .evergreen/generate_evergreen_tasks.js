@@ -617,7 +617,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
       ]
     });
 
-    const name = ex => `aws-${version}-csfle-${ex.split(' ').join('-')}`;
+    const name = ex => `aws-${version}-csfle-${ex.split(' ').join('-')}-${ref === 'master' ? ref : 'pinned-commit'}`;
     const aws_funcs = [
       { func: 'prepare aws with aws EC2 credentials' },
       { func: 'prepare aws with aws credentials as environment variables' },
