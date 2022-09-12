@@ -59,7 +59,7 @@ function makeSingleBench(suite) {
         .beforeTask(createCollection)
         .beforeTask(initCollection)
         .beforeTask(function () {
-          this.docs = Array.from(10000, () => Object.assign({}, this.doc));
+          this.docs = Array.from({ length: 10000 }, () => Object.assign({}, this.doc));
         })
         .task(async function () {
           for (const doc of this.docs) {
