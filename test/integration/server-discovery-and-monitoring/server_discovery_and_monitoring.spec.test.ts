@@ -9,6 +9,7 @@ import { sleep } from '../../tools/utils';
 
 const filter: TestFilter = ({ description }) => {
   const isAuthEnabled = process.env.AUTH === 'auth';
+  return description !== 'Network timeout on Monitor check' ? 'foo' : false;
   switch (description) {
     case 'Reset server and pool after AuthenticationFailure error':
     case 'Reset server and pool after misc command error':

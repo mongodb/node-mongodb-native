@@ -314,7 +314,11 @@ operations.set('findOneAndDelete', async ({ entities, operation }) => {
 
 operations.set('failPoint', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.arguments!.client);
-  return entities.failPoints.enableFailPoint(client, operation.arguments!.failPoint);
+  return entities.failPoints.enableFailPoint(client, operation.arguments!.failPoint).then(res => {
+    console.error('CONFIGURED FAILPOINT');
+    console.error('********************\n\n\n');
+    return res;
+  });
 });
 
 operations.set('insertOne', async ({ entities, operation }) => {

@@ -1,3 +1,4 @@
+import { performance } from 'perf_hooks';
 import { clearTimeout, setTimeout } from 'timers';
 
 import { Document, Long } from '../bson';
@@ -94,6 +95,12 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     return this[kConnection];
   }
 
+  log(...args) {
+    if (this.address.includes('localhost:27018')) {
+      console.log(...[`MONITOR(${performance.now()}): `, ...args]);
+    }
+  }
+
   constructor(server: Server, options: MonitorOptions) {
     super();
 
@@ -140,6 +147,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     }
 
     this.connectOptions = Object.freeze(connectOptions);
+
+    this.on('stateChanged', (oldState, newState) =>
+      this.log(`state changed from ${oldState} to ${newState}`)
+    );
   }
 
   connect(): void {
@@ -215,7 +226,7 @@ function resetMonitorState(monitor: Monitor) {
 
 function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let start = now();
-  console.log('ONE - heartbeat started', monitor.address, start);
+  monitor.log('ONE - heartbeat started', monitor.address, start);
   monitor.emit(Server.SERVER_HEARTBEAT_STARTED, new ServerHeartbeatStartedEvent(monitor.address));
 
   function failureHandler(err: Error) {
@@ -233,7 +244,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     } else {
       error = err;
     }
-    console.log('ONE - Adding reset pool label to error', monitor.address, error);
+    monitor.log('ONE - Adding reset pool label to error', monitor.address, error);
     error.addErrorLabel(MongoErrorLabel.ResetPool);
 
     monitor.emit('resetServer', error);
@@ -273,9 +284,9 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       );
     }
 
-    console.log('HEARTBEAT USING EXISTING CONNECTION', monitor.address, start);
+    monitor.log('HEARTBEAT USING EXISTING CONNECTION', monitor.address, start);
     connection.command(ns('admin.$cmd'), cmd, options, (err, hello) => {
-      console.log('HEARTBEAT RETURNED FROM EXISTING CONNECTION', monitor.address, start, err);
+      monitor.log('HEARTBEAT RETURNED FROM EXISTING CONNECTION', monitor.address, start, err);
       if (err) {
         return failureHandler(err);
       }
@@ -297,7 +308,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
       if (isAwaitable && hello.topologyVersion) {
-        console.log('TWO - awaitable heartbeat started', monitor.address, start, now());
+        monitor.log('TWO - awaitable heartbeat started', monitor.address, start, now());
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address)
@@ -314,10 +325,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     return;
   }
 
-  console.log('HEARTBEAT NEW CONNECTION', monitor.address, start, monitor.connectOptions);
+  monitor.log('HEARTBEAT NEW CONNECTION', monitor.address, start, monitor.connectOptions);
   // connecting does an implicit `hello`
   connect(monitor.connectOptions, (err, conn) => {
-    console.log('HEARTBEAT RETURNED FROM NEW CONNECTION', monitor.address, start, err);
+    monitor.log('HEARTBEAT RETURNED FROM NEW CONNECTION', monitor.address, start, err);
     if (err) {
       monitor[kConnection] = undefined;
 
