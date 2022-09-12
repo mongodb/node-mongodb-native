@@ -633,8 +633,6 @@ for (const version of ['5.0', 'rapid', 'latest']) {
             func: 'bootstrap mongo-orchestration',
             vars: {
               VERSION: version,
-              AUTH: 'auth',
-              ORCHESTRATION_FILE: 'auth-aws.json',
               TOPOLOGY: 'replica_set'
             }
           },

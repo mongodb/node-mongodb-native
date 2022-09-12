@@ -1765,8 +1765,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1784,8 +1782,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1803,8 +1799,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1840,8 +1834,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1859,8 +1851,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1878,8 +1868,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1915,8 +1903,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1934,8 +1920,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1953,8 +1937,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1990,8 +1972,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2009,8 +1989,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2028,8 +2006,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2065,8 +2041,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2084,8 +2058,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2103,8 +2075,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2140,8 +2110,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2159,8 +2127,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2178,8 +2144,6 @@ tasks:
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
           TOPOLOGY: replica_set
       - func: add aws auth variables to file
       - func: setup aws env
