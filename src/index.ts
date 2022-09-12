@@ -100,8 +100,8 @@ export {
   UnorderedBulkOperation
 };
 
-/** @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only. */
-export const Promise = PromiseProvider;
+// Deprecated, remove in next major
+export { PromiseProvider as Promise };
 
 // enums
 export { BatchType } from './bulk/common';

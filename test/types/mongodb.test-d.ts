@@ -21,8 +21,10 @@ expectDeprecated(FindCursor.prototype.count);
 expectDeprecated(Topology.prototype.unref);
 expectDeprecated(Db.prototype.unref);
 expectDeprecated(MongoDBDriver.ObjectID);
-expectDeprecated(MongoDBDriver.Promise);
 expectNotDeprecated(MongoDBDriver.ObjectId);
+
+// Unfortunately we cannot deprecate the export will also satisfying our tooling that requires every public symbol be exported
+expectNotDeprecated(MongoDBDriver.Promise);
 
 declare const options: MongoDBDriver.MongoClientOptions;
 expectDeprecated(options.w);
