@@ -230,7 +230,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   raw?: boolean;
   /** A primary key factory function for generation of custom `_id` keys */
   pkFactory?: PkFactory;
-  /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
+  /**
+   * A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
+   * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
+   */
   promiseLibrary?: any;
   /** The logging level */
   loggerLevel?: LoggerLevel;

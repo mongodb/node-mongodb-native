@@ -97,10 +97,11 @@ export {
   Logger,
   MongoClient,
   OrderedBulkOperation,
-  // Utils
-  PromiseProvider as Promise,
   UnorderedBulkOperation
 };
+
+// Deprecated, remove in next major
+export { PromiseProvider as Promise };
 
 // enums
 export { BatchType } from './bulk/common';
