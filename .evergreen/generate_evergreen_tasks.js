@@ -310,16 +310,15 @@ const AWS_AUTH_TASKS = [];
 for (const VERSION of AWS_AUTH_VERSIONS) {
   const name = ex => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
   const aws_funcs = [
-    { func: 'run aws auth test with regular aws credentials' },
-    { func: 'run aws auth test with assume role credentials' },
-    { func: 'run aws auth test with aws EC2 credentials' },
-    { func: 'run aws auth test with aws credentials as environment variables' },
-    { func: 'run aws auth test with aws credentials and session token as environment variables' },
-    { func: 'run aws ECS auth test' }
+    { func: 'prepare aws with regular aws credentials' },
+    { func: 'prepare aws with assume role credentials' },
+    { func: 'prepare aws with aws EC2 credentials' },
+    { func: 'prepare aws with aws credentials as environment variables' },
+    { func: 'prepare aws with aws credentials and session token as environment variables' }
   ];
 
   const aws_tasks = aws_funcs.map(fn => ({
-    name: name(fn.func),
+    name: name(fn.func.replace('prepare', 'run')),
     commands: [
       { func: 'install dependencies' },
       {
@@ -333,9 +332,29 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
       },
       { func: 'add aws auth variables to file' },
       { func: 'setup aws env' },
-      fn
+      fn,
+      { func: 'run aws tests' }
     ]
   }));
+
+  aws_tasks.push({
+    name: name('run aws ECS auth test'),
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION: VERSION,
+          AUTH: 'auth',
+          ORCHESTRATION_FILE: 'auth-aws.json',
+          TOPOLOGY: 'server'
+        }
+      },
+      { func: 'add aws auth variables to file' },
+      { func: 'setup aws env' },
+      { func: 'run aws ECS auth test' }
+    ]
+  });
 
   TASKS.push(...aws_tasks);
   AWS_AUTH_TASKS.push(...aws_tasks.map(t => t.name));
