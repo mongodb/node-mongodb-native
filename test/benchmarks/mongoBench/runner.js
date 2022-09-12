@@ -9,7 +9,15 @@ function percentileIndex(percentile, total) {
   return Math.max(Math.floor((total * percentile) / 100 - 1), 0);
 }
 
-async function timeTask(task, ctx) {
+function timeSyncTask(task, ctx) {
+  const start = performance.now();
+  task.call(ctx);
+  const end = performance.now();
+
+  return (end - start) / 1000;
+}
+
+async function timeAsyncTask(task, ctx) {
   const start = performance.now();
   await task.call(ctx);
   const end = performance.now();
@@ -157,12 +165,22 @@ class Runner {
     let time = performance.now() - start;
     let count = 1;
 
-    while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
-      await benchmark.beforeTask.call(ctx);
-      const executionTime = await timeTask(benchmark.task, ctx);
-      rawData.push(executionTime);
-      count++;
-      time = performance.now();
+    if (benchmark._taskType === 'sync') {
+      while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
+        await benchmark.beforeTask.call(ctx);
+        const executionTime = timeSyncTask(benchmark.task, ctx);
+        rawData.push(executionTime);
+        count++;
+        time = performance.now();
+      }
+    } else {
+      while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
+        await benchmark.beforeTask.call(ctx);
+        const executionTime = await timeAsyncTask(benchmark.task, ctx);
+        rawData.push(executionTime);
+        count++;
+        time = performance.now();
+      }
     }
 
     return {
