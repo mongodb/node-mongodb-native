@@ -1,3 +1,4 @@
+import { Promise as BluebirdPromise } from 'bluebird';
 import { expect } from 'chai';
 
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';
@@ -443,14 +444,9 @@ describe('driver utils', function () {
     });
 
     describe('when a custom promise constructor is set', () => {
-      class CustomPromise {
-        then() {
-          // do nothing
-        }
-      }
-
       beforeEach(() => {
-        PromiseProvider.set(CustomPromise as unknown as PromiseConstructor);
+        // @ts-expect-error: Bluebird does not have type info
+        PromiseProvider.set(BluebirdPromise);
       });
 
       afterEach(() => {
@@ -461,7 +457,17 @@ describe('driver utils', function () {
         const superPromiseSuccess = Promise.resolve(2);
         const result = maybeCallback(() => superPromiseSuccess);
         expect(result).to.not.equal(superPromiseSuccess);
-        expect(result).to.be.instanceOf(CustomPromise);
+        expect(result).to.be.instanceOf(BluebirdPromise);
+      });
+
+      it('should return a rejected custom promise instance if promiseFn rejects', async () => {
+        const superPromiseFailure = Promise.reject(new Error('ah!'));
+        const result = maybeCallback(() => superPromiseFailure);
+        expect(result).to.not.equal(superPromiseFailure);
+        expect(result).to.be.instanceOf(BluebirdPromise);
+        // @ts-expect-error: There is no overload to change the return type not be nullish,
+        // and we do not want to add one in fear of making it too easy to neglect adding the callback argument
+        expect(await result.catch(e => e)).to.have.property('message', 'ah!');
       });
 
       it('should return void event if a custom promise is set and a callback is provided', async () => {
