@@ -1764,6 +1764,8 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1781,6 +1783,8 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1798,6 +1802,8 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1831,6 +1837,8 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1848,6 +1856,8 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1865,6 +1875,8 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1898,6 +1910,8 @@ tasks:
         vars:
           VERSION: rapid
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1915,6 +1929,8 @@ tasks:
         vars:
           VERSION: rapid
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1932,6 +1948,8 @@ tasks:
         vars:
           VERSION: rapid
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1965,6 +1983,8 @@ tasks:
         vars:
           VERSION: rapid
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1982,6 +2002,8 @@ tasks:
         vars:
           VERSION: rapid
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -1999,6 +2021,8 @@ tasks:
         vars:
           VERSION: rapid
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -2032,6 +2056,8 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -2049,6 +2075,8 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -2066,6 +2094,8 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -2099,6 +2129,8 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -2116,6 +2148,8 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
@@ -2133,6 +2167,8 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
