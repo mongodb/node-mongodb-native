@@ -869,7 +869,7 @@ export class FindOperators {
     return this;
   }
 
-  /** Specifies hint for UpdateOne or UpdateMany bulk operations. */
+  /** Specifies hint for the bulk operation. */
   hint(hint: Hint): this {
     if (!this.bulkOperation.s.currentOp) {
       this.bulkOperation.s.currentOp = {};
