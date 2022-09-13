@@ -1689,7 +1689,7 @@ describe('Bulk', function () {
   });
 
   it('should apply hint via FindOperators', {
-    metadata: { requires: { mongodb: '>= 4.2' } },
+    metadata: { requires: { mongodb: '>= 4.4' } },
     async test() {
       const bulk = client.db().collection('coll').initializeOrderedBulkOp();
 
