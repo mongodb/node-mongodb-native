@@ -85,7 +85,6 @@ describe('Retryable Writes Spec Prose', () => {
         retryWrites: true,
         monitorCommands: true
       });
-      console.log(client.options.retryReads, client.options.retryWrites);
       await client.connect();
 
       testCollection = client.db('retryable-writes-prose').collection('pool-clear-retry');
@@ -123,7 +122,7 @@ describe('Retryable Writes Spec Prose', () => {
     });
 
     it('should emit events in the expected sequence', {
-      metadata: { requires: { mongodb: '>=4.2.9' } },
+      metadata: { requires: { mongodb: '>=4.2.9', topology: ['replicaset', 'sharded'] } },
       test: async function () {
         // iii. Start two threads and attempt to perform an insertOne simultaneously on both.
         await Promise.all([
