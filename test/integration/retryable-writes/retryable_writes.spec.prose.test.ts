@@ -28,14 +28,6 @@ describe('Retryable Writes Spec Prose', () => {
      * Note: Drivers that rely on serverStatus to determine the storage engine in use MAY skip this test for sharded clusters, since mongos does not report this information in its serverStatus response.
      */
     beforeEach(async function () {
-      if (
-        this.configuration.buildInfo.versionArray[0] < 4 ||
-        this.configuration.topologyType !== TopologyType.ReplicaSetWithPrimary
-      ) {
-        this.currentTest.skipReason =
-          'configureFailPoint only works on server versions greater than 4';
-        this.skip();
-      }
       client = this.configuration.newClient();
       await client.connect();
 
@@ -53,21 +45,24 @@ describe('Retryable Writes Spec Prose', () => {
       expect(failPoint).to.have.property('ok', 1);
     });
 
-    it('should error with the correct error message', async () => {
-      const error = await client
-        .db('test')
-        .collection('test')
-        .insertOne({ a: 1 })
-        .catch(error => error);
+    it('should error with the correct error message', {
+      metadata: { requires: { mongodb: '>=4.0.0', topology: ['replicaset', 'sharded'] } },
+      test: async function () {
+        const error = await client
+          .db('test')
+          .collection('test')
+          .insertOne({ a: 1 })
+          .catch(error => error);
 
-      expect(error).to.exist;
-      expect(error).that.is.instanceOf(MongoServerError);
-      expect(error).to.have.property('originalError').that.instanceOf(MongoError);
-      expect(error.originalError).to.have.property('code', 20);
-      expect(error).to.have.property(
-        'message',
-        'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.'
-      );
+        expect(error).to.exist;
+        expect(error).that.is.instanceOf(MongoServerError);
+        expect(error).to.have.property('originalError').that.instanceOf(MongoError);
+        expect(error.originalError).to.have.property('code', 20);
+        expect(error).to.have.property(
+          'message',
+          'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.'
+        );
+      }
     });
   });
 
