@@ -17,7 +17,6 @@ import { MongoInvalidArgumentError } from './error';
 import type { Logger, LoggerLevel } from './logger';
 import { TypedEventEmitter } from './mongo_types';
 import { connect } from './operations/connect';
-import { PromiseProvider } from './promise_provider';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
