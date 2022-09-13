@@ -146,9 +146,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   delete(id: ObjectId, callback?: Callback<void>): Promise<void> | void {
     return maybeCallback(async () => {
       const { deletedCount } = await this.s._filesCollection.deleteOne({ _id: id });
-      await this.s._chunksCollection.deleteMany({ files_id: id });
 
       // Delete orphaned chunks before returning FileNotFound
+      await this.s._chunksCollection.deleteMany({ files_id: id });
+
       if (deletedCount === 0) {
         // TODO(NODE-3483): Replace with more appropriate error
         // Consider creating new error MongoGridFSFileNotFoundError

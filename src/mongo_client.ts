@@ -29,6 +29,7 @@ import {
   Callback,
   ClientMetadata,
   HostAddress,
+  maybeCallback,
   maybePromise,
   MongoDBNamespace,
   ns,
@@ -580,26 +581,18 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     options?: MongoClientOptions | Callback<MongoClient>,
     callback?: Callback<MongoClient>
   ): Promise<MongoClient> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    callback =
+      typeof callback === 'function'
+        ? callback
+        : typeof options === 'function'
+        ? options
+        : undefined;
 
-    try {
-      // Create client
-      const mongoClient = new MongoClient(url, options);
-      // Execute the connect method
-      if (callback) {
-        return mongoClient.connect(callback);
-      } else {
-        return mongoClient.connect();
-      }
-    } catch (error) {
-      if (callback) {
-        return callback(error);
-      } else {
-        const PromiseConstructor = PromiseProvider.get() ?? Promise;
-        return PromiseConstructor.reject(error);
-      }
-    }
+    return maybeCallback(async () => {
+      options = typeof options !== 'function' ? options : undefined;
+      const client = new this(url, options);
+      return await client.connect();
+    }, callback);
   }
 
   /** Starts a new session on the server */

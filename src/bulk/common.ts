@@ -31,6 +31,7 @@ import {
   Callback,
   getTopology,
   hasAtomicOperators,
+  maybeCallback,
   MongoDBNamespace,
   resolveOptions
 } from '../utils';
@@ -1270,39 +1271,44 @@ export abstract class BulkOperationBase {
     options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    callback =
+      typeof callback === 'function'
+        ? callback
+        : typeof options === 'function'
+        ? options
+        : undefined;
 
-    if (this.s.executed) {
-      return handleEarlyError(new MongoBatchReExecutionError(), callback);
-    }
+    return maybeCallback(async () => {
+      options = options != null && typeof options !== 'function' ? options : {};
 
-    const writeConcern = WriteConcern.fromOptions(options);
-    if (writeConcern) {
-      this.s.writeConcern = writeConcern;
-    }
+      if (this.s.executed) {
+        throw new MongoBatchReExecutionError();
+      }
 
-    // If we have current batch
-    if (this.isOrdered) {
-      if (this.s.currentBatch) this.s.batches.push(this.s.currentBatch);
-    } else {
-      if (this.s.currentInsertBatch) this.s.batches.push(this.s.currentInsertBatch);
-      if (this.s.currentUpdateBatch) this.s.batches.push(this.s.currentUpdateBatch);
-      if (this.s.currentRemoveBatch) this.s.batches.push(this.s.currentRemoveBatch);
-    }
-    // If we have no operations in the bulk raise an error
-    if (this.s.batches.length === 0) {
-      const emptyBatchError = new MongoInvalidArgumentError(
-        'Invalid BulkOperation, Batch cannot be empty'
-      );
-      return handleEarlyError(emptyBatchError, callback);
-    }
+      const writeConcern = WriteConcern.fromOptions(options);
+      if (writeConcern) {
+        this.s.writeConcern = writeConcern;
+      }
 
-    this.s.executed = true;
-    const finalOptions = { ...this.s.options, ...options };
-    const operation = new BulkWriteShimOperation(this, finalOptions);
+      // If we have current batch
+      if (this.isOrdered) {
+        if (this.s.currentBatch) this.s.batches.push(this.s.currentBatch);
+      } else {
+        if (this.s.currentInsertBatch) this.s.batches.push(this.s.currentInsertBatch);
+        if (this.s.currentUpdateBatch) this.s.batches.push(this.s.currentUpdateBatch);
+        if (this.s.currentRemoveBatch) this.s.batches.push(this.s.currentRemoveBatch);
+      }
+      // If we have no operations in the bulk raise an error
+      if (this.s.batches.length === 0) {
+        throw new MongoInvalidArgumentError('Invalid BulkOperation, Batch cannot be empty');
+      }
 
-    return executeOperation(this.s.collection.s.db.s.client, operation, callback);
+      this.s.executed = true;
+      const finalOptions = { ...this.s.options, ...options };
+      const operation = new BulkWriteShimOperation(this, finalOptions);
+
+      return await executeOperation(this.s.collection.s.db.s.client, operation);
+    }, callback);
   }
 
   /**
@@ -1350,20 +1356,6 @@ Object.defineProperty(BulkOperationBase.prototype, 'length', {
     return this.s.currentIndex;
   }
 });
-
-/** helper function to assist with promiseOrCallback behavior */
-function handleEarlyError(
-  err?: AnyError,
-  callback?: Callback<BulkWriteResult>
-): Promise<BulkWriteResult> | void {
-  if (typeof callback === 'function') {
-    callback(err);
-    return;
-  }
-
-  const PromiseConstructor = PromiseProvider.get() ?? Promise;
-  return PromiseConstructor.reject(err);
-}
 
 function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {
   if (typeof bulkOperation.s.options.forceServerObjectId === 'boolean') {
