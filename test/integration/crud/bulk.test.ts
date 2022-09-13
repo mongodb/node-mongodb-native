@@ -1717,23 +1717,19 @@ describe('Bulk', function () {
 
       await bulk.execute();
 
-      try {
-        expect(events).to.be.an('array').with.length.at.least(1);
-        expect(events[0]).property('commandName').to.equal('update');
-        const updateCommand = events[0].command;
-        expect(updateCommand).property('updates').to.be.an('array').with.length(3);
-        updateCommand.updates.forEach(statement => {
-          expect(statement).property('hint').to.eql({ b: 1 });
-        });
-        expect(events[1]).property('commandName').to.equal('delete');
-        const deleteCommand = events[1].command;
-        expect(deleteCommand).property('deletes').to.be.an('array').with.length(2);
-        deleteCommand.deletes.forEach(statement => {
-          expect(statement).property('hint').to.eql({ b: 1 });
-        });
-      } finally {
-        await client.close();
-      }
+      expect(events).to.be.an('array').with.length.at.least(1);
+      expect(events[0]).property('commandName').to.equal('update');
+      const updateCommand = events[0].command;
+      expect(updateCommand).property('updates').to.be.an('array').with.length(3);
+      updateCommand.updates.forEach(statement => {
+        expect(statement).property('hint').to.eql({ b: 1 });
+      });
+      expect(events[1]).property('commandName').to.equal('delete');
+      const deleteCommand = events[1].command;
+      expect(deleteCommand).property('deletes').to.be.an('array').with.length(2);
+      deleteCommand.deletes.forEach(statement => {
+        expect(statement).property('hint').to.eql({ b: 1 });
+      });
     }
   });
 
@@ -1799,12 +1795,8 @@ describe('Bulk', function () {
 
       await bulk.execute();
 
-      try {
-        const contents = await coll.find().project({ _id: 0 }).toArray();
-        expect(contents).to.deep.equal([{ a: 11 }, { a: 102 }]);
-      } finally {
-        await client.close();
-      }
+      const contents = await coll.find().project({ _id: 0 }).toArray();
+      expect(contents).to.deep.equal([{ a: 11 }, { a: 102 }]);
     }
   });
 
