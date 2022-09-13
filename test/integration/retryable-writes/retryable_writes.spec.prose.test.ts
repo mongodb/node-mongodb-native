@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, MongoClient, MongoError, MongoServerError, TopologyType } from '../../../src';
+import { Collection, MongoClient, MongoError, MongoServerError } from '../../../src';
 
 describe('Retryable Writes Spec Prose', () => {
   let client: MongoClient, failPointName;
@@ -45,25 +45,28 @@ describe('Retryable Writes Spec Prose', () => {
       expect(failPoint).to.have.property('ok', 1);
     });
 
-    it('should error with the correct error message', {
-      metadata: { requires: { mongodb: '>=4.0.0', topology: ['replicaset', 'sharded'] } },
-      test: async function () {
-        const error = await client
-          .db('test')
-          .collection('test')
-          .insertOne({ a: 1 })
-          .catch(error => error);
+    for (const testTopology of ['replicaset', 'sharded']) {
+      const minFailPointVersion = testTopology === 'replicaset' ? '>=4.0.0' : '>=4.1.5';
+      it(`should error with the correct error message when topology is ${testTopology}`, {
+        metadata: { requires: { mongodb: minFailPointVersion, topology: [testTopology as any] } },
+        test: async function () {
+          const error = await client
+            .db('test')
+            .collection('test')
+            .insertOne({ a: 1 })
+            .catch(error => error);
 
-        expect(error).to.exist;
-        expect(error).that.is.instanceOf(MongoServerError);
-        expect(error).to.have.property('originalError').that.instanceOf(MongoError);
-        expect(error.originalError).to.have.property('code', 20);
-        expect(error).to.have.property(
-          'message',
-          'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.'
-        );
-      }
-    });
+          expect(error).to.exist;
+          expect(error).that.is.instanceOf(MongoServerError);
+          expect(error).to.have.property('originalError').that.instanceOf(MongoError);
+          expect(error.originalError).to.have.property('code', 20);
+          expect(error).to.have.property(
+            'message',
+            'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.'
+          );
+        }
+      });
+    }
   });
 
   describe('2. Test that drivers properly retry after encountering PoolClearedErrors.', () => {
