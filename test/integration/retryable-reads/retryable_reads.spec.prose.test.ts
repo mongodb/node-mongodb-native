@@ -68,7 +68,7 @@ describe('Retryable Reads Spec Prose', () => {
     });
 
     it('should emit events in the expected sequence', {
-      metadata: { requires: { mongodb: '>=4.2.9' } },
+      metadata: { requires: { mongodb: '>=4.2.9', topology: '!load-balanced' } },
       test: async function () {
         // 3. Start two threads and attempt to perform a findOne simultaneously on both.
         const results = await Promise.all([
