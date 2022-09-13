@@ -46,6 +46,6 @@ describe('ServerSession', () => {
     expect(events).to.have.lengthOf(operations.length);
 
     // This is a guarantee in node, unless you are performing a transaction (which is not being done in this test)
-    expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(1);
+    expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex')))).to.have.lengthOf(1);
   });
 });
