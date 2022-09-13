@@ -436,6 +436,35 @@ export function* makeCounter(seed = 0): Generator<number> {
 }
 
 /**
+ * Helper for handling legacy callback support.
+ */
+export function maybeCallback<T>(
+  promiseFn: () => Promise<T>,
+  callback?: Callback<T>
+): Promise<T> | void {
+  const PromiseConstructor = PromiseProvider.get();
+
+  const promise = promiseFn();
+  if (callback == null && PromiseConstructor == null) {
+    return promise;
+  }
+
+  if (PromiseConstructor != null) {
+    return new PromiseConstructor((resolve, reject) => {
+      promise.then(resolve, reject);
+    });
+  }
+
+  promise.then(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    result => callback!(undefined, result),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    error => callback!(error)
+  );
+  return;
+}
+
+/**
  * Helper function for either accepting a callback, or returning a promise
  * @internal
  *
