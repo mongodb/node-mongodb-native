@@ -315,8 +315,8 @@ operations.set('findOneAndDelete', async ({ entities, operation }) => {
 operations.set('failPoint', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.arguments!.client);
   return entities.failPoints.enableFailPoint(client, operation.arguments!.failPoint).then(res => {
-    console.error('CONFIGURED FAILPOINT');
-    console.error('********************\n\n\n');
+    console.log('CONFIGURED FAILPOINT');
+    console.log('********************\n\n\n');
     return res;
   });
 });

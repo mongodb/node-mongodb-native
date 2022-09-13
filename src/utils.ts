@@ -795,6 +795,8 @@ export interface InterruptibleAsyncInterval {
   stop(): void;
 }
 
+let _id = 0;
+
 /**
  * Creates an interval timer which is able to be woken up sooner than
  * the interval. The timer will also debounce multiple calls to wake
@@ -812,6 +814,8 @@ export function makeInterruptibleAsyncInterval(
   let lastCallTime: number;
   let cannotBeExpedited = false;
   let stopped = false;
+  const id = _id++;
+  const monitor = (options as any).monitor;
 
   options = options ?? {};
   const interval = options.interval || 1000;
@@ -820,6 +824,7 @@ export function makeInterruptibleAsyncInterval(
   const clock = typeof options.clock === 'function' ? options.clock : now;
 
   function wake() {
+    monitor.log(`async interval-${id}#wake()`);
     const currentTime = clock();
     const nextScheduledCallTime = lastCallTime + interval;
     const timeUntilNextCall = nextScheduledCallTime - currentTime;
@@ -853,6 +858,7 @@ export function makeInterruptibleAsyncInterval(
   }
 
   function stop() {
+    monitor.log(`async interval-${id}#stop() called`);
     stopped = true;
     if (timerId) {
       clearTimeout(timerId);
@@ -864,6 +870,7 @@ export function makeInterruptibleAsyncInterval(
   }
 
   function reschedule(ms?: number) {
+    monitor.log(`async interval-${id}#reschedule()`);
     if (stopped) return;
     if (timerId) {
       clearTimeout(timerId);
@@ -873,6 +880,7 @@ export function makeInterruptibleAsyncInterval(
   }
 
   function executeAndReschedule() {
+    monitor.log(`async interval-${id}#executeAndReschedule()`);
     cannotBeExpedited = false;
     lastCallTime = clock();
 

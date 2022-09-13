@@ -6,6 +6,7 @@ import { MONGODB_ERROR_CODES } from '../../../src/error';
 import type { MongoClient } from '../../../src/mongo_client';
 import { ReadPreference } from '../../../src/read_preference';
 import { TopologyType } from '../../../src/sdam/common';
+import { _idObject } from '../../../src/sdam/monitor';
 import { ns } from '../../../src/utils';
 import { ejson } from '../utils';
 import { EntitiesMap, UnifiedMongoClient } from './entities';
@@ -156,8 +157,11 @@ async function runUnifiedTest(
       }
     }
 
+    _idObject._id = 0;
     trace('createEntities');
+    console.log(`creating monitors - count is ${_idObject._id}`);
     entities = await EntitiesMap.createEntities(ctx.configuration, unifiedSuite.createEntities);
+    console.log(`created ${_idObject._id} monitors`);
 
     // Workaround for SERVER-39704:
     // test runners MUST execute a non-transactional distinct command on
@@ -197,6 +201,9 @@ async function runUnifiedTest(
         throw e;
       }
     }
+
+    console.log('**********************\n\n');
+    console.log('operations have completed');
 
     const clientList = new Map<string, UnifiedMongoClient>();
     // If any event listeners were enabled on any client entities,

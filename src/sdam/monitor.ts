@@ -75,6 +75,8 @@ export type MonitorEvents = {
   close(): void;
 } & EventEmitterWithState;
 
+export const _idObject = { _id: 0 };
+
 /** @internal */
 export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
@@ -90,14 +92,19 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   [kMonitorId]?: InterruptibleAsyncInterval;
   [kRTTPinger]?: RTTPinger;
+  _id = -1;
 
   get connection(): Connection | undefined {
     return this[kConnection];
   }
 
+  get isPrimary(): boolean {
+    return this.address.includes('localhost:27018');
+  }
+
   log(...args) {
-    if (this.address.includes('localhost:27018')) {
-      console.log(...[`MONITOR(${performance.now()}): `, ...args]);
+    if (this.isPrimary) {
+      console.log(...[`MONITOR-${this._id}(${performance.now()}): `, ...args]);
     }
   }
 
@@ -151,6 +158,12 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.on('stateChanged', (oldState, newState) =>
       this.log(`state changed from ${oldState} to ${newState}`)
     );
+
+    if (this.isPrimary) {
+      _idObject._id++;
+      this._id = _idObject._id;
+      this.log('created monitor');
+    }
   }
 
   connect(): void {
@@ -164,20 +177,25 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
       interval: heartbeatFrequencyMS,
       minInterval: minHeartbeatFrequencyMS,
-      immediate: true
+      immediate: true,
+      monitor: this
     });
   }
 
   requestCheck(): void {
+    this.log('requestCheck() - monitor state', this.s.state);
     if (INVALID_REQUEST_CHECK_STATES.has(this.s.state)) {
       return;
     }
+
+    this.log('waking monitor');
 
     this[kMonitorId]?.wake();
   }
 
   reset(): void {
     const topologyVersion = this[kServer].description.topologyVersion;
+    this.log('reset() - monitor state: ', this.s.state);
     if (isInCloseState(this) || topologyVersion == null) {
       return;
     }
@@ -193,11 +211,13 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
     this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
       interval: heartbeatFrequencyMS,
-      minInterval: minHeartbeatFrequencyMS
+      minInterval: minHeartbeatFrequencyMS,
+      monitor: this
     });
   }
 
   close(): void {
+    this.log('close() - monitor state', this.s.state);
     if (isInCloseState(this)) {
       return;
     }
@@ -325,7 +345,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     return;
   }
 
-  monitor.log('HEARTBEAT NEW CONNECTION', monitor.address, start, monitor.connectOptions);
+  monitor.log('HEARTBEAT NEW CONNECTION', monitor.address, start);
   // connecting does an implicit `hello`
   connect(monitor.connectOptions, (err, conn) => {
     monitor.log('HEARTBEAT RETURNED FROM NEW CONNECTION', monitor.address, start, err);
@@ -360,6 +380,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
 function monitorServer(monitor: Monitor) {
   return (callback: Callback) => {
+    monitor.log('callback triggered - about to start monitoring');
     stateTransition(monitor, STATE_MONITORING);
     function done() {
       if (!isInCloseState(monitor)) {
