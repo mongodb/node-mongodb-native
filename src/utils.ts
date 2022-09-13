@@ -438,9 +438,14 @@ export function* makeCounter(seed = 0): Generator<number> {
 /**
  * Helper for handling legacy callback support.
  */
+export function maybeCallback<T>(promiseFn: () => Promise<T>, callback: null): Promise<T>;
 export function maybeCallback<T>(
   promiseFn: () => Promise<T>,
   callback?: Callback<T>
+): Promise<T> | void;
+export function maybeCallback<T>(
+  promiseFn: () => Promise<T>,
+  callback?: Callback<T> | null
 ): Promise<T> | void {
   const PromiseConstructor = PromiseProvider.get();
 

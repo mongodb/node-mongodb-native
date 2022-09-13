@@ -642,16 +642,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     const session = this.startSession(options);
-    const PromiseConstructor = PromiseProvider.get() ?? Promise;
 
-    return PromiseConstructor.resolve()
-      .then(() => withSessionCallback(session))
-      .then(() => {
-        // Do not return the result of callback
-      })
-      .finally(() => {
+    return maybeCallback(async () => {
+      try {
+        await withSessionCallback(session);
+      } finally {
         session.endSession().catch(() => null);
-      });
+      }
+    }, null);
   }
 
   /**
