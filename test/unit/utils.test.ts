@@ -463,6 +463,17 @@ describe('driver utils', function () {
         expect(result).to.not.equal(superPromiseSuccess);
         expect(result).to.be.instanceOf(CustomPromise);
       });
+
+      it('should return void event if a custom promise is set and a callback is provided', async () => {
+        const superPromiseSuccess = Promise.resolve(2);
+        const result = maybeCallback(
+          () => superPromiseSuccess,
+          () => {
+            // ignore
+          }
+        );
+        expect(result).to.be.undefined;
+      });
     });
   });
 });

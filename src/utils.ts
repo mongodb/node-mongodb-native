@@ -445,21 +445,19 @@ export function maybeCallback<T>(
   const PromiseConstructor = PromiseProvider.get();
 
   const promise = promiseFn();
-  if (callback == null && PromiseConstructor == null) {
-    return promise;
-  }
-
-  if (PromiseConstructor != null) {
-    return new PromiseConstructor((resolve, reject) => {
-      promise.then(resolve, reject);
-    });
+  if (callback == null) {
+    if (PromiseConstructor == null) {
+      return promise;
+    } else {
+      return new PromiseConstructor((resolve, reject) => {
+        promise.then(resolve, reject);
+      });
+    }
   }
 
   promise.then(
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    result => callback!(undefined, result),
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    error => callback!(error)
+    result => callback(undefined, result),
+    error => callback(error)
   );
   return;
 }
