@@ -1346,13 +1346,13 @@ function handleEarlyError(
   err?: AnyError,
   callback?: Callback<BulkWriteResult>
 ): Promise<BulkWriteResult> | void {
-  const Promise = PromiseProvider.get();
   if (typeof callback === 'function') {
     callback(err);
     return;
   }
 
-  return Promise.reject(err);
+  const PromiseConstructor = PromiseProvider.get() ?? Promise;
+  return PromiseConstructor.reject(err);
 }
 
 function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {

@@ -593,8 +593,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         return mongoClient.connect();
       }
     } catch (error) {
-      if (callback) return callback(error);
-      else return PromiseProvider.get().reject(error);
+      if (callback) {
+        return callback(error);
+      } else {
+        const PromiseConstructor = PromiseProvider.get() ?? Promise;
+        return PromiseConstructor.reject(error);
+      }
     }
   }
 
@@ -645,9 +649,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     const session = this.startSession(options);
-    const Promise = PromiseProvider.get();
+    const PromiseConstructor = PromiseProvider.get() ?? Promise;
 
-    return Promise.resolve()
+    return PromiseConstructor.resolve()
       .then(() => withSessionCallback(session))
       .then(() => {
         // Do not return the result of callback

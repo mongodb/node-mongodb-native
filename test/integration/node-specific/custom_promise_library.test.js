@@ -9,8 +9,23 @@ class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
 describe('Optional PromiseLibrary', function () {
+  beforeEach(() => {
+    PromiseProvider.set(null);
+  });
+
   afterEach(() => {
+    PromiseProvider.set(null);
+  });
+
+  it('should initially be set to null', () => {
+    expect(PromiseProvider.get()).to.be.null;
+  });
+
+  it('should allow passing null to .set() to clear the set promise', () => {
     PromiseProvider.set(Promise);
+    expect(PromiseProvider.get()).to.equal(Promise);
+    expect(() => PromiseProvider.set(null)).to.not.throw();
+    expect(PromiseProvider.get()).to.be.null;
   });
 
   it('should emit a deprecation warning when a promiseLibrary is set', async () => {
