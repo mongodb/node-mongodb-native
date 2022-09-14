@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 
 import { Collection, MongoClient, MongoError, MongoServerError } from '../../../src';
@@ -174,7 +175,7 @@ describe('Retryable Writes Spec Prose', () => {
           'connectionCheckOutFailed',
           'expected 5) checkout 2 to fail'
         );
-        expect(nextEvent).to.have.deep.property('event.reason', 'connectionError');
+        expect(nextEvent!.event).to.have.property('reason', 'connectionError');
 
         // viii. Via Command Monitoring, assert that exactly three insert CommandStartedEvents were observed in total.
         const observedInsertCommandStartedEvents = commandStartedEvents.filter(

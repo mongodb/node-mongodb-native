@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 
 import { Collection, MongoClient } from '../../../src';
@@ -121,7 +122,7 @@ describe('Retryable Reads Spec Prose', () => {
           'connectionCheckOutFailed',
           'expected 5) checkout 2 to fail'
         );
-        expect(nextEvent).to.have.deep.property('event.reason', 'connectionError');
+        expect(nextEvent!.event).to.have.property('reason', 'connectionError');
 
         // 8. Via Command Monitoring, assert that exactly three find CommandStartedEvents were observed in total.
         const observedFindCommandStartedEvents = commandStartedEvents.filter(
