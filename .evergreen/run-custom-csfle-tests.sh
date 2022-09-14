@@ -29,6 +29,7 @@ ABS_PATH_TO_PATCH=$(pwd)
 # CDRIVER_GIT_REF - set the git reference to checkout for a custom CDRIVER version (this is for libbson)
 CSFLE_GIT_REF=${CSFLE_GIT_REF:-master}
 CDRIVER_GIT_REF=${CDRIVER_GIT_REF:-1.17.6}
+REFRESH_AWS_CREDENTIALS=${REFRESH_AWS_CREDENTIALS:-""}
 
 rm -rf ../csfle-deps-tmp
 mkdir -p ../csfle-deps-tmp
@@ -93,7 +94,7 @@ npm run build:ts
 popd # node_modules/mongodb
 
 # this variable needs to be empty
-export MONGODB_NODE_SKIP_LIVE_TESTS=""
+export MONGODB_NODE_SKIP_LIVE_TESTS=${REFRESH_AWS_CREDENTIALS}
 # all of the below must be defined (as well as AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
 export AWS_REGION="us-east-1"
 export AWS_CMK_ID="arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
