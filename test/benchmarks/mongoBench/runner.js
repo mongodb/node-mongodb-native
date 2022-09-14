@@ -165,22 +165,14 @@ class Runner {
     let time = performance.now() - start;
     let count = 1;
 
-    if (benchmark._taskType === 'sync') {
+    const taskTimer = benchmark._taskType === 'sync' ? timeSyncTask : timeAsyncTask;
+
       while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
         await benchmark.beforeTask.call(ctx);
-        const executionTime = timeSyncTask(benchmark.task, ctx);
+      const executionTime = await taskTimer(benchmark.task, ctx);
         rawData.push(executionTime);
         count++;
         time = performance.now();
-      }
-    } else {
-      while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
-        await benchmark.beforeTask.call(ctx);
-        const executionTime = await timeAsyncTask(benchmark.task, ctx);
-        rawData.push(executionTime);
-        count++;
-        time = performance.now();
-      }
     }
 
     return {
