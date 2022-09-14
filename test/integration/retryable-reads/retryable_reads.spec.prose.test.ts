@@ -31,7 +31,6 @@ describe('Retryable Reads Spec Prose', () => {
         retryReads: true,
         monitorCommands: true
       });
-      await client.connect();
 
       testCollection = client.db('retryable-reads-prose').collection('pool-clear-retry');
       await testCollection.drop().catch(() => null);
