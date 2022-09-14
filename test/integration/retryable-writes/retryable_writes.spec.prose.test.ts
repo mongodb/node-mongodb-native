@@ -79,11 +79,11 @@ describe('Retryable Writes Spec Prose', () => {
     let testCollection: Collection;
     beforeEach(async function () {
       // i. Create a client with maxPoolSize=1 and retryWrites=true.
-      // If testing against a sharded deployment, be sure to connect to only a single mongos. <-- TODO: what does that look like?
       client = this.configuration.newClient({
         maxPoolSize: 1,
         retryWrites: true,
-        monitorCommands: true
+        monitorCommands: true,
+        useMultipleMongoses: false // If testing against a sharded deployment, be sure to connect to only a single mongos.
       });
 
       testCollection = client.db('retryable-writes-prose').collection('pool-clear-retry');

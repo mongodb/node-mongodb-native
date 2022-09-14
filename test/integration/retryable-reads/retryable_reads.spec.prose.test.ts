@@ -27,11 +27,11 @@ describe('Retryable Reads Spec Prose', () => {
     let testCollection: Collection;
     beforeEach(async function () {
       // 1. Create a client with maxPoolSize=1 and retryReads=true.
-      // If testing against a sharded deployment, be sure to connect to only a single mongos. <-- TODO: what does that look like?
       client = this.configuration.newClient({
         maxPoolSize: 1,
         retryReads: true,
-        monitorCommands: true
+        monitorCommands: true,
+        useMultipleMongoses: false // If testing against a sharded deployment, be sure to connect to only a single mongos.
       });
 
       testCollection = client.db('retryable-reads-prose').collection('pool-clear-retry');
