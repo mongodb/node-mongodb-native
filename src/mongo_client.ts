@@ -646,7 +646,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       try {
         await withSessionCallback(session);
       } finally {
-        session.endSession().catch(() => null);
+        try {
+          await session.endSession();
+        } catch {
+          // We are not concerned with errors from endSession()
+        }
       }
     }, null);
   }
