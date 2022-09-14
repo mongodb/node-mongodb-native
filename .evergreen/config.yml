@@ -696,6 +696,7 @@ functions:
 
           export VERSION=${VERSION}
           export DRIVERS_TOOLS=${DRIVERS_TOOLS}
+          export REFRESH_AWS_CREDENTIALS=${REFRESH_AWS_CREDENTIALS}
 
           source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
           export MONGODB_URI="${MONGODB_URI}"
