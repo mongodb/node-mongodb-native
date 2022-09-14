@@ -106,6 +106,7 @@ describe('Retryable Writes Spec Prose', () => {
       expect(failPoint).to.have.property('ok', 1);
 
       cmapEvents = [];
+      commandStartedEvents = [];
       for (const observedEvent of [
         'connectionCheckOutStarted',
         'connectionCheckedOut',
