@@ -38,6 +38,7 @@ export class PromiseProvider {
       store[kPromise] = null;
       return;
     }
+
     if (!PromiseProvider.validate(lib)) {
       // validate
       return;
