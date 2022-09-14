@@ -80,7 +80,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   [kConnection]?: Connection;
   [kCancellationToken]: CancellationToken;
   /** @internal */
-  [kMonitorId]?: InterruptibleAsyncInterval;
+  [kMonitorId]?: SDAMMonitorInterval;
   [kRTTPinger]?: RTTPinger;
 
   get connection(): Connection | undefined {
@@ -143,9 +143,9 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // start
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = new InterruptibleAsyncInterval(monitorServer(this), {
-      interval: heartbeatFrequencyMS,
-      minInterval: minHeartbeatFrequencyMS,
+    this[kMonitorId] = new SDAMMonitorInterval(monitorServer(this), {
+      heartbeatFrequencyMS: heartbeatFrequencyMS,
+      minHeartbeatFrequencyMS: minHeartbeatFrequencyMS,
       immediate: true
     });
   }
@@ -173,9 +173,9 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // restart monitoring
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = new InterruptibleAsyncInterval(monitorServer(this), {
-      interval: heartbeatFrequencyMS,
-      minInterval: minHeartbeatFrequencyMS
+    this[kMonitorId] = new SDAMMonitorInterval(monitorServer(this), {
+      heartbeatFrequencyMS: heartbeatFrequencyMS,
+      minHeartbeatFrequencyMS: minHeartbeatFrequencyMS
     });
   }
 
@@ -460,11 +460,11 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
   });
 }
 
-export interface InterruptibleAsyncIntervalOptions {
+export interface SDAMMonitorIntervalOptions {
   /** The interval to execute a method on */
-  interval: number;
+  heartbeatFrequencyMS: number;
   /** A minimum interval that must elapse before the method is called */
-  minInterval: number;
+  minHeartbeatFrequencyMS: number;
   /** Whether the method should be called immediately when the interval is started  */
   immediate: boolean;
 
@@ -475,32 +475,27 @@ export interface InterruptibleAsyncIntervalOptions {
   clock: () => number;
 }
 
-export class InterruptibleAsyncInterval {
+export class SDAMMonitorInterval {
   fn: (callback: Callback) => void;
   timerId: NodeJS.Timeout | undefined;
   lastCallTime: number;
-  cannotBeExpedited = false;
+  isExpeditedCheckScheduled = false;
   stopped = false;
 
-  interval: number;
-  minInterval: number;
-  immediate: boolean;
+  heartbeatFrequencyMS: number;
+  minHeartbeatFrequencyMS: number;
   clock: () => number;
 
-  constructor(
-    fn: (callback: Callback) => void,
-    options?: Partial<InterruptibleAsyncIntervalOptions>
-  ) {
+  constructor(fn: (callback: Callback) => void, options?: Partial<SDAMMonitorIntervalOptions>) {
     this.fn = fn;
     this.lastCallTime = undefined as any;
 
     options = options ?? {};
-    this.interval = options.interval || 1000;
-    this.minInterval = options.minInterval || 500;
-    this.immediate = typeof options.immediate === 'boolean' ? options.immediate : false;
+    this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 1000;
+    this.minHeartbeatFrequencyMS = options.minHeartbeatFrequencyMS || 500;
     this.clock = typeof options.clock === 'function' ? options.clock : now;
 
-    if (this.immediate) {
+    if (options.immediate) {
       this._executeAndReschedule();
     } else {
       this.lastCallTime = this.clock();
@@ -510,7 +505,7 @@ export class InterruptibleAsyncInterval {
 
   wake() {
     const currentTime = this.clock();
-    const nextScheduledCallTime = this.lastCallTime + this.interval;
+    const nextScheduledCallTime = this.lastCallTime + this.heartbeatFrequencyMS;
     const timeUntilNextCall = nextScheduledCallTime - currentTime;
 
     // For the streaming protocol: there is nothing obviously stopping this
@@ -529,15 +524,15 @@ export class InterruptibleAsyncInterval {
     }
 
     // debounce multiple calls to wake within the `minInterval`
-    if (this.cannotBeExpedited) {
+    if (this.isExpeditedCheckScheduled) {
       return;
     }
 
     // reschedule a call as soon as possible, ensuring the call never happens
     // faster than the `minInterval`
-    if (timeUntilNextCall > this.minInterval) {
-      this._reschedule(this.minInterval);
-      this.cannotBeExpedited = true;
+    if (timeUntilNextCall > this.minHeartbeatFrequencyMS) {
+      this._reschedule(this.minHeartbeatFrequencyMS);
+      this.isExpeditedCheckScheduled = true;
     }
   }
 
@@ -549,7 +544,7 @@ export class InterruptibleAsyncInterval {
     }
 
     this.lastCallTime = 0;
-    this.cannotBeExpedited = false;
+    this.isExpeditedCheckScheduled = false;
   }
 
   private _reschedule(ms?: number) {
@@ -558,16 +553,16 @@ export class InterruptibleAsyncInterval {
       clearTimeout(this.timerId);
     }
 
-    this.timerId = setTimeout(this._executeAndReschedule, ms || this.interval);
+    this.timerId = setTimeout(this._executeAndReschedule, ms || this.heartbeatFrequencyMS);
   }
 
   private _executeAndReschedule = () => {
-    this.cannotBeExpedited = false;
+    this.isExpeditedCheckScheduled = false;
     this.lastCallTime = this.clock();
 
     this.fn(err => {
       if (err) throw err;
-      this._reschedule(this.interval);
+      this._reschedule(this.heartbeatFrequencyMS);
     });
   };
 }

@@ -5,7 +5,7 @@ import { setTimeout } from 'timers';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { ServerType } from '../../../src/sdam/common';
 import { ServerHeartbeatFailedEvent, ServerHeartbeatStartedEvent } from '../../../src/sdam/events';
-import { InterruptibleAsyncInterval, Monitor } from '../../../src/sdam/monitor';
+import { Monitor, SDAMMonitorInterval } from '../../../src/sdam/monitor';
 import { ServerDescription } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
 import { isHello } from '../../../src/utils';
@@ -285,10 +285,10 @@ describe('monitoring', function () {
 
     context('when the immediate option is provided', function () {
       it('executes the function immediately and schedules the next execution on the interval', function () {
-        executor = new InterruptibleAsyncInterval(fnSpy, {
+        executor = new SDAMMonitorInterval(fnSpy, {
           immediate: true,
-          minInterval: 10,
-          interval: 30
+          minHeartbeatFrequencyMS: 10,
+          heartbeatFrequencyMS: 30
         });
         // expect immediate invocation
         expect(fnSpy.calledOnce).to.be.true;
@@ -303,7 +303,10 @@ describe('monitoring', function () {
 
     context('when the immediate option is not provided', function () {
       it('executes the function on the provided interval', function () {
-        executor = new InterruptibleAsyncInterval(fnSpy, { minInterval: 10, interval: 30 });
+        executor = new SDAMMonitorInterval(fnSpy, {
+          minHeartbeatFrequencyMS: 10,
+          heartbeatFrequencyMS: 30
+        });
         // advance clock by less than the scheduled interval to ensure we don't execute early
         clock.tick(29);
         expect(fnSpy.callCount).to.equal(0);
@@ -322,9 +325,9 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is the first wake', () => {
           let fakeClockHasTicked = false;
-          executor = new InterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30,
+          executor = new SDAMMonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30,
             clock: () => {
               if (fakeClockHasTicked) {
                 return 81;
@@ -351,9 +354,9 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is a repeated wake and the current execution is not rescheduled', () => {
           let fakeClockTickCount = 0;
-          executor = new InterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30,
+          executor = new SDAMMonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30,
             clock: () => {
               if (fakeClockTickCount === 0) {
                 // on init, return arbitrary starting time
@@ -388,9 +391,9 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is a repeated wake even if the current execution is rescheduled', () => {
           let fakeClockTickCount = 0;
-          executor = new InterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30,
+          executor = new SDAMMonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30,
             clock: () => {
               if (fakeClockTickCount === 0) {
                 // on init, return arbitrary starting time
@@ -428,9 +431,9 @@ describe('monitoring', function () {
         // we can't make it go any faster, so we should let the scheduled execution run
 
         it('should execute on the interval if this is the first wake', () => {
-          executor = new InterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
+          executor = new SDAMMonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30
           });
           // tick the environment clock so that less than minInterval is left
           clock.tick(21);
@@ -449,9 +452,9 @@ describe('monitoring', function () {
         });
 
         it('should execute on the original interval if this is a repeated wake and the current execution is not rescheduled', () => {
-          executor = new InterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
+          executor = new SDAMMonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30
           });
           // tick the environment clock so that less than minInterval is left
           clock.tick(21);
@@ -473,9 +476,9 @@ describe('monitoring', function () {
         });
 
         it('should execute on the minInterval from the first wake if this is a repeated wake and the current execution is rescheduled', () => {
-          executor = new InterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
+          executor = new SDAMMonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30
           });
           // tick the environment clock so that more than minInterval is left
           clock.tick(13);
@@ -502,9 +505,9 @@ describe('monitoring', function () {
         // expedite the execution to minInterval
 
         it('should execute on the minInterval if this is the first wake', () => {
-          executor = new InterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
+          executor = new SDAMMonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30
           });
           // tick the environment clock so that more than minInterval is left
           clock.tick(3);
@@ -526,9 +529,9 @@ describe('monitoring', function () {
         it('should execute on the minInterval from the first wake if this is a repeated wake', () => {
           // NOTE: under regular circumstances, if the second wake is early enough to warrant a reschedule
           // then the first wake must have already warranted a reschedule
-          executor = new InterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
+          executor = new SDAMMonitorInterval(fnSpy, {
+            minHeartbeatFrequencyMS: 10,
+            heartbeatFrequencyMS: 30
           });
           // tick the environment clock so that more than minInterval is left
           clock.tick(3);
