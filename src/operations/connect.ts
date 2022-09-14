@@ -79,8 +79,7 @@ function createTopology(
 
       topology.connect(options, err => {
         if (err) {
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          topology.close({ force: true }, () => {});
+          topology.close({ force: true });
           return callback(err);
         }
 
@@ -98,8 +97,7 @@ function createTopology(
   // otherwise connect normally
   topology.connect(options, err => {
     if (err) {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      topology.close({ force: true }, () => {});
+      topology.close({ force: true });
       return callback(err);
     }
 

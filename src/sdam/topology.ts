@@ -471,6 +471,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   /** Close this topology */
   close(callback: Callback): void;
+  close(options: CloseOptions): void;
   close(options: CloseOptions, callback: Callback): void;
   close(options?: CloseOptions | Callback, callback?: Callback): void {
     if (typeof options === 'function') {
