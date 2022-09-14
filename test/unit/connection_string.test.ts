@@ -595,9 +595,9 @@ describe('Connection String', function () {
     it('should allow multiple bracketed portless localhost IPv6 addresses', () => {
       const client = new MongoClient('mongodb://[::1],[::1],[::1]/test');
       expect(client.options.hosts).to.deep.equal([
-        { host: '::1', port: 27017, isIPv6: true },
-        { host: '::1', port: 27017, isIPv6: true },
-        { host: '::1', port: 27017, isIPv6: true }
+        { host: '::1', port: 27017, isIPv6: true, socketPath: undefined },
+        { host: '::1', port: 27017, isIPv6: true, socketPath: undefined },
+        { host: '::1', port: 27017, isIPv6: true, socketPath: undefined }
       ]);
     });
 
@@ -606,18 +606,18 @@ describe('Connection String', function () {
         'mongodb://[ABCD:f::abcd:abcd:abcd:abcd],[ABCD:f::abcd:abcd:abcd:abcd],[ABCD:f::abcd:abcd:abcd:abcd]/test'
       );
       expect(client.options.hosts).to.deep.equal([
-        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true },
-        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true },
-        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true }
+        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true, socketPath: undefined },
+        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true, socketPath: undefined },
+        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true, socketPath: undefined }
       ]);
     });
 
     it('should allow multiple bracketed port-full IPv6 addresses', () => {
       const client = new MongoClient('mongodb://[::1]:27018,[::1]:27019,[::1]:27020/test');
       expect(client.options.hosts).to.deep.equal([
-        { host: '::1', port: 27018, isIPv6: true },
-        { host: '::1', port: 27019, isIPv6: true },
-        { host: '::1', port: 27020, isIPv6: true }
+        { host: '::1', port: 27018, isIPv6: true, socketPath: undefined },
+        { host: '::1', port: 27019, isIPv6: true, socketPath: undefined },
+        { host: '::1', port: 27020, isIPv6: true, socketPath: undefined }
       ]);
     });
   });

@@ -1142,11 +1142,9 @@ export class BufferPool {
 
 /** @public */
 export class HostAddress {
-  host: string | undefined;
-  port: number | undefined;
-  // Driver only works with unix socket path to connect
-  // SDAM operates only on tcp addresses
-  socketPath: string | undefined;
+  host: string | undefined = undefined;
+  port: number | undefined = undefined;
+  socketPath: string | undefined = undefined;
   isIPv6 = false;
 
   constructor(hostString: string) {
@@ -1155,8 +1153,6 @@ export class HostAddress {
     if (escapedHost.endsWith('.sock')) {
       // heuristically determine if we're working with a domain socket
       this.socketPath = decodeURIComponent(escapedHost);
-      delete this.port;
-      delete this.host;
       return;
     }
 
