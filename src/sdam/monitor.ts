@@ -488,7 +488,7 @@ export class SDAMMonitorInterval {
 
   constructor(fn: (callback: Callback) => void, options?: Partial<SDAMMonitorIntervalOptions>) {
     this.fn = fn;
-    this.lastCallTime = undefined as any;
+    this.lastCallTime = 0;
 
     options = options ?? {};
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 1000;
