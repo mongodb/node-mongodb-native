@@ -486,13 +486,12 @@ export class SDAMMonitorInterval {
   minHeartbeatFrequencyMS: number;
   clock: () => number;
 
-  constructor(fn: (callback: Callback) => void, options?: Partial<SDAMMonitorIntervalOptions>) {
+  constructor(fn: (callback: Callback) => void, options: Partial<SDAMMonitorIntervalOptions> = {}) {
     this.fn = fn;
     this.lastCallTime = 0;
 
-    options = options ?? {};
-    this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 1000;
-    this.minHeartbeatFrequencyMS = options.minHeartbeatFrequencyMS || 500;
+    this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 1000;
+    this.minHeartbeatFrequencyMS = options.minHeartbeatFrequencyMS ?? 500;
     this.clock = typeof options.clock === 'function' ? options.clock : now;
 
     if (options.immediate) {
