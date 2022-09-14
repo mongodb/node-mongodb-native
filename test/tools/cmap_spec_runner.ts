@@ -391,7 +391,10 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   if (expectedError) {
     expect(actualError).to.exist;
     const { type: errorType, message: errorMessage, ...errorPropsToCheck } = expectedError;
-    expect(actualError).to.have.property('name', `Mongo${errorType}`);
+    expect(
+      actualError,
+      `${actualError.name} does not match "Mongo${errorType}", ${actualError.message} ${actualError.stack}`
+    ).to.have.property('name', `Mongo${errorType}`);
     if (errorMessage) {
       if (
         errorMessage === 'Timed out while checking out a connection from connection pool' &&
