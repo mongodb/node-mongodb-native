@@ -460,7 +460,10 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
   });
 }
 
-interface SDAMMonitorIntervalOptions {
+/**
+ * @internal
+ */
+export interface SDAMMonitorIntervalOptions {
   /** The interval to execute a method on */
   heartbeatFrequencyMS: number;
   /** A minimum interval that must elapse before the method is called */
