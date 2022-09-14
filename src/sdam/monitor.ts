@@ -546,6 +546,21 @@ export class SDAMMonitorInterval {
     this.isExpeditedCheckScheduled = false;
   }
 
+  toString() {
+    return JSON.stringify(this);
+  }
+
+  toJSON() {
+    return {
+      timerId: this.timerId != null ? 'set' : 'cleared',
+      lastCallTime: this.lastCallTime,
+      isExpeditedCheckScheduled: this.isExpeditedCheckScheduled,
+      stopped: this.stopped,
+      heartbeatFrequencyMS: this.heartbeatFrequencyMS,
+      minHeartbeatFrequencyMS: this.minHeartbeatFrequencyMS
+    };
+  }
+
   private _reschedule(ms?: number) {
     if (this.stopped) return;
     if (this.timerId) {
