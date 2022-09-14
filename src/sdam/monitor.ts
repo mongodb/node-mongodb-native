@@ -460,7 +460,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
   });
 }
 
-export interface SDAMMonitorIntervalOptions {
+interface SDAMMonitorIntervalOptions {
   /** The interval to execute a method on */
   heartbeatFrequencyMS: number;
   /** A minimum interval that must elapse before the method is called */
@@ -475,6 +475,9 @@ export interface SDAMMonitorIntervalOptions {
   clock: () => number;
 }
 
+/**
+ * @internal
+ */
 export class SDAMMonitorInterval {
   fn: (callback: Callback) => void;
   timerId: NodeJS.Timeout | undefined;

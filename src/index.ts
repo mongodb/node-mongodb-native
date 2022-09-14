@@ -434,7 +434,8 @@ export type {
   MonitorOptions,
   MonitorPrivate,
   RTTPinger,
-  RTTPingerOptions
+  RTTPingerOptions,
+  SDAMMonitorInterval
 } from './sdam/monitor';
 export type { Server, ServerEvents, ServerOptions, ServerPrivate } from './sdam/server';
 export type {
@@ -475,7 +476,6 @@ export type {
   ClientMetadataOptions,
   EventEmitterWithState,
   HostAddress,
-  InterruptibleAsyncInterval,
   MongoDBNamespace
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';

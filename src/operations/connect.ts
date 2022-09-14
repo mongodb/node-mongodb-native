@@ -79,7 +79,7 @@ function createTopology(
 
       topology.connect(options, err => {
         if (err) {
-          topology.close({ force: true });
+          topology.close({ force: true }, () => {});
           return callback(err);
         }
 
@@ -97,7 +97,7 @@ function createTopology(
   // otherwise connect normally
   topology.connect(options, err => {
     if (err) {
-      topology.close({ force: true });
+      topology.close({ force: true }, () => {});
       return callback(err);
     }
 
