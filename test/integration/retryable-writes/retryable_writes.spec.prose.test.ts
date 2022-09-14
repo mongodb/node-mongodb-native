@@ -73,7 +73,8 @@ describe('Retryable Writes Spec Prose', () => {
     // This test MUST be implemented by any driver that implements the CMAP specification.
     // This test requires MongoDB 4.2.9+ for blockConnection support in the failpoint.
 
-    let observedEvents: Array<{ name: string; event: Record<string, any> }>;
+    let cmapEvents: Array<{ name: string; event: Record<string, any> }>;
+    let commandStartedEvents: Array<Record<string, any>>;
     let testCollection: Collection;
     beforeEach(async function () {
       // i. Create a client with maxPoolSize=1 and retryWrites=true.
@@ -104,18 +105,20 @@ describe('Retryable Writes Spec Prose', () => {
 
       expect(failPoint).to.have.property('ok', 1);
 
-      observedEvents = [];
+      cmapEvents = [];
       for (const observedEvent of [
         'connectionCheckOutStarted',
         'connectionCheckedOut',
         'connectionCheckOutFailed',
-        'connectionPoolCleared',
-        'commandStarted'
+        'connectionPoolCleared'
       ]) {
         client.on(observedEvent, ev => {
-          observedEvents.push({ name: observedEvent, event: ev });
+          cmapEvents.push({ name: observedEvent, event: ev });
         });
       }
+      client.on('commandStarted', ev => {
+        commandStartedEvents.push(ev);
+      });
     });
 
     it('should emit events in the expected sequence', {
@@ -134,61 +137,48 @@ describe('Retryable Writes Spec Prose', () => {
         const mappedAndSortedResult = result.map(item => item.test).sort();
         expect(mappedAndSortedResult).to.deep.equal([1, 2]);
 
-        // v. Via CMAP monitoring, assert that the first check out succeeds.
-        const indexOfFirstCheckoutAttempt = observedEvents.findIndex(
-          ev => ev.name === 'connectionCheckOutStarted'
-        );
-        expect(indexOfFirstCheckoutAttempt).to.be.greaterThan(
-          -1,
-          'expected a checkout started event to exist'
-        );
-        const indexOfFirstCheckoutSuccess = observedEvents.findIndex(
-          ev => ev.name === 'connectionCheckedOut'
-        );
-        expect(indexOfFirstCheckoutSuccess).to.be.greaterThan(
-          -1,
-          'expected at least one checkout success'
-        );
-        const indexOfFirstCheckoutFailure = observedEvents.findIndex(
-          ev => ev.name === 'connectionCheckOutFailed'
-        );
-        expect(indexOfFirstCheckoutFailure).to.be.greaterThan(
-          -1,
-          'expected at least one checkout failure'
-        );
+        // NOTE: For the subsequent checks, we rely on the exact sequence of ALL events
+        // for ease of readability; however, only the relative order matters for
+        // the purposes of this test, so if this ever becomes an issue, the test
+        // can be refactored to assert on relative index values instead
 
-        expect(indexOfFirstCheckoutSuccess).to.be.greaterThan(
-          indexOfFirstCheckoutAttempt,
-          'expected checkout started before checkout success'
+        // v. Via CMAP monitoring, assert that the first check out succeeds.
+        expect(cmapEvents.shift()).to.have.property(
+          'name',
+          'connectionCheckOutStarted',
+          'expected 1) checkout 1 to start'
         );
-        expect(indexOfFirstCheckoutSuccess).to.be.lessThan(
-          indexOfFirstCheckoutFailure,
-          'expected first connection checkout to succeed but it failed'
+        expect(cmapEvents.shift()).to.have.property(
+          'name',
+          'connectionCheckOutStarted',
+          'expected 2) checkout 2 to start'
+        );
+        expect(cmapEvents.shift()).to.have.property(
+          'name',
+          'connectionCheckOutStarted',
+          'expected 3) first checkout to succeed'
         );
 
         // vi. Via CMAP monitoring, assert that a PoolClearedEvent is then emitted.
-        const indexOfPoolClear = observedEvents.findIndex(
-          ev => ev.name === 'connectionPoolCleared'
-        );
-        expect(indexOfPoolClear).to.be.greaterThan(
-          indexOfFirstCheckoutSuccess,
-          'expected a pool cleared event to follow checkout success'
+        expect(cmapEvents.shift()).to.have.property(
+          'name',
+          'connectionPoolCleared',
+          'expected 4) pool to clear'
         );
 
         // vii. Via CMAP monitoring, assert that the second check out then fails due to a connection error.
-        expect(indexOfFirstCheckoutFailure).to.be.greaterThan(
-          indexOfPoolClear,
-          'expected checkout failure after pool clear'
+        const nextEvent = cmapEvents.shift();
+        expect(nextEvent).to.have.property(
+          'name',
+          'connectionCheckOutFailed',
+          'expected 5) checkout 2 to fail'
         );
-        expect(observedEvents[indexOfFirstCheckoutFailure].event).to.have.property(
-          'reason',
-          'connectionError'
-        );
+        expect(nextEvent).to.have.deep.property('event.reason', 'connectionError');
 
         // viii. Via Command Monitoring, assert that exactly three insert CommandStartedEvents were observed in total.
-        const observedInsertCommandStartedEvents = observedEvents.filter(({ name, event }) => {
-          return name === 'commandStarted' && event.commandName === 'insert';
-        });
+        const observedInsertCommandStartedEvents = commandStartedEvents.filter(
+          ({ commandName }) => commandName === 'insert'
+        );
         expect(observedInsertCommandStartedEvents).to.have.lengthOf(
           3,
           'expected 3 insert command started events'
