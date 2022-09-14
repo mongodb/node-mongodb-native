@@ -103,7 +103,7 @@ describe('Retryable Reads Spec Prose', () => {
         );
         expect(cmapEvents.shift()).to.have.property(
           'name',
-          'connectionCheckOutStarted',
+          'connectionCheckedOut',
           'expected 3) first checkout to succeed'
         );
 
