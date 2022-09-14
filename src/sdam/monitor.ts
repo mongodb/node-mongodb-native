@@ -143,7 +143,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // start
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
+    this[kMonitorId] = new InterruptibleAsyncInterval(monitorServer(this), {
       interval: heartbeatFrequencyMS,
       minInterval: minHeartbeatFrequencyMS,
       immediate: true
@@ -173,7 +173,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // restart monitoring
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
+    this[kMonitorId] = new InterruptibleAsyncInterval(monitorServer(this), {
       interval: heartbeatFrequencyMS,
       minInterval: minHeartbeatFrequencyMS
     });
@@ -475,39 +475,42 @@ export interface InterruptibleAsyncIntervalOptions {
   clock: () => number;
 }
 
-/** @internal */
-export interface InterruptibleAsyncInterval {
-  wake(): void;
-  stop(): void;
-}
+export class InterruptibleAsyncInterval {
+  fn: (callback: Callback) => void;
+  timerId: NodeJS.Timeout | undefined;
+  lastCallTime: number;
+  cannotBeExpedited = false;
+  stopped = false;
 
-/**
- * Creates an interval timer which is able to be woken up sooner than
- * the interval. The timer will also debounce multiple calls to wake
- * ensuring that the function is only ever called once within a minimum
- * interval window.
- * @internal
- *
- * @param fn - An async function to run on an interval, must accept a `callback` as its only parameter
- */
-export function makeInterruptibleAsyncInterval(
-  fn: (callback: Callback) => void,
-  options?: Partial<InterruptibleAsyncIntervalOptions>
-): InterruptibleAsyncInterval {
-  let timerId: NodeJS.Timeout | undefined;
-  let lastCallTime: number;
-  let cannotBeExpedited = false;
-  let stopped = false;
+  interval: number;
+  minInterval: number;
+  immediate: boolean;
+  clock: () => number;
 
-  options = options ?? {};
-  const interval = options.interval || 1000;
-  const minInterval = options.minInterval || 500;
-  const immediate = typeof options.immediate === 'boolean' ? options.immediate : false;
-  const clock = typeof options.clock === 'function' ? options.clock : now;
+  constructor(
+    fn: (callback: Callback) => void,
+    options?: Partial<InterruptibleAsyncIntervalOptions>
+  ) {
+    this.fn = fn;
+    this.lastCallTime = undefined as any;
 
-  function wake() {
-    const currentTime = clock();
-    const nextScheduledCallTime = lastCallTime + interval;
+    options = options ?? {};
+    this.interval = options.interval || 1000;
+    this.minInterval = options.minInterval || 500;
+    this.immediate = typeof options.immediate === 'boolean' ? options.immediate : false;
+    this.clock = typeof options.clock === 'function' ? options.clock : now;
+
+    if (this.immediate) {
+      this._executeAndReschedule();
+    } else {
+      this.lastCallTime = this.clock();
+      this._reschedule(undefined);
+    }
+  }
+
+  wake() {
+    const currentTime = this.clock();
+    const nextScheduledCallTime = this.lastCallTime + this.interval;
     const timeUntilNextCall = nextScheduledCallTime - currentTime;
 
     // For the streaming protocol: there is nothing obviously stopping this
@@ -521,59 +524,50 @@ export function makeInterruptibleAsyncInterval(
     // actually completes, so we want to execute immediately and then attempt
     // to reschedule.
     if (timeUntilNextCall < 0) {
-      executeAndReschedule();
+      this._executeAndReschedule();
       return;
     }
 
     // debounce multiple calls to wake within the `minInterval`
-    if (cannotBeExpedited) {
+    if (this.cannotBeExpedited) {
       return;
     }
 
     // reschedule a call as soon as possible, ensuring the call never happens
     // faster than the `minInterval`
-    if (timeUntilNextCall > minInterval) {
-      reschedule(minInterval);
-      cannotBeExpedited = true;
+    if (timeUntilNextCall > this.minInterval) {
+      this._reschedule(this.minInterval);
+      this.cannotBeExpedited = true;
     }
   }
 
-  function stop() {
-    stopped = true;
-    if (timerId) {
-      clearTimeout(timerId);
-      timerId = undefined;
+  stop() {
+    this.stopped = true;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = undefined;
     }
 
-    lastCallTime = 0;
-    cannotBeExpedited = false;
+    this.lastCallTime = 0;
+    this.cannotBeExpedited = false;
   }
 
-  function reschedule(ms?: number) {
-    if (stopped) return;
-    if (timerId) {
-      clearTimeout(timerId);
+  private _reschedule(ms?: number) {
+    if (this.stopped) return;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
     }
 
-    timerId = setTimeout(executeAndReschedule, ms || interval);
+    this.timerId = setTimeout(this._executeAndReschedule, ms || this.interval);
   }
 
-  function executeAndReschedule() {
-    cannotBeExpedited = false;
-    lastCallTime = clock();
+  private _executeAndReschedule = () => {
+    this.cannotBeExpedited = false;
+    this.lastCallTime = this.clock();
 
-    fn(err => {
+    this.fn(err => {
       if (err) throw err;
-      reschedule(interval);
+      this._reschedule(this.interval);
     });
-  }
-
-  if (immediate) {
-    executeAndReschedule();
-  } else {
-    lastCallTime = clock();
-    reschedule(undefined);
-  }
-
-  return { wake, stop };
+  };
 }
