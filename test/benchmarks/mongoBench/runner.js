@@ -167,12 +167,12 @@ class Runner {
 
     const taskTimer = benchmark._taskType === 'sync' ? timeSyncTask : timeAsyncTask;
 
-      while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
-        await benchmark.beforeTask.call(ctx);
+    while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
+      await benchmark.beforeTask.call(ctx);
       const executionTime = await taskTimer(benchmark.task, ctx);
-        rawData.push(executionTime);
-        count++;
-        time = performance.now();
+      rawData.push(executionTime);
+      count++;
+      time = performance.now();
     }
 
     return {
