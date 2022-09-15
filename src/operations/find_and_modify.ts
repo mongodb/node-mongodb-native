@@ -202,15 +202,6 @@ class FindAndModifyOperation extends CommandOperation<Document> {
       cmd.hint = options.hint;
     }
 
-    if (this.explain && maxWireVersion(server) < 4) {
-      callback(
-        new MongoCompatibilityError(
-          `Server ${server.name} does not support explain on findAndModify`
-        )
-      );
-      return;
-    }
-
     // Execute the command
     super.executeCommand(server, session, cmd, (err, result) => {
       if (err) return callback(err);

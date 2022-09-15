@@ -23,7 +23,6 @@ import {
   isNetworkErrorBeforeHandshake,
   isNodeShuttingDownError,
   isSDAMUnrecoverableError,
-  MongoCompatibilityError,
   MongoError,
   MongoErrorLabel,
   MongoInvalidArgumentError,
@@ -41,7 +40,6 @@ import type { ClientSession } from '../sessions';
 import { isTransactionCommand } from '../transactions';
 import {
   Callback,
-  collationNotSupported,
   EventEmitterWithState,
   makeStateMachine,
   maxWireVersion,
@@ -312,12 +310,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     // (primary) is not the same as the provided and must be removed completely.
     if (finalOptions.omitReadPreference) {
       delete finalOptions.readPreference;
-    }
-
-    // error if collation not supported
-    if (collationNotSupported(this, cmd)) {
-      callback(new MongoCompatibilityError(`Server ${this.name} does not support collation`));
-      return;
     }
 
     const session = finalOptions.session;
