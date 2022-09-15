@@ -601,7 +601,7 @@ describe('Connection String', function () {
       ]);
     });
 
-    it('should allow multiple bracketed portless localhost IPv6 addresses', () => {
+    it('should allow multiple bracketed portless remote IPv6 addresses', () => {
       const client = new MongoClient(
         'mongodb://[ABCD:f::abcd:abcd:abcd:abcd],[ABCD:f::abcd:abcd:abcd:abcd],[ABCD:f::abcd:abcd:abcd:abcd]/test'
       );
@@ -612,7 +612,7 @@ describe('Connection String', function () {
       ]);
     });
 
-    it('should allow multiple bracketed port-full IPv6 addresses', () => {
+    it('should allow multiple bracketed IPv6 addresses with specified ports', () => {
       const client = new MongoClient('mongodb://[::1]:27018,[::1]:27019,[::1]:27020/test');
       expect(client.options.hosts).to.deep.equal([
         { host: '::1', port: 27018, isIPv6: true, socketPath: undefined },

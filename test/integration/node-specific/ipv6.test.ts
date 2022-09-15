@@ -12,11 +12,11 @@ describe('IPv6 Addresses', () => {
 
   beforeEach(async function () {
     if (
-      process.platform !== 'win32' ||
+      process.platform === 'linux' ||
       this.configuration.topologyType !== TopologyType.ReplicaSetWithPrimary
     ) {
       if (this.currentTest) {
-        // Ubuntu 18 does not support localhost AAAA lookups (IPv6)
+        // Ubuntu 18 (linux) does not support localhost AAAA lookups (IPv6)
         // Windows (VS2019) has the AAAA lookup
         // We do not run a replica set on macos
         this.currentTest.skipReason =
