@@ -1,4 +1,4 @@
-import Denque = require('denque');
+import { Deque } from 'js-sdsl';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
@@ -192,7 +192,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @internal */
   s: TopologyPrivate;
   /** @internal */
-  [kWaitQueue]: Denque<ServerSelectionRequest>;
+  [kWaitQueue]: Deque<ServerSelectionRequest>;
   /** @internal */
   hello?: Document;
   /** @internal */
@@ -284,7 +284,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       serverDescriptions.set(hostAddress.toString(), new ServerDescription(hostAddress));
     }
 
-    this[kWaitQueue] = new Denque();
+    this[kWaitQueue] = new Deque();
     this.s = {
       // the id of this topology
       id: topologyId,
@@ -578,7 +578,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }, serverSelectionTimeoutMS);
     }
 
-    this[kWaitQueue].push(waitQueueMember);
+    this[kWaitQueue].pushBack(waitQueueMember);
     processWaitQueue(this);
   }
 
@@ -668,7 +668,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     updateServers(this, serverDescription);
 
     // attempt to resolve any outstanding server selection attempts
-    if (this[kWaitQueue].length > 0) {
+    if (!this[kWaitQueue].empty()) {
       processWaitQueue(this);
     }
 
@@ -863,9 +863,10 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   }
 }
 
-function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: MongoDriverError) {
-  while (queue.length) {
-    const waitQueueMember = queue.shift();
+function drainWaitQueue(queue: Deque<ServerSelectionRequest>, err?: MongoDriverError) {
+  while (queue.size()) {
+    const waitQueueMember = queue.front();
+    queue.popFront();
     if (!waitQueueMember) {
       continue;
     }
@@ -888,9 +889,10 @@ function processWaitQueue(topology: Topology) {
 
   const isSharded = topology.description.type === TopologyType.Sharded;
   const serverDescriptions = Array.from(topology.description.servers.values());
-  const membersToProcess = topology[kWaitQueue].length;
+  const membersToProcess = topology[kWaitQueue].size();
   for (let i = 0; i < membersToProcess; ++i) {
-    const waitQueueMember = topology[kWaitQueue].shift();
+    const waitQueueMember = topology[kWaitQueue].front();
+    topology[kWaitQueue].popFront();
     if (!waitQueueMember) {
       continue;
     }
@@ -916,7 +918,7 @@ function processWaitQueue(topology: Topology) {
 
     let selectedServer;
     if (selectedDescriptions.length === 0) {
-      topology[kWaitQueue].push(waitQueueMember);
+      topology[kWaitQueue].pushBack(waitQueueMember);
       continue;
     } else if (selectedDescriptions.length === 1) {
       selectedServer = topology.s.servers.get(selectedDescriptions[0].address);
@@ -952,7 +954,7 @@ function processWaitQueue(topology: Topology) {
     waitQueueMember.callback(undefined, selectedServer);
   }
 
-  if (topology[kWaitQueue].length > 0) {
+  if (!topology[kWaitQueue].empty()) {
     // ensure all server monitors attempt monitoring soon
     for (const [, server] of topology.s.servers) {
       process.nextTick(function scheduleServerCheck() {
