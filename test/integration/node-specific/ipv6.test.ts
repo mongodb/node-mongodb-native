@@ -41,7 +41,8 @@ describe('IPv6 Addresses', () => {
     const ipv6LocalhostAddresses = this.configuration.options.hostAddresses.map(({ port }) => ({
       host: '::1',
       port,
-      isIPv6: true
+      isIPv6: true,
+      socketPath: undefined
     }));
     expect(client.options.hosts).to.deep.equal(ipv6LocalhostAddresses);
   });
