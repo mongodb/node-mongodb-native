@@ -90,10 +90,14 @@ export class DeleteOperation extends CommandOperation<Document> {
         : undefined;
     }
 
-    const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
-    if (unacknowledgedWrite || maxWireVersion(server) < 5) {
-      if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoCompatibilityError(`Servers < 3.4 do not support hint on delete`));
+    if (maxWireVersion(server) < 9) {
+      const hintPresent = this.statements.some(o => o.hint);
+      const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
+
+      if (hintPresent && unacknowledgedWrite) {
+        callback(
+          new MongoCompatibilityError(`Servers < 4.4 do not support hint on unacknowledged delete`)
+        );
         return;
       }
     }
