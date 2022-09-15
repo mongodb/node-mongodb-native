@@ -141,6 +141,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param id - The id of the file doc
    */
   delete(id: ObjectId): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   delete(id: ObjectId, callback: Callback<void>): void;
   delete(id: ObjectId, callback?: Callback<void>): Promise<void> | void {
     return maybePromise(callback, callback => {
@@ -211,6 +212,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param filename - new name for the file
    */
   rename(id: ObjectId, filename: string): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   rename(id: ObjectId, filename: string, callback: Callback<void>): void;
   rename(id: ObjectId, filename: string, callback?: Callback<void>): Promise<void> | void {
     return maybePromise(callback, callback => {
@@ -232,6 +234,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
 
   /** Removes this bucket's files collection, followed by its chunks collection. */
   drop(): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   drop(callback: Callback<void>): void;
   drop(callback?: Callback<void>): Promise<void> | void {
     return maybePromise(callback, callback => {

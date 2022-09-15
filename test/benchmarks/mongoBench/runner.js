@@ -9,33 +9,18 @@ function percentileIndex(percentile, total) {
   return Math.max(Math.floor((total * percentile) / 100 - 1), 0);
 }
 
-function timeDoneTask(task, ctx) {
-  return new Promise((resolve, reject) => {
-    let called = false;
-    const start = performance.now();
-    task.call(ctx, err => {
-      const end = performance.now(start);
-      if (called) return;
-      if (err) return reject(err);
-      return resolve((end - start) / 1000);
-    });
-  });
+function timeSyncTask(task, ctx) {
+  const start = performance.now();
+  task.call(ctx);
+  const end = performance.now();
+
+  return (end - start) / 1000;
 }
 
-async function timeTask(task, ctx) {
-  // Some tasks are async, so they take callbacks.
-  if (task.length) {
-    return timeDoneTask(task, ctx);
-  }
-
+async function timeAsyncTask(task, ctx) {
   const start = performance.now();
-  const ret = task.call(ctx);
-  let end = performance.now();
-
-  if (ret && ret.then) {
-    await ret;
-    end = performance.now();
-  }
+  await task.call(ctx);
+  const end = performance.now();
 
   return (end - start) / 1000;
 }
@@ -180,9 +165,11 @@ class Runner {
     let time = performance.now() - start;
     let count = 1;
 
+    const taskTimer = benchmark._taskType === 'sync' ? timeSyncTask : timeAsyncTask;
+
     while (time < maxExecutionTime && (time < minExecutionTime || count < minExecutionCount)) {
       await benchmark.beforeTask.call(ctx);
-      const executionTime = await timeTask(benchmark.task, ctx);
+      const executionTime = await taskTimer(benchmark.task, ctx);
       rawData.push(executionTime);
       count++;
       time = performance.now();

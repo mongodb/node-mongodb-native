@@ -24,7 +24,6 @@ export class PoolClosedError extends MongoDriverError {
  * @category Error
  */
 export class PoolClearedError extends MongoNetworkError {
-  // TODO(NODE-3144): needs to extend RetryableError or be marked retryable in some other way per spec
   /** The address of the connection pool */
   address: string;
 

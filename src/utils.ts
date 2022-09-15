@@ -449,10 +449,10 @@ export function maybePromise<T>(
   callback: Callback<T> | undefined,
   wrapper: (fn: Callback<T>) => void
 ): Promise<T> | void {
-  const Promise = PromiseProvider.get();
+  const PromiseConstructor = PromiseProvider.get() ?? Promise;
   let result: Promise<T> | void;
   if (typeof callback !== 'function') {
-    result = new Promise<any>((resolve, reject) => {
+    result = new PromiseConstructor<any>((resolve, reject) => {
       callback = (err, res) => {
         if (err) return reject(err);
         resolve(res);
@@ -1234,7 +1234,7 @@ export const DEFAULT_PK_FACTORY = {
  * @public
  *
  * @example
- * ```js
+ * ```ts
  * process.on('warning', (warning) => {
  *  if (warning.code === MONGODB_WARNING_CODE) console.error('Ah an important warning! :)')
  * })

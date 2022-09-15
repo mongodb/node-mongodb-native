@@ -275,7 +275,15 @@
           "name": "createChangeStream",
           "object": "collection0",
           "arguments": {
-            "pipeline": [],
+            "pipeline": [
+              {
+                "$match": {
+                  "operationType": {
+                    "$ne": "create"
+                  }
+                }
+              }
+            ],
             "showExpandedEvents": true
           },
           "saveResultAsEntity": "changeStream0"

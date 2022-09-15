@@ -1,3 +1,5 @@
+const { Readable } = require('stream');
+const { pipeline } = require('stream/promises');
 const {
   loadSpecFile,
   makeLoadJSON,
@@ -12,30 +14,24 @@ const {
   createCollection,
   dropCollection,
   dropBucket,
-  initBucket
+  initBucket,
+  writeSingleByteFileToBucket
 } = require('../../driverBench/common');
 
 function loadGridFs() {
   this.bin = loadSpecFile(['single_and_multi_document', 'gridfs_large.bin']);
 }
 
-function findManyAndEmptyCursor(done) {
-  return this.collection.find({}).forEach(() => {}, done);
-}
-
-function docBulkInsert(done) {
-  return this.collection.insertMany(this.docs, { ordered: true }, done);
-}
-
 function gridFsInitUploadStream() {
-  this.stream = this.bucket.openUploadStream('gridfstest');
+  this.uploadStream = this.bucket.openUploadStream('gridfstest');
 }
 
-function writeSingleByteToUploadStream() {
-  return new Promise((resolve, reject) => {
-    this.stream.write('\0', null, err => (err ? reject(err) : resolve()));
-  });
+async function gridFsUpload() {
+  const uploadData = Readable.from(this.bin);
+  const uploadStream = this.uploadStream;
+  await pipeline(uploadData, uploadStream);
 }
+
 function makeMultiBench(suite) {
   return suite
     .benchmark('findManyAndEmptyCursor', benchmark =>
@@ -48,7 +44,12 @@ function makeMultiBench(suite) {
         .setup(dropDb)
         .setup(initCollection)
         .setup(makeLoadTweets(false))
-        .task(findManyAndEmptyCursor)
+        .task(async function () {
+          // eslint-disable-next-line no-unused-vars
+          for await (const _ of this.collection.find({})) {
+            // do nothing
+          }
+        })
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
@@ -67,7 +68,9 @@ function makeMultiBench(suite) {
         .beforeTask(dropCollection)
         .beforeTask(createCollection)
         .beforeTask(initCollection)
-        .task(docBulkInsert)
+        .task(async function () {
+          await this.collection.insertMany(this.docs, { ordered: true });
+        })
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
@@ -86,7 +89,9 @@ function makeMultiBench(suite) {
         .beforeTask(dropCollection)
         .beforeTask(createCollection)
         .beforeTask(initCollection)
-        .task(docBulkInsert)
+        .task(async function () {
+          await this.collection.insertMany(this.docs, { ordered: true });
+        })
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
@@ -103,10 +108,8 @@ function makeMultiBench(suite) {
         .beforeTask(dropBucket)
         .beforeTask(initBucket)
         .beforeTask(gridFsInitUploadStream)
-        .beforeTask(writeSingleByteToUploadStream)
-        .task(function (done) {
-          this.stream.on('error', done).end(this.bin, null, () => done());
-        })
+        .beforeTask(writeSingleByteFileToBucket)
+        .task(gridFsUpload)
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
@@ -123,21 +126,16 @@ function makeMultiBench(suite) {
         .setup(dropBucket)
         .setup(initBucket)
         .setup(gridFsInitUploadStream)
-        .setup(function () {
-          return new Promise((resolve, reject) => {
-            this.stream.end(this.bin, null, err => {
-              if (err) {
-                return reject(err);
-              }
-
-              this.id = this.stream.id;
-              this.stream = undefined;
-              resolve();
-            });
-          });
+        .setup(async function () {
+          await gridFsUpload.call(this);
+          this.id = this.uploadStream.id;
+          this.uploadData = undefined;
         })
-        .task(function (done) {
-          this.bucket.openDownloadStream(this.id).resume().on('end', done);
+        .task(async function () {
+          // eslint-disable-next-line no-unused-vars
+          for await (const _ of this.bucket.openDownloadStream(this.id)) {
+            // do nothing
+          }
         })
         .teardown(dropDb)
         .teardown(disconnectClient)

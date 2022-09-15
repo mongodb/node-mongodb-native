@@ -245,8 +245,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param callback - Optional callback for completion of this operation
    */
   endSession(): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   endSession(callback: Callback<void>): void;
   endSession(options: EndSessionOptions): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   endSession(options: EndSessionOptions, callback: Callback<void>): void;
   endSession(
     options?: EndSessionOptions | Callback<void>,
@@ -433,6 +435,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   commitTransaction(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   commitTransaction(callback: Callback<Document>): void;
   commitTransaction(callback?: Callback<Document>): Promise<Document> | void {
     return maybePromise(callback, cb => endTransaction(this, 'commitTransaction', cb));
@@ -444,6 +447,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   abortTransaction(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   abortTransaction(callback: Callback<Document>): void;
   abortTransaction(callback?: Callback<Document>): Promise<Document> | void {
     return maybePromise(callback, cb => endTransaction(this, 'abortTransaction', cb));
@@ -605,14 +609,14 @@ function attemptTransaction<TSchema>(
   fn: WithTransactionCallback<TSchema>,
   options?: TransactionOptions
 ): Promise<any> {
-  const Promise = PromiseProvider.get();
   session.startTransaction(options);
 
   let promise;
   try {
     promise = fn(session);
   } catch (err) {
-    promise = Promise.reject(err);
+    const PromiseConstructor = PromiseProvider.get() ?? Promise;
+    promise = PromiseConstructor.reject(err);
   }
 
   if (!isPromiseLike(promise)) {

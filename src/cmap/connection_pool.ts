@@ -423,11 +423,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kPoolState] = PoolState.paused;
 
     this.clearMinPoolSizeTimer();
-    this.processWaitQueue();
-
     if (!alreadyPaused) {
       this.emit(ConnectionPool.CONNECTION_POOL_CLEARED, new ConnectionPoolClearedEvent(this));
     }
+    this.processWaitQueue();
   }
 
   /** Close the pool */

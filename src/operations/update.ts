@@ -22,7 +22,7 @@ export interface UpdateOptions extends CommandOperationOptions {
   /** Specifies a collation */
   collation?: CollationOptions;
   /** Specify that the update query should only consider plans using the hinted index */
-  hint?: string | Document;
+  hint?: Hint;
   /** When true, creates a new document if no document matches the query */
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
@@ -280,7 +280,7 @@ export class ReplaceOneOperation extends UpdateOperation {
 
 export function makeUpdateStatement(
   filter: Document,
-  update: Document,
+  update: Document | Document[],
   options: UpdateOptions & { multi?: boolean }
 ): UpdateStatement {
   if (filter == null || typeof filter !== 'object') {
