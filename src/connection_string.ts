@@ -438,7 +438,9 @@ export function parseOptions(
 
   checkTLSOptions(mongoOptions);
 
-  if (options.promiseLibrary) PromiseProvider.set(options.promiseLibrary);
+  if (options.promiseLibrary) {
+    PromiseProvider.set(options.promiseLibrary);
+  }
 
   const lbError = validateLoadBalancedOptions(hosts, mongoOptions, isSRV);
   if (lbError) {

@@ -35,7 +35,6 @@ const options: MongoClientOptions = {
   promoteBuffers: false,
   authMechanism: 'SCRAM-SHA-1',
   forceServerObjectId: false,
-  promiseLibrary: Promise,
   directConnection: false
 };
 

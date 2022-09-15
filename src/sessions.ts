@@ -609,14 +609,14 @@ function attemptTransaction<TSchema>(
   fn: WithTransactionCallback<TSchema>,
   options?: TransactionOptions
 ): Promise<any> {
-  const Promise = PromiseProvider.get();
   session.startTransaction(options);
 
   let promise;
   try {
     promise = fn(session);
   } catch (err) {
-    promise = Promise.reject(err);
+    const PromiseConstructor = PromiseProvider.get() ?? Promise;
+    promise = PromiseConstructor.reject(err);
   }
 
   if (!isPromiseLike(promise)) {

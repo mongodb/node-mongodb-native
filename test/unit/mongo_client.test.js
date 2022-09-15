@@ -110,7 +110,6 @@ describe('MongoOptions', function () {
         return 'very unique';
       }
     },
-    promiseLibrary: global.Promise,
     promoteBuffers: true,
     promoteLongs: false,
     promoteValues: false,

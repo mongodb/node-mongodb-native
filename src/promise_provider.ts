@@ -4,11 +4,11 @@ import { MongoInvalidArgumentError } from './error';
 const kPromise = Symbol('promise');
 
 interface PromiseStore {
-  [kPromise]?: PromiseConstructor;
+  [kPromise]: PromiseConstructor | null;
 }
 
 const store: PromiseStore = {
-  [kPromise]: undefined
+  [kPromise]: null
 };
 
 /**
@@ -31,7 +31,14 @@ export class PromiseProvider {
    * Sets the promise library
    * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
    */
-  static set(lib: PromiseConstructor): void {
+  static set(lib: PromiseConstructor | null): void {
+    // eslint-disable-next-line no-restricted-syntax
+    if (lib === null) {
+      // Check explicitly against null since `.set()` (no args) should fall through to validate
+      store[kPromise] = null;
+      return;
+    }
+
     if (!PromiseProvider.validate(lib)) {
       // validate
       return;
@@ -43,9 +50,7 @@ export class PromiseProvider {
    * Get the stored promise library, or resolves passed in
    * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
    */
-  static get(): PromiseConstructor {
-    return store[kPromise] as PromiseConstructor;
+  static get(): PromiseConstructor | null {
+    return store[kPromise];
   }
 }
-
-PromiseProvider.set(global.Promise);
