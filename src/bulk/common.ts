@@ -784,7 +784,7 @@ export class FindOperators {
   }
 
   /** Add a multiple update operation to the bulk operation */
-  update(updateDocument: Document): BulkOperationBase {
+  update(updateDocument: Document | Document[]): BulkOperationBase {
     const currentOp = buildCurrentOp(this.bulkOperation);
     return this.bulkOperation.addToOperationsList(
       BatchType.UPDATE,
@@ -796,7 +796,7 @@ export class FindOperators {
   }
 
   /** Add a single update operation to the bulk operation */
-  updateOne(updateDocument: Document): BulkOperationBase {
+  updateOne(updateDocument: Document | Document[]): BulkOperationBase {
     if (!hasAtomicOperators(updateDocument)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
@@ -866,6 +866,16 @@ export class FindOperators {
     }
 
     this.bulkOperation.s.currentOp.arrayFilters = arrayFilters;
+    return this;
+  }
+
+  /** Specifies hint for the bulk operation. */
+  hint(hint: Hint): this {
+    if (!this.bulkOperation.s.currentOp) {
+      this.bulkOperation.s.currentOp = {};
+    }
+
+    this.bulkOperation.s.currentOp.hint = hint;
     return this;
   }
 }
