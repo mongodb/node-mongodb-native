@@ -23,7 +23,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { Callback, maybePromise, supportsRetryableWrites } from '../utils';
+import { Callback, maybePromise, maybeRunInAsyncScope, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -136,11 +136,15 @@ export function executeOperation<
 
     try {
       executeWithServerSelection<TResult>(topology, session, operation, (error, result) => {
+        const asyncResource = operation.options.asyncResource;
+
         if (session?.owner != null && session.owner === owner) {
-          return session.endSession(endSessionError => callback(endSessionError ?? error, result));
+          return session.endSession(endSessionError =>
+            maybeRunInAsyncScope(asyncResource, callback, endSessionError ?? error, result)
+          );
         }
 
-        callback(error, result);
+        maybeRunInAsyncScope(asyncResource, callback, error, result);
       });
     } catch (error) {
       if (session?.owner != null && session.owner === owner) {

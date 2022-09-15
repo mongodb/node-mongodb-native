@@ -72,7 +72,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const findOperation = new FindOperation(undefined, this.namespace, this[kFilter], {
       ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
-      session
+      session,
+      asyncResource: this.asyncResource
     });
 
     executeOperation(this.client, findOperation, (err, response) => {
@@ -147,7 +148,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       new CountOperation(this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
-        ...options
+        ...options,
+        asyncResource: this.asyncResource
       }),
       callback
     );
@@ -169,7 +171,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       new FindOperation(undefined, this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
-        explain: verbosity
+        explain: verbosity,
+        asyncResource: this.asyncResource
       }),
       callback
     );

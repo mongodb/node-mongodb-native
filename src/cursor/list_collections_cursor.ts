@@ -39,7 +39,8 @@ export class ListCollectionsCursor<
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,
       ...this.options,
-      session
+      session,
+      asyncResource: this.asyncResource
     });
 
     executeOperation(this.parent.s.client, operation, (err, response) => {

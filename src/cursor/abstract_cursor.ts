@@ -1,3 +1,4 @@
+import { AsyncResource } from 'async_hooks';
 import { Readable, Transform } from 'stream';
 
 import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
@@ -45,6 +46,8 @@ const kClosed = Symbol('closed');
 const kKilled = Symbol('killed');
 /** @internal */
 const kInit = Symbol('kInit');
+/** @internal */
+const kAsyncResource = Symbol('asyncResource');
 
 /** @public */
 export const CURSOR_FLAGS = [
@@ -161,6 +164,8 @@ export abstract class AbstractCursor<
   /** @internal */
   [kKilled]: boolean;
   /** @internal */
+  [kAsyncResource]: AsyncResource;
+  /** @internal */
   [kOptions]: InternalAbstractCursorOptions;
 
   /** @event */
@@ -183,6 +188,7 @@ export abstract class AbstractCursor<
     this[kInitialized] = false;
     this[kClosed] = false;
     this[kKilled] = false;
+    this[kAsyncResource] = new AsyncResource('mongodb:' + this.constructor.name);
     this[kOptions] = {
       readPreference:
         options.readPreference && options.readPreference instanceof ReadPreference
@@ -267,6 +273,10 @@ export abstract class AbstractCursor<
 
   get killed(): boolean {
     return this[kKilled];
+  }
+
+  get asyncResource(): AsyncResource {
+    return this[kAsyncResource];
   }
 
   get loadBalanced(): boolean {
@@ -649,7 +659,8 @@ export abstract class AbstractCursor<
     const getMoreOperation = new GetMoreOperation(this[kNamespace], this[kId]!, this[kServer]!, {
       ...this[kOptions],
       session: this[kSession],
-      batchSize
+      batchSize,
+      asyncResource: this[kAsyncResource]
     });
 
     executeOperation(this[kClient], getMoreOperation, callback);
@@ -854,7 +865,10 @@ function cleanupCursor(
 
   return executeOperation(
     cursor[kClient],
-    new KillCursorsOperation(cursorId, cursorNs, server, { session }),
+    new KillCursorsOperation(cursorId, cursorNs, server, {
+      session,
+      asyncResource: cursor[kAsyncResource]
+    }),
     completeCleanup
   );
 }

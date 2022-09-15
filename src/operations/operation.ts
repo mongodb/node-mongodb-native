@@ -1,3 +1,5 @@
+import type { AsyncResource } from 'async_hooks';
+
 import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -33,6 +35,9 @@ export interface OperationOptions extends BSONSerializeOptions {
   /** @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction */
   bypassPinningCheck?: boolean;
   omitReadPreference?: boolean;
+
+  /** @internal Run the operation under the execution context of this resource */
+  asyncResource?: AsyncResource;
 }
 
 /** @internal */
