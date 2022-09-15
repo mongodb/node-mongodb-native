@@ -31,6 +31,8 @@ CSFLE_GIT_REF=${CSFLE_GIT_REF:-master}
 CDRIVER_GIT_REF=${CDRIVER_GIT_REF:-1.17.6}
 REFRESH_AWS_CREDENTIALS=${REFRESH_AWS_CREDENTIALS:-""}
 
+echo "REFRESH_AWS_CREDENTIALS in script: $REFRESH_AWS_CREDENTIALS"
+
 rm -rf ../csfle-deps-tmp
 mkdir -p ../csfle-deps-tmp
 pushd ../csfle-deps-tmp

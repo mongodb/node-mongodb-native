@@ -701,6 +701,7 @@ functions:
           source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
           export MONGODB_URI="${MONGODB_URI}"
 
+          echo "REFRESH_AWS_CREDENTIALS: $REFRESH_AWS_CREDENTIALS"
           echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
