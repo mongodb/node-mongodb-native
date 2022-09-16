@@ -484,8 +484,8 @@ export interface MonitorIntervalOptions {
 export class MonitorInterval {
   fn: (callback: Callback) => void;
   timerId: NodeJS.Timeout | undefined;
-  lastCallTime: number;
-  isExpeditedCheckScheduled = false;
+  lastExecutionEnded: number;
+  isExpeditedCallToFnScheduled = false;
   stopped = false;
   isExecutionInProgress = false;
   hasExecutedOnce = false;
@@ -496,7 +496,7 @@ export class MonitorInterval {
 
   constructor(fn: (callback: Callback) => void, options: Partial<MonitorIntervalOptions> = {}) {
     this.fn = fn;
-    this.lastCallTime = 0;
+    this.lastExecutionEnded = 0;
 
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 1000;
     this.minHeartbeatFrequencyMS = options.minHeartbeatFrequencyMS ?? 500;
@@ -505,14 +505,14 @@ export class MonitorInterval {
     if (options.immediate) {
       this._executeAndReschedule();
     } else {
-      this.lastCallTime = this.clock();
+      this.lastExecutionEnded = this.clock();
       this._reschedule(undefined);
     }
   }
 
   wake() {
     const currentTime = this.clock();
-    const timeSinceLastCall = currentTime - this.lastCallTime;
+    const timeSinceLastCall = currentTime - this.lastExecutionEnded;
 
     if (!this.hasExecutedOnce) {
       this._executeAndReschedule();
@@ -524,14 +524,14 @@ export class MonitorInterval {
     }
 
     // debounce multiple calls to wake within the `minInterval`
-    if (this.isExpeditedCheckScheduled) {
+    if (this.isExpeditedCallToFnScheduled) {
       return;
     }
 
     // reschedule a call as soon as possible, ensuring the call never happens
     // faster than the `minInterval`
     if (timeSinceLastCall < this.minHeartbeatFrequencyMS) {
-      this.isExpeditedCheckScheduled = true;
+      this.isExpeditedCallToFnScheduled = true;
       this._reschedule(this.minHeartbeatFrequencyMS - timeSinceLastCall);
       return;
     }
@@ -546,8 +546,8 @@ export class MonitorInterval {
       this.timerId = undefined;
     }
 
-    this.lastCallTime = 0;
-    this.isExpeditedCheckScheduled = false;
+    this.lastExecutionEnded = 0;
+    this.isExpeditedCallToFnScheduled = false;
   }
 
   toString() {
@@ -556,11 +556,11 @@ export class MonitorInterval {
 
   toJSON() {
     const now = this.clock();
-    const timeSinceLastCall = now - this.lastCallTime;
+    const timeSinceLastCall = now - this.lastExecutionEnded;
     return {
       timerId: this.timerId != null ? 'set' : 'cleared',
-      lastCallTime: this.lastCallTime,
-      isExpeditedCheckScheduled: this.isExpeditedCheckScheduled,
+      lastCallTime: this.lastExecutionEnded,
+      isExpeditedCheckScheduled: this.isExpeditedCallToFnScheduled,
       stopped: this.stopped,
       heartbeatFrequencyMS: this.heartbeatFrequencyMS,
       minHeartbeatFrequencyMS: this.minHeartbeatFrequencyMS,
@@ -585,11 +585,11 @@ export class MonitorInterval {
     }
 
     this.hasExecutedOnce = true;
-    this.isExpeditedCheckScheduled = false;
+    this.isExpeditedCallToFnScheduled = false;
     this.isExecutionInProgress = true;
 
     this.fn(() => {
-      this.lastCallTime = this.clock();
+      this.lastExecutionEnded = this.clock();
       this.isExecutionInProgress = false;
       this._reschedule(this.heartbeatFrequencyMS);
     });
