@@ -470,7 +470,7 @@ describe('driver utils', function () {
         expect(await result.catch(e => e)).to.have.property('message', 'ah!');
       });
 
-      it('should return void event if a custom promise is set and a callback is provided', async () => {
+      it('should return void even if a custom promise is set and a callback is provided', async () => {
         const superPromiseSuccess = Promise.resolve(2);
         const result = maybeCallback(
           () => superPromiseSuccess,
