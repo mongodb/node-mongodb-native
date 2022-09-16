@@ -355,7 +355,7 @@ describe('driver utils', function () {
   });
 
   describe('maybeCallback()', () => {
-    it('should accept to two arguments', () => {
+    it('should accept two arguments', () => {
       expect(maybeCallback).to.have.lengthOf(2);
     });
 
@@ -445,7 +445,6 @@ describe('driver utils', function () {
 
     describe('when a custom promise constructor is set', () => {
       beforeEach(() => {
-        // @ts-expect-error: Bluebird does not have type info
         PromiseProvider.set(BluebirdPromise);
       });
 
