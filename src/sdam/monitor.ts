@@ -80,7 +80,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   [kConnection]?: Connection;
   [kCancellationToken]: CancellationToken;
   /** @internal */
-  [kMonitorId]?: SDAMMonitorInterval;
+  [kMonitorId]?: MonitorInterval;
   [kRTTPinger]?: RTTPinger;
 
   get connection(): Connection | undefined {
@@ -143,7 +143,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // start
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = new SDAMMonitorInterval(monitorServer(this), {
+    this[kMonitorId] = new MonitorInterval(monitorServer(this), {
       heartbeatFrequencyMS: heartbeatFrequencyMS,
       minHeartbeatFrequencyMS: minHeartbeatFrequencyMS,
       immediate: true
@@ -173,7 +173,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // restart monitoring
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = new SDAMMonitorInterval(monitorServer(this), {
+    this[kMonitorId] = new MonitorInterval(monitorServer(this), {
       heartbeatFrequencyMS: heartbeatFrequencyMS,
       minHeartbeatFrequencyMS: minHeartbeatFrequencyMS
     });
@@ -463,7 +463,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 /**
  * @internal
  */
-export interface SDAMMonitorIntervalOptions {
+export interface MonitorIntervalOptions {
   /** The interval to execute a method on */
   heartbeatFrequencyMS: number;
   /** A minimum interval that must elapse before the method is called */
@@ -481,7 +481,7 @@ export interface SDAMMonitorIntervalOptions {
 /**
  * @internal
  */
-export class SDAMMonitorInterval {
+export class MonitorInterval {
   fn: (callback: Callback) => void;
   timerId: NodeJS.Timeout | undefined;
   lastCallTime: number;
@@ -492,7 +492,7 @@ export class SDAMMonitorInterval {
   minHeartbeatFrequencyMS: number;
   clock: () => number;
 
-  constructor(fn: (callback: Callback) => void, options: Partial<SDAMMonitorIntervalOptions> = {}) {
+  constructor(fn: (callback: Callback) => void, options: Partial<MonitorIntervalOptions> = {}) {
     this.fn = fn;
     this.lastCallTime = 0;
 

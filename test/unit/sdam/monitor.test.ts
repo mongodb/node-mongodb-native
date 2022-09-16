@@ -5,7 +5,7 @@ import { setTimeout } from 'timers';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { ServerType } from '../../../src/sdam/common';
 import { ServerHeartbeatFailedEvent, ServerHeartbeatStartedEvent } from '../../../src/sdam/events';
-import { Monitor, SDAMMonitorInterval } from '../../../src/sdam/monitor';
+import { Monitor, MonitorInterval } from '../../../src/sdam/monitor';
 import { ServerDescription } from '../../../src/sdam/server_description';
 import { Topology } from '../../../src/sdam/topology';
 import { isHello } from '../../../src/utils';
@@ -264,7 +264,7 @@ describe('monitoring', function () {
     });
   });
 
-  describe('#new InterruptibleAsyncInterval', function () {
+  describe('class MonitorInterval', function () {
     let timerSandbox, clock, executor, fnSpy;
 
     beforeEach(function () {
@@ -285,7 +285,7 @@ describe('monitoring', function () {
 
     context('when the immediate option is provided', function () {
       it('executes the function immediately and schedules the next execution on the interval', function () {
-        executor = new SDAMMonitorInterval(fnSpy, {
+        executor = new MonitorInterval(fnSpy, {
           immediate: true,
           minHeartbeatFrequencyMS: 10,
           heartbeatFrequencyMS: 30
@@ -303,7 +303,7 @@ describe('monitoring', function () {
 
     context('when the immediate option is not provided', function () {
       it('executes the function on the provided interval', function () {
-        executor = new SDAMMonitorInterval(fnSpy, {
+        executor = new MonitorInterval(fnSpy, {
           minHeartbeatFrequencyMS: 10,
           heartbeatFrequencyMS: 30
         });
@@ -325,7 +325,7 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is the first wake', () => {
           let fakeClockHasTicked = false;
-          executor = new SDAMMonitorInterval(fnSpy, {
+          executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30,
             clock: () => {
@@ -354,7 +354,7 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is a repeated wake and the current execution is not rescheduled', () => {
           let fakeClockTickCount = 0;
-          executor = new SDAMMonitorInterval(fnSpy, {
+          executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30,
             clock: () => {
@@ -391,7 +391,7 @@ describe('monitoring', function () {
 
         it('should execute immediately and schedule the next execution on the interval if this is a repeated wake even if the current execution is rescheduled', () => {
           let fakeClockTickCount = 0;
-          executor = new SDAMMonitorInterval(fnSpy, {
+          executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30,
             clock: () => {
@@ -431,7 +431,7 @@ describe('monitoring', function () {
         // we can't make it go any faster, so we should let the scheduled execution run
 
         it('should execute on the interval if this is the first wake', () => {
-          executor = new SDAMMonitorInterval(fnSpy, {
+          executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
@@ -452,7 +452,7 @@ describe('monitoring', function () {
         });
 
         it('should execute on the original interval if this is a repeated wake and the current execution is not rescheduled', () => {
-          executor = new SDAMMonitorInterval(fnSpy, {
+          executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
@@ -476,7 +476,7 @@ describe('monitoring', function () {
         });
 
         it('should execute on the minInterval from the first wake if this is a repeated wake and the current execution is rescheduled', () => {
-          executor = new SDAMMonitorInterval(fnSpy, {
+          executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
@@ -505,7 +505,7 @@ describe('monitoring', function () {
         // expedite the execution to minInterval
 
         it('should execute on the minInterval if this is the first wake', () => {
-          executor = new SDAMMonitorInterval(fnSpy, {
+          executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
@@ -529,7 +529,7 @@ describe('monitoring', function () {
         it('should execute on the minInterval from the first wake if this is a repeated wake', () => {
           // NOTE: under regular circumstances, if the second wake is early enough to warrant a reschedule
           // then the first wake must have already warranted a reschedule
-          executor = new SDAMMonitorInterval(fnSpy, {
+          executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });

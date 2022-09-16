@@ -431,12 +431,12 @@ export type { ClusterTime, TimerQueue } from './sdam/common';
 export type {
   Monitor,
   MonitorEvents,
+  MonitorInterval,
+  MonitorIntervalOptions,
   MonitorOptions,
   MonitorPrivate,
   RTTPinger,
-  RTTPingerOptions,
-  SDAMMonitorInterval,
-  SDAMMonitorIntervalOptions
+  RTTPingerOptions
 } from './sdam/monitor';
 export type { Server, ServerEvents, ServerOptions, ServerPrivate } from './sdam/server';
 export type {
