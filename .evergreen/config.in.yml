@@ -64,7 +64,7 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           MONGODB_BINARIES: ${MONGODB_BINARIES}
         args:
-          - .evergreen/run-orchestration.sh
+          - src/.evergreen/run-orchestration.sh
 
     # run-orchestration generates expansion file with the MONGODB_URI for the cluster
     - command: expansions.update

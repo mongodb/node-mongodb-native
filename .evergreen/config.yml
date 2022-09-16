@@ -42,7 +42,7 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           MONGODB_BINARIES: ${MONGODB_BINARIES}
         args:
-          - .evergreen/run-orchestration.sh
+          - src/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
         file: mo-expansion.yml
