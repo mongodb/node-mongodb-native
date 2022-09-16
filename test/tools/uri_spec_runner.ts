@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoAPIError, MongoParseError } from '../../src';
+import { MongoAPIError, MongoParseError, MongoRuntimeError } from '../../src';
 import { MongoClient } from '../../src/mongo_client';
 
 type HostObject = {
@@ -69,8 +69,8 @@ export function executeUriValidationTest(
       new MongoClient(test.uri);
       expect.fail(`Expected "${test.uri}" to be invalid${test.valid ? ' because of warning' : ''}`);
     } catch (err) {
-      if (err instanceof TypeError) {
-        expect(err).to.have.property('code').equal('ERR_INVALID_URL');
+      if (err instanceof MongoRuntimeError) {
+        expect(err).to.have.nested.property('cause.code').equal('ERR_INVALID_URL');
       } else if (
         // most of our validation is MongoParseError, which does not extend from MongoAPIError
         !(err instanceof MongoParseError) &&

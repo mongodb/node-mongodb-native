@@ -1023,44 +1023,51 @@ export class BufferPool {
 
 /** @public */
 export class HostAddress {
-  host;
-  port;
-  // Driver only works with unix socket path to connect
-  // SDAM operates only on tcp addresses
-  socketPath;
-  isIPv6;
+  host: string | undefined = undefined;
+  port: number | undefined = undefined;
+  socketPath: string | undefined = undefined;
+  isIPv6 = false;
 
   constructor(hostString: string) {
     const escapedHost = hostString.split(' ').join('%20'); // escape spaces, for socket path hosts
-    const { hostname, port } = new URL(`mongodb://${escapedHost}`);
 
     if (escapedHost.endsWith('.sock')) {
       // heuristically determine if we're working with a domain socket
       this.socketPath = decodeURIComponent(escapedHost);
-    } else if (typeof hostname === 'string') {
-      this.isIPv6 = false;
+      return;
+    }
 
-      let normalized = decodeURIComponent(hostname).toLowerCase();
-      if (normalized.startsWith('[') && normalized.endsWith(']')) {
-        this.isIPv6 = true;
-        normalized = normalized.substring(1, hostname.length - 1);
-      }
+    const urlString = `iLoveJS://${escapedHost}`;
+    let url;
+    try {
+      url = new URL(urlString);
+    } catch (urlError) {
+      const runtimeError = new MongoRuntimeError(`Unable to parse ${escapedHost} with URL`);
+      runtimeError.cause = urlError;
+      throw runtimeError;
+    }
 
-      this.host = normalized.toLowerCase();
+    const hostname = url.hostname;
+    const port = url.port;
 
-      if (typeof port === 'number') {
-        this.port = port;
-      } else if (typeof port === 'string' && port !== '') {
-        this.port = Number.parseInt(port, 10);
-      } else {
-        this.port = 27017;
-      }
+    let normalized = decodeURIComponent(hostname).toLowerCase();
+    if (normalized.startsWith('[') && normalized.endsWith(']')) {
+      this.isIPv6 = true;
+      normalized = normalized.substring(1, hostname.length - 1);
+    }
 
-      if (this.port === 0) {
-        throw new MongoParseError('Invalid port (zero) with hostname');
-      }
+    this.host = normalized.toLowerCase();
+
+    if (typeof port === 'number') {
+      this.port = port;
+    } else if (typeof port === 'string' && port !== '') {
+      this.port = Number.parseInt(port, 10);
     } else {
-      throw new MongoInvalidArgumentError('Either socketPath or host must be defined.');
+      this.port = 27017;
+    }
+
+    if (this.port === 0) {
+      throw new MongoParseError('Invalid port (zero) with hostname');
     }
     Object.freeze(this);
   }
@@ -1070,15 +1077,12 @@ export class HostAddress {
   }
 
   inspect(): string {
-    return `new HostAddress('${this.toString(true)}')`;
+    return `new HostAddress('${this.toString()}')`;
   }
 
-  /**
-   * @param ipv6Brackets - optionally request ipv6 bracket notation required for connection strings
-   */
-  toString(ipv6Brackets = false): string {
+  toString(): string {
     if (typeof this.host === 'string') {
-      if (this.isIPv6 && ipv6Brackets) {
+      if (this.isIPv6) {
         return `[${this.host}]:${this.port}`;
       }
       return `${this.host}:${this.port}`;

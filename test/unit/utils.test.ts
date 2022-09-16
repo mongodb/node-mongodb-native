@@ -306,27 +306,27 @@ describe('driver utils', function () {
       it('should handle decoded unix socket path', () => {
         const ha = new HostAddress(socketPath);
         expect(ha).to.have.property('socketPath', socketPath);
-        expect(ha).to.not.have.property('port');
+        expect(ha).to.have.property('port', undefined);
       });
 
       it('should handle encoded unix socket path', () => {
         const ha = new HostAddress(encodeURIComponent(socketPath));
         expect(ha).to.have.property('socketPath', socketPath);
-        expect(ha).to.not.have.property('port');
+        expect(ha).to.have.property('port', undefined);
       });
 
       it('should handle encoded unix socket path with an unencoded space', () => {
         const socketPathWithSpaces = '/tmp/some directory/mongodb-27017.sock';
         const ha = new HostAddress(socketPathWithSpaces);
         expect(ha).to.have.property('socketPath', socketPathWithSpaces);
-        expect(ha).to.not.have.property('port');
+        expect(ha).to.have.property('port', undefined);
       });
 
       it('should handle unix socket path that does not begin with a slash', () => {
         const socketPathWithoutSlash = 'my_local/directory/mustEndWith.sock';
         const ha = new HostAddress(socketPathWithoutSlash);
         expect(ha).to.have.property('socketPath', socketPathWithoutSlash);
-        expect(ha).to.not.have.property('port');
+        expect(ha).to.have.property('port', undefined);
       });
 
       it('should only set the socketPath property on HostAddress when hostString ends in .sock', () => {
@@ -335,8 +335,8 @@ describe('driver utils', function () {
         const hostnameThatEndsWithSock = 'iLoveJavascript.sock';
         const ha = new HostAddress(hostnameThatEndsWithSock);
         expect(ha).to.have.property('socketPath', hostnameThatEndsWithSock);
-        expect(ha).to.not.have.property('port');
-        expect(ha).to.not.have.property('host');
+        expect(ha).to.have.property('port', undefined);
+        expect(ha).to.have.property('host', undefined);
       });
 
       it('should set the host and port property on HostAddress even when hostname ends in .sock if there is a port number specified', () => {
@@ -344,7 +344,7 @@ describe('driver utils', function () {
         // the port number at the end of the hostname (even if it is the default)
         const hostnameThatEndsWithSockHasPort = 'iLoveJavascript.sock:27017';
         const ha = new HostAddress(hostnameThatEndsWithSockHasPort);
-        expect(ha).to.not.have.property('socketPath');
+        expect(ha).to.have.property('socketPath', undefined);
         expect(ha).to.have.property('host', 'iLoveJavascript.sock'.toLowerCase());
         expect(ha).to.have.property('port', 27017);
       });
