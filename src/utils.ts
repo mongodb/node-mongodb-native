@@ -1,7 +1,6 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import * as os from 'os';
-import { clearTimeout, setTimeout } from 'timers';
 import { URL } from 'url';
 
 import { Document, ObjectId, resolveBSONOptions } from './bson';
@@ -772,124 +771,6 @@ export function calculateDurationInMs(started: number): number {
 
   const elapsed = now() - started;
   return elapsed < 0 ? 0 : elapsed;
-}
-
-export interface InterruptibleAsyncIntervalOptions {
-  /** The interval to execute a method on */
-  interval: number;
-  /** A minimum interval that must elapse before the method is called */
-  minInterval: number;
-  /** Whether the method should be called immediately when the interval is started  */
-  immediate: boolean;
-
-  /**
-   * Only used for testing unreliable timer environments
-   * @internal
-   */
-  clock: () => number;
-}
-
-/** @internal */
-export interface InterruptibleAsyncInterval {
-  wake(): void;
-  stop(): void;
-}
-
-/**
- * Creates an interval timer which is able to be woken up sooner than
- * the interval. The timer will also debounce multiple calls to wake
- * ensuring that the function is only ever called once within a minimum
- * interval window.
- * @internal
- *
- * @param fn - An async function to run on an interval, must accept a `callback` as its only parameter
- */
-export function makeInterruptibleAsyncInterval(
-  fn: (callback: Callback) => void,
-  options?: Partial<InterruptibleAsyncIntervalOptions>
-): InterruptibleAsyncInterval {
-  let timerId: NodeJS.Timeout | undefined;
-  let lastCallTime: number;
-  let cannotBeExpedited = false;
-  let stopped = false;
-
-  options = options ?? {};
-  const interval = options.interval || 1000;
-  const minInterval = options.minInterval || 500;
-  const immediate = typeof options.immediate === 'boolean' ? options.immediate : false;
-  const clock = typeof options.clock === 'function' ? options.clock : now;
-
-  function wake() {
-    const currentTime = clock();
-    const nextScheduledCallTime = lastCallTime + interval;
-    const timeUntilNextCall = nextScheduledCallTime - currentTime;
-
-    // For the streaming protocol: there is nothing obviously stopping this
-    // interval from being woken up again while we are waiting "infinitely"
-    // for `fn` to be called again`. Since the function effectively
-    // never completes, the `timeUntilNextCall` will continue to grow
-    // negatively unbounded, so it will never trigger a reschedule here.
-
-    // This is possible in virtualized environments like AWS Lambda where our
-    // clock is unreliable. In these cases the timer is "running" but never
-    // actually completes, so we want to execute immediately and then attempt
-    // to reschedule.
-    if (timeUntilNextCall < 0) {
-      executeAndReschedule();
-      return;
-    }
-
-    // debounce multiple calls to wake within the `minInterval`
-    if (cannotBeExpedited) {
-      return;
-    }
-
-    // reschedule a call as soon as possible, ensuring the call never happens
-    // faster than the `minInterval`
-    if (timeUntilNextCall > minInterval) {
-      reschedule(minInterval);
-      cannotBeExpedited = true;
-    }
-  }
-
-  function stop() {
-    stopped = true;
-    if (timerId) {
-      clearTimeout(timerId);
-      timerId = undefined;
-    }
-
-    lastCallTime = 0;
-    cannotBeExpedited = false;
-  }
-
-  function reschedule(ms?: number) {
-    if (stopped) return;
-    if (timerId) {
-      clearTimeout(timerId);
-    }
-
-    timerId = setTimeout(executeAndReschedule, ms || interval);
-  }
-
-  function executeAndReschedule() {
-    cannotBeExpedited = false;
-    lastCallTime = clock();
-
-    fn(err => {
-      if (err) throw err;
-      reschedule(interval);
-    });
-  }
-
-  if (immediate) {
-    executeAndReschedule();
-  } else {
-    lastCallTime = clock();
-    reschedule(undefined);
-  }
-
-  return { wake, stop };
 }
 
 /** @internal */

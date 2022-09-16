@@ -431,6 +431,8 @@ export type { ClusterTime, TimerQueue } from './sdam/common';
 export type {
   Monitor,
   MonitorEvents,
+  MonitorInterval,
+  MonitorIntervalOptions,
   MonitorOptions,
   MonitorPrivate,
   RTTPinger,
@@ -475,7 +477,6 @@ export type {
   ClientMetadataOptions,
   EventEmitterWithState,
   HostAddress,
-  InterruptibleAsyncInterval,
   MongoDBNamespace
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';

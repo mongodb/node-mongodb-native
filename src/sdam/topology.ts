@@ -386,7 +386,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /** Initiate server connect */
-  connect(options?: ConnectOptions, callback?: Callback): void {
+  connect(callback: Callback): void;
+  connect(options: ConnectOptions, callback: Callback): void;
+  connect(options?: ConnectOptions | Callback, callback?: Callback): void {
     if (typeof options === 'function') (callback = options), (options = {});
     options = options ?? {};
     if (this.s.state === STATE_CONNECTED) {
@@ -468,7 +470,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /** Close this topology */
-  close(options?: CloseOptions, callback?: Callback): void {
+  close(callback: Callback): void;
+  close(options: CloseOptions): void;
+  close(options: CloseOptions, callback: Callback): void;
+  close(options?: CloseOptions | Callback, callback?: Callback): void {
     if (typeof options === 'function') {
       callback = options;
       options = {};
@@ -484,7 +489,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     const destroyedServers = Array.from(this.s.servers.values(), server => {
-      return promisify(destroyServer)(server, this, options);
+      return promisify(destroyServer)(server, this, options as CloseOptions);
     });
 
     Promise.all(destroyedServers)
