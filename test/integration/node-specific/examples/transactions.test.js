@@ -1,22 +1,13 @@
 'use strict';
 
-const setupDatabase = require('../../shared').setupDatabase;
-const MongoClient = require('../../../../src').MongoClient;
+const { MongoClient } = require('../../../../src');
+
+// Yes, we are shadowing a global here but we are not actually ever printing anything in this file
+// This just so the examples can use console.log to make for nice copy pasting
+const console = { log() {} };
 
 describe('examples(transactions):', function () {
   let client;
-  let log;
-
-  before(async function () {
-    await setupDatabase(this.configuration);
-    log = console.log;
-    console.log = () => {};
-  });
-
-  after(function () {
-    console.log = log;
-    log = undefined;
-  });
 
   beforeEach(async function () {
     client = await this.configuration.newClient().connect();

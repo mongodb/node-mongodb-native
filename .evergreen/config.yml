@@ -13,79 +13,36 @@ functions:
       params:
         directory: src
         shallow_clone: true
-    - command: shell.exec
+    - command: subprocess.exec
       params:
         working_dir: src
-        script: |
-          # Get the current unique version of this checkout
-          if [ "${is_patch}" = "true" ]; then
-             CURRENT_VERSION=$(git describe)-patch-${version_id}
-          else
-             CURRENT_VERSION=latest
-          fi
-
-          export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
-
-          export PROJECT_DIRECTORY="$(pwd)"
-          export MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
-          export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
-          export UPLOAD_BUCKET="${project}"
-
-          # fix paths on windows
-          if [ "Windows_NT" = "$OS" ]; then
-            export DRIVERS_TOOLS=$(cygpath -m -a $DRIVERS_TOOLS)
-            export MONGO_ORCHESTRATION_HOME=$(cygpath -m -a $MONGO_ORCHESTRATION_HOME)
-            export MONGODB_BINARIES=$(cygpath -m -a $MONGODB_BINARIES)
-            export PROJECT_DIRECTORY=$(cygpath -m -a $PROJECT_DIRECTORY)
-          fi
-
-          cat <<EOT > expansion.yml
-          CURRENT_VERSION: "$CURRENT_VERSION"
-          DRIVERS_TOOLS: "$DRIVERS_TOOLS"
-          MONGO_ORCHESTRATION_HOME: "$MONGO_ORCHESTRATION_HOME"
-          MONGODB_BINARIES: "$MONGODB_BINARIES"
-          UPLOAD_BUCKET: "$UPLOAD_BUCKET"
-          PROJECT_DIRECTORY: "$PROJECT_DIRECTORY"
-          PREPARE_SHELL: |
-             set -o errexit
-             set -o xtrace
-             export DRIVERS_TOOLS="$DRIVERS_TOOLS"
-             export MONGO_ORCHESTRATION_HOME="$MONGO_ORCHESTRATION_HOME"
-             export MONGODB_BINARIES="$MONGODB_BINARIES"
-             export UPLOAD_BUCKET="$UPLOAD_BUCKET"
-             export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
-
-             export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
-             export PATH="$MONGODB_BINARIES:$PATH"
-             export PROJECT="${project}"
-          EOT
-          # See what we've done
-          cat expansion.yml
+        binary: bash
+        env:
+          is_patch: ${is_patch}
+          project: ${project}
+        args:
+          - .evergreen/prepare-shell.sh
     - command: expansions.update
       params:
         file: src/expansion.yml
-  prepare resources:
-    - command: shell.exec
-      params:
-        script: >
-          ${PREPARE_SHELL}
-
-          git clone --depth 1 https://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
-
-          echo "{ \"releases\": { \"default\": \"$MONGODB_BINARIES\" }}" >
-          $MONGO_ORCHESTRATION_HOME/orchestration.config
   bootstrap mongo-orchestration:
-    - command: shell.exec
+    - command: subprocess.exec
       params:
-        script: |
-          ${PREPARE_SHELL}
-          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} \
-          AUTH=${AUTH} SSL=${SSL} \
-          ORCHESTRATION_FILE=${ORCHESTRATION_FILE} \
-          REQUIRE_API_VERSION=${REQUIRE_API_VERSION} \
-          LOAD_BALANCER=${LOAD_BALANCER} \
-          COMPRESSOR=${COMPRESSOR} \
-          bash ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+        binary: bash
+        add_expansions_to_env: true
+        env:
+          MONGODB_VERSION: ${VERSION}
+          TOPOLOGY: ${TOPOLOGY}
+          AUTH: ${AUTH}
+          SSL: ${SSL}
+          ORCHESTRATION_FILE: ${ORCHESTRATION_FILE}
+          REQUIRE_API_VERSION: ${REQUIRE_API_VERSION}
+          LOAD_BALANCER: ${LOAD_BALANCER}
+          COMPRESSOR: ${COMPRESSOR}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_BINARIES: ${MONGODB_BINARIES}
+        args:
+          - src/.evergreen/run-orchestration.sh
     - command: expansions.update
       params:
         file: mo-expansion.yml
@@ -155,7 +112,7 @@ functions:
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} NO_EXIT=${NO_EXIT|1} \
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run serverless tests:
     - command: timeout.update
@@ -220,7 +177,6 @@ functions:
           MULTI_MONGOS_LB_URI="${MULTI_MONGOS_LB_URI}" \
           TOPOLOGY="${TOPOLOGY}" \
           SKIP_DEPS=${SKIP_DEPS|1} \
-          NO_EXIT=${NO_EXIT|1} \
           LOAD_BALANCER="${LOAD_BALANCER}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run-compression-tests:
@@ -240,7 +196,6 @@ functions:
           TOPOLOGY="${TOPOLOGY}" \
           COMPRESSOR="${COMPRESSOR}" \
           SKIP_DEPS=${SKIP_DEPS|1} \
-          NO_EXIT=${NO_EXIT|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
   run lint checks:
     - command: subprocess.exec
@@ -1230,10 +1185,6 @@ tasks:
           REQUIRE_API_VERSION: '1'
           AUTH: auth
       - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          MONGODB_API_VERSION: '1'
-          NO_EXIT: ''
   - name: test-atlas-connectivity
     tags:
       - atlas-connect
@@ -2253,7 +2204,6 @@ task_groups:
     setup_group_timeout_secs: 1800
     setup_group:
       - func: fetch source
-      - func: prepare resources
       - command: shell.exec
         params:
           shell: bash
@@ -2284,7 +2234,6 @@ task_groups:
       - .serverless
 pre:
   - func: fetch source
-  - func: prepare resources
   - func: windows fix
   - func: fix absolute paths
   - func: make files executable

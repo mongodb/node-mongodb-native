@@ -20,6 +20,23 @@ const {
 const fs = require('fs');
 const os = require('os');
 
+const print = message => fs.writeSync(2, Buffer.from(`${message}\n`, 'utf8'));
+
+const catchErr = fn => {
+  return (...args) => {
+    try {
+      fn(...args);
+    } catch (reporterError) {
+      print('\n');
+      print('FATAL: Mongodb Mocha Reporter encountered an error\n');
+      print(`name: ${reporterError.name}`);
+      print(`stack: ${reporterError.stack}`);
+      print('\n');
+      process.exit(1);
+    }
+  };
+};
+
 /**
  * @typedef {object} MongoMochaSuiteExtension
  * @property {Date} timestamp - suite start date
@@ -39,25 +56,6 @@ const os = require('os');
 // Turn this on if you have to debug this custom reporter!
 let REPORT_TO_STDIO = false;
 
-function captureStream(stream) {
-  var oldWrite = stream.write;
-  var buf = '';
-  stream.write = function (chunk) {
-    buf += chunk.toString(); // chunk is a String or Buffer
-    oldWrite.apply(stream, arguments);
-  };
-
-  return {
-    unhook: function unhook() {
-      stream.write = oldWrite;
-      return buf;
-    },
-    captured: function () {
-      return buf;
-    }
-  };
-}
-
 /**
  * @param {Mocha.Runner} runner
  * @this {any}
@@ -68,23 +66,52 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
     /** @type {Map<string, {suite: MongoMochaSuite, stdout?: any, stderr?: any}>} */
     this.suites = new Map();
     this.xunitWritten = false;
-    runner.on(EVENT_RUN_BEGIN, () => this.start());
-    runner.on(EVENT_RUN_END, () => this.end());
-    runner.on(EVENT_SUITE_BEGIN, suite => this.onSuite(suite));
-    runner.on(EVENT_TEST_BEGIN, test => this.onTest(test));
-    runner.on(EVENT_TEST_PASS, test => this.pass(test));
-    runner.on(EVENT_TEST_FAIL, (test, error) => this.fail(test, error));
-    runner.on(EVENT_TEST_PENDING, test => this.pending(test));
-    runner.on(EVENT_SUITE_END, suite => this.suiteEnd(suite));
-    runner.on(EVENT_TEST_END, test => this.testEnd(test));
+    runner.on(
+      EVENT_RUN_BEGIN,
+      catchErr(() => this.start())
+    );
+    runner.on(
+      EVENT_RUN_END,
+      catchErr(() => this.end())
+    );
+    runner.on(
+      EVENT_SUITE_BEGIN,
+      catchErr(suite => this.onSuite(suite))
+    );
+    runner.on(
+      EVENT_TEST_BEGIN,
+      catchErr(test => this.onTest(test))
+    );
+    runner.on(
+      EVENT_TEST_PASS,
+      catchErr(test => this.pass(test))
+    );
+    runner.on(
+      EVENT_TEST_FAIL,
+      catchErr((test, error) => this.fail(test, error))
+    );
+    runner.on(
+      EVENT_TEST_PENDING,
+      catchErr(test => this.pending(test))
+    );
+    runner.on(
+      EVENT_SUITE_END,
+      catchErr(suite => this.suiteEnd(suite))
+    );
+    runner.on(
+      EVENT_TEST_END,
+      catchErr(test => this.testEnd(test))
+    );
 
     process.on('SIGINT', () => this.end(true));
   }
+
   start() {}
 
   end(ctrlC) {
     try {
       if (ctrlC) console.log('emergency exit!');
+      /** @type {{ testSuites: any[] }}*/
       const output = { testSuites: [] };
 
       for (const [id, [className, { suite }]] of [...this.suites.entries()].entries()) {
@@ -135,7 +162,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
         timestamp = timestamp ? timestamp.toISOString().split('.')[0] : '';
 
         output.testSuites.push({
-          package: suite.file.includes('integration') ? 'Integration' : 'Unit',
+          package: suite.file && suite.file.includes('integration') ? 'Integration' : 'Unit',
           id,
           name: className,
           timestamp,
@@ -144,9 +171,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
           failures: failureCount,
           errors: '0',
           time: totalSuiteTime,
-          testCases,
-          stdout: suite.stdout,
-          stderr: suite.stderr
+          testCases
         });
       }
 
@@ -169,11 +194,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
     if (suite.root) return;
     if (!this.suites.has(suite.fullTitle())) {
       suite.timestamp = new Date();
-      this.suites.set(suite.fullTitle(), {
-        suite,
-        stdout: captureStream(process.stdout),
-        stderr: captureStream(process.stderr)
-      });
+      this.suites.set(suite.fullTitle(), { suite });
     } else {
       throw new Error(`${suite.fullTitle()} started twice`);
     }
@@ -316,8 +337,8 @@ function outputToXML(output) {
         s += `\t</testcase>\n`;
       }
     }
-    s += '\t' + makeTag('system-out', {}, false, cdata(suite.stdout)) + '\n';
-    s += '\t' + makeTag('system-err', {}, false, cdata(suite.stderr)) + '\n';
+    s += '\t' + makeTag('system-out', {}, false, 'none') + '\n';
+    s += '\t' + makeTag('system-err', {}, false, 'none') + '\n';
     s += `</testsuite>\n`;
   }
 
