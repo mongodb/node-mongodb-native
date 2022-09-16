@@ -310,6 +310,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return this[kServiceGenerations];
   }
 
+  get serverError() {
+    return this[kServer].description.error;
+  }
+
   /**
    * Get the metrics information for the pool when a wait queue timeout occurs.
    */
