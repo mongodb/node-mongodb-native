@@ -400,71 +400,41 @@ describe('monitoring', function () {
         });
       });
 
-      context(
-        'when it has been < minHeartbeatFrequencyMS and >= 0 since fn() last completed',
-        function () {
-          beforeEach(function () {
-            executor = new MonitorInterval(fnSpy, {
-              minHeartbeatFrequencyMS: 10,
-              heartbeatFrequencyMS: 30
-            });
-
-            // call fn() once
-            clock.tick(30);
-            expect(fnSpy.calledOnce).to.be.true;
-
-            fnSpy.callCount = 0;
-
-            // advance less than minHeartbeatFrequency
-            clock.tick(5);
-
-            executor.wake();
-          });
-
-          it('reschedules fn() to minHeartbeatFrequencyMS after the last call', function () {
-            expect(fnSpy.callCount).to.equal(0);
-            clock.tick(5);
-            expect(fnSpy.calledOnce).to.be.true;
-          });
-
-          context('when wake() is called more than once', function () {
-            it('schedules fn() minHeartbeatFrequencyMS after the last call to fn()', function () {
-              executor.wake();
-              executor.wake();
-              executor.wake();
-
-              expect(fnSpy.callCount).to.equal(0);
-              clock.tick(5);
-              expect(fnSpy.calledOnce).to.be.true;
-            });
-          });
-        }
-      );
-
-      context('when it has been <0 since fn() has last executed', function () {
+      context('when it has been < minHeartbeatFrequencyMS since fn() last completed', function () {
         beforeEach(function () {
           executor = new MonitorInterval(fnSpy, {
             minHeartbeatFrequencyMS: 10,
             heartbeatFrequencyMS: 30
           });
 
-          // negative ticks aren't supported, so manually set execution time
-          executor.lastExecutionEnded = Infinity;
+          // call fn() once
+          clock.tick(30);
+          expect(fnSpy.calledOnce).to.be.true;
+
+          fnSpy.callCount = 0;
+
+          // advance less than minHeartbeatFrequency
+          clock.tick(5);
+
           executor.wake();
         });
 
-        it('executes fn() immediately', function () {
+        it('reschedules fn() to minHeartbeatFrequencyMS after the last call', function () {
+          expect(fnSpy.callCount).to.equal(0);
+          clock.tick(5);
           expect(fnSpy.calledOnce).to.be.true;
         });
 
-        it('reschedules fn() to minHeartbeatFrequency away', function () {
-          fnSpy.callCount = 0;
+        context('when wake() is called more than once', function () {
+          it('schedules fn() minHeartbeatFrequencyMS after the last call to fn()', function () {
+            executor.wake();
+            executor.wake();
+            executor.wake();
 
-          clock.tick(29);
-          expect(fnSpy.callCount).to.equal(0);
-
-          clock.tick(1);
-          expect(fnSpy.calledOnce).to.be.true;
+            expect(fnSpy.callCount).to.equal(0);
+            clock.tick(5);
+            expect(fnSpy.calledOnce).to.be.true;
+          });
         });
       });
     });
