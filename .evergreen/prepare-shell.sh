@@ -11,7 +11,7 @@ PROJECT_DIRECTORY="$(pwd)"
 DRIVERS_TOOLS=$(cd .. && echo "$(pwd)/drivers-tools")
 MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
 MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
-UPLOAD_BUCKET="$project"
+UPLOAD_BUCKET="$PROJECT"
 
 if [ "Windows_NT" = "${OS:-notWindows}" ]; then
   # fix paths on windows
@@ -58,7 +58,7 @@ PREPARE_SHELL: |
     export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
     export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
     export PATH="$MONGODB_BINARIES:$PATH"
-    export PROJECT="${project}"
+    export PROJECT="${PROJECT}"
 EOT
 # See what we've done
 cat expansion.yml
