@@ -25,8 +25,8 @@ describe('SDAM Unified Tests', function () {
     // TODO(NODE-4573): fix socket leaks
     const LEAKY_TESTS = [
       'Command error on Monitor handshake',
-      'Network error on Monitor check',
-      'Network timeout on Monitor check',
+      // 'Network error on Monitor check',
+      // 'Network timeout on Monitor check',
       'Network error on Monitor handshake',
       'Network timeout on Monitor handshake'
     ];
