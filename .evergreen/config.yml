@@ -39,8 +39,10 @@ functions:
           REQUIRE_API_VERSION: ${REQUIRE_API_VERSION}
           LOAD_BALANCER: ${LOAD_BALANCER}
           COMPRESSOR: ${COMPRESSOR}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_BINARIES: ${MONGODB_BINARIES}
         args:
-          - ${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh
+          - .evergreen/run-orchestration.sh
     - command: expansions.update
       params:
         file: mo-expansion.yml

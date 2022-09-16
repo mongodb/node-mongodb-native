@@ -51,6 +51,7 @@ functions:
         binary: bash
         add_expansions_to_env: true
         env:
+          # The following is the settings for how we want to launch mongodb
           MONGODB_VERSION: ${VERSION}
           TOPOLOGY: ${TOPOLOGY}
           AUTH: ${AUTH}
@@ -59,7 +60,9 @@ functions:
           REQUIRE_API_VERSION: ${REQUIRE_API_VERSION}
           LOAD_BALANCER: ${LOAD_BALANCER}
           COMPRESSOR: ${COMPRESSOR}
+          # These are paths necessary for launching mongodb
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          MONGODB_BINARIES: ${MONGODB_BINARIES}
         args:
           - .evergreen/run-orchestration.sh
 

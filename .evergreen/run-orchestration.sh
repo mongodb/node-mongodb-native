@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
 
+# This is a thin wrapper around drivers-tools run orchestration meant to print each of the configuration settings we make use of
+# Additionally it ensures the downloaded binaries are in the PATH for the script to find (namely, the legacy shell for server set up)
+
 export MONGODB_VERSION=${VERSION}
 echo  "MONGODB_VERSION=${VERSION}"
 
@@ -23,5 +26,8 @@ echo  "LOAD_BALANCER=${LOAD_BALANCER}"
 
 export COMPRESSOR=${COMPRESSOR}
 echo  "COMPRESSOR=${COMPRESSOR}"
+
+export PATH="$MONGODB_BINARIES:$PATH"
+echo  "MONGODB_BINARIES=${MONGODB_BINARIES}"
 
 bash "${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh"
