@@ -151,7 +151,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       logger: new Logger('Server'),
       state: STATE_CLOSED,
       topology,
-      pool: new ConnectionPool(poolOptions),
+      pool: new ConnectionPool(this, poolOptions),
       operationCount: 0
     };
 

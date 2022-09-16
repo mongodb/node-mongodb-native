@@ -19,6 +19,7 @@ import {
 import { MongoError, MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { Logger } from '../logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import type { Server } from '../sdam/server';
 import { Callback, eachAsync, makeCounter } from '../utils';
 import { connect } from './connect';
 import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
@@ -38,6 +39,8 @@ import {
 import { PoolClearedError, PoolClosedError, WaitQueueTimeoutError } from './errors';
 import { ConnectionPoolMetrics } from './metrics';
 
+/** @internal */
+const kServer = Symbol('server');
 /** @internal */
 const kLogger = Symbol('logger');
 /** @internal */
@@ -126,6 +129,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** @internal */
   [kPoolState]: typeof PoolState[keyof typeof PoolState];
   /** @internal */
+  [kServer]: Server;
+  /** @internal */
   [kLogger]: Logger;
   /** @internal */
   [kConnections]: Denque<Connection>;
@@ -212,7 +217,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   static readonly CONNECTION_CHECKED_IN = CONNECTION_CHECKED_IN;
 
   /** @internal */
-  constructor(options: ConnectionPoolOptions) {
+  constructor(server: Server, options: ConnectionPoolOptions) {
     super();
 
     this.options = Object.freeze({
@@ -234,6 +239,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     this[kPoolState] = PoolState.paused;
+    this[kServer] = server;
     this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
     this[kPending] = 0;

@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
-import { Connection, HostAddress, MongoClient } from '../../src';
+import { Connection, HostAddress, MongoClient, Server } from '../../src';
 import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
 import { CMAP_EVENTS } from '../../src/constants';
 import { makeClientMetadata, shuffle } from '../../src/utils';
@@ -253,11 +253,12 @@ export class ThreadContext {
   threads: Map<any, Thread> = new Map();
   connections: Map<string, Connection> = new Map();
   orphans: Set<Connection> = new Set();
-  poolEvents = [];
+  poolEvents: any[] = [];
   poolEventsEventEmitter = new EventEmitter();
 
   #poolOptions: Partial<ConnectionPoolOptions>;
   #hostAddress: HostAddress;
+  #server: Server;
   #supportedOperations: ReturnType<typeof getTestOpDefinitions>;
   #injectPoolStats = false;
 
@@ -267,12 +268,14 @@ export class ThreadContext {
    * @param poolOptions - Allows the test to pass in extra options to the pool not specified by the spec test definition, such as the environment-dependent "loadBalanced"
    */
   constructor(
+    server: Server,
     hostAddress: HostAddress,
     poolOptions: Partial<ConnectionPoolOptions> = {},
     contextOptions: { injectPoolStats: boolean }
   ) {
     this.#poolOptions = poolOptions;
     this.#hostAddress = hostAddress;
+    this.#server = server;
     this.#supportedOperations = getTestOpDefinitions(this);
     this.#injectPoolStats = contextOptions.injectPoolStats;
   }
@@ -292,7 +295,7 @@ export class ThreadContext {
   }
 
   createPool(options) {
-    this.pool = new ConnectionPool({
+    this.pool = new ConnectionPool(this.#server, {
       ...this.#poolOptions,
       ...options,
       hostAddress: this.#hostAddress
@@ -438,7 +441,10 @@ export function runCmapTestSuite(
 ) {
   for (const test of tests) {
     describe(test.name, function () {
-      let hostAddress: HostAddress, threadContext: ThreadContext, client: MongoClient;
+      let hostAddress: HostAddress,
+        server: Server,
+        threadContext: ThreadContext,
+        client: MongoClient;
 
       beforeEach(async function () {
         let utilClient: MongoClient;
@@ -479,11 +485,14 @@ export function runCmapTestSuite(
         }
 
         try {
-          const serverMap = utilClient.topology.s.description.servers;
-          const hosts = shuffle(serverMap.keys());
+          const serverDescriptionMap = utilClient.topology?.s.description.servers;
+          const serverMap = utilClient.topology?.s.servers;
+          const hosts = shuffle(serverDescriptionMap.keys());
           const selectedHostUri = hosts[0];
-          hostAddress = serverMap.get(selectedHostUri).hostAddress;
+          hostAddress = serverDescriptionMap.get(selectedHostUri).hostAddress;
+          server = serverMap.get(selectedHostUri);
           threadContext = new ThreadContext(
+            server,
             hostAddress,
             this.configuration.isLoadBalanced ? { loadBalanced: true } : {},
             { injectPoolStats: !!options?.injectPoolStats }
