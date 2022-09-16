@@ -34,8 +34,6 @@ describe('Retryable Reads Spec Prose', () => {
         { maxPoolSize: 1, retryReads: true, monitorCommands: true }
       );
 
-      console.log(client.options);
-
       testCollection = client.db('retryable-reads-prose').collection('pool-clear-retry');
       await testCollection.drop().catch(() => null);
       await testCollection.insertMany([{ test: 1 }, { test: 2 }]);
