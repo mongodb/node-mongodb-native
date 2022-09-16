@@ -487,6 +487,8 @@ export class MonitorInterval {
   lastCallTime: number;
   isExpeditedCheckScheduled = false;
   stopped = false;
+  isExecutionInProgress = false;
+  hasExecutedOnce = false;
 
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
@@ -510,21 +512,14 @@ export class MonitorInterval {
 
   wake() {
     const currentTime = this.clock();
-    const nextScheduledCallTime = this.lastCallTime + this.heartbeatFrequencyMS;
-    const timeUntilNextCall = nextScheduledCallTime - currentTime;
+    const timeSinceLastCall = currentTime - this.lastCallTime;
 
-    // For the streaming protocol: there is nothing obviously stopping this
-    // interval from being woken up again while we are waiting "infinitely"
-    // for `fn` to be called again`. Since the function effectively
-    // never completes, the `timeUntilNextCall` will continue to grow
-    // negatively unbounded, so it will never trigger a reschedule here.
-
-    // This is possible in virtualized environments like AWS Lambda where our
-    // clock is unreliable. In these cases the timer is "running" but never
-    // actually completes, so we want to execute immediately and then attempt
-    // to reschedule.
-    if (timeUntilNextCall < 0) {
+    if (!this.hasExecutedOnce) {
       this._executeAndReschedule();
+      return;
+    }
+
+    if (this.isExecutionInProgress) {
       return;
     }
 
@@ -535,10 +530,13 @@ export class MonitorInterval {
 
     // reschedule a call as soon as possible, ensuring the call never happens
     // faster than the `minInterval`
-    if (timeUntilNextCall > this.minHeartbeatFrequencyMS) {
-      this._reschedule(this.minHeartbeatFrequencyMS);
+    if (timeSinceLastCall < this.minHeartbeatFrequencyMS) {
       this.isExpeditedCheckScheduled = true;
+      this._reschedule(this.minHeartbeatFrequencyMS - timeSinceLastCall);
+      return;
     }
+
+    this._executeAndReschedule();
   }
 
   stop() {
@@ -557,13 +555,17 @@ export class MonitorInterval {
   }
 
   toJSON() {
+    const now = this.clock();
+    const timeSinceLastCall = now - this.lastCallTime;
     return {
       timerId: this.timerId != null ? 'set' : 'cleared',
       lastCallTime: this.lastCallTime,
       isExpeditedCheckScheduled: this.isExpeditedCheckScheduled,
       stopped: this.stopped,
       heartbeatFrequencyMS: this.heartbeatFrequencyMS,
-      minHeartbeatFrequencyMS: this.minHeartbeatFrequencyMS
+      minHeartbeatFrequencyMS: this.minHeartbeatFrequencyMS,
+      now,
+      timeSinceLastCall
     };
   }
 
@@ -577,11 +579,18 @@ export class MonitorInterval {
   }
 
   private _executeAndReschedule = () => {
-    this.isExpeditedCheckScheduled = false;
-    this.lastCallTime = this.clock();
+    if (this.stopped) return;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+    }
 
-    this.fn(err => {
-      if (err) throw err;
+    this.hasExecutedOnce = true;
+    this.isExpeditedCheckScheduled = false;
+    this.isExecutionInProgress = true;
+
+    this.fn(() => {
+      this.lastCallTime = this.clock();
+      this.isExecutionInProgress = false;
       this._reschedule(this.heartbeatFrequencyMS);
     });
   };
