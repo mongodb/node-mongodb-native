@@ -470,12 +470,6 @@ export interface MonitorIntervalOptions {
   minHeartbeatFrequencyMS: number;
   /** Whether the method should be called immediately when the interval is started  */
   immediate: boolean;
-
-  /**
-   * Only used for testing unreliable timer environments
-   * @internal
-   */
-  clock: () => number;
 }
 
 /**
@@ -492,7 +486,6 @@ export class MonitorInterval {
 
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
-  clock: () => number;
 
   constructor(fn: (callback: Callback) => void, options: Partial<MonitorIntervalOptions> = {}) {
     this.fn = fn;
@@ -500,18 +493,17 @@ export class MonitorInterval {
 
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 1000;
     this.minHeartbeatFrequencyMS = options.minHeartbeatFrequencyMS ?? 500;
-    this.clock = typeof options.clock === 'function' ? options.clock : now;
 
     if (options.immediate) {
       this._executeAndReschedule();
     } else {
-      this.lastExecutionEnded = this.clock();
+      this.lastExecutionEnded = now();
       this._reschedule(undefined);
     }
   }
 
   wake() {
-    const currentTime = this.clock();
+    const currentTime = now();
     const timeSinceLastCall = currentTime - this.lastExecutionEnded;
 
     if (!this.hasExecutedOnce) {
@@ -555,8 +547,8 @@ export class MonitorInterval {
   }
 
   toJSON() {
-    const now = this.clock();
-    const timeSinceLastCall = now - this.lastExecutionEnded;
+    const currentTime = now();
+    const timeSinceLastCall = currentTime - this.lastExecutionEnded;
     return {
       timerId: this.timerId != null ? 'set' : 'cleared',
       lastCallTime: this.lastExecutionEnded,
@@ -564,7 +556,7 @@ export class MonitorInterval {
       stopped: this.stopped,
       heartbeatFrequencyMS: this.heartbeatFrequencyMS,
       minHeartbeatFrequencyMS: this.minHeartbeatFrequencyMS,
-      now,
+      currentTime,
       timeSinceLastCall
     };
   }
@@ -589,7 +581,7 @@ export class MonitorInterval {
     this.isExecutionInProgress = true;
 
     this.fn(() => {
-      this.lastExecutionEnded = this.clock();
+      this.lastExecutionEnded = now();
       this.isExecutionInProgress = false;
       this._reschedule(this.heartbeatFrequencyMS);
     });
