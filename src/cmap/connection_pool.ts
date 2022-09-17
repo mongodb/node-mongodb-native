@@ -638,13 +638,20 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     const queue = this[kConnections];
-    let index = queue.size() - 1;
-    while (index !== -1) {
-      const connection = queue.getElementByPos(index);
-      if (connection && this.connectionIsPerished(connection)) {
-        queue.eraseElementByPos(index);
-      }
-      --index;
+    const length = queue.size();
+    // null 1 2 3 null
+    // remove 2 then it be
+    // 3 null null null 1
+    // the elements order will not be changed
+    // because the first element is 1 (just move pointer)
+    // this is O(n) here
+    for (let i = 0; i < length; ++i) {
+      // here will not be undefined
+      const connection = queue.front() as Connection;
+      queue.popFront();
+      // no need to check undefined
+      if (this.connectionIsPerished(connection)) continue;
+      queue.pushBack(connection);
     }
 
     if (
