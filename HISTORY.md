@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.10.0](https://github.com/mongodb/node-mongodb-native/compare/v4.9.0...v4.10.0) (2022-09-19)
+
+
+### Features
+
+* **NODE-4385:** add cmap pool pausing functionality ([#3321](https://github.com/mongodb/node-mongodb-native/issues/3321)) ([335ee55](https://github.com/mongodb/node-mongodb-native/commit/335ee55d04d4f7f5a6a0dfb06884dd318dc0fc2d))
+* **NODE-4484:** add experimental support for disambiguatedPaths in change stream documents ([#3365](https://github.com/mongodb/node-mongodb-native/issues/3365)) ([846365a](https://github.com/mongodb/node-mongodb-native/commit/846365a5ef58acb53480fbd5a7e0e83cbfed2a3e))
+* **NODE-4519:** deprecate promiseLibrary and PromiseProvider ([#3403](https://github.com/mongodb/node-mongodb-native/issues/3403)) ([5c322b6](https://github.com/mongodb/node-mongodb-native/commit/5c322b647fb878534f612329e1ac99daad6405d2))
+* **NODE-4547:** mark all callback APIs as deprecated ([#3388](https://github.com/mongodb/node-mongodb-native/issues/3388)) ([a983f14](https://github.com/mongodb/node-mongodb-native/commit/a983f147776e38a8c09a063120f64d5053619842))
+* **NODE-4607:** add exports needed by legacy client ([#3396](https://github.com/mongodb/node-mongodb-native/issues/3396)) ([972f760](https://github.com/mongodb/node-mongodb-native/commit/972f760947330d11895579acc63b509fcaac893c))
+* **NODE-4634:** add support for bulk FindOperators.hint() ([#3408](https://github.com/mongodb/node-mongodb-native/issues/3408)) ([8758890](https://github.com/mongodb/node-mongodb-native/commit/87588901c620f3cf350acf188726c45a4acf30c4))
+
+
+### Bug Fixes
+
+* **NODE-3144:** pool clear event ordering and retryability tests ([#3407](https://github.com/mongodb/node-mongodb-native/issues/3407)) ([bdc0d67](https://github.com/mongodb/node-mongodb-native/commit/bdc0d675598805f725806f95714cf33aacf3d2dc))
+* **NODE-3986:** unskip MONGODB-AWS test ([#3397](https://github.com/mongodb/node-mongodb-native/issues/3397)) ([5676f81](https://github.com/mongodb/node-mongodb-native/commit/5676f8116a7d07faf73f47b000a6fb2f462ab681))
+* **NODE-4557:** randomize servers when there are only 2 eligible servers ([#3390](https://github.com/mongodb/node-mongodb-native/issues/3390)) ([ddcfa49](https://github.com/mongodb/node-mongodb-native/commit/ddcfa49e753d0a674ad8a7b8e7c17a540d9734cc))
+* **NODE-4583:** revert nested union type support ([#3383](https://github.com/mongodb/node-mongodb-native/issues/3383)) ([7f94f0a](https://github.com/mongodb/node-mongodb-native/commit/7f94f0a19d48cc3e779216a5b4c51881ab8ddbf0))
+* **NODE-4591:** only set loadBalanced on handshake when explicitly set ([#3386](https://github.com/mongodb/node-mongodb-native/issues/3386)) ([57e9f2d](https://github.com/mongodb/node-mongodb-native/commit/57e9f2d9a617732f49c7e4dcfa3549912209584e))
+* **NODE-4621:** ipv6 address handling in HostAddress ([#3410](https://github.com/mongodb/node-mongodb-native/issues/3410)) ([5eb3978](https://github.com/mongodb/node-mongodb-native/commit/5eb3978a71941b88d877f2121910f9612d15e9e5))
+* **NODE-4639:** allow PromiseProvider to be null ([#3412](https://github.com/mongodb/node-mongodb-native/issues/3412)) ([d29b3d9](https://github.com/mongodb/node-mongodb-native/commit/d29b3d9db6824c048b75e6a74433d3638a41163f))
+
 ## [4.9.0](https://github.com/mongodb/node-mongodb-native/compare/v4.8.1...v4.9.0) (2022-08-18)
 
 
