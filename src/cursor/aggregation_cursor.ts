@@ -65,8 +65,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     const aggregateOperation = new AggregateOperation(this.namespace, this[kPipeline], {
       ...this[kOptions],
       ...this.cursorOptions,
-      session,
-      asyncResource: this.asyncResource
+      session
     });
 
     executeOperation(this.client, aggregateOperation, (err, response) => {
@@ -94,8 +93,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
       new AggregateOperation(this.namespace, this[kPipeline], {
         ...this[kOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
-        explain: verbosity,
-        asyncResource: this.asyncResource
+        explain: verbosity
       }),
       callback
     );

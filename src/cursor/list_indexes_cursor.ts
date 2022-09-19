@@ -28,8 +28,7 @@ export class ListIndexesCursor extends AbstractCursor {
     const operation = new ListIndexesOperation(this.parent, {
       ...this.cursorOptions,
       ...this.options,
-      session,
-      asyncResource: this.asyncResource
+      session
     });
 
     executeOperation(this.parent.s.db.s.client, operation, (err, response) => {

@@ -1,4 +1,3 @@
-import type { AsyncResource } from 'async_hooks';
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import * as os from 'os';
@@ -1294,17 +1293,4 @@ export function compareObjectId(oid1?: ObjectId, oid2?: ObjectId): 0 | 1 | -1 {
   }
 
   return oid1.id.compare(oid2.id);
-}
-
-export function maybeRunInAsyncScope<T = any>(
-  asyncResource: AsyncResource | undefined,
-  callback: Callback<T>,
-  error?: AnyError,
-  result?: T
-) {
-  if (asyncResource) {
-    asyncResource.runInAsyncScope(callback, null, error, result);
-  } else {
-    callback(error, result);
-  }
 }

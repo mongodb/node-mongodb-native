@@ -143,8 +143,7 @@ export class ChangeStreamCursor<
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
       ...this.options,
-      session,
-      asyncResource: this.asyncResource
+      session
     });
 
     executeOperation<TODO_NODE_3286, ChangeStreamAggregateRawResult<TChange>>(
