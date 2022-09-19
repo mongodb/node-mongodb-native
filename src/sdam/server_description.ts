@@ -88,8 +88,8 @@ export class ServerDescription {
 
     this.address =
       typeof address === 'string'
-        ? HostAddress.fromString(address).toString(false) // Use HostAddress to normalize
-        : address.toString(false);
+        ? HostAddress.fromString(address).toString() // Use HostAddress to normalize
+        : address.toString();
     this.type = parseServerType(hello, options);
     this.hosts = hello?.hosts?.map((host: string) => host.toLowerCase()) ?? [];
     this.passives = hello?.passives?.map((host: string) => host.toLowerCase()) ?? [];

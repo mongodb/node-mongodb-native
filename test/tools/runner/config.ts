@@ -58,7 +58,7 @@ export class TestConfiguration {
   buildInfo: Record<string, any>;
   options: {
     hosts?: string[];
-    hostAddresses?: HostAddress[];
+    hostAddresses: HostAddress[];
     hostAddress?: HostAddress;
     host?: string;
     port?: number;

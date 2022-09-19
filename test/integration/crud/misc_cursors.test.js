@@ -264,39 +264,21 @@ describe('Cursor', function () {
     }
   });
 
-  it('Should correctly execute cursor count with secondary readPreference', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: 'replicaset' }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1,
-        monitorCommands: true
-      });
-
+  it('should correctly execute cursor count with secondary readPreference', {
+    metadata: { requires: { topology: 'replicaset' } },
+    async test() {
       const bag = [];
       client.on('commandStarted', filterForCommands(['count'], bag));
 
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+      const cursor = client
+        .db()
+        .collection('countTEST')
+        .find({ qty: { $gt: 4 } });
+      await cursor.count({ readPreference: ReadPreference.SECONDARY });
 
-        const db = client.db(configuration.db);
-        const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
-        cursor.count({ readPreference: ReadPreference.SECONDARY }, err => {
-          expect(err).to.not.exist;
-
-          const selectedServerAddress = bag[0].address.replace('127.0.0.1', 'localhost');
-          const selectedServer = client.topology.description.servers.get(selectedServerAddress);
-          expect(selectedServer).property('type').to.equal(ServerType.RSSecondary);
-
-          done();
-        });
-      });
+      const selectedServerAddress = bag[0].address.replace('127.0.0.1', 'localhost');
+      const selectedServer = client.topology.description.servers.get(selectedServerAddress);
+      expect(selectedServer).property('type').to.equal(ServerType.RSSecondary);
     }
   });
 

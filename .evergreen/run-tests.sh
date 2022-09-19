@@ -9,16 +9,12 @@ set -o errexit  # Exit the script with error if any of the commands fail
 #       MARCH                   Machine Architecture. Defaults to lowercase uname -m
 #       TEST_NPM_SCRIPT         Script to npm run. Defaults to "integration-coverage"
 #       SKIP_DEPS               Skip installing dependencies
-#       NO_EXIT                 Don't exit early from tests that leak resources
 #       TEST_CSFLE              Set to enforce running csfle tests
 
 AUTH=${AUTH:-noauth}
 MONGODB_URI=${MONGODB_URI:-}
 TEST_NPM_SCRIPT=${TEST_NPM_SCRIPT:-check:integration-coverage}
 COMPRESSOR=${COMPRESSOR:-}
-if [[ -z "${NO_EXIT}" ]]; then
-  TEST_NPM_SCRIPT="$TEST_NPM_SCRIPT -- --exit"
-fi
 
 # ssl setup
 SSL=${SSL:-nossl}
@@ -68,5 +64,4 @@ export MONGODB_URI=${MONGODB_URI}
 export LOAD_BALANCER=${LOAD_BALANCER}
 export TEST_CSFLE=${TEST_CSFLE}
 export COMPRESSOR=${COMPRESSOR}
-# Do not add quotes, due to the way NO_EXIT is handled
-npm run ${TEST_NPM_SCRIPT}
+npm run "${TEST_NPM_SCRIPT}"

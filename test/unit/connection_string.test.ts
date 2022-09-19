@@ -10,7 +10,8 @@ import {
   MongoAPIError,
   MongoDriverError,
   MongoInvalidArgumentError,
-  MongoParseError
+  MongoParseError,
+  MongoRuntimeError
 } from '../../src/error';
 import { MongoClient, MongoOptions } from '../../src/mongo_client';
 
@@ -571,6 +572,53 @@ describe('Connection String', function () {
       const flag = Array.from(FEATURE_FLAGS.keys())[0]; // grab a random supported flag
       const client = new MongoClient('mongodb://iLoveJavaScript', { [flag]: null });
       expect(client.s.options).to.have.property(flag, null);
+    });
+  });
+
+  describe('IPv6 host addresses', () => {
+    it('should not allow multiple unbracketed portless localhost IPv6 addresses', () => {
+      // Note there is no "port-full" version of this test, there's no way to distinguish when a port begins without brackets
+      expect(() => new MongoClient('mongodb://::1,::1,::1/test')).to.throw(
+        /invalid connection string/i
+      );
+    });
+
+    it('should not allow multiple unbracketed portless remote IPv6 addresses', () => {
+      expect(
+        () =>
+          new MongoClient(
+            'mongodb://ABCD:f::abcd:abcd:abcd:abcd,ABCD:f::abcd:abcd:abcd:abcd,ABCD:f::abcd:abcd:abcd:abcd/test'
+          )
+      ).to.throw(MongoRuntimeError);
+    });
+
+    it('should allow multiple bracketed portless localhost IPv6 addresses', () => {
+      const client = new MongoClient('mongodb://[::1],[::1],[::1]/test');
+      expect(client.options.hosts).to.deep.equal([
+        { host: '::1', port: 27017, isIPv6: true, socketPath: undefined },
+        { host: '::1', port: 27017, isIPv6: true, socketPath: undefined },
+        { host: '::1', port: 27017, isIPv6: true, socketPath: undefined }
+      ]);
+    });
+
+    it('should allow multiple bracketed portless remote IPv6 addresses', () => {
+      const client = new MongoClient(
+        'mongodb://[ABCD:f::abcd:abcd:abcd:abcd],[ABCD:f::abcd:abcd:abcd:abcd],[ABCD:f::abcd:abcd:abcd:abcd]/test'
+      );
+      expect(client.options.hosts).to.deep.equal([
+        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true, socketPath: undefined },
+        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true, socketPath: undefined },
+        { host: 'abcd:f::abcd:abcd:abcd:abcd', port: 27017, isIPv6: true, socketPath: undefined }
+      ]);
+    });
+
+    it('should allow multiple bracketed IPv6 addresses with specified ports', () => {
+      const client = new MongoClient('mongodb://[::1]:27018,[::1]:27019,[::1]:27020/test');
+      expect(client.options.hosts).to.deep.equal([
+        { host: '::1', port: 27018, isIPv6: true, socketPath: undefined },
+        { host: '::1', port: 27019, isIPv6: true, socketPath: undefined },
+        { host: '::1', port: 27020, isIPv6: true, socketPath: undefined }
+      ]);
     });
   });
 });

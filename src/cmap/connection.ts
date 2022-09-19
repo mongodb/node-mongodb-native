@@ -655,8 +655,9 @@ function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
     return options.hostAddress.toString();
   }
 
-  if (typeof stream.address === 'function') {
-    return `${stream.remoteAddress}:${stream.remotePort}`;
+  const { remoteAddress, remotePort } = stream;
+  if (typeof remoteAddress === 'string' && typeof remotePort === 'number') {
+    return HostAddress.fromHostPort(remoteAddress, remotePort).toString();
   }
 
   return uuidV4().toString('hex');

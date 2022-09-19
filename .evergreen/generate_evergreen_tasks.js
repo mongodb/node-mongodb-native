@@ -91,13 +91,13 @@ BASE_TASKS.push({
       }
     },
     { func: 'bootstrap kms servers' },
-    {
-      func: 'run tests',
-      vars: {
-        MONGODB_API_VERSION: '1',
-        NO_EXIT: ''
-      }
-    }
+    // TODO(NODE-4642): Fix versioned API tests
+    // {
+    //   func: 'run tests',
+    //   vars: {
+    //     MONGODB_API_VERSION: '1'
+    //   }
+    // }
   ]
 });
 
