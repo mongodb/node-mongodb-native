@@ -137,10 +137,12 @@ export function executeOperation<
     try {
       executeWithServerSelection<TResult>(topology, session, operation, (error, result) => {
         if (session?.owner != null && session.owner === owner) {
-          return session.endSession(endSessionError => callback(endSessionError ?? error, result));
+          return session.endSession(endSessionError =>
+            operation.runInAsyncScope(callback, null, endSessionError ?? error, result)
+          );
         }
 
-        callback(error, result);
+        operation.runInAsyncScope(callback, null, error, result);
       });
     } catch (error) {
       if (session?.owner != null && session.owner === owner) {

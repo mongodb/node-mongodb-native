@@ -1,3 +1,5 @@
+import { AsyncResource } from 'async_hooks';
+
 import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -45,7 +47,7 @@ const kSession = Symbol('session');
  * a specific aspect.
  * @internal
  */
-export abstract class AbstractOperation<TResult = any> {
+export abstract class AbstractOperation<TResult = any> extends AsyncResource {
   ns!: MongoDBNamespace;
   cmd!: Document;
   readPreference: ReadPreference;
@@ -61,6 +63,8 @@ export abstract class AbstractOperation<TResult = any> {
   [kSession]: ClientSession | undefined;
 
   constructor(options: OperationOptions = {}) {
+    super('mongodb:Operation');
+
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
       : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
