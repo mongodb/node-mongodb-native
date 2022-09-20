@@ -15,9 +15,9 @@ const DEFAULT_OS = 'ubuntu1804-large';
 
 const OPERATING_SYSTEMS = [
   {
-    name: 'ubuntu-18.04',
-    display_name: 'Ubuntu 18.04',
-    run_on: 'ubuntu1804-large'
+    name: 'ubuntu-22.04',
+    display_name: 'Ubuntu 22.04',
+    run_on: 'ubuntu2204-large'
   },
   {
     name: 'windows-64-vs2019',

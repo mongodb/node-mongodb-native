@@ -2249,9 +2249,9 @@ buildvariants:
     run_on: ubuntu1804-large
     tasks:
       - run-spec-benchmark-tests
-  - name: ubuntu-18.04-erbium
-    display_name: Ubuntu 18.04 Node Erbium
-    run_on: ubuntu1804-large
+  - name: ubuntu-22.04-erbium
+    display_name: Ubuntu 22.04 Node Erbium
+    run_on: ubuntu2204-large
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
@@ -2297,9 +2297,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-18.04-fermium
-    display_name: Ubuntu 18.04 Node Fermium
-    run_on: ubuntu1804-large
+  - name: ubuntu-22.04-fermium
+    display_name: Ubuntu 22.04 Node Fermium
+    run_on: ubuntu2204-large
     expansions:
       NODE_LTS_NAME: fermium
       CLIENT_ENCRYPTION: true
@@ -2345,9 +2345,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-18.04-gallium
-    display_name: Ubuntu 18.04 Node Gallium
-    run_on: ubuntu1804-large
+  - name: ubuntu-22.04-gallium
+    display_name: Ubuntu 22.04 Node Gallium
+    run_on: ubuntu2204-large
     expansions:
       NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
@@ -2391,9 +2391,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-18.04-hydrogen
-    display_name: Ubuntu 18.04 Node Hydrogen
-    run_on: ubuntu1804-large
+  - name: ubuntu-22.04-hydrogen
+    display_name: Ubuntu 22.04 Node Hydrogen
+    run_on: ubuntu2204-large
     expansions:
       NODE_LTS_NAME: hydrogen
       CLIENT_ENCRYPTION: true
