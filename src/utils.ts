@@ -436,6 +436,38 @@ export function* makeCounter(seed = 0): Generator<number> {
 }
 
 /**
+ * Helper for handling legacy callback support.
+ */
+export function maybeCallback<T>(promiseFn: () => Promise<T>, callback: null): Promise<T>;
+export function maybeCallback<T>(
+  promiseFn: () => Promise<T>,
+  callback?: Callback<T>
+): Promise<T> | void;
+export function maybeCallback<T>(
+  promiseFn: () => Promise<T>,
+  callback?: Callback<T> | null
+): Promise<T> | void {
+  const PromiseConstructor = PromiseProvider.get();
+
+  const promise = promiseFn();
+  if (callback == null) {
+    if (PromiseConstructor == null) {
+      return promise;
+    } else {
+      return new PromiseConstructor((resolve, reject) => {
+        promise.then(resolve, reject);
+      });
+    }
+  }
+
+  promise.then(
+    result => callback(undefined, result),
+    error => callback(error)
+  );
+  return;
+}
+
+/**
  * Helper function for either accepting a callback, or returning a promise
  * @internal
  *

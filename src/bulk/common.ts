@@ -22,7 +22,6 @@ import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
 import { AbstractOperation, Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, UpdateStatement } from '../operations/update';
-import { PromiseProvider } from '../promise_provider';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
@@ -31,6 +30,7 @@ import {
   Callback,
   getTopology,
   hasAtomicOperators,
+  maybeCallback,
   MongoDBNamespace,
   resolveOptions
 } from '../utils';
@@ -1270,11 +1270,19 @@ export abstract class BulkOperationBase {
     options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    callback =
+      typeof callback === 'function'
+        ? callback
+        : typeof options === 'function'
+        ? options
+        : undefined;
+    options = options != null && typeof options !== 'function' ? options : {};
 
     if (this.s.executed) {
-      return handleEarlyError(new MongoBatchReExecutionError(), callback);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      return maybeCallback(async () => {
+        throw new MongoBatchReExecutionError();
+      }, callback);
     }
 
     const writeConcern = WriteConcern.fromOptions(options);
@@ -1292,10 +1300,10 @@ export abstract class BulkOperationBase {
     }
     // If we have no operations in the bulk raise an error
     if (this.s.batches.length === 0) {
-      const emptyBatchError = new MongoInvalidArgumentError(
-        'Invalid BulkOperation, Batch cannot be empty'
-      );
-      return handleEarlyError(emptyBatchError, callback);
+      // eslint-disable-next-line @typescript-eslint/require-await
+      return maybeCallback(async () => {
+        throw new MongoInvalidArgumentError('Invalid BulkOperation, Batch cannot be empty');
+      }, callback);
     }
 
     this.s.executed = true;
@@ -1350,20 +1358,6 @@ Object.defineProperty(BulkOperationBase.prototype, 'length', {
     return this.s.currentIndex;
   }
 });
-
-/** helper function to assist with promiseOrCallback behavior */
-function handleEarlyError(
-  err?: AnyError,
-  callback?: Callback<BulkWriteResult>
-): Promise<BulkWriteResult> | void {
-  if (typeof callback === 'function') {
-    callback(err);
-    return;
-  }
-
-  const PromiseConstructor = PromiseProvider.get() ?? Promise;
-  return PromiseConstructor.reject(err);
-}
 
 function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {
   if (typeof bulkOperation.s.options.forceServerObjectId === 'boolean') {

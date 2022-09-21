@@ -17,7 +17,6 @@ import { MongoInvalidArgumentError } from './error';
 import type { Logger, LoggerLevel } from './logger';
 import { TypedEventEmitter } from './mongo_types';
 import { connect } from './operations/connect';
-import { PromiseProvider } from './promise_provider';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
@@ -29,6 +28,7 @@ import {
   Callback,
   ClientMetadata,
   HostAddress,
+  maybeCallback,
   maybePromise,
   MongoDBNamespace,
   ns,
@@ -580,26 +580,18 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     options?: MongoClientOptions | Callback<MongoClient>,
     callback?: Callback<MongoClient>
   ): Promise<MongoClient> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    callback =
+      typeof callback === 'function'
+        ? callback
+        : typeof options === 'function'
+        ? options
+        : undefined;
 
-    try {
-      // Create client
-      const mongoClient = new MongoClient(url, options);
-      // Execute the connect method
-      if (callback) {
-        return mongoClient.connect(callback);
-      } else {
-        return mongoClient.connect();
-      }
-    } catch (error) {
-      if (callback) {
-        return callback(error);
-      } else {
-        const PromiseConstructor = PromiseProvider.get() ?? Promise;
-        return PromiseConstructor.reject(error);
-      }
-    }
+    return maybeCallback(async () => {
+      options = typeof options !== 'function' ? options : undefined;
+      const client = new this(url, options);
+      return await client.connect();
+    }, callback);
   }
 
   /** Starts a new session on the server */
@@ -649,16 +641,18 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     const session = this.startSession(options);
-    const PromiseConstructor = PromiseProvider.get() ?? Promise;
 
-    return PromiseConstructor.resolve()
-      .then(() => withSessionCallback(session))
-      .then(() => {
-        // Do not return the result of callback
-      })
-      .finally(() => {
-        session.endSession().catch(() => null);
-      });
+    return maybeCallback(async () => {
+      try {
+        await withSessionCallback(session);
+      } finally {
+        try {
+          await session.endSession();
+        } catch {
+          // We are not concerned with errors from endSession()
+        }
+      }
+    }, null);
   }
 
   /**

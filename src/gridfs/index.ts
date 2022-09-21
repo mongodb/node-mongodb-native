@@ -7,7 +7,7 @@ import type { Logger } from '../logger';
 import { Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { Callback, maybePromise } from '../utils';
+import { Callback, maybeCallback } from '../utils';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -144,28 +144,18 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   delete(id: ObjectId, callback: Callback<void>): void;
   delete(id: ObjectId, callback?: Callback<void>): Promise<void> | void {
-    return maybePromise(callback, callback => {
-      return this.s._filesCollection.deleteOne({ _id: id }, (error, res) => {
-        if (error) {
-          return callback(error);
-        }
+    return maybeCallback(async () => {
+      const { deletedCount } = await this.s._filesCollection.deleteOne({ _id: id });
 
-        return this.s._chunksCollection.deleteMany({ files_id: id }, error => {
-          if (error) {
-            return callback(error);
-          }
+      // Delete orphaned chunks before returning FileNotFound
+      await this.s._chunksCollection.deleteMany({ files_id: id });
 
-          // Delete orphaned chunks before returning FileNotFound
-          if (!res?.deletedCount) {
-            // TODO(NODE-3483): Replace with more appropriate error
-            // Consider creating new error MongoGridFSFileNotFoundError
-            return callback(new MongoRuntimeError(`File not found for id ${id}`));
-          }
-
-          return callback();
-        });
-      });
-    });
+      if (deletedCount === 0) {
+        // TODO(NODE-3483): Replace with more appropriate error
+        // Consider creating new error MongoGridFSFileNotFoundError
+        throw new MongoRuntimeError(`File not found for id ${id}`);
+      }
+    }, callback);
   }
 
   /** Convenience wrapper around find on the files collection */
@@ -215,21 +205,14 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   rename(id: ObjectId, filename: string, callback: Callback<void>): void;
   rename(id: ObjectId, filename: string, callback?: Callback<void>): Promise<void> | void {
-    return maybePromise(callback, callback => {
+    return maybeCallback(async () => {
       const filter = { _id: id };
       const update = { $set: { filename } };
-      return this.s._filesCollection.updateOne(filter, update, (error?, res?) => {
-        if (error) {
-          return callback(error);
-        }
-
-        if (!res?.matchedCount) {
-          return callback(new MongoRuntimeError(`File with id ${id} not found`));
-        }
-
-        return callback();
-      });
-    });
+      const { matchedCount } = await this.s._filesCollection.updateOne(filter, update);
+      if (matchedCount === 0) {
+        throw new MongoRuntimeError(`File with id ${id} not found`);
+      }
+    }, callback);
   }
 
   /** Removes this bucket's files collection, followed by its chunks collection. */
@@ -237,20 +220,10 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   drop(callback: Callback<void>): void;
   drop(callback?: Callback<void>): Promise<void> | void {
-    return maybePromise(callback, callback => {
-      return this.s._filesCollection.drop(error => {
-        if (error) {
-          return callback(error);
-        }
-        return this.s._chunksCollection.drop(error => {
-          if (error) {
-            return callback(error);
-          }
-
-          return callback();
-        });
-      });
-    });
+    return maybeCallback(async () => {
+      await this.s._filesCollection.drop();
+      await this.s._chunksCollection.drop();
+    }, callback);
   }
 
   /** Get the Db scoped logger. */
