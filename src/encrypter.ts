@@ -27,6 +27,8 @@ async function driverOnKmsProviderRefresh() {
 /**
  * Gets the onKmsProviderRefresh function given a potentially
  * defined user provided function.
+ *
+ * @public
  */
 export function onKmsProviderRefresh(
   fn?: () => Promise<KmsProviders>

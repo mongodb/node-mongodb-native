@@ -284,7 +284,7 @@ export type {
   KmsProviders,
   LocalKmsOptions
 } from './deps';
-export type { Encrypter, EncrypterOptions } from './encrypter';
+export type { Encrypter, EncrypterOptions, onKmsProviderRefresh } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
 export type {
