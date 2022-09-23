@@ -11,13 +11,13 @@ const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '6.0', '5.0', '4.4'];
 const TLS_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2'];
 
-const DEFAULT_OS = 'ubuntu1804-large';
+const DEFAULT_OS = 'ubuntu2004-large';
 
 const OPERATING_SYSTEMS = [
   {
     name: 'ubuntu-22.04',
     display_name: 'Ubuntu 22.04',
-    run_on: 'ubuntu2204-large'
+    run_on: 'ubuntu2004-large'
   },
   {
     name: 'windows-64-vs2019',
