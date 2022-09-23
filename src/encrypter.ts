@@ -2,7 +2,7 @@
 import { deserialize, serialize } from './bson';
 import { findAwsKmsOptions } from './cmap/auth/mongodb_aws';
 import { MONGO_CLIENT_EVENTS } from './constants';
-import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
+import type { AutoEncrypter, AutoEncryptionOptions, KmsProviders } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
 import { MongoClient, MongoClientOptions } from './mongo_client';
 import { Callback, getMongoDBClientEncryption } from './utils';
@@ -28,8 +28,10 @@ async function driverOnKmsProviderRefresh() {
  * Gets the onKmsProviderRefresh function given a potentially
  * defined user provided function.
  */
-export function onKmsProviderRefresh(fn?: Function): Function {
-  return async function() {
+export function onKmsProviderRefresh(
+  fn?: () => Promise<KmsProviders>
+): () => Promise<KmsProviders> {
+  return async function (): Promise<KmsProviders> {
     // First attempt to use the user provided refresh function if it exists.
     let creds = (await fn?.()) ?? {};
     // Fallback to the driver getting the credentials if the user callback
@@ -38,7 +40,7 @@ export function onKmsProviderRefresh(fn?: Function): Function {
       creds = await driverOnKmsProviderRefresh();
     }
     return creds;
-  }
+  };
 }
 
 /** @internal */
