@@ -15,7 +15,7 @@ const DEFAULT_OS = 'ubuntu2004-large';
 
 const OPERATING_SYSTEMS = [
   {
-    name: 'ubuntu-22.04',
+    name: 'ubuntu-20.04',
     display_name: 'Ubuntu 22.04',
     run_on: 'ubuntu2004-large'
   },
@@ -496,15 +496,15 @@ SINGLETON_TASKS.push({
 BUILD_VARIANTS.push({
   name: 'mongosh_integration_tests',
   display_name: 'mongosh integration tests',
-  run_on: 'ubuntu1804-test',
+  run_on: DEFAULT_OS,
   tasks: ['run-mongosh-integration-tests']
 });
 
 // special case for MONGODB-AWS authentication
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-test-mongodb-aws',
+  name: 'ubuntu20.04-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
-  run_on: 'ubuntu1804-test',
+  run_on: DEFAULT_OS,
   expansions: {
     NODE_LTS_NAME: LOWEST_LTS
   },
@@ -602,7 +602,7 @@ const coverageTask = {
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-custom-dependency-tests',
+  name: 'ubuntu20.04-custom-dependency-tests',
   display_name: 'Custom Dependency Version Test',
   run_on: DEFAULT_OS,
   tasks: oneOffFuncAsTasks.map(({ name }) => name)
@@ -610,9 +610,9 @@ BUILD_VARIANTS.push({
 
 // special case for serverless testing
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-test-serverless',
+  name: 'ubuntu20.04-test-serverless',
   display_name: 'Serverless Test',
-  run_on: 'ubuntu1804-test',
+  run_on: DEFAULT_OS,
   expansions: {
     NODE_LTS_NAME: LOWEST_LTS
   },
@@ -620,7 +620,7 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-no-auth-tests',
+  name: 'ubuntu20.04-no-auth-tests',
   display_name: 'No Auth Tests',
   run_on: DEFAULT_OS,
   expansions: {
@@ -630,9 +630,9 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-test-lambda',
+  name: 'ubuntu20.04-test-lambda',
   display_name: 'AWS Lambda handler tests',
-  run_on: 'ubuntu1804-test',
+  run_on: DEFAULT_OS,
   tasks: ['test-lambda-example', 'test-lambda-aws-auth-example']
 });
 

@@ -2249,7 +2249,7 @@ buildvariants:
     run_on: ubuntu1804-large
     tasks:
       - run-spec-benchmark-tests
-  - name: ubuntu-22.04-erbium
+  - name: ubuntu-20.04-erbium
     display_name: Ubuntu 22.04 Node Erbium
     run_on: ubuntu2004-large
     expansions:
@@ -2297,7 +2297,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-22.04-fermium
+  - name: ubuntu-20.04-fermium
     display_name: Ubuntu 22.04 Node Fermium
     run_on: ubuntu2004-large
     expansions:
@@ -2345,7 +2345,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-22.04-gallium
+  - name: ubuntu-20.04-gallium
     display_name: Ubuntu 22.04 Node Gallium
     run_on: ubuntu2004-large
     expansions:
@@ -2391,7 +2391,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-22.04-hydrogen
+  - name: ubuntu-20.04-hydrogen
     display_name: Ubuntu 22.04 Node Hydrogen
     run_on: ubuntu2004-large
     expansions:
@@ -2624,12 +2624,12 @@ buildvariants:
       - run-typescript-next
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
-    run_on: ubuntu1804-test
+    run_on: ubuntu2004-large
     tasks:
       - run-mongosh-integration-tests
-  - name: ubuntu1804-test-mongodb-aws
+  - name: ubuntu20.04-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
-    run_on: ubuntu1804-test
+    run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: erbium
     tasks:
@@ -2657,7 +2657,7 @@ buildvariants:
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-4.4-auth-test-run-aws-ECS-auth-test
-  - name: ubuntu1804-custom-dependency-tests
+  - name: ubuntu20.04-custom-dependency-tests
     display_name: Custom Dependency Version Test
     run_on: ubuntu2004-large
     tasks:
@@ -2670,14 +2670,14 @@ buildvariants:
       - run-custom-csfle-tests-rapid-master
       - run-custom-csfle-tests-latest-pinned-commit
       - run-custom-csfle-tests-latest-master
-  - name: ubuntu1804-test-serverless
+  - name: ubuntu20.04-test-serverless
     display_name: Serverless Test
-    run_on: ubuntu1804-test
+    run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: erbium
     tasks:
       - serverless_task_group
-  - name: ubuntu1804-no-auth-tests
+  - name: ubuntu20.04-no-auth-tests
     display_name: No Auth Tests
     run_on: ubuntu2004-large
     expansions:
@@ -2707,9 +2707,9 @@ buildvariants:
       - test-3.6-server-noauth
       - test-3.6-replica_set-noauth
       - test-3.6-sharded_cluster-noauth
-  - name: ubuntu1804-test-lambda
+  - name: ubuntu20.04-test-lambda
     display_name: AWS Lambda handler tests
-    run_on: ubuntu1804-test
+    run_on: ubuntu2004-large
     tasks:
       - test-lambda-example
       - test-lambda-aws-auth-example
