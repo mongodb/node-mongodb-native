@@ -12,6 +12,7 @@ import {
   MongoClient,
   MongoMissingDependencyError
 } from '../../../src';
+import { onKmsProviderRefresh } from '../../../src/encrypter';
 import { getMongoDBClientEncryption } from '../../../src/utils';
 import { shouldRunServerlessTest } from '../../tools/utils';
 import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
@@ -406,6 +407,10 @@ export function createClientEncryption(
     autoEncryptionOptions.extraOptions = {
       cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
     };
+  }
+
+  if (process.env.REFRESH_AWS_CREDENTIALS) {
+    autoEncryptionOptions.onKmsProviderRefresh = onKmsProviderRefresh;
   }
 
   const clientEncryption = new ClientEncryptionClass(clientEntity, autoEncryptionOptions);

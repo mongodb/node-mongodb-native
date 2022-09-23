@@ -24,6 +24,23 @@ async function driverOnKmsProviderRefresh() {
   return await findAwsKmsOptions();
 }
 
+/**
+ * Gets the onKmsProviderRefresh function given a potentially
+ * defined user provided function.
+ */
+export function onKmsProviderRefresh(fn?: Function): Function {
+  return async function() {
+    // First attempt to use the user provided refresh function if it exists.
+    let creds = (await fn?.()) ?? {};
+    // Fallback to the driver getting the credentials if the user callback
+    // is empty or doesn't exist.
+    if (Object.keys(creds).length === 0) {
+      creds = await driverOnKmsProviderRefresh();
+    }
+    return creds;
+  }
+}
+
 /** @internal */
 export class Encrypter {
   [kInternalClient]: MongoClient | null;
@@ -44,16 +61,7 @@ export class Encrypter {
     const userOnKmsProviderRefresh = options.autoEncryption.onKmsProviderRefresh;
     options.autoEncryption = {
       ...options.autoEncryption,
-      async onKmsProviderRefresh() {
-        // First attempt to use the user provided refresh function if it exists.
-        let creds = (await userOnKmsProviderRefresh?.()) ?? {};
-        // Fallback to the driver getting the credentials if the user callback
-        // is empty or doesn't exist.
-        if (Object.keys(creds).length === 0) {
-          creds = await driverOnKmsProviderRefresh();
-        }
-        return creds;
-      }
+      onKmsProviderRefresh: onKmsProviderRefresh(userOnKmsProviderRefresh)
     };
 
     if (options.maxPoolSize === 0 && options.autoEncryption.keyVaultClient == null) {
