@@ -2250,7 +2250,7 @@ buildvariants:
     tasks:
       - run-spec-benchmark-tests
   - name: ubuntu-20.04-erbium
-    display_name: Ubuntu 22.04 Node Erbium
+    display_name: Ubuntu 20.04 Node Erbium
     run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: erbium
@@ -2298,7 +2298,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: ubuntu-20.04-fermium
-    display_name: Ubuntu 22.04 Node Fermium
+    display_name: Ubuntu 20.04 Node Fermium
     run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: fermium
@@ -2346,7 +2346,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: ubuntu-20.04-gallium
-    display_name: Ubuntu 22.04 Node Gallium
+    display_name: Ubuntu 20.04 Node Gallium
     run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: gallium
@@ -2392,7 +2392,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: ubuntu-20.04-hydrogen
-    display_name: Ubuntu 22.04 Node Hydrogen
+    display_name: Ubuntu 20.04 Node Hydrogen
     run_on: ubuntu2004-large
     expansions:
       NODE_LTS_NAME: hydrogen

@@ -16,7 +16,7 @@ const DEFAULT_OS = 'ubuntu2004-large';
 const OPERATING_SYSTEMS = [
   {
     name: 'ubuntu-20.04',
-    display_name: 'Ubuntu 22.04',
+    display_name: 'Ubuntu 20.04',
     run_on: 'ubuntu2004-large'
   },
   {
