@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
+import type { Callback, MongoDBNamespace } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects, Hint } from './operation';
@@ -83,7 +83,7 @@ export class DeleteOperation extends CommandOperation<Document> {
     }
 
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
-    if (unacknowledgedWrite || maxWireVersion(server) < 5) {
+    if (unacknowledgedWrite) {
       if (this.statements.find((o: Document) => o.hint)) {
         callback(new MongoCompatibilityError(`Servers < 3.4 do not support hint on delete`));
         return;
