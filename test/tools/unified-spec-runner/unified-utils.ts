@@ -285,10 +285,6 @@ export function getCSFLETestDataFromEnvironment(environment: Record<string, stri
     );
   }
 
-  if (environment.REFRESH_AWS_CREDENTIALS) {
-    delete parsedKMSProviders.aws;
-  }
-
   return {
     kmsProviders: parsedKMSProviders,
     tlsOptions: {
@@ -410,6 +406,7 @@ export function createClientEncryption(
   }
 
   if (process.env.REFRESH_AWS_CREDENTIALS) {
+    delete autoEncryptionOptions.kmsProviders.aws;
     autoEncryptionOptions.onKmsProviderRefresh = onKmsProviderRefresh;
   }
 
