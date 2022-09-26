@@ -11,13 +11,13 @@ const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '6.0', '5.0', '4.4'];
 const TLS_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2'];
 
-const DEFAULT_OS = 'ubuntu1804-large';
+const DEFAULT_OS = 'rhel80-large';
 
 const OPERATING_SYSTEMS = [
   {
-    name: 'ubuntu-18.04',
-    display_name: 'Ubuntu 18.04',
-    run_on: 'ubuntu1804-large'
+    name: 'rhel80-large',
+    display_name: 'rhel8',
+    run_on: DEFAULT_OS
   },
   {
     name: 'windows-64-vs2019',
@@ -496,7 +496,7 @@ SINGLETON_TASKS.push({
 BUILD_VARIANTS.push({
   name: 'mongosh_integration_tests',
   display_name: 'mongosh integration tests',
-  run_on: 'ubuntu1804-test',
+  run_on: 'ubuntu1804-large',
   tasks: ['run-mongosh-integration-tests']
 });
 
@@ -504,7 +504,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'ubuntu1804-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
-  run_on: 'ubuntu1804-test',
+  run_on: 'ubuntu1804-large',
   expansions: {
     NODE_LTS_NAME: LOWEST_LTS
   },
@@ -602,7 +602,7 @@ const coverageTask = {
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-custom-dependency-tests',
+  name: 'rhel8-custom-dependency-tests',
   display_name: 'Custom Dependency Version Test',
   run_on: DEFAULT_OS,
   tasks: oneOffFuncAsTasks.map(({ name }) => name)
@@ -610,9 +610,9 @@ BUILD_VARIANTS.push({
 
 // special case for serverless testing
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-test-serverless',
+  name: 'rhel8-test-serverless',
   display_name: 'Serverless Test',
-  run_on: 'ubuntu1804-test',
+  run_on: DEFAULT_OS,
   expansions: {
     NODE_LTS_NAME: LOWEST_LTS
   },
@@ -620,7 +620,7 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-no-auth-tests',
+  name: 'rhel8-no-auth-tests',
   display_name: 'No Auth Tests',
   run_on: DEFAULT_OS,
   expansions: {
@@ -630,9 +630,9 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-test-lambda',
+  name: 'rhel8-test-lambda',
   display_name: 'AWS Lambda handler tests',
-  run_on: 'ubuntu1804-test',
+  run_on: DEFAULT_OS,
   tasks: ['test-lambda-example', 'test-lambda-aws-auth-example']
 });
 
