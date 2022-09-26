@@ -662,7 +662,7 @@ export class Collection<TSchema extends Document = Document> {
       new RenameOperation(this as TODO_NODE_3286, newName, {
         ...options,
         readPreference: ReadPreference.PRIMARY
-      }),
+      }) as TODO_NODE_3286,
       callback
     );
   }
@@ -1299,7 +1299,7 @@ export class Collection<TSchema extends Document = Document> {
 
     return executeOperation(
       this.s.db.s.client,
-      new CollStatsOperation(this as TODO_NODE_3286, options),
+      new CollStatsOperation(this as TODO_NODE_3286, options) as TODO_NODE_3286,
       callback
     );
   }

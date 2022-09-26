@@ -96,7 +96,7 @@ describe('MaxTimeMS', function () {
       cappedCollection = await client
         .db()
         .createCollection('cappedAt3', { capped: true, size: 4096, max: 3 });
-      cappedCollection.insertMany(insertedDocs);
+      await cappedCollection.insertMany(insertedDocs);
 
       events = [];
       client.on('commandStarted', event =>
@@ -188,8 +188,10 @@ describe('MaxTimeMS', function () {
         it(`should create find cursor with ${optionsString}`, metadata, async () => {
           const { findDocOrError: findDoc, getMoreDocOrError: getMoreDoc } = await operation();
 
-          expect(findDoc).to.not.be.instanceOf(Error);
-          expect(getMoreDoc).to.not.be.instanceOf(Error);
+          // @ts-expect-error: If this is an error it will have a stack worth seeing
+          expect(findDoc, `${findDoc?.stack}`).to.not.be.instanceOf(Error);
+          // @ts-expect-error: If this is an error it will have a stack worth seeing
+          expect(getMoreDoc, `${getMoreDoc?.stack}`).to.not.be.instanceOf(Error);
 
           expect(findDoc).to.have.property('_id', 1);
 

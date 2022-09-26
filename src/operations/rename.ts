@@ -38,11 +38,7 @@ export class RenameOperation extends RunAdminCommandOperation {
     this.newName = newName;
   }
 
-  override execute(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Collection>
-  ): void {
+  override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
     const coll = this.collection;
 
     super.execute(server, session, (err, doc) => {

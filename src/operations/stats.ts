@@ -33,11 +33,7 @@ export class CollStatsOperation extends CommandOperation<Document> {
     this.collectionName = collection.collectionName;
   }
 
-  override execute(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<CollStats>
-  ): void {
+  override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
     const command: Document = { collStats: this.collectionName };
     if (this.options.scale != null) {
       command.scale = this.options.scale;

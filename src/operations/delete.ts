@@ -44,7 +44,7 @@ export interface DeleteStatement {
 }
 
 /** @internal */
-export class DeleteOperation extends CommandOperation<Document> {
+export class DeleteOperation extends CommandOperation<DeleteResult> {
   override options: DeleteOptions;
   statements: DeleteStatement[];
 
