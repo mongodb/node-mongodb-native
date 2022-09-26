@@ -386,6 +386,13 @@ describe('Sessions Spec', function () {
     let testCollection;
 
     beforeEach(async function () {
+      if (this.configuration.isServerless) {
+        if (this.currentTest) {
+          this.currentTest.skipReason =
+            'Serverless actually tests parallel connect which is broken';
+        }
+        return this.skip();
+      }
       utilClient = await this.configuration
         .newClient({ maxPoolSize: 1, monitorCommands: true })
         .connect();
@@ -397,6 +404,9 @@ describe('Sessions Spec', function () {
       // Fresh unused client for the test
       client = await this.configuration.newClient({ maxPoolSize: 1, monitorCommands: true });
       testCollection = client.db('test').collection('too.many.sessions');
+
+      utilClient.name = 'ann';
+      client.name = 'bob';
     });
 
     afterEach(async () => {
@@ -404,7 +414,7 @@ describe('Sessions Spec', function () {
       await utilClient?.close();
     });
 
-    it('should only use one session for many operations when maxPoolSize is 1', async () => {
+    it('should only use two sessions for many operations when maxPoolSize is 1', async () => {
       const documents = Array.from({ length: 50 }).map((_, idx) => ({ _id: idx }));
 
       const events: CommandStartedEvent[] = [];

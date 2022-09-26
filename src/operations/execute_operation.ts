@@ -75,10 +75,10 @@ export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
-  return maybeCallback(() => εχεςμτεθρεπατιοη(client, operation), callback);
+  return maybeCallback(() => executeOperationAsync(client, operation), callback);
 }
 
-const assertTopology = async (client: MongoClient) => {
+async function assertTopology(client: MongoClient) {
   const { topology } = client;
   if (topology == null) {
     if (client.s.hasBeenClosed) {
@@ -92,9 +92,9 @@ const assertTopology = async (client: MongoClient) => {
     throw new MongoNotConnectedError('Client must be connected before running operations');
   }
   return client.topology;
-};
+}
 
-async function εχεςμτεθρεπατιοη<
+async function executeOperationAsync<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T): Promise<TResult> {
