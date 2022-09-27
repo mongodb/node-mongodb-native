@@ -78,18 +78,21 @@ export function executeOperation<
   return maybeCallback(() => executeOperationAsync(client, operation), callback);
 }
 
-async function assertTopology(client: MongoClient) {
+async function maybeConnect(client: MongoClient): Promise<Topology> {
   const { topology } = client;
   if (topology == null) {
     if (client.s.hasBeenClosed) {
       throw new MongoNotConnectedError('Client must be connected before running operations');
     }
     client.s.options[Symbol.for('@@mdb.skipPingOnConnect')] = true;
-    await client.connect();
-    delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
+    try {
+      await client.connect();
+    } finally {
+      delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
+    }
   }
   if (client.topology == null) {
-    throw new MongoNotConnectedError('Client must be connected before running operations');
+    throw new MongoRuntimeError('client.connect did not create a topology but also did not throw');
   }
   return client.topology;
 }
@@ -103,7 +106,7 @@ async function executeOperationAsync<
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
-  const topology = await assertTopology(client);
+  const topology = await maybeConnect(client);
 
   if (topology.shouldCheckForSessionSupport()) {
     await topology.selectServerAsync(ReadPreference.primaryPreferred, {});
