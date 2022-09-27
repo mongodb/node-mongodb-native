@@ -259,6 +259,7 @@ export class ThreadContext {
   #poolOptions: Partial<ConnectionPoolOptions>;
   #hostAddress: HostAddress;
   #server: Server;
+  #originalServerPool: ConnectionPool;
   #supportedOperations: ReturnType<typeof getTestOpDefinitions>;
   #injectPoolStats = false;
 
@@ -300,6 +301,8 @@ export class ThreadContext {
       ...options,
       hostAddress: this.#hostAddress
     });
+    this.#originalServerPool = this.#server.s.pool;
+    this.#server.s.pool = this.pool;
     ALL_POOL_EVENTS.forEach(eventName => {
       this.pool.on(eventName, event => {
         if (this.#injectPoolStats) {
@@ -315,6 +318,7 @@ export class ThreadContext {
   }
 
   closePool() {
+    this.#server.s.pool = this.#originalServerPool;
     return new Promise(resolve => {
       ALL_POOL_EVENTS.forEach(ev => this.pool.removeAllListeners(ev));
       this.pool.close(resolve);
@@ -486,27 +490,32 @@ export function runCmapTestSuite(
 
         try {
           const serverDescriptionMap = utilClient.topology?.s.description.servers;
-          const serverMap = utilClient.topology?.s.servers;
           const hosts = shuffle(serverDescriptionMap.keys());
           const selectedHostUri = hosts[0];
           hostAddress = serverDescriptionMap.get(selectedHostUri).hostAddress;
-          server = serverMap.get(selectedHostUri);
+
+          client = this.configuration.newClient(
+            `mongodb://${hostAddress}/${
+              this.configuration.isLoadBalanced ? '?loadBalanced=true' : '?directConnection=true'
+            }`
+          );
+          await client.connect();
+          if (test.failPoint) {
+            await client.db('admin').command(test.failPoint);
+          }
+
+          const serverMap = client.topology?.s.servers;
+          server = serverMap?.get(selectedHostUri);
+          if (!server) {
+            throw new Error('Failed to retrieve server for test');
+          }
+
           threadContext = new ThreadContext(
             server,
             hostAddress,
             this.configuration.isLoadBalanced ? { loadBalanced: true } : {},
             { injectPoolStats: !!options?.injectPoolStats }
           );
-
-          if (test.failPoint) {
-            client = this.configuration.newClient(
-              `mongodb://${hostAddress}/${
-                this.configuration.isLoadBalanced ? '?loadBalanced=true' : '?directConnection=true'
-              }`
-            );
-            await client.connect();
-            await client.db('admin').command(test.failPoint);
-          }
         } finally {
           await utilClient.close();
         }

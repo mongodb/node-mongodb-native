@@ -670,12 +670,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         }
         if (this[kPoolState] === PoolState.ready) {
           clearTimeout(this[kMinPoolSizeTimer]);
-          this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 5000);
+          this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
         }
       });
     } else {
       clearTimeout(this[kMinPoolSizeTimer]);
-      this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10000);
+      this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 100);
     }
   }
 
