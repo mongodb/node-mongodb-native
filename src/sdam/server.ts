@@ -20,6 +20,7 @@ import {
 } from '../constants';
 import type { AutoEncrypter } from '../deps';
 import {
+  AnyError,
   isNetworkErrorBeforeHandshake,
   isNodeShuttingDownError,
   isSDAMUnrecoverableError,
@@ -381,7 +382,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    * Handle SDAM error
    * @internal
    */
-  handleError(error: MongoError, connection: Connection) {
+  handleError(error: AnyError, connection?: Connection) {
+    if (!(error instanceof MongoError)) {
+      return;
+    }
     if (error instanceof MongoNetworkError) {
       if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
         // In load balanced mode we never mark the server as unknown and always
@@ -390,7 +394,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         if (!this.loadBalanced) {
           error.addErrorLabel(MongoErrorLabel.ResetPool);
           markServerUnknown(this, error);
-        } else {
+        } else if (connection) {
           this.s.pool.clear(connection.serviceId);
         }
       }
@@ -398,7 +402,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       if (isSDAMUnrecoverableError(error)) {
         if (shouldHandleStateChangeError(this, error)) {
           const shouldClearPool = maxWireVersion(this) <= 7 || isNodeShuttingDownError(error);
-          if (this.loadBalanced && shouldClearPool) {
+          if (this.loadBalanced && connection && shouldClearPool) {
             this.s.pool.clear(connection.serviceId);
           }
 

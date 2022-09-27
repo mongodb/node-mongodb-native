@@ -661,18 +661,21 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // connection permits because that potentially delays the availability of
       // the connection to a checkout request
       this.createConnection((err, connection) => {
+        if (err) {
+          this[kServer].handleError(err);
+        }
         if (!err && connection) {
           this[kConnections].push(connection);
           process.nextTick(() => this.processWaitQueue());
         }
         if (this[kPoolState] === PoolState.ready) {
           clearTimeout(this[kMinPoolSizeTimer]);
-          this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
+          this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 5000);
         }
       });
     } else {
       clearTimeout(this[kMinPoolSizeTimer]);
-      this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 100);
+      this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10000);
     }
   }
 
