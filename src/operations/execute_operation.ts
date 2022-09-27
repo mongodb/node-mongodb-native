@@ -191,28 +191,24 @@ async function executeOperationAsync<
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
   const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
 
-  if ((hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite)) {
-    if (hasWriteAspect && willRetryWrite) {
-      operation.options.willRetryWrite = true;
-      session.incrementTransactionNumber();
-    }
+  if (hasWriteAspect && willRetryWrite) {
+    operation.options.willRetryWrite = true;
+    session.incrementTransactionNumber();
   }
 
   try {
-    try {
-      return await operation.executeAsync(server, session);
-    } catch (operationError) {
-      if ((hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite)) {
-        if (operationError instanceof MongoError) {
-          return await retryOperation(operation, operationError, {
-            session,
-            topology,
-            selector
-          });
-        }
+    return await operation.executeAsync(server, session);
+  } catch (operationError) {
+    if ((hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite)) {
+      if (operationError instanceof MongoError) {
+        return await retryOperation(operation, operationError, {
+          session,
+          topology,
+          selector
+        });
       }
-      throw operationError;
     }
+    throw operationError;
   } finally {
     if (session?.owner != null && session.owner === owner) {
       await session.endSession().catch(() => null);
