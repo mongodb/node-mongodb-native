@@ -376,6 +376,43 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       callback
     );
   }
+
+  /**
+   * Handle SDAM error
+   * @internal
+   */
+  handleError(error: MongoError, connection: Connection) {
+    if (error instanceof MongoNetworkError) {
+      if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
+        // In load balanced mode we never mark the server as unknown and always
+        // clear for the specific service id.
+
+        if (!this.loadBalanced) {
+          error.addErrorLabel(MongoErrorLabel.ResetPool);
+          markServerUnknown(this, error);
+        } else {
+          this.s.pool.clear(connection.serviceId);
+        }
+      }
+    } else {
+      if (isSDAMUnrecoverableError(error)) {
+        if (shouldHandleStateChangeError(this, error)) {
+          const shouldClearPool = maxWireVersion(this) <= 7 || isNodeShuttingDownError(error);
+          if (this.loadBalanced && shouldClearPool) {
+            this.s.pool.clear(connection.serviceId);
+          }
+
+          if (!this.loadBalanced) {
+            if (shouldClearPool) {
+              error.addErrorLabel(MongoErrorLabel.ResetPool);
+            }
+            markServerUnknown(this, error);
+            process.nextTick(() => this.requestCheck());
+          }
+        }
+      }
+    }
+  }
 }
 
 function calculateRoundTripTime(oldRtt: number, duration: number): number {
@@ -444,39 +481,6 @@ function isRetryableWritesEnabled(topology: Topology) {
   return topology.s.options.retryWrites !== false;
 }
 
-function handleError(server: Server, error: MongoError, connection: Connection) {
-  if (error instanceof MongoNetworkError) {
-    if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
-      // In load balanced mode we never mark the server as unknown and always
-      // clear for the specific service id.
-
-      if (!server.loadBalanced) {
-        error.addErrorLabel(MongoErrorLabel.ResetPool);
-        markServerUnknown(server, error);
-      } else {
-        server.s.pool.clear(connection.serviceId);
-      }
-    }
-  } else {
-    if (isSDAMUnrecoverableError(error)) {
-      if (shouldHandleStateChangeError(server, error)) {
-        const shouldClearPool = maxWireVersion(server) <= 7 || isNodeShuttingDownError(error);
-        if (server.loadBalanced && shouldClearPool) {
-          server.s.pool.clear(connection.serviceId);
-        }
-
-        if (!server.loadBalanced) {
-          if (shouldClearPool) {
-            error.addErrorLabel(MongoErrorLabel.ResetPool);
-          }
-          markServerUnknown(server, error);
-          process.nextTick(() => server.requestCheck());
-        }
-      }
-    }
-  }
-}
-
 function makeOperationHandler(
   server: Server,
   connection: Connection,
@@ -541,7 +545,7 @@ function makeOperationHandler(
       session.unpin({ force: true });
     }
 
-    handleError(server, error, connection);
+    server.handleError(error, connection);
 
     return callback(error);
   };
