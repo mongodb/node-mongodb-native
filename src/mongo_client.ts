@@ -590,7 +590,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return maybeCallback(async () => {
       options = typeof options !== 'function' ? options : undefined;
       const client = new this(url, options);
-      return await client.connect();
+      return client.connect();
     }, callback);
   }
 

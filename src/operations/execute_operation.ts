@@ -272,5 +272,5 @@ async function retryOperation<
     );
   }
 
-  return await operation.executeAsync(server, session);
+  return operation.executeAsync(server, session);
 }

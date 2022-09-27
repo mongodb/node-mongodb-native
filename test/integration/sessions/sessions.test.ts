@@ -386,13 +386,6 @@ describe('Sessions Spec', function () {
     let testCollection;
 
     beforeEach(async function () {
-      if (this.configuration.isServerless) {
-        if (this.currentTest) {
-          this.currentTest.skipReason =
-            'Serverless actually tests parallel connect which is broken';
-        }
-        return this.skip();
-      }
       utilClient = await this.configuration
         .newClient({ maxPoolSize: 1, monitorCommands: true })
         .connect();
@@ -402,11 +395,12 @@ describe('Sessions Spec', function () {
       await utilClient.close();
 
       // Fresh unused client for the test
-      client = await this.configuration.newClient({ maxPoolSize: 1, monitorCommands: true });
+      client = await this.configuration.newClient({
+        maxPoolSize: 1,
+        monitorCommands: true
+      });
+      await client.connect(); // Parallel connect issue
       testCollection = client.db('test').collection('too.many.sessions');
-
-      utilClient.name = 'ann';
-      client.name = 'bob';
     });
 
     afterEach(async () => {
