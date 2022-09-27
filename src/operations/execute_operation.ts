@@ -142,7 +142,7 @@ async function executeOperationAsync<
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
-  if (!readPreference.equals(ReadPreference.primary) && inTransaction) {
+  if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
     throw new MongoTransactionError(
       `Read preference in a transaction must be primary, not: ${readPreference.mode}`
     );
@@ -169,8 +169,13 @@ async function executeOperationAsync<
 
   const server = await topology.selectServerAsync(selector, { session });
 
-  if (session == null || !operation.hasAspect(Aspect.RETRYABLE)) {
-    // No session or non-retryable operation, simple early exit
+  if (session == null) {
+    // No session also means it is not retryable, early exit
+    return operation.executeAsync(server, undefined);
+  }
+
+  if (!operation.hasAspect(Aspect.RETRYABLE)) {
+    // non-retryable operation, early exit
     try {
       return await operation.executeAsync(server, session);
     } finally {
