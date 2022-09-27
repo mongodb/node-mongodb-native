@@ -124,7 +124,8 @@ describe('Server Operation Count Tests', function () {
         collection.insertOne({ count: 1 })
       );
 
-      // operation count will not be incremented synchronously after execOp async/await refactor
+      // operation count is incremented after connection checkout, which happens asynchronously (even though there are plenty of connections in the pool).
+      // we sleep to give the event loop a turn so that all the commands check out a connection before asserting the operation count
       await sleep(1);
 
       expect(server.s.operationCount).to.equal(10);
