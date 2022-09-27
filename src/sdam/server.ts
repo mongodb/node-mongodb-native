@@ -444,6 +444,39 @@ function isRetryableWritesEnabled(topology: Topology) {
   return topology.s.options.retryWrites !== false;
 }
 
+function handleError(server: Server, error: MongoError, connection: Connection) {
+  if (error instanceof MongoNetworkError) {
+    if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
+      // In load balanced mode we never mark the server as unknown and always
+      // clear for the specific service id.
+
+      if (!server.loadBalanced) {
+        error.addErrorLabel(MongoErrorLabel.ResetPool);
+        markServerUnknown(server, error);
+      } else {
+        server.s.pool.clear(connection.serviceId);
+      }
+    }
+  } else {
+    if (isSDAMUnrecoverableError(error)) {
+      if (shouldHandleStateChangeError(server, error)) {
+        const shouldClearPool = maxWireVersion(server) <= 7 || isNodeShuttingDownError(error);
+        if (server.loadBalanced && shouldClearPool) {
+          server.s.pool.clear(connection.serviceId);
+        }
+
+        if (!server.loadBalanced) {
+          if (shouldClearPool) {
+            error.addErrorLabel(MongoErrorLabel.ResetPool);
+          }
+          markServerUnknown(server, error);
+          process.nextTick(() => server.requestCheck());
+        }
+      }
+    }
+  }
+}
+
 function makeOperationHandler(
   server: Server,
   connection: Connection,
@@ -490,18 +523,6 @@ function makeOperationHandler(
       ) {
         error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
       }
-
-      if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
-        // In load balanced mode we never mark the server as unknown and always
-        // clear for the specific service id.
-
-        if (!server.loadBalanced) {
-          error.addErrorLabel(MongoErrorLabel.ResetPool);
-          markServerUnknown(server, error);
-        } else {
-          server.s.pool.clear(connection.serviceId);
-        }
-      }
     } else {
       if (
         (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
@@ -509,23 +530,6 @@ function makeOperationHandler(
         !inActiveTransaction(session, cmd)
       ) {
         error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
-      }
-
-      if (isSDAMUnrecoverableError(error)) {
-        if (shouldHandleStateChangeError(server, error)) {
-          const shouldClearPool = maxWireVersion(server) <= 7 || isNodeShuttingDownError(error);
-          if (server.loadBalanced && shouldClearPool) {
-            server.s.pool.clear(connection.serviceId);
-          }
-
-          if (!server.loadBalanced) {
-            if (shouldClearPool) {
-              error.addErrorLabel(MongoErrorLabel.ResetPool);
-            }
-            markServerUnknown(server, error);
-            process.nextTick(() => server.requestCheck());
-          }
-        }
       }
     }
 
@@ -536,6 +540,8 @@ function makeOperationHandler(
     ) {
       session.unpin({ force: true });
     }
+
+    handleError(server, error, connection);
 
     return callback(error);
   };
