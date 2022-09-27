@@ -597,6 +597,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       if (err || !connection) {
         this[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
         this[kPending]--;
+        this.emit(
+          ConnectionPool.CONNECTION_CLOSED,
+          new ConnectionClosedEvent(this, { id: connectOptions.id } as Connection, 'error')
+        );
         callback(err ?? new MongoRuntimeError('Connection creation failed without error'));
         return;
       }
