@@ -2,7 +2,7 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
+const NODE_VERSIONS = ['erbium', 'fermium', 'gallium', 'hydrogen'];
 NODE_VERSIONS.sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
 const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
@@ -642,6 +642,22 @@ for (const variant of BUILD_VARIANTS.filter(
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
+  );
+}
+
+// TODO(NODE-4667): debug failing tests on Node18
+for (const variant of BUILD_VARIANTS.filter(
+  variant => variant.expansions && variant.expansions.NODE_LTS_NAME === 'hydrogen'
+)) {
+  variant.tasks = variant.tasks.filter(
+    name => ![
+      'test-zstd-compression',
+      'test-snappy-compression',
+      'test-atlas-data-lake',
+      'test-socks5',
+      'test-socks5-tls',
+      'test-auth-kerberos'
+    ].includes(name)
   );
 }
 

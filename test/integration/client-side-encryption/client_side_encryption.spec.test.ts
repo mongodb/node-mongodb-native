@@ -1,3 +1,4 @@
+import { setDefaultResultOrder } from 'dns';
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
@@ -80,5 +81,8 @@ describe('Client Side Encryption (Legacy)', function () {
 });
 
 describe('Client Side Encryption (Unified)', function () {
+  if (process.version.includes('18')) {
+    setDefaultResultOrder('ipv4first');
+  }
   runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')));
 });
