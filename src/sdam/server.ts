@@ -382,6 +382,12 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     if (!(error instanceof MongoError)) {
       return;
     }
+
+    // ignore stale errors
+    if (error.connectionGeneration && error.connectionGeneration < this.s.pool.generation) {
+      return;
+    }
+
     const isNetworkNonTimeoutError =
       error instanceof MongoNetworkError && !(error instanceof MongoNetworkTimeoutError);
     const isNetworkTimeoutBeforeHandshakeError = isNetworkErrorBeforeHandshake(error);
