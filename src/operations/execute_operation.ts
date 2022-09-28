@@ -192,9 +192,9 @@ async function executeOperationAsync<
 
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
   const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
-  const retryable = (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
+  const willRetry = (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
 
-  if (retryable) {
+  if (hasWriteAspect && willRetryWrite) {
     operation.options.willRetryWrite = true;
     session.incrementTransactionNumber();
   }
@@ -202,7 +202,7 @@ async function executeOperationAsync<
   try {
     return await operation.executeAsync(server, session);
   } catch (operationError) {
-    if (retryable && operationError instanceof MongoError) {
+    if (willRetry && operationError instanceof MongoError) {
       return await retryOperation(operation, operationError, {
         session,
         topology,
