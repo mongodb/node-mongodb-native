@@ -110,7 +110,8 @@ export class UpdateOperation extends CommandOperation<Document> {
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
     if (unacknowledgedWrite) {
       if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoCompatibilityError(`Servers < 3.4 do not support hint on update`));
+        // TODO(NODE-3541): fix error for hint with unacknowledged writes
+        callback(new MongoCompatibilityError(`hint is not supported with unacknowledged writes`));
         return;
       }
     }
