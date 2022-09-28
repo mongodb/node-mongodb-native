@@ -375,7 +375,7 @@ for (const
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
     const nodeVersionNumber = versions.find(({ codeName }) => codeName === NODE_LTS_NAME).versionNumber;
-    const nodeLtsDisplayName = `Node ${nodeVersionNumber} (${capitalize(NODE_LTS_NAME)})`;
+    const nodeLtsDisplayName = `Node${nodeVersionNumber} (${capitalize(NODE_LTS_NAME)})`;
     const name = `${osName}-${NODE_LTS_NAME}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_NAME };
