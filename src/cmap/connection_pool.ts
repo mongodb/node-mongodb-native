@@ -599,7 +599,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         this[kPending]--;
         this.emit(
           ConnectionPool.CONNECTION_CLOSED,
-          new ConnectionClosedEvent(this, { id: connectOptions.id } as Connection, 'error')
+          new ConnectionClosedEvent(this, { id: connectOptions.id, serviceId: undefined }, 'error')
         );
         callback(err ?? new MongoRuntimeError('Connection creation failed without error'));
         return;
