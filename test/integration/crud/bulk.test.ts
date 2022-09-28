@@ -1788,7 +1788,7 @@ describe('Bulk', function () {
       const coll = client.db().collection('coll');
       const bulk = coll.initializeOrderedBulkOp();
 
-      coll.insertMany([{ a: 1 }, { a: 2 }]);
+      await coll.insertMany([{ a: 1 }, { a: 2 }]);
 
       bulk.find({ a: 1 }).updateOne([{ $project: { a: { $add: ['$a', 10] } } }]);
       bulk.find({ a: 2 }).update([{ $project: { a: { $add: ['$a', 100] } } }]);

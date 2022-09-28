@@ -1276,41 +1276,37 @@ export abstract class BulkOperationBase {
         : typeof options === 'function'
         ? options
         : undefined;
-    options = options != null && typeof options !== 'function' ? options : {};
+    return maybeCallback(async () => {
+      options = options != null && typeof options !== 'function' ? options : {};
 
-    if (this.s.executed) {
-      // eslint-disable-next-line @typescript-eslint/require-await
-      return maybeCallback(async () => {
+      if (this.s.executed) {
         throw new MongoBatchReExecutionError();
-      }, callback);
-    }
+      }
 
-    const writeConcern = WriteConcern.fromOptions(options);
-    if (writeConcern) {
-      this.s.writeConcern = writeConcern;
-    }
+      const writeConcern = WriteConcern.fromOptions(options);
+      if (writeConcern) {
+        this.s.writeConcern = writeConcern;
+      }
 
-    // If we have current batch
-    if (this.isOrdered) {
-      if (this.s.currentBatch) this.s.batches.push(this.s.currentBatch);
-    } else {
-      if (this.s.currentInsertBatch) this.s.batches.push(this.s.currentInsertBatch);
-      if (this.s.currentUpdateBatch) this.s.batches.push(this.s.currentUpdateBatch);
-      if (this.s.currentRemoveBatch) this.s.batches.push(this.s.currentRemoveBatch);
-    }
-    // If we have no operations in the bulk raise an error
-    if (this.s.batches.length === 0) {
-      // eslint-disable-next-line @typescript-eslint/require-await
-      return maybeCallback(async () => {
+      // If we have current batch
+      if (this.isOrdered) {
+        if (this.s.currentBatch) this.s.batches.push(this.s.currentBatch);
+      } else {
+        if (this.s.currentInsertBatch) this.s.batches.push(this.s.currentInsertBatch);
+        if (this.s.currentUpdateBatch) this.s.batches.push(this.s.currentUpdateBatch);
+        if (this.s.currentRemoveBatch) this.s.batches.push(this.s.currentRemoveBatch);
+      }
+      // If we have no operations in the bulk raise an error
+      if (this.s.batches.length === 0) {
         throw new MongoInvalidArgumentError('Invalid BulkOperation, Batch cannot be empty');
-      }, callback);
-    }
+      }
 
-    this.s.executed = true;
-    const finalOptions = { ...this.s.options, ...options };
-    const operation = new BulkWriteShimOperation(this, finalOptions);
+      this.s.executed = true;
+      const finalOptions = { ...this.s.options, ...options };
+      const operation = new BulkWriteShimOperation(this, finalOptions);
 
-    return executeOperation(this.s.collection.s.db.s.client, operation, callback);
+      return executeOperation(this.s.collection.s.db.s.client, operation);
+    }, callback);
   }
 
   /**

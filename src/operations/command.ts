@@ -117,12 +117,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     return true;
   }
 
-  abstract override execute(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<T>
-  ): void;
-
   executeCommand(
     server: Server,
     session: ClientSession | undefined,

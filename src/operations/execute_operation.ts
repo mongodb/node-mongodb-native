@@ -23,7 +23,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { Callback, maybePromise, supportsRetryableWrites } from '../utils';
+import { Callback, maybeCallback, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -75,97 +75,73 @@ export function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
+  return maybeCallback(() => executeOperationAsync(client, operation), callback);
+}
+
+async function executeOperationAsync<
+  T extends AbstractOperation<TResult>,
+  TResult = ResultTypeFromOperation<T>
+>(client: MongoClient, operation: T): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
 
-  return maybePromise(callback, callback => {
-    const topology = client.topology;
-
-    if (topology == null) {
-      if (client.s.hasBeenClosed) {
-        return callback(
-          new MongoNotConnectedError('Client must be connected before running operations')
-        );
-      }
-      client.s.options[Symbol.for('@@mdb.skipPingOnConnect')] = true;
-      return client.connect(error => {
-        delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
-        if (error) {
-          return callback(error);
-        }
-        return executeOperation<T, TResult>(client, operation, callback);
-      });
+  if (client.topology == null) {
+    // Auto connect on operation
+    if (client.s.hasBeenClosed) {
+      throw new MongoNotConnectedError('Client must be connected before running operations');
     }
-
-    if (topology.shouldCheckForSessionSupport()) {
-      return topology.selectServer(ReadPreference.primaryPreferred, {}, err => {
-        if (err) return callback(err);
-
-        executeOperation<T, TResult>(client, operation, callback);
-      });
-    }
-
-    // The driver sessions spec mandates that we implicitly create sessions for operations
-    // that are not explicitly provided with a session.
-    let session = operation.session;
-    let owner: symbol | undefined;
-    if (topology.hasSessionSupport()) {
-      if (session == null) {
-        owner = Symbol();
-        session = client.startSession({ owner, explicit: false });
-      } else if (session.hasEnded) {
-        return callback(new MongoExpiredSessionError('Use of expired sessions is not permitted'));
-      } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
-        return callback(new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later'));
-      }
-    } else {
-      // no session support
-      if (session && session.explicit) {
-        // If the user passed an explicit session and we are still, after server selection,
-        // trying to run against a topology that doesn't support sessions we error out.
-        return callback(new MongoCompatibilityError('Current topology does not support sessions'));
-      } else if (session && !session.explicit) {
-        // We do not have to worry about ending the session because the server session has not been acquired yet
-        delete operation.options.session;
-        operation.clearSession();
-        session = undefined;
-      }
-    }
-
+    client.s.options[Symbol.for('@@mdb.skipPingOnConnect')] = true;
     try {
-      executeWithServerSelection<TResult>(topology, session, operation, (error, result) => {
-        if (session?.owner != null && session.owner === owner) {
-          return session.endSession(endSessionError => callback(endSessionError ?? error, result));
-        }
-
-        callback(error, result);
-      });
-    } catch (error) {
-      if (session?.owner != null && session.owner === owner) {
-        session.endSession().catch(() => null);
-      }
-
-      throw error;
+      await client.connect();
+    } finally {
+      delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
     }
-  });
-}
+  }
 
-function executeWithServerSelection<TResult>(
-  topology: Topology,
-  session: ClientSession | undefined,
-  operation: AbstractOperation,
-  callback: Callback<TResult>
-) {
+  const { topology } = client;
+  if (topology == null) {
+    throw new MongoRuntimeError('client.connect did not create a topology but also did not throw');
+  }
+
+  if (topology.shouldCheckForSessionSupport()) {
+    await topology.selectServerAsync(ReadPreference.primaryPreferred, {});
+  }
+
+  // The driver sessions spec mandates that we implicitly create sessions for operations
+  // that are not explicitly provided with a session.
+  let session = operation.session;
+  let owner: symbol | undefined;
+  if (topology.hasSessionSupport()) {
+    if (session == null) {
+      owner = Symbol();
+      session = client.startSession({ owner, explicit: false });
+    } else if (session.hasEnded) {
+      throw new MongoExpiredSessionError('Use of expired sessions is not permitted');
+    } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
+      throw new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later');
+    }
+  } else {
+    // no session support
+    if (session && session.explicit) {
+      // If the user passed an explicit session and we are still, after server selection,
+      // trying to run against a topology that doesn't support sessions we error out.
+      throw new MongoCompatibilityError('Current topology does not support sessions');
+    } else if (session && !session.explicit) {
+      // We do not have to worry about ending the session because the server session has not been acquired yet
+      delete operation.options.session;
+      operation.clearSession();
+      session = undefined;
+    }
+  }
+
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
   if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
-    return callback(
-      new MongoTransactionError(
-        `Read preference in a transaction must be primary, not: ${readPreference.mode}`
-      )
+    throw new MongoTransactionError(
+      `Read preference in a transaction must be primary, not: ${readPreference.mode}`
     );
   }
 
@@ -188,111 +164,113 @@ function executeWithServerSelection<TResult>(
     selector = readPreference;
   }
 
-  const serverSelectionOptions = { session };
-  function retryOperation(originalError: MongoError) {
-    const isWriteOperation = operation.hasAspect(Aspect.WRITE_OPERATION);
-    const isReadOperation = operation.hasAspect(Aspect.READ_OPERATION);
+  const server = await topology.selectServerAsync(selector, { session });
 
-    if (isWriteOperation && originalError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
-      return callback(
-        new MongoServerError({
-          message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-          errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
-          originalError
-        })
-      );
-    }
+  if (session == null) {
+    // No session also means it is not retryable, early exit
+    return operation.executeAsync(server, undefined);
+  }
 
-    if (isWriteOperation && !isRetryableWriteError(originalError)) {
-      return callback(originalError);
-    }
-
-    if (isReadOperation && !isRetryableReadError(originalError)) {
-      return callback(originalError);
-    }
-
-    if (
-      originalError instanceof MongoNetworkError &&
-      session?.isPinned &&
-      !session.inTransaction() &&
-      operation.hasAspect(Aspect.CURSOR_CREATING)
-    ) {
-      // If we have a cursor and the initial command fails with a network error,
-      // we can retry it on another connection. So we need to check it back in, clear the
-      // pool for the service id, and retry again.
-      session.unpin({ force: true, forceClear: true });
-    }
-
-    // select a new server, and attempt to retry the operation
-    topology.selectServer(selector, serverSelectionOptions, (error?: Error, server?: Server) => {
-      if (!error && isWriteOperation && !supportsRetryableWrites(server)) {
-        return callback(
-          new MongoUnexpectedServerResponseError(
-            'Selected server does not support retryable writes'
-          )
-        );
+  if (!operation.hasAspect(Aspect.RETRYABLE)) {
+    // non-retryable operation, early exit
+    try {
+      return await operation.executeAsync(server, session);
+    } finally {
+      if (session?.owner != null && session.owner === owner) {
+        await session.endSession().catch(() => null);
       }
+    }
+  }
 
-      if (error || !server) {
-        return callback(
-          error ?? new MongoUnexpectedServerResponseError('Server selection failed without error')
-        );
-      }
+  const willRetryRead = topology.s.options.retryReads && !inTransaction && operation.canRetryRead;
 
-      operation.execute(server, session, callback);
+  const willRetryWrite =
+    topology.s.options.retryWrites &&
+    !inTransaction &&
+    supportsRetryableWrites(server) &&
+    operation.canRetryWrite;
+
+  const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
+  const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
+  const willRetry = (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
+
+  if (hasWriteAspect && willRetryWrite) {
+    operation.options.willRetryWrite = true;
+    session.incrementTransactionNumber();
+  }
+
+  try {
+    return await operation.executeAsync(server, session);
+  } catch (operationError) {
+    if (willRetry && operationError instanceof MongoError) {
+      return await retryOperation(operation, operationError, {
+        session,
+        topology,
+        selector
+      });
+    }
+    throw operationError;
+  } finally {
+    if (session?.owner != null && session.owner === owner) {
+      await session.endSession().catch(() => null);
+    }
+  }
+}
+
+/** @internal */
+type RetryOptions = {
+  session: ClientSession;
+  topology: Topology;
+  selector: ReadPreference | ServerSelector;
+};
+
+async function retryOperation<
+  T extends AbstractOperation<TResult>,
+  TResult = ResultTypeFromOperation<T>
+>(
+  operation: T,
+  originalError: MongoError,
+  { session, topology, selector }: RetryOptions
+): Promise<TResult> {
+  const isWriteOperation = operation.hasAspect(Aspect.WRITE_OPERATION);
+  const isReadOperation = operation.hasAspect(Aspect.READ_OPERATION);
+
+  if (isWriteOperation && originalError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
+    throw new MongoServerError({
+      message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+      errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+      originalError
     });
   }
 
-  if (
-    readPreference &&
-    !readPreference.equals(ReadPreference.primary) &&
-    session?.inTransaction()
-  ) {
-    callback(
-      new MongoTransactionError(
-        `Read preference in a transaction must be primary, not: ${readPreference.mode}`
-      )
-    );
-
-    return;
+  if (isWriteOperation && !isRetryableWriteError(originalError)) {
+    throw originalError;
   }
 
-  // select a server, and execute the operation against it
-  topology.selectServer(selector, serverSelectionOptions, (error, server) => {
-    if (error || !server) {
-      return callback(error);
-    }
+  if (isReadOperation && !isRetryableReadError(originalError)) {
+    throw originalError;
+  }
 
-    if (session && operation.hasAspect(Aspect.RETRYABLE)) {
-      const willRetryRead =
-        topology.s.options.retryReads && !inTransaction && operation.canRetryRead;
+  if (
+    originalError instanceof MongoNetworkError &&
+    session.isPinned &&
+    !session.inTransaction() &&
+    operation.hasAspect(Aspect.CURSOR_CREATING)
+  ) {
+    // If we have a cursor and the initial command fails with a network error,
+    // we can retry it on another connection. So we need to check it back in, clear the
+    // pool for the service id, and retry again.
+    session.unpin({ force: true, forceClear: true });
+  }
 
-      const willRetryWrite =
-        topology.s.options.retryWrites &&
-        !inTransaction &&
-        supportsRetryableWrites(server) &&
-        operation.canRetryWrite;
+  // select a new server, and attempt to retry the operation
+  const server = await topology.selectServerAsync(selector, { session });
 
-      const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
-      const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
+  if (isWriteOperation && !supportsRetryableWrites(server)) {
+    throw new MongoUnexpectedServerResponseError(
+      'Selected server does not support retryable writes'
+    );
+  }
 
-      if ((hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite)) {
-        if (hasWriteAspect && willRetryWrite) {
-          operation.options.willRetryWrite = true;
-          session.incrementTransactionNumber();
-        }
-
-        return operation.execute(server, session, (error, result) => {
-          if (error instanceof MongoError) {
-            return retryOperation(error);
-          } else if (error) {
-            return callback(error);
-          }
-          callback(undefined, result);
-        });
-      }
-    }
-
-    return operation.execute(server, session, callback);
-  });
+  return operation.executeAsync(server, session);
 }

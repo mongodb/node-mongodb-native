@@ -233,11 +233,24 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    */
   bson: { serialize: typeof serialize; deserialize: typeof deserialize };
 
+  selectServerAsync: (
+    selector: string | ReadPreference | ServerSelector,
+    options: SelectServerOptions
+  ) => Promise<Server>;
+
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
   constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
     super();
+
+    this.selectServerAsync = promisify(
+      (
+        selector: string | ReadPreference | ServerSelector,
+        options: SelectServerOptions,
+        callback: (e: Error, r: Server) => void
+      ) => this.selectServer(selector, options, callback as any)
+    );
 
     // Legacy CSFLE support
     this.bson = Object.create(null);

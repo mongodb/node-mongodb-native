@@ -490,6 +490,10 @@ function makeOperationHandler(
       return callback(undefined, result);
     }
 
+    if (options?.noResponse === true) {
+      return callback(undefined, null);
+    }
+
     if (!error) {
       return callback(new MongoUnexpectedServerResponseError('Empty response with no error'));
     }
