@@ -2,7 +2,13 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const NODE_VERSIONS = ['erbium', 'fermium', 'gallium', 'hydrogen'];
+const versions = [
+  { codeName: 'erbium', versionNumber: 12 },
+  { codeName: 'fermium', versionNumber: 14 },
+  { codeName: 'gallium', versionNumber: 16 },
+  { codeName: 'hydrogen', versionNumber: 18 }
+];
+const NODE_VERSIONS = versions.map(({ codeName }) => codeName)
 NODE_VERSIONS.sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
 const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
@@ -38,6 +44,17 @@ const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
+
+function capitalize(string) {
+  if (typeof string !== 'string') {
+    return;
+  }
+  if (string.length === 0) {
+    return '';
+  }
+
+  return `${string[0].toUpperCase()}${string.slice(1)}`;
+}
 
 function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
   return {
@@ -357,7 +374,8 @@ for (const
     });
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
-    const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.slice(1)}`;
+    const nodeVersionNumber = versions.find(({ codeName }) => codeName === NODE_LTS_NAME).versionNumber;
+    const nodeLtsDisplayName = `Node ${nodeVersionNumber} (${capitalize(NODE_LTS_NAME)})`;
     const name = `${osName}-${NODE_LTS_NAME}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_NAME };

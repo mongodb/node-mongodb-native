@@ -2250,7 +2250,7 @@ buildvariants:
     tasks:
       - run-spec-benchmark-tests
   - name: rhel80-large-erbium
-    display_name: rhel8 Node Erbium
+    display_name: rhel8 Node 12 (Erbium)
     run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: erbium
@@ -2298,7 +2298,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: rhel80-large-fermium
-    display_name: rhel8 Node Fermium
+    display_name: rhel8 Node 14 (Fermium)
     run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: fermium
@@ -2346,7 +2346,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: rhel80-large-gallium
-    display_name: rhel8 Node Gallium
+    display_name: rhel8 Node 16 (Gallium)
     run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: gallium
@@ -2392,7 +2392,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: rhel80-large-hydrogen
-    display_name: rhel8 Node Hydrogen
+    display_name: rhel8 Node 18 (Hydrogen)
     run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: hydrogen
@@ -2434,7 +2434,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: windows-64-vs2019-erbium
-    display_name: Windows (VS2019) Node Erbium
+    display_name: Windows (VS2019) Node 12 (Erbium)
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: erbium
@@ -2476,7 +2476,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: windows-64-vs2019-fermium
-    display_name: Windows (VS2019) Node Fermium
+    display_name: Windows (VS2019) Node 14 (Fermium)
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: fermium
@@ -2518,7 +2518,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: windows-64-vs2019-gallium
-    display_name: Windows (VS2019) Node Gallium
+    display_name: Windows (VS2019) Node 16 (Gallium)
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: gallium
@@ -2558,7 +2558,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: windows-64-vs2019-hydrogen
-    display_name: Windows (VS2019) Node Hydrogen
+    display_name: Windows (VS2019) Node 18 (Hydrogen)
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: hydrogen
