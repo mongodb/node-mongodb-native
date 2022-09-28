@@ -45,17 +45,6 @@ const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
-function capitalize(string) {
-  if (typeof string !== 'string') {
-    return;
-  }
-  if (string.length === 0) {
-    return '';
-  }
-
-  return `${string[0].toUpperCase()}${string.slice(1)}`;
-}
-
 function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
   return {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
@@ -375,7 +364,7 @@ for (const
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
     const nodeVersionNumber = versions.find(({ codeName }) => codeName === NODE_LTS_NAME).versionNumber;
-    const nodeLtsDisplayName = `Node${nodeVersionNumber} (${capitalize(NODE_LTS_NAME)})`;
+    const nodeLtsDisplayName = `Node${nodeVersionNumber}`;
     const name = `${osName}-${NODE_LTS_NAME}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_NAME };
