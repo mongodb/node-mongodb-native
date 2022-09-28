@@ -903,7 +903,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_NAME: hydrogen
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -965,6 +965,6 @@ ignore:
 buildvariants:
   - name: performance-tests
     display_name: Performance Test
-    run_on: ubuntu1804-large
+    run_on: rhel80-large
     tasks:
       - run-spec-benchmark-tests
