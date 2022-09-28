@@ -26,7 +26,7 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
+    const pool = new ConnectionPool(server, { maxPoolSize: 1, hostAddress: server.hostAddress() });
     pool.ready();
 
     const events = [];
@@ -69,7 +69,7 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool({
+    const pool = new ConnectionPool(server, {
       maxPoolSize: 1,
       socketTimeoutMS: 200,
       hostAddress: server.hostAddress()
@@ -99,7 +99,7 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool({
+    const pool = new ConnectionPool(server, {
       maxPoolSize: 1,
       waitQueueTimeoutMS: 200,
       hostAddress: server.hostAddress()
@@ -137,7 +137,7 @@ describe('Connection Pool', function () {
         }
       });
 
-      const pool = new ConnectionPool({ hostAddress: server.hostAddress() });
+      const pool = new ConnectionPool(server, { hostAddress: server.hostAddress() });
       pool.ready();
 
       const callback = (err, result) => {
@@ -169,7 +169,7 @@ describe('Connection Pool', function () {
         }
       });
 
-      const pool = new ConnectionPool({
+      const pool = new ConnectionPool(server, {
         waitQueueTimeoutMS: 200,
         hostAddress: server.hostAddress()
       });
@@ -201,7 +201,7 @@ describe('Connection Pool', function () {
         }
       });
 
-      const pool = new ConnectionPool({ hostAddress: server.hostAddress() });
+      const pool = new ConnectionPool(server, { hostAddress: server.hostAddress() });
       pool.ready();
 
       const callback = (err, result) => {
@@ -229,7 +229,10 @@ describe('Connection Pool', function () {
         }
       });
 
-      const pool = new ConnectionPool({ maxPoolSize: 1, hostAddress: server.hostAddress() });
+      const pool = new ConnectionPool(server, {
+        maxPoolSize: 1,
+        hostAddress: server.hostAddress()
+      });
       pool.ready();
 
       const events = [];

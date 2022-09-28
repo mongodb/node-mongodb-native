@@ -19,6 +19,7 @@ import {
 import { MongoError, MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { Logger } from '../logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import type { Server } from '../sdam/server';
 import { Callback, eachAsync, makeCounter } from '../utils';
 import { connect } from './connect';
 import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
@@ -38,6 +39,8 @@ import {
 import { PoolClearedError, PoolClosedError, WaitQueueTimeoutError } from './errors';
 import { ConnectionPoolMetrics } from './metrics';
 
+/** @internal */
+const kServer = Symbol('server');
 /** @internal */
 const kLogger = Symbol('logger');
 /** @internal */
@@ -126,6 +129,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** @internal */
   [kPoolState]: typeof PoolState[keyof typeof PoolState];
   /** @internal */
+  [kServer]: Server;
+  /** @internal */
   [kLogger]: Logger;
   /** @internal */
   [kConnections]: Denque<Connection>;
@@ -212,7 +217,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   static readonly CONNECTION_CHECKED_IN = CONNECTION_CHECKED_IN;
 
   /** @internal */
-  constructor(options: ConnectionPoolOptions) {
+  constructor(server: Server, options: ConnectionPoolOptions) {
     super();
 
     this.options = Object.freeze({
@@ -234,6 +239,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     this[kPoolState] = PoolState.paused;
+    this[kServer] = server;
     this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
     this[kPending] = 0;
@@ -302,6 +308,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   get serviceGenerations(): Map<string, number> {
     return this[kServiceGenerations];
+  }
+
+  get serverError() {
+    return this[kServer].description.error;
   }
 
   /**
@@ -587,6 +597,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       if (err || !connection) {
         this[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
         this[kPending]--;
+        this.emit(
+          ConnectionPool.CONNECTION_CLOSED,
+          new ConnectionClosedEvent(this, { id: connectOptions.id, serviceId: undefined }, 'error')
+        );
         callback(err ?? new MongoRuntimeError('Connection creation failed without error'));
         return;
       }
@@ -651,6 +665,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // connection permits because that potentially delays the availability of
       // the connection to a checkout request
       this.createConnection((err, connection) => {
+        if (err) {
+          this[kServer].handleError(err);
+        }
         if (!err && connection) {
           this[kConnections].push(connection);
           process.nextTick(() => this.processWaitQueue());

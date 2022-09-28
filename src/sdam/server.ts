@@ -20,6 +20,7 @@ import {
 } from '../constants';
 import type { AutoEncrypter } from '../deps';
 import {
+  AnyError,
   isNetworkErrorBeforeHandshake,
   isNodeShuttingDownError,
   isSDAMUnrecoverableError,
@@ -149,7 +150,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       logger: new Logger('Server'),
       state: STATE_CLOSED,
       topology,
-      pool: new ConnectionPool(poolOptions),
+      pool: new ConnectionPool(this, poolOptions),
       operationCount: 0
     };
 
@@ -368,6 +369,46 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       callback
     );
   }
+
+  /**
+   * Handle SDAM error
+   * @internal
+   */
+  handleError(error: AnyError, connection?: Connection) {
+    if (!(error instanceof MongoError)) {
+      return;
+    }
+    if (error instanceof MongoNetworkError) {
+      if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
+        // In load balanced mode we never mark the server as unknown and always
+        // clear for the specific service id.
+
+        if (!this.loadBalanced) {
+          error.addErrorLabel(MongoErrorLabel.ResetPool);
+          markServerUnknown(this, error);
+        } else if (connection) {
+          this.s.pool.clear(connection.serviceId);
+        }
+      }
+    } else {
+      if (isSDAMUnrecoverableError(error)) {
+        if (shouldHandleStateChangeError(this, error)) {
+          const shouldClearPool = maxWireVersion(this) <= 7 || isNodeShuttingDownError(error);
+          if (this.loadBalanced && connection && shouldClearPool) {
+            this.s.pool.clear(connection.serviceId);
+          }
+
+          if (!this.loadBalanced) {
+            if (shouldClearPool) {
+              error.addErrorLabel(MongoErrorLabel.ResetPool);
+            }
+            markServerUnknown(this, error);
+            process.nextTick(() => this.requestCheck());
+          }
+        }
+      }
+    }
+  }
 }
 
 function calculateRoundTripTime(oldRtt: number, duration: number): number {
@@ -482,18 +523,6 @@ function makeOperationHandler(
       ) {
         error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
       }
-
-      if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
-        // In load balanced mode we never mark the server as unknown and always
-        // clear for the specific service id.
-
-        if (!server.loadBalanced) {
-          error.addErrorLabel(MongoErrorLabel.ResetPool);
-          markServerUnknown(server, error);
-        } else {
-          server.s.pool.clear(connection.serviceId);
-        }
-      }
     } else {
       if (
         (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
@@ -501,23 +530,6 @@ function makeOperationHandler(
         !inActiveTransaction(session, cmd)
       ) {
         error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
-      }
-
-      if (isSDAMUnrecoverableError(error)) {
-        if (shouldHandleStateChangeError(server, error)) {
-          const shouldClearPool = maxWireVersion(server) <= 7 || isNodeShuttingDownError(error);
-          if (server.loadBalanced && shouldClearPool) {
-            server.s.pool.clear(connection.serviceId);
-          }
-
-          if (!server.loadBalanced) {
-            if (shouldClearPool) {
-              error.addErrorLabel(MongoErrorLabel.ResetPool);
-            }
-            markServerUnknown(server, error);
-            process.nextTick(() => server.requestCheck());
-          }
-        }
       }
     }
 
@@ -528,6 +540,8 @@ function makeOperationHandler(
     ) {
       session.unpin({ force: true });
     }
+
+    server.handleError(error, connection);
 
     return callback(error);
   };
