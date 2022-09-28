@@ -564,17 +564,6 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
 }
 
 /**
- * Checks that collation is supported by server.
- * @internal
- *
- * @param server - to check against
- * @param cmd - object where collation may be specified
- */
-export function collationNotSupported(server: Server, cmd: Document): boolean {
-  return cmd && cmd.collation && maxWireVersion(server) < 5;
-}
-
-/**
  * Applies the function `eachFn` to each item in `arr`, in parallel.
  * @internal
  *

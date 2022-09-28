@@ -99,10 +99,8 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
       this.readConcern = undefined;
     }
 
-    if (serverWireVersion >= 5) {
-      if (this.hasWriteStage && this.writeConcern) {
-        Object.assign(command, { writeConcern: this.writeConcern });
-      }
+    if (this.hasWriteStage && this.writeConcern) {
+      Object.assign(command, { writeConcern: this.writeConcern });
     }
 
     if (options.bypassDocumentValidation === true) {
