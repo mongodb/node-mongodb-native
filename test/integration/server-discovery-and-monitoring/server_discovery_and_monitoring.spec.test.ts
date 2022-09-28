@@ -8,17 +8,7 @@ import { TestFilter } from '../../tools/unified-spec-runner/schema';
 import { sleep } from '../../tools/utils';
 
 const filter: TestFilter = ({ description }) => {
-  const isAuthEnabled = process.env.AUTH === 'auth';
   switch (description) {
-    case 'Reset server and pool after AuthenticationFailure error':
-    case 'Reset server and pool after misc command error':
-    case 'Reset server and pool after network error during authentication':
-    case 'Reset server and pool after network timeout error during authentication':
-    case 'Reset server and pool after shutdown error during authentication':
-      // These tests time out waiting for the PoolCleared event
-      return isAuthEnabled
-        ? 'TODO(NODE-3135): handle auth errors, also see NODE-3891: fix tests broken when AUTH enabled'
-        : false;
     case 'Network error on Monitor check':
     case 'Network timeout on Monitor check':
       return 'TODO(NODE-4608): Disallow parallel monitor checks';
