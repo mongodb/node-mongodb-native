@@ -78,9 +78,17 @@ export function executeOperation<
   return maybeCallback(() => executeOperationAsync(client, operation), callback);
 }
 
-async function maybeConnect(client: MongoClient): Promise<Topology> {
-  const { topology } = client;
-  if (topology == null) {
+async function executeOperationAsync<
+  T extends AbstractOperation<TResult>,
+  TResult = ResultTypeFromOperation<T>
+>(client: MongoClient, operation: T): Promise<TResult> {
+  if (!(operation instanceof AbstractOperation)) {
+    // TODO(NODE-3483): Extend MongoRuntimeError
+    throw new MongoRuntimeError('This method requires a valid operation instance');
+  }
+
+  if (client.topology == null) {
+    // Auto connect on operation
     if (client.s.hasBeenClosed) {
       throw new MongoNotConnectedError('Client must be connected before running operations');
     }
@@ -91,22 +99,11 @@ async function maybeConnect(client: MongoClient): Promise<Topology> {
       delete client.s.options[Symbol.for('@@mdb.skipPingOnConnect')];
     }
   }
-  if (client.topology == null) {
+
+  const { topology } = client;
+  if (topology == null) {
     throw new MongoRuntimeError('client.connect did not create a topology but also did not throw');
   }
-  return client.topology;
-}
-
-async function executeOperationAsync<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T): Promise<TResult> {
-  if (!(operation instanceof AbstractOperation)) {
-    // TODO(NODE-3483): Extend MongoRuntimeError
-    throw new MongoRuntimeError('This method requires a valid operation instance');
-  }
-
-  const topology = await maybeConnect(client);
 
   if (topology.shouldCheckForSessionSupport()) {
     await topology.selectServerAsync(ReadPreference.primaryPreferred, {});
@@ -195,8 +192,9 @@ async function executeOperationAsync<
 
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
   const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
+  const retryable = (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
 
-  if (hasWriteAspect && willRetryWrite) {
+  if (retryable) {
     operation.options.willRetryWrite = true;
     session.incrementTransactionNumber();
   }
@@ -204,14 +202,12 @@ async function executeOperationAsync<
   try {
     return await operation.executeAsync(server, session);
   } catch (operationError) {
-    if ((hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite)) {
-      if (operationError instanceof MongoError) {
-        return await retryOperation(operation, operationError, {
-          session,
-          topology,
-          selector
-        });
-      }
+    if (retryable && operationError instanceof MongoError) {
+      return await retryOperation(operation, operationError, {
+        session,
+        topology,
+        selector
+      });
     }
     throw operationError;
   } finally {
