@@ -849,7 +849,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_NAME: hydrogen
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2246,12 +2246,12 @@ ignore:
 buildvariants:
   - name: performance-tests
     display_name: Performance Test
-    run_on: ubuntu1804-large
+    run_on: rhel80-large
     tasks:
       - run-spec-benchmark-tests
-  - name: ubuntu-18.04-erbium
-    display_name: Ubuntu 18.04 Node Erbium
-    run_on: ubuntu1804-large
+  - name: rhel80-large-erbium
+    display_name: rhel8 Node Erbium
+    run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: erbium
       CLIENT_ENCRYPTION: true
@@ -2297,9 +2297,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-18.04-fermium
-    display_name: Ubuntu 18.04 Node Fermium
-    run_on: ubuntu1804-large
+  - name: rhel80-large-fermium
+    display_name: rhel8 Node Fermium
+    run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: fermium
       CLIENT_ENCRYPTION: true
@@ -2345,9 +2345,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: ubuntu-18.04-gallium
-    display_name: Ubuntu 18.04 Node Gallium
-    run_on: ubuntu1804-large
+  - name: rhel80-large-gallium
+    display_name: rhel8 Node Gallium
+    run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: gallium
       CLIENT_ENCRYPTION: true
@@ -2525,7 +2525,7 @@ buildvariants:
       - test-rapid-server
   - name: lint
     display_name: lint
-    run_on: ubuntu1804-large
+    run_on: rhel80-large
     tasks:
       - run-unit-tests
       - run-lint-checks
@@ -2534,12 +2534,12 @@ buildvariants:
       - run-typescript-next
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
-    run_on: ubuntu1804-test
+    run_on: ubuntu1804-large
     tasks:
       - run-mongosh-integration-tests
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
-    run_on: ubuntu1804-test
+    run_on: ubuntu1804-large
     expansions:
       NODE_LTS_NAME: erbium
     tasks:
@@ -2567,9 +2567,9 @@ buildvariants:
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-4.4-auth-test-run-aws-ECS-auth-test
-  - name: ubuntu1804-custom-dependency-tests
+  - name: rhel8-custom-dependency-tests
     display_name: Custom Dependency Version Test
-    run_on: ubuntu1804-large
+    run_on: rhel80-large
     tasks:
       - run-custom-snappy-tests
       - run-bson-ext-integration
@@ -2580,16 +2580,16 @@ buildvariants:
       - run-custom-csfle-tests-rapid-master
       - run-custom-csfle-tests-latest-pinned-commit
       - run-custom-csfle-tests-latest-master
-  - name: ubuntu1804-test-serverless
+  - name: rhel8-test-serverless
     display_name: Serverless Test
-    run_on: ubuntu1804-test
+    run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: erbium
     tasks:
       - serverless_task_group
-  - name: ubuntu1804-no-auth-tests
+  - name: rhel8-no-auth-tests
     display_name: No Auth Tests
-    run_on: ubuntu1804-large
+    run_on: rhel80-large
     expansions:
       CLIENT_ENCRYPTION: true
     tasks:
@@ -2617,9 +2617,9 @@ buildvariants:
       - test-3.6-server-noauth
       - test-3.6-replica_set-noauth
       - test-3.6-sharded_cluster-noauth
-  - name: ubuntu1804-test-lambda
+  - name: rhel8-test-lambda
     display_name: AWS Lambda handler tests
-    run_on: ubuntu1804-test
+    run_on: rhel80-large
     tasks:
       - test-lambda-example
       - test-lambda-aws-auth-example
