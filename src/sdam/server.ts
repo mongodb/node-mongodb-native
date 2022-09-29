@@ -29,6 +29,7 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoRuntimeError,
   MongoServerClosedError,
   MongoServerError,
   MongoUnexpectedServerResponseError,
@@ -348,8 +349,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       (err, conn, cb) => {
         if (err || !conn) {
           this.s.operationCount -= 1;
+          if (!err) {
+            return cb(new MongoRuntimeError('Failed to create connection without error'));
+          }
           if (!(err instanceof PoolClearedError)) {
-            markServerUnknown(this, err);
+            this.handleError(err);
           } else {
             err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
           }
@@ -378,17 +382,25 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     if (!(error instanceof MongoError)) {
       return;
     }
-    if (error instanceof MongoNetworkError) {
-      if (!(error instanceof MongoNetworkTimeoutError) || isNetworkErrorBeforeHandshake(error)) {
-        // In load balanced mode we never mark the server as unknown and always
-        // clear for the specific service id.
 
-        if (!this.loadBalanced) {
-          error.addErrorLabel(MongoErrorLabel.ResetPool);
-          markServerUnknown(this, error);
-        } else if (connection) {
-          this.s.pool.clear(connection.serviceId);
-        }
+    const isStaleError =
+      error.connectionGeneration && error.connectionGeneration < this.s.pool.generation;
+    if (isStaleError) {
+      return;
+    }
+
+    const isNetworkNonTimeoutError =
+      error instanceof MongoNetworkError && !(error instanceof MongoNetworkTimeoutError);
+    const isNetworkTimeoutBeforeHandshakeError = isNetworkErrorBeforeHandshake(error);
+    const isAuthHandshakeError = error.hasErrorLabel(MongoErrorLabel.HandshakeError);
+    if (isNetworkNonTimeoutError || isNetworkTimeoutBeforeHandshakeError || isAuthHandshakeError) {
+      // In load balanced mode we never mark the server as unknown and always
+      // clear for the specific service id.
+      if (!this.loadBalanced) {
+        error.addErrorLabel(MongoErrorLabel.ResetPool);
+        markServerUnknown(this, error);
+      } else if (connection) {
+        this.s.pool.clear(connection.serviceId);
       }
     } else {
       if (isSDAMUnrecoverableError(error)) {

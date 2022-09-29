@@ -16,7 +16,13 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY
 } from '../constants';
-import { MongoError, MongoInvalidArgumentError, MongoRuntimeError } from '../error';
+import {
+  MongoError,
+  MongoInvalidArgumentError,
+  MongoNetworkError,
+  MongoRuntimeError,
+  MongoServerError
+} from '../error';
 import { Logger } from '../logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
@@ -601,6 +607,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CLOSED,
           new ConnectionClosedEvent(this, { id: connectOptions.id, serviceId: undefined }, 'error')
         );
+        if (err instanceof MongoNetworkError || err instanceof MongoServerError) {
+          err.connectionGeneration = connectOptions.generation;
+        }
         callback(err ?? new MongoRuntimeError('Connection creation failed without error'));
         return;
       }
