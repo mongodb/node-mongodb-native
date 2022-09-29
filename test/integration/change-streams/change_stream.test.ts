@@ -1051,35 +1051,38 @@ describe('Change Streams', function () {
         await client.close();
       });
 
-      it('should support consecutive resumes', async function () {
-        const failCommand: FailPoint = {
-          configureFailPoint: 'failCommand',
-          mode: {
-            times: 2
-          },
-          data: {
-            failCommands: ['getMore'],
-            closeConnection: true
+      it('should support consecutive resumes', {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
+        async test() {
+          const failCommand: FailPoint = {
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 2
+            },
+            data: {
+              failCommands: ['getMore'],
+              closeConnection: true
+            }
+          };
+
+          await client.db('admin').command(failCommand);
+
+          const collection = client.db('test_consecutive_resume').collection('collection');
+
+          changeStream = collection.watch([], { batchSize: 1 });
+
+          await initIteratorMode(changeStream);
+
+          await collection.insertOne({ name: 'bumpy' });
+          await collection.insertOne({ name: 'bumpy' });
+          await collection.insertOne({ name: 'bumpy' });
+
+          await sleep(1000);
+
+          for (let i = 0; i < 3; ++i) {
+            const change = await changeStream.next();
+            expect(change).not.to.be.null;
           }
-        };
-
-        await client.db('admin').command(failCommand);
-
-        const collection = client.db('test_consecutive_resume').collection('collection');
-
-        changeStream = collection.watch([], { batchSize: 1 });
-
-        await initIteratorMode(changeStream);
-
-        await collection.insertOne({ name: 'bumpy' });
-        await collection.insertOne({ name: 'bumpy' });
-        await collection.insertOne({ name: 'bumpy' });
-
-        await sleep(500);
-
-        for (let i = 0; i < 3; ++i) {
-          const change = await changeStream.next();
-          expect(change).not.to.be.null;
         }
       });
     });
