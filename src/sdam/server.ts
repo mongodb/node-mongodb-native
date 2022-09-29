@@ -383,8 +383,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
-    // ignore stale errors
-    if (error.connectionGeneration && error.connectionGeneration < this.s.pool.generation) {
+    const isStaleError =
+      error.connectionGeneration && error.connectionGeneration < this.s.pool.generation;
+    if (isStaleError) {
       return;
     }
 
