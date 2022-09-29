@@ -1,4 +1,4 @@
-description: "setVersion that is less than maxSetVersion is ignored if there is no electionId"
+description: "Pre 6.0 setVersion is ignored if there is no electionId"
 
 uri: "mongodb://a/?replicaSet=rs"
 
@@ -15,7 +15,7 @@ phases: [
                 setName: "rs",
                 setVersion: 2,
                 minWireVersion: 0,
-                maxWireVersion: 17
+                maxWireVersion: 6
             }]
         ],
 
@@ -40,7 +40,8 @@ phases: [
         }
     },
 
-    # B is elected, its setVersion is older so it is stale
+    # B is elected, its setVersion is older but we believe it anyway, because
+    # setVersion is only used in conjunction with electionId.
     {
         responses: [
             ["b:27017", {
@@ -51,21 +52,21 @@ phases: [
                 setName: "rs",
                 setVersion: 1,
                 minWireVersion: 0,
-                maxWireVersion: 17
+                maxWireVersion: 6
             }]
         ],
 
         outcome: {
             servers: {
                 "a:27017": {
-                    type: "RSPrimary",
-                    setName: "rs",
-                    setVersion: 2 ,
+                    type: "Unknown",
+                    setName: ,
                     electionId:
                 },
                 "b:27017": {
-                    type: "Unknown",
-                    setName: ,
+                    type: "RSPrimary",
+                    setName: "rs",
+                    setVersion: 1,
                     electionId:
                 }
             },

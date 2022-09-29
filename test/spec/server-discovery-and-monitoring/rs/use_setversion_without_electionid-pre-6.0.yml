@@ -1,10 +1,10 @@
-description: "setVersion that is greater than maxSetVersion is used if there is no electionId"
+description: "Pre 6.0 Record max setVersion, even from primary without electionId"
 
 uri: "mongodb://a/?replicaSet=rs"
 
 phases: [
 
-    # Primary A is discovered and tells us about B.
+    # Primary A has setVersion and electionId, tells us about B.
     {
         responses: [
             ["a:27017", {
@@ -14,8 +14,9 @@ phases: [
                 hosts: ["a:27017", "b:27017"],
                 setName: "rs",
                 setVersion: 1,
+                electionId: {"$oid": "000000000000000000000001"},
                 minWireVersion: 0,
-                maxWireVersion: 17
+                maxWireVersion: 6
             }]
         ],
 
@@ -25,7 +26,7 @@ phases: [
                     type: "RSPrimary",
                     setName: "rs",
                     setVersion: 1,
-                    electionId:
+                    electionId: {"$oid": "000000000000000000000001"}
                 },
                 "b:27017": {
                     type: "Unknown",
@@ -37,11 +38,11 @@ phases: [
             logicalSessionTimeoutMinutes: null,
             setName: "rs",
             maxSetVersion: 1,
+            maxElectionId: {"$oid": "000000000000000000000001"},
         }
     },
 
-    # B is elected, its setVersion is greater than our current maxSetVersion
-    # B is primary, A is marked Unknown
+    # Reconfig the set and elect B, it has a new setVersion but no electionId.
     {
         responses: [
             ["b:27017", {
@@ -52,7 +53,7 @@ phases: [
                 setName: "rs",
                 setVersion: 2,
                 minWireVersion: 0,
-                maxWireVersion: 17
+                maxWireVersion: 6
             }]
         ],
 
@@ -66,14 +67,51 @@ phases: [
                 "b:27017": {
                     type: "RSPrimary",
                     setName: "rs",
-                    setVersion: 2,
-                    electionId:
-                },
+                    setVersion: 2
+                }
             },
             topologyType: "ReplicaSetWithPrimary",
             logicalSessionTimeoutMinutes: null,
             setName: "rs",
             maxSetVersion: 2,
+            maxElectionId: {"$oid": "000000000000000000000001"},
+        }
+    },
+
+    # Delayed response from A, reporting its reelection. Its setVersion shows
+    # the election preceded B's so we ignore it.
+    {
+        responses: [
+            ["a:27017", {
+                ok: 1,
+                helloOk: true,
+                isWritablePrimary: true,
+                hosts: ["a:27017", "b:27017"],
+                setName: "rs",
+                setVersion: 1,
+                electionId: {"$oid": "000000000000000000000002"},
+                minWireVersion: 0,
+                maxWireVersion: 6
+            }]
+        ],
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "Unknown",
+                    setName: ,
+                    electionId:
+                },
+                "b:27017": {
+                    type: "RSPrimary",
+                    setName: "rs",
+                    setVersion: 2
+                }
+            },
+            topologyType: "ReplicaSetWithPrimary",
+            logicalSessionTimeoutMinutes: null,
+            setName: "rs",
+            maxSetVersion: 2,
+            maxElectionId: {"$oid": "000000000000000000000001"},
         }
     }
 ]

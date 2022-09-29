@@ -14,7 +14,7 @@ phases:
           electionId:
             $oid: "000000000000000000000001"
           minWireVersion: 0
-          maxWireVersion: 6
+          maxWireVersion: 17
       - - "b:27017"
         - ok: 1
           helloOk: true
@@ -27,7 +27,7 @@ phases:
           electionId:
             $oid: "000000000000000000000001"
           minWireVersion: 0
-          maxWireVersion: 6
+          maxWireVersion: 17
       - - "a:27017"
         - ok: 1
           helloOk: true
@@ -40,7 +40,7 @@ phases:
           electionId:
             $oid: "000000000000000000000002"
           minWireVersion: 0
-          maxWireVersion: 6
+          maxWireVersion: 17
     outcome:
       servers:
         "a:27017":
