@@ -81,8 +81,16 @@ describe('Client Side Encryption (Legacy)', function () {
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  if (process.version.includes('18')) {
-    setDefaultResultOrder('ipv4first');
-  }
+  before(function () {
+    if (process.version.includes('18')) {
+      setDefaultResultOrder('ipv4first');
+    }
+  });
+
+  after(function () {
+    if (process.version.includes('18')) {
+      setDefaultResultOrder('verbatim');
+    }
+  });
   runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')));
 });
