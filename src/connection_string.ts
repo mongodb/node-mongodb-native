@@ -2,7 +2,6 @@ import * as dns from 'dns';
 import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
-import { promisify } from 'util';
 
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';

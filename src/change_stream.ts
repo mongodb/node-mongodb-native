@@ -1,5 +1,4 @@
 import type { Readable } from 'stream';
-import { promisify } from 'util';
 
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
