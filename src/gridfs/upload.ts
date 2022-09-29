@@ -138,7 +138,6 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
     return waitForIndexes(this, () => doWrite(this, chunk, encoding, callback));
   }
 
-  // TODO(NODE-3405): Refactor this with maybePromise and MongoStreamClosedError
   /**
    * Places this write stream into an aborted state (all future writes fail)
    * and deletes all chunks that have already been written.

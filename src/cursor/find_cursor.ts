@@ -420,7 +420,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       throw new MongoInvalidArgumentError('Option "allowDiskUse" requires a sort specification');
     }
 
-    // As of 6.0 the default is true. This allows users to get back to the old behaviour.
+    // As of 6.0 the default is true. This allows users to get back to the old behavior.
     if (!allow) {
       this[kBuiltOptions].allowDiskUse = false;
       return this;

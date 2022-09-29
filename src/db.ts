@@ -752,7 +752,7 @@ export class Db {
    * changes to system collections.
    *
    * @remarks
-   * watch() accepts two generic arguments for distinct usecases:
+   * watch() accepts two generic arguments for distinct use cases:
    * - The first is to provide the schema that may be defined for all the collections within this database
    * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
    *

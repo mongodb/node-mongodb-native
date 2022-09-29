@@ -31,50 +31,29 @@ describe('Cursor', function () {
     await client.close();
   });
 
-  it('cursorShouldBeAbleToResetOnToArrayRunningQueryAgain', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('should not fail on toArray and forEach calls after cursor is closed', async function () {
+    const db = client.db();
 
-    test: function (done) {
-      const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+    const collection = await db.collection('test_to_a');
+    await collection.insertMany([{ a: 1 }]);
+    const cursor = collection.find({});
 
-        const db = client.db(configuration.db);
-        db.createCollection('test_to_a', (err, collection) => {
-          expect(err).to.not.exist;
+    const firstToArray = await cursor.toArray().catch(error => error);
+    expect(firstToArray).to.be.an('array');
 
-          collection.insert({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+    expect(cursor.closed).to.be.true;
 
-            const cursor = collection.find({});
-            this.defer(() => cursor.close());
+    // should not fail instead return empty array
+    const secondToArray = await cursor.toArray().catch(error => error);
+    expect(secondToArray).to.be.an('array');
 
-            cursor.toArray(err => {
-              expect(err).to.not.exist;
-
-              // Should fail if called again (cursor should be closed)
-              cursor.toArray(err => {
-                expect(err).to.not.exist;
-
-                // Should fail if called again (cursor should be closed)
-                cursor.forEach(
-                  () => {},
-                  err => {
-                    expect(err).to.not.exist;
-                    done();
-                  }
-                );
-              });
-            });
-          });
-        });
-      });
-    }
+    // should not fail instead returns nothing
+    const forEachResult = await cursor
+      .forEach(() => {
+        expect.fail('should not run forEach on an empty/closed cursor');
+      })
+      .catch(error => error);
+    expect(forEachResult).to.be.undefined;
   });
 
   it('cursor should close after first next operation', {

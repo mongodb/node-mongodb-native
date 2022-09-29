@@ -40,7 +40,7 @@ export type WithId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id: InferIdType<
 export type OptionalId<TSchema> = EnhancedOmit<TSchema, '_id'> & { _id?: InferIdType<TSchema> };
 
 /**
- * Adds an optional _id field to an object shaped type, unless the _id field is requried on that type.
+ * Adds an optional _id field to an object shaped type, unless the _id field is required on that type.
  * In the case _id is required, this method continues to require_id.
  *
  * @public

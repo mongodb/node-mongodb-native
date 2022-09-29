@@ -1,8 +1,18 @@
 import { expect } from 'chai';
 
+import { MongoInvalidArgumentError } from '../../../src/error';
 import { filterForCommands } from '../shared';
 
 describe('Aggregation', function () {
+  let client;
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
+  });
+
   it('should correctly execute simple aggregation pipeline using array', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),
       databaseName = this.configuration.db;
@@ -580,13 +590,8 @@ describe('Aggregation', function () {
     });
   });
 
-  it('should fail aggregation due to illegal cursor option and streams', function (done) {
-    const databaseName = this.configuration.db;
-    const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
-      maxPoolSize: 1
-    });
-
-    const db = client.db(databaseName);
+  it('should fail aggregation due to illegal cursor option and streams', async function () {
+    const db = client.db();
     // Some docs for insertion
     const docs = [
       {
@@ -606,85 +611,60 @@ describe('Aggregation', function () {
     // Create a collection
     const collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
     // Insert the docs
-    collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
-      expect(result).to.exist;
-      expect(err).to.not.exist;
+    const result = await collection.insertMany(docs, { writeConcern: { w: 1 } });
+    expect(result).to.exist;
 
-      try {
-        // Execute aggregate, notice the pipeline is expressed as an Array
-        const cursor = collection.aggregate(
-          [
-            {
-              $project: {
-                author: 1,
-                tags: 1
-              }
-            },
-            { $unwind: '$tags' },
-            {
-              $group: {
-                _id: { tags: '$tags' },
-                authors: { $addToSet: '$author' }
-              }
-            }
-          ],
-          {
-            cursor: 1
+    // Execute aggregate, notice the pipeline is expressed as an Array
+    const cursor = collection.aggregate(
+      [
+        {
+          $project: {
+            author: 1,
+            tags: 1
           }
-        );
-
-        cursor.next();
-      } catch (err) {
-        client.close(done);
-        return;
+        },
+        { $unwind: '$tags' },
+        {
+          $group: {
+            _id: { tags: '$tags' },
+            authors: { $addToSet: '$author' }
+          }
+        }
+      ],
+      {
+        cursor: 1
       }
+    );
 
-      // should never happen
-      expect(true).to.be.false;
-    });
+    const error = await cursor.next().catch(error => error);
+    expect(error).to.be.instanceOf(MongoInvalidArgumentError);
   });
 
-  it('should fail if you try to use explain flag with writeConcern', async function () {
-    const databaseName = this.configuration.db;
-    const client = this.configuration.newClient({ maxPoolSize: 1 });
+  it(`should fail if you try to use explain flag with { readConcern: { level: 'local' }, writeConcern: { j: true } }`, async function () {
+    const db = client.db();
 
-    const testCases = [
-      { writeConcern: { j: true } },
-      { readConcern: { level: 'local' }, writeConcern: { j: true } }
-    ];
+    const collection = db.collection('foo');
+    Object.assign(collection.s, { writeConcern: { j: true } });
+    const error = await collection
+      .aggregate([{ $project: { _id: 0 } }, { $out: 'bar' }], { explain: true })
+      .toArray()
+      .catch(error => error);
 
-    const db = client.db(databaseName);
+    expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+  });
 
-    await Promise.all(
-      testCases.map(testCase => {
-        const stringifiedTestCase = JSON.stringify(testCase);
-        const collection = db.collection('foo');
-        Object.assign(collection.s, testCase);
-        try {
-          const promise = collection
-            .aggregate([{ $project: { _id: 0 } }, { $out: 'bar' }], { explain: true })
-            .toArray()
-            .then(
-              () => {
-                throw new Error(
-                  'Expected aggregation to not succeed for options ' + stringifiedTestCase
-                );
-              },
-              () => {
-                throw new Error(
-                  'Expected aggregation to fail on client instead of server for options ' +
-                    stringifiedTestCase
-                );
-              }
-            );
+  it('should fail if you try to use explain flag with { writeConcern: { j: true } }', async function () {
+    const db = client.db();
 
-          return promise;
-        } catch (e) {
-          expect(e).to.exist;
-          return Promise.resolve();
-        }
-      })
-    ).finally(() => client.close());
+    const collection = db.collection('foo');
+    Object.assign(collection.s, { writeConcern: { j: true } });
+
+    const error = await collection
+      .aggregate([{ $project: { _id: 0 } }, { $out: 'bar' }], { explain: true })
+      .toArray()
+      .catch(error => error);
+
+    expect(error).to.be.instanceOf(MongoInvalidArgumentError);
   });
 
   it('should ensure MaxTimeMS is correctly passed down into command execution when using a cursor', function (done) {

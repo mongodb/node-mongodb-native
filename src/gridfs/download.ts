@@ -221,16 +221,14 @@ function doRead(stream: GridFSBucketReadStream): void {
     if (!doc) {
       stream.push(null);
 
-      process.nextTick(() => {
-        if (!stream.s.cursor) return;
-        stream.s.cursor.close(error => {
-          if (error) {
-            stream.emit(GridFSBucketReadStream.ERROR, error);
-            return;
-          }
+      if (!stream.s.cursor) return;
+      stream.s.cursor.close(error => {
+        if (error) {
+          stream.emit(GridFSBucketReadStream.ERROR, error);
+          return;
+        }
 
-          stream.emit(GridFSBucketReadStream.CLOSE);
-        });
+        stream.emit(GridFSBucketReadStream.CLOSE);
       });
 
       return;
