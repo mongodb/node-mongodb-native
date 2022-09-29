@@ -283,6 +283,10 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       initialRecords = undefined,
       replacementRecords = undefined,
       srvServiceName = 'mongodb'
+    }: {
+      initialRecords?: dns.SrvRecord[];
+      replacementRecords?: dns.SrvRecord[];
+      srvServiceName?: string;
     }) {
       let initialDNSLookup = true;
       const mockRecords = shardedCluster.srvRecords;
@@ -290,13 +294,13 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       initialRecords ??= mockRecords;
       // first call is for the driver initial connection
       // second call will check the poller
-      resolveSrvStub = sinon.stub(dns, 'resolveSrv').callsFake((address, callback) => {
+      resolveSrvStub = sinon.stub(dns.promises, 'resolveSrv').callsFake(async address => {
         expect(address).to.equal(`_${srvServiceName}._tcp.test.mock.test.build.10gen.cc`);
         if (initialDNSLookup) {
           initialDNSLookup = false;
-          return process.nextTick(callback, null, initialRecords);
+          return initialRecords;
         }
-        process.nextTick(callback, null, replacementRecords);
+        return replacementRecords;
       });
 
       lookupStub = sinon.stub(dns, 'lookup').callsFake((...args) => {

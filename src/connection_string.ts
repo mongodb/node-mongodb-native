@@ -71,10 +71,6 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  * @param options - Optional user provided connection string options
  */
 export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddress[]> {
-  // We need to do this here to make sinon tests work :(
-  const dnsResolveSrv = promisify(dns.resolveSrv);
-  const dnsResolveTxt = promisify(dns.resolveTxt);
-
   if (typeof options.srvHost !== 'string') {
     throw new MongoAPIError('Option "srvHost" must not be empty');
   }
@@ -86,7 +82,9 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
   const lookupAddress = options.srvHost;
-  const addresses = await dnsResolveSrv(`_${options.srvServiceName}._tcp.${lookupAddress}`);
+  const addresses = await dns.promises.resolveSrv(
+    `_${options.srvServiceName}._tcp.${lookupAddress}`
+  );
 
   if (addresses.length === 0) {
     throw new MongoAPIError('No addresses found at host');
@@ -105,7 +103,7 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
   // Resolve TXT record and add options from there if they exist.
   let record;
   try {
-    record = await dnsResolveTxt(lookupAddress);
+    record = await dns.promises.resolveTxt(lookupAddress);
   } catch (error) {
     if (error.code !== 'ENODATA' && error.code !== 'ENOTFOUND') {
       throw error;
@@ -514,6 +512,15 @@ export function parseOptions(
   return mongoOptions;
 }
 
+/**
+ * #### Throws if LB mode is true:
+ * - hosts contains more than one host
+ * - there is a replicaSet name set
+ * - directConnection is set
+ * - if srvMaxHosts is used when an srv connection string is passed in
+ *
+ * @throws MongoParseError
+ */
 function validateLoadBalancedOptions(
   hosts: HostAddress[] | string[],
   mongoOptions: MongoOptions,

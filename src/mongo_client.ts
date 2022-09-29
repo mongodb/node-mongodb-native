@@ -452,7 +452,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         }
       }
 
-      // Create the topology
       const topology = new Topology(options.hosts, options);
       // Events can be emitted before initialization is complete so we have to
       // save the reference to the topology on the client ASAP if the event handlers need to access it
@@ -475,13 +474,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       };
 
       if (this.autoEncrypter) {
-        // initialize CSFLE if requested
         const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
         await initAutoEncrypter();
         await topologyConnect();
         await options.encrypter.connectInternalClient();
       } else {
-        // otherwise connect normally
         await topologyConnect();
       }
 
@@ -520,15 +517,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const force = typeof forceOrCallback === 'boolean' ? forceOrCallback : false;
 
     return maybeCallback(async () => {
-      if (this.topology == null) {
-        // Do not connect just to end sessions
-        return;
-      }
-
       const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
       this.s.activeSessions.clear();
 
       await Promise.all(activeSessionEnds);
+
+      if (this.topology == null) {
+        return;
+      }
 
       // If we would attempt to select a server and get nothing back we short circuit
       // to avoid the server selection timeout.

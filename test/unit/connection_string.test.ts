@@ -436,12 +436,12 @@ describe('Connection String', function () {
 
       // first call is for stubbing resolveSrv
       // second call is for stubbing resolveTxt
-      sinon.stub(dns, 'resolveSrv').callsFake((address, callback) => {
-        return process.nextTick(callback, null, mockAddress);
+      sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+        return mockAddress;
       });
 
-      sinon.stub(dns, 'resolveTxt').callsFake((address, whatWeTest) => {
-        whatWeTest(null, mockRecord);
+      sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
+        return mockRecord;
       });
     }
 

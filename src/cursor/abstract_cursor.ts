@@ -307,19 +307,13 @@ export abstract class AbstractCursor<
       }
     }
 
+    const iterator = nativeAsyncIterator.call(this);
+
     if (PromiseProvider.get() == null) {
-      return nativeAsyncIterator.call(this);
+      return iterator;
     }
     return {
-      next: () => {
-        return maybeCallback(async () => {
-          if (this.closed) return { done: true, value: undefined };
-          const document = (await this.next()) ?? undefined;
-          return document == null
-            ? { done: true, value: undefined }
-            : { done: false, value: document };
-        }, null);
-      }
+      next: () => maybeCallback(() => iterator.next(), null)
     };
   }
 

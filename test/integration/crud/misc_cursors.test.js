@@ -43,11 +43,10 @@ describe('Cursor', function () {
 
     expect(cursor.closed).to.be.true;
 
-    // should not fail instead return empty array
     const secondToArray = await cursor.toArray().catch(error => error);
     expect(secondToArray).to.be.an('array');
+    expect(secondToArray).to.have.lengthOf(0);
 
-    // should not fail instead returns nothing
     const forEachResult = await cursor
       .forEach(() => {
         expect.fail('should not run forEach on an empty/closed cursor');
