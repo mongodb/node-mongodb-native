@@ -91,7 +91,7 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
   /** If we are in load balancer mode. */
   loadBalanced: boolean;
   /** @experimental */
-  minPoolSizeCheckIntervalMS: number;
+  minPoolSizeCheckIntervalMS?: number;
 }
 
 /** @internal */
