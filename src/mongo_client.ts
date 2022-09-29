@@ -437,7 +437,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     return maybeCallback(async () => {
-      // If a connection already been established, we can terminate early
       if (this.topology && this.topology.isConnected()) {
         return this;
       }
