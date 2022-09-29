@@ -918,36 +918,26 @@ export class ChangeStream<
     }
   }
 
-  /**
-   * @internal
-   *
-   * TODO(NODE-4320): promisify selectServer and refactor this code to be async
-   *
-   * we promisify _processErrorIteratorModeCallback until we have a promisifed version of selectServer.
-   */
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  private _processErrorIteratorMode = promisify(this._processErrorIteratorModeCallback);
-
   /** @internal */
-  private _processErrorIteratorModeCallback(changeStreamError: AnyError, callback: Callback) {
+  private async _processErrorIteratorMode(changeStreamError: AnyError) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
+      throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
-      this.cursor.close().catch(() => null);
+    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+      return this.close();
+    }
 
-      const topology = getTopology(this.parent);
-      topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
-        // if the topology can't reconnect, close the stream
-        if (serverSelectionError) return this.close(() => callback(changeStreamError));
-
-        this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-        callback();
-      });
-    } else {
-      this.close(() => callback(changeStreamError));
+    await this.cursor.close().catch(() => null);
+    const topology = getTopology(this.parent);
+    try {
+      await topology.selectServerAsync(this.cursor.readPreference, {});
+      this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
+    } catch (serverSelectionError) {
+      // if the topology can't reconnect, close the stream
+      await this.close();
+      throw serverSelectionError;
     }
   }
 }
