@@ -1757,7 +1757,7 @@ tasks:
       - func: bootstrap kms servers
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
   - name: aws-5.0-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
     commands:
@@ -1774,7 +1774,7 @@ tasks:
       - func: prepare aws with aws EC2 credentials
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -1793,7 +1793,7 @@ tasks:
       - func: prepare aws with aws credentials as environment variables
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -1812,7 +1812,7 @@ tasks:
       - func: prepare aws with aws credentials and session token as environment variables
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -1903,7 +1903,7 @@ tasks:
       - func: bootstrap kms servers
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
   - name: aws-rapid-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
     commands:
@@ -1920,7 +1920,7 @@ tasks:
       - func: prepare aws with aws EC2 credentials
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -1939,7 +1939,7 @@ tasks:
       - func: prepare aws with aws credentials as environment variables
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -1958,7 +1958,7 @@ tasks:
       - func: prepare aws with aws credentials and session token as environment variables
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -2049,7 +2049,7 @@ tasks:
       - func: bootstrap kms servers
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
   - name: aws-latest-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
     commands:
@@ -2066,7 +2066,7 @@ tasks:
       - func: prepare aws with aws EC2 credentials
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -2085,7 +2085,7 @@ tasks:
       - func: prepare aws with aws credentials as environment variables
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -2104,7 +2104,7 @@ tasks:
       - func: prepare aws with aws credentials and session token as environment variables
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: refresh-debug
+          CSFLE_GIT_REF: aeec6675034d1ceea4790467143199f7002c15a1
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
