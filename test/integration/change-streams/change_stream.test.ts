@@ -5,7 +5,7 @@ import { gte, lt } from 'semver';
 import * as sinon from 'sinon';
 import { PassThrough } from 'stream';
 import { setTimeout } from 'timers';
-import { promisify } from 'util';
+import { inspect, promisify } from 'util';
 
 import {
   AbstractCursor,
@@ -1037,6 +1037,59 @@ describe('Change Streams', function () {
   });
 
   describe('Change Stream Resume Error Tests', function () {
+    describe('TODO(NODE-4670): fix consecutive resumes unified tests', function () {
+      let client: MongoClient;
+      let changeStream: ChangeStream;
+
+      async function initCursor(cursor: AbstractCursor) {
+        const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
+        const initFunction = promisify(cursor[init]).bind(cursor);
+        return initFunction();
+      }
+
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await changeStream.close();
+        await client.close();
+      });
+
+      it('should support consecutive resumes', async function () {
+        const failCommand: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: {
+            times: 2
+          },
+          data: {
+            failCommands: ['getMore'],
+            closeConnection: true
+          }
+        };
+
+        await client.db('admin').command(failCommand);
+
+        const collection = client.db('test_consecutive_resume').collection('collection');
+
+        changeStream = collection.watch([], { batchSize: 1 });
+
+        await initCursor(changeStream.cursor);
+
+        await collection.insertOne({ name: 'bumpy' });
+        await collection.insertOne({ name: 'bumpy' });
+        await collection.insertOne({ name: 'bumpy' });
+
+        await sleep(500);
+
+        for (let i = 0; i < 3; ++i) {
+          const change = await changeStream.next();
+          expect(change).not.to.be.null;
+        }
+      });
+    });
+
     it.skip('should continue piping changes after a resumable error', {
       metadata: { requires: { topology: 'replicaset' } },
       test: done => {
