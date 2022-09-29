@@ -383,7 +383,7 @@ for (const
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node ${LATEST_LTS[0].toUpperCase()}${LATEST_LTS.slice(1)}`,
+  display_name: `MacOS 11 Node${versions[versions.length - 1].versionNumber}`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_NAME: LATEST_LTS,

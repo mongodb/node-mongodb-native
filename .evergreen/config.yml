@@ -2595,7 +2595,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: macos-1100
-    display_name: MacOS 11 Node Hydrogen
+    display_name: MacOS 11 Node18
     run_on: macos-1100
     expansions:
       NODE_LTS_NAME: hydrogen
