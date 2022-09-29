@@ -5,7 +5,7 @@ import { gte, lt } from 'semver';
 import * as sinon from 'sinon';
 import { PassThrough } from 'stream';
 import { setTimeout } from 'timers';
-import { inspect, promisify } from 'util';
+import { promisify } from 'util';
 
 import {
   AbstractCursor,
@@ -1041,12 +1041,6 @@ describe('Change Streams', function () {
       let client: MongoClient;
       let changeStream: ChangeStream;
 
-      async function initCursor(cursor: AbstractCursor) {
-        const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
-        const initFunction = promisify(cursor[init]).bind(cursor);
-        return initFunction();
-      }
-
       beforeEach(async function () {
         client = this.configuration.newClient();
         await client.connect();
@@ -1075,7 +1069,7 @@ describe('Change Streams', function () {
 
         changeStream = collection.watch([], { batchSize: 1 });
 
-        await initCursor(changeStream.cursor);
+        await initIteratorMode(changeStream);
 
         await collection.insertOne({ name: 'bumpy' });
         await collection.insertOne({ name: 'bumpy' });
