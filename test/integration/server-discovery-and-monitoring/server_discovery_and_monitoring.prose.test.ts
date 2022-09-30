@@ -74,7 +74,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
     });
 
     it('ensure monitors sleep for an appropriate amount of time between pings', {
-      metadata: { requires: { mongodb: '>=4.9.0' } },
+      metadata: { requires: { mongodb: '>=4.9.0', topology: '!load-balanced' } },
       test: async function () {
         // 3.
         const startTime = Date.now();
