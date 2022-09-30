@@ -11,7 +11,7 @@ import { Topology } from '../../../src/sdam/topology';
 import { TopologyDescription } from '../../../src/sdam/topology_description';
 import { sleep } from '../../tools/utils';
 
-describe.only('Mongos SRV Polling', function () {
+describe('Mongos SRV Polling', function () {
   const SRV_HOST = 'darmok.tanagra.com';
 
   function srvRecord(mockServer, port?: number) {
