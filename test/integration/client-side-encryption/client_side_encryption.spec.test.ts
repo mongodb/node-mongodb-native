@@ -70,6 +70,19 @@ describe('Client Side Encryption (Legacy)', function () {
     path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),
     testContext
   );
+
+  before(function () {
+    if (process.version.includes('18')) {
+      setDefaultResultOrder('ipv4first');
+    }
+  });
+
+  after(function () {
+    if (process.version.includes('18')) {
+      setDefaultResultOrder('verbatim');
+    }
+  });
+
   after(() => testContext.teardown());
   before(function () {
     return testContext.setup(this.configuration);

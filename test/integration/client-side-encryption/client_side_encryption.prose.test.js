@@ -11,6 +11,7 @@ const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { MongoNetworkError, MongoServerError } = require('../../../src/error');
 const { getEncryptExtraOptions } = require('../../tools/utils');
+const { setDefaultResultOrder } = require('dns');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -69,6 +70,17 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'base64'
   );
 
+  before(function () {
+    if (process.version.includes('18')) {
+      setDefaultResultOrder('ipv4first');
+    }
+  });
+
+  after(function () {
+    if (process.version.includes('18')) {
+      setDefaultResultOrder('verbatim');
+    }
+  });
   describe('Data key and double encryption', function () {
     // Data key and double encryption
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
