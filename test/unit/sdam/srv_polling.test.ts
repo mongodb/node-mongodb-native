@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import * as dns from 'dns';
 import { EventEmitter } from 'events';
 import * as sinon from 'sinon';
+import { clearTimeout } from 'timers';
 
 import { MongoDriverError } from '../../../src/error';
 import { TopologyType } from '../../../src/sdam/common';
@@ -51,9 +52,9 @@ describe('Mongos SRV Polling', function () {
 
   describe('SrvPoller', function () {
     function stubPoller(poller) {
-      sinon.spy(poller, 'success');
-      sinon.spy(poller, 'failure');
-      sinon.spy(poller, 'parentDomainMismatch');
+      sinon.stub(poller, 'success');
+      sinon.stub(poller, 'failure');
+      sinon.stub(poller, 'parentDomainMismatch');
     }
 
     it('should always return a valid value for `intervalMS`', function () {
@@ -87,14 +88,31 @@ describe('Mongos SRV Polling', function () {
     });
 
     describe('failure', function () {
-      it('should enable haMode and schedule', function () {
+      it('should enable haMode and schedule', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
-        sinon.spy(poller, 'schedule');
+        sinon.stub(poller, 'schedule');
         poller.failure('Some kind of failure');
 
         expect(poller.schedule).to.have.been.calledOnce;
         expect(poller).to.have.property('haMode', true);
+      });
+
+      it('should do something if dns API breaks', async function () {
+        const poller = new SrvPoller({ srvHost: SRV_HOST, loggerLevel: 'error' });
+
+        // @ts-expect-error: Testing what happens if node breaks DNS API
+        sinon.stub(dns.promises, 'resolveSrv').resolves(null);
+
+        const loggerError = sinon.stub(poller.logger, 'error').returns();
+
+        poller._poll();
+        await sleep(1);
+        clearTimeout(poller._timeout);
+
+        expect(loggerError).to.have.been.calledOnceWith(
+          sinon.match(/Unexpected MongoRuntimeError/)
+        );
       });
     });
 
@@ -104,12 +122,14 @@ describe('Mongos SRV Polling', function () {
         expect(() => new SrvPoller({})).to.throw(MongoDriverError);
       });
 
-      it('should poll dns srv records', function () {
+      it('should poll dns srv records', async function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
-        sinon.stub(dns.promises, 'resolveSrv').resolves();
+        sinon.stub(dns.promises, 'resolveSrv').resolves([srvRecord('iLoveJavascript.lots')]);
 
         poller._poll();
+        await sleep(1);
+        clearTimeout(poller._timeout);
 
         expect(dns.promises.resolveSrv).to.have.been.calledOnce.and.to.have.been.calledWith(
           `_mongodb._tcp.${SRV_HOST}`

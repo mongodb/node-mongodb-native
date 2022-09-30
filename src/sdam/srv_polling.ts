@@ -137,29 +137,34 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     const generation = this.generation;
     dns.promises
       .resolveSrv(this.srvAddress)
-      .then(srvRecords => {
-        if (generation !== this.generation) {
-          return;
-        }
-
-        const finalAddresses: dns.SrvRecord[] = [];
-        for (const record of srvRecords) {
-          if (matchesParentDomain(record.name, this.srvHost)) {
-            finalAddresses.push(record);
-          } else {
-            this.parentDomainMismatch(record);
+      .then(
+        srvRecords => {
+          if (generation !== this.generation) {
+            return;
           }
-        }
 
-        if (!finalAddresses.length) {
-          this.failure('No valid addresses found at host');
-          return;
-        }
+          const finalAddresses: dns.SrvRecord[] = [];
+          for (const record of srvRecords) {
+            if (matchesParentDomain(record.name, this.srvHost)) {
+              finalAddresses.push(record);
+            } else {
+              this.parentDomainMismatch(record);
+            }
+          }
 
-        this.success(finalAddresses);
-      })
-      .catch(err => {
-        this.failure('DNS error', err);
+          if (!finalAddresses.length) {
+            this.failure('No valid addresses found at host');
+            return;
+          }
+
+          this.success(finalAddresses);
+        },
+        err => {
+          this.failure('DNS error', err);
+        }
+      )
+      .catch(unexpectedRuntimeError => {
+        this.logger.error(`Unexpected ${new MongoRuntimeError(unexpectedRuntimeError).stack}`);
       });
   }
 }
