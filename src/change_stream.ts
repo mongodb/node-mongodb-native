@@ -925,7 +925,12 @@ export class ChangeStream<
     }
 
     if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
-      return this.close();
+      try {
+        await this.close();
+      } catch {
+        // ignore errors from close
+      }
+      throw changeStreamError;
     }
 
     await this.cursor.close().catch(() => null);
@@ -933,10 +938,10 @@ export class ChangeStream<
     try {
       await topology.selectServerAsync(this.cursor.readPreference, {});
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-    } catch (serverSelectionError) {
+    } catch (selectionOrCreationError) {
       // if the topology can't reconnect, close the stream
       await this.close();
-      throw serverSelectionError;
+      throw selectionOrCreationError;
     }
   }
 }
