@@ -150,11 +150,7 @@ export class TestConfiguration {
   }
 
   newClient(dbOptions?: string | Record<string, any>, serverOptions?: Record<string, any>) {
-    serverOptions = Object.assign(
-      { minHeartbeatFrequencyMS: 100 },
-      getEnvironmentalOptions(),
-      serverOptions
-    );
+    serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
 
     // support MongoClient constructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
