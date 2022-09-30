@@ -91,7 +91,7 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
   /** If we are in load balancer mode. */
   loadBalanced: boolean;
   /** @internal */
-  minPoolSizeCheckIntervalMS?: number;
+  minPoolSizeCheckFrequencyMS?: number;
 }
 
 /** @internal */
@@ -236,7 +236,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       maxConnecting: options.maxConnecting ?? 2,
       maxIdleTimeMS: options.maxIdleTimeMS ?? 0,
       waitQueueTimeoutMS: options.waitQueueTimeoutMS ?? 0,
-      minPoolSizeCheckIntervalMS: options.minPoolSizeCheckIntervalMS ?? 100,
+      minPoolSizeCheckFrequencyMS: options.minPoolSizeCheckFrequencyMS ?? 100,
       autoEncrypter: options.autoEncrypter,
       metadata: options.metadata
     });
@@ -688,7 +688,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           clearTimeout(this[kMinPoolSizeTimer]);
           this[kMinPoolSizeTimer] = setTimeout(
             () => this.ensureMinPoolSize(),
-            this.options.minPoolSizeCheckIntervalMS
+            this.options.minPoolSizeCheckFrequencyMS
           );
         }
       });
@@ -696,7 +696,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       clearTimeout(this[kMinPoolSizeTimer]);
       this[kMinPoolSizeTimer] = setTimeout(
         () => this.ensureMinPoolSize(),
-        this.options.minPoolSizeCheckIntervalMS
+        this.options.minPoolSizeCheckFrequencyMS
       );
     }
   }

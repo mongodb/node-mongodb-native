@@ -351,10 +351,10 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   const poolOptions = test.poolOptions || {};
   expect(CMAP_POOL_OPTION_NAMES).to.include.members(Object.keys(poolOptions));
 
-  let minPoolSizeCheckIntervalMS;
+  let minPoolSizeCheckFrequencyMS;
   if (poolOptions.backgroundThreadIntervalMS) {
     if (poolOptions.backgroundThreadIntervalMS !== -1) {
-      minPoolSizeCheckIntervalMS = poolOptions.backgroundThreadIntervalMS;
+      minPoolSizeCheckFrequencyMS = poolOptions.backgroundThreadIntervalMS;
     }
     delete poolOptions.backgroundThreadIntervalMS;
   }
@@ -376,7 +376,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   const mainThread = threadContext.getThread(MAIN_THREAD_KEY);
   mainThread.start();
 
-  threadContext.createPool({ ...poolOptions, metadata, minPoolSizeCheckIntervalMS });
+  threadContext.createPool({ ...poolOptions, metadata, minPoolSizeCheckFrequencyMS });
   // yield control back to the event loop so that the ConnectionPoolCreatedEvent
   // has a chance to be fired before any synchronously-emitted events from
   // the queued operations

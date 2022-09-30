@@ -144,10 +144,10 @@ describe('Connection Pool', function () {
       }
     });
 
-    it('should respect the minPoolSizeCheckIntervalMS option', function () {
+    it('should respect the minPoolSizeCheckFrequencyMS option', function () {
       const pool = new ConnectionPool(server, {
         minPoolSize: 2,
-        minPoolSizeCheckIntervalMS: 42,
+        minPoolSizeCheckFrequencyMS: 42,
         hostAddress: server.hostAddress()
       });
       const ensureSpy = sinon.spy(pool, 'ensureMinPoolSize');
@@ -180,7 +180,7 @@ describe('Connection Pool', function () {
       expect(createConnStub).to.have.been.calledTwice;
     });
 
-    it('should default minPoolSizeCheckIntervalMS to 100ms', function () {
+    it('should default minPoolSizeCheckFrequencyMS to 100ms', function () {
       const pool = new ConnectionPool(server, {
         minPoolSize: 2,
         hostAddress: server.hostAddress()
