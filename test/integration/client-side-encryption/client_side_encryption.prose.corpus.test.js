@@ -148,8 +148,8 @@ describe('Client Side Encryption Prose Corpus Test', function () {
     }
   }
 
-  beforeEach(node18DNSResolutionOrderAfterEachHook);
-  afterEach(node18DNSResolutionOrderAfterEachHook);
+  before(node18DNSResolutionOrderAfterEachHook);
+  after(node18DNSResolutionOrderAfterEachHook);
 
   before(function () {
     // 1. Create a MongoClient without encryption enabled (referred to as ``client``).

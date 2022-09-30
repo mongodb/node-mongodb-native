@@ -25,8 +25,8 @@ describe('Client Side Encryption Functional', function () {
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
-  beforeEach(node18DNSResolutionOrderBeforeEachHook);
-  afterEach(node18DNSResolutionOrderAfterEachHook);
+  before(node18DNSResolutionOrderAfterEachHook);
+  after(node18DNSResolutionOrderAfterEachHook);
 
   it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
     const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;

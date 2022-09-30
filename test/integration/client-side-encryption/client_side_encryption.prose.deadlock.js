@@ -96,8 +96,8 @@ function deadlockTests(_metadata) {
   const metadata = { ..._metadata, requires: { ..._metadata.requires, auth: 'disabled' } };
   metadata.skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
   describe('Connection Pool Deadlock Prevention', function () {
-    beforeEach(node18DNSResolutionOrderBeforeEachHook);
-    afterEach(node18DNSResolutionOrderAfterEachHook);
+    before(node18DNSResolutionOrderAfterEachHook);
+    after(node18DNSResolutionOrderAfterEachHook);
 
     beforeEach(function () {
       try {
