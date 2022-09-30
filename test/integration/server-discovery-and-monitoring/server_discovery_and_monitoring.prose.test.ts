@@ -35,7 +35,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
 
     let client: MongoClient;
     beforeEach(async function () {
-      const utilClient = this.configuration.newClient();
+      const utilClient = this.configuration.newClient({ directConnection: true });
 
       // 1.
       await utilClient.db('admin').command({
