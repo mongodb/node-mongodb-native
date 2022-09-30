@@ -1,6 +1,5 @@
 import { expect } from 'chai';
-import { setTimeout } from 'timers';
-import { promisify } from 'util';
+import { on } from 'events';
 
 import { CommandStartedEvent } from '../../../src';
 import { Collection } from '../../../src/collection';
@@ -27,19 +26,12 @@ async function runTaskGroup(collection: Collection, count: 10 | 100 | 1000) {
 
 async function ensurePoolIsFull(client: MongoClient) {
   let connectionCount = 0;
-  const onConnectionCreated = () => connectionCount++;
-  client.on('connectionCreated', onConnectionCreated);
-
-  // 250ms should be plenty of time to fill the connection pool,
-  // but just in case we'll loop a couple of times.
-  for (let i = 0; connectionCount < POOL_SIZE * 2 && i < 10; ++i) {
-    await promisify(setTimeout)(250);
-  }
-
-  client.removeListener('connectionCreated', onConnectionCreated);
-
-  if (connectionCount !== POOL_SIZE * 2) {
-    throw new Error('Connection pool did not fill up');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const _event of on(client, 'connectionCreated')) {
+    connectionCount++;
+    if (connectionCount === POOL_SIZE * 2) {
+      break;
+    }
   }
 }
 
