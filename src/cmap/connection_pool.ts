@@ -90,7 +90,7 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
   waitQueueTimeoutMS: number;
   /** If we are in load balancer mode. */
   loadBalanced: boolean;
-  /** @experimental */
+  /** @internal */
   minPoolSizeCheckIntervalMS?: number;
 }
 
