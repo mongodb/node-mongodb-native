@@ -9,6 +9,7 @@ const { expect } = require('chai');
 const { setImmediate } = require('timers');
 const { ns, isHello } = require('../../../src/utils');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { createTimerSandbox } = require('../timer_sandbox');
 
 describe('Connection Pool', function () {
   let server;
@@ -125,6 +126,93 @@ describe('Connection Pool', function () {
         setImmediate(() => expect(pool).property('waitQueueSize').to.equal(0));
         done();
       });
+    });
+  });
+
+  describe('minPoolSize population', function () {
+    let clock, timerSandbox;
+    beforeEach(() => {
+      timerSandbox = createTimerSandbox();
+      clock = sinon.useFakeTimers();
+    });
+
+    afterEach(() => {
+      if (clock) {
+        timerSandbox.restore();
+        clock.restore();
+        clock = undefined;
+      }
+    });
+
+    it('should respect the minPoolSizeCheckFrequencyMS option', function () {
+      const pool = new ConnectionPool(server, {
+        minPoolSize: 2,
+        minPoolSizeCheckFrequencyMS: 42,
+        hostAddress: server.hostAddress()
+      });
+      const ensureSpy = sinon.spy(pool, 'ensureMinPoolSize');
+
+      // return a fake connection that won't get identified as perished
+      const createConnStub = sinon
+        .stub(pool, 'createConnection')
+        .yields(null, { destroy: () => null, generation: 0 });
+
+      pool.ready();
+
+      // expect ensureMinPoolSize to execute immediately
+      expect(ensureSpy).to.have.been.calledOnce;
+      expect(createConnStub).to.have.been.calledOnce;
+
+      // check that the successful connection return schedules another run
+      clock.tick(42);
+      expect(ensureSpy).to.have.been.calledTwice;
+      expect(createConnStub).to.have.been.calledTwice;
+
+      // check that the 2nd successful connection return schedules another run
+      // but don't expect to get a new connection since we are at minPoolSize
+      clock.tick(42);
+      expect(ensureSpy).to.have.been.calledThrice;
+      expect(createConnStub).to.have.been.calledTwice;
+
+      // check that the next scheduled check runs even after we're at minPoolSize
+      clock.tick(42);
+      expect(ensureSpy).to.have.callCount(4);
+      expect(createConnStub).to.have.been.calledTwice;
+    });
+
+    it('should default minPoolSizeCheckFrequencyMS to 100ms', function () {
+      const pool = new ConnectionPool(server, {
+        minPoolSize: 2,
+        hostAddress: server.hostAddress()
+      });
+      const ensureSpy = sinon.spy(pool, 'ensureMinPoolSize');
+
+      // return a fake connection that won't get identified as perished
+      const createConnStub = sinon
+        .stub(pool, 'createConnection')
+        .yields(null, { destroy: () => null, generation: 0 });
+
+      pool.ready();
+
+      // expect ensureMinPoolSize to execute immediately
+      expect(ensureSpy).to.have.been.calledOnce;
+      expect(createConnStub).to.have.been.calledOnce;
+
+      // check that the successful connection return schedules another run
+      clock.tick(100);
+      expect(ensureSpy).to.have.been.calledTwice;
+      expect(createConnStub).to.have.been.calledTwice;
+
+      // check that the 2nd successful connection return schedules another run
+      // but don't expect to get a new connection since we are at minPoolSize
+      clock.tick(100);
+      expect(ensureSpy).to.have.been.calledThrice;
+      expect(createConnStub).to.have.been.calledTwice;
+
+      // check that the next scheduled check runs even after we're at minPoolSize
+      clock.tick(100);
+      expect(ensureSpy).to.have.callCount(4);
+      expect(createConnStub).to.have.been.calledTwice;
     });
   });
 
