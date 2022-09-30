@@ -4,6 +4,7 @@ import { on } from 'events';
 import { CommandStartedEvent } from '../../../src';
 import { Collection } from '../../../src/collection';
 import { MongoClient } from '../../../src/mongo_client';
+import { sleep } from '../../tools/utils';
 
 const failPoint = {
   configureFailPoint: 'failCommand',
@@ -24,7 +25,7 @@ async function runTaskGroup(collection: Collection, count: 10 | 100 | 1000) {
   }
 }
 
-async function ensurePoolIsFull(client: MongoClient) {
+async function ensurePoolIsFull(client: MongoClient): Promise<boolean> {
   let connectionCount = 0;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for await (const _event of on(client, 'connectionCreated')) {
@@ -74,7 +75,10 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
     await client.connect();
 
     // Step 4: Using CMAP events, ensure the client's connection pools for both mongoses have been saturated
-    await poolIsFullPromise;
+    const poolIsFull = Promise.race([poolIsFullPromise, sleep(30 * 1000)]);
+    if (!poolIsFull) {
+      throw new Error('Timed out waiting for connection pool to fill to minPoolSize');
+    }
 
     seeds = client.topology.s.seedlist.map(address => address.toString());
 
