@@ -1,25 +1,20 @@
-'use strict';
+import { expect } from 'chai';
+import * as dns from 'dns';
+import { EventEmitter } from 'events';
+import * as sinon from 'sinon';
 
-const { Topology } = require('../../../src/sdam/topology');
-const { TopologyDescription } = require('../../../src/sdam/topology_description');
-const { TopologyType } = require('../../../src/sdam/common');
-const { SrvPoller, SrvPollingEvent } = require('../../../src/sdam/srv_polling');
-const sdamEvents = require('../../../src/sdam/events');
+import { MongoDriverError } from '../../../src/error';
+import { TopologyType } from '../../../src/sdam/common';
+import * as sdamEvents from '../../../src/sdam/events';
+import { SrvPoller, SrvPollingEvent } from '../../../src/sdam/srv_polling';
+import { Topology } from '../../../src/sdam/topology';
+import { TopologyDescription } from '../../../src/sdam/topology_description';
+import { sleep } from '../../tools/utils';
 
-const dns = require('dns');
-const EventEmitter = require('events').EventEmitter;
-const chai = require('chai');
-const sinon = require('sinon');
-const { MongoDriverError } = require('../../../src/error');
-
-const expect = chai.expect;
-chai.use(require('sinon-chai'));
-
-describe('Mongos SRV Polling', function () {
-  const context = {};
+describe.only('Mongos SRV Polling', function () {
   const SRV_HOST = 'darmok.tanagra.com';
 
-  function srvRecord(mockServer, port) {
+  function srvRecord(mockServer, port?: number) {
     if (typeof mockServer === 'string') {
       mockServer = { host: mockServer, port };
     }
@@ -42,29 +37,23 @@ describe('Mongos SRV Polling', function () {
     });
   }
 
-  function stubDns(err, records) {
-    context.sinon.stub(dns, 'resolveSrv').callsFake(function (_srvAddress, callback) {
-      process.nextTick(() => callback(err, records));
-    });
+  function stubDns(err: Error | null, records?: dns.SrvRecord[]) {
+    if (err) {
+      sinon.stub(dns.promises, 'resolveSrv').rejects(err);
+    } else {
+      sinon.stub(dns.promises, 'resolveSrv').resolves(records);
+    }
   }
 
-  before(function () {
-    context.sinon = sinon.createSandbox();
-  });
-
   afterEach(function () {
-    context.sinon.restore();
-  });
-
-  after(function () {
-    delete context.sinon;
+    sinon.restore();
   });
 
   describe('SrvPoller', function () {
     function stubPoller(poller) {
-      context.sinon.stub(poller, 'success');
-      context.sinon.stub(poller, 'failure');
-      context.sinon.stub(poller, 'parentDomainMismatch');
+      sinon.spy(poller, 'success');
+      sinon.spy(poller, 'failure');
+      sinon.spy(poller, 'parentDomainMismatch');
     }
 
     it('should always return a valid value for `intervalMS`', function () {
@@ -77,7 +66,7 @@ describe('Mongos SRV Polling', function () {
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
-        context.sinon.stub(poller, 'schedule');
+        sinon.stub(poller, 'schedule');
 
         poller.haMode = true;
         expect(poller).to.have.property('haMode', true);
@@ -101,7 +90,7 @@ describe('Mongos SRV Polling', function () {
       it('should enable haMode and schedule', function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
-        context.sinon.stub(poller, 'schedule');
+        sinon.spy(poller, 'schedule');
         poller.failure('Some kind of failure');
 
         expect(poller.schedule).to.have.been.calledOnce;
@@ -118,13 +107,12 @@ describe('Mongos SRV Polling', function () {
       it('should poll dns srv records', function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
-        context.sinon.stub(dns, 'resolveSrv');
+        sinon.stub(dns.promises, 'resolveSrv').resolves();
 
         poller._poll();
 
-        expect(dns.resolveSrv).to.have.been.calledOnce.and.to.have.been.calledWith(
-          `_mongodb._tcp.${SRV_HOST}`,
-          sinon.match.func
+        expect(dns.promises.resolveSrv).to.have.been.calledOnce.and.to.have.been.calledWith(
+          `_mongodb._tcp.${SRV_HOST}`
         );
       });
 
@@ -144,39 +132,37 @@ describe('Mongos SRV Polling', function () {
         });
       });
 
-      it('should fail if dns returns error', function (done) {
+      it('should fail if dns returns error', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         stubDns(new Error('Some Error'));
         stubPoller(poller);
 
         poller._poll();
+        await sleep(1);
 
-        tryDone(done, () => {
-          expect(poller.success).to.not.have.been.called;
-          expect(poller.failure).to.have.been.calledOnce.and.calledWith('DNS error');
-          expect(poller.parentDomainMismatch).to.not.have.been.called;
-        });
+        expect(poller.success).to.not.have.been.called;
+        expect(poller.failure).to.have.been.calledOnce.and.calledWith('DNS error');
+        expect(poller.parentDomainMismatch).to.not.have.been.called;
       });
 
-      it('should fail if dns returns no records', function (done) {
+      it('should fail if dns returns no records', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         stubDns(null, []);
         stubPoller(poller);
 
         poller._poll();
+        await sleep(1);
 
-        tryDone(done, () => {
-          expect(poller.success).to.not.have.been.called;
-          expect(poller.failure).to.have.been.calledOnce.and.calledWith(
-            'No valid addresses found at host'
-          );
-          expect(poller.parentDomainMismatch).to.not.have.been.called;
-        });
+        expect(poller.success).to.not.have.been.called;
+        expect(poller.failure).to.have.been.calledOnce.and.calledWith(
+          'No valid addresses found at host'
+        );
+        expect(poller.parentDomainMismatch).to.not.have.been.called;
       });
 
-      it('should fail if dns returns no records that match parent domain', function (done) {
+      it('should fail if dns returns no records that match parent domain', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.org'), srvRecord('shaka.walls.com')];
 
@@ -184,19 +170,18 @@ describe('Mongos SRV Polling', function () {
         stubPoller(poller);
 
         poller._poll();
+        await sleep(1);
 
-        tryDone(done, () => {
-          expect(poller.success).to.not.have.been.called;
-          expect(poller.failure).to.have.been.calledOnce.and.calledWith(
-            'No valid addresses found at host'
-          );
-          expect(poller.parentDomainMismatch)
-            .to.have.been.calledTwice.and.calledWith(records[0])
-            .and.calledWith(records[1]);
-        });
+        expect(poller.success).to.not.have.been.called;
+        expect(poller.failure).to.have.been.calledOnce.and.calledWith(
+          'No valid addresses found at host'
+        );
+        expect(poller.parentDomainMismatch)
+          .to.have.been.calledTwice.and.calledWith(records[0])
+          .and.calledWith(records[1]);
       });
 
-      it('should succeed when valid records are returned by dns', function (done) {
+      it('should succeed when valid records are returned by dns', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
 
@@ -204,15 +189,14 @@ describe('Mongos SRV Polling', function () {
         stubPoller(poller);
 
         poller._poll();
+        await sleep(1);
 
-        tryDone(done, () => {
-          expect(poller.success).to.have.been.calledOnce.and.calledWithMatch(records);
-          expect(poller.failure).to.not.have.been.called;
-          expect(poller.parentDomainMismatch).to.not.have.been.called;
-        });
+        expect(poller.success).to.have.been.calledOnce.and.calledWithMatch(records);
+        expect(poller.failure).to.not.have.been.called;
+        expect(poller.parentDomainMismatch).to.not.have.been.called;
       });
 
-      it('should succeed when some valid records are returned and some do not match parent domain', function (done) {
+      it('should succeed when some valid records are returned and some do not match parent domain', async () => {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.walls.com')];
 
@@ -220,20 +204,23 @@ describe('Mongos SRV Polling', function () {
         stubPoller(poller);
 
         poller._poll();
+        await sleep(1);
 
-        tryDone(done, () => {
-          expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
-          expect(poller.failure).to.not.have.been.called;
-          expect(poller.parentDomainMismatch).to.have.been.calledOnce.and.calledWith(records[1]);
-        });
+        expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
+        expect(poller.failure).to.not.have.been.called;
+        expect(poller.parentDomainMismatch).to.have.been.calledOnce.and.calledWith(records[1]);
       });
     });
   });
 
   describe('topology', function () {
     class FakeSrvPoller extends EventEmitter {
-      start() {}
-      stop() {}
+      start() {
+        // ignore
+      }
+      stop() {
+        // ignore
+      }
       trigger(srvRecords) {
         this.emit('srvRecordDiscovery', new SrvPollingEvent(srvRecords));
       }
