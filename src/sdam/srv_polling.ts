@@ -135,31 +135,31 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
 
   _poll(): void {
     const generation = this.generation;
-    dns.resolveSrv(this.srvAddress, (err, srvRecords) => {
-      if (generation !== this.generation) {
-        return;
-      }
-
-      if (err) {
-        this.failure('DNS error', err);
-        return;
-      }
-
-      const finalAddresses: dns.SrvRecord[] = [];
-      for (const record of srvRecords) {
-        if (matchesParentDomain(record.name, this.srvHost)) {
-          finalAddresses.push(record);
-        } else {
-          this.parentDomainMismatch(record);
+    dns.promises
+      .resolveSrv(this.srvAddress)
+      .then(srvRecords => {
+        if (generation !== this.generation) {
+          return;
         }
-      }
 
-      if (!finalAddresses.length) {
-        this.failure('No valid addresses found at host');
-        return;
-      }
+        const finalAddresses: dns.SrvRecord[] = [];
+        for (const record of srvRecords) {
+          if (matchesParentDomain(record.name, this.srvHost)) {
+            finalAddresses.push(record);
+          } else {
+            this.parentDomainMismatch(record);
+          }
+        }
 
-      this.success(finalAddresses);
-    });
+        if (!finalAddresses.length) {
+          this.failure('No valid addresses found at host');
+          return;
+        }
+
+        this.success(finalAddresses);
+      })
+      .catch(err => {
+        this.failure('DNS error', err);
+      });
   }
 }
