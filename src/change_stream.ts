@@ -938,10 +938,10 @@ export class ChangeStream<
     try {
       await topology.selectServerAsync(this.cursor.readPreference, {});
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-    } catch (selectionOrCreationError) {
+    } catch {
       // if the topology can't reconnect, close the stream
       await this.close();
-      throw selectionOrCreationError;
+      throw changeStreamError;
     }
   }
 }
