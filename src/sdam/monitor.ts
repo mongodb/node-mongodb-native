@@ -489,7 +489,7 @@ export class MonitorInterval {
 
   constructor(fn: (callback: Callback) => void, options: Partial<MonitorIntervalOptions> = {}) {
     this.fn = fn;
-    this.lastExecutionEnded = 0;
+    this.lastExecutionEnded = -Infinity;
 
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 1000;
     this.minHeartbeatFrequencyMS = options.minHeartbeatFrequencyMS ?? 500;
@@ -497,7 +497,6 @@ export class MonitorInterval {
     if (options.immediate) {
       this._executeAndReschedule();
     } else {
-      this.lastExecutionEnded = now();
       this._reschedule(undefined);
     }
   }
@@ -506,9 +505,8 @@ export class MonitorInterval {
     const currentTime = now();
     const timeSinceLastCall = currentTime - this.lastExecutionEnded;
 
-    if (!this.hasExecutedOnce) {
-      this._executeAndReschedule();
-      return;
+    if (timeSinceLastCall < 0) {
+      return this._executeAndReschedule();
     }
 
     if (this.isExecutionInProgress) {
@@ -538,7 +536,7 @@ export class MonitorInterval {
       this.timerId = undefined;
     }
 
-    this.lastExecutionEnded = 0;
+    this.lastExecutionEnded = -Infinity;
     this.isExpeditedCallToFnScheduled = false;
   }
 
@@ -576,7 +574,6 @@ export class MonitorInterval {
       clearTimeout(this.timerId);
     }
 
-    this.hasExecutedOnce = true;
     this.isExpeditedCallToFnScheduled = false;
     this.isExecutionInProgress = true;
 
