@@ -7,7 +7,10 @@ const util = require('util');
 const fs = require('fs');
 const path = require('path');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { node18BeforeHook, node18AfterHook } = require('./node18-dns-hooks');
+const {
+  node18DNSResolutionOrderAfterEachHook,
+  node18DNSResolutionOrderBeforeEachHook
+} = require('../../tools/runner/hooks/configuration');
 
 /* REFERENCE: (note commit hash) */
 /* https://github.com/mongodb/specifications/blob/b3beada72ae1c992294ae6a8eea572003a274c35/source/client-side-encryption/tests/README.rst#deadlock-tests */
@@ -93,8 +96,8 @@ function deadlockTests(_metadata) {
   const metadata = { ..._metadata, requires: { ..._metadata.requires, auth: 'disabled' } };
   metadata.skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
   describe('Connection Pool Deadlock Prevention', function () {
-    beforeEach(node18BeforeHook);
-    afterEach(node18AfterHook);
+    beforeEach(node18DNSResolutionOrderBeforeEachHook);
+    afterEach(node18DNSResolutionOrderAfterEachHook);
 
     beforeEach(function () {
       try {

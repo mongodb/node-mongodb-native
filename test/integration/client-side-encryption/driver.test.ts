@@ -4,9 +4,12 @@ import * as crypto from 'crypto';
 
 import { Collection, CommandStartedEvent, MongoClient } from '../../../src';
 import * as BSON from '../../../src/bson';
+import {
+  node18DNSResolutionOrderAfterEachHook,
+  node18DNSResolutionOrderBeforeEachHook
+} from '../../tools/runner/hooks/configuration';
 import { ClientEncryption } from '../../tools/unified-spec-runner/schema';
 import { getEncryptExtraOptions } from '../../tools/utils';
-import { node18AfterHook, node18BeforeHook } from './node18-dns-hooks';
 
 const metadata = {
   requires: {
@@ -22,8 +25,8 @@ describe('Client Side Encryption Functional', function () {
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
 
-  beforeEach(node18BeforeHook);
-  afterEach(node18AfterHook);
+  beforeEach(node18DNSResolutionOrderBeforeEachHook);
+  afterEach(node18DNSResolutionOrderAfterEachHook);
 
   it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
     const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;

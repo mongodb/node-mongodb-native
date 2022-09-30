@@ -11,7 +11,10 @@ const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { MongoNetworkError, MongoServerError } = require('../../../src/error');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { node18BeforeHook, node18AfterHook } = require('./node18-dns-hooks');
+const {
+  node18DNSResolutionOrderBeforeEachHook,
+  node18DNSResolutionOrderAfterEachHook
+} = require('../../tools/runner/hooks/configuration');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -70,8 +73,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'base64'
   );
 
-  beforeEach(node18BeforeHook);
-  afterEach(node18AfterHook);
+  beforeEach(node18DNSResolutionOrderBeforeEachHook);
+  afterEach(node18DNSResolutionOrderAfterEachHook);
 
   describe('Data key and double encryption', function () {
     // Data key and double encryption

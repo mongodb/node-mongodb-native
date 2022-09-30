@@ -1,4 +1,4 @@
-'use strict';
+('use strict');
 
 require('source-map-support').install({
   hookRequire: true
@@ -11,6 +11,7 @@ const { TestConfiguration } = require('../config');
 const { getEnvironmentalOptions } = require('../../utils');
 const mock = require('../../mongodb-mock/index');
 const { inspect } = require('util');
+const { setDefaultResultOrder } = require('dns');
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -166,11 +167,25 @@ const beforeAllPluginImports = () => {
   require('mocha-sinon');
 };
 
+function node18DNSResolutionOrderBeforeEachHook() {
+  if (process.version.startsWith('v18')) {
+    setDefaultResultOrder('ipv4first');
+  }
+}
+
+function node18DNSResolutionOrderAfterEachHook() {
+  if (process.version.startsWith('v18')) {
+    setDefaultResultOrder('verbatim');
+  }
+}
+
 module.exports = {
   mochaHooks: {
     beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
     beforeEach: [testSkipBeforeEachHook],
     afterAll: [cleanUpMocksAfterHook]
   },
-  skipBrokenAuthTestBeforeEachHook
+  skipBrokenAuthTestBeforeEachHook,
+  node18DNSResolutionOrderBeforeEachHook,
+  node18DNSResolutionOrderAfterEachHook
 };

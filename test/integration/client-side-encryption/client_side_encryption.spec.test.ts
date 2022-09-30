@@ -1,14 +1,16 @@
-import { setDefaultResultOrder } from 'dns';
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
+import {
+  node18DNSResolutionOrderAfterEachHook,
+  node18DNSResolutionOrderBeforeEachHook
+} from '../../tools/runner/hooks/configuration';
 import {
   gatherTestSuites,
   generateTopologyTests,
   TestRunnerContext
 } from '../../tools/spec-runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
-import { node18AfterHook, node18BeforeHook } from './node18-dns-hooks';
 
 const isAuthEnabled = process.env.AUTH === 'auth';
 
@@ -72,8 +74,8 @@ describe('Client Side Encryption (Legacy)', function () {
     testContext
   );
 
-  beforeEach(node18BeforeHook);
-  afterEach(node18AfterHook);
+  beforeEach(node18DNSResolutionOrderBeforeEachHook);
+  afterEach(node18DNSResolutionOrderAfterEachHook);
 
   after(() => testContext.teardown());
   before(function () {
@@ -86,16 +88,7 @@ describe('Client Side Encryption (Legacy)', function () {
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  before(function () {
-    if (process.version.includes('18')) {
-      setDefaultResultOrder('ipv4first');
-    }
-  });
-
-  after(function () {
-    if (process.version.includes('18')) {
-      setDefaultResultOrder('verbatim');
-    }
-  });
+  beforeEach(node18DNSResolutionOrderBeforeEachHook);
+  afterEach(node18DNSResolutionOrderAfterEachHook);
   runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')));
 });
