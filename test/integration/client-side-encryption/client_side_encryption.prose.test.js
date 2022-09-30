@@ -11,7 +11,6 @@ const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { MongoNetworkError, MongoServerError } = require('../../../src/error');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { setDefaultResultOrder } = require('dns');
 const { node18BeforeHook, node18AfterHook } = require('./node18-dns-hooks');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {

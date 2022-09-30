@@ -7,7 +7,6 @@ const util = require('util');
 const fs = require('fs');
 const path = require('path');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { setDefaultResultOrder } = require('dns');
 const { node18BeforeHook, node18AfterHook } = require('./node18-dns-hooks');
 
 /* REFERENCE: (note commit hash) */
