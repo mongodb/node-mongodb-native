@@ -505,6 +505,7 @@ export class MonitorInterval {
     const currentTime = now();
     const timeSinceLastCall = currentTime - this.lastExecutionEnded;
 
+    // TODO(NODE-4674): Add error handling and logging to the monitor
     if (timeSinceLastCall < 0) {
       return this._executeAndReschedule();
     }
