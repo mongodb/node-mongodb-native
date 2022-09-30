@@ -8,6 +8,7 @@ import {
   TestRunnerContext
 } from '../../tools/spec-runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
+import { node18AfterHook, node18BeforeHook } from './node18-dns-hooks';
 
 const isAuthEnabled = process.env.AUTH === 'auth';
 
@@ -71,17 +72,8 @@ describe('Client Side Encryption (Legacy)', function () {
     testContext
   );
 
-  before(function () {
-    if (process.version.includes('18')) {
-      setDefaultResultOrder('ipv4first');
-    }
-  });
-
-  after(function () {
-    if (process.version.includes('18')) {
-      setDefaultResultOrder('verbatim');
-    }
-  });
+  beforeEach(node18BeforeHook);
+  afterEach(node18AfterHook);
 
   after(() => testContext.teardown());
   before(function () {

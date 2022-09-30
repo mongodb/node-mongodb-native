@@ -6,6 +6,7 @@ import { Collection, CommandStartedEvent, MongoClient } from '../../../src';
 import * as BSON from '../../../src/bson';
 import { ClientEncryption } from '../../tools/unified-spec-runner/schema';
 import { getEncryptExtraOptions } from '../../tools/utils';
+import { node18AfterHook, node18BeforeHook } from './node18-dns-hooks';
 
 const metadata = {
   requires: {
@@ -20,6 +21,9 @@ describe('Client Side Encryption Functional', function () {
   const keyVaultDbName = 'keyvault';
   const keyVaultCollName = 'datakeys';
   const keyVaultNamespace = `${keyVaultDbName}.${keyVaultCollName}`;
+
+  beforeEach(node18BeforeHook);
+  afterEach(node18AfterHook);
 
   it('CSFLE_KMS_PROVIDERS should be valid EJSON', function () {
     const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;

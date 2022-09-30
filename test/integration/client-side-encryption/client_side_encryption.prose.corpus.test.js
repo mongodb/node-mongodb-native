@@ -8,7 +8,7 @@ const BSON = require('bson');
 const { EJSON } = require('bson');
 const { expect } = require('chai');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { setDefaultResultOrder } = require('dns');
+const { node18BeforeHook, node18AfterHook } = require('./node18-dns-hooks');
 
 describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {
@@ -148,17 +148,8 @@ describe('Client Side Encryption Prose Corpus Test', function () {
     }
   }
 
-  before(function () {
-    if (process.version.includes('18')) {
-      setDefaultResultOrder('ipv4first');
-    }
-  });
-
-  after(function () {
-    if (process.version.includes('18')) {
-      setDefaultResultOrder('verbatim');
-    }
-  });
+  beforeEach(node18BeforeHook);
+  afterEach(node18AfterHook);
 
   before(function () {
     // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
