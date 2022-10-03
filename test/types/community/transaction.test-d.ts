@@ -48,6 +48,7 @@ async function runTransactionWithRetry(
 
 async function updateEmployeeInfo(client: MongoClient, session: ClientSession) {
   session.startTransaction({
+    readPreference: 'primary',
     readConcern: new ReadConcern('available'), // NODE-3297
     writeConcern: { w: 'majority' }
   });
