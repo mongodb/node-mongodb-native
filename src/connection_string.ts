@@ -30,7 +30,6 @@ import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
 import {
   AnyOptions,
-  Callback,
   DEFAULT_PK_FACTORY,
   emitWarning,
   emitWarningOnce,
@@ -70,97 +69,89 @@ function matchesParentDomain(srvAddress: string, parentDomain: string): boolean 
  * @param uri - The connection string to parse
  * @param options - Optional user provided connection string options
  */
-export function resolveSRVRecord(options: MongoOptions, callback: Callback<HostAddress[]>): void {
+export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddress[]> {
   if (typeof options.srvHost !== 'string') {
-    return callback(new MongoAPIError('Option "srvHost" must not be empty'));
+    throw new MongoAPIError('Option "srvHost" must not be empty');
   }
 
   if (options.srvHost.split('.').length < 3) {
     // TODO(NODE-3484): Replace with MongoConnectionStringError
-    return callback(new MongoAPIError('URI must include hostname, domain name, and tld'));
+    throw new MongoAPIError('URI must include hostname, domain name, and tld');
   }
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
   const lookupAddress = options.srvHost;
-  dns.resolveSrv(`_${options.srvServiceName}._tcp.${lookupAddress}`, (err, addresses) => {
-    if (err) return callback(err);
+  const addresses = await dns.promises.resolveSrv(
+    `_${options.srvServiceName}._tcp.${lookupAddress}`
+  );
 
-    if (addresses.length === 0) {
-      return callback(new MongoAPIError('No addresses found at host'));
+  if (addresses.length === 0) {
+    throw new MongoAPIError('No addresses found at host');
+  }
+
+  for (const { name } of addresses) {
+    if (!matchesParentDomain(name, lookupAddress)) {
+      throw new MongoAPIError('Server record does not share hostname with parent URI');
     }
+  }
 
-    for (const { name } of addresses) {
-      if (!matchesParentDomain(name, lookupAddress)) {
-        return callback(new MongoAPIError('Server record does not share hostname with parent URI'));
-      }
+  const hostAddresses = addresses.map(r => HostAddress.fromString(`${r.name}:${r.port ?? 27017}`));
+
+  validateLoadBalancedOptions(hostAddresses, options, true);
+
+  // Resolve TXT record and add options from there if they exist.
+  let record;
+  try {
+    record = await dns.promises.resolveTxt(lookupAddress);
+  } catch (error) {
+    if (error.code !== 'ENODATA' && error.code !== 'ENOTFOUND') {
+      throw error;
     }
+    return hostAddresses;
+  }
 
-    const hostAddresses = addresses.map(r =>
-      HostAddress.fromString(`${r.name}:${r.port ?? 27017}`)
-    );
+  if (record.length > 1) {
+    throw new MongoParseError('Multiple text records not allowed');
+  }
 
-    const lbError = validateLoadBalancedOptions(hostAddresses, options, true);
-    if (lbError) {
-      return callback(lbError);
-    }
+  const txtRecordOptions = new URLSearchParams(record[0].join(''));
+  const txtRecordOptionKeys = [...txtRecordOptions.keys()];
+  if (txtRecordOptionKeys.some(key => !VALID_TXT_RECORDS.includes(key))) {
+    throw new MongoParseError(`Text record may only set any of: ${VALID_TXT_RECORDS.join(', ')}`);
+  }
 
-    // Resolve TXT record and add options from there if they exist.
-    dns.resolveTxt(lookupAddress, (err, record) => {
-      if (err) {
-        if (err.code !== 'ENODATA' && err.code !== 'ENOTFOUND') {
-          return callback(err);
-        }
-      } else {
-        if (record.length > 1) {
-          return callback(new MongoParseError('Multiple text records not allowed'));
-        }
+  if (VALID_TXT_RECORDS.some(option => txtRecordOptions.get(option) === '')) {
+    throw new MongoParseError('Cannot have empty URI params in DNS TXT Record');
+  }
 
-        const txtRecordOptions = new URLSearchParams(record[0].join(''));
-        const txtRecordOptionKeys = [...txtRecordOptions.keys()];
-        if (txtRecordOptionKeys.some(key => !VALID_TXT_RECORDS.includes(key))) {
-          return callback(
-            new MongoParseError(`Text record may only set any of: ${VALID_TXT_RECORDS.join(', ')}`)
-          );
-        }
+  const source = txtRecordOptions.get('authSource') ?? undefined;
+  const replicaSet = txtRecordOptions.get('replicaSet') ?? undefined;
+  const loadBalanced = txtRecordOptions.get('loadBalanced') ?? undefined;
 
-        if (VALID_TXT_RECORDS.some(option => txtRecordOptions.get(option) === '')) {
-          return callback(new MongoParseError('Cannot have empty URI params in DNS TXT Record'));
-        }
+  if (
+    !options.userSpecifiedAuthSource &&
+    source &&
+    options.credentials &&
+    !AUTH_MECHS_AUTH_SRC_EXTERNAL.has(options.credentials.mechanism)
+  ) {
+    options.credentials = MongoCredentials.merge(options.credentials, { source });
+  }
 
-        const source = txtRecordOptions.get('authSource') ?? undefined;
-        const replicaSet = txtRecordOptions.get('replicaSet') ?? undefined;
-        const loadBalanced = txtRecordOptions.get('loadBalanced') ?? undefined;
+  if (!options.userSpecifiedReplicaSet && replicaSet) {
+    options.replicaSet = replicaSet;
+  }
 
-        if (
-          !options.userSpecifiedAuthSource &&
-          source &&
-          options.credentials &&
-          !AUTH_MECHS_AUTH_SRC_EXTERNAL.has(options.credentials.mechanism)
-        ) {
-          options.credentials = MongoCredentials.merge(options.credentials, { source });
-        }
+  if (loadBalanced === 'true') {
+    options.loadBalanced = true;
+  }
 
-        if (!options.userSpecifiedReplicaSet && replicaSet) {
-          options.replicaSet = replicaSet;
-        }
+  if (options.replicaSet && options.srvMaxHosts > 0) {
+    throw new MongoParseError('Cannot combine replicaSet option with srvMaxHosts');
+  }
 
-        if (loadBalanced === 'true') {
-          options.loadBalanced = true;
-        }
+  validateLoadBalancedOptions(hostAddresses, options, true);
 
-        if (options.replicaSet && options.srvMaxHosts > 0) {
-          return callback(new MongoParseError('Cannot combine replicaSet option with srvMaxHosts'));
-        }
-
-        const lbError = validateLoadBalancedOptions(hostAddresses, options, true);
-        if (lbError) {
-          return callback(lbError);
-        }
-      }
-
-      callback(undefined, hostAddresses);
-    });
-  });
+  return hostAddresses;
 }
 
 /**
@@ -442,10 +433,8 @@ export function parseOptions(
     PromiseProvider.set(options.promiseLibrary);
   }
 
-  const lbError = validateLoadBalancedOptions(hosts, mongoOptions, isSRV);
-  if (lbError) {
-    throw lbError;
-  }
+  validateLoadBalancedOptions(hosts, mongoOptions, isSRV);
+
   if (mongoClient && mongoOptions.autoEncryption) {
     Encrypter.checkForMongoCrypt();
     mongoOptions.encrypter = new Encrypter(mongoClient, uri, options);
@@ -522,24 +511,33 @@ export function parseOptions(
   return mongoOptions;
 }
 
+/**
+ * #### Throws if LB mode is true:
+ * - hosts contains more than one host
+ * - there is a replicaSet name set
+ * - directConnection is set
+ * - if srvMaxHosts is used when an srv connection string is passed in
+ *
+ * @throws MongoParseError
+ */
 function validateLoadBalancedOptions(
   hosts: HostAddress[] | string[],
   mongoOptions: MongoOptions,
   isSrv: boolean
-): MongoParseError | undefined {
+): void {
   if (mongoOptions.loadBalanced) {
     if (hosts.length > 1) {
-      return new MongoParseError(LB_SINGLE_HOST_ERROR);
+      throw new MongoParseError(LB_SINGLE_HOST_ERROR);
     }
     if (mongoOptions.replicaSet) {
-      return new MongoParseError(LB_REPLICA_SET_ERROR);
+      throw new MongoParseError(LB_REPLICA_SET_ERROR);
     }
     if (mongoOptions.directConnection) {
-      return new MongoParseError(LB_DIRECT_CONNECTION_ERROR);
+      throw new MongoParseError(LB_DIRECT_CONNECTION_ERROR);
     }
 
     if (isSrv && mongoOptions.srvMaxHosts > 0) {
-      return new MongoParseError('Cannot limit srv hosts with loadBalanced enabled');
+      throw new MongoParseError('Cannot limit srv hosts with loadBalanced enabled');
     }
   }
   return;

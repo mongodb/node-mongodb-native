@@ -3,15 +3,19 @@
 const { Double } = require('bson');
 const stream = require('stream');
 const fs = require('fs');
-const { setupDatabase } = require('./../shared');
 const { expect } = require('chai');
 const { GridFSBucket, ObjectId } = require('../../../src');
 const sinon = require('sinon');
 const { sleep } = require('../../tools/utils');
 
 describe('GridFS Stream', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
+  let client;
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
   });
 
   /**
@@ -357,32 +361,28 @@ describe('GridFS Stream', function () {
     metadata: { requires: { topology: ['single'] } },
 
     test(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        const db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, {
-          bucketName: 'gridfsdownload',
-          chunkSizeBytes: 6000
-        });
-
-        const readStream = fs.createReadStream('./LICENSE.md');
-        const uploadStream = bucket.openUploadStream('teststart.dat');
-        uploadStream.once('finish', function () {
-          const downloadStream = bucket.openDownloadStreamByName('teststart.dat');
-
-          const events = [];
-          downloadStream.on('data', () => events.push('data'));
-          downloadStream.on('close', () => events.push('close'));
-          downloadStream.on('end', () => {
-            expect(events).to.eql(['data', 'data', 'close']);
-            client.close(done);
-          });
-        });
-
-        readStream.pipe(uploadStream);
+      const db = client.db();
+      const bucket = new GridFSBucket(db, {
+        bucketName: 'gridfsdownload',
+        chunkSizeBytes: 6000
       });
+
+      const readStream = fs.createReadStream('./LICENSE.md');
+      const uploadStream = bucket.openUploadStream('teststart.dat');
+      uploadStream.once('finish', function () {
+        const downloadStream = bucket.openDownloadStreamByName('teststart.dat');
+
+        const events = [];
+        downloadStream.on('data', () => events.push('data'));
+        downloadStream.on('close', () => events.push('close'));
+        downloadStream.on('end', () => {
+          expect(events).to.deep.equal(['data', 'data', 'close']);
+          expect(downloadStream).to.exist;
+          client.close(done);
+        });
+      });
+
+      readStream.pipe(uploadStream);
     }
   });
 

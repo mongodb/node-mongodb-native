@@ -199,14 +199,12 @@ export function applyWriteConcern<T extends HasWriteConcern>(
 /**
  * Checks if a given value is a Promise
  *
- * @typeParam T - The result type of maybePromise
- * @param maybePromise - An object that could be a promise
+ * @typeParam T - The resolution type of the possible promise
+ * @param value - An object that could be a promise
  * @returns true if the provided value is a Promise
  */
-export function isPromiseLike<T = any>(
-  maybePromise?: PromiseLike<T> | void
-): maybePromise is Promise<T> {
-  return !!maybePromise && typeof maybePromise.then === 'function';
+export function isPromiseLike<T = any>(value?: PromiseLike<T> | void): value is Promise<T> {
+  return !!value && typeof value.then === 'function';
 }
 
 /**
@@ -467,50 +465,6 @@ export function maybeCallback<T>(
   return;
 }
 
-/**
- * Helper function for either accepting a callback, or returning a promise
- * @internal
- *
- * @param callback - The last function argument in exposed method, controls if a Promise is returned
- * @param wrapper - A function that wraps the callback
- * @returns Returns void if a callback is supplied, else returns a Promise.
- */
-export function maybePromise<T>(
-  callback: Callback<T> | undefined,
-  wrapper: (fn: Callback<T>) => void
-): Promise<T> | void {
-  const PromiseConstructor = PromiseProvider.get() ?? Promise;
-  let result: Promise<T> | void;
-  if (typeof callback !== 'function') {
-    result = new PromiseConstructor<any>((resolve, reject) => {
-      callback = (err, res) => {
-        if (err) return reject(err);
-        resolve(res);
-      };
-    });
-  }
-
-  wrapper((err, res) => {
-    if (err != null) {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        callback!(err);
-      } catch (error) {
-        process.nextTick(() => {
-          throw error;
-        });
-      }
-
-      return;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    callback!(err, res);
-  });
-
-  return result;
-}
-
 /** @internal */
 export function databaseNamespace(ns: string): string {
   return ns.split('.')[0];
@@ -537,7 +491,7 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
       // Since we do not have a monitor, we assume the load balanced server is always
       // pointed at the latest mongodb version. There is a risk that for on-prem
       // deployments that don't upgrade immediately that this could alert to the
-      // application that a feature is avaiable that is actually not.
+      // application that a feature is available that is actually not.
       return MAX_SUPPORTED_WIRE_VERSION;
     }
     if (topologyOrServer.hello) {

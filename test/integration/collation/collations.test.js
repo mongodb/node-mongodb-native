@@ -28,7 +28,7 @@ describe('Collation', function () {
     await client.close();
   });
 
-  it('Should correctly create index with collation', async function () {
+  it('should correctly create index with collation', async function () {
     const configuration = this.configuration;
     const client = configuration.newClient();
 

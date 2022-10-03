@@ -2,7 +2,6 @@
 const os = require('os');
 const fs = require('fs');
 const { expect } = require('chai');
-const { promisify } = require('util');
 const { getSymbolFrom } = require('../tools/utils');
 const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
 const { ReadConcern } = require('../../src/read_concern');
@@ -773,28 +772,21 @@ describe('MongoOptions', function () {
   });
 
   it('srvServiceName should error if it is too long', async () => {
-    let thrownError;
-    let options;
-    try {
-      options = parseOptions('mongodb+srv://localhost.a.com', { srvServiceName: 'a'.repeat(255) });
-      await promisify(resolveSRVRecord)(options);
-    } catch (error) {
-      thrownError = error;
-    }
-    expect(thrownError).to.have.property('code', 'EBADNAME');
+    const options = parseOptions('mongodb+srv://localhost.a.com', {
+      srvServiceName: 'a'.repeat(255)
+    });
+    const error = await resolveSRVRecord(options).catch(error => error);
+    expect(error).to.have.property('code', 'EBADNAME');
   });
 
   it('srvServiceName should not error if it is greater than 15 characters as long as the DNS query limit is not surpassed', async () => {
-    let thrownError;
-    let options;
-    try {
-      options = parseOptions('mongodb+srv://localhost.a.com', { srvServiceName: 'a'.repeat(16) });
-      await promisify(resolveSRVRecord)(options);
-    } catch (error) {
-      thrownError = error;
-    }
+    const options = parseOptions('mongodb+srv://localhost.a.com', {
+      srvServiceName: 'a'.repeat(16)
+    });
+    const error = await resolveSRVRecord(options).catch(error => error);
+
     // Nothing wrong with the name, just DNE
-    expect(thrownError).to.have.property('code', 'ENOTFOUND');
+    expect(error).to.have.property('code', 'ENOTFOUND');
   });
 
   describe('dbName and authSource', () => {

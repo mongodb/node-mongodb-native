@@ -1,5 +1,4 @@
 import type { Readable } from 'stream';
-import { promisify } from 'util';
 
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
@@ -239,7 +238,7 @@ export interface ChangeStreamInsertDocument<TSchema extends Document = Document>
   operationType: 'insert';
   /** This key will contain the document being inserted */
   fullDocument: TSchema;
-  /** Namespace the insert event occured on */
+  /** Namespace the insert event occurred on */
   ns: ChangeStreamNameSpace;
 }
 
@@ -262,7 +261,7 @@ export interface ChangeStreamUpdateDocument<TSchema extends Document = Document>
   fullDocument?: TSchema;
   /** Contains a description of updated and removed fields in this operation */
   updateDescription: UpdateDescription<TSchema>;
-  /** Namespace the update event occured on */
+  /** Namespace the update event occurred on */
   ns: ChangeStreamNameSpace;
   /**
    * Contains the pre-image of the modified or deleted document if the
@@ -285,7 +284,7 @@ export interface ChangeStreamReplaceDocument<TSchema extends Document = Document
   operationType: 'replace';
   /** The fullDocument of a replace event represents the document after the insert of the replacement document */
   fullDocument: TSchema;
-  /** Namespace the replace event occured on */
+  /** Namespace the replace event occurred on */
   ns: ChangeStreamNameSpace;
   /**
    * Contains the pre-image of the modified or deleted document if the
@@ -307,7 +306,7 @@ export interface ChangeStreamDeleteDocument<TSchema extends Document = Document>
     ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'delete';
-  /** Namespace the delete event occured on */
+  /** Namespace the delete event occurred on */
   ns: ChangeStreamNameSpace;
   /**
    * Contains the pre-image of the modified or deleted document if the
@@ -328,7 +327,7 @@ export interface ChangeStreamDropDocument
     ChangeStreamDocumentCollectionUUID {
   /** Describes the type of operation represented in this change notification */
   operationType: 'drop';
-  /** Namespace the drop event occured on */
+  /** Namespace the drop event occurred on */
   ns: ChangeStreamNameSpace;
 }
 
@@ -343,7 +342,7 @@ export interface ChangeStreamRenameDocument
   operationType: 'rename';
   /** The new name for the `ns.coll` collection */
   to: { db: string; coll: string };
-  /** The "from" namespace that the rename occured on */
+  /** The "from" namespace that the rename occurred on */
   ns: ChangeStreamNameSpace;
 }
 
@@ -918,36 +917,31 @@ export class ChangeStream<
     }
   }
 
-  /**
-   * @internal
-   *
-   * TODO(NODE-4320): promisify selectServer and refactor this code to be async
-   *
-   * we promisify _processErrorIteratorModeCallback until we have a promisifed version of selectServer.
-   */
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  private _processErrorIteratorMode = promisify(this._processErrorIteratorModeCallback);
-
   /** @internal */
-  private _processErrorIteratorModeCallback(changeStreamError: AnyError, callback: Callback) {
+  private async _processErrorIteratorMode(changeStreamError: AnyError) {
     if (this[kClosed]) {
       // TODO(NODE-3485): Replace with MongoChangeStreamClosedError
-      return callback(new MongoAPIError(CHANGESTREAM_CLOSED_ERROR));
+      throw new MongoAPIError(CHANGESTREAM_CLOSED_ERROR);
     }
 
-    if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
-      this.cursor.close().catch(() => null);
+    if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
+      try {
+        await this.close();
+      } catch {
+        // ignore errors from close
+      }
+      throw changeStreamError;
+    }
 
-      const topology = getTopology(this.parent);
-      topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
-        // if the topology can't reconnect, close the stream
-        if (serverSelectionError) return this.close(() => callback(changeStreamError));
-
-        this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-        callback();
-      });
-    } else {
-      this.close(() => callback(changeStreamError));
+    await this.cursor.close().catch(() => null);
+    const topology = getTopology(this.parent);
+    try {
+      await topology.selectServerAsync(this.cursor.readPreference, {});
+      this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
+    } catch {
+      // if the topology can't reconnect, close the stream
+      await this.close();
+      throw changeStreamError;
     }
   }
 }

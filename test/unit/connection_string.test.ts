@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
-import { promisify } from 'util';
 
 import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
@@ -419,8 +418,6 @@ describe('Connection String', function () {
   });
 
   describe('resolveSRVRecord()', () => {
-    const resolveSRVRecordAsync = promisify(resolveSRVRecord);
-
     afterEach(() => {
       sinon.restore();
     });
@@ -439,12 +436,12 @@ describe('Connection String', function () {
 
       // first call is for stubbing resolveSrv
       // second call is for stubbing resolveTxt
-      sinon.stub(dns, 'resolveSrv').callsFake((address, callback) => {
-        return process.nextTick(callback, null, mockAddress);
+      sinon.stub(dns.promises, 'resolveSrv').callsFake(async () => {
+        return mockAddress;
       });
 
-      sinon.stub(dns, 'resolveTxt').callsFake((address, whatWeTest) => {
-        whatWeTest(null, mockRecord);
+      sinon.stub(dns.promises, 'resolveTxt').callsFake(async () => {
+        return mockRecord;
       });
     }
 
@@ -467,7 +464,7 @@ describe('Connection String', function () {
           userSpecifiedAuthSource: false
         } as MongoOptions;
 
-        await resolveSRVRecordAsync(options);
+        await resolveSRVRecord(options);
         // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
         expect(options).property('credentials').to.equal(credentials);
         expect(options).to.have.nested.property('credentials.source', '$external');
@@ -493,7 +490,7 @@ describe('Connection String', function () {
         userSpecifiedAuthSource: false
       } as MongoOptions;
 
-      await resolveSRVRecordAsync(options);
+      await resolveSRVRecord(options);
       // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
       expect(options).property('credentials').to.not.equal(credentials);
       expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');
@@ -517,7 +514,7 @@ describe('Connection String', function () {
         userSpecifiedAuthSource: false
       } as MongoOptions;
 
-      await resolveSRVRecordAsync(options as any);
+      await resolveSRVRecord(options as any);
       // check MongoCredentials instance (i.e. whether or not merge on options.credentials was called)
       expect(options).property('credentials').to.equal(credentials);
       expect(options).to.have.nested.property('credentials.source', 'admin');
@@ -533,7 +530,7 @@ describe('Connection String', function () {
         userSpecifiedAuthSource: false
       } as MongoOptions;
 
-      await resolveSRVRecordAsync(options as any);
+      await resolveSRVRecord(options as any);
       expect(options).to.have.nested.property('credentials.username', '');
       expect(options).to.have.nested.property('credentials.mechanism', 'DEFAULT');
       expect(options).to.have.nested.property('credentials.source', 'thisShouldBeAuthSource');

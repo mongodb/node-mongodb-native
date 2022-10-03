@@ -41,7 +41,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
         options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
 
       if (!encryptedFields && encryptedFieldsMap) {
-        // If the MongoClient was configued with an encryptedFieldsMap,
+        // If the MongoClient was configured with an encryptedFieldsMap,
         // and no encryptedFields config was available in it or explicitly
         // passed as an argument, the spec tells us to look one up using
         // listCollections().

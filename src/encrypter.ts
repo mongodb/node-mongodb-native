@@ -101,15 +101,13 @@ export class Encrypter {
     return internalClient;
   }
 
-  connectInternalClient(callback: Callback): void {
+  async connectInternalClient(): Promise<void> {
     // TODO(NODE-4144): Remove new variable for type narrowing
     const internalClient = this[kInternalClient];
     if (this.needsConnecting && internalClient != null) {
       this.needsConnecting = false;
-      return internalClient.connect(callback);
+      await internalClient.connect();
     }
-
-    return callback();
   }
 
   close(client: MongoClient, force: boolean, callback: Callback): void {

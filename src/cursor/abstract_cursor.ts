@@ -1,4 +1,5 @@
 import { Readable, Transform } from 'stream';
+import { promisify } from 'util';
 
 import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
 import {
@@ -15,11 +16,12 @@ import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
+import { PromiseProvider } from '../promise_provider';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { Callback, maybePromise, MongoDBNamespace, ns } from '../utils';
+import { Callback, maybeCallback, MongoDBNamespace, ns } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
@@ -284,11 +286,34 @@ export abstract class AbstractCursor<
   }
 
   [Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
+    async function* nativeAsyncIterator(this: AbstractCursor<TSchema>) {
+      if (this.closed) {
+        return;
+      }
+
+      while (true) {
+        const document = await this.next();
+
+        if (document == null) {
+          break;
+        }
+
+        yield document;
+
+        if (this[kId] === Long.ZERO) {
+          // Cursor exhausted
+          break;
+        }
+      }
+    }
+
+    const iterator = nativeAsyncIterator.call(this);
+
+    if (PromiseProvider.get() == null) {
+      return iterator;
+    }
     return {
-      next: () =>
-        this.next().then(value =>
-          value != null ? { value, done: false } : { value: undefined, done: true }
-        )
+      next: () => maybeCallback(() => iterator.next(), null)
     };
   }
 
@@ -320,27 +345,24 @@ export abstract class AbstractCursor<
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   hasNext(callback: Callback<boolean>): void;
   hasNext(callback?: Callback<boolean>): Promise<boolean> | void {
-    return maybePromise(callback, done => {
+    return maybeCallback(async () => {
       if (this[kId] === Long.ZERO) {
-        return done(undefined, false);
+        return false;
       }
 
       if (this[kDocuments].length) {
-        return done(undefined, true);
+        return true;
       }
 
-      next<TSchema>(this, true, (err, doc) => {
-        if (err) return done(err);
+      const doc = await nextAsync<TSchema>(this, true);
 
-        if (doc) {
-          this[kDocuments].unshift(doc);
-          done(undefined, true);
-          return;
-        }
+      if (doc) {
+        this[kDocuments].unshift(doc);
+        return true;
+      }
 
-        done(undefined, false);
-      });
-    });
+      return false;
+    }, callback);
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
@@ -350,13 +372,13 @@ export abstract class AbstractCursor<
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void;
   next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
-    return maybePromise(callback, done => {
+    return maybeCallback(async () => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoCursorExhaustedError());
+        throw new MongoCursorExhaustedError();
       }
 
-      next(this, true, done);
-    });
+      return nextAsync(this, true);
+    }, callback);
   }
 
   /**
@@ -366,13 +388,13 @@ export abstract class AbstractCursor<
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   tryNext(callback: Callback<TSchema | null>): void;
   tryNext(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
-    return maybePromise(callback, done => {
+    return maybeCallback(async () => {
       if (this[kId] === Long.ZERO) {
-        return done(new MongoCursorExhaustedError());
+        throw new MongoCursorExhaustedError();
       }
 
-      next(this, false, done);
-    });
+      return nextAsync(this, false);
+    }, callback);
   }
 
   /**
@@ -391,40 +413,14 @@ export abstract class AbstractCursor<
     if (typeof iterator !== 'function') {
       throw new MongoInvalidArgumentError('Argument "iterator" must be a function');
     }
-    return maybePromise(callback, done => {
-      const transform = this[kTransform];
-      const fetchDocs = () => {
-        next<TSchema>(this, true, (err, doc) => {
-          if (err || doc == null) return done(err);
-          let result;
-          // NOTE: no need to transform because `next` will do this automatically
-          try {
-            result = iterator(doc); // TODO(NODE-3283): Improve transform typing
-          } catch (error) {
-            return done(error);
-          }
-
-          if (result === false) return done();
-
-          // these do need to be transformed since they are copying the rest of the batch
-          const internalDocs = this[kDocuments].splice(0, this[kDocuments].length);
-          for (let i = 0; i < internalDocs.length; ++i) {
-            try {
-              result = iterator(
-                (transform ? transform(internalDocs[i]) : internalDocs[i]) as TSchema // TODO(NODE-3283): Improve transform typing
-              );
-            } catch (error) {
-              return done(error);
-            }
-            if (result === false) return done();
-          }
-
-          fetchDocs();
-        });
-      };
-
-      fetchDocs();
-    });
+    return maybeCallback(async () => {
+      for await (const document of this) {
+        const result = iterator(document);
+        if (result === false) {
+          break;
+        }
+      }
+    }, callback);
   }
 
   close(): Promise<void>;
@@ -445,7 +441,7 @@ export abstract class AbstractCursor<
     const needsToEmitClosed = !this[kClosed];
     this[kClosed] = true;
 
-    return maybePromise(callback, done => cleanupCursor(this, { needsToEmitClosed }, done));
+    return maybeCallback(async () => cleanupCursorAsync(this, { needsToEmitClosed }), callback);
   }
 
   /**
@@ -460,35 +456,13 @@ export abstract class AbstractCursor<
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   toArray(callback: Callback<TSchema[]>): void;
   toArray(callback?: Callback<TSchema[]>): Promise<TSchema[]> | void {
-    return maybePromise(callback, done => {
-      const docs: TSchema[] = [];
-      const transform = this[kTransform];
-      const fetchDocs = () => {
-        // NOTE: if we add a `nextBatch` then we should use it here
-        next<TSchema>(this, true, (err, doc) => {
-          if (err) return done(err);
-          if (doc == null) return done(undefined, docs);
-
-          // NOTE: no need to transform because `next` will do this automatically
-          docs.push(doc);
-
-          // these do need to be transformed since they are copying the rest of the batch
-          const internalDocs = (
-            transform
-              ? this[kDocuments].splice(0, this[kDocuments].length).map(transform)
-              : this[kDocuments].splice(0, this[kDocuments].length)
-          ) as TSchema[]; // TODO(NODE-3283): Improve transform typing
-
-          if (internalDocs) {
-            docs.push(...internalDocs);
-          }
-
-          fetchDocs();
-        });
-      };
-
-      fetchDocs();
-    });
+    return maybeCallback(async () => {
+      const array = [];
+      for await (const document of this) {
+        array.push(document);
+      }
+      return array;
+    }, callback);
   }
 
   /**
@@ -729,6 +703,14 @@ function nextDocument<T>(cursor: AbstractCursor): T | null {
   return null;
 }
 
+const nextAsync = promisify(
+  next as <T>(
+    cursor: AbstractCursor<T>,
+    blocking: boolean,
+    callback: (e: Error, r: T | null) => void
+  ) => void
+);
+
 /**
  * @param cursor - the cursor on which to call `next`
  * @param blocking - a boolean indicating whether or not the cursor should `block` until data
@@ -800,6 +782,8 @@ function cursorIsDead(cursor: AbstractCursor): boolean {
   const cursorId = cursor[kId];
   return !!cursorId && cursorId.isZero();
 }
+
+const cleanupCursorAsync = promisify(cleanupCursor);
 
 function cleanupCursor(
   cursor: AbstractCursor,
