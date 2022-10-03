@@ -4,18 +4,7 @@ import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
-import { TestFilter } from '../../tools/unified-spec-runner/schema';
 import { sleep } from '../../tools/utils';
-
-const filter: TestFilter = ({ description }) => {
-  switch (description) {
-    case 'Network error on Monitor check':
-    case 'Network timeout on Monitor check':
-      return 'TODO(NODE-4608): Disallow parallel monitor checks';
-    default:
-      return false;
-  }
-};
 
 describe('SDAM Unified Tests', function () {
   afterEach(async function () {
@@ -46,5 +35,5 @@ describe('SDAM Unified Tests', function () {
       this.test!.error(new Error(`Test failed to clean up ${sockArray.length} socket(s)`));
     }
   });
-  runUnifiedSuite(loadSpecTests(path.join('server-discovery-and-monitoring', 'unified')), filter);
+  runUnifiedSuite(loadSpecTests(path.join('server-discovery-and-monitoring', 'unified')));
 });
