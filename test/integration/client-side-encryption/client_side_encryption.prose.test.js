@@ -73,8 +73,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'base64'
   );
 
-  before(node18DNSResolutionOrderAfterEachHook);
-  after(node18DNSResolutionOrderBeforeEachHook);
+  before(node18DNSResolutionOrderBeforeEachHook);
+  after(node18DNSResolutionOrderAfterEachHook);
 
   describe('Data key and double encryption', function () {
     // Data key and double encryption

@@ -74,7 +74,7 @@ describe('Client Side Encryption (Legacy)', function () {
     testContext
   );
 
-  before(node18DNSResolutionOrderAfterEachHook);
+  before(node18DNSResolutionOrderBeforeEachHook);
   after(node18DNSResolutionOrderAfterEachHook);
 
   after(() => testContext.teardown());
