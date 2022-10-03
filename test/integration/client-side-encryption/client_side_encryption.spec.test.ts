@@ -1,10 +1,7 @@
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
-import {
-  node18DNSResolutionOrderAfterEachHook,
-  node18DNSResolutionOrderBeforeEachHook
-} from '../../tools/runner/hooks/configuration';
+import { installNode18DNSHooks } from '../../tools/runner/hooks/configuration';
 import {
   gatherTestSuites,
   generateTopologyTests,
@@ -74,8 +71,7 @@ describe('Client Side Encryption (Legacy)', function () {
     testContext
   );
 
-  before(node18DNSResolutionOrderBeforeEachHook);
-  after(node18DNSResolutionOrderAfterEachHook);
+  installNode18DNSHooks();
 
   after(() => testContext.teardown());
   before(function () {
@@ -88,7 +84,6 @@ describe('Client Side Encryption (Legacy)', function () {
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  beforeEach(node18DNSResolutionOrderBeforeEachHook);
-  afterEach(node18DNSResolutionOrderAfterEachHook);
+  installNode18DNSHooks();
   runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')));
 });

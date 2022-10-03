@@ -167,15 +167,14 @@ const beforeAllPluginImports = () => {
   require('mocha-sinon');
 };
 
-function node18DNSResolutionOrderBeforeEachHook() {
+function installNode18DNSHooks() {
   if (process.version.startsWith('v18')) {
-    setDefaultResultOrder('ipv4first');
-  }
-}
-
-function node18DNSResolutionOrderAfterEachHook() {
-  if (process.version.startsWith('v18')) {
-    setDefaultResultOrder('verbatim');
+    beforeEach(() => {
+      setDefaultResultOrder('ipv4first');
+    });
+    afterEach(() => {
+      setDefaultResultOrder('verbatim');
+    });
   }
 }
 
@@ -186,6 +185,5 @@ module.exports = {
     afterAll: [cleanUpMocksAfterHook]
   },
   skipBrokenAuthTestBeforeEachHook,
-  node18DNSResolutionOrderBeforeEachHook,
-  node18DNSResolutionOrderAfterEachHook
+  installNode18DNSHooks
 };
