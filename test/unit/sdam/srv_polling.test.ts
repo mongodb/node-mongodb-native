@@ -27,17 +27,6 @@ describe('Mongos SRV Polling', function () {
     };
   }
 
-  function tryDone(done, handle) {
-    process.nextTick(() => {
-      try {
-        handle();
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
-  }
-
   function stubDns(err: Error | null, records?: dns.SrvRecord[]) {
     if (err) {
       sinon.stub(dns.promises, 'resolveSrv').rejects(err);
