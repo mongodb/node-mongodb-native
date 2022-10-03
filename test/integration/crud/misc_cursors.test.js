@@ -31,7 +31,7 @@ describe('Cursor', function () {
     await client.close();
   });
 
-  it('should not fail on toArray and forEach calls after cursor is closed', async function () {
+  it('should not throw an error when toArray and forEach are called after cursor is closed', async function () {
     const db = client.db();
 
     const collection = await db.collection('test_to_a');

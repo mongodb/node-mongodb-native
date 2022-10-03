@@ -111,7 +111,11 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
       clearTimeout(this._timeout);
     }
 
-    this._timeout = setTimeout(() => this._poll(), this.intervalMS);
+    this._timeout = setTimeout(() => {
+      this._poll().catch(unexpectedRuntimeError => {
+        this.logger.error(`Unexpected ${new MongoRuntimeError(unexpectedRuntimeError).stack}`);
+      });
+    }, this.intervalMS);
   }
 
   success(srvRecords: dns.SrvRecord[]): void {
@@ -133,38 +137,35 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     );
   }
 
-  _poll(): void {
+  async _poll(): Promise<void> {
     const generation = this.generation;
-    dns.promises
-      .resolveSrv(this.srvAddress)
-      .then(
-        srvRecords => {
-          if (generation !== this.generation) {
-            return;
-          }
+    let srvRecords;
 
-          const finalAddresses: dns.SrvRecord[] = [];
-          for (const record of srvRecords) {
-            if (matchesParentDomain(record.name, this.srvHost)) {
-              finalAddresses.push(record);
-            } else {
-              this.parentDomainMismatch(record);
-            }
-          }
+    try {
+      srvRecords = await dns.promises.resolveSrv(this.srvAddress);
+    } catch (dnsError) {
+      this.failure('DNS error', dnsError);
+      return;
+    }
 
-          if (!finalAddresses.length) {
-            this.failure('No valid addresses found at host');
-            return;
-          }
+    if (generation !== this.generation) {
+      return;
+    }
 
-          this.success(finalAddresses);
-        },
-        err => {
-          this.failure('DNS error', err);
-        }
-      )
-      .catch(unexpectedRuntimeError => {
-        this.logger.error(`Unexpected ${new MongoRuntimeError(unexpectedRuntimeError).stack}`);
-      });
+    const finalAddresses: dns.SrvRecord[] = [];
+    for (const record of srvRecords) {
+      if (matchesParentDomain(record.name, this.srvHost)) {
+        finalAddresses.push(record);
+      } else {
+        this.parentDomainMismatch(record);
+      }
+    }
+
+    if (!finalAddresses.length) {
+      this.failure('No valid addresses found at host');
+      return;
+    }
+
+    this.success(finalAddresses);
   }
 }

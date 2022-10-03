@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
-import { EventEmitter } from 'events';
+import { EventEmitter, once } from 'events';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
@@ -63,27 +63,25 @@ describe('Mongos SRV Polling', function () {
     });
 
     describe('success', function () {
-      it('should emit event, disable haMode, and schedule another poll', function (done) {
+      it('should emit event, disable haMode, and schedule another poll', async function () {
         const records = [srvRecord('jalad.tanagra.com'), srvRecord('thebeast.tanagra.com')];
-        const poller = new SrvPoller({ srvHost: SRV_HOST });
+        const poller = new SrvPoller({ srvHost: SRV_HOST, heartbeatFrequencyMS: 100 });
+
+        const willBeDiscovery = once(poller, 'srvRecordDiscovery');
 
         sinon.stub(poller, 'schedule');
 
         poller.haMode = true;
         expect(poller).to.have.property('haMode', true);
-
-        poller.once('srvRecordDiscovery', e => {
-          tryDone(done, () => {
-            expect(e)
-              .to.be.an.instanceOf(SrvPollingEvent)
-              .and.to.have.property('srvRecords')
-              .that.deep.equals(records);
-            expect(poller.schedule).to.have.been.calledOnce;
-            expect(poller).to.have.property('haMode', false);
-          });
-        });
-
         poller.success(records);
+
+        const [e] = await willBeDiscovery;
+        expect(e)
+          .to.be.an.instanceOf(SrvPollingEvent)
+          .and.to.have.property('srvRecords')
+          .that.deep.equals(records);
+        expect(poller.schedule).to.have.been.calledOnce;
+        expect(poller).to.have.property('haMode', false);
       });
     });
 
@@ -99,15 +97,22 @@ describe('Mongos SRV Polling', function () {
       });
 
       it('should do something if dns API breaks', async function () {
-        const poller = new SrvPoller({ srvHost: SRV_HOST, loggerLevel: 'error' });
+        const poller = new SrvPoller({
+          srvHost: SRV_HOST,
+          loggerLevel: 'error',
+          heartbeatFrequencyMS: 100
+        });
+
+        // set haMode to make the poller use the 100ms heartbeat, otherwise this test would take 60 secs
+        poller.haMode = true;
 
         // @ts-expect-error: Testing what happens if node breaks DNS API
         sinon.stub(dns.promises, 'resolveSrv').resolves(null);
 
         const loggerError = sinon.stub(poller.logger, 'error').returns();
 
-        poller._poll();
-        await sleep(1);
+        poller.schedule();
+        await sleep(130);
         clearTimeout(poller._timeout);
 
         expect(loggerError).to.have.been.calledOnceWith(
@@ -127,8 +132,8 @@ describe('Mongos SRV Polling', function () {
 
         sinon.stub(dns.promises, 'resolveSrv').resolves([srvRecord('iLoveJavascript.lots')]);
 
-        poller._poll();
-        await sleep(1);
+        await poller._poll();
+
         clearTimeout(poller._timeout);
 
         expect(dns.promises.resolveSrv).to.have.been.calledOnce.and.to.have.been.calledWith(
@@ -136,20 +141,19 @@ describe('Mongos SRV Polling', function () {
         );
       });
 
-      it('should not succeed or fail if poller was stopped', function (done) {
+      it('should not succeed or fail if poller was stopped', async function () {
         const poller = new SrvPoller({ srvHost: SRV_HOST });
 
         stubDns(null, []);
         stubPoller(poller);
 
-        poller._poll();
+        const pollerPromise = poller._poll();
         poller.generation += 1;
+        await pollerPromise;
 
-        tryDone(done, () => {
-          expect(poller.success).to.not.have.been.called;
-          expect(poller.failure).to.not.have.been.called;
-          expect(poller.parentDomainMismatch).to.not.have.been.called;
-        });
+        expect(poller.success).to.not.have.been.called;
+        expect(poller.failure).to.not.have.been.called;
+        expect(poller.parentDomainMismatch).to.not.have.been.called;
       });
 
       it('should fail if dns returns error', async () => {
@@ -158,8 +162,7 @@ describe('Mongos SRV Polling', function () {
         stubDns(new Error('Some Error'));
         stubPoller(poller);
 
-        poller._poll();
-        await sleep(1);
+        await poller._poll();
 
         expect(poller.success).to.not.have.been.called;
         expect(poller.failure).to.have.been.calledOnce.and.calledWith('DNS error');
@@ -172,8 +175,7 @@ describe('Mongos SRV Polling', function () {
         stubDns(null, []);
         stubPoller(poller);
 
-        poller._poll();
-        await sleep(1);
+        await poller._poll();
 
         expect(poller.success).to.not.have.been.called;
         expect(poller.failure).to.have.been.calledOnce.and.calledWith(
@@ -189,8 +191,7 @@ describe('Mongos SRV Polling', function () {
         stubDns(null, records);
         stubPoller(poller);
 
-        poller._poll();
-        await sleep(1);
+        await poller._poll();
 
         expect(poller.success).to.not.have.been.called;
         expect(poller.failure).to.have.been.calledOnce.and.calledWith(
@@ -208,8 +209,7 @@ describe('Mongos SRV Polling', function () {
         stubDns(null, records);
         stubPoller(poller);
 
-        poller._poll();
-        await sleep(1);
+        await poller._poll();
 
         expect(poller.success).to.have.been.calledOnce.and.calledWithMatch(records);
         expect(poller.failure).to.not.have.been.called;
@@ -223,8 +223,7 @@ describe('Mongos SRV Polling', function () {
         stubDns(null, records);
         stubPoller(poller);
 
-        poller._poll();
-        await sleep(1);
+        await poller._poll();
 
         expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
         expect(poller.failure).to.not.have.been.called;
