@@ -1,23 +1,66 @@
-import { expectError } from 'tsd';
+import { expectAssignable, expectError, expectNotAssignable } from 'tsd';
 
-import type { Collection } from '../../../../src';
+import type { Collection, Filter, UpdateFilter } from '../../../../src';
 
 /**
  * mutually recursive types are not supported and will not get type safety
  */
-interface A {
-  b: B;
+interface Author {
+  books: Book[];
+  favoritePublication: Book;
+  name: string;
 }
 
-interface B {
-  a: A;
+interface Book {
+  author: Author;
+  title: string;
+  published: Date;
 }
 
-declare const mutuallyRecursive: Collection<A>;
-//@ts-expect-error
+declare const mutuallyRecursive: Collection<Author>;
 mutuallyRecursive.find({});
 mutuallyRecursive.find({
-  b: {}
+  b: { a: { b: { a: null } } }
+});
+
+// Extremely deep type checking for recursive schemas
+expectNotAssignable<Filter<Author>>({
+  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.title': 23
+});
+expectAssignable<Filter<Author>>({
+  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.title':
+    'good soup'
+});
+expectNotAssignable<Filter<Author>>({
+  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 23
+});
+
+// Beyond the depth of 10, `extends Document` permits anything (number for name is permitted)
+expectAssignable<Filter<Author>>({
+  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 23
+});
+
+// Update filter has similar depth limit
+expectAssignable<UpdateFilter<Author>>({
+  $set: {
+    'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name':
+      'joe'
+  }
+});
+
+// Depth below 9 is type checked
+expectNotAssignable<UpdateFilter<Author>>({
+  $set: {
+    'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 3
+  }
+});
+
+// Using keys that are beyond the permitted depth in $set still result in an error as opposed to falling back to any (known limitation)
+expectNotAssignable<UpdateFilter<Author>>({
+  $set: {
+    'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name':
+      'name'
+  }
 });
 
 /**
