@@ -328,6 +328,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
 function monitorServer(monitor: Monitor) {
   return (callback: Callback) => {
+    if (monitor.s.state === STATE_MONITORING) {
+      process.nextTick(callback);
+      return;
+    }
     stateTransition(monitor, STATE_MONITORING);
     function done() {
       if (!isInCloseState(monitor)) {
