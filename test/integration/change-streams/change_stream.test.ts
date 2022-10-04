@@ -1037,6 +1037,56 @@ describe('Change Streams', function () {
   });
 
   describe('Change Stream Resume Error Tests', function () {
+    describe('TODO(NODE-4670): fix consecutive resumes unified tests', function () {
+      let client: MongoClient;
+      let changeStream: ChangeStream;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+      });
+
+      afterEach(async function () {
+        await changeStream.close();
+        await client.close();
+      });
+
+      it('should support consecutive resumes', {
+        metadata: { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
+        async test() {
+          const failCommand: FailPoint = {
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 2
+            },
+            data: {
+              failCommands: ['getMore'],
+              closeConnection: true
+            }
+          };
+
+          await client.db('admin').command(failCommand);
+
+          const collection = client.db('test_consecutive_resume').collection('collection');
+
+          changeStream = collection.watch([], { batchSize: 1 });
+
+          await initIteratorMode(changeStream);
+
+          await collection.insertOne({ name: 'bumpy' });
+          await collection.insertOne({ name: 'bumpy' });
+          await collection.insertOne({ name: 'bumpy' });
+
+          await sleep(1000);
+
+          for (let i = 0; i < 3; ++i) {
+            const change = await changeStream.next();
+            expect(change).not.to.be.null;
+          }
+        }
+      });
+    });
+
     it.skip('should continue piping changes after a resumable error', {
       metadata: { requires: { topology: 'replicaset' } },
       test: done => {

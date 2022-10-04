@@ -1,3 +1,5 @@
+import { promisify } from 'util';
+
 import { Binary, Document, Long, Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
@@ -34,7 +36,7 @@ import {
   commandSupportsReadConcern,
   isPromiseLike,
   maxWireVersion,
-  maybePromise,
+  maybeCallback,
   now,
   uuidV4
 } from './utils';
@@ -245,8 +247,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param callback - Optional callback for completion of this operation
    */
   endSession(): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   endSession(callback: Callback<void>): void;
   endSession(options: EndSessionOptions): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   endSession(options: EndSessionOptions, callback: Callback<void>): void;
   endSession(
     options?: EndSessionOptions | Callback<void>,
@@ -255,47 +259,32 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     if (typeof options === 'function') (callback = options), (options = {});
     const finalOptions = { force: true, ...options };
 
-    return maybePromise(callback, done => {
-      if (this.hasEnded) {
-        maybeClearPinnedConnection(this, finalOptions);
-        return done();
-      }
-
-      const completeEndSession = () => {
-        maybeClearPinnedConnection(this, finalOptions);
-
-        const serverSession = this[kServerSession];
-        if (serverSession != null) {
-          // release the server session back to the pool
-          this.sessionPool.release(serverSession);
-          // Make sure a new serverSession never makes it onto this ClientSession
-          Object.defineProperty(this, kServerSession, {
-            value: ServerSession.clone(serverSession),
-            writable: false
-          });
+    return maybeCallback(async () => {
+      try {
+        if (this.inTransaction()) {
+          await this.abortTransaction();
         }
-
-        // mark the session as ended, and emit a signal
-        this.hasEnded = true;
-        this.emit('ended', this);
-
+        if (!this.hasEnded) {
+          const serverSession = this[kServerSession];
+          if (serverSession != null) {
+            // release the server session back to the pool
+            this.sessionPool.release(serverSession);
+            // Make sure a new serverSession never makes it onto this ClientSession
+            Object.defineProperty(this, kServerSession, {
+              value: ServerSession.clone(serverSession),
+              writable: false
+            });
+          }
+          // mark the session as ended, and emit a signal
+          this.hasEnded = true;
+          this.emit('ended', this);
+        }
+      } catch {
         // spec indicates that we should ignore all errors for `endSessions`
-        done();
-      };
-
-      if (this.inTransaction()) {
-        // If we've reached endSession and the transaction is still active
-        // by default we abort it
-        this.abortTransaction(err => {
-          if (err) return done(err);
-          completeEndSession();
-        });
-
-        return;
+      } finally {
+        maybeClearPinnedConnection(this, finalOptions);
       }
-
-      completeEndSession();
-    });
+    }, callback);
   }
 
   /**
@@ -433,9 +422,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   commitTransaction(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   commitTransaction(callback: Callback<Document>): void;
   commitTransaction(callback?: Callback<Document>): Promise<Document> | void {
-    return maybePromise(callback, cb => endTransaction(this, 'commitTransaction', cb));
+    return maybeCallback(async () => endTransactionAsync(this, 'commitTransaction'), callback);
   }
 
   /**
@@ -444,9 +434,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   abortTransaction(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   abortTransaction(callback: Callback<Document>): void;
   abortTransaction(callback?: Callback<Document>): Promise<Document> | void {
-    return maybePromise(callback, cb => endTransaction(this, 'abortTransaction', cb));
+    return maybeCallback(async () => endTransactionAsync(this, 'abortTransaction'), callback);
   }
 
   /**
@@ -605,14 +596,14 @@ function attemptTransaction<TSchema>(
   fn: WithTransactionCallback<TSchema>,
   options?: TransactionOptions
 ): Promise<any> {
-  const Promise = PromiseProvider.get();
   session.startTransaction(options);
 
   let promise;
   try {
     promise = fn(session);
   } catch (err) {
-    promise = Promise.reject(err);
+    const PromiseConstructor = PromiseProvider.get() ?? Promise;
+    promise = PromiseConstructor.reject(err);
   }
 
   if (!isPromiseLike(promise)) {
@@ -655,6 +646,14 @@ function attemptTransaction<TSchema>(
     }
   );
 }
+
+const endTransactionAsync = promisify(
+  endTransaction as (
+    session: ClientSession,
+    commandName: 'abortTransaction' | 'commitTransaction',
+    callback: (error: Error, result: Document) => void
+  ) => void
+);
 
 function endTransaction(
   session: ClientSession,

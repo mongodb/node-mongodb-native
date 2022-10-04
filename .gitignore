@@ -13,6 +13,8 @@ pids
 *.heapsnapshot
 *.cpuprofile
 *.heapprofile
+*.dylib
+*.so
 test*.*
 output
 etc/docs/template/.hugo_build.lock
@@ -29,6 +31,7 @@ public/
 .idea/
 test_boot/
 t.js
+tmp.json
 .DS_Store
 test/benchmarks/performance-data
 .nyc_output/
@@ -69,6 +72,8 @@ output
 serverless-expansion.yml
 serverless.env
 
+expansion.yml
+mo-expansion.yml
 lb-expansion.yml
 lb.env
 

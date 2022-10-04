@@ -1,14 +1,38 @@
 'use strict';
 
+const { once } = require('events');
 const { expect } = require('chai');
 const { PromiseProvider } = require('../../../src/promise_provider');
+const { MongoClient } = require('../../../src/mongo_client');
 
 class CustomPromise extends Promise {}
 CustomPromise.prototype.isCustomMongo = true;
 
 describe('Optional PromiseLibrary', function () {
+  beforeEach(() => {
+    PromiseProvider.set(null);
+  });
+
   afterEach(() => {
+    PromiseProvider.set(null);
+  });
+
+  it('should initially be set to null', () => {
+    expect(PromiseProvider.get()).to.be.null;
+  });
+
+  it('should allow passing null to .set() to clear the set promise', () => {
     PromiseProvider.set(Promise);
+    expect(PromiseProvider.get()).to.equal(Promise);
+    expect(() => PromiseProvider.set(null)).to.not.throw();
+    expect(PromiseProvider.get()).to.be.null;
+  });
+
+  it('should emit a deprecation warning when a promiseLibrary is set', async () => {
+    const willEmitWarning = once(process, 'warning');
+    new MongoClient('mongodb://iLoveJavascript', { promiseLibrary: () => {} });
+    const [warning] = await willEmitWarning;
+    expect(warning).to.have.property('message', 'promiseLibrary is a deprecated option');
   });
 
   it('should correctly implement custom dependency-less promise', function (done) {

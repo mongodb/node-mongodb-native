@@ -1,7 +1,6 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import * as os from 'os';
-import { clearTimeout, setTimeout } from 'timers';
 import { URL } from 'url';
 
 import { Document, ObjectId, resolveBSONOptions } from './bson';
@@ -200,14 +199,12 @@ export function applyWriteConcern<T extends HasWriteConcern>(
 /**
  * Checks if a given value is a Promise
  *
- * @typeParam T - The result type of maybePromise
- * @param maybePromise - An object that could be a promise
+ * @typeParam T - The resolution type of the possible promise
+ * @param value - An object that could be a promise
  * @returns true if the provided value is a Promise
  */
-export function isPromiseLike<T = any>(
-  maybePromise?: PromiseLike<T> | void
-): maybePromise is Promise<T> {
-  return !!maybePromise && typeof maybePromise.then === 'function';
+export function isPromiseLike<T = any>(value?: PromiseLike<T> | void): value is Promise<T> {
+  return !!value && typeof value.then === 'function';
 }
 
 /**
@@ -437,47 +434,35 @@ export function* makeCounter(seed = 0): Generator<number> {
 }
 
 /**
- * Helper function for either accepting a callback, or returning a promise
- * @internal
- *
- * @param callback - The last function argument in exposed method, controls if a Promise is returned
- * @param wrapper - A function that wraps the callback
- * @returns Returns void if a callback is supplied, else returns a Promise.
+ * Helper for handling legacy callback support.
  */
-export function maybePromise<T>(
-  callback: Callback<T> | undefined,
-  wrapper: (fn: Callback<T>) => void
+export function maybeCallback<T>(promiseFn: () => Promise<T>, callback: null): Promise<T>;
+export function maybeCallback<T>(
+  promiseFn: () => Promise<T>,
+  callback?: Callback<T>
+): Promise<T> | void;
+export function maybeCallback<T>(
+  promiseFn: () => Promise<T>,
+  callback?: Callback<T> | null
 ): Promise<T> | void {
-  const Promise = PromiseProvider.get();
-  let result: Promise<T> | void;
-  if (typeof callback !== 'function') {
-    result = new Promise<any>((resolve, reject) => {
-      callback = (err, res) => {
-        if (err) return reject(err);
-        resolve(res);
-      };
-    });
+  const PromiseConstructor = PromiseProvider.get();
+
+  const promise = promiseFn();
+  if (callback == null) {
+    if (PromiseConstructor == null) {
+      return promise;
+    } else {
+      return new PromiseConstructor((resolve, reject) => {
+        promise.then(resolve, reject);
+      });
+    }
   }
 
-  wrapper((err, res) => {
-    if (err != null) {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        callback!(err);
-      } catch (error) {
-        process.nextTick(() => {
-          throw error;
-        });
-      }
-
-      return;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    callback!(err, res);
-  });
-
-  return result;
+  promise.then(
+    result => callback(undefined, result),
+    error => callback(error)
+  );
+  return;
 }
 
 /** @internal */
@@ -506,7 +491,7 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
       // Since we do not have a monitor, we assume the load balanced server is always
       // pointed at the latest mongodb version. There is a risk that for on-prem
       // deployments that don't upgrade immediately that this could alert to the
-      // application that a feature is avaiable that is actually not.
+      // application that a feature is available that is actually not.
       return MAX_SUPPORTED_WIRE_VERSION;
     }
     if (topologyOrServer.hello) {
@@ -530,17 +515,6 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
   }
 
   return 0;
-}
-
-/**
- * Checks that collation is supported by server.
- * @internal
- *
- * @param server - to check against
- * @param cmd - object where collation may be specified
- */
-export function collationNotSupported(server: Server, cmd: Document): boolean {
-  return cmd && cmd.collation && maxWireVersion(server) < 5;
 }
 
 /**
@@ -772,124 +746,6 @@ export function calculateDurationInMs(started: number): number {
 
   const elapsed = now() - started;
   return elapsed < 0 ? 0 : elapsed;
-}
-
-export interface InterruptibleAsyncIntervalOptions {
-  /** The interval to execute a method on */
-  interval: number;
-  /** A minimum interval that must elapse before the method is called */
-  minInterval: number;
-  /** Whether the method should be called immediately when the interval is started  */
-  immediate: boolean;
-
-  /**
-   * Only used for testing unreliable timer environments
-   * @internal
-   */
-  clock: () => number;
-}
-
-/** @internal */
-export interface InterruptibleAsyncInterval {
-  wake(): void;
-  stop(): void;
-}
-
-/**
- * Creates an interval timer which is able to be woken up sooner than
- * the interval. The timer will also debounce multiple calls to wake
- * ensuring that the function is only ever called once within a minimum
- * interval window.
- * @internal
- *
- * @param fn - An async function to run on an interval, must accept a `callback` as its only parameter
- */
-export function makeInterruptibleAsyncInterval(
-  fn: (callback: Callback) => void,
-  options?: Partial<InterruptibleAsyncIntervalOptions>
-): InterruptibleAsyncInterval {
-  let timerId: NodeJS.Timeout | undefined;
-  let lastCallTime: number;
-  let cannotBeExpedited = false;
-  let stopped = false;
-
-  options = options ?? {};
-  const interval = options.interval || 1000;
-  const minInterval = options.minInterval || 500;
-  const immediate = typeof options.immediate === 'boolean' ? options.immediate : false;
-  const clock = typeof options.clock === 'function' ? options.clock : now;
-
-  function wake() {
-    const currentTime = clock();
-    const nextScheduledCallTime = lastCallTime + interval;
-    const timeUntilNextCall = nextScheduledCallTime - currentTime;
-
-    // For the streaming protocol: there is nothing obviously stopping this
-    // interval from being woken up again while we are waiting "infinitely"
-    // for `fn` to be called again`. Since the function effectively
-    // never completes, the `timeUntilNextCall` will continue to grow
-    // negatively unbounded, so it will never trigger a reschedule here.
-
-    // This is possible in virtualized environments like AWS Lambda where our
-    // clock is unreliable. In these cases the timer is "running" but never
-    // actually completes, so we want to execute immediately and then attempt
-    // to reschedule.
-    if (timeUntilNextCall < 0) {
-      executeAndReschedule();
-      return;
-    }
-
-    // debounce multiple calls to wake within the `minInterval`
-    if (cannotBeExpedited) {
-      return;
-    }
-
-    // reschedule a call as soon as possible, ensuring the call never happens
-    // faster than the `minInterval`
-    if (timeUntilNextCall > minInterval) {
-      reschedule(minInterval);
-      cannotBeExpedited = true;
-    }
-  }
-
-  function stop() {
-    stopped = true;
-    if (timerId) {
-      clearTimeout(timerId);
-      timerId = undefined;
-    }
-
-    lastCallTime = 0;
-    cannotBeExpedited = false;
-  }
-
-  function reschedule(ms?: number) {
-    if (stopped) return;
-    if (timerId) {
-      clearTimeout(timerId);
-    }
-
-    timerId = setTimeout(executeAndReschedule, ms || interval);
-  }
-
-  function executeAndReschedule() {
-    cannotBeExpedited = false;
-    lastCallTime = clock();
-
-    fn(err => {
-      if (err) throw err;
-      reschedule(interval);
-    });
-  }
-
-  if (immediate) {
-    executeAndReschedule();
-  } else {
-    lastCallTime = clock();
-    reschedule(undefined);
-  }
-
-  return { wake, stop };
 }
 
 /** @internal */
@@ -1142,44 +998,51 @@ export class BufferPool {
 
 /** @public */
 export class HostAddress {
-  host;
-  port;
-  // Driver only works with unix socket path to connect
-  // SDAM operates only on tcp addresses
-  socketPath;
-  isIPv6;
+  host: string | undefined = undefined;
+  port: number | undefined = undefined;
+  socketPath: string | undefined = undefined;
+  isIPv6 = false;
 
   constructor(hostString: string) {
     const escapedHost = hostString.split(' ').join('%20'); // escape spaces, for socket path hosts
-    const { hostname, port } = new URL(`mongodb://${escapedHost}`);
 
     if (escapedHost.endsWith('.sock')) {
       // heuristically determine if we're working with a domain socket
       this.socketPath = decodeURIComponent(escapedHost);
-    } else if (typeof hostname === 'string') {
-      this.isIPv6 = false;
+      return;
+    }
 
-      let normalized = decodeURIComponent(hostname).toLowerCase();
-      if (normalized.startsWith('[') && normalized.endsWith(']')) {
-        this.isIPv6 = true;
-        normalized = normalized.substring(1, hostname.length - 1);
-      }
+    const urlString = `iLoveJS://${escapedHost}`;
+    let url;
+    try {
+      url = new URL(urlString);
+    } catch (urlError) {
+      const runtimeError = new MongoRuntimeError(`Unable to parse ${escapedHost} with URL`);
+      runtimeError.cause = urlError;
+      throw runtimeError;
+    }
 
-      this.host = normalized.toLowerCase();
+    const hostname = url.hostname;
+    const port = url.port;
 
-      if (typeof port === 'number') {
-        this.port = port;
-      } else if (typeof port === 'string' && port !== '') {
-        this.port = Number.parseInt(port, 10);
-      } else {
-        this.port = 27017;
-      }
+    let normalized = decodeURIComponent(hostname).toLowerCase();
+    if (normalized.startsWith('[') && normalized.endsWith(']')) {
+      this.isIPv6 = true;
+      normalized = normalized.substring(1, hostname.length - 1);
+    }
 
-      if (this.port === 0) {
-        throw new MongoParseError('Invalid port (zero) with hostname');
-      }
+    this.host = normalized.toLowerCase();
+
+    if (typeof port === 'number') {
+      this.port = port;
+    } else if (typeof port === 'string' && port !== '') {
+      this.port = Number.parseInt(port, 10);
     } else {
-      throw new MongoInvalidArgumentError('Either socketPath or host must be defined.');
+      this.port = 27017;
+    }
+
+    if (this.port === 0) {
+      throw new MongoParseError('Invalid port (zero) with hostname');
     }
     Object.freeze(this);
   }
@@ -1189,15 +1052,12 @@ export class HostAddress {
   }
 
   inspect(): string {
-    return `new HostAddress('${this.toString(true)}')`;
+    return `new HostAddress('${this.toString()}')`;
   }
 
-  /**
-   * @param ipv6Brackets - optionally request ipv6 bracket notation required for connection strings
-   */
-  toString(ipv6Brackets = false): string {
+  toString(): string {
     if (typeof this.host === 'string') {
-      if (this.isIPv6 && ipv6Brackets) {
+      if (this.isIPv6) {
         return `[${this.host}]:${this.port}`;
       }
       return `${this.host}:${this.port}`;
@@ -1233,7 +1093,7 @@ export const DEFAULT_PK_FACTORY = {
  * @public
  *
  * @example
- * ```js
+ * ```ts
  * process.on('warning', (warning) => {
  *  if (warning.code === MONGODB_WARNING_CODE) console.error('Ah an important warning! :)')
  * })

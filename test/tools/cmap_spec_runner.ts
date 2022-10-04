@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
-import { Connection, HostAddress, MongoClient } from '../../src';
+import { Connection, HostAddress, MongoClient, Server } from '../../src';
 import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
 import { CMAP_EVENTS } from '../../src/constants';
 import { makeClientMetadata, shuffle } from '../../src/utils';
@@ -253,11 +253,13 @@ export class ThreadContext {
   threads: Map<any, Thread> = new Map();
   connections: Map<string, Connection> = new Map();
   orphans: Set<Connection> = new Set();
-  poolEvents = [];
+  poolEvents: any[] = [];
   poolEventsEventEmitter = new EventEmitter();
 
   #poolOptions: Partial<ConnectionPoolOptions>;
   #hostAddress: HostAddress;
+  #server: Server;
+  #originalServerPool: ConnectionPool;
   #supportedOperations: ReturnType<typeof getTestOpDefinitions>;
   #injectPoolStats = false;
 
@@ -267,12 +269,14 @@ export class ThreadContext {
    * @param poolOptions - Allows the test to pass in extra options to the pool not specified by the spec test definition, such as the environment-dependent "loadBalanced"
    */
   constructor(
+    server: Server,
     hostAddress: HostAddress,
     poolOptions: Partial<ConnectionPoolOptions> = {},
     contextOptions: { injectPoolStats: boolean }
   ) {
     this.#poolOptions = poolOptions;
     this.#hostAddress = hostAddress;
+    this.#server = server;
     this.#supportedOperations = getTestOpDefinitions(this);
     this.#injectPoolStats = contextOptions.injectPoolStats;
   }
@@ -292,11 +296,13 @@ export class ThreadContext {
   }
 
   createPool(options) {
-    this.pool = new ConnectionPool({
+    this.pool = new ConnectionPool(this.#server, {
       ...this.#poolOptions,
       ...options,
       hostAddress: this.#hostAddress
     });
+    this.#originalServerPool = this.#server.s.pool;
+    this.#server.s.pool = this.pool;
     ALL_POOL_EVENTS.forEach(eventName => {
       this.pool.on(eventName, event => {
         if (this.#injectPoolStats) {
@@ -312,6 +318,7 @@ export class ThreadContext {
   }
 
   closePool() {
+    this.#server.s.pool = this.#originalServerPool;
     return new Promise(resolve => {
       ALL_POOL_EVENTS.forEach(ev => this.pool.removeAllListeners(ev));
       this.pool.close(resolve);
@@ -344,8 +351,11 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   const poolOptions = test.poolOptions || {};
   expect(CMAP_POOL_OPTION_NAMES).to.include.members(Object.keys(poolOptions));
 
-  // TODO(NODE-3255): update condition to only remove option if set to -1
+  let minPoolSizeCheckFrequencyMS;
   if (poolOptions.backgroundThreadIntervalMS) {
+    if (poolOptions.backgroundThreadIntervalMS !== -1) {
+      minPoolSizeCheckFrequencyMS = poolOptions.backgroundThreadIntervalMS;
+    }
     delete poolOptions.backgroundThreadIntervalMS;
   }
 
@@ -366,7 +376,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   const mainThread = threadContext.getThread(MAIN_THREAD_KEY);
   mainThread.start();
 
-  threadContext.createPool({ ...poolOptions, metadata });
+  threadContext.createPool({ ...poolOptions, metadata, minPoolSizeCheckFrequencyMS });
   // yield control back to the event loop so that the ConnectionPoolCreatedEvent
   // has a chance to be fired before any synchronously-emitted events from
   // the queued operations
@@ -391,7 +401,10 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   if (expectedError) {
     expect(actualError).to.exist;
     const { type: errorType, message: errorMessage, ...errorPropsToCheck } = expectedError;
-    expect(actualError).to.have.property('name', `Mongo${errorType}`);
+    expect(
+      actualError,
+      `${actualError.name} does not match "Mongo${errorType}", ${actualError.message} ${actualError.stack}`
+    ).to.have.property('name', `Mongo${errorType}`);
     if (errorMessage) {
       if (
         errorMessage === 'Timed out while checking out a connection from connection pool' &&
@@ -435,7 +448,10 @@ export function runCmapTestSuite(
 ) {
   for (const test of tests) {
     describe(test.name, function () {
-      let hostAddress: HostAddress, threadContext: ThreadContext, client: MongoClient;
+      let hostAddress: HostAddress,
+        server: Server,
+        threadContext: ThreadContext,
+        client: MongoClient;
 
       beforeEach(async function () {
         let utilClient: MongoClient;
@@ -476,25 +492,33 @@ export function runCmapTestSuite(
         }
 
         try {
-          const serverMap = utilClient.topology.s.description.servers;
-          const hosts = shuffle(serverMap.keys());
+          const serverDescriptionMap = utilClient.topology?.s.description.servers;
+          const hosts = shuffle(serverDescriptionMap.keys());
           const selectedHostUri = hosts[0];
-          hostAddress = serverMap.get(selectedHostUri).hostAddress;
+          hostAddress = serverDescriptionMap.get(selectedHostUri).hostAddress;
+
+          client = this.configuration.newClient(
+            `mongodb://${hostAddress}/${
+              this.configuration.isLoadBalanced ? '?loadBalanced=true' : '?directConnection=true'
+            }`
+          );
+          await client.connect();
+          if (test.failPoint) {
+            await client.db('admin').command(test.failPoint);
+          }
+
+          const serverMap = client.topology?.s.servers;
+          server = serverMap?.get(selectedHostUri);
+          if (!server) {
+            throw new Error('Failed to retrieve server for test');
+          }
+
           threadContext = new ThreadContext(
+            server,
             hostAddress,
             this.configuration.isLoadBalanced ? { loadBalanced: true } : {},
             { injectPoolStats: !!options?.injectPoolStats }
           );
-
-          if (test.failPoint) {
-            client = this.configuration.newClient(
-              `mongodb://${hostAddress}/${
-                this.configuration.isLoadBalanced ? '?loadBalanced=true' : '?directConnection=true'
-              }`
-            );
-            await client.connect();
-            await client.db('admin').command(test.failPoint);
-          }
         } finally {
           await utilClient.close();
         }

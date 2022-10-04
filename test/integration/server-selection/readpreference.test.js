@@ -531,18 +531,25 @@ describe('ReadPreference', function () {
 
   context('should enforce fixed primary read preference', function () {
     const collectionName = 'ddl_collection';
+    let client;
 
     beforeEach(async function () {
       const configuration = this.configuration;
-      const client = this.configuration.newClient(configuration.writeConcernMax(), {
+      const utilClient = this.configuration.newClient(configuration.writeConcernMax(), {
         readPreference: 'primaryPreferred'
       });
 
-      const db = client.db(configuration.db);
+      const db = utilClient.db(configuration.db);
       await db.addUser('default', 'pass', { roles: 'readWrite' }).catch(() => null);
       await db.createCollection('before_collection').catch(() => null);
       await db.createIndex(collectionName, { aloha: 1 }).catch(() => null);
 
+      await utilClient.close();
+
+      client = await this.configuration.newClient(configuration.writeConcernMax()).connect();
+    });
+
+    afterEach(async () => {
       await client.close();
     });
 
@@ -558,14 +565,13 @@ describe('ReadPreference', function () {
       'Db#dropDatabase': []
     };
 
-    Object.keys(methods).forEach(operation => {
+    for (const operation of Object.keys(methods)) {
       it(`${operation}`, {
         metadata: {
           requires: { topology: ['replicaset', 'sharded'] }
         },
         test: async function () {
           const configuration = this.configuration;
-          const client = this.configuration.newClient(configuration.writeConcernMax());
           const db = client.db(configuration.db);
           const args = methods[operation];
           const [parentId, method] = operation.split('#');
@@ -577,20 +583,12 @@ describe('ReadPreference', function () {
           await parent[method](...args);
 
           expect(selectServerSpy.called).to.equal(true);
-          if (typeof selectServerSpy.args[0][0] === 'function') {
-            expect(selectServerSpy)
-              .nested.property('args[0][1].readPreference.mode')
-              .to.equal(ReadPreference.PRIMARY);
-          } else {
-            expect(selectServerSpy)
-              .nested.property('args[0][0].readPreference.mode')
-              .to.equal(ReadPreference.PRIMARY);
-          }
-
-          await client.close();
+          const selectionCall = selectServerSpy.getCall(0);
+          expect(selectionCall.args[0]).to.not.be.a('function');
+          expect(selectionCall).nested.property('args[0].mode').to.equal(ReadPreference.PRIMARY);
         }
       });
-    });
+    }
   });
 
   it('should respect readPreference from uri', {

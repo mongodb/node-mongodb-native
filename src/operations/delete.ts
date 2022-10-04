@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, collationNotSupported, maxWireVersion, MongoDBNamespace } from '../utils';
+import type { Callback, MongoDBNamespace } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects, Hint } from './operation';
@@ -44,7 +44,7 @@ export interface DeleteStatement {
 }
 
 /** @internal */
-export class DeleteOperation extends CommandOperation<Document> {
+export class DeleteOperation extends CommandOperation<DeleteResult> {
   override options: DeleteOptions;
   statements: DeleteStatement[];
 
@@ -82,26 +82,13 @@ export class DeleteOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
-    if (options.explain != null && maxWireVersion(server) < 3) {
-      return callback
-        ? callback(
-            new MongoCompatibilityError(`Server ${server.name} does not support explain on delete`)
-          )
-        : undefined;
-    }
-
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
-    if (unacknowledgedWrite || maxWireVersion(server) < 5) {
+    if (unacknowledgedWrite) {
       if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoCompatibilityError(`Servers < 3.4 do not support hint on delete`));
+        // TODO(NODE-3541): fix error for hint with unacknowledged writes
+        callback(new MongoCompatibilityError(`hint is not supported with unacknowledged writes`));
         return;
       }
-    }
-
-    const statementWithCollation = this.statements.find(statement => !!statement.collation);
-    if (statementWithCollation && collationNotSupported(server, statementWithCollation)) {
-      callback(new MongoCompatibilityError(`Server ${server.name} does not support collation`));
-      return;
     }
 
     super.executeCommand(server, session, command, callback);

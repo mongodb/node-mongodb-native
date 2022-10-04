@@ -3,13 +3,7 @@ import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import {
-  Callback,
-  collationNotSupported,
-  hasAtomicOperators,
-  maxWireVersion,
-  MongoDBNamespace
-} from '../utils';
+import { Callback, hasAtomicOperators, MongoDBNamespace } from '../utils';
 import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects, Hint } from './operation';
 
@@ -22,7 +16,7 @@ export interface UpdateOptions extends CommandOperationOptions {
   /** Specifies a collation */
   collation?: CollationOptions;
   /** Specify that the update query should only consider plans using the hinted index */
-  hint?: string | Document;
+  hint?: Hint;
   /** When true, creates a new document if no document matches the query */
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
@@ -113,35 +107,13 @@ export class UpdateOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
-    const statementWithCollation = this.statements.find(statement => !!statement.collation);
-    if (
-      collationNotSupported(server, options) ||
-      (statementWithCollation && collationNotSupported(server, statementWithCollation))
-    ) {
-      callback(new MongoCompatibilityError(`Server ${server.name} does not support collation`));
-      return;
-    }
-
     const unacknowledgedWrite = this.writeConcern && this.writeConcern.w === 0;
-    if (unacknowledgedWrite || maxWireVersion(server) < 5) {
+    if (unacknowledgedWrite) {
       if (this.statements.find((o: Document) => o.hint)) {
-        callback(new MongoCompatibilityError(`Servers < 3.4 do not support hint on update`));
+        // TODO(NODE-3541): fix error for hint with unacknowledged writes
+        callback(new MongoCompatibilityError(`hint is not supported with unacknowledged writes`));
         return;
       }
-    }
-
-    if (this.explain && maxWireVersion(server) < 3) {
-      callback(
-        new MongoCompatibilityError(`Server ${server.name} does not support explain on update`)
-      );
-      return;
-    }
-
-    if (this.statements.some(statement => !!statement.arrayFilters) && maxWireVersion(server) < 6) {
-      callback(
-        new MongoCompatibilityError('Option "arrayFilters" is only supported on MongoDB 3.6+')
-      );
-      return;
     }
 
     super.executeCommand(server, session, command, callback);
@@ -280,7 +252,7 @@ export class ReplaceOneOperation extends UpdateOperation {
 
 export function makeUpdateStatement(
   filter: Document,
-  update: Document,
+  update: Document | Document[],
   options: UpdateOptions & { multi?: boolean }
 ): UpdateStatement {
   if (filter == null || typeof filter !== 'object') {

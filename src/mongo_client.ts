@@ -1,5 +1,6 @@
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
+import { promisify } from 'util';
 
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
@@ -8,28 +9,26 @@ import type { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
 import type { CompressorName } from './cmap/wire_protocol/compression';
-import { parseOptions } from './connection_string';
-import type { MONGO_CLIENT_EVENTS } from './constants';
+import { parseOptions, resolveSRVRecord } from './connection_string';
+import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import type { Logger, LoggerLevel } from './logger';
 import { TypedEventEmitter } from './mongo_types';
-import { connect } from './operations/connect';
-import { PromiseProvider } from './promise_provider';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
 import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
-import type { Topology, TopologyEvents } from './sdam/topology';
+import { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
 import {
   Callback,
   ClientMetadata,
   HostAddress,
-  maybePromise,
+  maybeCallback,
   MongoDBNamespace,
   ns,
   resolveOptions
@@ -230,7 +229,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   raw?: boolean;
   /** A primary key factory function for generation of custom `_id` keys */
   pkFactory?: PkFactory;
-  /** A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible */
+  /**
+   * A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
+   * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
+   */
   promiseLibrary?: any;
   /** The logging level */
   loggerLevel?: LoggerLevel;
@@ -318,36 +320,15 @@ const kOptions = Symbol('options');
  * The programmatically provided options take precedence over the URI options.
  *
  * @example
- * ```js
- * // Connect using a MongoClient instance
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * const mongoClient = new MongoClient(url);
- * mongoClient.connect(function(err, client) {
- *   const db = client.db(dbName);
- *   client.close();
- * });
- * ```
+ * ```ts
+ * import { MongoClient } from 'mongodb';
  *
- * @example
- * ```js
- * // Connect using the MongoClient.connect static method
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   const db = client.db(dbName);
- *   client.close();
- * });
+ * // Enable command monitoring for debugging
+ * const client = new MongoClient('mongodb://localhost:27017', { monitorCommands: true });
+ *
+ * client.on('commandStarted', started => console.log(started));
+ * client.db().collection('pets');
+ * await client.insertOne({ name: 'spot', kind: 'dog' });
  * ```
  */
 export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
@@ -448,18 +429,60 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   connect(): Promise<this>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   connect(callback: Callback<this>): void;
   connect(callback?: Callback<this>): Promise<this> | void {
     if (callback && typeof callback !== 'function') {
       throw new MongoInvalidArgumentError('Method `connect` only accepts a callback');
     }
 
-    return maybePromise(callback, cb => {
-      connect(this, this[kOptions], err => {
-        if (err) return cb(err);
-        cb(undefined, this);
-      });
-    });
+    return maybeCallback(async () => {
+      if (this.topology && this.topology.isConnected()) {
+        return this;
+      }
+
+      const options = this[kOptions];
+
+      if (typeof options.srvHost === 'string') {
+        const hosts = await resolveSRVRecord(options);
+
+        for (const [index, host] of hosts.entries()) {
+          options.hosts[index] = host;
+        }
+      }
+
+      const topology = new Topology(options.hosts, options);
+      // Events can be emitted before initialization is complete so we have to
+      // save the reference to the topology on the client ASAP if the event handlers need to access it
+      this.topology = topology;
+      topology.client = this;
+
+      topology.once(Topology.OPEN, () => this.emit('open', this));
+
+      for (const event of MONGO_CLIENT_EVENTS) {
+        topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
+      }
+
+      const topologyConnect = async () => {
+        try {
+          await promisify(callback => topology.connect(options, callback))();
+        } catch (error) {
+          topology.close({ force: true });
+          throw error;
+        }
+      };
+
+      if (this.autoEncrypter) {
+        const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
+        await initAutoEncrypter();
+        await topologyConnect();
+        await options.encrypter.connectInternalClient();
+      } else {
+        await topologyConnect();
+      }
+
+      return this;
+    }, callback);
   }
 
   /**
@@ -469,8 +492,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   close(): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   close(callback: Callback<void>): void;
   close(force: boolean): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   close(force: boolean, callback: Callback<void>): void;
   close(
     forceOrCallback?: boolean | Callback<void>,
@@ -490,66 +515,52 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     const force = typeof forceOrCallback === 'boolean' ? forceOrCallback : false;
 
-    return maybePromise(callback, callback => {
-      if (this.topology == null) {
-        // Do not connect just to end sessions
-        return callback();
-      }
-
+    return maybeCallback(async () => {
       const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
       this.s.activeSessions.clear();
 
-      Promise.all(activeSessionEnds)
-        .then(() => {
-          if (this.topology == null) {
-            return;
-          }
-          // If we would attempt to select a server and get nothing back we short circuit
-          // to avoid the server selection timeout.
-          const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
-          const topologyDescription = this.topology.description;
-          const serverDescriptions = Array.from(topologyDescription.servers.values());
-          const servers = selector(topologyDescription, serverDescriptions);
-          if (servers.length === 0) {
-            return;
-          }
+      await Promise.all(activeSessionEnds);
 
-          const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
-          if (endSessions.length === 0) return;
-          return this.db('admin')
+      if (this.topology == null) {
+        return;
+      }
+
+      // If we would attempt to select a server and get nothing back we short circuit
+      // to avoid the server selection timeout.
+      const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
+      const topologyDescription = this.topology.description;
+      const serverDescriptions = Array.from(topologyDescription.servers.values());
+      const servers = selector(topologyDescription, serverDescriptions);
+      if (servers.length !== 0) {
+        const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
+        if (endSessions.length !== 0) {
+          await this.db('admin')
             .command(
               { endSessions },
               { readPreference: ReadPreference.primaryPreferred, noResponse: true }
             )
             .catch(() => null); // outcome does not matter
-        })
-        .then(() => {
-          if (this.topology == null) {
-            return;
-          }
-          // clear out references to old topology
-          const topology = this.topology;
-          this.topology = undefined;
+        }
+      }
 
-          return new Promise<void>((resolve, reject) => {
-            topology.close({ force }, error => {
+      // clear out references to old topology
+      const topology = this.topology;
+      this.topology = undefined;
+
+      await new Promise<void>((resolve, reject) => {
+        topology.close({ force }, error => {
+          if (error) return reject(error);
+          const { encrypter } = this[kOptions];
+          if (encrypter) {
+            return encrypter.close(this, force, error => {
               if (error) return reject(error);
-              const { encrypter } = this[kOptions];
-              if (encrypter) {
-                return encrypter.close(this, force, error => {
-                  if (error) return reject(error);
-                  resolve();
-                });
-              }
               resolve();
             });
-          });
-        })
-        .then(
-          () => callback(),
-          error => callback(error)
-        );
-    });
+          }
+          resolve();
+        });
+      });
+    }, callback);
   }
 
   /**
@@ -585,30 +596,28 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @see https://docs.mongodb.org/manual/reference/connection-string/
    */
   static connect(url: string): Promise<MongoClient>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   static connect(url: string, callback: Callback<MongoClient>): void;
   static connect(url: string, options: MongoClientOptions): Promise<MongoClient>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   static connect(url: string, options: MongoClientOptions, callback: Callback<MongoClient>): void;
   static connect(
     url: string,
     options?: MongoClientOptions | Callback<MongoClient>,
     callback?: Callback<MongoClient>
   ): Promise<MongoClient> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    callback =
+      typeof callback === 'function'
+        ? callback
+        : typeof options === 'function'
+        ? options
+        : undefined;
 
-    try {
-      // Create client
-      const mongoClient = new MongoClient(url, options);
-      // Execute the connect method
-      if (callback) {
-        return mongoClient.connect(callback);
-      } else {
-        return mongoClient.connect();
-      }
-    } catch (error) {
-      if (callback) return callback(error);
-      else return PromiseProvider.get().reject(error);
-    }
+    return maybeCallback(async () => {
+      options = typeof options !== 'function' ? options : undefined;
+      const client = new this(url, options);
+      return client.connect();
+    }, callback);
   }
 
   /** Starts a new session on the server */
@@ -658,16 +667,18 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     const session = this.startSession(options);
-    const Promise = PromiseProvider.get();
 
-    return Promise.resolve()
-      .then(() => withSessionCallback(session))
-      .then(() => {
-        // Do not return the result of callback
-      })
-      .finally(() => {
-        session.endSession().catch(() => null);
-      });
+    return maybeCallback(async () => {
+      try {
+        await withSessionCallback(session);
+      } finally {
+        try {
+          await session.endSession();
+        } catch {
+          // We are not concerned with errors from endSession()
+        }
+      }
+    }, null);
   }
 
   /**
@@ -676,7 +687,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * changes to system collections, as well as the local, admin, and config databases.
    *
    * @remarks
-   * watch() accepts two generic arguments for distinct usecases:
+   * watch() accepts two generic arguments for distinct use cases:
    * - The first is to provide the schema that may be defined for all the data within the current cluster
    * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
    *

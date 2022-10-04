@@ -1,3 +1,5 @@
+import { promisify } from 'util';
+
 import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -60,7 +62,19 @@ export abstract class AbstractOperation<TResult = any> {
 
   [kSession]: ClientSession | undefined;
 
+  executeAsync: (server: Server, session: ClientSession | undefined) => Promise<TResult>;
+
   constructor(options: OperationOptions = {}) {
+    this.executeAsync = promisify(
+      (
+        server: Server,
+        session: ClientSession | undefined,
+        callback: (e: Error, r: TResult) => void
+      ) => {
+        this.execute(server, session, callback as any);
+      }
+    );
+
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
       : ReadPreference.fromOptions(options) ?? ReadPreference.primary;

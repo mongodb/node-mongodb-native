@@ -122,11 +122,11 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead
    */
   count(): Promise<number>;
-  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead */
+  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead. Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   count(callback: Callback<number>): void;
-  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead */
+  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead. */
   count(options: CountOptions): Promise<number>;
-  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead */
+  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead. Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   count(options: CountOptions, callback: Callback<number>): void;
   count(
     options?: CountOptions | Callback<number>,
@@ -155,6 +155,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** Execute the explain for the cursor */
   explain(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   explain(callback: Callback): void;
   explain(verbosity?: ExplainVerbosityLike): Promise<Document>;
   explain(
@@ -419,7 +420,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       throw new MongoInvalidArgumentError('Option "allowDiskUse" requires a sort specification');
     }
 
-    // As of 6.0 the default is true. This allows users to get back to the old behaviour.
+    // As of 6.0 the default is true. This allows users to get back to the old behavior.
     if (!allow) {
       this[kBuiltOptions].allowDiskUse = false;
       return this;

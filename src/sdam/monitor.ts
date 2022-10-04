@@ -6,15 +6,8 @@ import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { Callback, InterruptibleAsyncInterval } from '../utils';
-import {
-  calculateDurationInMs,
-  EventEmitterWithState,
-  makeInterruptibleAsyncInterval,
-  makeStateMachine,
-  now,
-  ns
-} from '../utils';
+import type { Callback } from '../utils';
+import { calculateDurationInMs, EventEmitterWithState, makeStateMachine, now, ns } from '../utils';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
   ServerHeartbeatFailedEvent,
@@ -87,7 +80,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   [kConnection]?: Connection;
   [kCancellationToken]: CancellationToken;
   /** @internal */
-  [kMonitorId]?: InterruptibleAsyncInterval;
+  [kMonitorId]?: MonitorInterval;
   [kRTTPinger]?: RTTPinger;
 
   get connection(): Connection | undefined {
@@ -150,9 +143,9 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // start
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
-      interval: heartbeatFrequencyMS,
-      minInterval: minHeartbeatFrequencyMS,
+    this[kMonitorId] = new MonitorInterval(monitorServer(this), {
+      heartbeatFrequencyMS: heartbeatFrequencyMS,
+      minHeartbeatFrequencyMS: minHeartbeatFrequencyMS,
       immediate: true
     });
   }
@@ -180,9 +173,9 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // restart monitoring
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;
-    this[kMonitorId] = makeInterruptibleAsyncInterval(monitorServer(this), {
-      interval: heartbeatFrequencyMS,
-      minInterval: minHeartbeatFrequencyMS
+    this[kMonitorId] = new MonitorInterval(monitorServer(this), {
+      heartbeatFrequencyMS: heartbeatFrequencyMS,
+      minHeartbeatFrequencyMS: minHeartbeatFrequencyMS
     });
   }
 
@@ -465,4 +458,130 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
     measureAndReschedule();
   });
+}
+
+/**
+ * @internal
+ */
+export interface MonitorIntervalOptions {
+  /** The interval to execute a method on */
+  heartbeatFrequencyMS: number;
+  /** A minimum interval that must elapse before the method is called */
+  minHeartbeatFrequencyMS: number;
+  /** Whether the method should be called immediately when the interval is started  */
+  immediate: boolean;
+}
+
+/**
+ * @internal
+ */
+export class MonitorInterval {
+  fn: (callback: Callback) => void;
+  timerId: NodeJS.Timeout | undefined;
+  lastExecutionEnded: number;
+  isExpeditedCallToFnScheduled = false;
+  stopped = false;
+  isExecutionInProgress = false;
+  hasExecutedOnce = false;
+
+  heartbeatFrequencyMS: number;
+  minHeartbeatFrequencyMS: number;
+
+  constructor(fn: (callback: Callback) => void, options: Partial<MonitorIntervalOptions> = {}) {
+    this.fn = fn;
+    this.lastExecutionEnded = -Infinity;
+
+    this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 1000;
+    this.minHeartbeatFrequencyMS = options.minHeartbeatFrequencyMS ?? 500;
+
+    if (options.immediate) {
+      this._executeAndReschedule();
+    } else {
+      this._reschedule(undefined);
+    }
+  }
+
+  wake() {
+    const currentTime = now();
+    const timeSinceLastCall = currentTime - this.lastExecutionEnded;
+
+    // TODO(NODE-4674): Add error handling and logging to the monitor
+    if (timeSinceLastCall < 0) {
+      return this._executeAndReschedule();
+    }
+
+    if (this.isExecutionInProgress) {
+      return;
+    }
+
+    // debounce multiple calls to wake within the `minInterval`
+    if (this.isExpeditedCallToFnScheduled) {
+      return;
+    }
+
+    // reschedule a call as soon as possible, ensuring the call never happens
+    // faster than the `minInterval`
+    if (timeSinceLastCall < this.minHeartbeatFrequencyMS) {
+      this.isExpeditedCallToFnScheduled = true;
+      this._reschedule(this.minHeartbeatFrequencyMS - timeSinceLastCall);
+      return;
+    }
+
+    this._executeAndReschedule();
+  }
+
+  stop() {
+    this.stopped = true;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = undefined;
+    }
+
+    this.lastExecutionEnded = -Infinity;
+    this.isExpeditedCallToFnScheduled = false;
+  }
+
+  toString() {
+    return JSON.stringify(this);
+  }
+
+  toJSON() {
+    const currentTime = now();
+    const timeSinceLastCall = currentTime - this.lastExecutionEnded;
+    return {
+      timerId: this.timerId != null ? 'set' : 'cleared',
+      lastCallTime: this.lastExecutionEnded,
+      isExpeditedCheckScheduled: this.isExpeditedCallToFnScheduled,
+      stopped: this.stopped,
+      heartbeatFrequencyMS: this.heartbeatFrequencyMS,
+      minHeartbeatFrequencyMS: this.minHeartbeatFrequencyMS,
+      currentTime,
+      timeSinceLastCall
+    };
+  }
+
+  private _reschedule(ms?: number) {
+    if (this.stopped) return;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+    }
+
+    this.timerId = setTimeout(this._executeAndReschedule, ms || this.heartbeatFrequencyMS);
+  }
+
+  private _executeAndReschedule = () => {
+    if (this.stopped) return;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+    }
+
+    this.isExpeditedCallToFnScheduled = false;
+    this.isExecutionInProgress = true;
+
+    this.fn(() => {
+      this.lastExecutionEnded = now();
+      this.isExecutionInProgress = false;
+      this._reschedule(this.heartbeatFrequencyMS);
+    });
+  };
 }

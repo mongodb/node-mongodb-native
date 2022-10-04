@@ -471,29 +471,14 @@ describe('Explain', function () {
     }
   });
 
-  it('should honor boolean explain with find', {
-    metadata: {
-      requires: {
-        mongodb: '>=3.0'
-      }
-    },
-    test: function (done) {
-      const db = client.db('shouldHonorBooleanExplainWithFind');
-      const collection = db.collection('test');
+  it('should honor boolean explain with find', async () => {
+    const db = client.db('shouldHonorBooleanExplainWithFind');
+    const collection = db.collection('test');
 
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
-
-        collection.find({ a: 1 }, { explain: true }).toArray((err, docs) => {
-          expect(err).to.not.exist;
-          const explanation = docs[0];
-          expect(explanation).to.exist;
-          expect(explanation).property('queryPlanner').to.exist;
-          done();
-        });
-      });
-    }
+    await collection.insertOne({ a: 1 });
+    const [explanation] = await collection.find({ a: 1 }, { explain: true }).toArray();
+    expect(explanation).to.exist;
+    expect(explanation).property('queryPlanner').to.exist;
   });
 
   it('should honor string explain with find', {

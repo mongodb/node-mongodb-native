@@ -1,12 +1,16 @@
 'use strict';
-var expect = require('chai').expect;
-const { setupDatabase } = require('../shared');
+const { expect } = require('chai');
 const { Binary } = require('../../../src');
 const { setTimeout, setImmediate } = require('timers');
 
 describe('Cursor Streams', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
+  let client;
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
   });
 
   it('should stream documents with pause and resume for fetching', {
@@ -208,69 +212,67 @@ describe('Cursor Streams', function () {
     }
   });
 
-  // TODO: NODE-3819: Unskip flaky MacOS tests.
-  const maybeIt = process.platform === 'darwin' ? it.skip : it;
-  maybeIt('should stream documents across getMore command and count correctly', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var self = this;
-      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
-
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-
-        var db = client.db(self.configuration.db);
-        var docs = [];
-
-        for (var i = 0; i < 2000; i++) {
-          docs.push({ a: i, b: new Binary(Buffer.alloc(1024)) });
-        }
-
-        var collection = db.collection('test_streaming_function_with_limit_for_fetching');
-        var updateCollection = db.collection(
-          'test_streaming_function_with_limit_for_fetching_update'
-        );
-
-        collection.insert(docs, { writeConcern: { w: 1 } }, function (err) {
-          expect(err).to.not.exist;
-
-          const stream = collection.find({}).stream();
-
-          stream.on('end', () => {
-            updateCollection.findOne({ id: 1 }, function (err, doc) {
-              expect(err).to.not.exist;
-              expect(doc.count).to.equal(1999);
-
-              client.close(done);
-            });
-          });
-
-          let docCount = 0;
-          stream.on('data', () => {
-            stream.pause();
-
-            if (docCount++ === docs.length - 1) {
-              return;
-            }
-
-            updateCollection.updateMany(
-              { id: 1 },
-              { $inc: { count: 1 } },
-              { writeConcern: { w: 1 }, upsert: true },
-              function (err) {
-                expect(err).to.not.exist;
-                stream.resume();
-              }
-            );
-          });
-        });
-      });
+  it('should stream documents across getMore command and count correctly', async function () {
+    if (process.platform === 'darwin') {
+      this.skipReason = 'TODO(NODE-3819): Unskip flaky MacOS tests.';
+      return this.skip();
     }
+
+    const db = client.db();
+    const collection = db.collection('streaming');
+    const updateCollection = db.collection('update_within_streaming');
+
+    await collection.drop().catch(() => null);
+    await updateCollection.drop().catch(() => null);
+
+    const docs = Array.from({ length: 10 }, (_, i) => ({
+      _id: i,
+      b: new Binary(Buffer.alloc(1024))
+    }));
+
+    await collection.insertMany(docs);
+    // Set the batchSize to be a 5th of the total docCount to make getMores happen
+    const stream = collection.find({}, { batchSize: 2 }).stream();
+
+    let done;
+    const end = new Promise((resolve, reject) => {
+      done = error => (error != null ? reject(error) : resolve());
+    });
+
+    stream.on('end', () => {
+      updateCollection
+        .findOne({ id: 1 })
+        .then(function (doc) {
+          expect(doc.count).to.equal(9);
+          done();
+        })
+        .catch(done)
+        .finally(() => client.close());
+    });
+
+    let docCount = 0;
+    stream.on('data', data => {
+      stream.pause();
+      try {
+        expect(data).to.have.property('_id', docCount);
+      } catch (assertionError) {
+        return done(assertionError);
+      }
+
+      if (docCount++ === docs.length - 1) {
+        stream.resume();
+        return;
+      }
+
+      updateCollection
+        .updateMany({ id: 1 }, { $inc: { count: 1 } }, { writeConcern: { w: 1 }, upsert: true })
+        .then(() => {
+          stream.resume();
+        })
+        .catch(done);
+    });
+
+    return end;
   });
 
   it('should correctly error out stream', {

@@ -27,22 +27,22 @@ function makeBsonBench({ suite, BSON }) {
   }
   return suite
     .benchmark('flatBsonEncoding', benchmark =>
-      benchmark.taskSize(75.31).setup(makeBSONLoader('flat_bson')).task(encodeBSON)
+      benchmark.taskSize(75.31).taskType('sync').setup(makeBSONLoader('flat_bson')).task(encodeBSON)
     )
     .benchmark('flatBsonDecoding', benchmark =>
-      benchmark.taskSize(75.31).setup(makeBSONLoader('flat_bson')).task(decodeBSON)
+      benchmark.taskSize(75.31).taskType('sync').setup(makeBSONLoader('flat_bson')).task(decodeBSON)
     )
     .benchmark('deepBsonEncoding', benchmark =>
-      benchmark.taskSize(19.64).setup(makeBSONLoader('deep_bson')).task(encodeBSON)
+      benchmark.taskSize(19.64).taskType('sync').setup(makeBSONLoader('deep_bson')).task(encodeBSON)
     )
     .benchmark('deepBsonDecoding', benchmark =>
-      benchmark.taskSize(19.64).setup(makeBSONLoader('deep_bson')).task(decodeBSON)
+      benchmark.taskSize(19.64).taskType('sync').setup(makeBSONLoader('deep_bson')).task(decodeBSON)
     )
     .benchmark('fullBsonEncoding', benchmark =>
-      benchmark.taskSize(57.34).setup(makeBSONLoader('full_bson')).task(encodeBSON)
+      benchmark.taskSize(57.34).taskType('sync').setup(makeBSONLoader('full_bson')).task(encodeBSON)
     )
     .benchmark('fullBsonDecoding', benchmark =>
-      benchmark.taskSize(57.34).setup(makeBSONLoader('full_bson')).task(decodeBSON)
+      benchmark.taskSize(57.34).taskType('sync').setup(makeBSONLoader('full_bson')).task(decodeBSON)
     );
 }
 

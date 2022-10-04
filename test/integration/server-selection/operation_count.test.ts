@@ -3,7 +3,7 @@ import * as sinon from 'sinon';
 
 import { AbstractCursor, Collection, MongoClient } from '../../../src';
 import { ConnectionPool } from '../../../src/cmap/connection_pool';
-import { FailPoint } from '../../tools/utils';
+import { FailPoint, sleep } from '../../tools/utils';
 
 const testMetadata: MongoDBMetadataUI = {
   requires: {
@@ -123,6 +123,10 @@ describe('Server Operation Count Tests', function () {
       const operationPromises = Array.from({ length: 10 }, () =>
         collection.insertOne({ count: 1 })
       );
+
+      // operation count is incremented after connection checkout, which happens asynchronously (even though there are plenty of connections in the pool).
+      // we sleep to give the event loop a turn so that all the commands check out a connection before asserting the operation count
+      await sleep(1);
 
       expect(server.s.operationCount).to.equal(10);
 

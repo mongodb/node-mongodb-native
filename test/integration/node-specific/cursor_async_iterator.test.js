@@ -109,7 +109,7 @@ describe('Cursor Async Iterator Tests', function () {
 
     afterEach(() => {
       promiseSpy.restore();
-      PromiseProvider.set(Promise);
+      PromiseProvider.set(null);
       return client.close();
     });
 

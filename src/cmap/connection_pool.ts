@@ -16,9 +16,16 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY
 } from '../constants';
-import { MongoError, MongoInvalidArgumentError, MongoRuntimeError } from '../error';
+import {
+  MongoError,
+  MongoInvalidArgumentError,
+  MongoNetworkError,
+  MongoRuntimeError,
+  MongoServerError
+} from '../error';
 import { Logger } from '../logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import type { Server } from '../sdam/server';
 import { Callback, eachAsync, makeCounter } from '../utils';
 import { connect } from './connect';
 import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
@@ -38,6 +45,8 @@ import {
 import { PoolClearedError, PoolClosedError, WaitQueueTimeoutError } from './errors';
 import { ConnectionPoolMetrics } from './metrics';
 
+/** @internal */
+const kServer = Symbol('server');
 /** @internal */
 const kLogger = Symbol('logger');
 /** @internal */
@@ -81,6 +90,8 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
   waitQueueTimeoutMS: number;
   /** If we are in load balancer mode. */
   loadBalanced: boolean;
+  /** @internal */
+  minPoolSizeCheckFrequencyMS?: number;
 }
 
 /** @internal */
@@ -125,6 +136,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   options: Readonly<ConnectionPoolOptions>;
   /** @internal */
   [kPoolState]: typeof PoolState[keyof typeof PoolState];
+  /** @internal */
+  [kServer]: Server;
   /** @internal */
   [kLogger]: Logger;
   /** @internal */
@@ -212,7 +225,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   static readonly CONNECTION_CHECKED_IN = CONNECTION_CHECKED_IN;
 
   /** @internal */
-  constructor(options: ConnectionPoolOptions) {
+  constructor(server: Server, options: ConnectionPoolOptions) {
     super();
 
     this.options = Object.freeze({
@@ -223,6 +236,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       maxConnecting: options.maxConnecting ?? 2,
       maxIdleTimeMS: options.maxIdleTimeMS ?? 0,
       waitQueueTimeoutMS: options.waitQueueTimeoutMS ?? 0,
+      minPoolSizeCheckFrequencyMS: options.minPoolSizeCheckFrequencyMS ?? 100,
       autoEncrypter: options.autoEncrypter,
       metadata: options.metadata
     });
@@ -234,6 +248,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     this[kPoolState] = PoolState.paused;
+    this[kServer] = server;
     this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
     this[kPending] = 0;
@@ -302,6 +317,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   get serviceGenerations(): Map<string, number> {
     return this[kServiceGenerations];
+  }
+
+  get serverError() {
+    return this[kServer].description.error;
   }
 
   /**
@@ -423,11 +442,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kPoolState] = PoolState.paused;
 
     this.clearMinPoolSizeTimer();
-    this.processWaitQueue();
-
     if (!alreadyPaused) {
       this.emit(ConnectionPool.CONNECTION_POOL_CLEARED, new ConnectionPoolClearedEvent(this));
     }
+    this.processWaitQueue();
   }
 
   /** Close the pool */
@@ -588,6 +606,13 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       if (err || !connection) {
         this[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
         this[kPending]--;
+        this.emit(
+          ConnectionPool.CONNECTION_CLOSED,
+          new ConnectionClosedEvent(this, { id: connectOptions.id, serviceId: undefined }, 'error')
+        );
+        if (err instanceof MongoNetworkError || err instanceof MongoServerError) {
+          err.connectionGeneration = connectOptions.generation;
+        }
         callback(err ?? new MongoRuntimeError('Connection creation failed without error'));
         return;
       }
@@ -652,18 +677,27 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // connection permits because that potentially delays the availability of
       // the connection to a checkout request
       this.createConnection((err, connection) => {
+        if (err) {
+          this[kServer].handleError(err);
+        }
         if (!err && connection) {
           this[kConnections].push(connection);
           process.nextTick(() => this.processWaitQueue());
         }
         if (this[kPoolState] === PoolState.ready) {
           clearTimeout(this[kMinPoolSizeTimer]);
-          this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 10);
+          this[kMinPoolSizeTimer] = setTimeout(
+            () => this.ensureMinPoolSize(),
+            this.options.minPoolSizeCheckFrequencyMS
+          );
         }
       });
     } else {
       clearTimeout(this[kMinPoolSizeTimer]);
-      this[kMinPoolSizeTimer] = setTimeout(() => this.ensureMinPoolSize(), 100);
+      this[kMinPoolSizeTimer] = setTimeout(
+        () => this.ensureMinPoolSize(),
+        this.options.minPoolSizeCheckFrequencyMS
+      );
     }
   }
 

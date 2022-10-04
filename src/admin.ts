@@ -29,26 +29,15 @@ export interface AdminPrivate {
  * @public
  *
  * @example
- * ```js
- * const MongoClient = require('mongodb').MongoClient;
- * const test = require('assert');
- * // Connection url
- * const url = 'mongodb://localhost:27017';
- * // Database Name
- * const dbName = 'test';
+ * ```ts
+ * import { MongoClient } from 'mongodb';
  *
- * // Connect using MongoClient
- * MongoClient.connect(url, function(err, client) {
- *   // Use the admin database for the operation
- *   const adminDb = client.db(dbName).admin();
- *
- *   // List all the available databases
- *   adminDb.listDatabases(function(err, dbs) {
- *     expect(err).to.not.exist;
- *     test.ok(dbs.databases.length > 0);
- *     client.close();
- *   });
- * });
+ * const client = new MongoClient('mongodb://localhost:27017');
+ * const admin = client.db().admin();
+ * const dbInfo = await admin.listDatabases();
+ * for (const db of dbInfo.databases) {
+ *   console.log(db.name);
+ * }
  * ```
  */
 export class Admin {
@@ -71,8 +60,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   command(command: Document): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   command(command: Document, callback: Callback<Document>): void;
   command(command: Document, options: RunCommandOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   command(command: Document, options: RunCommandOptions, callback: Callback<Document>): void;
   command(
     command: Document,
@@ -96,8 +87,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   buildInfo(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   buildInfo(callback: Callback<Document>): void;
   buildInfo(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   buildInfo(options: CommandOperationOptions, callback: Callback<Document>): void;
   buildInfo(
     options?: CommandOperationOptions | Callback<Document>,
@@ -115,8 +108,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   serverInfo(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   serverInfo(callback: Callback<Document>): void;
   serverInfo(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   serverInfo(options: CommandOperationOptions, callback: Callback<Document>): void;
   serverInfo(
     options?: CommandOperationOptions | Callback<Document>,
@@ -134,8 +129,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   serverStatus(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   serverStatus(callback: Callback<Document>): void;
   serverStatus(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   serverStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
   serverStatus(
     options?: CommandOperationOptions | Callback<Document>,
@@ -153,8 +150,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   ping(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   ping(callback: Callback<Document>): void;
   ping(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   ping(options: CommandOperationOptions, callback: Callback<Document>): void;
   ping(
     options?: CommandOperationOptions | Callback<Document>,
@@ -174,12 +173,16 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   addUser(username: string): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   addUser(username: string, callback: Callback<Document>): void;
   addUser(username: string, password: string): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   addUser(username: string, password: string, callback: Callback<Document>): void;
   addUser(username: string, options: AddUserOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   addUser(username: string, options: AddUserOptions, callback: Callback<Document>): void;
   addUser(username: string, password: string, options: AddUserOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   addUser(
     username: string,
     password: string,
@@ -221,8 +224,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   removeUser(username: string): Promise<boolean>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   removeUser(username: string, callback: Callback<boolean>): void;
   removeUser(username: string, options: RemoveUserOptions): Promise<boolean>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   removeUser(username: string, options: RemoveUserOptions, callback: Callback<boolean>): void;
   removeUser(
     username: string,
@@ -247,8 +252,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   validateCollection(collectionName: string): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   validateCollection(collectionName: string, callback: Callback<Document>): void;
   validateCollection(collectionName: string, options: ValidateCollectionOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   validateCollection(
     collectionName: string,
     options: ValidateCollectionOptions,
@@ -276,8 +283,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   listDatabases(): Promise<ListDatabasesResult>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   listDatabases(callback: Callback<ListDatabasesResult>): void;
   listDatabases(options: ListDatabasesOptions): Promise<ListDatabasesResult>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   listDatabases(options: ListDatabasesOptions, callback: Callback<ListDatabasesResult>): void;
   listDatabases(
     options?: ListDatabasesOptions | Callback<ListDatabasesResult>,
@@ -300,8 +309,10 @@ export class Admin {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   replSetGetStatus(): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   replSetGetStatus(callback: Callback<Document>): void;
   replSetGetStatus(options: CommandOperationOptions): Promise<Document>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   replSetGetStatus(options: CommandOperationOptions, callback: Callback<Document>): void;
   replSetGetStatus(
     options?: CommandOperationOptions | Callback<Document>,

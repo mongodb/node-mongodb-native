@@ -11,45 +11,6 @@ const {
   makeLoadTweets
 } = require('../../driverBench/common');
 
-function makeTestInsertOne(numberOfOps) {
-  return function (done) {
-    const loop = _id => {
-      if (_id > numberOfOps) {
-        return done();
-      }
-
-      const doc = Object.assign({}, this.doc);
-
-      this.collection.insertOne(doc, err => (err ? done(err) : loop(_id + 1)));
-    };
-
-    loop(1);
-  };
-}
-
-function findOneById(done) {
-  const loop = _id => {
-    if (_id > 10000) {
-      return done();
-    }
-
-    return this.collection.findOne({ _id }, err => (err ? done(err) : loop(_id + 1)));
-  };
-
-  return loop(1);
-}
-
-function runCommand(done) {
-  const loop = _id => {
-    if (_id > 10000) {
-      return done();
-    }
-    return this.db.command({ hello: true }, err => (err ? done(err) : loop(_id + 1)));
-  };
-
-  return loop(1);
-}
-
 function makeSingleBench(suite) {
   suite
     .benchmark('runCommand', benchmark =>
@@ -58,7 +19,11 @@ function makeSingleBench(suite) {
         .setup(makeClient)
         .setup(connectClient)
         .setup(initDb)
-        .task(runCommand)
+        .task(async function () {
+          for (let i = 0; i < 10000; ++i) {
+            await this.db.command({ hello: true });
+          }
+        })
         .teardown(disconnectClient)
     )
     .benchmark('findOne', benchmark =>
@@ -71,7 +36,11 @@ function makeSingleBench(suite) {
         .setup(dropDb)
         .setup(initCollection)
         .setup(makeLoadTweets(true))
-        .task(findOneById)
+        .task(async function () {
+          for (let _id = 0; _id < 10000; ++_id) {
+            await this.collection.findOne({ _id });
+          }
+        })
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
@@ -89,7 +58,14 @@ function makeSingleBench(suite) {
         .beforeTask(dropCollection)
         .beforeTask(createCollection)
         .beforeTask(initCollection)
-        .task(makeTestInsertOne(10000))
+        .beforeTask(function () {
+          this.docs = Array.from({ length: 10000 }, () => Object.assign({}, this.doc));
+        })
+        .task(async function () {
+          for (const doc of this.docs) {
+            await this.collection.insertOne(doc);
+          }
+        })
         .teardown(dropDb)
         .teardown(disconnectClient)
     )
@@ -107,7 +83,14 @@ function makeSingleBench(suite) {
         .beforeTask(dropCollection)
         .beforeTask(createCollection)
         .beforeTask(initCollection)
-        .task(makeTestInsertOne(10))
+        .beforeTask(function () {
+          this.docs = Array.from({ length: 10 }, () => Object.assign({}, this.doc));
+        })
+        .task(async function () {
+          for (const doc of this.docs) {
+            await this.collection.insertOne(doc);
+          }
+        })
         .teardown(dropDb)
         .teardown(disconnectClient)
     );

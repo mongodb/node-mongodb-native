@@ -14,6 +14,7 @@ class Benchmark {
     // Meta information
     this._taskSize = null;
     this._description = null;
+    this._taskType = 'async';
   }
 
   /**
@@ -97,6 +98,23 @@ class Benchmark {
   }
 
   /**
+   * Sets the task type - either a synchronous or asynchronous task.  The default is async.
+   *
+   * @param {'async' | 'sync'} type - the type of task
+   */
+  taskType(type) {
+    if (['async', 'sync'].includes(type)) {
+      this._taskType = type;
+    } else {
+      throw new Error(
+        `Invalid value for benchmark field _taskType: expected either 'async' or 'sync', but received ${type}`
+      );
+    }
+
+    return this;
+  }
+
+  /**
    * Set the Description
    *
    * @param {string} description The description of the benchmark
@@ -122,11 +140,11 @@ class Benchmark {
    * @throws Error
    */
   validate() {
-    ['_task', '_taskSize'].forEach(key => {
+    for (const key of ['_task', '_taskSize', '_taskType']) {
       if (!this[key]) {
         throw new Error(`Benchmark is missing required field ${key}`);
       }
-    });
+    }
   }
 
   toObj() {

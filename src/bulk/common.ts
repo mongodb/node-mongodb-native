@@ -22,7 +22,6 @@ import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
 import { AbstractOperation, Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, UpdateStatement } from '../operations/update';
-import { PromiseProvider } from '../promise_provider';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
@@ -31,6 +30,7 @@ import {
   Callback,
   getTopology,
   hasAtomicOperators,
+  maybeCallback,
   MongoDBNamespace,
   resolveOptions
 } from '../utils';
@@ -784,7 +784,7 @@ export class FindOperators {
   }
 
   /** Add a multiple update operation to the bulk operation */
-  update(updateDocument: Document): BulkOperationBase {
+  update(updateDocument: Document | Document[]): BulkOperationBase {
     const currentOp = buildCurrentOp(this.bulkOperation);
     return this.bulkOperation.addToOperationsList(
       BatchType.UPDATE,
@@ -796,7 +796,7 @@ export class FindOperators {
   }
 
   /** Add a single update operation to the bulk operation */
-  updateOne(updateDocument: Document): BulkOperationBase {
+  updateOne(updateDocument: Document | Document[]): BulkOperationBase {
     if (!hasAtomicOperators(updateDocument)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
@@ -866,6 +866,16 @@ export class FindOperators {
     }
 
     this.bulkOperation.s.currentOp.arrayFilters = arrayFilters;
+    return this;
+  }
+
+  /** Specifies hint for the bulk operation. */
+  hint(hint: Hint): this {
+    if (!this.bulkOperation.s.currentOp) {
+      this.bulkOperation.s.currentOp = {};
+    }
+
+    this.bulkOperation.s.currentOp.hint = hint;
     return this;
   }
 }
@@ -1065,7 +1075,7 @@ export abstract class BulkOperationBase {
    * Add a single insert document to the bulk operation
    *
    * @example
-   * ```js
+   * ```ts
    * const bulkOp = collection.initializeOrderedBulkOp();
    *
    * // Adds three inserts to the bulkOp.
@@ -1089,7 +1099,7 @@ export abstract class BulkOperationBase {
    * Returns a builder object used to complete the definition of the operation.
    *
    * @example
-   * ```js
+   * ```ts
    * const bulkOp = collection.initializeOrderedBulkOp();
    *
    * // Add an updateOne to the bulkOp
@@ -1247,8 +1257,11 @@ export abstract class BulkOperationBase {
   }
 
   execute(options?: BulkWriteOptions): Promise<BulkWriteResult>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   execute(callback: Callback<BulkWriteResult>): void;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   execute(options: BulkWriteOptions | undefined, callback: Callback<BulkWriteResult>): void;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   execute(
     options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
@@ -1257,39 +1270,43 @@ export abstract class BulkOperationBase {
     options?: BulkWriteOptions | Callback<BulkWriteResult>,
     callback?: Callback<BulkWriteResult>
   ): Promise<BulkWriteResult> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
+    callback =
+      typeof callback === 'function'
+        ? callback
+        : typeof options === 'function'
+        ? options
+        : undefined;
+    return maybeCallback(async () => {
+      options = options != null && typeof options !== 'function' ? options : {};
 
-    if (this.s.executed) {
-      return handleEarlyError(new MongoBatchReExecutionError(), callback);
-    }
+      if (this.s.executed) {
+        throw new MongoBatchReExecutionError();
+      }
 
-    const writeConcern = WriteConcern.fromOptions(options);
-    if (writeConcern) {
-      this.s.writeConcern = writeConcern;
-    }
+      const writeConcern = WriteConcern.fromOptions(options);
+      if (writeConcern) {
+        this.s.writeConcern = writeConcern;
+      }
 
-    // If we have current batch
-    if (this.isOrdered) {
-      if (this.s.currentBatch) this.s.batches.push(this.s.currentBatch);
-    } else {
-      if (this.s.currentInsertBatch) this.s.batches.push(this.s.currentInsertBatch);
-      if (this.s.currentUpdateBatch) this.s.batches.push(this.s.currentUpdateBatch);
-      if (this.s.currentRemoveBatch) this.s.batches.push(this.s.currentRemoveBatch);
-    }
-    // If we have no operations in the bulk raise an error
-    if (this.s.batches.length === 0) {
-      const emptyBatchError = new MongoInvalidArgumentError(
-        'Invalid BulkOperation, Batch cannot be empty'
-      );
-      return handleEarlyError(emptyBatchError, callback);
-    }
+      // If we have current batch
+      if (this.isOrdered) {
+        if (this.s.currentBatch) this.s.batches.push(this.s.currentBatch);
+      } else {
+        if (this.s.currentInsertBatch) this.s.batches.push(this.s.currentInsertBatch);
+        if (this.s.currentUpdateBatch) this.s.batches.push(this.s.currentUpdateBatch);
+        if (this.s.currentRemoveBatch) this.s.batches.push(this.s.currentRemoveBatch);
+      }
+      // If we have no operations in the bulk raise an error
+      if (this.s.batches.length === 0) {
+        throw new MongoInvalidArgumentError('Invalid BulkOperation, Batch cannot be empty');
+      }
 
-    this.s.executed = true;
-    const finalOptions = { ...this.s.options, ...options };
-    const operation = new BulkWriteShimOperation(this, finalOptions);
+      this.s.executed = true;
+      const finalOptions = { ...this.s.options, ...options };
+      const operation = new BulkWriteShimOperation(this, finalOptions);
 
-    return executeOperation(this.s.collection.s.db.s.client, operation, callback);
+      return executeOperation(this.s.collection.s.db.s.client, operation);
+    }, callback);
   }
 
   /**
@@ -1337,20 +1354,6 @@ Object.defineProperty(BulkOperationBase.prototype, 'length', {
     return this.s.currentIndex;
   }
 });
-
-/** helper function to assist with promiseOrCallback behavior */
-function handleEarlyError(
-  err?: AnyError,
-  callback?: Callback<BulkWriteResult>
-): Promise<BulkWriteResult> | void {
-  const Promise = PromiseProvider.get();
-  if (typeof callback === 'function') {
-    callback(err);
-    return;
-  }
-
-  return Promise.reject(err);
-}
 
 function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {
   if (typeof bulkOperation.s.options.forceServerObjectId === 'boolean') {

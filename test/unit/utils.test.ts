@@ -1,18 +1,18 @@
+import { Promise as BluebirdPromise } from 'bluebird';
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 import { MongoRuntimeError } from '../../src/error';
+import { Promise as PromiseProvider } from '../../src/index';
 import {
   BufferPool,
   eachAsync,
   HostAddress,
   isHello,
-  makeInterruptibleAsyncInterval,
+  maybeCallback,
   MongoDBNamespace,
   shuffle
 } from '../../src/utils';
-import { createTimerSandbox } from './timer_sandbox';
 
 describe('driver utils', function () {
   context('eachAsync()', function () {
@@ -43,295 +43,6 @@ describe('driver utils', function () {
         )
       ).to.throw(/something wicked/);
       done();
-    });
-  });
-
-  describe('#makeInterruptibleAsyncInterval', function () {
-    let timerSandbox, clock, executor, fnSpy;
-
-    beforeEach(function () {
-      timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-      fnSpy = sinon.spy(cb => {
-        cb();
-      });
-    });
-
-    afterEach(function () {
-      if (executor) {
-        executor.stop();
-      }
-      clock.restore();
-      timerSandbox.restore();
-    });
-
-    context('when the immediate option is provided', function () {
-      it('executes the function immediately and schedules the next execution on the interval', function () {
-        executor = makeInterruptibleAsyncInterval(fnSpy, {
-          immediate: true,
-          minInterval: 10,
-          interval: 30
-        });
-        // expect immediate invocation
-        expect(fnSpy.calledOnce).to.be.true;
-        // advance clock by less than the scheduled interval to ensure we don't execute early
-        clock.tick(29);
-        expect(fnSpy.calledOnce).to.be.true;
-        // advance clock to the interval
-        clock.tick(1);
-        expect(fnSpy.calledTwice).to.be.true;
-      });
-    });
-
-    context('when the immediate option is not provided', function () {
-      it('executes the function on the provided interval', function () {
-        executor = makeInterruptibleAsyncInterval(fnSpy, { minInterval: 10, interval: 30 });
-        // advance clock by less than the scheduled interval to ensure we don't execute early
-        clock.tick(29);
-        expect(fnSpy.callCount).to.equal(0);
-        // advance clock to the interval
-        clock.tick(1);
-        expect(fnSpy.calledOnce).to.be.true;
-        // advance clock by the interval
-        clock.tick(30);
-        expect(fnSpy.calledTwice).to.be.true;
-      });
-    });
-
-    describe('#wake', function () {
-      context('when the time until next call is negative', () => {
-        // somehow we missed the execution, due to an unreliable clock
-
-        it('should execute immediately and schedule the next execution on the interval if this is the first wake', () => {
-          let fakeClockHasTicked = false;
-          executor = makeInterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30,
-            clock: () => {
-              if (fakeClockHasTicked) {
-                return 81;
-              }
-              fakeClockHasTicked = true;
-              return 50;
-            }
-          });
-
-          // tick the environment clock by a smaller amount than the interval
-          clock.tick(2);
-          // sanity check to make sure we haven't called execute yet
-          expect(fnSpy.callCount).to.equal(0);
-          executor.wake();
-          // expect immediate execution since expected next call time was 50 + 30 = 80, but the clock shows 81
-          expect(fnSpy.calledOnce).to.be.true;
-          // move forward by more than minInterval but less than full interval to ensure we're scheduling correctly
-          clock.tick(29);
-          expect(fnSpy.calledOnce).to.be.true;
-          // move forward by the full interval to make sure the scheduled call executes
-          clock.tick(1);
-          expect(fnSpy.calledTwice).to.be.true;
-        });
-
-        it('should execute immediately and schedule the next execution on the interval if this is a repeated wake and the current execution is not rescheduled', () => {
-          let fakeClockTickCount = 0;
-          executor = makeInterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30,
-            clock: () => {
-              if (fakeClockTickCount === 0) {
-                // on init, return arbitrary starting time
-                fakeClockTickCount++;
-                return 50;
-              }
-              if (fakeClockTickCount === 1) {
-                // expected execution time is 80
-                // on first wake return a time so less than minInterval is left and no need to reschedule
-                fakeClockTickCount++;
-                return 71;
-              }
-              return 81;
-            }
-          });
-
-          // tick the clock by a small amount before and after the wake to make sure no unexpected async things are happening
-          clock.tick(11);
-          executor.wake();
-          clock.tick(5);
-          expect(fnSpy.callCount).to.equal(0);
-          // call our second wake that gets the overdue timer, so expect immediate execution
-          executor.wake();
-          expect(fnSpy.calledOnce).to.be.true;
-          // move forward by more than minInterval but less than full interval to ensure we're scheduling correctly
-          clock.tick(29);
-          expect(fnSpy.calledOnce).to.be.true;
-          // move forward by the full interval to make sure the scheduled call executes
-          clock.tick(1);
-          expect(fnSpy.calledTwice).to.be.true;
-        });
-
-        it('should execute immediately and schedule the next execution on the interval if this is a repeated wake even if the current execution is rescheduled', () => {
-          let fakeClockTickCount = 0;
-          executor = makeInterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30,
-            clock: () => {
-              if (fakeClockTickCount === 0) {
-                // on init, return arbitrary starting time
-                fakeClockTickCount++;
-                return 50;
-              }
-              if (fakeClockTickCount === 1) {
-                // expected execution time is 80
-                // on first wake return a time so that more than minInterval is left
-                fakeClockTickCount++;
-                return 61;
-              }
-              return 81;
-            }
-          });
-
-          // tick the clock by a small amount before and after the wake to make sure no unexpected async things are happening
-          clock.tick(2);
-          executor.wake();
-          clock.tick(9);
-          expect(fnSpy.callCount).to.equal(0);
-          // call our second wake that gets the overdue timer, so expect immediate execution
-          executor.wake();
-          expect(fnSpy.calledOnce).to.be.true;
-          // move forward by more than minInterval but less than full interval to ensure we're scheduling correctly
-          clock.tick(29);
-          expect(fnSpy.calledOnce).to.be.true;
-          // move forward by the full interval to make sure the scheduled call executes
-          clock.tick(1);
-          expect(fnSpy.calledTwice).to.be.true;
-        });
-      });
-
-      context('when the time until next call is less than the minInterval', () => {
-        // we can't make it go any faster, so we should let the scheduled execution run
-
-        it('should execute on the interval if this is the first wake', () => {
-          executor = makeInterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
-          });
-          // tick the environment clock so that less than minInterval is left
-          clock.tick(21);
-          executor.wake();
-          // move forward to just before exepected execution time
-          clock.tick(8);
-          expect(fnSpy.callCount).to.equal(0);
-          // move forward to the full interval to make sure the scheduled call executes
-          clock.tick(1);
-          expect(fnSpy.calledOnce).to.be.true;
-          // check to make sure the next execution runs as expected
-          clock.tick(29);
-          expect(fnSpy.calledOnce).to.be.true;
-          clock.tick(1);
-          expect(fnSpy.calledTwice).to.be.true;
-        });
-
-        it('should execute on the original interval if this is a repeated wake and the current execution is not rescheduled', () => {
-          executor = makeInterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
-          });
-          // tick the environment clock so that less than minInterval is left
-          clock.tick(21);
-          executor.wake();
-          // tick the environment clock some more so that the next wake is called at a different time
-          clock.tick(2);
-          executor.wake();
-          // tick to just before the expected execution time
-          clock.tick(6);
-          expect(fnSpy.callCount).to.equal(0);
-          // tick up to 20 for the expected execution
-          clock.tick(1);
-          expect(fnSpy.calledOnce).to.be.true;
-          // check to make sure the next execution runs as expected
-          clock.tick(29);
-          expect(fnSpy.calledOnce).to.be.true;
-          clock.tick(1);
-          expect(fnSpy.calledTwice).to.be.true;
-        });
-
-        it('should execute on the minInterval from the first wake if this is a repeated wake and the current execution is rescheduled', () => {
-          executor = makeInterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
-          });
-          // tick the environment clock so that more than minInterval is left
-          clock.tick(13);
-          executor.wake();
-          // the first wake should move up the execution to occur at 23 ticks from the start
-          // we tick 8 to get to 21, so that less than minInterval is left on the original interval expected execution
-          clock.tick(8);
-          executor.wake();
-          // now we tick to just before the rescheduled execution time
-          clock.tick(1);
-          expect(fnSpy.callCount).to.equal(0);
-          // tick up to 23 for the expected execution
-          clock.tick(1);
-          expect(fnSpy.calledOnce).to.be.true;
-          // check to make sure the next execution runs as expected
-          clock.tick(29);
-          expect(fnSpy.calledOnce).to.be.true;
-          clock.tick(1);
-          expect(fnSpy.calledTwice).to.be.true;
-        });
-      });
-
-      context('when the time until next call is more than the minInterval', () => {
-        // expedite the execution to minInterval
-
-        it('should execute on the minInterval if this is the first wake', () => {
-          executor = makeInterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
-          });
-          // tick the environment clock so that more than minInterval is left
-          clock.tick(3);
-          executor.wake();
-          // the first wake should move up the execution to occur at 13 ticks from the start
-          // we tick to just before the rescheduled execution time
-          clock.tick(9);
-          expect(fnSpy.callCount).to.equal(0);
-          // tick up to 13 for the expected execution
-          clock.tick(1);
-          expect(fnSpy.calledOnce).to.be.true;
-          // check to make sure the next execution runs as expected
-          clock.tick(29);
-          expect(fnSpy.calledOnce).to.be.true;
-          clock.tick(1);
-          expect(fnSpy.calledTwice).to.be.true;
-        });
-
-        it('should execute on the minInterval from the first wake if this is a repeated wake', () => {
-          // NOTE: under regular circumstances, if the second wake is early enough to warrant a reschedule
-          // then the first wake must have already warranted a reschedule
-          executor = makeInterruptibleAsyncInterval(fnSpy, {
-            minInterval: 10,
-            interval: 30
-          });
-          // tick the environment clock so that more than minInterval is left
-          clock.tick(3);
-          executor.wake();
-          // the first wake should move up the execution to occur at 13 ticks from the start
-          // we tick a bit more so that more than minInterval is still left and call our repeated wake
-          clock.tick(2);
-          executor.wake();
-          // tick up to just before the expected execution
-          clock.tick(7);
-          expect(fnSpy.callCount).to.equal(0);
-          // now go up to 13
-          clock.tick(1);
-          expect(fnSpy.calledOnce).to.be.true;
-          // check to make sure the next execution runs as expected
-          clock.tick(29);
-          expect(fnSpy.calledOnce).to.be.true;
-          clock.tick(1);
-          expect(fnSpy.calledTwice).to.be.true;
-        });
-      });
     });
   });
 
@@ -598,27 +309,27 @@ describe('driver utils', function () {
       it('should handle decoded unix socket path', () => {
         const ha = new HostAddress(socketPath);
         expect(ha).to.have.property('socketPath', socketPath);
-        expect(ha).to.not.have.property('port');
+        expect(ha).to.have.property('port', undefined);
       });
 
       it('should handle encoded unix socket path', () => {
         const ha = new HostAddress(encodeURIComponent(socketPath));
         expect(ha).to.have.property('socketPath', socketPath);
-        expect(ha).to.not.have.property('port');
+        expect(ha).to.have.property('port', undefined);
       });
 
       it('should handle encoded unix socket path with an unencoded space', () => {
         const socketPathWithSpaces = '/tmp/some directory/mongodb-27017.sock';
         const ha = new HostAddress(socketPathWithSpaces);
         expect(ha).to.have.property('socketPath', socketPathWithSpaces);
-        expect(ha).to.not.have.property('port');
+        expect(ha).to.have.property('port', undefined);
       });
 
       it('should handle unix socket path that does not begin with a slash', () => {
         const socketPathWithoutSlash = 'my_local/directory/mustEndWith.sock';
         const ha = new HostAddress(socketPathWithoutSlash);
         expect(ha).to.have.property('socketPath', socketPathWithoutSlash);
-        expect(ha).to.not.have.property('port');
+        expect(ha).to.have.property('port', undefined);
       });
 
       it('should only set the socketPath property on HostAddress when hostString ends in .sock', () => {
@@ -627,8 +338,8 @@ describe('driver utils', function () {
         const hostnameThatEndsWithSock = 'iLoveJavascript.sock';
         const ha = new HostAddress(hostnameThatEndsWithSock);
         expect(ha).to.have.property('socketPath', hostnameThatEndsWithSock);
-        expect(ha).to.not.have.property('port');
-        expect(ha).to.not.have.property('host');
+        expect(ha).to.have.property('port', undefined);
+        expect(ha).to.have.property('host', undefined);
       });
 
       it('should set the host and port property on HostAddress even when hostname ends in .sock if there is a port number specified', () => {
@@ -636,9 +347,137 @@ describe('driver utils', function () {
         // the port number at the end of the hostname (even if it is the default)
         const hostnameThatEndsWithSockHasPort = 'iLoveJavascript.sock:27017';
         const ha = new HostAddress(hostnameThatEndsWithSockHasPort);
-        expect(ha).to.not.have.property('socketPath');
+        expect(ha).to.have.property('socketPath', undefined);
         expect(ha).to.have.property('host', 'iLoveJavascript.sock'.toLowerCase());
         expect(ha).to.have.property('port', 27017);
+      });
+    });
+  });
+
+  describe('maybeCallback()', () => {
+    it('should accept two arguments', () => {
+      expect(maybeCallback).to.have.lengthOf(2);
+    });
+
+    describe('when handling an error case', () => {
+      it('should pass the error to the callback provided', done => {
+        const superPromiseRejection = Promise.reject(new Error('fail'));
+        const result = maybeCallback(
+          () => superPromiseRejection,
+          (error, result) => {
+            try {
+              expect(result).to.not.exist;
+              expect(error).to.be.instanceOf(Error);
+              return done();
+            } catch (assertionError) {
+              return done(assertionError);
+            }
+          }
+        );
+        expect(result).to.be.undefined;
+      });
+
+      it('should return the rejected promise to the caller when no callback is provided', async () => {
+        const superPromiseRejection = Promise.reject(new Error('fail'));
+        const returnedPromise = maybeCallback(() => superPromiseRejection, undefined);
+        expect(returnedPromise).to.equal(superPromiseRejection);
+        // @ts-expect-error: There is no overload to change the return type not be nullish,
+        // and we do not want to add one in fear of making it too easy to neglect adding the callback argument
+        const thrownError = await returnedPromise.catch(error => error);
+        expect(thrownError).to.be.instanceOf(Error);
+      });
+
+      it('should not modify a rejection error promise', async () => {
+        class MyError extends Error {}
+        const driverError = Object.freeze(new MyError());
+        const rejection = Promise.reject(driverError);
+        // @ts-expect-error: There is no overload to change the return type not be nullish,
+        // and we do not want to add one in fear of making it too easy to neglect adding the callback argument
+        const thrownError = await maybeCallback(() => rejection, undefined).catch(error => error);
+        expect(thrownError).to.be.equal(driverError);
+      });
+
+      it('should not modify a rejection error when passed to callback', done => {
+        class MyError extends Error {}
+        const driverError = Object.freeze(new MyError());
+        const rejection = Promise.reject(driverError);
+        maybeCallback(
+          () => rejection,
+          error => {
+            try {
+              expect(error).to.exist;
+              expect(error).to.equal(driverError);
+              done();
+            } catch (assertionError) {
+              done(assertionError);
+            }
+          }
+        );
+      });
+    });
+
+    describe('when handling a success case', () => {
+      it('should pass the result and undefined error to the callback provided', done => {
+        const superPromiseSuccess = Promise.resolve(2);
+
+        const result = maybeCallback(
+          () => superPromiseSuccess,
+          (error, result) => {
+            try {
+              expect(error).to.be.undefined;
+              expect(result).to.equal(2);
+              done();
+            } catch (assertionError) {
+              done(assertionError);
+            }
+          }
+        );
+        expect(result).to.be.undefined;
+      });
+
+      it('should return the resolved promise to the caller when no callback is provided', async () => {
+        const superPromiseSuccess = Promise.resolve(2);
+        const result = maybeCallback(() => superPromiseSuccess);
+        expect(result).to.equal(superPromiseSuccess);
+        expect(await result).to.equal(2);
+      });
+    });
+
+    describe('when a custom promise constructor is set', () => {
+      beforeEach(() => {
+        PromiseProvider.set(BluebirdPromise);
+      });
+
+      afterEach(() => {
+        PromiseProvider.set(null);
+      });
+
+      it('should return the custom promise if no callback is provided', async () => {
+        const superPromiseSuccess = Promise.resolve(2);
+        const result = maybeCallback(() => superPromiseSuccess);
+        expect(result).to.not.equal(superPromiseSuccess);
+        expect(result).to.be.instanceOf(BluebirdPromise);
+      });
+
+      it('should return a rejected custom promise instance if promiseFn rejects', async () => {
+        const superPromiseFailure = Promise.reject(new Error('ah!'));
+        const result = maybeCallback(() => superPromiseFailure);
+        expect(result).to.not.equal(superPromiseFailure);
+        expect(result).to.be.instanceOf(BluebirdPromise);
+        // @ts-expect-error: There is no overload to change the return type not be nullish,
+        // and we do not want to add one in fear of making it too easy to neglect adding the callback argument
+        expect(await result.catch(e => e)).to.have.property('message', 'ah!');
+      });
+
+      it('should return void even if a custom promise is set and a callback is provided', async () => {
+        const superPromiseSuccess = Promise.resolve(2);
+        const result = maybeCallback(
+          () => superPromiseSuccess,
+          () => {
+            // ignore
+          }
+        );
+        expect(result).to.be.undefined;
       });
     });
   });

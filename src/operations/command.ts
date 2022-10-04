@@ -1,5 +1,5 @@
 import type { BSONSerializeOptions, Document } from '../bson';
-import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import { Explain, ExplainOptions } from '../explain';
 import type { Logger } from '../logger';
 import { ReadConcern } from '../read_concern';
@@ -17,8 +17,6 @@ import {
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
 import { AbstractOperation, Aspect, OperationOptions } from './operation';
-
-const SUPPORTS_WRITE_CONCERN_AND_COLLATION = 5;
 
 /** @public */
 export interface CollationOptions {
@@ -119,12 +117,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     return true;
   }
 
-  abstract override execute(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<T>
-  ): void;
-
   executeCommand(
     server: Server,
     session: ClientSession | undefined,
@@ -152,27 +144,16 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       options.omitReadPreference = true;
     }
 
-    if (options.collation && serverWireVersion < SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
-      callback(
-        new MongoCompatibilityError(
-          `Server ${server.name}, which reports wire version ${serverWireVersion}, does not support collation`
-        )
-      );
-      return;
-    }
-
     if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
       Object.assign(cmd, { writeConcern: this.writeConcern });
     }
 
-    if (serverWireVersion >= SUPPORTS_WRITE_CONCERN_AND_COLLATION) {
-      if (
-        options.collation &&
-        typeof options.collation === 'object' &&
-        !this.hasAspect(Aspect.SKIP_COLLATION)
-      ) {
-        Object.assign(cmd, { collation: options.collation });
-      }
+    if (
+      options.collation &&
+      typeof options.collation === 'object' &&
+      !this.hasAspect(Aspect.SKIP_COLLATION)
+    ) {
+      Object.assign(cmd, { collation: options.collation });
     }
 
     if (typeof options.maxTimeMS === 'number') {
@@ -180,12 +161,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     }
 
     if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
-      if (serverWireVersion < 6 && cmd.aggregate) {
-        // Prior to 3.6, with aggregate, verbosity is ignored, and we must pass in "explain: true"
-        cmd.explain = true;
-      } else {
-        cmd = decorateWithExplain(cmd, this.explain);
-      }
+      cmd = decorateWithExplain(cmd, this.explain);
     }
 
     server.command(this.ns, cmd, options, callback);

@@ -10,6 +10,84 @@ import {
 } from '../../../src/constants';
 
 describe('Server Discovery and Monitoring Prose Tests', function () {
+  context('Monitors sleep at least minHeartbeatFrequencyMS between checks', function () {
+    /*
+      This test will be used to ensure monitors sleep for an appropriate amount of time between failed server checks
+      so as to not flood the server with new connection creations.
+
+      This test requires MongoDB 4.9.0+.
+
+      1. Enable the following failpoint:
+          {
+              configureFailPoint: "failCommand",
+              mode: { times: 5 },
+              data: {
+                  failCommands: ["hello"], // or legacy hello command
+                  errorCode: 1234,
+                  appName: "SDAMMinHeartbeatFrequencyTest"
+              }
+          }
+      2. Create a client with directConnection=true, appName="SDAMMinHeartbeatFrequencyTest", and serverSelectionTimeoutMS=5000.
+      3. Start a timer.
+      4. Execute a ping command.
+      5. Stop the timer. Assert that the ping took between 2 seconds and 3.5 seconds to complete.
+    */
+
+    let client: MongoClient;
+    beforeEach(async function () {
+      const utilClient = this.configuration.newClient({ directConnection: true });
+
+      // 1.
+      await utilClient.db('admin').command({
+        configureFailPoint: 'failCommand',
+        mode: { times: 5 },
+        data: {
+          failCommands: ['hello', 'ismaster'],
+          errorCode: 1234,
+          appName: 'SDAMMinHeartbeatFrequencyTest'
+        }
+      });
+      await utilClient.close();
+
+      // 2.
+      client = this.configuration.newClient({
+        directConnection: true,
+        appName: 'SDAMMinHeartbeatFrequencyTest',
+        serverSelectionTimeoutMS: 5000
+      });
+    });
+
+    afterEach(async function () {
+      await client.db('admin').command({
+        configureFailPoint: 'failCommand',
+        mode: 'off',
+        data: {
+          failCommands: ['hello', 'ismaster'],
+          errorCode: 1234,
+          appName: 'SDAMMinHeartbeatFrequencyTest'
+        }
+      });
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('ensure monitors sleep for an appropriate amount of time between pings', {
+      metadata: { requires: { mongodb: '>=4.9.0', topology: '!load-balanced' } },
+      test: async function () {
+        // 3.
+        const startTime = Date.now();
+        // 4.
+        await client.db().command({ ping: 1 });
+        // 5.
+        const timeTaken = Date.now() - startTime;
+        const secondsTaken = timeTaken / 1000;
+        expect(secondsTaken).to.be.within(2, 3.5);
+      }
+    });
+  });
+
   context('Connection Pool Management', function () {
     /* 
       This test will be used to ensure monitors properly create and unpause connection pools when they discover servers.

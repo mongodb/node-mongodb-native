@@ -97,10 +97,11 @@ export {
   Logger,
   MongoClient,
   OrderedBulkOperation,
-  // Utils
-  PromiseProvider as Promise,
   UnorderedBulkOperation
 };
+
+// Deprecated, remove in next major
+export { PromiseProvider as Promise };
 
 // enums
 export { BatchType } from './bulk/common';
@@ -430,6 +431,8 @@ export type { ClusterTime, TimerQueue } from './sdam/common';
 export type {
   Monitor,
   MonitorEvents,
+  MonitorInterval,
+  MonitorIntervalOptions,
   MonitorOptions,
   MonitorPrivate,
   RTTPinger,
@@ -474,7 +477,6 @@ export type {
   ClientMetadataOptions,
   EventEmitterWithState,
   HostAddress,
-  InterruptibleAsyncInterval,
   MongoDBNamespace
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
