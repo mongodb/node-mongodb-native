@@ -3,9 +3,10 @@ import { expect } from 'chai';
 
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 import { MongoRuntimeError } from '../../src/error';
-import { Promise as PromiseProvider } from '../../src/index';
+import { ObjectId, Promise as PromiseProvider } from '../../src/index';
 import {
   BufferPool,
+  compareObjectId,
   eachAsync,
   HostAddress,
   isHello,
@@ -480,5 +481,49 @@ describe('driver utils', function () {
         expect(result).to.be.undefined;
       });
     });
+  });
+
+  describe('compareObjectId()', () => {
+    const table = [
+      { oid1: null, oid2: null, result: 0 },
+      { oid1: undefined, oid2: null, result: 0 },
+      { oid1: null, oid2: undefined, result: 0 },
+      { oid1: undefined, oid2: undefined, result: 0 },
+      { oid1: new ObjectId('00'.repeat(12)), oid2: undefined, result: 1 },
+      { oid1: new ObjectId('00'.repeat(12)), oid2: null, result: 1 },
+      { oid1: undefined, oid2: new ObjectId('00'.repeat(12)), result: -1 },
+      { oid1: null, oid2: new ObjectId('00'.repeat(12)), result: -1 },
+      { oid1: new ObjectId('00'.repeat(12)), oid2: new ObjectId('00'.repeat(12)), result: 0 },
+      {
+        oid1: new ObjectId('00'.repeat(11) + '01'),
+        oid2: new ObjectId('00'.repeat(12)),
+        result: 1
+      },
+      {
+        oid1: new ObjectId('00'.repeat(12)),
+        oid2: new ObjectId('00'.repeat(11) + '01'),
+        result: -1
+      },
+      {
+        oid1: 2,
+        oid2: 1,
+        result: 'throws'
+      }
+    ];
+
+    for (const { oid1, oid2, result } of table) {
+      if (result === 'throws') {
+        it('passing non-objectId values throw', () =>
+          // @ts-expect-error: Passing bad values to ensure thrown error
+          expect(() => compareObjectId(oid1, oid2)).to.throw());
+        continue;
+      }
+
+      const title = `comparing ${oid1} to ${oid2} returns ${
+        result === 0 ? 'equal' : result === -1 ? 'less than' : 'greater than'
+      }`;
+      // @ts-expect-error: not narrowed based on numeric result, but these values are correct
+      it(title, () => expect(compareObjectId(oid1, oid2)).to.equal(result));
+    }
   });
 });
