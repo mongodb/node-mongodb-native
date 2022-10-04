@@ -50,7 +50,16 @@ const VALID_INDEX_OPTIONS = new Set([
 ]);
 
 /** @public */
-export type IndexDirection = -1 | 1 | '2d' | '2dsphere' | 'text' | 'geoHaystack' | number;
+export type IndexDirection =
+  | -1
+  | 1
+  | '2d'
+  | '2dsphere'
+  | 'text'
+  | 'geoHaystack'
+  | 'hashed'
+  | number;
+
 function isIndexDirection(x: unknown): x is IndexDirection {
   return (
     typeof x === 'number' || x === '2d' || x === '2dsphere' || x === 'text' || x === 'geoHaystack'
