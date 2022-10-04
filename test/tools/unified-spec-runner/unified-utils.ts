@@ -406,7 +406,7 @@ export function createClientEncryption(
   }
 
   if (process.env.REFRESH_AWS_CREDENTIALS) {
-    delete autoEncryptionOptions.kmsProviders.aws;
+    autoEncryptionOptions.kmsProviders.aws = {};
     autoEncryptionOptions.onKmsProviderRefresh = onKmsProviderRefresh;
   }
 

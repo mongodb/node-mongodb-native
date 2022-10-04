@@ -96,7 +96,7 @@ function translateClientOptions(options) {
         }
 
         if (process.env.REFRESH_AWS_CREDENTIALS) {
-          delete options.autoEncryption.kmsProviders.aws;
+          options.autoEncryption.kmsProviders.aws = {};
         }
 
         options.autoEncryption.kmsProviders = kmsProviders;
