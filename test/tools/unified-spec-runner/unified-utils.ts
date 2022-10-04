@@ -406,8 +406,8 @@ export function createClientEncryption(
   }
 
   if (process.env.REFRESH_AWS_CREDENTIALS) {
-    autoEncryptionOptions.kmsProviders.aws = {};
-    autoEncryptionOptions.onKmsProviderRefresh = onKmsProviderRefresh;
+    //autoEncryptionOptions.kmsProviders.aws = {};
+    //autoEncryptionOptions.onKmsProviderRefresh = onKmsProviderRefresh;
   }
 
   const clientEncryption = new ClientEncryptionClass(clientEntity, autoEncryptionOptions);
