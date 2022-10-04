@@ -27,6 +27,7 @@ class MockServer extends EventEmitter {
     // Save the settings
     this.host = host;
     this.port = port;
+    this.family = 'ipv4';
 
     // Create a server socket
     this.server = options.tls ? tls.createServer(options) : net.createServer(options);
@@ -49,22 +50,23 @@ class MockServer extends EventEmitter {
   }
 
   hostAddress() {
-    const address = this.address();
-    return new HostAddress(`${address.host}:${address.port}`);
+    return new HostAddress(this.uri());
   }
 
   /**
    *
    */
   uri() {
-    return `${this.host}:${this.port}`;
+    const { host, family, port } = this.address();
+    const isIpv6Address = family.toLowerCase() === 'ipv6';
+    return isIpv6Address ? `[${host}]:${port}` : `${host}:${port}`;
   }
 
   /**
    *
    */
   address() {
-    return { host: this.host, port: this.port };
+    return { host: this.host, port: this.port, family: this.family };
   }
 
   /**
@@ -135,6 +137,7 @@ class MockServer extends EventEmitter {
         // update address information if necessary
         self.host = self.server.address().address;
         self.port = self.server.address().port;
+        self.family = self.server.address().family;
 
         resolve(self);
       });

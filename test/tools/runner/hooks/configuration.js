@@ -11,6 +11,7 @@ const { TestConfiguration } = require('../config');
 const { getEnvironmentalOptions } = require('../../utils');
 const mock = require('../../mongodb-mock/index');
 const { inspect } = require('util');
+const { setDefaultResultOrder } = require('dns');
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -166,11 +167,23 @@ const beforeAllPluginImports = () => {
   require('mocha-sinon');
 };
 
+function installNode18DNSHooks() {
+  if (process.version.startsWith('v18')) {
+    beforeEach(() => {
+      setDefaultResultOrder('ipv4first');
+    });
+    afterEach(() => {
+      setDefaultResultOrder('verbatim');
+    });
+  }
+}
+
 module.exports = {
   mochaHooks: {
     beforeAll: [beforeAllPluginImports, testConfigBeforeHook],
     beforeEach: [testSkipBeforeEachHook],
     afterAll: [cleanUpMocksAfterHook]
   },
-  skipBrokenAuthTestBeforeEachHook
+  skipBrokenAuthTestBeforeEachHook,
+  installNode18DNSHooks
 };

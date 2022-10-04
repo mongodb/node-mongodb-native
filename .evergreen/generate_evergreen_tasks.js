@@ -2,7 +2,13 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const NODE_VERSIONS = ['erbium', 'fermium', 'gallium'];
+const versions = [
+  { codeName: 'erbium', versionNumber: 12 },
+  { codeName: 'fermium', versionNumber: 14 },
+  { codeName: 'gallium', versionNumber: 16 },
+  { codeName: 'hydrogen', versionNumber: 18 }
+];
+const NODE_VERSIONS = versions.map(({ codeName }) => codeName)
 NODE_VERSIONS.sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
 const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
@@ -357,7 +363,8 @@ for (const
     });
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
-    const nodeLtsDisplayName = `Node ${NODE_LTS_NAME[0].toUpperCase()}${NODE_LTS_NAME.slice(1)}`;
+    const nodeVersionNumber = versions.find(({ codeName }) => codeName === NODE_LTS_NAME).versionNumber;
+    const nodeLtsDisplayName = `Node${nodeVersionNumber}`;
     const name = `${osName}-${NODE_LTS_NAME}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_NAME };
@@ -376,7 +383,7 @@ for (const
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node ${LATEST_LTS[0].toUpperCase()}${LATEST_LTS.slice(1)}`,
+  display_name: `MacOS 11 Node${versions[versions.length - 1].versionNumber}`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_NAME: LATEST_LTS,
@@ -642,6 +649,22 @@ for (const variant of BUILD_VARIANTS.filter(
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
+  );
+}
+
+// TODO(NODE-4667): debug failing tests on Node18
+for (const variant of BUILD_VARIANTS.filter(
+  variant => variant.expansions && variant.expansions.NODE_LTS_NAME === 'hydrogen'
+)) {
+  variant.tasks = variant.tasks.filter(
+    name => ![
+      'test-zstd-compression',
+      'test-snappy-compression',
+      'test-atlas-data-lake',
+      'test-socks5',
+      'test-socks5-tls',
+      'test-auth-kerberos'
+    ].includes(name)
   );
 }
 

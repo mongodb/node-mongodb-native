@@ -254,7 +254,9 @@ describe('Cursor', function () {
         .find({ qty: { $gt: 4 } });
       await cursor.count({ readPreference: ReadPreference.SECONDARY });
 
-      const selectedServerAddress = bag[0].address.replace('127.0.0.1', 'localhost');
+      const selectedServerAddress = bag[0].address
+        .replace('127.0.0.1', 'localhost')
+        .replace('[::1]', 'localhost');
       const selectedServer = client.topology.description.servers.get(selectedServerAddress);
       expect(selectedServer).property('type').to.equal(ServerType.RSSecondary);
     }

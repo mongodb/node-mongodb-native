@@ -2250,7 +2250,7 @@ buildvariants:
     tasks:
       - run-spec-benchmark-tests
   - name: rhel80-large-erbium
-    display_name: rhel8 Node Erbium
+    display_name: rhel8 Node12
     run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: erbium
@@ -2298,7 +2298,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: rhel80-large-fermium
-    display_name: rhel8 Node Fermium
+    display_name: rhel8 Node14
     run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: fermium
@@ -2346,7 +2346,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: rhel80-large-gallium
-    display_name: rhel8 Node Gallium
+    display_name: rhel8 Node16
     run_on: rhel80-large
     expansions:
       NODE_LTS_NAME: gallium
@@ -2391,8 +2391,50 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: rhel80-large-hydrogen
+    display_name: rhel8 Node18
+    run_on: rhel80-large
+    expansions:
+      NODE_LTS_NAME: hydrogen
+      CLIENT_ENCRYPTION: true
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-atlas-connectivity
+      - test-5.0-load-balanced
+      - test-6.0-load-balanced
+      - test-latest-load-balanced
+      - test-auth-ldap
+      - test-tls-support-latest
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: windows-64-vs2019-erbium
-    display_name: Windows (VS2019) Node Erbium
+    display_name: Windows (VS2019) Node12
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: erbium
@@ -2434,7 +2476,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: windows-64-vs2019-fermium
-    display_name: Windows (VS2019) Node Fermium
+    display_name: Windows (VS2019) Node14
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: fermium
@@ -2476,7 +2518,7 @@ buildvariants:
       - test-tls-support-4.4
       - test-tls-support-4.2
   - name: windows-64-vs2019-gallium
-    display_name: Windows (VS2019) Node Gallium
+    display_name: Windows (VS2019) Node16
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: gallium
@@ -2515,11 +2557,48 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: windows-64-vs2019-hydrogen
+    display_name: Windows (VS2019) Node18
+    run_on: windows-64-vs2019-large
+    expansions:
+      NODE_LTS_NAME: hydrogen
+      MSVS_VERSION: 2019
+    tasks:
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-rapid-server
+      - test-rapid-replica_set
+      - test-rapid-sharded_cluster
+      - test-6.0-server
+      - test-6.0-replica_set
+      - test-6.0-sharded_cluster
+      - test-5.0-server
+      - test-5.0-replica_set
+      - test-5.0-sharded_cluster
+      - test-4.4-server
+      - test-4.4-replica_set
+      - test-4.4-sharded_cluster
+      - test-4.2-server
+      - test-4.2-replica_set
+      - test-4.2-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-latest-server-v1-api
+      - test-tls-support-latest
+      - test-tls-support-6.0
+      - test-tls-support-5.0
+      - test-tls-support-4.4
+      - test-tls-support-4.2
   - name: macos-1100
-    display_name: MacOS 11 Node Gallium
+    display_name: MacOS 11 Node18
     run_on: macos-1100
     expansions:
-      NODE_LTS_NAME: gallium
+      NODE_LTS_NAME: hydrogen
       CLIENT_ENCRYPTION: true
     tasks:
       - test-rapid-server

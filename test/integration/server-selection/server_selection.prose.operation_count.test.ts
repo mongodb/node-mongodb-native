@@ -4,6 +4,7 @@ import { on } from 'events';
 import { CommandStartedEvent } from '../../../src';
 import { Collection } from '../../../src/collection';
 import { MongoClient } from '../../../src/mongo_client';
+import { installNode18DNSHooks } from '../../tools/runner/hooks/configuration';
 import { sleep } from '../../tools/utils';
 
 const failPoint = {
@@ -48,6 +49,8 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
     const count = counts[mongosPort] ?? 0;
     counts[mongosPort] = count + 1;
   };
+
+  installNode18DNSHooks();
 
   beforeEach(async function () {
     // Step 3: Create a client with both mongoses' addresses in its seed list, appName="loadBalancingTest", and localThresholdMS=30000.
