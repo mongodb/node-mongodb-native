@@ -1,4 +1,4 @@
-import { expectAssignable, expectError, expectNotAssignable } from 'tsd';
+import { expectAssignable, expectError, expectNotAssignable, expectNotType } from 'tsd';
 
 import type { Collection, Filter, UpdateFilter } from '../../../../src';
 
@@ -6,21 +6,33 @@ import type { Collection, Filter, UpdateFilter } from '../../../../src';
  * mutually recursive types are not supported and will not get type safety
  */
 interface Author {
-  books: Book[];
-  favoritePublication: Book;
   name: string;
+  favoritePublication: Book;
 }
 
 interface Book {
-  author: Author;
   title: string;
-  published: Date;
+  author: Author;
 }
 
-declare const mutuallyRecursive: Collection<Author>;
-mutuallyRecursive.find({});
-mutuallyRecursive.find({
-  b: { a: { b: { a: null } } }
+expectAssignable<Filter<Author>>({
+  favoritePublication: {
+    title: 'book title',
+    author: {
+      name: 'author name'
+    }
+  }
+});
+expectNotType<UpdateFilter<Author>>({
+  $set: {
+    favoritePublication: {
+      title: 'a title',
+      published: new Date(),
+      author: {
+        name: 23
+      }
+    }
+  }
 });
 
 // Extremely deep type checking for recursive schemas
