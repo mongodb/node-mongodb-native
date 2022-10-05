@@ -23,7 +23,7 @@ fi
 # run tests
 echo "Running $AUTH tests over $SSL, connecting to $MONGODB_URI"
 
-npm install mongodb-client-encryption@">=2.2.0"
+npm install mongodb-client-encryption@">=2.3.0"
 npm install bson-ext
 
 export MONGODB_API_VERSION=${MONGODB_API_VERSION}
