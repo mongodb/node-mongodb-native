@@ -3,7 +3,7 @@ runOn:
     # Require server version 6.0.0 to get behavior added in SERVER-64911.
     - minServerVersion: "6.0.0"
       # FLE 2 Encrypted collections are not supported on standalone.
-      topology: [ "replicaset", "sharded" ]
+      topology: [ "replicaset", "sharded", "load-balanced" ]
 
 database_name: &database_name "default"
 collection_name: &collection_name "default"
