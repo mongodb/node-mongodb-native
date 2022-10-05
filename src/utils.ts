@@ -1254,7 +1254,7 @@ export function getMongoDBClientEncryption(): {
  * - `-1 = oid1 is less than oid2`
  * - `+0 = oid1 is equal oid2`
  */
-export function compareObjectId(oid1?: ObjectId, oid2?: ObjectId): 0 | 1 | -1 {
+export function compareObjectId(oid1?: ObjectId | null, oid2?: ObjectId | null): 0 | 1 | -1 {
   if (oid1 == null && oid2 == null) {
     return 0;
   }

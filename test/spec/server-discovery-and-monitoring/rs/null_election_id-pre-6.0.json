@@ -1,5 +1,5 @@
 {
-  "description": "Record max setVersion, even from primary without electionId",
+  "description": "Pre 6.0 Primaries with and without electionIds",
   "uri": "mongodb://a/?replicaSet=rs",
   "phases": [
     {
@@ -12,15 +12,13 @@
             "isWritablePrimary": true,
             "hosts": [
               "a:27017",
-              "b:27017"
+              "b:27017",
+              "c:27017"
             ],
-            "setName": "rs",
             "setVersion": 1,
-            "electionId": {
-              "$oid": "000000000000000000000001"
-            },
+            "setName": "rs",
             "minWireVersion": 0,
-            "maxWireVersion": 17
+            "maxWireVersion": 6
           }
         ]
       ],
@@ -30,11 +28,14 @@
             "type": "RSPrimary",
             "setName": "rs",
             "setVersion": 1,
-            "electionId": {
-              "$oid": "000000000000000000000001"
-            }
+            "electionId": null
           },
           "b:27017": {
+            "type": "Unknown",
+            "setName": null,
+            "electionId": null
+          },
+          "c:27017": {
             "type": "Unknown",
             "setName": null,
             "electionId": null
@@ -43,10 +44,7 @@
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
         "setName": "rs",
-        "maxSetVersion": 1,
-        "maxElectionId": {
-          "$oid": "000000000000000000000001"
-        }
+        "maxSetVersion": 1
       }
     },
     {
@@ -59,26 +57,35 @@
             "isWritablePrimary": true,
             "hosts": [
               "a:27017",
-              "b:27017"
+              "b:27017",
+              "c:27017"
             ],
             "setName": "rs",
-            "setVersion": 2,
+            "setVersion": 1,
+            "electionId": {
+              "$oid": "000000000000000000000002"
+            },
             "minWireVersion": 0,
-            "maxWireVersion": 17
+            "maxWireVersion": 6
           }
         ]
       ],
       "outcome": {
         "servers": {
           "a:27017": {
+            "type": "Unknown",
+            "setName": null,
+            "electionId": null
+          },
+          "b:27017": {
             "type": "RSPrimary",
             "setName": "rs",
             "setVersion": 1,
             "electionId": {
-              "$oid": "000000000000000000000001"
+              "$oid": "000000000000000000000002"
             }
           },
-          "b:27017": {
+          "c:27017": {
             "type": "Unknown",
             "setName": null,
             "electionId": null
@@ -89,7 +96,7 @@
         "setName": "rs",
         "maxSetVersion": 1,
         "maxElectionId": {
-          "$oid": "000000000000000000000001"
+          "$oid": "000000000000000000000002"
         }
       }
     },
@@ -103,15 +110,13 @@
             "isWritablePrimary": true,
             "hosts": [
               "a:27017",
-              "b:27017"
+              "b:27017",
+              "c:27017"
             ],
-            "setName": "rs",
             "setVersion": 1,
-            "electionId": {
-              "$oid": "000000000000000000000002"
-            },
+            "setName": "rs",
             "minWireVersion": 0,
-            "maxWireVersion": 17
+            "maxWireVersion": 6
           }
         ]
       ],
@@ -121,11 +126,65 @@
             "type": "RSPrimary",
             "setName": "rs",
             "setVersion": 1,
-            "electionId": {
-              "$oid": "000000000000000000000002"
-            }
+            "electionId": null
           },
           "b:27017": {
+            "type": "Unknown",
+            "setName": null,
+            "electionId": null
+          },
+          "c:27017": {
+            "type": "Unknown",
+            "setName": null,
+            "electionId": null
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs",
+        "maxSetVersion": 1,
+        "maxElectionId": {
+          "$oid": "000000000000000000000002"
+        }
+      }
+    },
+    {
+      "responses": [
+        [
+          "c:27017",
+          {
+            "ok": 1,
+            "helloOk": true,
+            "isWritablePrimary": true,
+            "hosts": [
+              "a:27017",
+              "b:27017",
+              "c:27017"
+            ],
+            "setName": "rs",
+            "setVersion": 1,
+            "electionId": {
+              "$oid": "000000000000000000000001"
+            },
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 1,
+            "electionId": null
+          },
+          "b:27017": {
+            "type": "Unknown",
+            "setName": null,
+            "electionId": null
+          },
+          "c:27017": {
             "type": "Unknown",
             "setName": null,
             "electionId": null

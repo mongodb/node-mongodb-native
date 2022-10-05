@@ -18,7 +18,7 @@
             "setVersion": 1,
             "setName": "rs",
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 17
           }
         ]
       ],
@@ -66,7 +66,7 @@
               "$oid": "000000000000000000000002"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 17
           }
         ]
       ],
@@ -116,22 +116,25 @@
             "setVersion": 1,
             "setName": "rs",
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 17
           }
         ]
       ],
       "outcome": {
         "servers": {
           "a:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
+            "type": "Unknown",
+            "setName": null,
+            "setVersion": null,
             "electionId": null
           },
           "b:27017": {
-            "type": "Unknown",
-            "setName": null,
-            "electionId": null
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 1,
+            "electionId": {
+              "$oid": "000000000000000000000002"
+            }
           },
           "c:27017": {
             "type": "Unknown",
@@ -167,22 +170,25 @@
               "$oid": "000000000000000000000001"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 6
+            "maxWireVersion": 17
           }
         ]
       ],
       "outcome": {
         "servers": {
           "a:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
+            "type": "Unknown",
+            "setName": null,
+            "setVersion": null,
             "electionId": null
           },
           "b:27017": {
-            "type": "Unknown",
-            "setName": null,
-            "electionId": null
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 1,
+            "electionId": {
+              "$oid": "000000000000000000000002"
+            }
           },
           "c:27017": {
             "type": "Unknown",

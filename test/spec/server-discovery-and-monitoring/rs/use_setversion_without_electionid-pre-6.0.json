@@ -1,5 +1,5 @@
 {
-  "description": "Record max setVersion, even from primary without electionId",
+  "description": "Pre 6.0 Record max setVersion, even from primary without electionId",
   "uri": "mongodb://a/?replicaSet=rs",
   "phases": [
     {
@@ -20,7 +20,7 @@
               "$oid": "000000000000000000000001"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 17
+            "maxWireVersion": 6
           }
         ]
       ],
@@ -64,30 +64,27 @@
             "setName": "rs",
             "setVersion": 2,
             "minWireVersion": 0,
-            "maxWireVersion": 17
+            "maxWireVersion": 6
           }
         ]
       ],
       "outcome": {
         "servers": {
           "a:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
-            "electionId": {
-              "$oid": "000000000000000000000001"
-            }
-          },
-          "b:27017": {
             "type": "Unknown",
             "setName": null,
             "electionId": null
+          },
+          "b:27017": {
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 2
           }
         },
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
         "setName": "rs",
-        "maxSetVersion": 1,
+        "maxSetVersion": 2,
         "maxElectionId": {
           "$oid": "000000000000000000000001"
         }
@@ -111,32 +108,29 @@
               "$oid": "000000000000000000000002"
             },
             "minWireVersion": 0,
-            "maxWireVersion": 17
+            "maxWireVersion": 6
           }
         ]
       ],
       "outcome": {
         "servers": {
           "a:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
-            "electionId": {
-              "$oid": "000000000000000000000002"
-            }
-          },
-          "b:27017": {
             "type": "Unknown",
             "setName": null,
             "electionId": null
+          },
+          "b:27017": {
+            "type": "RSPrimary",
+            "setName": "rs",
+            "setVersion": 2
           }
         },
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
         "setName": "rs",
-        "maxSetVersion": 1,
+        "maxSetVersion": 2,
         "maxElectionId": {
-          "$oid": "000000000000000000000002"
+          "$oid": "000000000000000000000001"
         }
       }
     }

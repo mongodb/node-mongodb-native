@@ -373,31 +373,56 @@ function updateRsFromPrimary(
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
-  const electionId = serverDescription.electionId ? serverDescription.electionId : null;
-  if (serverDescription.setVersion && electionId) {
-    if (maxSetVersion && maxElectionId) {
-      if (
-        maxSetVersion > serverDescription.setVersion ||
-        compareObjectId(maxElectionId, electionId) > 0
-      ) {
-        // this primary is stale, we must remove it
-        serverDescriptions.set(
-          serverDescription.address,
-          new ServerDescription(serverDescription.address)
-        );
+  if (serverDescription.maxWireVersion >= 17) {
+    const electionIdComparison = compareObjectId(maxElectionId, serverDescription.electionId);
+    const maxElectionIdIsEqual = electionIdComparison === 0;
+    const maxElectionIdIsLess = electionIdComparison === -1;
+    const maxSetVersionIsLessOrEqual =
+      (maxSetVersion ?? -1) <= (serverDescription.setVersion ?? -1);
 
-        return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
+    if (maxElectionIdIsLess || (maxElectionIdIsEqual && maxSetVersionIsLessOrEqual)) {
+      // The reported electionId was greater
+      // or the electionId was equal and reported setVersion was greater
+      // Always update both values, they are a tuple
+      maxElectionId = serverDescription.electionId;
+      maxSetVersion = serverDescription.setVersion;
+    } else {
+      // Stale primary
+      // replace serverDescription with a default ServerDescription of type "Unknown"
+      serverDescriptions.set(
+        serverDescription.address,
+        new ServerDescription(serverDescription.address)
+      );
+
+      return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
+    }
+  } else {
+    const electionId = serverDescription.electionId ? serverDescription.electionId : null;
+    if (serverDescription.setVersion && electionId) {
+      if (maxSetVersion && maxElectionId) {
+        if (
+          maxSetVersion > serverDescription.setVersion ||
+          compareObjectId(maxElectionId, electionId) > 0
+        ) {
+          // this primary is stale, we must remove it
+          serverDescriptions.set(
+            serverDescription.address,
+            new ServerDescription(serverDescription.address)
+          );
+
+          return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
+        }
       }
+
+      maxElectionId = serverDescription.electionId;
     }
 
-    maxElectionId = serverDescription.electionId;
-  }
-
-  if (
-    serverDescription.setVersion != null &&
-    (maxSetVersion == null || serverDescription.setVersion > maxSetVersion)
-  ) {
-    maxSetVersion = serverDescription.setVersion;
+    if (
+      serverDescription.setVersion != null &&
+      (maxSetVersion == null || serverDescription.setVersion > maxSetVersion)
+    ) {
+      maxSetVersion = serverDescription.setVersion;
+    }
   }
 
   // We've heard from the primary. Is it the same primary as before?
