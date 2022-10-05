@@ -1,6 +1,6 @@
 {
   "description": "change-streams-clusterTime",
-  "schemaVersion": "1.3",
+  "schemaVersion": "1.4",
   "createEntities": [
     {
       "client": {
@@ -31,7 +31,8 @@
         "sharded-replicaset",
         "load-balanced",
         "sharded"
-      ]
+      ],
+      "serverless": "forbid"
     }
   ],
   "initialData": [

@@ -3,6 +3,7 @@ schemaVersion: "1.7"
 runOnRequirements:
   - minServerVersion: "6.0.0"
     topologies: [ replicaset, sharded-replicaset, sharded ]
+    serverless: forbid
 createEntities:
   - client:
       id: &client0 client0
