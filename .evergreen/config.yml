@@ -814,6 +814,9 @@ functions:
           ${PREPARE_SHELL}
           export AWS_ACCESS_KEY_ID=${aws_key}
           export AWS_SECRET_ACCESS_KEY=${aws_secret}
+
+          sudo dnf install --assumeyes awscli
+
           # Download all the task coverage files.
           # TODO NODE-3897 - finish this function.  the code below this point is untested because
           #   aws s3 cp fails due to permissions errors
