@@ -2984,7 +2984,7 @@ buildvariants:
       - run-typescript-next
   - name: generate-combined-coverage
     display_name: Generate Combined Coverage
-    run_on: ubuntu1804-large
+    run_on: rhel80-large
     tasks:
       - download-and-merge-coverage
   - name: mongosh_integration_tests
