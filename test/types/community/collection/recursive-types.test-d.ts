@@ -228,3 +228,41 @@ recursiveSchemaWithArray.findOne({
     name: 3
   }
 });
+
+// Modeling A -> B -> C -> D -> A recursive type
+type A = {
+  name: string;
+  b: B;
+};
+
+type B = {
+  name: string;
+  c: C;
+};
+
+type C = {
+  name: string;
+  d: D;
+};
+
+type D = {
+  name: string;
+  a: A;
+};
+
+expectAssignable<Filter<A>>({
+  'b.c.d.a.b.c.d.a.b.name': 'a'
+});
+
+expectNotAssignable<Filter<A>>({
+  'b.c.d.a.b.c.d.a.b.name': 2
+});
+
+expectAssignable<Filter<A>>({
+  'b.c.d.a.b.c.d.a.b.c.name': 2
+});
+
+// why does this blow up
+expectNotAssignable<UpdateFilter<A>>({
+  $set: { 'b.c.d.a.b.c.d.a.b.c.name': 'a' }
+});
