@@ -1,3 +1,5 @@
+import type { Readable } from 'stream';
+
 import type { Document, Long, Timestamp } from '../bson';
 import {
   type ChangeStreamDocument,
@@ -14,7 +16,12 @@ import type { CollationOptions } from '../operations/command';
 import { type ExecutionResult, executeOperation } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
 import { type Callback, type MongoDBNamespace, maxWireVersion } from '../utils';
-import { type AbstractCursorOptions, AbstractCursor } from './abstract_cursor';
+import {
+  type AbstractCursorOptions,
+  AbstractCursor,
+  next,
+  ReadableCursorStream
+} from './abstract_cursor';
 
 /** @internal */
 export interface ChangeStreamCursorOptions extends AbstractCursorOptions {
@@ -111,6 +118,10 @@ export class ChangeStreamCursor<
     return options;
   }
 
+  override cursorStream(): Readable {
+    return new ChangeStreamCursorStream(this);
+  }
+
   cacheResumeToken(resumeToken: ResumeToken): void {
     if (this.bufferedCount() === 0 && this.postBatchResumeToken) {
       this.resumeToken = this.postBatchResumeToken;
@@ -189,6 +200,29 @@ export class ChangeStreamCursor<
       this.emit(ChangeStream.MORE, response);
       this.emit(ChangeStream.RESPONSE);
       callback(err, response);
+    });
+  }
+}
+
+/** @internal */
+export class ChangeStreamCursorStream extends ReadableCursorStream {
+  override _readNext() {
+    next(this._cursor, true, (err, result) => {
+      if (err) {
+        return this.destroy(err);
+      }
+
+      if (result == null) {
+        this.push(null);
+      } else if (this.destroyed) {
+        this._cursor.close().catch(() => null);
+      } else {
+        if (this.push(result)) {
+          return this._readNext();
+        }
+
+        this._readInProgress = false;
+      }
     });
   }
 }
