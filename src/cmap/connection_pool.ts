@@ -324,6 +324,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   /**
+   * This is exposed ONLY for use on mongosh, so they can
+   * kill connections if a user quits the shell with operations
+   * in progress.
+   */
+  get checkedOutConnections() {
+    return this[kCheckedOut];
+  }
+
+  /**
    * Get the metrics information for the pool when a wait queue timeout occurs.
    */
   private waitQueueErrorMetrics(): string {
