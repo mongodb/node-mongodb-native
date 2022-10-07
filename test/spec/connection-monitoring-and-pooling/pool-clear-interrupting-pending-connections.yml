@@ -1,0 +1,42 @@
+version: 1
+style: integration
+description: clear with interruptInUseConnections = true closes pending connections
+runOn:
+  -
+    minServerVersion: "4.9.0"
+failPoint:
+  configureFailPoint: failCommand
+  mode: "alwaysOn"
+  data:
+    failCommands: ["isMaster","hello"]
+    closeConnection: false
+    blockConnection: true
+    blockTimeMS: 1000
+poolOptions:
+  minPoolSize: 0
+operations:
+  - name: ready
+  - name: start
+    target: thread1
+  - name: checkOut
+    thread: thread1
+  - name: waitForEvent
+    event: ConnectionCreated
+    count: 1
+  - name: clear
+    interruptInUseConnections: true
+  - name: waitForEvent
+    event: ConnectionCheckOutFailed
+    count: 1
+events:
+  - type: ConnectionCheckOutStarted
+  - type: ConnectionCreated
+  - type: ConnectionPoolCleared
+    interruptInUseConnections: true
+  - type: ConnectionClosed
+  - type: ConnectionCheckOutFailed
+ignore:
+  - ConnectionCheckedIn
+  - ConnectionCheckedOut
+  - ConnectionPoolCreated
+  - ConnectionPoolReady

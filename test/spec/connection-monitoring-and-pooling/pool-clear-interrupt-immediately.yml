@@ -1,0 +1,46 @@
+version: 1
+style: unit
+description: Connections MUST be interrupted as soon as possible (interruptInUseConnections=true)
+poolOptions:
+  # ensure it's not involved by default
+  backgroundThreadIntervalMS: 10000
+operations:
+  - name: ready
+  - name: checkOut
+  - name: checkOut
+    label: conn
+  - name: clear
+    interruptInUseConnections: true
+  - name: waitForEvent
+    event: ConnectionPoolCleared
+    count: 1
+    timeout: 1000
+  - name: waitForEvent
+    event: ConnectionClosed
+    count: 2
+    timeout: 1000
+  - name: close
+events:
+  - type: ConnectionCheckedOut
+    connectionId: 1
+    address: 42
+  - type: ConnectionCheckedOut
+    connectionId: 2
+    address: 42
+  - type: ConnectionPoolCleared
+    interruptInUseConnections: true
+  - type: ConnectionClosed
+    reason: stale
+    address: 42
+  - type: ConnectionClosed
+    reason: stale
+    address: 42
+  - type: ConnectionPoolClosed
+    address: 42
+ignore:
+  - ConnectionCreated
+  - ConnectionPoolReady
+  - ConnectionReady
+  - ConnectionCheckOutStarted
+  - ConnectionPoolCreated
+  - ConnectionCheckedIn

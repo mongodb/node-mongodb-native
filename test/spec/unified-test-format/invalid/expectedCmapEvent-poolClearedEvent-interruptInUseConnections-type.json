@@ -1,0 +1,23 @@
+{
+  "description": "expectedCmapEvent-poolClearedEvent-interruptInUseConnections-type",
+  "schemaVersion": "1.11",
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "eventType": "cmap",
+          "events": [
+            {
+              "poolClearedEvent": {
+                "interruptInUseConnections": "foo"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

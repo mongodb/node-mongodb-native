@@ -428,7 +428,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       this.emit(
         ConnectionPool.CONNECTION_POOL_CLEARED,
-        new ConnectionPoolClearedEvent(this, serviceId)
+        new ConnectionPoolClearedEvent(this, { serviceId })
       );
       return;
     }

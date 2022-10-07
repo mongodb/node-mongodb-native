@@ -187,9 +187,18 @@ export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
   /** @internal */
   serviceId?: ObjectId;
 
+  interruptInUseConnections?: boolean;
+
   /** @internal */
-  constructor(pool: ConnectionPool, serviceId?: ObjectId) {
+  constructor(
+    pool: ConnectionPool,
+    {
+      serviceId,
+      interruptInUseConnections
+    }: { serviceId?: ObjectId; interruptInUseConnections?: boolean } = {}
+  ) {
     super(pool);
     this.serviceId = serviceId;
+    this.interruptInUseConnections = interruptInUseConnections;
   }
 }

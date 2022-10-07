@@ -19,6 +19,16 @@ const LB_SKIP_TESTS: SkipDescription[] = [
   skipReason: 'cannot run against a load balanced environment'
 }));
 
+const INTERRUPT_IN_USE_CONNECTIONS_TESTS: SkipDescription[] = [
+  'Connections MUST be interrupted as soon as possible (interruptInUseConnections=true)',
+  'Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections: false)',
+  'clear with interruptInUseConnections = true closes pending connections'
+].map(description => ({
+  description,
+  skipIfCondition: 'always',
+  skipReason: 'TODO(NODE-4691): cancel inflight operations when heartbeat fails'
+}));
+
 describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
   const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
@@ -30,6 +40,6 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration)', function 
         skipReason:
           'not applicable: waitQueueTimeoutMS limits connection establishment time in our driver'
       }
-    ])
+    ]).concat(INTERRUPT_IN_USE_CONNECTIONS_TESTS)
   });
 });
