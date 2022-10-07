@@ -892,7 +892,7 @@ functions:
         aws_key: ${aws_key}
         aws_secret: ${aws_secret}
         local_file:  src/coverage/index.html
-        remote_file: mciuploads/mongo-node-driver/${revision}/${version_id}/coverage/index.html
+        remote_file: mongo-node-driver/${revision}/${version_id}/coverage/index.html
         bucket: mciuploads
         permissions: public-read
         content_type: text/html
