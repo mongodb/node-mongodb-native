@@ -1,5 +1,5 @@
 runOn:
-  - maxServerVersion: "4.0"
+  - maxServerVersion: "4.0.99"
 database_name: &database_name "default"
 collection_name: &collection_name "default"
 
