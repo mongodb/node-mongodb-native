@@ -801,7 +801,7 @@ functions:
         aws_secret: ${aws_secret}
         local_file: src/coverage/coverage-final.json
         optional: true
-        remote_file: ${UPLOAD_BUCKET}/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
+        remote_file: mongo-node-driver/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads
         permissions: public-read
         content_type: application/json
@@ -818,9 +818,9 @@ functions:
           sudo dnf install --assumeyes awscli
 
           # Download all the task coverage files.
-          # NOTE: All coverage files are too large for V8 to handle the resulting call to
+          # NOTE: All coverage files are too large for V3 to handle the resulting call to
           #       JSON.stringify from within nyc, so with stick to latest Node only.
-          aws s3 cp --recursive s3://mciuploads/${UPLOAD_BUCKET}/${revision}/${version_id}/ \
+          aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ \
             coverage/ \
             --exclude "*rhel80-large*" \
             --include "*hydrogen"
@@ -831,7 +831,7 @@ functions:
           npx nyc report -t merged-coverage --reporter=html --report-dir coverage
 
           aws s3 cp coverage/ \
-            s3://mciuploads/${UPLOAD_BUCKET}/${revision}/${version_id}/coverage/ \
+            s3://mciuploads/mongo-node-driver/${revision}/${version_id}/coverage/ \
             --recursive \
             --acl public-read \
             --region us-east-1
@@ -840,7 +840,7 @@ functions:
         aws_key: ${aws_key}
         aws_secret: ${aws_secret}
         local_file: src/coverage/index.html
-        remote_file: ${UPLOAD_BUCKET}/${revision}/${version_id}/coverage/index.html
+        remote_file: mongo-node-driver/${revision}/${version_id}/coverage/index.html
         bucket: mciuploads
         permissions: public-read
         content_type: text/html
