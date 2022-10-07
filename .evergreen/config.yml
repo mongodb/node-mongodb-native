@@ -822,6 +822,7 @@ functions:
           #   aws s3 cp fails due to permissions errors
           aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ coverage/
 
+          npm install @istanbuljs/nyc-config-typescript
           npx nyc merge coverage/ merged-coverage/coverage.json
           npx nyc report -t merged-coverage --reporter=html --report-dir output
 
