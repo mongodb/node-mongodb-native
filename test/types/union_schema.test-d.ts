@@ -1,10 +1,10 @@
 import { expectAssignable, expectError, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
-import { ObjectId } from '../../src/bson';
+import { Document, ObjectId } from '../../src/bson';
 import type { Collection } from '../../src/collection';
 import type { WithId } from '../../src/mongo_types';
 
-type InsertOneFirstParam<Schema> = Parameters<Collection<Schema>['insertOne']>[0];
+type InsertOneFirstParam<Schema extends Document> = Parameters<Collection<Schema>['insertOne']>[0];
 
 interface Circle {
   _id: ObjectId;

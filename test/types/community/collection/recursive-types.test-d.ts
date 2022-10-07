@@ -67,14 +67,6 @@ expectNotAssignable<UpdateFilter<Author>>({
   }
 });
 
-// Using keys that are beyond the permitted depth in $set still result in an error as opposed to falling back to any (known limitation)
-expectNotAssignable<UpdateFilter<Author>>({
-  $set: {
-    'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name':
-      'name'
-  }
-});
-
 /**
  * types that are not recursive in name but are recursive in structure are
  *   still supported
@@ -254,15 +246,19 @@ expectAssignable<Filter<A>>({
   'b.c.d.a.b.c.d.a.b.name': 'a'
 });
 
-expectNotAssignable<Filter<A>>({
-  'b.c.d.a.b.c.d.a.b.name': 2
+// Beyond the depth supported, there is no type checking
+expectAssignable<Filter<A>>({
+  'b.c.d.a.b.c.d.a.b.c.name': 3
 });
 
 expectAssignable<Filter<A>>({
   'b.c.d.a.b.c.d.a.b.c.name': 2
 });
 
-// why does this blow up
-expectNotAssignable<UpdateFilter<A>>({
+expectAssignable<UpdateFilter<A>>({
+  $set: { 'b.c.d.a.b.c.d.a.b.name': 'a' }
+});
+
+expectAssignable<UpdateFilter<A>>({
   $set: { 'b.c.d.a.b.c.d.a.b.c.name': 'a' }
 });

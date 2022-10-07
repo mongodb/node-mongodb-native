@@ -272,7 +272,7 @@ export type MatchKeysAndValues<TSchema> = Readonly<
     [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
       | `[${string}]`
       | ''}.${string}`]?: any; // Could be further narrowed
-  }
+  } & Document
 >;
 
 /** @public */
