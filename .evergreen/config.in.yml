@@ -880,9 +880,23 @@ functions:
           # npx does not recognize the dependency so install it directly.
           npm install @istanbuljs/nyc-config-typescript
           npx nyc merge coverage/ merged-coverage/coverage.json
-          npx nyc report -t merged-coverage --reporter=html --report-dir output
+          npx nyc report -t merged-coverage --reporter=html --report-dir coverage
 
-          aws s3 cp output/ s3://mciuploads/mongo-node-driver/${revision}/${version_id}/lcov-report/
+          aws s3 cp coverage/ \
+            s3://mciuploads/mongo-node-driver/${revision}/${version_id}/coverage/ \
+            --recursive \
+            --acl public-read \
+            --region us-east-1
+    - command: s3.put
+      params:
+        aws_key: ${aws_key}
+        aws_secret: ${aws_secret}
+        local_file:  src/coverage/index.html
+        remote_file: mciuploads/mongo-node-driver/${revision}/${version_id}/coverage/index.html
+        bucket: mciuploads
+        permissions: public-read
+        content_type: text/html
+        display_name: "Coverage Report HTML"
 
   "run spec driver benchmarks":
     - command: subprocess.exec
