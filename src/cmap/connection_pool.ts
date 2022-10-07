@@ -145,7 +145,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   /** @internal */
   [kPending]: number;
   /** @internal */
-  [kCheckedOut]: number;
+  [kCheckedOut]: Set<Connection>;
   /** @internal */
   [kMinPoolSizeTimer]?: NodeJS.Timeout;
   /**
@@ -252,7 +252,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
     this[kPending] = 0;
-    this[kCheckedOut] = 0;
+    this[kCheckedOut] = new Set();
     this[kMinPoolSizeTimer] = undefined;
     this[kGeneration] = 0;
     this[kServiceGenerations] = new Map();
@@ -304,7 +304,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   get currentCheckedOutCount(): number {
-    return this[kCheckedOut];
+    return this[kCheckedOut].size;
   }
 
   get waitQueueSize(): number {
@@ -395,7 +395,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this[kConnections].unshift(connection);
     }
 
-    this[kCheckedOut]--;
+    this[kCheckedOut].delete(connection);
     this.emit(ConnectionPool.CONNECTION_CHECKED_IN, new ConnectionCheckedInEvent(this, connection));
 
     if (willDestroy) {
@@ -744,7 +744,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
 
       if (!this.connectionIsPerished(connection)) {
-        this[kCheckedOut]++;
+        this[kCheckedOut].add(connection);
         this.emit(
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(this, connection)
@@ -780,7 +780,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
               new ConnectionCheckOutFailedEvent(this, 'connectionError')
             );
           } else if (connection) {
-            this[kCheckedOut]++;
+            this[kCheckedOut].add(connection);
             this.emit(
               ConnectionPool.CONNECTION_CHECKED_OUT,
               new ConnectionCheckedOutEvent(this, connection)
