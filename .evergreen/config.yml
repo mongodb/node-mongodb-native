@@ -830,7 +830,7 @@ functions:
           npx nyc merge coverage/ merged-coverage/coverage.json
           npx nyc report -t merged-coverage --reporter=html --report-dir output
 
-          aws s3 cp output/lcov-report s3://mciuploads/mongo-node-driver/${revision}/${version_id}//lcov-report/
+          aws s3 cp output/ s3://mciuploads/mongo-node-driver/${revision}/${version_id}/lcov-report/
   run spec driver benchmarks:
     - command: subprocess.exec
       type: test
