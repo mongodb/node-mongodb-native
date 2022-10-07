@@ -199,10 +199,6 @@ export class TestConfiguration {
       dbOptions.loadBalanced = true;
     }
 
-    if (process.env.MONGODB_API_VERSION) {
-      dbOptions.apiVersion = process.env.MONGODB_API_VERSION;
-    }
-
     const urlOptions: url.UrlObject = {
       protocol: this.isServerless ? 'mongodb+srv' : 'mongodb',
       slashes: true,

@@ -299,7 +299,10 @@ export class ThreadContext {
     this.pool = new ConnectionPool(this.#server, {
       ...this.#poolOptions,
       ...options,
-      hostAddress: this.#hostAddress
+      hostAddress: this.#hostAddress,
+      serverApi: process.env.MONGODB_API_VERSION
+        ? { version: process.env.MONGODB_API_VERSION }
+        : undefined
     });
     this.#originalServerPool = this.#server.s.pool;
     this.#server.s.pool = this.pool;
@@ -370,8 +373,6 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   const expectedEvents = test.events;
   const ignoreEvents = test.ignore || [];
 
-  let actualError;
-
   const MAIN_THREAD_KEY = Symbol('Main Thread');
   const mainThread = threadContext.getThread(MAIN_THREAD_KEY);
   mainThread.start();
@@ -394,9 +395,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     }
   }
 
-  await mainThread.finish().catch(e => {
-    actualError = e;
-  });
+  const actualError = await mainThread.finish().catch(e => e);
 
   if (expectedError) {
     expect(actualError).to.exist;
