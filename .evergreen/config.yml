@@ -827,10 +827,13 @@ functions:
 
           # npx does not recognize the dependency so install it directly.
           npm install @istanbuljs/nyc-config-typescript
+          cd coverage
+          sed -i'' -e 's/\/data\/mci\/.\{32\}\/src//g' *
+          cd ..
           npx nyc merge coverage/ merged-coverage/coverage.json
-          npx nyc report -t merged-coverage --reporter=html --report-dir coverage
+          npx nyc report -t merged-coverage/ --reporter=html --report-dir coverage-report
 
-          aws s3 cp coverage/ \
+          aws s3 cp coverage-report/ \
             s3://mciuploads/mongo-node-driver/${revision}/${version_id}/coverage/ \
             --recursive \
             --acl public-read \
