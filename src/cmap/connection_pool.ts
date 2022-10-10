@@ -324,7 +324,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   /**
-   * This is exposed ONLY for use on mongosh, so they can
+   * This is exposed ONLY for use in mongosh, so they can
    * kill connections if a user quits the shell with operations
    * in progress.
    */
