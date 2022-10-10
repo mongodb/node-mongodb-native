@@ -251,10 +251,6 @@ expectAssignable<Filter<A>>({
   'b.c.d.a.b.c.d.a.b.c.name': 3
 });
 
-expectAssignable<Filter<A>>({
-  'b.c.d.a.b.c.d.a.b.c.name': 2
-});
-
 expectAssignable<UpdateFilter<A>>({
   $set: { 'b.c.d.a.b.c.d.a.b.name': 'a' }
 });
