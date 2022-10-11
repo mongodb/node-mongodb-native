@@ -269,7 +269,7 @@ export type MatchKeysAndValues<TSchema> = Readonly<
       PropertyType<TSchema, Property extends `${infer Key}.$${string}` ? Key : never>
     >;
   } & {
-    [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
+    [Property in `${NestedPathsOfType<TSchema, Record<string | number, any>[]>}.$${
       | `[${string}]`
       | ''}.${string}`]?: any; // Could be further narrowed
   }
@@ -478,14 +478,18 @@ export type PropertyType<Type, Property extends string> = string extends Propert
   ? unknown
   : Property extends keyof Type
   ? Type[Property]
-  : Property extends `${number}`
+  : Property extends `${infer NumberProperty extends number}`
   ? Type extends ReadonlyArray<infer ArrayType>
     ? ArrayType
+    : NumberProperty extends keyof Type
+    ? Type[NumberProperty]
     : unknown
   : Property extends `${infer Key}.${infer Rest}`
-  ? Key extends `${number}`
+  ? Key extends `${infer NumberKey extends number}`
     ? Type extends ReadonlyArray<infer ArrayType>
       ? PropertyType<ArrayType, Rest>
+      : NumberKey extends keyof Type
+      ? PropertyType<Type[NumberKey], Rest>
       : unknown
     : Key extends keyof Type
     ? Type[Key] extends Map<string, infer MapType>
@@ -516,23 +520,23 @@ export type NestedPaths<Type> = Type extends
   ? [string]
   : Type extends object
   ? {
-      [Key in Extract<keyof Type, string>]: Type[Key] extends Type // type of value extends the parent
-        ? [Key]
-        : // for a recursive union type, the child will never extend the parent type.
-        // but the parent will still extend the child
-        Type extends Type[Key]
-        ? [Key]
-        : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
-        ? Type extends ArrayType // is the type of the parent the same as the type of the array?
-          ? [Key] // yes, it's a recursive array type
-          : // for unions, the child type extends the parent
-          ArrayType extends Type
-          ? [Key] // we have a recursive array union
-          : // child is an array, but it's not a recursive array
-            [Key, ...NestedPaths<Type[Key]>]
-        : // child is not structured the same as the parent
-          [Key, ...NestedPaths<Type[Key]>] | [Key];
-    }[Extract<keyof Type, string>]
+      [Key in Extract<keyof Type, string | number>]: Type[Key] extends infer Value
+        ? Value extends any // distribute union types
+          ? // the type of the parent is the same as the type of the value (see https://github.com/Microsoft/TypeScript/issues/27024#issuecomment-421529650)
+            (<T>() => T extends Type ? 1 : 2) extends <T>() => T extends Value ? 1 : 2
+            ? [Key] // the object value type is recursive
+            : Type[Key] extends ReadonlyArray<infer ArrayType> // handling recursive types with arrays
+            ? Type extends ArrayType // is the type of the parent the same as the type of the array?
+              ? [Key] // yes, it's a recursive array type
+              : // for unions, the child type extends the parent
+              ArrayType extends Type
+              ? [Key] // we have a recursive array union
+              : // child is an array, but it's not a recursive array
+                [Key, ...NestedPaths<Type[Key]>]
+            : [Key] | [Key, ...NestedPaths<Value>] // not recursive
+          : never
+        : never;
+    }[Extract<keyof Type, string | number>]
   : [];
 
 /**
