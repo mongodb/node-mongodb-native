@@ -881,10 +881,9 @@ functions:
           npm install @istanbuljs/nyc-config-typescript
           cd coverage
           sed -i'' -e 's/\/data\/mci\/.\{32\}\/src\///g' *
-          rm *-e
+          ls -la
           cd ..
           npx nyc merge coverage/ merged-coverage/coverage.json
-          more merged-coverage/coverage.json
           npx nyc report -t merged-coverage/ --reporter=html --report-dir coverage-report
 
           aws s3 cp coverage-report/ \
