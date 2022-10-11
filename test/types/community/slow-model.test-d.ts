@@ -1,4 +1,4 @@
-import type { UUID as MUUID } from 'bson';
+import type { UUID } from 'bson';
 
 import type { Collection, Db } from '../../../src';
 
@@ -83,7 +83,7 @@ export interface AnotherSpecificModel {
 }
 
 export interface CircularModel {
-  _id: MUUID;
+  _id: UUID;
   data: SpecificModel;
 }
 
@@ -269,7 +269,7 @@ export interface ExtraType11 {
 }
 
 export interface ExtraType12 {
-  _id?: MUUID;
+  _id?: UUID;
   prop42: ExtraType13[];
 }
 
@@ -294,7 +294,7 @@ export interface ExtraType6 {
 }
 
 export interface SlowModel extends SlowModelBase {
-  _id: MUUID;
+  _id: UUID;
 }
 
 export interface SpecialType extends SlowModel {
@@ -351,7 +351,7 @@ export interface Key19IType2 extends IType2 {
 
 export type ExtraType19 = ExtraType15[] | ExtraType20;
 export interface ExtraType7<T extends ExtraType19 = ExtraType19> {
-  id: MUUID;
+  id: UUID;
   prop66?: string;
   prop67: T;
   prop68?: ExtraType21;
@@ -379,7 +379,7 @@ export interface ExtraType21 {
 }
 
 export interface ExtraType8 {
-  id: MUUID;
+  id: UUID;
   prop81: string;
   prop82: ExtraType15[];
   prop83: ExtraType15;
