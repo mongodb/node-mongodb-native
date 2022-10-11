@@ -801,7 +801,7 @@ functions:
         aws_secret: ${aws_secret}
         local_file: src/coverage/coverage-final.json
         optional: true
-        remote_file: mongo-node-driver/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
+        remote_file: ${UPLOAD_BUCKET}/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads
         permissions: public-read
         content_type: application/json
@@ -818,7 +818,7 @@ functions:
           sudo dnf install --assumeyes awscli
 
           # Download all the task coverage files.
-          # NOTE: All coverage files are too large for V3 to handle the resulting call to
+          # NOTE: All coverage files are too large for V8 to handle the resulting call to
           #       JSON.stringify from within nyc, so with stick to latest Node only.
           aws s3 cp --recursive s3://mciuploads/${UPLOAD_BUCKET}/${revision}/${version_id}/ \
             coverage/ \
