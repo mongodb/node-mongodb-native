@@ -819,11 +819,12 @@ functions:
 
           # Download all the task coverage files.
           # NOTE: All coverage files are too large for V8 to handle the resulting call to
-          #       JSON.stringify from within nyc, so with stick to latest Node only.
+          #       JSON.stringify from within nyc, so with stick to Fermiun to include the
+          #       compression tests.
           aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ \
             coverage/ \
             --exclude "*rhel80-large*" \
-            --include "*hydrogen"
+            --include "*fermiun"
 
           # npx does not recognize the dependency so install it directly.
           npm install @istanbuljs/nyc-config-typescript
