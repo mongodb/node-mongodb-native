@@ -499,7 +499,7 @@ export type PropertyType<Type, Property extends string> = string extends Propert
  * returns tuple of strings (keys to be joined on '.') that represent every path into a schema
  * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
  */
-export type NestedPaths<Type, Depth extends number[]> = Depth['length'] extends 10
+export type NestedPaths<Type, Depth extends number[]> = Depth['length'] extends 8
   ? []
   : Type extends
       | string
