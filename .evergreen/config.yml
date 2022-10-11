@@ -842,7 +842,7 @@ functions:
       params:
         aws_key: ${aws_key}
         aws_secret: ${aws_secret}
-        local_file: src/coverage/index.html
+        local_file: src/coverage-report/index.html
         remote_file: mongo-node-driver/${revision}/${version_id}/coverage/index.html
         bucket: mciuploads
         permissions: public-read
