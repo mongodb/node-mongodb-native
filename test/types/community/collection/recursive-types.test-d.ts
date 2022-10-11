@@ -37,14 +37,14 @@ expectNotType<UpdateFilter<Author>>({
 
 // Extremely deep type checking for recursive schemas
 expectNotAssignable<Filter<Author>>({
-  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.title': 23
+  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.title': 23
 });
 expectAssignable<Filter<Author>>({
   'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.title':
     'good soup'
 });
 expectNotAssignable<Filter<Author>>({
-  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 23
+  'favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 23
 });
 
 // Beyond the depth of 10, `extends Document` permits anything (number for name is permitted)
@@ -60,10 +60,10 @@ expectAssignable<UpdateFilter<Author>>({
   }
 });
 
-// Depth below 9 is type checked
+// Depth 7 or below is type checked
 expectNotAssignable<UpdateFilter<Author>>({
   $set: {
-    'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 3
+    'favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 3
   }
 });
 
