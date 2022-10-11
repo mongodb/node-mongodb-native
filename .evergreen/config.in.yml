@@ -850,8 +850,6 @@ functions:
         local_file:  src/coverage/coverage-final.json
         optional: true
         # Upload the coverage report for all tasks in a single build to the same directory.
-        # TODO NODE-3897 - change upload directory to mongo-node-driver-next
-        # This change will require changing the `download and merge coverage` func as well
         remote_file: ${UPLOAD_BUCKET}/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads
         permissions: public-read
