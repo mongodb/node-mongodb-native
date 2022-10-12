@@ -24,7 +24,7 @@ expectAssignable<Filter<Author>>({
   }
 });
 
-// Check that devolving to Document after a certain recursive depth does not effect checking
+// Check that devolving to Document after a certain recursive depth does not affect checking
 // cases where dot notation is not being used
 expectNotType<UpdateFilter<Author>>({
   $set: {
