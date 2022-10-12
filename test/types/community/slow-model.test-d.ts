@@ -1,3 +1,10 @@
+/*
+ * The following type testing was adapted from @ermik
+ * it is a reproduction of a slow down in typescript compilation
+ * as well as issues with compiling recursive schemas
+ * https://github.com/thinkalpha/node-mongodb-typechecking-performance
+ */
+
 import type { UUID } from 'bson';
 
 import type { Collection, Db } from '../../../src';
