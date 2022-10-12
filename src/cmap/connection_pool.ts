@@ -134,38 +134,25 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   options: Readonly<ConnectionPoolOptions>;
-  /** @internal */
   [kPoolState]: typeof PoolState[keyof typeof PoolState];
-  /** @internal */
   [kServer]: Server;
-  /** @internal */
   [kLogger]: Logger;
-  /** @internal */
   [kConnections]: Denque<Connection>;
-  /** @internal */
   [kPending]: number;
-  /** @internal */
-  [kCheckedOut]: number;
-  /** @internal */
+  [kCheckedOut]: Set<Connection>;
   [kMinPoolSizeTimer]?: NodeJS.Timeout;
   /**
    * An integer representing the SDAM generation of the pool
-   * @internal
    */
   [kGeneration]: number;
-  /** A map of generations to service ids
-   * @internal
+  /**
+   * A map of generations to service ids
    */
   [kServiceGenerations]: Map<string, number>;
-  /** @internal */
   [kConnectionCounter]: Generator<number>;
-  /** @internal */
   [kCancellationToken]: CancellationToken;
-  /** @internal */
   [kWaitQueue]: Denque<WaitQueueMember>;
-  /** @internal */
   [kMetrics]: ConnectionPoolMetrics;
-  /** @internal */
   [kProcessingWaitQueue]: boolean;
 
   /**
@@ -224,7 +211,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    */
   static readonly CONNECTION_CHECKED_IN = CONNECTION_CHECKED_IN;
 
-  /** @internal */
   constructor(server: Server, options: ConnectionPoolOptions) {
     super();
 
@@ -252,7 +238,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new Denque();
     this[kPending] = 0;
-    this[kCheckedOut] = 0;
+    this[kCheckedOut] = new Set();
     this[kMinPoolSizeTimer] = undefined;
     this[kGeneration] = 0;
     this[kServiceGenerations] = new Map();
@@ -304,7 +290,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   get currentCheckedOutCount(): number {
-    return this[kCheckedOut];
+    return this[kCheckedOut].size;
   }
 
   get waitQueueSize(): number {
@@ -321,6 +307,17 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
   get serverError() {
     return this[kServer].description.error;
+  }
+
+  /**
+   * This is exposed ONLY for use in mongosh, to enable
+   * killing all connections if a user quits the shell with
+   * operations in progress.
+   *
+   * This property may be removed as a part of NODE-3263.
+   */
+  get checkedOutConnections() {
+    return this[kCheckedOut];
   }
 
   /**
@@ -395,7 +392,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this[kConnections].unshift(connection);
     }
 
-    this[kCheckedOut]--;
+    this[kCheckedOut].delete(connection);
     this.emit(ConnectionPool.CONNECTION_CHECKED_IN, new ConnectionCheckedInEvent(this, connection));
 
     if (willDestroy) {
@@ -744,7 +741,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
 
       if (!this.connectionIsPerished(connection)) {
-        this[kCheckedOut]++;
+        this[kCheckedOut].add(connection);
         this.emit(
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(this, connection)
@@ -780,7 +777,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
               new ConnectionCheckOutFailedEvent(this, 'connectionError')
             );
           } else if (connection) {
-            this[kCheckedOut]++;
+            this[kCheckedOut].add(connection);
             this.emit(
               ConnectionPool.CONNECTION_CHECKED_OUT,
               new ConnectionCheckedOutEvent(this, connection)
