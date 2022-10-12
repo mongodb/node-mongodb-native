@@ -324,9 +324,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   /**
-   * This is exposed ONLY for use in mongosh, so they can
-   * kill connections if a user quits the shell with operations
-   * in progress.
+   * This is exposed ONLY for use in mongosh, to enable
+   * killing all connections if a user quits the shell with
+   * operations in progress.
+   *
+   * This property may be removed as a part of NODE-3263.
    */
   get checkedOutConnections() {
     return this[kCheckedOut];
