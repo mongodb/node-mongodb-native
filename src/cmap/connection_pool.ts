@@ -134,38 +134,25 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   options: Readonly<ConnectionPoolOptions>;
-  /** @internal */
   [kPoolState]: typeof PoolState[keyof typeof PoolState];
-  /** @internal */
   [kServer]: Server;
-  /** @internal */
   [kLogger]: Logger;
-  /** @internal */
   [kConnections]: Denque<Connection>;
-  /** @internal */
   [kPending]: number;
-  /** @internal */
   [kCheckedOut]: Set<Connection>;
-  /** @internal */
   [kMinPoolSizeTimer]?: NodeJS.Timeout;
   /**
    * An integer representing the SDAM generation of the pool
-   * @internal
    */
   [kGeneration]: number;
-  /** A map of generations to service ids
-   * @internal
+  /**
+   * A map of generations to service ids
    */
   [kServiceGenerations]: Map<string, number>;
-  /** @internal */
   [kConnectionCounter]: Generator<number>;
-  /** @internal */
   [kCancellationToken]: CancellationToken;
-  /** @internal */
   [kWaitQueue]: Denque<WaitQueueMember>;
-  /** @internal */
   [kMetrics]: ConnectionPoolMetrics;
-  /** @internal */
   [kProcessingWaitQueue]: boolean;
 
   /**
@@ -224,7 +211,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    */
   static readonly CONNECTION_CHECKED_IN = CONNECTION_CHECKED_IN;
 
-  /** @internal */
   constructor(server: Server, options: ConnectionPoolOptions) {
     super();
 
