@@ -7,7 +7,7 @@ import type { Collection, Filter, UpdateFilter } from '../../../../src';
  */
 interface Author {
   name: string;
-  favoritePublication: Book;
+  bestBook: Book;
 }
 
 interface Book {
@@ -16,16 +16,19 @@ interface Book {
 }
 
 expectAssignable<Filter<Author>>({
-  favoritePublication: {
+  bestBook: {
     title: 'book title',
     author: {
       name: 'author name'
     }
   }
 });
+
+// Check that devolving to Document after a certain recursive depth does not effect checking
+// cases where dot notation is not being used
 expectNotType<UpdateFilter<Author>>({
   $set: {
-    favoritePublication: {
+    bestBook: {
       title: 'a title',
       published: new Date(),
       author: {
@@ -35,35 +38,87 @@ expectNotType<UpdateFilter<Author>>({
   }
 });
 
-// Extremely deep type checking for recursive schemas
+//////////// Filter
+// Depth of 1 has type checking
 expectNotAssignable<Filter<Author>>({
-  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.title': 23
+  'bestBook.title': 23
 });
-expectAssignable<Filter<Author>>({
-  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.title':
-    'good soup'
-});
+// Depth of 2 has type checking
 expectNotAssignable<Filter<Author>>({
-  'favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 23
+  'bestBook.author.name': 23
 });
-
-// Beyond the depth of 10, `extends Document` permits anything (number for name is permitted)
+// Depth of 3 has type checking
+expectNotAssignable<Filter<Author>>({
+  'bestBook.author.bestBook.title': 23
+});
+// Depth of 4 has type checking
+expectNotAssignable<Filter<Author>>({
+  'bestBook.author.bestBook.author.name': 23
+});
+// Depth of 5 has type checking
+expectNotAssignable<Filter<Author>>({
+  'bestBook.author.bestBook.author.bestBook.title': 23
+});
+// Depth of 6 has type checking
+expectNotAssignable<Filter<Author>>({
+  'bestBook.author.bestBook.author.bestBook.author.name': 23
+});
+// Depth of 7 has type checking
+expectNotAssignable<Filter<Author>>({
+  'bestBook.author.bestBook.author.bestBook.author.bestBook.title': 23
+});
+// Depth of 8 does **not** have type checking
 expectAssignable<Filter<Author>>({
-  'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 23
+  'bestBook.author.bestBook.author.bestBook.author.bestBook.author.name': 23
 });
 
-// Update filter has similar depth limit
-expectAssignable<UpdateFilter<Author>>({
-  $set: {
-    'favoritePublication.author.favoritePublication.author.favoritePublication.author.favoritePublication.author.name':
-      'joe'
-  }
-});
-
-// Depth 7 or below is type checked
+//////////// UpdateFilter
+// Depth of 1 has type checking
 expectNotAssignable<UpdateFilter<Author>>({
   $set: {
-    'favoritePublication.author.favoritePublication.author.favoritePublication.author.name': 3
+    'bestBook.title': 23
+  }
+});
+// Depth of 2 has type checking
+expectNotAssignable<UpdateFilter<Author>>({
+  $set: {
+    'bestBook.author.name': 23
+  }
+});
+// Depth of 3 has type checking
+expectNotAssignable<UpdateFilter<Author>>({
+  $set: {
+    'bestBook.author.bestBook.title': 23
+  }
+});
+// Depth of 4 has type checking
+expectNotAssignable<UpdateFilter<Author>>({
+  $set: {
+    'bestBook.author.bestBook.author.name': 23
+  }
+});
+// Depth of 5 has type checking
+expectNotAssignable<UpdateFilter<Author>>({
+  $set: {
+    'bestBook.author.bestBook.author.bestBook.title': 23
+  }
+});
+// Depth of 6 has type checking
+expectNotAssignable<UpdateFilter<Author>>({
+  $set: {
+    'bestBook.author.bestBook.author.bestBook.author.name': 23
+  }
+});
+// Depth of 7 has type checking
+expectNotAssignable<UpdateFilter<Author>>({
+  $set: {
+    'bestBook.author.bestBook.author.bestBook.author.bestBook.title': 23
+  }
+});
+// Depth of 8 does **not** have type checking
+expectAssignable<UpdateFilter<Author>>({
+  $set: {
+    'bestBook.author.bestBook.author.bestBook.author.bestBook.author.name': 23
   }
 });
 
