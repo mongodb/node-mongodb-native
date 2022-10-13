@@ -897,14 +897,22 @@ class ReadableCursorStream extends Readable {
         }
 
         // NOTE: This is also perhaps questionable. The rationale here is that these errors tend
-        //       to be "operation interrupted", where a cursor has been closed but there is an
+        //       to be "operation was interrupted", where a cursor has been closed but there is an
         //       active getMore in-flight. This used to check if the cursor was killed but once
         //       that changed to happen in cleanup legitimate errors would not destroy the
         //       stream. There are change streams test specifically test these cases.
-        if (err.message.match(/interrupted/)) {
+        if (err.message.match(/operation was interrupted/)) {
           return this.push(null);
         }
 
+        // NOTE: The two above checks on the message of the error will cause a null to be pushed
+        //       to the stream, thus closing the stream before the destroy call happens. This means
+        //       that either of those error messages on a change stream will not get a proper
+        //       'error' event to be emitted (the error passed to destroy). Change stream resumability
+        //       relies on that error event to be emitted to create its new cursor and thus was not
+        //       working on 4.4 servers because the error emitted on failover was "interrupted at
+        //       shutdown" while on 5.0+ it is "The server is in quiesce mode and will shut down".
+        //       See NODE-4475.
         return this.destroy(err);
       }
 
