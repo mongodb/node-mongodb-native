@@ -1759,63 +1759,6 @@ tasks:
         vars:
           CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
       - func: run custom csfle tests
-  - name: aws-5.0-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws EC2 credentials
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-5.0-csfle-refresh-aws-with-aws-credentials-as-environment-variables-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-5.0-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials and session token as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
   - name: run-custom-csfle-tests-5.0-master
     tags:
       - run-custom-dependency-tests
@@ -1832,63 +1775,6 @@ tasks:
         vars:
           CSFLE_GIT_REF: master
       - func: run custom csfle tests
-  - name: aws-5.0-csfle-refresh-aws-with-aws-EC2-credentials-master
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws EC2 credentials
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: master
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-5.0-csfle-refresh-aws-with-aws-credentials-as-environment-variables-master
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: master
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-5.0-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-master
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials and session token as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: master
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
   - name: run-custom-csfle-tests-rapid-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -1905,63 +1791,6 @@ tasks:
         vars:
           CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
       - func: run custom csfle tests
-  - name: aws-rapid-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws EC2 credentials
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-rapid-csfle-refresh-aws-with-aws-credentials-as-environment-variables-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-rapid-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials and session token as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
   - name: run-custom-csfle-tests-rapid-master
     tags:
       - run-custom-dependency-tests
@@ -1978,63 +1807,6 @@ tasks:
         vars:
           CSFLE_GIT_REF: master
       - func: run custom csfle tests
-  - name: aws-rapid-csfle-refresh-aws-with-aws-EC2-credentials-master
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws EC2 credentials
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: master
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-rapid-csfle-refresh-aws-with-aws-credentials-as-environment-variables-master
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: master
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-rapid-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-master
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials and session token as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: master
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
   - name: run-custom-csfle-tests-latest-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -2051,63 +1823,6 @@ tasks:
         vars:
           CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
       - func: run custom csfle tests
-  - name: aws-latest-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws EC2 credentials
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-latest-csfle-refresh-aws-with-aws-credentials-as-environment-variables-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
-  - name: aws-latest-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-pinned-commit
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-aws.json
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: bootstrap kms servers
-      - func: prepare aws with aws credentials and session token as environment variables
-      - func: prepare csfle environment
-        vars:
-          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
-      - func: run custom csfle tests
-        vars:
-          REFRESH_AWS_CREDENTIALS: true
   - name: run-custom-csfle-tests-latest-master
     tags:
       - run-custom-dependency-tests
@@ -2124,7 +1839,7 @@ tasks:
         vars:
           CSFLE_GIT_REF: master
       - func: run custom csfle tests
-  - name: aws-latest-csfle-refresh-aws-with-aws-EC2-credentials-master
+  - name: refresh aws with aws EC2 credentials
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2136,14 +1851,14 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
-      - func: prepare aws with aws EC2 credentials
+      - func: refresh aws with aws EC2 credentials
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: master
+          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
-  - name: aws-latest-csfle-refresh-aws-with-aws-credentials-as-environment-variables-master
+  - name: refresh aws with aws credentials as environment variables
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2155,14 +1870,14 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
-      - func: prepare aws with aws credentials as environment variables
+      - func: refresh aws with aws credentials as environment variables
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: master
+          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
-  - name: aws-latest-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-master
+  - name: refresh aws with aws credentials and session token as environment variables
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2174,10 +1889,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: bootstrap kms servers
-      - func: prepare aws with aws credentials and session token as environment variables
+      - func: refresh aws with aws credentials and session token as environment variables
       - func: prepare csfle environment
         vars:
-          CSFLE_GIT_REF: master
+          CSFLE_GIT_REF: fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb
       - func: run custom csfle tests
         vars:
           REFRESH_AWS_CREDENTIALS: true
@@ -2999,29 +2714,14 @@ buildvariants:
       - run-bson-ext-integration
       - run-bson-ext-unit
       - run-custom-csfle-tests-5.0-pinned-commit
-      - aws-5.0-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
-      - aws-5.0-csfle-refresh-aws-with-aws-credentials-as-environment-variables-pinned-commit
-      - aws-5.0-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-pinned-commit
       - run-custom-csfle-tests-5.0-master
-      - aws-5.0-csfle-refresh-aws-with-aws-EC2-credentials-master
-      - aws-5.0-csfle-refresh-aws-with-aws-credentials-as-environment-variables-master
-      - aws-5.0-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-master
       - run-custom-csfle-tests-rapid-pinned-commit
-      - aws-rapid-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
-      - aws-rapid-csfle-refresh-aws-with-aws-credentials-as-environment-variables-pinned-commit
-      - aws-rapid-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-pinned-commit
       - run-custom-csfle-tests-rapid-master
-      - aws-rapid-csfle-refresh-aws-with-aws-EC2-credentials-master
-      - aws-rapid-csfle-refresh-aws-with-aws-credentials-as-environment-variables-master
-      - aws-rapid-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-master
       - run-custom-csfle-tests-latest-pinned-commit
-      - aws-latest-csfle-refresh-aws-with-aws-EC2-credentials-pinned-commit
-      - aws-latest-csfle-refresh-aws-with-aws-credentials-as-environment-variables-pinned-commit
-      - aws-latest-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-pinned-commit
       - run-custom-csfle-tests-latest-master
-      - aws-latest-csfle-refresh-aws-with-aws-EC2-credentials-master
-      - aws-latest-csfle-refresh-aws-with-aws-credentials-as-environment-variables-master
-      - aws-latest-csfle-refresh-aws-with-aws-credentials-and-session-token-as-environment-variables-master
+      - refresh aws with aws EC2 credentials
+      - refresh aws with aws credentials as environment variables
+      - refresh aws with aws credentials and session token as environment variables
   - name: rhel8-test-serverless
     display_name: Serverless Test
     run_on: rhel80-large

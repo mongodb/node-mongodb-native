@@ -582,8 +582,10 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
+const PINNED_CSFLE_COMMIT = 'fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb'
+
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of ['fadbaa81a049b6c7b7b00fb42c2cc2cd61b588fb', 'master']) {
+  for (const ref of [PINNED_CSFLE_COMMIT, 'master']) {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests'],
@@ -612,47 +614,47 @@ for (const version of ['5.0', 'rapid', 'latest']) {
       ]
     });
 
-    const name = ex => `aws-${version}-csfle-${ex.split(' ').join('-')}-${ref === 'master' ? ref : 'pinned-commit'}`;
-    const aws_funcs = [
-      { func: 'prepare aws with aws EC2 credentials' },
-      { func: 'prepare aws with aws credentials as environment variables' },
-      { func: 'prepare aws with aws credentials and session token as environment variables' }
-    ];
-
-    for (const fn of aws_funcs) {
-      oneOffFuncAsTasks.push({
-        name: name(fn.func.replace('prepare', 'refresh')),
-        commands: [
-          { func: 'install dependencies' },
-          {
-            func: 'bootstrap mongo-orchestration',
-            vars: {
-              VERSION: version,
-              TOPOLOGY: 'replica_set',
-              AUTH: 'auth',
-              ORCHESTRATION_FILE: 'auth-aws.json'
-            }
-          },
-          { func: 'add aws auth variables to file' },
-          { func: 'setup aws env' },
-          { func: 'bootstrap kms servers' },
-          fn,
-          {
-            func: 'prepare csfle environment',
-            vars: {
-              CSFLE_GIT_REF: ref
-            }
-          },
-          {
-            func: 'run custom csfle tests',
-            vars: {
-              REFRESH_AWS_CREDENTIALS: true
-            }
-          }
-        ]
-      });
-    }
   }
+}
+
+const awsFuncs = [
+  { func: 'refresh aws with aws EC2 credentials' },
+  { func: 'refresh aws with aws credentials as environment variables' },
+  { func: 'refresh aws with aws credentials and session token as environment variables' }
+];
+
+for (const fn of awsFuncs) {
+  oneOffFuncAsTasks.push({
+    name: fn.func,
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION: 'latest',
+          TOPOLOGY: 'replica_set',
+          AUTH: 'auth',
+          ORCHESTRATION_FILE: 'auth-aws.json'
+        }
+      },
+      { func: 'add aws auth variables to file' },
+      { func: 'setup aws env' },
+      { func: 'bootstrap kms servers' },
+      fn,
+      {
+        func: 'prepare csfle environment',
+        vars: {
+          CSFLE_GIT_REF: PINNED_CSFLE_COMMIT
+        }
+      },
+      {
+        func: 'run custom csfle tests',
+        vars: {
+          REFRESH_AWS_CREDENTIALS: true
+        }
+      }
+    ]
+  });
 }
 
 // TODO NODE-3897 - generate combined coverage report
