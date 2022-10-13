@@ -2091,7 +2091,7 @@ describe('ChangeStream resumability', function () {
             data: {
               failCommands: ['getMore'],
               errorCode: resumableErrorCodes[0].code,
-              errorCode: resumableErrorCodes[0].message
+              errmsg: resumableErrorCodes[0].message
             }
           } as FailPoint);
 
