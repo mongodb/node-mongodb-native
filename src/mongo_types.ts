@@ -68,7 +68,7 @@ export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 export type Filter<TSchema> =
   | Partial<TSchema>
   | ({
-      [Property in Join<NestedPaths<WithId<TSchema>>, '.'>]?: Condition<
+      [Property in Join<NestedPaths<WithId<TSchema>, []>, '.'>]?: Condition<
         PropertyType<WithId<TSchema>, Property>
       >;
     } & RootFilterOperators<WithId<TSchema>>);
@@ -263,7 +263,7 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
 /** @public */
 export type MatchKeysAndValues<TSchema> = Readonly<
   {
-    [Property in Join<NestedPaths<TSchema>, '.'>]?: PropertyType<TSchema, Property>;
+    [Property in Join<NestedPaths<TSchema, []>, '.'>]?: PropertyType<TSchema, Property>;
   } & {
     [Property in `${NestedPathsOfType<TSchema, any[]>}.$${`[${string}]` | ''}`]?: ArrayElement<
       PropertyType<TSchema, Property extends `${infer Key}.$${string}` ? Key : never>
@@ -272,7 +272,7 @@ export type MatchKeysAndValues<TSchema> = Readonly<
     [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
       | `[${string}]`
       | ''}.${string}`]?: any; // Could be further narrowed
-  }
+  } & Document
 >;
 
 /** @public */
@@ -498,20 +498,29 @@ export type PropertyType<Type, Property extends string> = string extends Propert
  * @public
  * returns tuple of strings (keys to be joined on '.') that represent every path into a schema
  * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
+ *
+ * @remarks
+ * Through testing we determined that a depth of 8 is safe for the typescript compiler
+ * and provides reasonable compilation times. This number is otherwise not special and
+ * should be changed if issues are found with this level of checking. Beyond this
+ * depth any helpers that make use of NestedPaths should devolve to not asserting any
+ * type safety on the input.
  */
-export type NestedPaths<Type> = Type extends
-  | string
-  | number
-  | boolean
-  | Date
-  | RegExp
-  | Buffer
-  | Uint8Array
-  | ((...args: any[]) => any)
-  | { _bsontype: string }
+export type NestedPaths<Type, Depth extends number[]> = Depth['length'] extends 8
+  ? []
+  : Type extends
+      | string
+      | number
+      | boolean
+      | Date
+      | RegExp
+      | Buffer
+      | Uint8Array
+      | ((...args: any[]) => any)
+      | { _bsontype: string }
   ? []
   : Type extends ReadonlyArray<infer ArrayType>
-  ? [] | [number, ...NestedPaths<ArrayType>]
+  ? [] | [number, ...NestedPaths<ArrayType, [...Depth, 1]>]
   : Type extends Map<string, any>
   ? [string]
   : Type extends object
@@ -529,9 +538,9 @@ export type NestedPaths<Type> = Type extends
           ArrayType extends Type
           ? [Key] // we have a recursive array union
           : // child is an array, but it's not a recursive array
-            [Key, ...NestedPaths<Type[Key]>]
+            [Key, ...NestedPaths<Type[Key], [...Depth, 1]>]
         : // child is not structured the same as the parent
-          [Key, ...NestedPaths<Type[Key]>] | [Key];
+          [Key, ...NestedPaths<Type[Key], [...Depth, 1]>] | [Key];
     }[Extract<keyof Type, string>]
   : [];
 
@@ -542,7 +551,7 @@ export type NestedPaths<Type> = Type extends
  */
 export type NestedPathsOfType<TSchema, Type> = KeysOfAType<
   {
-    [Property in Join<NestedPaths<TSchema>, '.'>]: PropertyType<TSchema, Property>;
+    [Property in Join<NestedPaths<TSchema, []>, '.'>]: PropertyType<TSchema, Property>;
   },
   Type
 >;

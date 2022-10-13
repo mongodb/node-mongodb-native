@@ -221,7 +221,10 @@ expectError<UpdateFilter<TestModel>>({
   $set: { 'subInterfaceField.nestedObject': { a: 1, b: '2' } }
 });
 expectError(buildUpdateFilter({ $set: { 'subInterfaceField.field2': 2 } }));
-expectError(buildUpdateFilter({ $set: { 'unknown.field': null } }));
+
+// NODE-3875 introduced intersection with Document to the MatchKeysAndValues so this no longer errors
+expectAssignable<UpdateFilter<TestModel>>({ $set: { 'unknown.field': null } });
+
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'numberArray.$': 40 } });
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'numberArray.$[bla]': 40 } });
 expectAssignable<UpdateFilter<TestModel>>({ $set: { 'numberArray.$[]': 1000.2 } });
@@ -241,7 +244,10 @@ expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { stringField: 'a' } }
 expectError(buildUpdateFilter({ $setOnInsert: { stringField: 123 } }));
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'subInterfaceField.field1': '2' } });
 expectError(buildUpdateFilter({ $setOnInsert: { 'subInterfaceField.field2': 2 } }));
-expectError(buildUpdateFilter({ $setOnInsert: { 'unknown.field': null } }));
+
+// NODE-3875 introduced intersection with Document to the MatchKeysAndValues so this no longer errors
+expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'unknown.field': null } });
+
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'numberArray.$': 40 } });
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'numberArray.$[bla]': 40 } });
 expectAssignable<UpdateFilter<TestModel>>({ $setOnInsert: { 'numberArray.$[]': 1000.2 } });
