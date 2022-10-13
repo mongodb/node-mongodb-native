@@ -1,23 +1,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import { Collection, MongoClient, MongoError, MongoServerError } from '../../../src';
+import {
+  Collection,
+  MongoClient,
+  MongoError,
+  MongoServerError,
+  MongoWriteConcernError
+} from '../../../src';
+import { Server } from '../../../src/sdam/server';
 
 describe('Retryable Writes Spec Prose', () => {
-  let client: MongoClient, failPointName;
-
-  afterEach(async () => {
-    try {
-      if (failPointName) {
-        await client.db('admin').command({ configureFailPoint: failPointName, mode: 'off' });
-      }
-    } finally {
-      failPointName = undefined;
-      await client?.close();
-    }
-  });
-
   describe('1. Test that retryable writes raise an exception when using the MMAPv1 storage engine.', () => {
+    let client: MongoClient;
+    let failPointName: string | undefined;
     /**
      * For this test, execute a write operation, such as insertOne, which should generate an exception and the error code is 20.
      * Assert that the error message is the replacement error message:
@@ -46,10 +43,21 @@ describe('Retryable Writes Spec Prose', () => {
       expect(failPoint).to.have.property('ok', 1);
     });
 
-    for (const testTopology of ['replicaset', 'sharded']) {
+    afterEach(async () => {
+      try {
+        if (failPointName) {
+          await client.db('admin').command({ configureFailPoint: failPointName, mode: 'off' });
+        }
+      } finally {
+        failPointName = undefined;
+        await client?.close();
+      }
+    });
+
+    for (const testTopology of ['replicaset', 'sharded'] as const) {
       const minFailPointVersion = testTopology === 'replicaset' ? '>=4.0.0' : '>=4.1.5';
       it(`should error with the correct error message when topology is ${testTopology}`, {
-        metadata: { requires: { mongodb: minFailPointVersion, topology: [testTopology as any] } },
+        metadata: { requires: { mongodb: minFailPointVersion, topology: [testTopology] } },
         test: async function () {
           const error = await client
             .db('test')
@@ -74,6 +82,8 @@ describe('Retryable Writes Spec Prose', () => {
     // This test MUST be implemented by any driver that implements the CMAP specification.
     // This test requires MongoDB 4.2.9+ for blockConnection support in the failpoint.
 
+    let client: MongoClient;
+    let failPointName: string | undefined;
     let cmapEvents: Array<{ name: string; event: Record<string, any> }>;
     let commandStartedEvents: Array<Record<string, any>>;
     let testCollection: Collection;
@@ -121,6 +131,17 @@ describe('Retryable Writes Spec Prose', () => {
       client.on('commandStarted', ev => {
         commandStartedEvents.push(ev);
       });
+    });
+
+    afterEach(async () => {
+      try {
+        if (failPointName) {
+          await client.db('admin').command({ configureFailPoint: failPointName, mode: 'off' });
+        }
+      } finally {
+        failPointName = undefined;
+        await client?.close();
+      }
     });
 
     it('should emit events in the expected sequence', {
@@ -187,5 +208,96 @@ describe('Retryable Writes Spec Prose', () => {
         );
       }
     });
+  });
+
+  describe('3. Test that drivers return the original error after encountering a WriteConcernError with a RetryableWriteError label', () => {
+    let client: MongoClient;
+    let collection: Collection<{ _id: 1 }>;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true, retryWrites: true });
+      await client
+        .db()
+        .collection('retryReturnsOriginal')
+        .drop()
+        .catch(() => null);
+      collection = client.db().collection('retryReturnsOriginal');
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await client.close();
+    });
+
+    /**
+     * **NOTE:** Node emits a command failed event for writeConcern errors, making the commandSucceeded part of this test inconsistent see (DRIVERS-2468).
+     * Second our event emitters are called synchronously but operations are asynchronous, we don't have a way to make sure a fail point is set before a retry
+     * is attempted, if the server allowed us to specify an ordered list of fail points this would be possible, alas we can use sinon. Sinon will set an error
+     * to be thrown on the first and second call to Server.command(), this should enter the retry logic for the second error thrown.
+     *
+     * This test MUST be implemented by any driver that implements the Command Monitoring specification,
+     * only run against replica sets as mongos does not propagate the NoWritesPerformed label to the drivers.
+     * Additionally, this test requires drivers to set a fail point after an insertOne operation but before the subsequent retry.
+     * Drivers that are unable to set a failCommand after the CommandSucceededEvent SHOULD use mocking or write a unit test to cover the same sequence of events.
+     *
+     * Create a client with retryWrites=true.
+     *
+     * Configure a fail point with error code 91 (ShutdownInProgress):
+     * ```js
+     * db.adminCommand({
+     *   configureFailPoint: 'failCommand',
+     *   mode: { times: 1 },
+     *   data: {
+     *     writeConcernError: {
+     *       code: 91,
+     *       errorLabels: ['RetryableWriteError']
+     *     },
+     *     failCommands: ['insert']
+     *   }
+     * });
+     * ```
+     * Via the command monitoring CommandSucceededEvent, configure a fail point with error code 10107 (NotWritablePrimary) and a NoWritesPerformed label:
+     *
+     * ```js
+     * db.adminCommand({
+     *   configureFailPoint: 'failCommand',
+     *   mode: { times: 1 },
+     *   data: {
+     *     errorCode: 10107,
+     *     errorLabels: ['RetryableWriteError', 'NoWritesPerformed'],
+     *     failCommands: ['insert']
+     *   }
+     * });
+     * ```
+     * Drivers SHOULD only configure the 10107 fail point command if the the succeeded event is for the 91 error configured in step 2.
+     *
+     * Attempt an insertOne operation on any record for any database and collection. For the resulting error, assert that the associated error code is 91.
+     */
+    it(
+      'when a retry attempt fails with an error labeled NoWritesPerformed, drivers MUST return the original error',
+      { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
+      async () => {
+        const serverCommandStub = sinon.stub(Server.prototype, 'command');
+        serverCommandStub
+          .onCall(0)
+          .yieldsRight(
+            new MongoWriteConcernError({ errorLabels: ['RetryableWriteError'], code: 91 }, {})
+          );
+        serverCommandStub
+          .onCall(1)
+          .yieldsRight(
+            new MongoWriteConcernError(
+              { errorLabels: ['RetryableWriteError', 'NoWritesPerformed'], errorCode: 10107 },
+              {}
+            )
+          );
+
+        const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+        sinon.restore();
+
+        expect(insertResult).to.be.instanceOf(MongoServerError);
+        expect(insertResult).to.have.property('code', 91);
+      }
+    );
   });
 });

@@ -294,7 +294,7 @@ export interface FailPoint {
     closeConnection?: boolean;
     blockConnection?: boolean;
     blockTimeMS?: number;
-    writeConcernError?: { code: number; errmsg: string };
+    writeConcernError?: { code: number; errmsg?: string; errorLabels?: string[] };
     threadName?: string;
     failInternalCommands?: boolean;
     errorLabels?: string[];

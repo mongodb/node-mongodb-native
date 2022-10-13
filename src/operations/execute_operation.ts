@@ -5,6 +5,7 @@ import {
   MongoCompatibilityError,
   MONGODB_ERROR_CODES,
   MongoError,
+  MongoErrorLabel,
   MongoExpiredSessionError,
   MongoNetworkError,
   MongoNotConnectedError,
@@ -272,5 +273,15 @@ async function retryOperation<
     );
   }
 
-  return operation.executeAsync(server, session);
+  try {
+    return await operation.executeAsync(server, session);
+  } catch (retryError) {
+    if (
+      retryError instanceof MongoError &&
+      retryError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
+    ) {
+      throw originalError;
+    }
+    throw retryError;
+  }
 }
