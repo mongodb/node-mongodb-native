@@ -4,7 +4,7 @@ import * as url from 'url';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { aws4 } from '../../deps';
+import { aws4, credentialProvider } from '../../deps';
 import {
   MongoAWSError,
   MongoCompatibilityError,
@@ -52,6 +52,14 @@ export class MongoDBAWS extends AuthProvider {
         )
       );
       return;
+    }
+
+    if ('kModuleError' in credentialProvider) {
+      // Use our way of getting credentials.
+    } else {
+      const { fromNodeProviderChain } = credentialProvider;
+      /* eslint no-console: 0 */
+      console.log('AWS CREDS', fromNodeProviderChain());
     }
 
     if (!credentials.username) {
