@@ -87,6 +87,7 @@
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
   "optionalDependencies": {
+    "@aws-sdk/credential-providers": "^3.186.0",
     "saslprep": "^1.0.3"
   },
   "scripts": {
