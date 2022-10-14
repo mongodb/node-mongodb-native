@@ -58,8 +58,16 @@ export class MongoDBAWS extends AuthProvider {
       // Use our way of getting credentials.
     } else {
       const { fromNodeProviderChain } = credentialProvider;
-      /* eslint no-console: 0 */
-      console.log('AWS CREDS', fromNodeProviderChain());
+      const provider = fromNodeProviderChain();
+      provider()
+        .then(creds => {
+          /* eslint no-console: 0 */
+          console.log('AWS CREDS', creds);
+        })
+        .catch(error => {
+          /* eslint no-console: 0 */
+          console.log('AWS ERROR', error);
+        });
     }
 
     if (!credentials.username) {
