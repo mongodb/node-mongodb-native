@@ -264,7 +264,7 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
       .catch(error => {
         /* eslint no-console: 0 */
         console.log('AWS ERROR', error);
-        callback(error);
+        callback(new MongoAwsError(error.message));
       });
   }
 }
