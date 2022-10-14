@@ -10,6 +10,7 @@ import {
   eachAsync,
   HostAddress,
   isHello,
+  List,
   maybeCallback,
   MongoDBNamespace,
   shuffle
@@ -47,7 +48,7 @@ describe('driver utils', function () {
     });
   });
 
-  context('new BufferPool()', function () {
+  describe('class BufferPool', function () {
     it('should report the correct length', function () {
       const buffer = new BufferPool();
       buffer.append(Buffer.from([0, 1]));
@@ -69,7 +70,7 @@ describe('driver utils', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([0, 1]));
         const data = buffer.peek(2);
-        expect(data).to.eql(Buffer.from([0, 1]));
+        expect(data).to.deep.equal(Buffer.from([0, 1]));
         expect(buffer).property('length').to.equal(2);
       });
 
@@ -77,8 +78,10 @@ describe('driver utils', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([0, 1, 2, 3]));
         const data = buffer.peek(2);
-        expect(data).to.eql(Buffer.from([0, 1]));
+        expect(data).to.deep.equal(Buffer.from([0, 1]));
         expect(buffer).property('length').to.equal(4);
+        // Check that peek didn't remove items (length may have been left unmodified)
+        expect(buffer.read(4)).to.deep.equal(Buffer.from([0, 1, 2, 3]));
       });
 
       it('across multiple buffers', function () {
@@ -88,7 +91,7 @@ describe('driver utils', function () {
         buffer.append(Buffer.from([4, 5]));
         expect(buffer).property('length').to.equal(6);
         const data = buffer.peek(5);
-        expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4]));
+        expect(data).to.deep.equal(Buffer.from([0, 1, 2, 3, 4]));
         expect(buffer).property('length').to.equal(6);
       });
     });
@@ -109,7 +112,7 @@ describe('driver utils', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([0, 1]));
         const data = buffer.read(2);
-        expect(data).to.eql(Buffer.from([0, 1]));
+        expect(data).to.deep.equal(Buffer.from([0, 1]));
         expect(buffer).property('length').to.equal(0);
       });
 
@@ -117,7 +120,7 @@ describe('driver utils', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([0, 1, 2, 3]));
         const data = buffer.read(2);
-        expect(data).to.eql(Buffer.from([0, 1]));
+        expect(data).to.deep.equal(Buffer.from([0, 1]));
         expect(buffer).property('length').to.equal(2);
       });
 
@@ -128,9 +131,254 @@ describe('driver utils', function () {
         buffer.append(Buffer.from([4, 5]));
         expect(buffer).property('length').to.equal(6);
         const data = buffer.read(5);
-        expect(data).to.eql(Buffer.from([0, 1, 2, 3, 4]));
+        expect(data).to.deep.equal(Buffer.from([0, 1, 2, 3, 4]));
         expect(buffer).property('length').to.equal(1);
-        expect(buffer.read(1)).to.eql(Buffer.from([5]));
+        expect(buffer.read(1)).to.deep.equal(Buffer.from([5]));
+      });
+    });
+  });
+
+  describe('class List', () => {
+    describe('constructor()', () => {
+      it('should make an empty list', () => {
+        const list = new List();
+        expect(list).to.have.property('length', 0);
+        // Double checking some internals, if future code changes modify these expectations
+        // They are not intended to be set in stone or expected by users of the List class
+        expect(list).to.have.property('head').that.is.not.null;
+        expect(list).to.have.nested.property('head.next').that.is.not.null;
+        expect(list).to.have.nested.property('head.prev').that.is.not.null;
+      });
+    });
+
+    describe('get isEmpty', () => {
+      it('should be readonly', () => {
+        const list = new List<number>();
+        expect(() => {
+          // @ts-expect-error: testing readonly-ness
+          list.isEmpty = false;
+        }).to.throw(TypeError);
+      });
+
+      it('should return true for a list with no items', () => {
+        const list = new List();
+        expect(list).to.have.property('isEmpty', true);
+      });
+
+      it('should return false for a list with some items', () => {
+        const list = new List<number>();
+        list.push(1);
+        expect(list).to.have.property('isEmpty', false);
+      });
+    });
+
+    describe('get length', () => {
+      it('should be readonly', () => {
+        const list = new List<number>();
+        expect(() => {
+          // @ts-expect-error: testing readonly-ness
+          list.length = 34;
+        }).to.throw(TypeError);
+      });
+
+      it('should return the count of items in the list', () => {
+        const list = new List<number>();
+        expect(list).to.have.property('length', 0);
+        list.push(10);
+        expect(list).to.have.property('length', 1);
+        list.push(23);
+        expect(list).to.have.property('length', 2);
+        list.pop();
+        expect(list).to.have.property('length', 1);
+      });
+    });
+
+    describe('get [Symbol.toStringTag]()', () => {
+      it('should define a toStringTag getter', () => {
+        const list = new List<number>();
+        expect(Object.prototype.toString.call(list)).to.equal('[object List]');
+      });
+    });
+
+    describe('*[Symbol.iterator]()', () => {
+      it('should be instanceof GeneratorFunction', () => {
+        const list = new List<number>();
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        expect(list[Symbol.iterator]).to.be.instanceOf(function* () {}.constructor);
+      });
+
+      it('should only run generator for the number of items in the list', () => {
+        // Our implementation is circularly linked, so we want to confirm we stop where we started
+        const list = new List<number>();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+        const iterator = list[Symbol.iterator]();
+
+        const first = iterator.next();
+        expect(first).to.have.property('done', false);
+        expect(first).to.have.property('value', 1);
+
+        const second = iterator.next();
+        expect(second).to.have.property('done', false);
+        expect(second).to.have.property('value', 2);
+
+        const third = iterator.next();
+        expect(third).to.have.property('done', false);
+        expect(third).to.have.property('value', 3);
+
+        // finished
+        const fourth = iterator.next();
+        expect(fourth).to.have.property('done', true);
+        expect(fourth).to.have.property('value', undefined);
+
+        // beyond finished
+        const fifth = iterator.next();
+        expect(fifth).to.have.property('done', true);
+        expect(fifth).to.have.property('value', undefined);
+      });
+    });
+
+    describe('push()', () => {
+      it('should add an item to the end of a list', () => {
+        const list = new List<number>();
+        list.push(1);
+        list.push(2);
+        expect(Array.from(list)).to.deep.equal([1, 2]);
+      });
+
+      it('should support nullish values', () => {
+        const list = new List<null | undefined>();
+        list.push(null);
+        // @ts-expect-error: Checking if undefined pushes will not be ignored
+        list.push();
+        expect(Array.from(list)).to.deep.equal([null, undefined]);
+      });
+    });
+
+    describe('unshift()', () => {
+      it('should add an item to the start of a list', () => {
+        const list = new List<number>();
+        list.unshift(1);
+        list.unshift(2);
+        expect(Array.from(list)).to.deep.equal([2, 1]);
+      });
+
+      it('should support nullish values', () => {
+        const list = new List<null | undefined>();
+        list.unshift(null);
+        // @ts-expect-error: Checking if undefined pushes will not be ignored
+        list.unshift();
+        expect(Array.from(list)).to.deep.equal([undefined, null]);
+      });
+    });
+
+    describe('shift()', () => {
+      let list: List<number>;
+
+      beforeEach(() => {
+        list = new List();
+        // Just to make pushing not part of the tests here
+        list.push(1);
+        list.push(2);
+        expect(Array.from(list)).to.deep.equal([1, 2]);
+      });
+
+      it('should take an item to the start of a list', () => {
+        const last = list.shift();
+        expect(last).to.equal(1);
+        expect(Array.from(list)).to.deep.equal([2]);
+      });
+
+      it('should return null when list is empty', () => {
+        const list = new List<number>();
+        expect(list.shift()).to.be.null;
+        expect(list.shift()).to.be.null;
+        expect(list.shift()).to.be.null;
+      });
+    });
+    describe('pop()', () => {
+      let list: List<number>;
+
+      beforeEach(() => {
+        list = new List();
+        // Just to make pushing not part of the tests here
+        list.push(1);
+        list.push(2);
+        expect(Array.from(list)).to.deep.equal([1, 2]);
+      });
+
+      it('should take an item to the end of a list', () => {
+        const last = list.pop();
+        expect(last).to.equal(2);
+        expect(Array.from(list)).to.deep.equal([1]);
+      });
+
+      it('should return null when list is empty', () => {
+        const list = new List<number>();
+        expect(list.pop()).to.be.null;
+        expect(list.pop()).to.be.null;
+        expect(list.pop()).to.be.null;
+      });
+    });
+
+    describe('clear()', () => {
+      let list: List<number>;
+
+      beforeEach(() => {
+        list = new List();
+        // Just to make pushing not part of the tests here
+        list.push(1);
+        list.push(2);
+        expect(Array.from(list)).to.deep.equal([1, 2]);
+      });
+
+      it('should empty a list of all values', () => {
+        list.clear();
+        expect(list.isEmpty).to.be.true;
+        // Double checking some internals, if future code changes modify these expectations
+        // They are not intended to be set in stone or expected by users of the List class
+        expect(list).to.have.property('head').that.is.not.null;
+        // @ts-expect-error: checking circularity is maintained
+        expect(list).to.have.nested.property('head.next').that.equals(list.head);
+        // @ts-expect-error: checking circularity is maintained
+        expect(list).to.have.nested.property('head.prev').that.equals(list.head);
+      });
+    });
+
+    describe('first()', () => {
+      let list: List<number>;
+
+      beforeEach(() => {
+        list = new List();
+        // Just to make pushing not part of the tests here
+        list.push(1);
+        list.push(2);
+        expect(Array.from(list)).to.deep.equal([1, 2]);
+      });
+
+      it('should return the first item without removing it', () => {
+        expect(list.first()).to.equal(1);
+        expect(list.first()).to.equal(1);
+        expect(list.first()).to.equal(1);
+        expect(Array.from(list)).to.deep.equal([1, 2]);
+      });
+    });
+
+    describe('toString()', () => {
+      let list: List<number>;
+
+      beforeEach(() => {
+        list = new List();
+        // Just to make pushing not part of the tests here
+        list.push(1);
+        list.push(2);
+        list.push(3);
+        expect(Array.from(list)).to.deep.equal([1, 2, 3]);
+      });
+
+      it('should return string that describes links', () => {
+        expect(`${list}`).to.equal('head <=> 1 <=> 2 <=> 3 <=> head');
       });
     });
   });

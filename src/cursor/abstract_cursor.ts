@@ -21,7 +21,7 @@ import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { Callback, maybeCallback, MongoDBNamespace, ns } from '../utils';
+import { Callback, List, maybeCallback, MongoDBNamespace, ns } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
@@ -143,7 +143,7 @@ export abstract class AbstractCursor<
   CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
 > extends TypedEventEmitter<CursorEvents> {
   /** @internal */
-  [kId]?: Long;
+  [kId]: Long;
   /** @internal */
   [kSession]: ClientSession;
   /** @internal */
@@ -151,7 +151,7 @@ export abstract class AbstractCursor<
   /** @internal */
   [kNamespace]: MongoDBNamespace;
   /** @internal */
-  [kDocuments]: TSchema[];
+  [kDocuments]: List<TSchema>;
   /** @internal */
   [kClient]: MongoClient;
   /** @internal */
@@ -181,7 +181,9 @@ export abstract class AbstractCursor<
     }
     this[kClient] = client;
     this[kNamespace] = namespace;
-    this[kDocuments] = [];
+    // @ts-expect-error: blah
+    this[kId] = undefined;
+    this[kDocuments] = new List();
     this[kInitialized] = false;
     this[kClosed] = false;
     this[kKilled] = false;
@@ -275,6 +277,20 @@ export abstract class AbstractCursor<
     return !!this[kClient].topology?.loadBalanced;
   }
 
+  /**
+   * The cursor implementation does not actually discard documents as it iterates (since it is a perf hit to shift)
+   * Instead we track how deep we are into the current batch, when the offset into the [kDocuments] array
+   * is equal to the length of that array there are no new documents to return.
+   *
+   * `isCurrentlyEmpty` - indicated if the current batch has been exhausted
+   * this does not imply that there is not more batches to be fetched from the server
+   *
+   * @internal
+   */
+  get isCurrentlyEmpty() {
+    return this[kDocuments].isEmpty;
+  }
+
   /** Returns current buffered documents length */
   bufferedCount(): number {
     return this[kDocuments].length;
@@ -282,7 +298,17 @@ export abstract class AbstractCursor<
 
   /** Returns current buffered documents */
   readBufferedDocuments(number?: number): TSchema[] {
-    return this[kDocuments].splice(0, number ?? this[kDocuments].length);
+    const bufferedDocs: TSchema[] = [];
+    const documentsToRead = number ?? this[kDocuments].length;
+
+    for (let count = 0; count < documentsToRead; count++) {
+      const document = this[kDocuments].shift();
+      if (document != null) {
+        bufferedDocs.push(document);
+      }
+    }
+
+    return bufferedDocs;
   }
 
   [Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
@@ -350,7 +376,7 @@ export abstract class AbstractCursor<
         return false;
       }
 
-      if (this[kDocuments].length) {
+      if (!this.isCurrentlyEmpty) {
         return true;
       }
 
@@ -597,8 +623,9 @@ export abstract class AbstractCursor<
       return;
     }
 
+    // @ts-expect-error: ah
     this[kId] = undefined;
-    this[kDocuments] = [];
+    this[kDocuments].clear();
     this[kClosed] = false;
     this[kKilled] = false;
     this[kInitialized] = false;
@@ -662,7 +689,7 @@ export abstract class AbstractCursor<
             this[kNamespace] = ns(response.cursor.ns);
           }
 
-          this[kDocuments] = response.cursor.firstBatch;
+          this[kDocuments].pushMany(response.cursor.firstBatch);
         }
 
         // When server responses return without a cursor document, we close this cursor
@@ -671,7 +698,7 @@ export abstract class AbstractCursor<
         if (this[kId] == null) {
           this[kId] = Long.ZERO;
           // TODO(NODE-3286): ExecutionResult needs to accept a generic parameter
-          this[kDocuments] = [state.response as TODO_NODE_3286];
+          this[kDocuments].push(state.response as TODO_NODE_3286);
         }
       }
 
@@ -688,11 +715,12 @@ export abstract class AbstractCursor<
 }
 
 function nextDocument<T>(cursor: AbstractCursor): T | null {
-  if (cursor[kDocuments] == null || !cursor[kDocuments].length) {
+  if (cursor.isCurrentlyEmpty) {
     return null;
   }
 
   const doc = cursor[kDocuments].shift();
+
   if (doc) {
     const transform = cursor[kTransform];
     if (transform) {
@@ -733,7 +761,7 @@ export function next<T>(
     return callback(undefined, null);
   }
 
-  if (cursor[kDocuments] && cursor[kDocuments].length) {
+  if (cursorId != null && !cursor.isCurrentlyEmpty) {
     callback(undefined, nextDocument<T>(cursor));
     return;
   }
@@ -757,22 +785,22 @@ export function next<T>(
 
   // otherwise need to call getMore
   const batchSize = cursor[kOptions].batchSize || 1000;
-  cursor._getMore(batchSize, (err, response) => {
+  cursor._getMore(batchSize, (error, response) => {
     if (response) {
       const cursorId =
         typeof response.cursor.id === 'number'
           ? Long.fromNumber(response.cursor.id)
           : response.cursor.id;
 
-      cursor[kDocuments] = response.cursor.nextBatch;
+      cursor[kDocuments].pushMany(response.cursor.nextBatch);
       cursor[kId] = cursorId;
     }
 
-    if (err || cursorIsDead(cursor)) {
-      return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument<T>(cursor)));
+    if (error || cursorIsDead(cursor)) {
+      return cleanupCursor(cursor, { error }, () => callback(error, nextDocument<T>(cursor)));
     }
 
-    if (cursor[kDocuments].length === 0 && blocking === false) {
+    if (cursor.isCurrentlyEmpty && blocking === false) {
       return callback(undefined, null);
     }
 
@@ -797,7 +825,7 @@ function cleanupCursor(
   const server = cursor[kServer];
   const session = cursor[kSession];
   const error = options?.error;
-  const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
+  const needsToEmitClosed = options?.needsToEmitClosed ?? cursor.isCurrentlyEmpty;
 
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {

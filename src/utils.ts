@@ -898,31 +898,164 @@ export function deepCopy<T>(value: T): T {
 }
 
 /** @internal */
-const kBuffers = Symbol('buffers');
+type ListNode<T> = { value: T; next: ListNode<T>; prev: ListNode<T> };
 /** @internal */
-const kLength = Symbol('length');
+export class List<T = unknown> {
+  private head: ListNode<T>;
+  private count: number;
+
+  get length() {
+    return this.count;
+  }
+
+  get isEmpty() {
+    return this.count === 0;
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'List' as const;
+  }
+
+  constructor() {
+    this.count = 0;
+
+    const sentinel = {
+      value: null as unknown as T,
+      next: null as unknown as ListNode<T>,
+      prev: null as unknown as ListNode<T>
+    };
+    sentinel.next = sentinel as unknown as ListNode<T>;
+    sentinel.prev = sentinel as unknown as ListNode<T>;
+
+    this.head = sentinel;
+  }
+
+  toArray() {
+    return Array.from(this);
+  }
+
+  toString() {
+    return `head <=> ${this.toArray().join(' <=> ')} <=> head`;
+  }
+
+  *[Symbol.iterator](): Generator<T, void, void> {
+    if (this.isEmpty) {
+      return;
+    }
+
+    let ptr = this.head.next;
+    while (ptr !== this.head) {
+      // Save next before yielding so that we make removing within iteration safe
+      const { next } = ptr;
+      yield ptr.value;
+      ptr = next;
+    }
+  }
+
+  /** Insert at end of list */
+  push(value: T) {
+    this.count += 1;
+    const newNode: ListNode<T> = {
+      next: this.head as unknown as ListNode<T>,
+      prev: this.head.prev,
+      value: value
+    };
+    this.head.prev.next = newNode;
+    this.head.prev = newNode;
+  }
+
+  /** Inserts every item inside an iterable instead of the iterable itself */
+  pushMany(iterable: Iterable<T>) {
+    for (const value of iterable) {
+      this.push(value);
+    }
+  }
+
+  /** Insert at front of list */
+  unshift(value: T) {
+    this.count += 1;
+    const newNode: ListNode<T> = {
+      next: this.head.next,
+      prev: this.head as unknown as ListNode<T>,
+      value
+    };
+    this.head.next.prev = newNode;
+    this.head.next = newNode;
+  }
+
+  private remove(node?: ListNode<T> | null) {
+    if (node == null || this.isEmpty) {
+      return null;
+    }
+
+    this.count -= 1;
+
+    const prevNode = node.prev;
+    const nextNode = node.next;
+    prevNode.next = nextNode;
+    nextNode.prev = prevNode;
+
+    // Null out the pointers so that a double remove does not break things
+    node.next = null as any;
+    node.prev = null as any;
+    return node;
+  }
+
+  /** Removes the first node at the front of the list */
+  shift() {
+    if (this.isEmpty) {
+      return null;
+    }
+    // The isEmpty check prevents the following from being null
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.remove(this.head.next)!.value;
+  }
+
+  /** Removes the first node at the front of the list */
+  pop() {
+    if (this.isEmpty) {
+      return null;
+    }
+    // The isEmpty check prevents the following from being null
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.remove(this.head.prev)!.value;
+  }
+
+  clear() {
+    this.count = 0;
+    this.head.next = this.head;
+    this.head.prev = this.head;
+  }
+
+  first() {
+    if (this.isEmpty) {
+      return null;
+    }
+    return this.head.next.value;
+  }
+}
 
 /**
  * A pool of Buffers which allow you to read them as if they were one
  * @internal
  */
 export class BufferPool {
-  [kBuffers]: Buffer[];
-  [kLength]: number;
+  private buffers: List<Buffer>;
+  private totalByteLength: number;
 
   constructor() {
-    this[kBuffers] = [];
-    this[kLength] = 0;
+    this.buffers = new List();
+    this.totalByteLength = 0;
   }
 
   get length(): number {
-    return this[kLength];
+    return this.totalByteLength;
   }
 
   /** Adds a buffer to the internal buffer pool list */
   append(buffer: Buffer): void {
-    this[kBuffers].push(buffer);
-    this[kLength] += buffer.length;
+    this.buffers.push(buffer);
+    this.totalByteLength += buffer.length;
   }
 
   /** Returns the requested number of bytes without consuming them */
@@ -936,60 +1069,66 @@ export class BufferPool {
       throw new MongoInvalidArgumentError('Argument "size" must be a non-negative number');
     }
 
-    if (size > this[kLength]) {
+    // oversized request returns empty buffer
+    if (size > this.totalByteLength) {
       return Buffer.alloc(0);
     }
 
-    let result: Buffer;
-
-    // read the whole buffer
     if (size === this.length) {
-      result = Buffer.concat(this[kBuffers]);
+      // read the whole list of buffers
+      const result = Buffer.concat(Array.from(this.buffers));
 
       if (consume) {
-        this[kBuffers] = [];
-        this[kLength] = 0;
+        this.buffers.clear();
+        this.totalByteLength = 0;
       }
+      return result;
     }
 
     // size is within first buffer, no need to concat
-    else if (size <= this[kBuffers][0].length) {
-      result = this[kBuffers][0].slice(0, size);
+    const firstBuffer = this.buffers.first();
+    if (firstBuffer == null) {
+      throw new MongoRuntimeError('Unexpected null buffer');
+    }
+    if (size <= firstBuffer.byteLength) {
+      const result = firstBuffer.subarray(0, size);
       if (consume) {
-        this[kBuffers][0] = this[kBuffers][0].slice(size);
-        this[kLength] -= size;
+        this.buffers.unshift(firstBuffer.subarray(size + 1));
+        this.totalByteLength -= size;
       }
+      return result;
     }
 
     // size is beyond first buffer, need to track and copy
-    else {
-      result = Buffer.allocUnsafe(size);
+    const result = Buffer.allocUnsafe(size);
 
-      let idx;
-      let offset = 0;
-      let bytesToCopy = size;
-      for (idx = 0; idx < this[kBuffers].length; ++idx) {
-        let bytesCopied;
-        if (bytesToCopy > this[kBuffers][idx].length) {
-          bytesCopied = this[kBuffers][idx].copy(result, offset, 0);
-          offset += bytesCopied;
-        } else {
-          bytesCopied = this[kBuffers][idx].copy(result, offset, 0, bytesToCopy);
-          if (consume) {
-            this[kBuffers][idx] = this[kBuffers][idx].slice(bytesCopied);
-          }
-          offset += bytesCopied;
-          break;
-        }
-
-        bytesToCopy -= bytesCopied;
+    let offset = 0;
+    let bytesRemaining = size;
+    while (bytesRemaining !== 0) {
+      const buffer = this.buffers.shift();
+      if (buffer == null) {
+        throw new MongoRuntimeError('Unexpected null buffer');
       }
 
-      // compact the internal buffer array
-      if (consume) {
-        this[kBuffers] = this[kBuffers].slice(idx);
-        this[kLength] -= size;
+      if (bytesRemaining > buffer.byteLength) {
+        result.set(buffer, offset);
+        offset += buffer.byteLength;
+        bytesRemaining -= buffer.byteLength;
+      } else {
+        const slice = buffer.subarray(0, bytesRemaining);
+        result.set(slice, offset);
+        offset += slice.byteLength;
+        bytesRemaining -= slice.byteLength; // should always be zero here
+        this.buffers.unshift(buffer.subarray(1));
       }
+    }
+
+    if (!consume) {
+      // If not consume, we can maintain a reference to the concat buffer
+      // Following reads will have the same behavior
+      this.buffers.unshift(result);
+    } else {
+      this.totalByteLength -= size;
     }
 
     return result;

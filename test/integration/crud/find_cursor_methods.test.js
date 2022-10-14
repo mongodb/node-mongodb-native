@@ -4,7 +4,8 @@ const { filterForCommands } = require('../shared');
 
 describe('Find Cursor', function () {
   let client;
-  before(async function () {
+
+  beforeEach(async function () {
     const setupClient = this.configuration.newClient();
     const docs = [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }, { a: 6 }];
     const coll = setupClient.db().collection('abstract_cursor');
@@ -41,31 +42,25 @@ describe('Find Cursor', function () {
   });
 
   context('#readBufferedDocuments', function () {
-    it('should support reading buffered documents', function (done) {
+    it('should support reading buffered documents', async function () {
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({}, { batchSize: 5 });
 
-      cursor.next((err, doc) => {
-        expect(err).to.not.exist;
-        expect(doc).property('a').to.equal(1);
-        expect(cursor.bufferedCount()).to.equal(4);
+      const doc = await cursor.next();
+      expect(doc).property('a', 1);
 
-        // Read the buffered Count
-        cursor.readBufferedDocuments(cursor.bufferedCount());
+      const bufferedCount = cursor.bufferedCount();
+      expect(bufferedCount).to.equal(4);
 
-        // Get the next item
-        cursor.next((err, doc) => {
-          expect(err).to.not.exist;
-          expect(doc).to.exist;
+      // Read the buffered Count
+      const bufferedDocs = cursor.readBufferedDocuments(bufferedCount);
+      expect(bufferedDocs.map(({ a }) => a)).to.deep.equal([2, 3, 4, 5]);
 
-          cursor.next((err, doc) => {
-            expect(err).to.not.exist;
-            expect(doc).to.be.null;
+      const doc2 = await cursor.next();
+      expect(doc2).to.have.property('a', 6);
 
-            done();
-          });
-        });
-      });
+      const doc3 = await cursor.next();
+      expect(doc3).to.be.null;
     });
   });
 
