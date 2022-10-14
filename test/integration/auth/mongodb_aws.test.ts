@@ -96,7 +96,7 @@ describe('MONGODB-AWS', function () {
       expect(caughtError).to.be.instanceOf(MongoAWSError);
       expect(caughtError)
         .property('message')
-        .match(/timed out after/);
+        .match(/(timed out after)|(Could not load credentials)/);
       expect(timeTaken).to.be.within(10000, 12000);
     });
   });
