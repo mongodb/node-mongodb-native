@@ -97,7 +97,10 @@ describe('MONGODB-AWS', function () {
       expect(caughtError)
         .property('message')
         .match(/(timed out after)|(Could not load credentials)/);
-      expect(timeTaken).to.be.within(10000, 12000);
+      // Credentials provider from the SDeK does not allow to configure the timeout
+      // and defaults to 2 seconds - so we ensure this timeout happens below 12s
+      // instead of the 10s-12s range previously.
+      expect(timeTaken).to.be.below(12000);
     });
   });
 });
