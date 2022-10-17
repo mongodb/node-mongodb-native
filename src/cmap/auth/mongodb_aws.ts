@@ -167,6 +167,13 @@ interface AWSTempCredentials {
   Expiration?: Date;
 }
 
+interface AWSCredentials {
+  accessKeyId?: string;
+  secretAccessKey?: string;
+  sessionToken?: string;
+  expiration?: Date;
+}
+
 function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
   function done(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
@@ -251,9 +258,7 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
     const { fromNodeProviderChain } = credentialProvider;
     const provider = fromNodeProviderChain();
     provider()
-      .then(creds => {
-        /* eslint no-console: 0 */
-        console.log('AWS CREDS', creds);
+      .then((creds: AWSCredentials) => {
         done({
           AccessKeyId: creds.accessKeyId,
           SecretAccessKey: creds.secretAccessKey,
@@ -261,9 +266,7 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
           Expiration: creds.expiration
         });
       })
-      .catch(error => {
-        /* eslint no-console: 0 */
-        console.log('AWS ERROR', error);
+      .catch((error: Error) => {
         callback(new MongoAWSError(error.message));
       });
   }
