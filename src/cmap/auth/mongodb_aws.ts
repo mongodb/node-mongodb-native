@@ -167,7 +167,8 @@ interface AWSTempCredentials {
   Expiration?: Date;
 }
 
-interface AWSCredentials {
+/* @internal */
+export interface AWSCredentials {
   accessKeyId?: string;
   secretAccessKey?: string;
   sessionToken?: string;
