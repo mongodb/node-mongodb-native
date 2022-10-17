@@ -5,7 +5,7 @@ import { gte, lt } from 'semver';
 import * as sinon from 'sinon';
 import { PassThrough } from 'stream';
 import { setTimeout } from 'timers';
-import { promisify } from 'util';
+import { inspect, promisify } from 'util';
 
 import {
   AbstractCursor,
@@ -19,8 +19,10 @@ import {
   MongoClient,
   MongoServerError,
   ReadPreference,
-  ResumeToken
+  ResumeToken,
+  WriteConcernOptions
 } from '../../../src';
+import { applySession } from '../../../src/sessions';
 import { isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import {
@@ -72,6 +74,102 @@ describe('Change Streams', function () {
     await changeStream.close();
     await client.close();
     await mock.cleanup();
+  });
+
+  context('NODE-4670', function () {
+    let client;
+
+    function makeAggregate(cs_options = {}) {
+      return {
+        aggregate: 'collection',
+        pipeline: [{ $changeStream: cs_options }],
+        cursor: { batchSize: 1 }
+      };
+    }
+
+    function makeGetMore(cursor_id: Long) {
+      return {
+        getMore: cursor_id,
+        collection: 'collection',
+        batchSize: 1
+      };
+    }
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      await client.connect();
+      db = client.db('db');
+      collection = db.collection('collection');
+
+      const utilClient = this.configuration.newClient();
+      await utilClient.connect();
+
+      const failCommand: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: {
+          times: 2
+        },
+        data: {
+          failCommands: ['getMore'],
+          closeConnection: true
+        }
+      };
+
+      await utilClient.db('admin').command(failCommand);
+
+      await utilClient.close();
+    });
+
+    afterEach(async function () {
+      // console.error(inspect(started, { depth: Infinity }));
+      await client.close();
+    });
+
+    async function test(writeConcern: WriteConcernOptions) {
+      const session = client.startSession();
+      const initialAggregate = makeAggregate();
+      applySession(session, initialAggregate, {});
+      const { cursor } = await client.db('test').command(initialAggregate);
+      const resumeToken = cursor.postBatchResumeToken;
+
+      await client.db('test').collection('collection').insertOne({ name: 'bailey' }, writeConcern);
+
+      const getMore = makeGetMore(cursor.id);
+      applySession(session, getMore, {});
+      let response = await client
+        .db('test')
+        .command(getMore)
+        .catch(e => e);
+
+      expect(response).to.be.instanceOf(Error);
+      const secondAggregate = makeAggregate({ resumeAfter: resumeToken });
+      applySession(session, secondAggregate, {});
+
+      response = await client.db('test').command(secondAggregate);
+
+      const batch = response.cursor.firstBatch;
+      expect(batch, 'no firstBatch defined').not.to.be.undefined;
+      expect(
+        batch,
+        'unexpected empty change stream response.  expected one change event, received none.'
+      ).to.have.lengthOf(1);
+    }
+
+    context('no write concern applied', function () {
+      for (let i = 0; i < 25; ++i) {
+        it.only(`test iteration ${i}`, async function () {
+          await test({});
+        });
+      }
+    });
+
+    context('{ w: `majority` } applied', function () {
+      for (let i = 0; i < 25; ++i) {
+        it.only(`test iteration ${i}`, async function () {
+          await test({ writeConcern: { w: 'majority' } });
+        });
+      }
+    });
   });
 
   context('ChangeStreamCursor options', function () {
@@ -1041,12 +1139,16 @@ describe('Change Streams', function () {
       let client: MongoClient;
       let changeStream: ChangeStream;
 
+      const commands = [];
+
       beforeEach(async function () {
-        client = this.configuration.newClient();
+        client = this.configuration.newClient({ monitorCommands: true });
+        client.on('commandStarted', e => commands.push(e.command));
         await client.connect();
       });
 
       afterEach(async function () {
+        console.error(inspect(commands, { depth: Infinity }));
         await changeStream.close();
         await client.close();
       });

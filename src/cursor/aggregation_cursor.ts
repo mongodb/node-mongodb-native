@@ -1,3 +1,5 @@
+import { promisify } from 'util';
+
 import type { Document } from '../bson';
 import type { ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
@@ -42,6 +44,8 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
     this[kPipeline] = pipeline;
     this[kOptions] = options;
+
+    this._initAsync = promisify(this._initialize).bind(this);
   }
 
   get pipeline(): Document[] {
