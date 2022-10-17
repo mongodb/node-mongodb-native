@@ -477,6 +477,7 @@ export type {
   ClientMetadataOptions,
   EventEmitterWithState,
   HostAddress,
+  List,
   MongoDBNamespace
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';

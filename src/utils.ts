@@ -899,17 +899,16 @@ export function deepCopy<T>(value: T): T {
 
 /** @internal */
 type ListNode<T> = { value: T; next: ListNode<T>; prev: ListNode<T> };
-/** @internal */
+/**
+ * T extends NonNullable<unknown> = NonNullable<unknown>
+ * @internal
+ * */
 export class List<T = unknown> {
-  private head: ListNode<T>;
+  private readonly head: ListNode<T>;
   private count: number;
 
   get length() {
     return this.count;
-  }
-
-  get isEmpty() {
-    return this.count === 0;
   }
 
   get [Symbol.toStringTag]() {
@@ -939,15 +938,17 @@ export class List<T = unknown> {
   }
 
   *[Symbol.iterator](): Generator<T, void, void> {
-    if (this.isEmpty) {
-      return;
+    for (const node of this.nodes()) {
+      yield node.value;
     }
+  }
 
+  private *nodes() {
     let ptr = this.head.next;
     while (ptr !== this.head) {
       // Save next before yielding so that we make removing within iteration safe
       const { next } = ptr;
-      yield ptr.value;
+      yield ptr;
       ptr = next;
     }
   }
@@ -958,7 +959,7 @@ export class List<T = unknown> {
     const newNode: ListNode<T> = {
       next: this.head as unknown as ListNode<T>,
       prev: this.head.prev,
-      value: value
+      value
     };
     this.head.prev.next = newNode;
     this.head.prev = newNode;
@@ -984,8 +985,8 @@ export class List<T = unknown> {
   }
 
   private remove(node?: ListNode<T> | null) {
-    if (node == null || this.isEmpty) {
-      return null;
+    if (node == null || this.length === 0) {
+      return { next: null, prev: null, value: null };
     }
 
     this.count -= 1;
@@ -1003,22 +1004,21 @@ export class List<T = unknown> {
 
   /** Removes the first node at the front of the list */
   shift() {
-    if (this.isEmpty) {
-      return null;
-    }
-    // The isEmpty check prevents the following from being null
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.remove(this.head.next)!.value;
+    return this.remove(this.head.next).value;
   }
 
-  /** Removes the first node at the front of the list */
+  /** Removes the last node at the end of the list */
   pop() {
-    if (this.isEmpty) {
-      return null;
+    return this.remove(this.head.prev).value;
+  }
+
+  /** Iterates through the list and removes nodes where filter returns true */
+  prune(filter: (value: T) => boolean) {
+    for (const node of this.nodes()) {
+      if (filter(node.value)) {
+        this.remove(node);
+      }
     }
-    // The isEmpty check prevents the following from being null
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.remove(this.head.prev)!.value;
   }
 
   clear() {
@@ -1027,11 +1027,14 @@ export class List<T = unknown> {
     this.head.prev = this.head;
   }
 
-  first() {
-    if (this.isEmpty) {
-      return null;
-    }
+  first(): T | null {
+    // If the list is empty, value will be the sentinel's null
     return this.head.next.value;
+  }
+
+  last(): T | null {
+    // If the list is empty, value will be the sentinel's null
+    return this.head.prev.value;
   }
 }
 
@@ -1058,13 +1061,33 @@ export class BufferPool {
     this.totalByteLength += buffer.length;
   }
 
-  /** Returns the requested number of bytes without consuming them */
-  peek(size: number): Buffer {
-    return this.read(size, false);
+  /**
+   * If BufferPool contains 4 bytes or more construct an int32 from the leading bytes,
+   * otherwise return null. Size can be negative, caller should error check.
+   */
+  readSize(): number | null {
+    if (this.totalByteLength < 4) {
+      return null;
+    }
+    const firstBuffer = this.buffers.first();
+    if (firstBuffer != null && firstBuffer.byteLength >= 4) {
+      return firstBuffer.readInt32LE(0);
+    }
+
+    // Unlikely case: an int32 is split across buffers.
+    // Use read and put the returned buffer back on top
+    const top4Bytes = this.read(4);
+    const value = top4Bytes.readInt32LE(0);
+
+    // Put it back.
+    this.totalByteLength += 4;
+    this.buffers.unshift(top4Bytes);
+
+    return value;
   }
 
   /** Reads the requested number of bytes, optionally consuming them */
-  read(size: number, consume = true): Buffer {
+  read(size: number): Buffer {
     if (typeof size !== 'number' || size < 0) {
       throw new MongoInvalidArgumentError('Argument "size" must be a non-negative number');
     }
@@ -1074,61 +1097,26 @@ export class BufferPool {
       return Buffer.alloc(0);
     }
 
-    if (size === this.length) {
-      // read the whole list of buffers
-      const result = Buffer.concat(Array.from(this.buffers));
-
-      if (consume) {
-        this.buffers.clear();
-        this.totalByteLength = 0;
-      }
-      return result;
-    }
-
-    // size is within first buffer, no need to concat
-    const firstBuffer = this.buffers.first();
-    if (firstBuffer == null) {
-      throw new MongoRuntimeError('Unexpected null buffer');
-    }
-    if (size <= firstBuffer.byteLength) {
-      const result = firstBuffer.subarray(0, size);
-      if (consume) {
-        this.buffers.unshift(firstBuffer.subarray(size + 1));
-        this.totalByteLength -= size;
-      }
-      return result;
-    }
-
-    // size is beyond first buffer, need to track and copy
+    // We know we have enough, we just don't know how it is spread across chunks
+    // TODO(NODE-XXXX): alloc API should change based on raw option
     const result = Buffer.allocUnsafe(size);
 
-    let offset = 0;
-    let bytesRemaining = size;
-    while (bytesRemaining !== 0) {
+    for (let bytesRead = 0; bytesRead < size; ) {
       const buffer = this.buffers.shift();
       if (buffer == null) {
-        throw new MongoRuntimeError('Unexpected null buffer');
+        break;
       }
+      const bytesRemaining = size - bytesRead;
+      const bytesReadable = Math.min(bytesRemaining, buffer.byteLength);
+      const bytes = buffer.subarray(0, bytesReadable);
 
-      if (bytesRemaining > buffer.byteLength) {
-        result.set(buffer, offset);
-        offset += buffer.byteLength;
-        bytesRemaining -= buffer.byteLength;
-      } else {
-        const slice = buffer.subarray(0, bytesRemaining);
-        result.set(slice, offset);
-        offset += slice.byteLength;
-        bytesRemaining -= slice.byteLength; // should always be zero here
-        this.buffers.unshift(buffer.subarray(1));
+      result.set(bytes, bytesRead);
+
+      bytesRead += bytesReadable;
+      this.totalByteLength -= bytesReadable;
+      if (bytesReadable < buffer.byteLength) {
+        this.buffers.unshift(buffer.subarray(bytesReadable));
       }
-    }
-
-    if (!consume) {
-      // If not consume, we can maintain a reference to the concat buffer
-      // Following reads will have the same behavior
-      this.buffers.unshift(result);
-    } else {
-      this.totalByteLength -= size;
     }
 
     return result;

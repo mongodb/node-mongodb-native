@@ -134,29 +134,27 @@ function canCompress(command: WriteProtocolMessageType) {
 
 function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) {
   const buffer = stream[kBuffer];
-  if (buffer.length < 4) {
+  const sizeOfMessage = buffer.readSize();
+
+  if (sizeOfMessage == null) {
     callback();
     return;
   }
 
-  const sizeOfMessage = buffer.peek(4).readInt32LE();
   if (sizeOfMessage < 0) {
-    callback(new MongoParseError(`Invalid message size: ${sizeOfMessage}`));
-    return;
+    return callback(new MongoParseError(`Invalid message size: ${sizeOfMessage}`));
   }
 
   if (sizeOfMessage > stream.maxBsonMessageSize) {
-    callback(
+    return callback(
       new MongoParseError(
         `Invalid message size: ${sizeOfMessage}, max allowed: ${stream.maxBsonMessageSize}`
       )
     );
-    return;
   }
 
   if (sizeOfMessage > buffer.length) {
-    callback();
-    return;
+    return callback();
   }
 
   const message = buffer.read(sizeOfMessage);
@@ -170,11 +168,9 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
   const monitorHasAnotherHello = () => {
     if (stream.isMonitoringConnection) {
       // Can we read the next message size?
-      if (buffer.length >= 4) {
-        const sizeOfMessage = buffer.peek(4).readInt32LE();
-        if (sizeOfMessage <= buffer.length) {
-          return true;
-        }
+      const sizeOfMessage = buffer.readSize();
+      if (sizeOfMessage != null && sizeOfMessage <= buffer.length) {
+        return true;
       }
     }
     return false;
@@ -182,7 +178,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
 
   let ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
   if (messageHeader.opCode !== OP_COMPRESSED) {
-    const messageBody = message.slice(MESSAGE_HEADER_SIZE);
+    const messageBody = message.subarray(MESSAGE_HEADER_SIZE);
 
     // If we are a monitoring connection message stream and
     // there is more in the buffer that can be read, skip processing since we

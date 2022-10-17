@@ -57,46 +57,105 @@ describe('driver utils', function () {
       expect(buffer).property('length').to.equal(6);
     });
 
-    it('return an empty buffer if too many bytes requested', function () {
-      const buffer = new BufferPool();
-      buffer.append(Buffer.from([0, 1, 2, 3]));
-      const data = buffer.read(6);
-      expect(data).to.have.length(0);
-      expect(buffer).property('length').to.equal(4);
+    it('should have a readonly length', () => {
+      // @ts-expect-error: checking for readonly runtime behavior
+      expect(() => (new BufferPool().length = 3)).to.throw(TypeError);
     });
 
-    context('peek', function () {
-      it('exact size', function () {
+    describe('readSize', function () {
+      it('less than an int32 sized buffer returns null', () => {
         const buffer = new BufferPool();
-        buffer.append(Buffer.from([0, 1]));
-        const data = buffer.peek(2);
-        expect(data).to.deep.equal(Buffer.from([0, 1]));
-        expect(buffer).property('length').to.equal(2);
+        buffer.append(Buffer.from([1, 0, 0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.be.null;
+        expect(buffer).property('length').to.equal(3);
       });
 
-      it('within first buffer', function () {
+      it('exactly int32 sized buffer', () => {
+        const buffer = new BufferPool();
+        buffer.append(Buffer.from([1, 0, 0, 0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.equal(1);
+        expect(buffer).property('length', 4);
+      });
+
+      it('greater than an int32 sized buffer in total but still can read int32 from first buffer', () => {
+        const buffer = new BufferPool();
+        buffer.append(Buffer.from([1, 0, 0, 0]));
+        buffer.append(Buffer.from([2, 0, 0, 0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.equal(1);
+        expect(buffer).property('length', 8);
+      });
+
+      it('int32 is split across multiple buffers 1, 3', () => {
+        const buffer = new BufferPool();
+        buffer.append(Buffer.from([1]));
+        buffer.append(Buffer.from([0, 0, 0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.equal(1);
+        expect(buffer).property('length', 4);
+      });
+
+      it('int32 is split across multiple buffers 2, 2', () => {
+        const buffer = new BufferPool();
+        buffer.append(Buffer.from([1, 0]));
+        buffer.append(Buffer.from([0, 0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.equal(1);
+        expect(buffer).property('length', 4);
+      });
+
+      it('int32 is split across multiple buffers 3, 1', () => {
+        const buffer = new BufferPool();
+        buffer.append(Buffer.from([1, 0, 0]));
+        buffer.append(Buffer.from([0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.equal(1);
+        expect(buffer).property('length', 4);
+      });
+
+      it('int32 is split across multiple buffers 1, 2, 1', () => {
+        const buffer = new BufferPool();
+        buffer.append(Buffer.from([1]));
+        buffer.append(Buffer.from([0, 0]));
+        buffer.append(Buffer.from([0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.equal(1);
+        expect(buffer).property('length', 4);
+      });
+
+      it('int32 is split across multiple buffers 2, 1, 1', () => {
+        const buffer = new BufferPool();
+        buffer.append(Buffer.from([1, 0]));
+        buffer.append(Buffer.from([0]));
+        buffer.append(Buffer.from([0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.equal(1);
+        expect(buffer).property('length', 4);
+      });
+
+      it('int32 is split across multiple buffers 1, 1, 1, 1', () => {
+        const buffer = new BufferPool();
+        buffer.append(Buffer.from([1]));
+        buffer.append(Buffer.from([0]));
+        buffer.append(Buffer.from([0]));
+        buffer.append(Buffer.from([0]));
+        const int32 = buffer.readSize();
+        expect(int32).to.equal(1);
+        expect(buffer).property('length', 4);
+      });
+    });
+
+    describe('read', function () {
+      it('return an empty buffer if too many bytes requested', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([0, 1, 2, 3]));
-        const data = buffer.peek(2);
-        expect(data).to.deep.equal(Buffer.from([0, 1]));
-        expect(buffer).property('length').to.equal(4);
-        // Check that peek didn't remove items (length may have been left unmodified)
-        expect(buffer.read(4)).to.deep.equal(Buffer.from([0, 1, 2, 3]));
+        const data = buffer.read(6);
+        expect(data).to.have.length(0);
+        expect(buffer).property('length', 4);
       });
 
-      it('across multiple buffers', function () {
-        const buffer = new BufferPool();
-        buffer.append(Buffer.from([0, 1]));
-        buffer.append(Buffer.from([2, 3]));
-        buffer.append(Buffer.from([4, 5]));
-        expect(buffer).property('length').to.equal(6);
-        const data = buffer.peek(5);
-        expect(data).to.deep.equal(Buffer.from([0, 1, 2, 3, 4]));
-        expect(buffer).property('length').to.equal(6);
-      });
-    });
-
-    context('read', function () {
       it('should throw an error if a negative size is requested', function () {
         const buffer = new BufferPool();
         expect(() => buffer.read(-1)).to.throw(/Argument "size" must be a non-negative number/);
@@ -148,27 +207,6 @@ describe('driver utils', function () {
         expect(list).to.have.property('head').that.is.not.null;
         expect(list).to.have.nested.property('head.next').that.is.not.null;
         expect(list).to.have.nested.property('head.prev').that.is.not.null;
-      });
-    });
-
-    describe('get isEmpty', () => {
-      it('should be readonly', () => {
-        const list = new List<number>();
-        expect(() => {
-          // @ts-expect-error: testing readonly-ness
-          list.isEmpty = false;
-        }).to.throw(TypeError);
-      });
-
-      it('should return true for a list with no items', () => {
-        const list = new List();
-        expect(list).to.have.property('isEmpty', true);
-      });
-
-      it('should return false for a list with some items', () => {
-        const list = new List<number>();
-        list.push(1);
-        expect(list).to.have.property('isEmpty', false);
       });
     });
 
@@ -335,7 +373,7 @@ describe('driver utils', function () {
 
       it('should empty a list of all values', () => {
         list.clear();
-        expect(list.isEmpty).to.be.true;
+        expect(list.length).to.equal(0);
         // Double checking some internals, if future code changes modify these expectations
         // They are not intended to be set in stone or expected by users of the List class
         expect(list).to.have.property('head').that.is.not.null;
@@ -694,6 +732,7 @@ describe('driver utils', function () {
 
     describe('when a custom promise constructor is set', () => {
       beforeEach(() => {
+        // @ts-expect-error: BluebirdPromise is not type compat with this internal API.
         PromiseProvider.set(BluebirdPromise);
       });
 

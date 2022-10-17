@@ -143,7 +143,7 @@ export abstract class AbstractCursor<
   CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
 > extends TypedEventEmitter<CursorEvents> {
   /** @internal */
-  [kId]: Long;
+  [kId]: Long | null;
   /** @internal */
   [kSession]: ClientSession;
   /** @internal */
@@ -181,8 +181,7 @@ export abstract class AbstractCursor<
     }
     this[kClient] = client;
     this[kNamespace] = namespace;
-    // @ts-expect-error: blah
-    this[kId] = undefined;
+    this[kId] = null;
     this[kDocuments] = new List();
     this[kInitialized] = false;
     this[kClosed] = false;
@@ -226,7 +225,7 @@ export abstract class AbstractCursor<
   }
 
   get id(): Long | undefined {
-    return this[kId];
+    return this[kId] ?? undefined;
   }
 
   /** @internal */
@@ -275,20 +274,6 @@ export abstract class AbstractCursor<
 
   get loadBalanced(): boolean {
     return !!this[kClient].topology?.loadBalanced;
-  }
-
-  /**
-   * The cursor implementation does not actually discard documents as it iterates (since it is a perf hit to shift)
-   * Instead we track how deep we are into the current batch, when the offset into the [kDocuments] array
-   * is equal to the length of that array there are no new documents to return.
-   *
-   * `isCurrentlyEmpty` - indicated if the current batch has been exhausted
-   * this does not imply that there is not more batches to be fetched from the server
-   *
-   * @internal
-   */
-  get isCurrentlyEmpty() {
-    return this[kDocuments].isEmpty;
   }
 
   /** Returns current buffered documents length */
@@ -376,7 +361,7 @@ export abstract class AbstractCursor<
         return false;
       }
 
-      if (!this.isCurrentlyEmpty) {
+      if (this[kDocuments].length !== 0) {
         return true;
       }
 
@@ -623,8 +608,7 @@ export abstract class AbstractCursor<
       return;
     }
 
-    // @ts-expect-error: ah
-    this[kId] = undefined;
+    this[kId] = null;
     this[kDocuments].clear();
     this[kClosed] = false;
     this[kKilled] = false;
@@ -714,23 +698,14 @@ export abstract class AbstractCursor<
   }
 }
 
-function nextDocument<T>(cursor: AbstractCursor): T | null {
-  if (cursor.isCurrentlyEmpty) {
-    return null;
-  }
-
+function nextDocument<T>(cursor: AbstractCursor<T>): T | null {
   const doc = cursor[kDocuments].shift();
 
-  if (doc) {
-    const transform = cursor[kTransform];
-    if (transform) {
-      return transform(doc) as T;
-    }
-
-    return doc;
+  if (doc != null && cursor[kTransform]) {
+    return cursor[kTransform](doc) as T;
   }
 
-  return null;
+  return doc;
 }
 
 const nextAsync = promisify(
@@ -761,7 +736,7 @@ export function next<T>(
     return callback(undefined, null);
   }
 
-  if (cursorId != null && !cursor.isCurrentlyEmpty) {
+  if (cursorId != null && cursor[kDocuments].length !== 0) {
     callback(undefined, nextDocument<T>(cursor));
     return;
   }
@@ -800,7 +775,7 @@ export function next<T>(
       return cleanupCursor(cursor, { error }, () => callback(error, nextDocument<T>(cursor)));
     }
 
-    if (cursor.isCurrentlyEmpty && blocking === false) {
+    if (cursor[kDocuments].length === 0 && blocking === false) {
       return callback(undefined, null);
     }
 
@@ -825,7 +800,7 @@ function cleanupCursor(
   const server = cursor[kServer];
   const session = cursor[kSession];
   const error = options?.error;
-  const needsToEmitClosed = options?.needsToEmitClosed ?? cursor.isCurrentlyEmpty;
+  const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
 
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {

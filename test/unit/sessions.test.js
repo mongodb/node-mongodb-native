@@ -428,7 +428,7 @@ describe('Sessions - unit', function () {
       done();
     });
 
-    it('should remove sessions which have timed out on release', function (done) {
+    it('should remove sessions which have timed out on release', function () {
       const newSession = new ServerSession();
       const oldSessions = [new ServerSession(), new ServerSession()].map(session => {
         session.lastUse = now() - 30 * 60 * 1000; // add 30min
@@ -436,12 +436,11 @@ describe('Sessions - unit', function () {
       });
 
       const pool = new ServerSessionPool(client);
-      pool.sessions = pool.sessions.concat(oldSessions);
+      pool.sessions.pushMany(oldSessions);
 
       pool.release(newSession);
       expect(pool.sessions).to.have.length(1);
-      expect(pool.sessions[0]).to.eql(newSession);
-      done();
+      expect(pool.sessions.first()).to.deep.equal(newSession);
     });
 
     it('should not reintroduce a soon-to-expire session to the pool on release', function (done) {
