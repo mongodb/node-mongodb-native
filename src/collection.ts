@@ -288,7 +288,7 @@ export class Collection<TSchema extends Document = Document> {
       options = {};
     }
 
-    // versions of mongodb-client-encryption before 1.2.1 pass in hardcoded { w: 'majority' }
+    // versions of mongodb-client-encryption before v1.2.6 pass in hardcoded { w: 'majority' }
     // specifically to an insertOne call in createDataKey, so we want to support this only here
     if (options && Reflect.get(options, 'w')) {
       options.writeConcern = WriteConcern.fromOptions(Reflect.get(options, 'w'));
