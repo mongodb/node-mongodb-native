@@ -86,10 +86,12 @@ describe('Client Side Encryption (Legacy)', function () {
     }
     if (isServerless) {
       // TODO(NODE-4730): Fix failing csfle tests against serverless
-      return [
+      const isSkippedTest = [
         'BypassQueryAnalysis decrypts',
         'encryptedFieldsMap is preferred over remote encryptedFields'
       ].includes(description);
+
+      return !isSkippedTest;
     }
     return true;
   });
