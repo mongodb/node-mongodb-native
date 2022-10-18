@@ -288,8 +288,8 @@ export class Collection<TSchema extends Document = Document> {
       options = {};
     }
 
-    // In use encryption passes in { w: 'majority' } to ensure the lib works in both 3.x and 4.x
-    // we support that option style here only
+    // Older versions of mongodb-client-encryption passes in hardcoded { w: 'majority' }
+    // specifically to an insertOne call, so we want to just support this here
     if (options && Reflect.get(options, 'w')) {
       options.writeConcern = WriteConcern.fromOptions(Reflect.get(options, 'w'));
     }

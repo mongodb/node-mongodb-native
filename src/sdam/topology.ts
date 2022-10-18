@@ -252,7 +252,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       ) => this.selectServer(selector, options, callback as any)
     );
 
-    // Legacy in use encryption support
+    // Keeping a reference to these BSON functions supports older mongodb-client-encryption versions
     this.bson = Object.create(null);
     this.bson.serialize = serialize;
     this.bson.deserialize = deserialize;
