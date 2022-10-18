@@ -288,8 +288,8 @@ export class Collection<TSchema extends Document = Document> {
       options = {};
     }
 
-    // CSFLE passes in { w: 'majority' } to ensure the lib works in both 3.x and 4.x
-    // we support that option style here only
+    // versions of mongodb-client-encryption before v1.2.6 pass in hardcoded { w: 'majority' }
+    // specifically to an insertOne call in createDataKey, so we want to support this only here
     if (options && Reflect.get(options, 'w')) {
       options.writeConcern = WriteConcern.fromOptions(Reflect.get(options, 'w'));
     }

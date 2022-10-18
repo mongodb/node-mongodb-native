@@ -243,7 +243,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Server API version */
   serverApi?: ServerApi | ServerApiVersion;
   /**
-   * Optionally enable client side auto encryption
+   * Optionally enable in-use auto encryption
    *
    * @remarks
    *  Automatic encryption is an enterprise only feature that only applies to operations on a collection. Automatic encryption is not supported for operations on a database or view, and operations that are not bypassed will result in error

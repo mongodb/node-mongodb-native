@@ -252,7 +252,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       ) => this.selectServer(selector, options, callback as any)
     );
 
-    // Legacy CSFLE support
+    // Saving a reference to these BSON functions
+    // supports v2.2.0 and older versions of mongodb-client-encryption
     this.bson = Object.create(null);
     this.bson.serialize = serialize;
     this.bson.deserialize = deserialize;

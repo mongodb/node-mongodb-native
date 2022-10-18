@@ -111,7 +111,7 @@ export interface ErrorDescription extends Document {
  * @category Error
  *
  * @privateRemarks
- * CSFLE has a dependency on this error, it uses the constructor with a string argument
+ * mongodb-client-encryption has a dependency on this error, it uses the constructor with a string argument
  */
 export class MongoError extends Error {
   /** @internal */
@@ -568,7 +568,7 @@ export class MongoNetworkError extends MongoError {
  * @category Error
  *
  * @privateRemarks
- * CSFLE has a dependency on this error with an instanceof check
+ * mongodb-client-encryption has a dependency on this error with an instanceof check
  */
 export class MongoNetworkTimeoutError extends MongoNetworkError {
   constructor(message: string, options?: MongoNetworkErrorOptions) {
