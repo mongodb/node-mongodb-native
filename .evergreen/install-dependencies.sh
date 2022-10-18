@@ -110,4 +110,4 @@ tmp=${NPM_TMP_DIR}
 EOT
 fi
 
-npm install
+npm install ${NPM_OPTIONS}

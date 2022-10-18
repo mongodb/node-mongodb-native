@@ -4,7 +4,7 @@ import * as url from 'url';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { aws4 } from '../../deps';
+import { aws4, credentialProvider } from '../../deps';
 import {
   MongoAWSError,
   MongoCompatibilityError,
@@ -167,6 +167,14 @@ interface AWSTempCredentials {
   Expiration?: Date;
 }
 
+/* @internal */
+export interface AWSCredentials {
+  accessKeyId?: string;
+  secretAccessKey?: string;
+  sessionToken?: string;
+  expiration?: Date;
+}
+
 function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
   function done(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
@@ -190,50 +198,79 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
     );
   }
 
-  // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-  // is set then drivers MUST assume that it was set by an AWS ECS agent
-  if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
-    request(
-      `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`,
-      undefined,
-      (err, res) => {
-        if (err) return callback(err);
-        done(res);
-      }
-    );
-
-    return;
-  }
-
-  // Otherwise assume we are on an EC2 instance
-
-  // get a token
-  request(
-    `${AWS_EC2_URI}/latest/api/token`,
-    { method: 'PUT', json: false, headers: { 'X-aws-ec2-metadata-token-ttl-seconds': 30 } },
-    (err, token) => {
-      if (err) return callback(err);
-
-      // get role name
+  // Check if the AWS credential provider from the SDK is present. If not,
+  // use the old method.
+  if ('kModuleError' in credentialProvider) {
+    // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
+    // is set then drivers MUST assume that it was set by an AWS ECS agent
+    if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
       request(
-        `${AWS_EC2_URI}/${AWS_EC2_PATH}`,
-        { json: false, headers: { 'X-aws-ec2-metadata-token': token } },
-        (err, roleName) => {
+        `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`,
+        undefined,
+        (err, res) => {
           if (err) return callback(err);
-
-          // get temp credentials
-          request(
-            `${AWS_EC2_URI}/${AWS_EC2_PATH}/${roleName}`,
-            { headers: { 'X-aws-ec2-metadata-token': token } },
-            (err, creds) => {
-              if (err) return callback(err);
-              done(creds);
-            }
-          );
+          done(res);
         }
       );
+
+      return;
     }
-  );
+
+    // Otherwise assume we are on an EC2 instance
+
+    // get a token
+    request(
+      `${AWS_EC2_URI}/latest/api/token`,
+      { method: 'PUT', json: false, headers: { 'X-aws-ec2-metadata-token-ttl-seconds': 30 } },
+      (err, token) => {
+        if (err) return callback(err);
+
+        // get role name
+        request(
+          `${AWS_EC2_URI}/${AWS_EC2_PATH}`,
+          { json: false, headers: { 'X-aws-ec2-metadata-token': token } },
+          (err, roleName) => {
+            if (err) return callback(err);
+
+            // get temp credentials
+            request(
+              `${AWS_EC2_URI}/${AWS_EC2_PATH}/${roleName}`,
+              { headers: { 'X-aws-ec2-metadata-token': token } },
+              (err, creds) => {
+                if (err) return callback(err);
+                done(creds);
+              }
+            );
+          }
+        );
+      }
+    );
+  } else {
+    /*
+     * Creates a credential provider that will attempt to find credentials from the
+     * following sources (listed in order of precedence):
+     *
+     * - Environment variables exposed via process.env
+     * - SSO credentials from token cache
+     * - Web identity token credentials
+     * - Shared credentials and config ini files
+     * - The EC2/ECS Instance Metadata Service
+     */
+    const { fromNodeProviderChain } = credentialProvider;
+    const provider = fromNodeProviderChain();
+    provider()
+      .then((creds: AWSCredentials) => {
+        done({
+          AccessKeyId: creds.accessKeyId,
+          SecretAccessKey: creds.secretAccessKey,
+          Token: creds.sessionToken,
+          Expiration: creds.expiration
+        });
+      })
+      .catch((error: Error) => {
+        callback(new MongoAWSError(error.message));
+      });
+  }
 }
 
 function deriveRegion(host: string) {

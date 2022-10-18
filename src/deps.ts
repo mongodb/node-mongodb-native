@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { deserialize, Document, serialize } from './bson';
+import type { AWSCredentials } from './cmap/auth/mongodb_aws';
 import type { ProxyOptions } from './cmap/connection';
 import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
@@ -65,6 +66,23 @@ export let ZStandard: ZStandardLib | { kModuleError: MongoMissingDependencyError
 
 try {
   ZStandard = require('@mongodb-js/zstd');
+} catch {} // eslint-disable-line
+
+type CredentialProvider = {
+  fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;
+};
+
+export let credentialProvider: CredentialProvider | { kModuleError: MongoMissingDependencyError } =
+  makeErrorModule(
+    new MongoMissingDependencyError(
+      'Optional module `@aws-sdk/credential-providers` not found.' +
+        ' Please install it to enable getting aws credentials via the official sdk.'
+    )
+  );
+
+try {
+  // Ensure you always wrap an optional require in the try block NODE-3199
+  credentialProvider = require('@aws-sdk/credential-providers');
 } catch {} // eslint-disable-line
 
 type SnappyLib = {

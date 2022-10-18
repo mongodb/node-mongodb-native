@@ -309,7 +309,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} MSVS_VERSION=${MSVS_VERSION} \
+          NODE_LTS_NAME=${NODE_LTS_NAME} MSVS_VERSION=${MSVS_VERSION} NPM_OPTIONS=${NPM_OPTIONS}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
     - command: expansions.update
       params:
@@ -1375,7 +1375,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with regular aws credentials
+      - &ref_0
+        func: run aws auth test with regular aws credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - func: install dependencies
@@ -1387,7 +1388,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with assume role credentials
+      - &ref_1
+        func: run aws auth test with assume role credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - func: install dependencies
@@ -1399,7 +1401,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
+      - &ref_2
+        func: run aws auth test with aws EC2 credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - func: install dependencies
@@ -1411,7 +1414,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
+      - &ref_3
+        func: run aws auth test with aws credentials as environment variables
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - func: install dependencies
@@ -1423,7 +1427,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
+      - &ref_4
+        func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-latest-auth-test-run-aws-ECS-auth-test
     commands:
       - func: install dependencies
@@ -1435,7 +1440,92 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws ECS auth test
+      - &ref_5
+        func: run aws ECS auth test
+  - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_0
+  - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_1
+  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_2
+  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_3
+  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_4
+  - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_5
   - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
@@ -1447,7 +1537,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with regular aws credentials
+      - &ref_6
+        func: run aws auth test with regular aws credentials
   - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - func: install dependencies
@@ -1459,7 +1550,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with assume role credentials
+      - &ref_7
+        func: run aws auth test with assume role credentials
   - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - func: install dependencies
@@ -1471,7 +1563,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
+      - &ref_8
+        func: run aws auth test with aws EC2 credentials
   - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - func: install dependencies
@@ -1483,7 +1576,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
+      - &ref_9
+        func: run aws auth test with aws credentials as environment variables
   - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - func: install dependencies
@@ -1495,7 +1589,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
+      - &ref_10
+        func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-6.0-auth-test-run-aws-ECS-auth-test
     commands:
       - func: install dependencies
@@ -1507,7 +1602,92 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws ECS auth test
+      - &ref_11
+        func: run aws ECS auth test
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_6
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_7
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_8
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_9
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_10
+  - name: aws-6.0-auth-test-run-aws-ECS-auth-test-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_11
   - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
@@ -1519,7 +1699,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with regular aws credentials
+      - &ref_12
+        func: run aws auth test with regular aws credentials
   - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - func: install dependencies
@@ -1531,7 +1712,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with assume role credentials
+      - &ref_13
+        func: run aws auth test with assume role credentials
   - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - func: install dependencies
@@ -1543,7 +1725,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
+      - &ref_14
+        func: run aws auth test with aws EC2 credentials
   - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - func: install dependencies
@@ -1555,7 +1738,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
+      - &ref_15
+        func: run aws auth test with aws credentials as environment variables
   - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - func: install dependencies
@@ -1567,7 +1751,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
+      - &ref_16
+        func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-5.0-auth-test-run-aws-ECS-auth-test
     commands:
       - func: install dependencies
@@ -1579,7 +1764,92 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws ECS auth test
+      - &ref_17
+        func: run aws ECS auth test
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_12
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_13
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_14
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_15
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_16
+  - name: aws-5.0-auth-test-run-aws-ECS-auth-test-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_17
   - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
@@ -1591,7 +1861,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with regular aws credentials
+      - &ref_18
+        func: run aws auth test with regular aws credentials
   - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - func: install dependencies
@@ -1603,7 +1874,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with assume role credentials
+      - &ref_19
+        func: run aws auth test with assume role credentials
   - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - func: install dependencies
@@ -1615,7 +1887,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
+      - &ref_20
+        func: run aws auth test with aws EC2 credentials
   - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - func: install dependencies
@@ -1627,7 +1900,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
+      - &ref_21
+        func: run aws auth test with aws credentials as environment variables
   - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - func: install dependencies
@@ -1639,7 +1913,8 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
+      - &ref_22
+        func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-4.4-auth-test-run-aws-ECS-auth-test
     commands:
       - func: install dependencies
@@ -1651,7 +1926,92 @@ tasks:
           TOPOLOGY: server
       - func: add aws auth variables to file
       - func: setup aws env
-      - func: run aws ECS auth test
+      - &ref_23
+        func: run aws ECS auth test
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_18
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_19
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_20
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_21
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_22
+  - name: aws-4.4-auth-test-run-aws-ECS-auth-test-no-optional
+    commands:
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: '--no-optional'
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-aws.json
+          TOPOLOGY: server
+      - func: add aws auth variables to file
+      - func: setup aws env
+      - *ref_23
   - name: run-unit-tests
     tags:
       - run-unit-tests
@@ -2631,24 +2991,49 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-latest-auth-test-run-aws-ECS-auth-test
+      - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+      - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+      - aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+      - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+      - >-
+        aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+      - aws-latest-auth-test-run-aws-ECS-auth-test-no-optional
       - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-6.0-auth-test-run-aws-ECS-auth-test
+      - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+      - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+      - aws-6.0-auth-test-run-aws-ECS-auth-test-no-optional
       - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-5.0-auth-test-run-aws-ECS-auth-test
+      - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+      - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+      - aws-5.0-auth-test-run-aws-ECS-auth-test-no-optional
       - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
       - aws-4.4-auth-test-run-aws-ECS-auth-test
+      - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+      - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+      - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+      - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+      - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+      - aws-4.4-auth-test-run-aws-ECS-auth-test-no-optional
   - name: rhel8-custom-dependency-tests
     display_name: Custom Dependency Version Test
     run_on: rhel80-large
