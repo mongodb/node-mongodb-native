@@ -95,6 +95,42 @@
   ],
   "tests": [
     {
+      "description": "saveResultAsEntity is optional for createChangeStream",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.8.0",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "client0",
+          "arguments": {
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": 1
+                },
+                "commandName": "aggregate",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "description": "Executing a watch helper on a MongoClient results in notifications for changes to all collections in all databases in the cluster.",
       "runOnRequirements": [
         {
@@ -265,6 +301,9 @@
           "arguments": {
             "document": {
               "x": 1
+            },
+            "writeConcern": {
+              "w": "majority"
             }
           }
         },
@@ -274,6 +313,9 @@
           "arguments": {
             "document": {
               "x": 2
+            },
+            "writeConcern": {
+              "w": "majority"
             }
           }
         },
@@ -283,6 +325,9 @@
           "arguments": {
             "document": {
               "x": 3
+            },
+            "writeConcern": {
+              "w": "majority"
             }
           }
         },

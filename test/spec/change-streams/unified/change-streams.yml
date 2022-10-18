@@ -854,14 +854,20 @@ tests:
         object: *globalCollection0
         arguments:
           document: { x: 1 }
+          writeConcern: 
+            w: 'majority'
       - name: insertOne
         object: *globalCollection0
         arguments:
           document: { x: 2 }
+          writeConcern: 
+            w: 'majority'
       - name: insertOne
         object: *globalCollection0
         arguments:
           document: { x: 3 }
+          writeConcern: 
+            w: 'majority'
       - name: iterateUntilDocumentOrError
         object: *changeStream0
         expectResult:

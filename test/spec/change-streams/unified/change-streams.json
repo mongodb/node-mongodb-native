@@ -1650,6 +1650,9 @@
           "arguments": {
             "document": {
               "x": 1
+            },
+            "writeConcern": {
+              "w": "majority"
             }
           }
         },
@@ -1659,6 +1662,9 @@
           "arguments": {
             "document": {
               "x": 2
+            },
+            "writeConcern": {
+              "w": "majority"
             }
           }
         },
@@ -1668,6 +1674,9 @@
           "arguments": {
             "document": {
               "x": 3
+            },
+            "writeConcern": {
+              "w": "majority"
             }
           }
         },
