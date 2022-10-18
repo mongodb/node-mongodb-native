@@ -288,7 +288,7 @@ export class Collection<TSchema extends Document = Document> {
       options = {};
     }
 
-    // CSFLE passes in { w: 'majority' } to ensure the lib works in both 3.x and 4.x
+    // In use encryption passes in { w: 'majority' } to ensure the lib works in both 3.x and 4.x
     // we support that option style here only
     if (options && Reflect.get(options, 'w')) {
       options.writeConcern = WriteConcern.fromOptions(Reflect.get(options, 'w'));

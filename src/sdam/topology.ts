@@ -252,7 +252,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       ) => this.selectServer(selector, options, callback as any)
     );
 
-    // Legacy CSFLE support
+    // Legacy in use encryption support
     this.bson = Object.create(null);
     this.bson.serialize = serialize;
     this.bson.deserialize = deserialize;
