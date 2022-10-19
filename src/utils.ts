@@ -1097,7 +1097,7 @@ export class BufferPool {
     }
 
     // We know we have enough, we just don't know how it is spread across chunks
-    // TODO(NODE-XXXX): alloc API should change based on raw option
+    // TODO(NODE-4732): alloc API should change based on raw option
     const result = Buffer.allocUnsafe(size);
 
     for (let bytesRead = 0; bytesRead < size; ) {
