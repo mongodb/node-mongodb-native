@@ -62,11 +62,11 @@ describe('driver utils', function () {
       expect(() => (new BufferPool().length = 3)).to.throw(TypeError);
     });
 
-    describe('readSize()', function () {
+    describe('getInt32()', function () {
       it('should return null when pool has less than an int32 sized totalByteLength', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0, 0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.be.null;
         expect(buffer).property('length').to.equal(3);
       });
@@ -74,7 +74,7 @@ describe('driver utils', function () {
       it('should return number when pool has exactly an int32 sized totalByteLength', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0, 0, 0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.equal(1);
         expect(buffer).property('length', 4);
       });
@@ -83,7 +83,7 @@ describe('driver utils', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0, 0, 0]));
         buffer.append(Buffer.from([2, 0, 0, 0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.equal(1);
         expect(buffer).property('length', 8);
       });
@@ -92,7 +92,7 @@ describe('driver utils', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1]));
         buffer.append(Buffer.from([0, 0, 0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.equal(1);
         expect(buffer).property('length', 4);
       });
@@ -101,7 +101,7 @@ describe('driver utils', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0]));
         buffer.append(Buffer.from([0, 0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.equal(1);
         expect(buffer).property('length', 4);
       });
@@ -110,7 +110,7 @@ describe('driver utils', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0, 0]));
         buffer.append(Buffer.from([0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.equal(1);
         expect(buffer).property('length', 4);
       });
@@ -120,7 +120,7 @@ describe('driver utils', function () {
         buffer.append(Buffer.from([1]));
         buffer.append(Buffer.from([0, 0]));
         buffer.append(Buffer.from([0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.equal(1);
         expect(buffer).property('length', 4);
       });
@@ -130,7 +130,7 @@ describe('driver utils', function () {
         buffer.append(Buffer.from([1, 0]));
         buffer.append(Buffer.from([0]));
         buffer.append(Buffer.from([0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.equal(1);
         expect(buffer).property('length', 4);
       });
@@ -141,7 +141,7 @@ describe('driver utils', function () {
         buffer.append(Buffer.from([0]));
         buffer.append(Buffer.from([0]));
         buffer.append(Buffer.from([0]));
-        const int32 = buffer.readSize();
+        const int32 = buffer.getInt32();
         expect(int32).to.equal(1);
         expect(buffer).property('length', 4);
       });
@@ -760,7 +760,6 @@ describe('driver utils', function () {
 
     describe('when a custom promise constructor is set', () => {
       beforeEach(() => {
-        // @ts-expect-error: BluebirdPromise is not type compat with this internal API.
         PromiseProvider.set(BluebirdPromise);
       });
 

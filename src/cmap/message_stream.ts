@@ -134,7 +134,7 @@ function canCompress(command: WriteProtocolMessageType) {
 
 function processIncomingData(stream: MessageStream, callback: Callback<Buffer>): void {
   const buffer = stream[kBuffer];
-  const sizeOfMessage = buffer.readSize();
+  const sizeOfMessage = buffer.getInt32();
 
   if (sizeOfMessage == null) {
     return callback();
@@ -167,7 +167,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>):
   const monitorHasAnotherHello = () => {
     if (stream.isMonitoringConnection) {
       // Can we read the next message size?
-      const sizeOfMessage = buffer.readSize();
+      const sizeOfMessage = buffer.getInt32();
       if (sizeOfMessage != null && sizeOfMessage <= buffer.length) {
         return true;
       }

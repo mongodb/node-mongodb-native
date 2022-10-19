@@ -1064,7 +1064,7 @@ export class BufferPool {
    * If BufferPool contains 4 bytes or more construct an int32 from the leading bytes,
    * otherwise return null. Size can be negative, caller should error check.
    */
-  readSize(): number | null {
+  getInt32(): number | null {
     if (this.totalByteLength < 4) {
       return null;
     }
