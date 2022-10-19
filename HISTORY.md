@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.11.0](https://github.com/mongodb/node-mongodb-native/compare/v4.10.0...v4.11.0) (2022-10-19)
+
+
+### Features
+
+* **NODE-3255:** add minPoolSizeCheckIntervalMS option to connection pool ([#3429](https://github.com/mongodb/node-mongodb-native/issues/3429)) ([5f34ad0](https://github.com/mongodb/node-mongodb-native/commit/5f34ad07220bfbaf3b9fb6da2fdf67b78b92cb9e))
+* **NODE-3651:** add hashed index type ([#3432](https://github.com/mongodb/node-mongodb-native/issues/3432)) ([f6b56a1](https://github.com/mongodb/node-mongodb-native/commit/f6b56a17bfd707bb8f42c22af09915dc8b4e6e68))
+* **NODE-3875:** support recursive schema types ([#3433](https://github.com/mongodb/node-mongodb-native/issues/3433)) ([26bce4a](https://github.com/mongodb/node-mongodb-native/commit/26bce4a8debb65df5a42dc8599e886c9c83de10d))
+* **NODE-4503:** throw original error when server attaches NoWritesPerformed label ([#3441](https://github.com/mongodb/node-mongodb-native/issues/3441)) ([a7dab96](https://github.com/mongodb/node-mongodb-native/commit/a7dab96cf0a148bc411eb943d4433ba659451117))
+* **NODE-4650:** handle handshake errors with SDAM ([#3426](https://github.com/mongodb/node-mongodb-native/issues/3426)) ([cbe7533](https://github.com/mongodb/node-mongodb-native/commit/cbe75332d767a921551d71ea5725fac250906b00))
+* **NODE-4721:** add aws-sdk as optional dependency ([#3446](https://github.com/mongodb/node-mongodb-native/issues/3446)) ([b879cb5](https://github.com/mongodb/node-mongodb-native/commit/b879cb590e1c1880d12522aea2a3ac3a66e6031d))
+
+
+### Bug Fixes
+
+* **NODE-3712,NODE-4546:** electionId should be ordered before setVersion ([#3174](https://github.com/mongodb/node-mongodb-native/issues/3174)) ([ca51fec](https://github.com/mongodb/node-mongodb-native/commit/ca51feca25ab1413df7efe9e79b1de051ceb21eb))
+* **NODE-3921:** error on invalid TLS option combinations ([#3405](https://github.com/mongodb/node-mongodb-native/issues/3405)) ([1a550df](https://github.com/mongodb/node-mongodb-native/commit/1a550df3aa328f8c1790c0e02cd1cdd4731b88f8))
+* **NODE-4186:** accept ReadPreferenceLike in TransactionOptions type ([#3425](https://github.com/mongodb/node-mongodb-native/issues/3425)) ([dc62bcb](https://github.com/mongodb/node-mongodb-native/commit/dc62bcb158e52f4fbc6536f513bc2cab6d01640b))
+* **NODE-4475:** make interrupted message more specific ([#3437](https://github.com/mongodb/node-mongodb-native/issues/3437)) ([5f37cb6](https://github.com/mongodb/node-mongodb-native/commit/5f37cb6454878294ae004d13a5fcf62eef6adbbe))
+* **NODE-4608:** prevent parallel monitor checks ([#3404](https://github.com/mongodb/node-mongodb-native/issues/3404)) ([78bcfe4](https://github.com/mongodb/node-mongodb-native/commit/78bcfe4834d03d7f85bd0aaaf8ffc3a316be372d))
+* **NODE-4647:** improve error message ([#3409](https://github.com/mongodb/node-mongodb-native/issues/3409)) ([0d3c02e](https://github.com/mongodb/node-mongodb-native/commit/0d3c02e25f5327d3200d8631a5472309d93a6c8c))
+* **NODE-4649:** use SDAM handling for errors from min pool size population ([#3424](https://github.com/mongodb/node-mongodb-native/issues/3424)) ([ef3b55d](https://github.com/mongodb/node-mongodb-native/commit/ef3b55dd99eb52972e6cbebb4cb3d2ed2f72c081))
+
 ## [4.10.0](https://github.com/mongodb/node-mongodb-native/compare/v4.9.0...v4.10.0) (2022-09-19)
 
 
