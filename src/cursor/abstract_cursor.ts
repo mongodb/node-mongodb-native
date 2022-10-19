@@ -504,6 +504,29 @@ export abstract class AbstractCursor<
    * this function's transform.
    *
    * @remarks
+   *
+   * **Note** Cursors use `null` internally to indicate that there are no more documents in the cursor. Providing a mapping
+   * function that maps values to `null` will result in the cursor closing itself before it has finished iterating
+   * all documents.  This will **not** result in a memory leak, just surprising behavior.  For example:
+   *
+   * ```typescript
+   * const cursor = collection.find({});
+   * cursor.map(() => null);
+   *
+   * const documents = await cursor.toArray();
+   * // documents is always [], regardless of how many documents are in the collection.
+   * ```
+   *
+   * Other falsey values are allowed:
+   *
+   * ```typescript
+   * const cursor = collection.find({});
+   * cursor.map(() => '');
+   *
+   * const documents = await cursor.toArray();
+   * // documents is now an array of empty strings
+   * ```
+   *
    * **Note for Typescript Users:** adding a transform changes the return type of the iteration of this cursor,
    * it **does not** return a new instance of a cursor. This means when calling map,
    * you should always assign the result to a new variable in order to get a correctly typed cursor variable.
