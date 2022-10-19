@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
 import {
   AnyError,
+  MongoAPIError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
   MongoInvalidArgumentError,
@@ -306,6 +307,11 @@ export abstract class AbstractCursor<
         const document = await this.next();
 
         if (document == null) {
+          if (!this.closed) {
+            const message =
+              'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
+            throw new MongoAPIError(message);
+          }
           break;
         }
 

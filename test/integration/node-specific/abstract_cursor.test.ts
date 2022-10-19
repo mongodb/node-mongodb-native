@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
-import { Collection, MongoClient } from '../../../src';
+import { Collection, MongoAPIError, MongoClient } from '../../../src';
 
-describe('class AbstractCursor', function () {
+describe.only('class AbstractCursor', function () {
   let client: MongoClient;
 
   let collection: Collection;
@@ -37,9 +37,9 @@ describe('class AbstractCursor', function () {
       const cursor = collection.find();
       cursor.map(() => null);
 
-      const result = await cursor.toArray();
+      const error = await cursor.toArray().catch(e => e);
 
-      expect(result).to.deep.equal([]);
+      expect(error).be.instanceOf(MongoAPIError);
     });
   });
 
@@ -65,9 +65,13 @@ describe('class AbstractCursor', function () {
       const cursor = collection.find();
       cursor.map(() => null);
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const document of cursor) {
-        expect.fail('Expected no documents from cursor, received at least one.');
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const document of cursor) {
+          expect.fail('Expected error to be thrown');
+        }
+      } catch (error) {
+        expect(error).to.be.instanceOf(MongoAPIError);
       }
     });
   });
@@ -100,7 +104,8 @@ describe('class AbstractCursor', function () {
         expect.fail('Expected no documents from cursor, received at least one.');
       }
 
-      await cursor.forEach(transform);
+      const error = await cursor.forEach(transform).catch(e => e);
+      expect(error).to.be.instanceOf(MongoAPIError);
     });
   });
 });
