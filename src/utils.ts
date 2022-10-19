@@ -900,9 +900,9 @@ export function deepCopy<T>(value: T): T {
 /** @internal */
 type ListNode<T> = { value: T; next: ListNode<T>; prev: ListNode<T> };
 /**
- * T extends NonNullable<unknown> = NonNullable<unknown>
+ * A sequential list of items
  * @internal
- * */
+ */
 export class List<T = unknown> {
   private readonly head: ListNode<T>;
   private count: number;
@@ -957,7 +957,7 @@ export class List<T = unknown> {
   push(value: T) {
     this.count += 1;
     const newNode: ListNode<T> = {
-      next: this.head as unknown as ListNode<T>,
+      next: this.head,
       prev: this.head.prev,
       value
     };
@@ -977,16 +977,16 @@ export class List<T = unknown> {
     this.count += 1;
     const newNode: ListNode<T> = {
       next: this.head.next,
-      prev: this.head as unknown as ListNode<T>,
+      prev: this.head,
       value
     };
     this.head.next.prev = newNode;
     this.head.next = newNode;
   }
 
-  private remove(node?: ListNode<T> | null) {
+  private remove(node?: ListNode<T> | null): T | null {
     if (node == null || this.length === 0) {
-      return { next: null, prev: null, value: null };
+      return null;
     }
 
     this.count -= 1;
@@ -996,20 +996,17 @@ export class List<T = unknown> {
     prevNode.next = nextNode;
     nextNode.prev = prevNode;
 
-    // Null out the pointers so that a double remove does not break things
-    node.next = null as any;
-    node.prev = null as any;
-    return node;
+    return node.value;
   }
 
   /** Removes the first node at the front of the list */
-  shift() {
-    return this.remove(this.head.next).value;
+  shift(): T | null {
+    return this.remove(this.head.next);
   }
 
   /** Removes the last node at the end of the list */
-  pop() {
-    return this.remove(this.head.prev).value;
+  pop(): T | null {
+    return this.remove(this.head.prev);
   }
 
   /** Iterates through the list and removes nodes where filter returns true */
@@ -1027,11 +1024,13 @@ export class List<T = unknown> {
     this.head.prev = this.head;
   }
 
+  /** Returns the first item in the list, does not remove */
   first(): T | null {
     // If the list is empty, value will be the sentinel's null
     return this.head.next.value;
   }
 
+  /** Returns the last item in the list, does not remove */
   last(): T | null {
     // If the list is empty, value will be the sentinel's null
     return this.head.prev.value;

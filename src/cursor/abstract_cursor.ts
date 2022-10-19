@@ -701,7 +701,7 @@ export abstract class AbstractCursor<
 function nextDocument<T>(cursor: AbstractCursor<T>): T | null {
   const doc = cursor[kDocuments].shift();
 
-  if (doc != null && cursor[kTransform]) {
+  if (doc && cursor[kTransform]) {
     return cursor[kTransform](doc) as T;
   }
 
@@ -736,7 +736,7 @@ export function next<T>(
     return callback(undefined, null);
   }
 
-  if (cursorId != null && cursor[kDocuments].length !== 0) {
+  if (cursor[kDocuments].length !== 0) {
     callback(undefined, nextDocument<T>(cursor));
     return;
   }

@@ -132,13 +132,12 @@ function canCompress(command: WriteProtocolMessageType) {
   return !uncompressibleCommands.has(commandName);
 }
 
-function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) {
+function processIncomingData(stream: MessageStream, callback: Callback<Buffer>): void {
   const buffer = stream[kBuffer];
   const sizeOfMessage = buffer.readSize();
 
   if (sizeOfMessage == null) {
-    callback();
-    return;
+    return callback();
   }
 
   if (sizeOfMessage < 0) {
@@ -184,18 +183,15 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
     if (monitorHasAnotherHello()) {
-      processIncomingData(stream, callback);
-    } else {
-      stream.emit('message', new ResponseType(message, messageHeader, messageBody));
-
-      if (buffer.length >= 4) {
-        processIncomingData(stream, callback);
-      } else {
-        callback();
-      }
+      return processIncomingData(stream, callback);
     }
 
-    return;
+    stream.emit('message', new ResponseType(message, messageHeader, messageBody));
+
+    if (buffer.length >= 4) {
+      return processIncomingData(stream, callback);
+    }
+    return callback();
   }
 
   messageHeader.fromCompressed = true;
@@ -206,33 +202,28 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
 
   // recalculate based on wrapped opcode
   ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
-  decompress(compressorID, compressedBuffer, (err, messageBody) => {
+  return decompress(compressorID, compressedBuffer, (err, messageBody) => {
     if (err || !messageBody) {
-      callback(err);
-      return;
+      return callback(err);
     }
 
     if (messageBody.length !== messageHeader.length) {
-      callback(
+      return callback(
         new MongoDecompressionError('Message body and message header must be the same length')
       );
-
-      return;
     }
 
     // If we are a monitoring connection message stream and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
     if (monitorHasAnotherHello()) {
-      processIncomingData(stream, callback);
-    } else {
-      stream.emit('message', new ResponseType(message, messageHeader, messageBody));
-
-      if (buffer.length >= 4) {
-        processIncomingData(stream, callback);
-      } else {
-        callback();
-      }
+      return processIncomingData(stream, callback);
     }
+    stream.emit('message', new ResponseType(message, messageHeader, messageBody));
+
+    if (buffer.length >= 4) {
+      return processIncomingData(stream, callback);
+    }
+    return callback();
   });
 }

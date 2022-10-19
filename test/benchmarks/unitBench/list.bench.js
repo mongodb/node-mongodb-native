@@ -27,7 +27,7 @@ const printHistogram = (name, h) => {
   console.log('\n' + '-'.repeat(155));
 };
 
-void (function testArrayShift() {
+const testArrayShift = () => {
   let bigArray = makeBigArray();
   const h = createHistogram();
   for (let runs = 0; runs < iterations; runs++) {
@@ -38,9 +38,9 @@ void (function testArrayShift() {
   }
 
   printHistogram(`shift(${defaultItemsSize}) from Array`, h);
-})();
+};
 
-void (function testListShift() {
+const testListShift = () => {
   const bigList = new List();
   bigList.pushMany(makeBigArray());
   const h = createHistogram();
@@ -52,9 +52,9 @@ void (function testListShift() {
   }
 
   printHistogram(`shift(${defaultItemsSize}) from List`, h);
-})();
+};
 
-void (function testDenqueShift() {
+const testDenqueShift = () => {
   const Denque = require('denque');
   let bigDenque = new Denque(makeBigArray());
   const h = createHistogram();
@@ -66,9 +66,9 @@ void (function testDenqueShift() {
   }
 
   printHistogram(`shift(${defaultItemsSize}) from Denque`, h);
-})();
+};
 
-void (function testArrayPush() {
+const testArrayPush = () => {
   const bigArray = [];
   const h = createHistogram();
   for (let runs = 0; runs < iterations; runs++) {
@@ -79,9 +79,9 @@ void (function testArrayPush() {
   }
 
   printHistogram(`push(${defaultItemsSize}) to Array`, h);
-})();
+};
 
-void (function testListPush() {
+const testListPush = () => {
   const bigList = new List();
   const h = createHistogram();
   for (let runs = 0; runs < iterations; runs++) {
@@ -92,9 +92,9 @@ void (function testListPush() {
   }
 
   printHistogram(`push(${defaultItemsSize}) to List`, h);
-})();
+};
 
-void (function testDenqueShift() {
+const testDenquePush = () => {
   const Denque = require('denque');
   let bigDenque = new Denque([]);
   const h = createHistogram();
@@ -106,4 +106,15 @@ void (function testDenqueShift() {
   }
 
   printHistogram(`push(${defaultItemsSize}) to Denque`, h);
-})();
+};
+
+const main = () => {
+  testArrayPush();
+  testListPush();
+  testDenquePush();
+
+  testArrayShift();
+  testListShift();
+  testDenqueShift();
+};
+main();

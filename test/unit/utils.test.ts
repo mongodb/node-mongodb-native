@@ -62,8 +62,8 @@ describe('driver utils', function () {
       expect(() => (new BufferPool().length = 3)).to.throw(TypeError);
     });
 
-    describe('readSize', function () {
-      it('less than an int32 sized buffer returns null', () => {
+    describe('readSize()', function () {
+      it('should return null when pool has less than an int32 sized totalByteLength', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0, 0]));
         const int32 = buffer.readSize();
@@ -71,7 +71,7 @@ describe('driver utils', function () {
         expect(buffer).property('length').to.equal(3);
       });
 
-      it('exactly int32 sized buffer', () => {
+      it('should return number when pool has exactly an int32 sized totalByteLength', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0, 0, 0]));
         const int32 = buffer.readSize();
@@ -79,7 +79,7 @@ describe('driver utils', function () {
         expect(buffer).property('length', 4);
       });
 
-      it('greater than an int32 sized buffer in total but still can read int32 from first buffer', () => {
+      it('should return number when pool has more than an int32 sized buffer first in the list', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0, 0, 0]));
         buffer.append(Buffer.from([2, 0, 0, 0]));
@@ -88,7 +88,7 @@ describe('driver utils', function () {
         expect(buffer).property('length', 8);
       });
 
-      it('int32 is split across multiple buffers 1, 3', () => {
+      it('should return number when int32 is split across multiple buffers 1, 3', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1]));
         buffer.append(Buffer.from([0, 0, 0]));
@@ -97,7 +97,7 @@ describe('driver utils', function () {
         expect(buffer).property('length', 4);
       });
 
-      it('int32 is split across multiple buffers 2, 2', () => {
+      it('should return number when int32 is split across multiple buffers 2, 2', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0]));
         buffer.append(Buffer.from([0, 0]));
@@ -106,7 +106,7 @@ describe('driver utils', function () {
         expect(buffer).property('length', 4);
       });
 
-      it('int32 is split across multiple buffers 3, 1', () => {
+      it('should return number when int32 is split across multiple buffers 3, 1', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0, 0]));
         buffer.append(Buffer.from([0]));
@@ -115,7 +115,7 @@ describe('driver utils', function () {
         expect(buffer).property('length', 4);
       });
 
-      it('int32 is split across multiple buffers 1, 2, 1', () => {
+      it('should return number when int32 is split across multiple buffers 1, 2, 1', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1]));
         buffer.append(Buffer.from([0, 0]));
@@ -125,7 +125,7 @@ describe('driver utils', function () {
         expect(buffer).property('length', 4);
       });
 
-      it('int32 is split across multiple buffers 2, 1, 1', () => {
+      it('should return number when int32 is split across multiple buffers 2, 1, 1', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1, 0]));
         buffer.append(Buffer.from([0]));
@@ -135,7 +135,7 @@ describe('driver utils', function () {
         expect(buffer).property('length', 4);
       });
 
-      it('int32 is split across multiple buffers 1, 1, 1, 1', () => {
+      it('should return number when int32 is split across multiple buffers 1, 1, 1, 1', () => {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([1]));
         buffer.append(Buffer.from([0]));
@@ -147,7 +147,7 @@ describe('driver utils', function () {
       });
     });
 
-    describe('read', function () {
+    describe('read()', function () {
       it('return an empty buffer if too many bytes requested', function () {
         const buffer = new BufferPool();
         buffer.append(Buffer.from([0, 1, 2, 3]));
@@ -205,8 +205,11 @@ describe('driver utils', function () {
         // Double checking some internals, if future code changes modify these expectations
         // They are not intended to be set in stone or expected by users of the List class
         expect(list).to.have.property('head').that.is.not.null;
-        expect(list).to.have.nested.property('head.next').that.is.not.null;
-        expect(list).to.have.nested.property('head.prev').that.is.not.null;
+        expect(list).to.have.nested.property('head.value', null);
+        // @ts-expect-error: checking circularity is maintained
+        expect(list).to.have.nested.property('head.next').that.equals(list.head);
+        // @ts-expect-error: checking circularity is maintained
+        expect(list).to.have.nested.property('head.prev').that.equals(list.head);
       });
     });
 
@@ -219,15 +222,39 @@ describe('driver utils', function () {
         }).to.throw(TypeError);
       });
 
-      it('should return the count of items in the list', () => {
+      it('should increment by one with each item inserted into the list', () => {
         const list = new List<number>();
         expect(list).to.have.property('length', 0);
         list.push(10);
         expect(list).to.have.property('length', 1);
         list.push(23);
         expect(list).to.have.property('length', 2);
+        list.pushMany(Array.from({ length: 100 }, () => 22));
+        expect(list).to.have.property('length', 102);
+      });
+
+      it('should decrement by one with each item removed from the list', () => {
+        const list = new List<number>();
+        list.pushMany([1, 2, 3]);
+        expect(list).to.have.property('length', 3);
+        list.pop();
+        expect(list).to.have.property('length', 2);
         list.pop();
         expect(list).to.have.property('length', 1);
+        list.pop();
+        expect(list).to.have.property('length', 0);
+        list.pop();
+        expect(list).to.have.property('length', 0);
+      });
+
+      it('should not fall below zero if items are removed from empty list', () => {
+        const list = new List<number>();
+        expect(list).to.have.property('length', 0);
+        list.pop();
+        list.pop();
+        list.shift();
+        list.shift();
+        expect(list).to.have.property('length', 0);
       });
     });
 
@@ -322,7 +349,7 @@ describe('driver utils', function () {
         expect(Array.from(list)).to.deep.equal([1, 2]);
       });
 
-      it('should take an item to the start of a list', () => {
+      it('should remove and return an item from the start of the list', () => {
         const last = list.shift();
         expect(last).to.equal(1);
         expect(Array.from(list)).to.deep.equal([2]);
@@ -377,6 +404,7 @@ describe('driver utils', function () {
         // Double checking some internals, if future code changes modify these expectations
         // They are not intended to be set in stone or expected by users of the List class
         expect(list).to.have.property('head').that.is.not.null;
+        expect(list).to.have.nested.property('head.value', null);
         // @ts-expect-error: checking circularity is maintained
         expect(list).to.have.nested.property('head.next').that.equals(list.head);
         // @ts-expect-error: checking circularity is maintained
