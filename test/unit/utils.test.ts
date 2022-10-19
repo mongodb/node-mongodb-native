@@ -391,7 +391,7 @@ describe('driver utils', function () {
         expect(Array.from(list)).to.deep.equal([1, 2]);
       });
 
-      it('should take an item to the end of a list', () => {
+      it('should remove and return an item from the end of the list', () => {
         const last = list.pop();
         expect(last).to.equal(2);
         expect(Array.from(list)).to.deep.equal([1]);
