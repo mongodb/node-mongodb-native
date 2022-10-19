@@ -745,7 +745,7 @@ export function next<T>(
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
     cursor[kInit]((err, value) => {
       if (err) return callback(err);
-      if (value) {
+      if (value != null) {
         return callback(undefined, value);
       }
       return next(cursor, blocking, callback);
