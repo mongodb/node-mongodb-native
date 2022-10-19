@@ -904,10 +904,9 @@ type HeadNode<T> = { value: null; next: ListNode<T>; prev: ListNode<T> };
  * A sequential list of items in a circularly linked list
  * @remarks
  * The head node is special, it is always defined and has a value of null.
- * It is never "included" in the list, in that, it is not returned by pop/shift or yielded by the iterator
- * The circular linkage and always defined head node are to reduce checks for null next/prev references to zero
- * New nodes are declared as object literals with keys always in the same order: next, prev, value
- *
+ * It is never "included" in the list, in that, it is not returned by pop/shift or yielded by the iterator.
+ * The circular linkage and always defined head node are to reduce checks for null next/prev references to zero.
+ * New nodes are declared as object literals with keys always in the same order: next, prev, value.
  * @internal
  */
 export class List<T = unknown> {
