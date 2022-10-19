@@ -899,12 +899,19 @@ export function deepCopy<T>(value: T): T {
 
 /** @internal */
 type ListNode<T> = { value: T; next: ListNode<T>; prev: ListNode<T> };
+type HeadNode<T> = { value: null; next: ListNode<T>; prev: ListNode<T> };
 /**
- * A sequential list of items
+ * A sequential list of items in a circularly linked list
+ * @remarks
+ * The head node is special, it is always defined and has a value of null.
+ * It is never "included" in the list, in that, it is not returned by pop/shift or yielded by the iterator
+ * The circular linkage and always defined head node are to reduce checks for null next/prev references to zero
+ * New nodes are declared as object literals with keys always in the same order: next, prev, value
+ *
  * @internal
  */
 export class List<T = unknown> {
-  private readonly head: ListNode<T>;
+  private readonly head: HeadNode<T>;
   private count: number;
 
   get length() {
@@ -918,15 +925,13 @@ export class List<T = unknown> {
   constructor() {
     this.count = 0;
 
-    const sentinel = {
-      value: null as unknown as T,
+    this.head = {
       next: null as unknown as ListNode<T>,
-      prev: null as unknown as ListNode<T>
+      prev: null as unknown as ListNode<T>,
+      value: null
     };
-    sentinel.next = sentinel as unknown as ListNode<T>;
-    sentinel.prev = sentinel as unknown as ListNode<T>;
-
-    this.head = sentinel;
+    this.head.next = this.head as unknown as ListNode<T>;
+    this.head.prev = this.head as unknown as ListNode<T>;
   }
 
   toArray() {
@@ -957,7 +962,7 @@ export class List<T = unknown> {
   push(value: T) {
     this.count += 1;
     const newNode: ListNode<T> = {
-      next: this.head,
+      next: this.head as ListNode<T>,
       prev: this.head.prev,
       value
     };
@@ -977,7 +982,7 @@ export class List<T = unknown> {
     this.count += 1;
     const newNode: ListNode<T> = {
       next: this.head.next,
-      prev: this.head,
+      prev: this.head as ListNode<T>,
       value
     };
     this.head.next.prev = newNode;
@@ -1020,19 +1025,19 @@ export class List<T = unknown> {
 
   clear() {
     this.count = 0;
-    this.head.next = this.head;
-    this.head.prev = this.head;
+    this.head.next = this.head as ListNode<T>;
+    this.head.prev = this.head as ListNode<T>;
   }
 
   /** Returns the first item in the list, does not remove */
   first(): T | null {
-    // If the list is empty, value will be the sentinel's null
+    // If the list is empty, value will be the head's null
     return this.head.next.value;
   }
 
   /** Returns the last item in the list, does not remove */
   last(): T | null {
-    // If the list is empty, value will be the sentinel's null
+    // If the list is empty, value will be the head's null
     return this.head.prev.value;
   }
 }

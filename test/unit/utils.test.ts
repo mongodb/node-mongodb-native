@@ -211,6 +211,24 @@ describe('driver utils', function () {
         // @ts-expect-error: checking circularity is maintained
         expect(list).to.have.nested.property('head.prev').that.equals(list.head);
       });
+
+      it('should construct nodes with keys always in the same order', () => {
+        // declaring object literals with the exact same key ordering improves perf
+        const list = new List<number>();
+        list.push(2);
+        list.unshift(1);
+
+        // head node from constructor
+        expect(Object.keys(list.head)).to.deep.equal(['next', 'prev', 'value']);
+
+        // 1 node from push
+        expect(list.head.prev).to.have.property('value', 2);
+        expect(Object.keys(list.head.prev)).to.deep.equal(['next', 'prev', 'value']);
+
+        // 2 node from unshift
+        expect(list.head.next).to.have.property('value', 1);
+        expect(Object.keys(list.head.next)).to.deep.equal(['next', 'prev', 'value']);
+      });
     });
 
     describe('get length', () => {
