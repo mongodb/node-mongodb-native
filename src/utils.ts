@@ -910,6 +910,16 @@ type HeadNode<T> = {
 };
 
 /**
+ * When a list is empty the head is a reference with pointers to itself
+ * So this type represents that self referential state
+ */
+type EmptyNode = {
+  value: null;
+  next: EmptyNode;
+  prev: EmptyNode;
+};
+
+/**
  * A sequential list of items in a circularly linked list
  * @remarks
  * The head node is special, it is always defined and has a value of null.
@@ -919,7 +929,7 @@ type HeadNode<T> = {
  * @internal
  */
 export class List<T = unknown> {
-  private readonly head: HeadNode<T>;
+  private readonly head: HeadNode<T> | EmptyNode;
   private count: number;
 
   get length() {
@@ -937,10 +947,10 @@ export class List<T = unknown> {
     // declaring a complete and consistently key ordered
     // object is beneficial to the runtime optimizations
     this.head = {
-      next: null as unknown as HeadNode<T>,
-      prev: null as unknown as HeadNode<T>,
+      next: null,
+      prev: null,
       value: null
-    };
+    } as unknown as EmptyNode;
     this.head.next = this.head;
     this.head.prev = this.head;
   }
