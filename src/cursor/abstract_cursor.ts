@@ -284,7 +284,7 @@ export abstract class AbstractCursor<
   /** Returns current buffered documents */
   readBufferedDocuments(number?: number): TSchema[] {
     const bufferedDocs: TSchema[] = [];
-    const documentsToRead = number ?? this[kDocuments].length;
+    const documentsToRead = Math.min(number ?? this[kDocuments].length, this[kDocuments].length);
 
     for (let count = 0; count < documentsToRead; count++) {
       const document = this[kDocuments].shift();

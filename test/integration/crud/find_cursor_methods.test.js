@@ -41,11 +41,55 @@ describe('Find Cursor', function () {
     });
   });
 
-  context('#readBufferedDocuments', function () {
-    it('should support reading buffered documents', async function () {
+  describe('#readBufferedDocuments', function () {
+    let cursor;
+    beforeEach(async () => {
       const coll = client.db().collection('abstract_cursor');
-      const cursor = coll.find({}, { batchSize: 5 });
+      cursor = coll.find({}, { batchSize: 5 });
+      await cursor.hasNext(); // fetch firstBatch
+    });
 
+    it('should remove buffered documents from subsequent cursor iterations', async () => {
+      const [doc] = cursor.readBufferedDocuments(1);
+      expect(doc).to.have.property('a', 1);
+
+      const nextDoc = await cursor.next();
+      expect(nextDoc).to.have.property('a', 2);
+    });
+
+    it('should return the amount of documents requested', async () => {
+      const buf1 = cursor.readBufferedDocuments(1);
+      expect(buf1).to.be.lengthOf(1);
+
+      const buf2 = cursor.readBufferedDocuments(3);
+      expect(buf2).to.be.lengthOf(3);
+    });
+
+    it('should bound the request by the maximum amount of documents currently buffered', async () => {
+      const buf1 = cursor.readBufferedDocuments(1000);
+      expect(buf1).to.be.lengthOf(5);
+
+      const buf2 = cursor.readBufferedDocuments(23);
+      expect(buf2).to.be.lengthOf(0);
+    });
+
+    it('should return all buffered documents when no argument is passed', async () => {
+      const buf1 = cursor.readBufferedDocuments();
+      expect(buf1).to.be.lengthOf(5);
+
+      const buf2 = cursor.readBufferedDocuments();
+      expect(buf2).to.be.lengthOf(0);
+    });
+
+    it('should return empty array for size zero or less', async () => {
+      const buf1 = cursor.readBufferedDocuments(0);
+      expect(buf1).to.be.lengthOf(0);
+
+      const buf2 = cursor.readBufferedDocuments(-23);
+      expect(buf2).to.be.lengthOf(0);
+    });
+
+    it('should return the same amount of documents reported by bufferedCount', async function () {
       const doc = await cursor.next();
       expect(doc).property('a', 1);
 
