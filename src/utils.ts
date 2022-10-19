@@ -897,9 +897,18 @@ export function deepCopy<T>(value: T): T {
   return value;
 }
 
-/** @internal */
-type ListNode<T> = { value: T; next: ListNode<T>; prev: ListNode<T> };
-type HeadNode<T> = { value: null; next: ListNode<T>; prev: ListNode<T> };
+type ListNode<T> = {
+  value: T;
+  next: ListNode<T> | HeadNode<T>;
+  prev: ListNode<T> | HeadNode<T>;
+};
+
+type HeadNode<T> = {
+  value: null;
+  next: ListNode<T> | HeadNode<T>;
+  prev: ListNode<T> | HeadNode<T>;
+};
+
 /**
  * A sequential list of items in a circularly linked list
  * @remarks
@@ -924,13 +933,16 @@ export class List<T = unknown> {
   constructor() {
     this.count = 0;
 
+    // this is carefully crafted:
+    // declaring a complete and consistently key ordered
+    // object is beneficial to the runtime optimizations
     this.head = {
-      next: null as unknown as ListNode<T>,
-      prev: null as unknown as ListNode<T>,
+      next: null as unknown as HeadNode<T>,
+      prev: null as unknown as HeadNode<T>,
       value: null
     };
-    this.head.next = this.head as unknown as ListNode<T>;
-    this.head.prev = this.head as unknown as ListNode<T>;
+    this.head.next = this.head;
+    this.head.prev = this.head;
   }
 
   toArray() {
@@ -947,12 +959,12 @@ export class List<T = unknown> {
     }
   }
 
-  private *nodes() {
-    let ptr = this.head.next;
+  private *nodes(): Generator<ListNode<T>, void, void> {
+    let ptr: HeadNode<T> | ListNode<T> = this.head.next;
     while (ptr !== this.head) {
       // Save next before yielding so that we make removing within iteration safe
       const { next } = ptr;
-      yield ptr;
+      yield ptr as ListNode<T>;
       ptr = next;
     }
   }
@@ -961,7 +973,7 @@ export class List<T = unknown> {
   push(value: T) {
     this.count += 1;
     const newNode: ListNode<T> = {
-      next: this.head as ListNode<T>,
+      next: this.head,
       prev: this.head.prev,
       value
     };
@@ -981,15 +993,15 @@ export class List<T = unknown> {
     this.count += 1;
     const newNode: ListNode<T> = {
       next: this.head.next,
-      prev: this.head as ListNode<T>,
+      prev: this.head,
       value
     };
     this.head.next.prev = newNode;
     this.head.next = newNode;
   }
 
-  private remove(node?: ListNode<T> | null): T | null {
-    if (node == null || this.length === 0) {
+  private remove(node?: ListNode<T> | HeadNode<T> | null): T | null {
+    if (node == null || node === this.head || this.length === 0) {
       return null;
     }
 
@@ -1024,8 +1036,8 @@ export class List<T = unknown> {
 
   clear() {
     this.count = 0;
-    this.head.next = this.head as ListNode<T>;
-    this.head.prev = this.head as ListNode<T>;
+    this.head.next = this.head;
+    this.head.prev = this.head;
   }
 
   /** Returns the first item in the list, does not remove */
