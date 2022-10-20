@@ -505,30 +505,6 @@ describe('Sessions - unit', function () {
       });
     });
 
-    it('should remove all sessions which have timed out on release', function () {
-      const newSession = new ServerSession();
-      const oldSessions = [new ServerSession(), new ServerSession()].map(session => {
-        session.lastUse = now() - 30 * 60 * 1000; // add 30min
-        return session;
-      });
-
-      const pool = new ServerSessionPool(client);
-      pool.sessions.pushMany(oldSessions);
-      // List contains timed out sessions but the last one in the pool is still fresh
-      const freshSession = new ServerSession();
-      pool.sessions.push(freshSession);
-
-      pool.release(newSession);
-      expect(pool.sessions).to.have.lengthOf(2);
-      // Released sessions are put at the top of the pool
-      // heuristically they just were successfully used by an operation
-      // so they're likely to still be good for the next one)
-      expect(pool.sessions.first()).to.deep.equal(newSession);
-      // Our existing freshSession should still be in the pool
-      // pruning should only rid us of the timedOut sessions
-      expect(pool.sessions.last()).to.deep.equal(freshSession);
-    });
-
     it('should not reintroduce a soon-to-expire session to the pool on release', function (done) {
       const session = new ServerSession();
       session.lastUse = now() - 9.5 * 60 * 1000; // add 9.5min
