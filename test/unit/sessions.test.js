@@ -428,14 +428,14 @@ describe('Sessions - unit', function () {
       done();
     });
 
-    describe('upon release timed out sessions should be removed', () => {
+    describe('release()', () => {
       const makeOldSession = () => {
         const oldSession = new ServerSession();
         oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
         return oldSession;
       };
 
-      it('if they are at the start of the pool', () => {
+      it('should remove old sessions if they are at the start of the pool', () => {
         const pool = new ServerSessionPool(client);
         // old sessions at the start
         pool.sessions.pushMany(Array.from({ length: 3 }, () => makeOldSession()));
@@ -451,7 +451,7 @@ describe('Sessions - unit', function () {
           .be.false;
       });
 
-      it('if they are in the middle of the pool', () => {
+      it('should remove old sessions if they are in the middle of the pool', () => {
         const pool = new ServerSessionPool(client);
         pool.sessions.push(new ServerSession()); // one fresh before
         pool.sessions.pushMany(Array.from({ length: 3 }, () => makeOldSession()));
@@ -467,7 +467,7 @@ describe('Sessions - unit', function () {
           .be.false;
       });
 
-      it('if they are at the end of the pool', () => {
+      it('should remove old sessions if they are at the end of the pool', () => {
         const pool = new ServerSessionPool(client);
         pool.sessions.pushMany([new ServerSession(), new ServerSession()]);
 
@@ -484,7 +484,7 @@ describe('Sessions - unit', function () {
           .be.false;
       });
 
-      it('if they are not contiguous in the pool', () => {
+      it('should remove old sessions that are not contiguous in the pool', () => {
         const pool = new ServerSessionPool(client);
         pool.sessions.pushMany([
           makeOldSession(),
