@@ -648,21 +648,21 @@ export class ChangeStream<
   hasNext(callback?: Callback): Promise<boolean> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      try {
-        const hasNext = await this.cursor.hasNext();
-        return hasNext;
-      } catch (error) {
+      for (;;) {
         try {
-          await this._processErrorIteratorMode(error);
           const hasNext = await this.cursor.hasNext();
           return hasNext;
         } catch (error) {
           try {
-            await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+            await this._processErrorIteratorMode(error);
+          } catch (error) {
+            try {
+              await this.close();
+            } catch {
+              // We are not concerned with errors from close()
+            }
+            throw error;
           }
-          throw error;
         }
       }
     }, callback);
@@ -675,23 +675,22 @@ export class ChangeStream<
   next(callback?: Callback<TChange>): Promise<TChange> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      try {
-        const change = await this.cursor.next();
-        const processedChange = this._processChange(change ?? null);
-        return processedChange;
-      } catch (error) {
+      for (;;) {
         try {
-          await this._processErrorIteratorMode(error);
           const change = await this.cursor.next();
           const processedChange = this._processChange(change ?? null);
           return processedChange;
         } catch (error) {
           try {
-            await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+            await this._processErrorIteratorMode(error);
+          } catch (error) {
+            try {
+              await this.close();
+            } catch {
+              // We are not concerned with errors from close()
+            }
+            throw error;
           }
-          throw error;
         }
       }
     }, callback);
@@ -706,21 +705,21 @@ export class ChangeStream<
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      try {
-        const change = await this.cursor.tryNext();
-        return change ?? null;
-      } catch (error) {
+      for (;;) {
         try {
-          await this._processErrorIteratorMode(error);
           const change = await this.cursor.tryNext();
           return change ?? null;
         } catch (error) {
           try {
-            await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+            await this._processErrorIteratorMode(error);
+          } catch (error) {
+            try {
+              await this.close();
+            } catch {
+              // We are not concerned with errors from close()
+            }
+            throw error;
           }
-          throw error;
         }
       }
     }, callback);
