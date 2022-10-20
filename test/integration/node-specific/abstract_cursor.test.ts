@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { Collection, MongoAPIError, MongoClient } from '../../../src';
 
-describe.only('class AbstractCursor', function () {
+describe('class AbstractCursor', function () {
   let client: MongoClient;
 
   let collection: Collection;
@@ -40,6 +40,7 @@ describe.only('class AbstractCursor', function () {
       const error = await cursor.toArray().catch(e => e);
 
       expect(error).be.instanceOf(MongoAPIError);
+      expect(cursor.closed).to.be.true;
     });
   });
 
@@ -72,6 +73,7 @@ describe.only('class AbstractCursor', function () {
         }
       } catch (error) {
         expect(error).to.be.instanceOf(MongoAPIError);
+        expect(cursor.closed).to.be.true;
       }
     });
   });
@@ -106,6 +108,7 @@ describe.only('class AbstractCursor', function () {
 
       const error = await cursor.forEach(transform).catch(e => e);
       expect(error).to.be.instanceOf(MongoAPIError);
+      expect(cursor.closed).to.be.true;
     });
   });
 });

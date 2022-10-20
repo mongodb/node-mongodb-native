@@ -310,6 +310,9 @@ export abstract class AbstractCursor<
           if (!this.closed) {
             const message =
               'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
+
+            await cleanupCursorAsync(this, { needsToEmitClosed: true }).catch(() => null);
+
             throw new MongoAPIError(message);
           }
           break;
