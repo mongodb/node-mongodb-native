@@ -428,6 +428,83 @@ describe('Sessions - unit', function () {
       done();
     });
 
+    describe('upon release timed out sessions should be removed', () => {
+      const makeOldSession = () => {
+        const oldSession = new ServerSession();
+        oldSession.lastUse = now() - 30 * 60 * 1000; // add 30min
+        return oldSession;
+      };
+
+      it('if they are at the start of the pool', () => {
+        const pool = new ServerSessionPool(client);
+        // old sessions at the start
+        pool.sessions.pushMany(Array.from({ length: 3 }, () => makeOldSession()));
+        pool.sessions.pushMany([new ServerSession(), new ServerSession()]);
+
+        pool.release(new ServerSession());
+
+        expect(pool.sessions).to.have.lengthOf(3);
+        const anyTimedOutSessions = pool.sessions
+          .toArray()
+          .some(s => s.hasTimedOut(30 * 60 * 1000));
+        expect(anyTimedOutSessions, 'Unexpected timed out sessions found in pool after release').to
+          .be.false;
+      });
+
+      it('if they are in the middle of the pool', () => {
+        const pool = new ServerSessionPool(client);
+        pool.sessions.push(new ServerSession()); // one fresh before
+        pool.sessions.pushMany(Array.from({ length: 3 }, () => makeOldSession()));
+        pool.sessions.push(new ServerSession()); // one fresh after
+
+        pool.release(new ServerSession());
+
+        expect(pool.sessions).to.have.lengthOf(3);
+        const anyTimedOutSessions = pool.sessions
+          .toArray()
+          .some(s => s.hasTimedOut(30 * 60 * 1000));
+        expect(anyTimedOutSessions, 'Unexpected timed out sessions found in pool after release').to
+          .be.false;
+      });
+
+      it('if they are at the end of the pool', () => {
+        const pool = new ServerSessionPool(client);
+        pool.sessions.pushMany([new ServerSession(), new ServerSession()]);
+
+        const oldSession = makeOldSession();
+        pool.sessions.push(oldSession);
+
+        pool.release(new ServerSession());
+
+        expect(pool.sessions).to.have.lengthOf(3);
+        const anyTimedOutSessions = pool.sessions
+          .toArray()
+          .some(s => s.hasTimedOut(30 * 60 * 1000));
+        expect(anyTimedOutSessions, 'Unexpected timed out sessions found in pool after release').to
+          .be.false;
+      });
+
+      it('if they are not contiguous in the pool', () => {
+        const pool = new ServerSessionPool(client);
+        pool.sessions.pushMany([
+          makeOldSession(),
+          new ServerSession(),
+          makeOldSession(),
+          new ServerSession(),
+          makeOldSession()
+        ]);
+
+        pool.release(new ServerSession());
+
+        expect(pool.sessions).to.have.lengthOf(3);
+        const anyTimedOutSessions = pool.sessions
+          .toArray()
+          .some(s => s.hasTimedOut(30 * 60 * 1000));
+        expect(anyTimedOutSessions, 'Unexpected timed out sessions found in pool after release').to
+          .be.false;
+      });
+    });
+
     it('should remove all sessions which have timed out on release', function () {
       const newSession = new ServerSession();
       const oldSessions = [new ServerSession(), new ServerSession()].map(session => {

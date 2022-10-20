@@ -905,8 +905,8 @@ type ListNode<T> = {
 
 type HeadNode<T> = {
   value: null;
-  next: ListNode<T> | HeadNode<T>;
-  prev: ListNode<T> | HeadNode<T>;
+  next: ListNode<T>;
+  prev: ListNode<T>;
 };
 
 /**
@@ -970,10 +970,10 @@ export class List<T = unknown> {
   }
 
   private *nodes(): Generator<ListNode<T>, void, void> {
-    let ptr: HeadNode<T> | ListNode<T> = this.head.next;
+    let ptr: HeadNode<T> | ListNode<T> | EmptyNode = this.head.next;
     while (ptr !== this.head) {
       // Save next before yielding so that we make removing within iteration safe
-      const { next } = ptr;
+      const { next } = ptr as ListNode<T>;
       yield ptr as ListNode<T>;
       ptr = next;
     }
@@ -983,8 +983,8 @@ export class List<T = unknown> {
   push(value: T) {
     this.count += 1;
     const newNode: ListNode<T> = {
-      next: this.head,
-      prev: this.head.prev,
+      next: this.head as HeadNode<T>,
+      prev: this.head.prev as ListNode<T>,
       value
     };
     this.head.prev.next = newNode;
@@ -1002,16 +1002,16 @@ export class List<T = unknown> {
   unshift(value: T) {
     this.count += 1;
     const newNode: ListNode<T> = {
-      next: this.head.next,
-      prev: this.head,
+      next: this.head.next as ListNode<T>,
+      prev: this.head as HeadNode<T>,
       value
     };
     this.head.next.prev = newNode;
     this.head.next = newNode;
   }
 
-  private remove(node?: ListNode<T> | HeadNode<T> | null): T | null {
-    if (node == null || node === this.head || this.length === 0) {
+  private remove(node: ListNode<T> | EmptyNode): T | null {
+    if (node === this.head || this.length === 0) {
       return null;
     }
 
@@ -1046,8 +1046,8 @@ export class List<T = unknown> {
 
   clear() {
     this.count = 0;
-    this.head.next = this.head;
-    this.head.prev = this.head;
+    this.head.next = this.head as EmptyNode;
+    this.head.prev = this.head as EmptyNode;
   }
 
   /** Returns the first item in the list, does not remove */
