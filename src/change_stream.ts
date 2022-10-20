@@ -737,6 +737,28 @@ export class ChangeStream<
     }, callback);
   }
 
+  [Symbol.asyncIterator](): AsyncIterator<TChange, void> {
+    async function* nativeAsyncIterator(this: ChangeStream<TSchema, TChange>) {
+      if (this.closed) {
+        return;
+      }
+
+      while (true) {
+        if (!(await this.hasNext())) {
+          break;
+        }
+
+        yield await this.next();
+      }
+    }
+
+    const iterator = nativeAsyncIterator.call(this);
+
+    return {
+      next: () => iterator.next()
+    };
+  }
+
   /** Is the cursor closed */
   get closed(): boolean {
     return this[kClosed] || this.cursor.closed;

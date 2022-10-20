@@ -1688,6 +1688,7 @@ describe('ChangeStream resumability', function () {
     aggregateEvents = [];
   });
 
+  // TODO(andymina): resumable error tests here
   context('iterator api', function () {
     context('#next', function () {
       for (const { error, code, message } of resumableErrorCodes) {
@@ -2196,6 +2197,35 @@ describe('ChangeStream resumability', function () {
             expect(aggregateEvents).to.have.lengthOf(1);
           }
         );
+      });
+    });
+
+    context.only('#asyncIterator', function () {
+      /**
+       * TODO(andymina): three test cases to cover
+       * 
+       * happy path - asyncIterable works
+       * unhappy path - it errors out
+       * resumable error - continues but also throws the error out
+       */
+      // happy path
+      it('happy path', async function () {
+        changeStream = collection.watch([]);
+        await initIteratorMode(changeStream);
+
+        const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+        await collection.insertMany(docs);
+
+        let count = 0;
+        for await (const change of changeStream) {
+          const { fullDocument } = change;
+          expect(fullDocument.city).to.equal(docs[count].city);
+
+          count++;
+          if (count === 3) {
+            changeStream.close();
+          }
+        }
       });
     });
   });
