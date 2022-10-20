@@ -11,7 +11,7 @@ PROJECT_DIRECTORY="$(pwd)"
 DRIVERS_TOOLS=$(cd .. && echo "$(pwd)/drivers-tools")
 MONGO_ORCHESTRATION_HOME="$DRIVERS_TOOLS/.evergreen/orchestration"
 MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
-UPLOAD_BUCKET="$PROJECT"
+UPLOAD_BUCKET="${project}"
 
 if [ "Windows_NT" = "${OS:-notWindows}" ]; then
   # fix paths on windows

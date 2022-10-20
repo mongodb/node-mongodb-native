@@ -809,21 +809,45 @@ functions:
   download and merge coverage:
     - command: shell.exec
       params:
-        silent: true
         working_dir: src
         script: |
           ${PREPARE_SHELL}
           export AWS_ACCESS_KEY_ID=${aws_key}
           export AWS_SECRET_ACCESS_KEY=${aws_secret}
+
           # Download all the task coverage files.
-          # TODO NODE-3897 - finish this function.  the code below this point is untested because
-          #   aws s3 cp fails due to permissions errors
-          aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ coverage/
+          # NOTE: All coverage files are too large for V8 to handle the resulting call to
+          #       JSON.stringify from within nyc, so with stick to Fermiun to include the
+          #       compression tests.
+          aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ \
+            coverage/ \
+            --exclude "*rhel80-large*" \
+            --include "*fermiun"
 
+          # npx does not recognize the dependency so install it directly.
+          npm install @istanbuljs/nyc-config-typescript
+          cd coverage
+          sed -i'' -e 's/\/data\/mci\/.\{32\}\/src\///g' *
+          ls -la
+          cd ..
           npx nyc merge coverage/ merged-coverage/coverage.json
-          npx nyc report -t merged-coverage --reporter=html --report-dir output
+          npx nyc report -t merged-coverage/ --reporter=html --report-dir coverage-report
 
-          aws s3 cp output/lcov-report s3://mciuploads/mongo-node-driver/${revision}/${version_id}//lcov-report/
+          aws s3 cp coverage-report/ \
+            s3://mciuploads/mongo-node-driver/${revision}/${version_id}/coverage/ \
+            --recursive \
+            --acl public-read \
+            --region us-east-1
+    - command: s3.put
+      params:
+        aws_key: ${aws_key}
+        aws_secret: ${aws_secret}
+        local_file: src/coverage-report/index.html
+        remote_file: mongo-node-driver/${revision}/${version_id}/coverage/index.html
+        bucket: mciuploads
+        permissions: public-read
+        content_type: text/html
+        display_name: Coverage Report HTML
   run spec driver benchmarks:
     - command: subprocess.exec
       type: test
@@ -2061,6 +2085,15 @@ tasks:
         vars:
           NODE_LTS_NAME: gallium
       - func: run mongosh integration tests
+  - name: download-and-merge-coverage
+    tags: []
+    commands:
+      - func: download and merge coverage
+    depends_on:
+      - name: '*'
+        variant: '*'
+        status: '*'
+        patch_optional: true
   - name: run-custom-snappy-tests
     tags:
       - run-custom-dependency-tests
@@ -2974,6 +3007,11 @@ buildvariants:
       - run-typescript-current
       - run-typescript-oldest
       - run-typescript-next
+  - name: generate-combined-coverage
+    display_name: Generate Combined Coverage
+    run_on: rhel80-large
+    tasks:
+      - download-and-merge-coverage
   - name: mongosh_integration_tests
     display_name: mongosh integration tests
     run_on: ubuntu1804-large

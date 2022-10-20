@@ -850,7 +850,7 @@ functions:
         local_file:  src/coverage/coverage-final.json
         optional: true
         # Upload the coverage report for all tasks in a single build to the same directory.
-        # TODO NODE-3897 - change upload directory to mongo-node-driver-next
+        # TODO NODE-4707 - change upload directory to ${UPLOAD_BUCKET} 
         # This change will require changing the `download and merge coverage` func as well
         remote_file: mongo-node-driver/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads
@@ -861,21 +861,45 @@ functions:
   "download and merge coverage":
     - command: shell.exec
       params:
-        silent: true
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
           export AWS_ACCESS_KEY_ID=${aws_key}
           export AWS_SECRET_ACCESS_KEY=${aws_secret}
+
           # Download all the task coverage files.
-          # TODO NODE-3897 - finish this function.  the code below this point is untested because
-          #   aws s3 cp fails due to permissions errors
-          aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ coverage/
+          # NOTE: All coverage files are too large for V8 to handle the resulting call to
+          #       JSON.stringify from within nyc, so with stick to Fermiun to include the
+          #       compression tests.
+          aws s3 cp --recursive s3://mciuploads/mongo-node-driver/${revision}/${version_id}/ \
+            coverage/ \
+            --exclude "*rhel80-large*" \
+            --include "*fermiun"
 
+          # npx does not recognize the dependency so install it directly.
+          npm install @istanbuljs/nyc-config-typescript
+          cd coverage
+          sed -i'' -e 's/\/data\/mci\/.\{32\}\/src\///g' *
+          ls -la
+          cd ..
           npx nyc merge coverage/ merged-coverage/coverage.json
-          npx nyc report -t merged-coverage --reporter=html --report-dir output
+          npx nyc report -t merged-coverage/ --reporter=html --report-dir coverage-report
 
-          aws s3 cp output/lcov-report s3://mciuploads/mongo-node-driver/${revision}/${version_id}//lcov-report/
+          aws s3 cp coverage-report/ \
+            s3://mciuploads/mongo-node-driver/${revision}/${version_id}/coverage/ \
+            --recursive \
+            --acl public-read \
+            --region us-east-1
+    - command: s3.put
+      params:
+        aws_key: ${aws_key}
+        aws_secret: ${aws_secret}
+        local_file:  src/coverage-report/index.html
+        remote_file: mongo-node-driver/${revision}/${version_id}/coverage/index.html
+        bucket: mciuploads
+        permissions: public-read
+        content_type: text/html
+        display_name: "Coverage Report HTML"
 
   "run spec driver benchmarks":
     - command: subprocess.exec
