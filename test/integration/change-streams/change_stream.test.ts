@@ -1742,7 +1742,7 @@ describe('ChangeStream resumability', function () {
             // resuming a change stream don't return the change event.  So we defer the insert until a period of time
             // after the change stream has started listening for a change.  2000ms is long enough for the change
             // stream to attempt to resume and fail multiple times before exhausting the failpoint and succeeding.
-            const [_, value] = await Promise.allSettled([
+            const [, value] = await Promise.allSettled([
               sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
               changeStream.next()
             ]);
@@ -1908,7 +1908,7 @@ describe('ChangeStream resumability', function () {
             // resuming a change stream don't return the change event.  So we defer the insert until a period of time
             // after the change stream has started listening for a change.  2000ms is long enough for the change
             // stream to attempt to resume and fail multiple times before exhausting the failpoint and succeeding.
-            const [_, value] = await Promise.allSettled([
+            const [, value] = await Promise.allSettled([
               sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
               changeStream.hasNext()
             ]);
@@ -2257,7 +2257,7 @@ describe('ChangeStream resumability', function () {
           // resuming a change stream don't return the change event.  So we defer the insert until a period of time
           // after the change stream has started listening for a change.  2000ms is long enough for the change
           // stream to attempt to resume and fail multiple times before exhausting the failpoint and succeeding.
-          const [_, value] = await Promise.allSettled([
+          const [, value] = await Promise.allSettled([
             sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
             changes
           ]);
