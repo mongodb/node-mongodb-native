@@ -16,7 +16,8 @@ type CmapOperation =
   | { name: 'waitForEvent'; event: string; count: number; timeout?: number }
   | { name: 'checkOut'; thread: string; label: string }
   | { name: 'checkIn'; connection: string }
-  | { name: 'clear' | 'close' | 'ready' };
+  | { name: 'clear'; interruptInUseConnections?: boolean }
+  | { name: 'close' | 'ready' };
 
 const CMAP_POOL_OPTION_NAMES: Array<keyof CmapPoolOptions> = [
   'appName',
@@ -196,7 +197,9 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
 
     return threadContext.pool.checkIn(connection);
   },
-  clear: function () {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  clear: function (interruptInUseConnections: boolean) {
+    // TODO(NODE-4619): pass interruptInUseConnections into clear pool method
     return threadContext.pool.clear();
   },
   close: async function () {
@@ -205,7 +208,7 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   ready: function () {
     return threadContext.pool.ready();
   },
-  wait: async function (options) {
+  wait: function (options) {
     const ms = options.ms;
     return sleep(ms);
   },

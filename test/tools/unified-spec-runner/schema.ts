@@ -269,6 +269,7 @@ export interface ExpectedCmapEvent {
   poolClearedEvent?: {
     serviceId?: ObjectId;
     hasServiceId?: boolean;
+    interruptInUseConnections?: boolean;
   };
   poolClosedEvent?: Record<string, never>;
   connectionCreatedEvent?: Record<string, never>;

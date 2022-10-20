@@ -467,6 +467,11 @@ function compareEvents(
       if (expectedEvent.poolClearedEvent.hasServiceId) {
         expect(actualEvent).property('serviceId').to.exist;
       }
+      if (expectedEvent.poolClearedEvent.interruptInUseConnections != null) {
+        expect(actualEvent)
+          .property('interruptInUseConnections')
+          .to.equal(expectedEvent.poolClearedEvent.interruptInUseConnections);
+      }
     } else if (validEmptyCmapEvent(expectedEvent as ExpectedCmapEvent)) {
       const expectedEventName = Object.keys(expectedEvent)[0];
       const expectedEventInstance = EMPTY_CMAP_EVENTS[expectedEventName];

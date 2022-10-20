@@ -1,0 +1,339 @@
+---
+description: interruptInUse
+
+schemaVersion: "1.11"
+
+runOnRequirements:
+  # failCommand appName requirements
+  - minServerVersion: "4.9"
+    serverless: forbid
+    topologies: [ replicaset, sharded ]
+
+createEntities:
+  - client:
+      id: &setupClient setupClient
+      useMultipleMongoses: false
+
+initialData: &initialData
+  - collectionName: &collectionName interruptInUse
+    databaseName: &databaseName sdam-tests
+    documents: []
+
+tests:
+  - description: Connection pool clear uses interruptInUseConnections=true after monitor timeout
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                observeEvents:
+                  - poolClearedEvent
+                  - connectionClosedEvent
+                  - commandStartedEvent
+                  - commandSucceededEvent
+                  - commandFailedEvent
+                  - connectionCheckedOutEvent
+                  - connectionCheckedInEvent
+                uriOptions:
+                  connectTimeoutMS: 500
+                  heartbeatFrequencyMS: 500
+                  appname: interruptInUse
+                  retryReads: false
+                  minPoolSize: 0
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+            - thread:
+                id: &thread1 thread1
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 1 }
+      # simulate a long-running query
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          thread: *thread1
+          operation:
+            name: find
+            object: *collection
+            arguments:
+              filter:
+                $where : sleep(2000) || true
+            expectError:
+              isError: true
+        # Configure the monitor check to fail with a timeout.
+        # Use "times: 4" to increase the probability that the Monitor check triggers
+        # the failpoint, since the RTT hello may trigger this failpoint one or many 
+        # times as well.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *setupClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 4
+            data:
+              failCommands:
+                - hello
+                - isMaster
+              blockConnection:  true,
+              blockTimeMS: 1500,                
+              appName: interruptInUse        
+      - name: waitForThread
+        object: testRunner,
+        arguments:
+          thread: *thread1
+
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+      - client: *client
+        eventType: cmap
+        events:
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          - connectionCheckedOutEvent: {}
+          - poolClearedEvent:
+              interruptInUseConnections: true
+          - connectionCheckedInEvent: {}
+          - connectionClosedEvent: {}
+
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - _id: 1
+
+  - description: Error returned from connection pool clear with interruptInUseConnections=true is retryable
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                observeEvents:
+                  - poolClearedEvent
+                  - connectionClosedEvent
+                  - commandStartedEvent
+                  - commandFailedEvent
+                  - commandSucceededEvent
+                  - connectionCheckedOutEvent
+                  - connectionCheckedInEvent
+                uriOptions:
+                  connectTimeoutMS: 500
+                  heartbeatFrequencyMS: 500
+                  appname: interruptInUseRetryable
+                  retryReads: true
+                  minPoolSize: 0
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+            - thread:
+                id: &thread1 thread1
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 1 }
+      # simulate a long-running query
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          thread: *thread1
+          operation:
+            name: find
+            object: *collection
+            arguments:
+              filter:
+                $where : sleep(2000) || true
+        # Configure the monitor check to fail with a timeout.
+        # Use "times: 4" to increase the probability that the Monitor check triggers
+        # the failpoint, since the RTT hello may trigger this failpoint one or many 
+        # times as well.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *setupClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 4
+            data:
+              failCommands:
+                - hello
+                - isMaster
+              blockConnection:  true,
+              blockTimeMS: 1500,                
+              appName: interruptInUseRetryable
+      - name: waitForThread
+        object: testRunner,
+        arguments:
+          thread: *thread1
+
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              commandName: insert
+          - commandSucceededEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: find
+          - commandFailedEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: find
+          - commandSucceededEvent:
+              commandName: find
+      - client: *client
+        eventType: cmap
+        events:
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          - connectionCheckedOutEvent: {}
+          - poolClearedEvent:
+              interruptInUseConnections: true
+          - connectionCheckedInEvent: {}
+          - connectionClosedEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+     
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - _id: 1
+  - description: Error returned from connection pool clear with interruptInUseConnections=true is retryable for write
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                observeEvents:
+                  - poolClearedEvent
+                  - connectionClosedEvent
+                  - commandStartedEvent
+                  - commandFailedEvent
+                  - commandSucceededEvent
+                  - connectionCheckedOutEvent
+                  - connectionCheckedInEvent
+                uriOptions:
+                  connectTimeoutMS: 500
+                  heartbeatFrequencyMS: 500
+                  appname: interruptInUseRetryableWrite
+                  retryWrites: true
+                  minPoolSize: 0
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+            - thread:
+                id: &thread1 thread1
+      # ensure the primary is discovered                
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 1 }
+      # simulate a long-running query
+      - name: runOnThread
+        object: testRunner
+        arguments:
+          thread: *thread1
+          operation:
+            name: updateOne
+            object: *collection
+            arguments:
+              filter: 
+                $where": sleep(2000) || true
+              update: 
+                "$set": { "a": "bar" } 
+        # Configure the monitor check to fail with a timeout.
+        # Use "times: 4" to increase the probability that the Monitor check triggers
+        # the failpoint, since the RTT hello may trigger this failpoint one or many 
+        # times as well.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *setupClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 4
+            data:
+              failCommands:
+                - hello
+                - isMaster
+              blockConnection:  true,
+              blockTimeMS: 1500,                
+              appName: interruptInUseRetryableWrite
+      - name: waitForThread
+        object: testRunner,
+        arguments:
+          thread: *thread1
+
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              commandName: insert
+          - commandSucceededEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: update
+          - commandFailedEvent:
+              commandName: update
+          - commandStartedEvent:
+              commandName: update
+          - commandSucceededEvent:
+              commandName: update
+      - client: *client
+        eventType: cmap
+        events:
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+          - connectionCheckedOutEvent: {}
+          - poolClearedEvent:
+              interruptInUseConnections: true
+          - connectionCheckedInEvent: {}
+          - connectionClosedEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+     
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1, a : bar }
+
