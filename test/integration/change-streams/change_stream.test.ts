@@ -10,7 +10,6 @@ import { promisify } from 'util';
 import {
   AbstractCursor,
   ChangeStream,
-  ChangeStreamDocument,
   ChangeStreamOptions,
   Collection,
   CommandStartedEvent,
@@ -2208,8 +2207,50 @@ describe('ChangeStream resumability', function () {
        * unhappy path - it errors out
        * resumable error - continues but also throws the error out
        */
+      for (const { error, code, message } of resumableErrorCodes) {
+        it(
+          `resumes on error code ${code} (${error})`,
+          { requires: { topology: '!single', mongodb: '<4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            // on 3.6 servers, no postBatchResumeToken is sent back in the initial aggregate response.
+            // This means that a resume token isn't cached until the first change has been iterated.
+            // In order to test the resume, we need to ensure that at least one document has
+            // been iterated so we have a resume token to resume on.
+
+            // insert the doc
+            await collection.insertOne({ city: 'New York City' });
+
+            // fail the call
+            const mock = sinon
+              .stub(changeStream.cursor, '_getMore')
+              .callsFake((_batchSize, callback) => {
+                mock.restore();
+                const error = new MongoServerError({ message });
+                error.code = code;
+                callback(error);
+              });
+
+            // insert another doc
+            await collection.insertOne({ city: 'New York City' });
+
+            let total_changes = 0;
+            for await (const change of changeStream) {
+              total_changes++;
+              if (total_changes === 2) {
+                changeStream.close();
+              }
+            }
+
+            expect(aggregateEvents).to.have.lengthOf(2);
+          }
+        );
+      }
+
       // happy path
-      it('happy path', async function () {
+      it('happy path', { requires: { topology: '!single', mongodb: '>=4.2' } }, async function () {
         changeStream = collection.watch([]);
         await initIteratorMode(changeStream);
 
@@ -2223,10 +2264,43 @@ describe('ChangeStream resumability', function () {
 
           count++;
           if (count === 3) {
+            expect(docs.length).to.equal(count);
             changeStream.close();
           }
         }
       });
+
+      // unhappy path
+      it(
+        'unhappy path',
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
+        async function () {
+          changeStream = collection.watch([]);
+          await initIteratorMode(changeStream);
+
+          const unresumableErrorCode = 1000;
+          await client.db('admin').command({
+            configureFailPoint: is4_2Server(this.configuration.version)
+              ? 'failCommand'
+              : 'failGetMoreAfterCursorCheckout',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              errorCode: unresumableErrorCode
+            }
+          } as FailPoint);
+
+          await collection.insertOne({ city: 'New York City' });
+
+          try {
+            for await (const change of changeStream) {
+              // should not run
+            }
+          } catch (error) {
+            expect(error).to.be.instanceOf(MongoServerError);
+          }
+        }
+      );
     });
   });
 
