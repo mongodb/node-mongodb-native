@@ -306,7 +306,10 @@ export abstract class AbstractCursor<
       while (true) {
         const document = await this.next();
 
-        if (document == null) {
+        // Intentional strict null check, because users can map cursors to falsey values.
+        // We allow mapping to all values except for null.
+        // eslint-disable-next-line no-restricted-syntax
+        if (document === null) {
           if (!this.closed) {
             const message =
               'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
@@ -777,7 +780,10 @@ export function next<T>(
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
     cursor[kInit]((err, value) => {
       if (err) return callback(err);
-      if (value != null) {
+      // Intentional strict null check, because users can map cursors to falsey values.
+      // We allow mapping to all values except for null.
+      // eslint-disable-next-line no-restricted-syntax
+      if (value !== null) {
         return callback(undefined, value);
       }
       return next(cursor, blocking, callback);
