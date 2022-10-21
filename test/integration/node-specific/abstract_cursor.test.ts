@@ -1,13 +1,16 @@
 import { expect } from 'chai';
+import { inspect } from 'util';
 
 import { Collection, MongoAPIError, MongoClient } from '../../../src';
+
+const falseyValues = [0, 0n, NaN, '', false, undefined];
 
 describe('class AbstractCursor', function () {
   let client: MongoClient;
 
   let collection: Collection;
   beforeEach(async function () {
-    client = await this.configuration.newClient().connect();
+    client = this.configuration.newClient();
 
     collection = client.db('abstract_cursor_integration').collection('test');
 
@@ -20,9 +23,8 @@ describe('class AbstractCursor', function () {
   });
 
   context('toArray() with custom transforms', function () {
-    const falseyValues = [0, NaN, '', false];
     for (const value of falseyValues) {
-      it(`supports mapping to falsey value '${value}'`, async function () {
+      it(`supports mapping to falsey value '${inspect(value)}'`, async function () {
         const cursor = collection.find();
         cursor.map(() => value);
 
@@ -33,7 +35,7 @@ describe('class AbstractCursor', function () {
       });
     }
 
-    it('does not support mapping to `null`', async function () {
+    it('throws when mapping to `null` and cleans up cursor', async function () {
       const cursor = collection.find();
       cursor.map(() => null);
 
@@ -45,9 +47,8 @@ describe('class AbstractCursor', function () {
   });
 
   context('Symbol.asyncIterator() with custom transforms', function () {
-    const falseyValues = [0, NaN, '', false];
     for (const value of falseyValues) {
-      it(`supports mapping to falsey value '${value}'`, async function () {
+      it(`supports mapping to falsey value '${inspect(value)}'`, async function () {
         const cursor = collection.find();
         cursor.map(() => value);
 
@@ -62,7 +63,7 @@ describe('class AbstractCursor', function () {
       });
     }
 
-    it('does not support mapping to `null`', async function () {
+    it('throws when mapping to `null` and cleans up cursor', async function () {
       const cursor = collection.find();
       cursor.map(() => null);
 
@@ -79,9 +80,8 @@ describe('class AbstractCursor', function () {
   });
 
   context('forEach() with custom transforms', function () {
-    const falseyValues = [0, NaN, '', false];
     for (const value of falseyValues) {
-      it(`supports mapping to falsey value '${value}'`, async function () {
+      it(`supports mapping to falsey value '${inspect(value)}'`, async function () {
         const cursor = collection.find();
         cursor.map(() => value);
 
@@ -98,15 +98,15 @@ describe('class AbstractCursor', function () {
       });
     }
 
-    it('does not support mapping to `null`', async function () {
+    it('throws when mapping to `null` and cleans up cursor', async function () {
       const cursor = collection.find();
       cursor.map(() => null);
 
-      function transform() {
+      function iterator() {
         expect.fail('Expected no documents from cursor, received at least one.');
       }
 
-      const error = await cursor.forEach(transform).catch(e => e);
+      const error = await cursor.forEach(iterator).catch(e => e);
       expect(error).to.be.instanceOf(MongoAPIError);
       expect(cursor.closed).to.be.true;
     });
