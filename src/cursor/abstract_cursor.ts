@@ -21,7 +21,7 @@ import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { Callback, maybeCallback, MongoDBNamespace, ns } from '../utils';
+import { Callback, List, maybeCallback, MongoDBNamespace, ns } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
@@ -143,7 +143,7 @@ export abstract class AbstractCursor<
   CursorEvents extends AbstractCursorEvents = AbstractCursorEvents
 > extends TypedEventEmitter<CursorEvents> {
   /** @internal */
-  [kId]?: Long;
+  [kId]: Long | null;
   /** @internal */
   [kSession]: ClientSession;
   /** @internal */
@@ -151,7 +151,7 @@ export abstract class AbstractCursor<
   /** @internal */
   [kNamespace]: MongoDBNamespace;
   /** @internal */
-  [kDocuments]: TSchema[];
+  [kDocuments]: List<TSchema>;
   /** @internal */
   [kClient]: MongoClient;
   /** @internal */
@@ -181,7 +181,8 @@ export abstract class AbstractCursor<
     }
     this[kClient] = client;
     this[kNamespace] = namespace;
-    this[kDocuments] = [];
+    this[kId] = null;
+    this[kDocuments] = new List();
     this[kInitialized] = false;
     this[kClosed] = false;
     this[kKilled] = false;
@@ -224,7 +225,7 @@ export abstract class AbstractCursor<
   }
 
   get id(): Long | undefined {
-    return this[kId];
+    return this[kId] ?? undefined;
   }
 
   /** @internal */
@@ -282,7 +283,17 @@ export abstract class AbstractCursor<
 
   /** Returns current buffered documents */
   readBufferedDocuments(number?: number): TSchema[] {
-    return this[kDocuments].splice(0, number ?? this[kDocuments].length);
+    const bufferedDocs: TSchema[] = [];
+    const documentsToRead = Math.min(number ?? this[kDocuments].length, this[kDocuments].length);
+
+    for (let count = 0; count < documentsToRead; count++) {
+      const document = this[kDocuments].shift();
+      if (document != null) {
+        bufferedDocs.push(document);
+      }
+    }
+
+    return bufferedDocs;
   }
 
   [Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
@@ -350,7 +361,7 @@ export abstract class AbstractCursor<
         return false;
       }
 
-      if (this[kDocuments].length) {
+      if (this[kDocuments].length !== 0) {
         return true;
       }
 
@@ -597,8 +608,8 @@ export abstract class AbstractCursor<
       return;
     }
 
-    this[kId] = undefined;
-    this[kDocuments] = [];
+    this[kId] = null;
+    this[kDocuments].clear();
     this[kClosed] = false;
     this[kKilled] = false;
     this[kInitialized] = false;
@@ -662,7 +673,7 @@ export abstract class AbstractCursor<
             this[kNamespace] = ns(response.cursor.ns);
           }
 
-          this[kDocuments] = response.cursor.firstBatch;
+          this[kDocuments].pushMany(response.cursor.firstBatch);
         }
 
         // When server responses return without a cursor document, we close this cursor
@@ -671,7 +682,7 @@ export abstract class AbstractCursor<
         if (this[kId] == null) {
           this[kId] = Long.ZERO;
           // TODO(NODE-3286): ExecutionResult needs to accept a generic parameter
-          this[kDocuments] = [state.response as TODO_NODE_3286];
+          this[kDocuments].push(state.response as TODO_NODE_3286);
         }
       }
 
@@ -687,22 +698,14 @@ export abstract class AbstractCursor<
   }
 }
 
-function nextDocument<T>(cursor: AbstractCursor): T | null {
-  if (cursor[kDocuments] == null || !cursor[kDocuments].length) {
-    return null;
-  }
-
+function nextDocument<T>(cursor: AbstractCursor<T>): T | null {
   const doc = cursor[kDocuments].shift();
-  if (doc) {
-    const transform = cursor[kTransform];
-    if (transform) {
-      return transform(doc) as T;
-    }
 
-    return doc;
+  if (doc && cursor[kTransform]) {
+    return cursor[kTransform](doc) as T;
   }
 
-  return null;
+  return doc;
 }
 
 const nextAsync = promisify(
@@ -733,7 +736,7 @@ export function next<T>(
     return callback(undefined, null);
   }
 
-  if (cursor[kDocuments] && cursor[kDocuments].length) {
+  if (cursor[kDocuments].length !== 0) {
     callback(undefined, nextDocument<T>(cursor));
     return;
   }
@@ -757,19 +760,19 @@ export function next<T>(
 
   // otherwise need to call getMore
   const batchSize = cursor[kOptions].batchSize || 1000;
-  cursor._getMore(batchSize, (err, response) => {
+  cursor._getMore(batchSize, (error, response) => {
     if (response) {
       const cursorId =
         typeof response.cursor.id === 'number'
           ? Long.fromNumber(response.cursor.id)
           : response.cursor.id;
 
-      cursor[kDocuments] = response.cursor.nextBatch;
+      cursor[kDocuments].pushMany(response.cursor.nextBatch);
       cursor[kId] = cursorId;
     }
 
-    if (err || cursorIsDead(cursor)) {
-      return cleanupCursor(cursor, { error: err }, () => callback(err, nextDocument<T>(cursor)));
+    if (error || cursorIsDead(cursor)) {
+      return cleanupCursor(cursor, { error }, () => callback(error, nextDocument<T>(cursor)));
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {

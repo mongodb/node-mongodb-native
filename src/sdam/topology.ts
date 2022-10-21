@@ -1,4 +1,3 @@
-import Denque = require('denque');
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
@@ -43,6 +42,7 @@ import {
   emitWarning,
   EventEmitterWithState,
   HostAddress,
+  List,
   makeStateMachine,
   ns,
   shuffle
@@ -192,7 +192,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @internal */
   s: TopologyPrivate;
   /** @internal */
-  [kWaitQueue]: Denque<ServerSelectionRequest>;
+  [kWaitQueue]: List<ServerSelectionRequest>;
   /** @internal */
   hello?: Document;
   /** @internal */
@@ -298,7 +298,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       serverDescriptions.set(hostAddress.toString(), new ServerDescription(hostAddress));
     }
 
-    this[kWaitQueue] = new Denque();
+    this[kWaitQueue] = new List();
     this.s = {
       // the id of this topology
       id: topologyId,
@@ -882,7 +882,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   }
 }
 
-function drainWaitQueue(queue: Denque<ServerSelectionRequest>, err?: MongoDriverError) {
+function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverError) {
   while (queue.length) {
     const waitQueueMember = queue.shift();
     if (!waitQueueMember) {
