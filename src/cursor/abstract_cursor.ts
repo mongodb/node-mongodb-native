@@ -692,7 +692,7 @@ export abstract class AbstractCursor<
    * a significant refactor.
    */
   [kInit](callback: Callback<TSchema | null>): void {
-    this._initialize(this[kSession], (err, state) => {
+    this._initialize(this[kSession], (error, state) => {
       if (state) {
         const response = state.response;
         this[kServer] = state.server;
@@ -724,8 +724,12 @@ export abstract class AbstractCursor<
       // the cursor is now initialized, even if an error occurred or it is dead
       this[kInitialized] = true;
 
-      if (err || cursorIsDead(this)) {
-        return cleanupCursor(this, { error: err }, () => callback(err, nextDocument(this)));
+      if (error) {
+        return cleanupCursor(this, { error }, () => callback(error, undefined));
+      }
+
+      if (cursorIsDead(this)) {
+        return cleanupCursor(this, undefined, () => callback());
       }
 
       callback();
@@ -778,14 +782,8 @@ export function next<T>(
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    cursor[kInit]((err, value) => {
+    cursor[kInit](err => {
       if (err) return callback(err);
-      // Intentional strict null check, because users can map cursors to falsey values.
-      // We allow mapping to all values except for null.
-      // eslint-disable-next-line no-restricted-syntax
-      if (value !== null) {
-        return callback(undefined, value);
-      }
       return next(cursor, blocking, callback);
     });
 
