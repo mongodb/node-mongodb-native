@@ -742,11 +742,7 @@ export class ChangeStream<
       return;
     }
 
-    while (true) {
-      if (!(await this.hasNext())) {
-        break;
-      }
-
+    while (await this.hasNext()) {
       yield await this.next();
     }
   }

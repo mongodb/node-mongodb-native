@@ -2198,7 +2198,7 @@ describe('ChangeStream resumability', function () {
       });
     });
 
-    context.only('#asyncIterator', function () {
+    context('#asyncIterator', function () {
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2339,7 +2339,7 @@ describe('ChangeStream resumability', function () {
       );
 
       context('when the error is not a resumable error', function () {
-        it(
+        it.only(
           'does not resume',
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
@@ -2362,15 +2362,16 @@ describe('ChangeStream resumability', function () {
             await collection.insertOne({ city: 'New York City' });
             try {
               for await (const change of changeStream) {
-                // DOESN'T REACH
                 expect.fail('Change stream produced changes on an unresumable error');
               }
+
+              expect.fail(
+                'Change stream did not throw unresumable error and did not produce any events'
+              );
             } catch (error) {
               expect(error).to.be.instanceOf(MongoServerError);
               expect(aggregateEvents).to.have.lengthOf(1);
             }
-            // fails here
-            expect.fail('Change stream did not throw unresumable error');
           }
         );
       });
