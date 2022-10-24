@@ -1687,7 +1687,6 @@ describe('ChangeStream resumability', function () {
     aggregateEvents = [];
   });
 
-  // TODO(andymina): resumable error tests here
   context('iterator api', function () {
     context('#next', function () {
       for (const { error, code, message } of resumableErrorCodes) {
@@ -2199,7 +2198,7 @@ describe('ChangeStream resumability', function () {
       });
     });
 
-    context('#asyncIterator', function () {
+    context.only('#asyncIterator', function () {
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2300,13 +2299,51 @@ describe('ChangeStream resumability', function () {
         }
       );
 
+      it(
+        'maintains change stream options on resume',
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
+        async function () {
+          changeStream = collection.watch([], changeStreamResumeOptions);
+          await initIteratorMode(changeStream);
+
+          await client.db('admin').command({
+            configureFailPoint: is4_2Server(this.configuration.version)
+              ? 'failCommand'
+              : 'failGetMoreAfterCursorCheckout',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              errorCode: resumableErrorCodes[0].code,
+              errmsg: resumableErrorCodes[0].message
+            }
+          } as FailPoint);
+
+          expect(changeStream.cursor)
+            .to.have.property('options')
+            .that.containSubset(changeStreamResumeOptions);
+
+          await collection.insertOne({ city: 'New York City' });
+
+          let total_changes = 0;
+          for await (const change of changeStream) {
+            total_changes++;
+            if (total_changes === 1) {
+              changeStream.close();
+            }
+          }
+
+          expect(changeStream.cursor)
+            .to.have.property('options')
+            .that.containSubset(changeStreamResumeOptions);
+        }
+      );
+
       context('when the error is not a resumable error', function () {
         it(
           'does not resume',
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
-            await initIteratorMode(changeStream);
 
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
@@ -2320,15 +2357,20 @@ describe('ChangeStream resumability', function () {
               }
             } as FailPoint);
 
-            await collection.insertOne({ city: 'New York City' });
+            await initIteratorMode(changeStream);
 
+            await collection.insertOne({ city: 'New York City' });
             try {
               for await (const change of changeStream) {
-                // should not run
+                // DOESN'T REACH
+                expect.fail('Change stream produced changes on an unresumable error');
               }
             } catch (error) {
               expect(error).to.be.instanceOf(MongoServerError);
+              expect(aggregateEvents).to.have.lengthOf(1);
             }
+            // fails here
+            expect.fail('Change stream did not throw unresumable error');
           }
         );
       });
