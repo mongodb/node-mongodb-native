@@ -197,10 +197,8 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
 
     return threadContext.pool.checkIn(connection);
   },
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   clear: function (interruptInUseConnections: boolean) {
-    // TODO(NODE-4619): pass interruptInUseConnections into clear pool method
-    return threadContext.pool.clear();
+    return threadContext.pool.clear({ interruptInUseConnections });
   },
   close: async function () {
     return await promisify(ConnectionPool.prototype.close).call(threadContext.pool);
