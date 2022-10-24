@@ -2200,13 +2200,41 @@ describe('ChangeStream resumability', function () {
     });
 
     context.only('#asyncIterator', function () {
-      /**
-       * TODO(andymina): three test cases to cover
-       * 
-       * happy path - asyncIterable works
-       * unhappy path - it errors out
-       * resumable error - continues but also throws the error out
-       */
+      for (const { error, code, message } of resumableErrorCodes) {
+        it(
+          `resumes on error code ${code} (${error})`,
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await client.db('admin').command({
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 1 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: code,
+                errmsg: message
+              }
+            } as FailPoint);
+
+            await collection.insertOne({ city: 'New York City' });
+
+            let total_changes = 0;
+            for await (const change of changeStream) {
+              total_changes++;
+              if (total_changes === 1) {
+                changeStream.close();
+              }
+            }
+
+            expect(aggregateEvents).to.have.lengthOf(2);
+          }
+        );
+      }
+
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2220,10 +2248,8 @@ describe('ChangeStream resumability', function () {
             // In order to test the resume, we need to ensure that at least one document has
             // been iterated so we have a resume token to resume on.
 
-            // insert the doc
             await collection.insertOne({ city: 'New York City' });
 
-            // fail the call
             const mock = sinon
               .stub(changeStream.cursor, '_getMore')
               .callsFake((_batchSize, callback) => {
@@ -2249,58 +2275,64 @@ describe('ChangeStream resumability', function () {
         );
       }
 
-      // happy path
-      it('happy path', { requires: { topology: '!single', mongodb: '>=4.2' } }, async function () {
-        changeStream = collection.watch([]);
-        await initIteratorMode(changeStream);
-
-        const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
-        await collection.insertMany(docs);
-
-        let count = 0;
-        for await (const change of changeStream) {
-          const { fullDocument } = change;
-          expect(fullDocument.city).to.equal(docs[count].city);
-
-          count++;
-          if (count === 3) {
-            expect(docs.length).to.equal(count);
-            changeStream.close();
-          }
-        }
-      });
-
-      // unhappy path
       it(
-        'unhappy path',
+        'can iterate through changes',
         { requires: { topology: '!single', mongodb: '>=4.2' } },
         async function () {
           changeStream = collection.watch([]);
           await initIteratorMode(changeStream);
 
-          const unresumableErrorCode = 1000;
-          await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
-            mode: { times: 1 },
-            data: {
-              failCommands: ['getMore'],
-              errorCode: unresumableErrorCode
-            }
-          } as FailPoint);
+          const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+          await collection.insertMany(docs);
 
-          await collection.insertOne({ city: 'New York City' });
+          let count = 0;
+          for await (const change of changeStream) {
+            const { fullDocument } = change;
+            expect(fullDocument.city).to.equal(docs[count].city);
 
-          try {
-            for await (const change of changeStream) {
-              // should not run
+            count++;
+            if (count === 3) {
+              changeStream.close();
             }
-          } catch (error) {
-            expect(error).to.be.instanceOf(MongoServerError);
           }
+
+          expect(docs.length).to.equal(count);
         }
       );
+
+      context('when the error is not a resumable error', function () {
+        it(
+          'does not resume',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            const unresumableErrorCode = 1000;
+            await client.db('admin').command({
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 1 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: unresumableErrorCode
+              }
+            } as FailPoint);
+
+            await collection.insertOne({ city: 'New York City' });
+
+            try {
+              for await (const change of changeStream) {
+                // should not run
+              }
+            } catch (error) {
+              expect(error).to.be.instanceOf(MongoServerError);
+            }
+          }
+        );
+      });
+
     });
   });
 
