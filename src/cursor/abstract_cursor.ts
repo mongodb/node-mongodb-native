@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
 import {
   AnyError,
+  MongoAPIError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
   MongoInvalidArgumentError,
@@ -305,7 +306,18 @@ export abstract class AbstractCursor<
       while (true) {
         const document = await this.next();
 
-        if (document == null) {
+        // Intentional strict null check, because users can map cursors to falsey values.
+        // We allow mapping to all values except for null.
+        // eslint-disable-next-line no-restricted-syntax
+        if (document === null) {
+          if (!this.closed) {
+            const message =
+              'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
+
+            await cleanupCursorAsync(this, { needsToEmitClosed: true }).catch(() => null);
+
+            throw new MongoAPIError(message);
+          }
           break;
         }
 
@@ -504,6 +516,29 @@ export abstract class AbstractCursor<
    * this function's transform.
    *
    * @remarks
+   *
+   * **Note** Cursors use `null` internally to indicate that there are no more documents in the cursor. Providing a mapping
+   * function that maps values to `null` will result in the cursor closing itself before it has finished iterating
+   * all documents.  This will **not** result in a memory leak, just surprising behavior.  For example:
+   *
+   * ```typescript
+   * const cursor = collection.find({});
+   * cursor.map(() => null);
+   *
+   * const documents = await cursor.toArray();
+   * // documents is always [], regardless of how many documents are in the collection.
+   * ```
+   *
+   * Other falsey values are allowed:
+   *
+   * ```typescript
+   * const cursor = collection.find({});
+   * cursor.map(() => '');
+   *
+   * const documents = await cursor.toArray();
+   * // documents is now an array of empty strings
+   * ```
+   *
    * **Note for Typescript Users:** adding a transform changes the return type of the iteration of this cursor,
    * it **does not** return a new instance of a cursor. This means when calling map,
    * you should always assign the result to a new variable in order to get a correctly typed cursor variable.
@@ -657,7 +692,7 @@ export abstract class AbstractCursor<
    * a significant refactor.
    */
   [kInit](callback: Callback<TSchema | null>): void {
-    this._initialize(this[kSession], (err, state) => {
+    this._initialize(this[kSession], (error, state) => {
       if (state) {
         const response = state.response;
         this[kServer] = state.server;
@@ -689,8 +724,12 @@ export abstract class AbstractCursor<
       // the cursor is now initialized, even if an error occurred or it is dead
       this[kInitialized] = true;
 
-      if (err || cursorIsDead(this)) {
-        return cleanupCursor(this, { error: err }, () => callback(err, nextDocument(this)));
+      if (error) {
+        return cleanupCursor(this, { error }, () => callback(error, undefined));
+      }
+
+      if (cursorIsDead(this)) {
+        return cleanupCursor(this, undefined, () => callback());
       }
 
       callback();
@@ -743,11 +782,8 @@ export function next<T>(
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    cursor[kInit]((err, value) => {
+    cursor[kInit](err => {
       if (err) return callback(err);
-      if (value) {
-        return callback(undefined, value);
-      }
       return next(cursor, blocking, callback);
     });
 
