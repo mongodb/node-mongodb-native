@@ -2372,6 +2372,8 @@ describe('ChangeStream resumability', function () {
               expect(error).to.be.instanceOf(MongoServerError);
               expect(aggregateEvents).to.have.lengthOf(1);
             }
+
+            changeStream.close();
           }
         );
       });
