@@ -2339,7 +2339,7 @@ describe('ChangeStream resumability', function () {
       );
 
       context('when the error is not a resumable error', function () {
-        it.only(
+        it(
           'does not resume',
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
@@ -2362,7 +2362,7 @@ describe('ChangeStream resumability', function () {
             await collection.insertOne({ city: 'New York City' });
             try {
               for await (const change of changeStream) {
-                expect.fail('Change stream produced changes on an unresumable error');
+                expect.fail('Change stream produced events on an unresumable error');
               }
 
               expect.fail(
