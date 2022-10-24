@@ -41,7 +41,12 @@ import {
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './connection_pool_events';
-import { PoolClearedError, PoolClosedError, WaitQueueTimeoutError } from './errors';
+import {
+  PoolClearedError,
+  PoolClearedOnNetworkError,
+  PoolClosedError,
+  WaitQueueTimeoutError
+} from './errors';
 import { ConnectionPoolMetrics } from './metrics';
 
 /** @internal */
@@ -391,10 +396,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this[kConnections].unshift(connection);
     }
 
-    this[kCheckedOut].delete(connection);
+    const wasConnectionDeleted = this[kCheckedOut].delete(connection);
     this.emit(ConnectionPool.CONNECTION_CHECKED_IN, new ConnectionCheckedInEvent(this, connection));
 
-    if (willDestroy) {
+    if (wasConnectionDeleted && willDestroy) {
       const reason = connection.closed ? 'error' : poolClosed ? 'poolClosed' : 'stale';
       this.destroyConnection(connection, reason);
     }
@@ -408,8 +413,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * Pool reset is handled by incrementing the pool's generation count. Any existing connection of a
    * previous generation will eventually be pruned during subsequent checkouts.
    */
-  clear(options: { serviceId?: ObjectId } = {}): void {
+  clear(options: { serviceId?: ObjectId; interruptInUseConnections?: boolean } = {}): void {
     const { serviceId } = options;
+    const interruptInUseConnections = options.interruptInUseConnections ?? false;
     if (this.closed) {
       return;
     }
@@ -433,6 +439,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       return;
     }
 
+    const oldGeneration = this[kGeneration];
+
     // handle non load-balanced case
     this[kGeneration] += 1;
     const alreadyPaused = this[kPoolState] === PoolState.paused;
@@ -440,9 +448,61 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this.clearMinPoolSizeTimer();
     if (!alreadyPaused) {
-      this.emit(ConnectionPool.CONNECTION_POOL_CLEARED, new ConnectionPoolClearedEvent(this));
+      this.emit(
+        ConnectionPool.CONNECTION_POOL_CLEARED,
+        new ConnectionPoolClearedEvent(this, { interruptInUseConnections })
+      );
     }
+
+    process.nextTick(() =>
+      this.pruneConnections({ minGeneration: oldGeneration, interruptInUseConnections })
+    );
+
     this.processWaitQueue();
+  }
+
+  /**
+   * Closes all checked in perished connections in the pool with a resumable PoolClearedOnNetworkError.
+   *
+   * If interruptInUseConnections is `true`, this method attempts to kill checked out connections as well.
+   * Only connections where `connection.generation <= minGeneration` are killed.  Connections are closed with a
+   * resumable PoolClearedOnNetworkTimeoutError.
+   */
+  private pruneConnections({
+    interruptInUseConnections,
+    minGeneration
+  }: {
+    interruptInUseConnections: boolean;
+    minGeneration: number;
+  }) {
+    this[kConnections].prune(connection => {
+      if (connection.generation <= minGeneration) {
+        connection.onError(new PoolClearedOnNetworkError(this));
+        this.emit(
+          ConnectionPool.CONNECTION_CLOSED,
+          new ConnectionClosedEvent(this, connection, 'stale')
+        );
+
+        return true;
+      }
+      return false;
+    });
+
+    if (interruptInUseConnections) {
+      for (const connection of this[kCheckedOut]) {
+        if (connection.generation <= minGeneration) {
+          this[kCheckedOut].delete(connection);
+          connection.onError(new PoolClearedOnNetworkError(this));
+          this.emit(
+            ConnectionPool.CONNECTION_CLOSED,
+            new ConnectionClosedEvent(this, connection, 'stale')
+          );
+        }
+      }
+
+      // TODO(NODE-xxxx): track pending connections and cancel
+      // this[kCancellationToken].emit('cancel');
+    }
   }
 
   /** Close the pool */
@@ -573,7 +633,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return !!(this.options.maxIdleTimeMS && connection.idleTime > this.options.maxIdleTimeMS);
   }
 
-  private connectionIsPerished(connection: Connection) {
+  /**
+   * Destroys a connection if the connection is perished.
+   *
+   * @returns `true` if the connection was destroyed, `false` otherwise.
+   */
+  private destroyConnectionIfPerished(connection: Connection) {
     const isStale = this.connectionIsStale(connection);
     const isIdle = this.connectionIsIdle(connection);
     if (!isStale && !isIdle && !connection.closed) {
@@ -659,7 +724,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       return;
     }
 
-    this[kConnections].prune(connection => this.connectionIsPerished(connection));
+    this[kConnections].prune(connection => this.destroyConnectionIfPerished(connection));
 
     if (
       this.totalConnectionCount < minPoolSize &&
@@ -735,7 +800,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         break;
       }
 
-      if (!this.connectionIsPerished(connection)) {
+      if (!this.destroyConnectionIfPerished(connection)) {
         this[kCheckedOut].add(connection);
         this.emit(
           ConnectionPool.CONNECTION_CHECKED_OUT,

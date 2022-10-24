@@ -19,17 +19,28 @@ const LB_SKIP_TESTS: SkipDescription[] = [
   skipReason: 'cannot run against a load balanced environment'
 }));
 
+const INTERRUPT_IN_USE_SKIPPED_TESTS: SkipDescription[] = [
+  {
+    description: 'clear with interruptInUseConnections = true closes pending connections',
+    skipIfCondition: 'always',
+    skipReason: 'TODO(NODE-xxxx): track and kill pending connections'
+  }
+];
+
 describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
   const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
   runCmapTestSuite(tests, {
-    testsToSkip: LB_SKIP_TESTS.concat([
-      {
-        description: 'waiting on maxConnecting is limited by WaitQueueTimeoutMS',
-        skipIfCondition: 'always',
-        skipReason:
-          'not applicable: waitQueueTimeoutMS limits connection establishment time in our driver'
-      }
-    ])
+    testsToSkip: LB_SKIP_TESTS.concat(
+      [
+        {
+          description: 'waiting on maxConnecting is limited by WaitQueueTimeoutMS',
+          skipIfCondition: 'always',
+          skipReason:
+            'not applicable: waitQueueTimeoutMS limits connection establishment time in our driver'
+        }
+      ],
+      INTERRUPT_IN_USE_SKIPPED_TESTS
+    )
   });
 });

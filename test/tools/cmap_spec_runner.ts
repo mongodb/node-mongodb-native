@@ -197,7 +197,7 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
 
     return threadContext.pool.checkIn(connection);
   },
-  clear: function (interruptInUseConnections: boolean) {
+  clear: function ({ interruptInUseConnections }: { interruptInUseConnections: boolean }) {
     return threadContext.pool.clear({ interruptInUseConnections });
   },
   close: async function () {

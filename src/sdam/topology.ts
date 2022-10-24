@@ -6,6 +6,7 @@ import { deserialize, serialize } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
+import { PoolClearedOnNetworkError } from '../cmap/errors';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
   CLOSE,
@@ -839,7 +840,11 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
         incomingServerDescription.error instanceof MongoError &&
         incomingServerDescription.error.hasErrorLabel(MongoErrorLabel.ResetPool)
       ) {
-        server.s.pool.clear();
+        const interruptInUseConnections = incomingServerDescription.error.hasErrorLabel(
+          MongoErrorLabel.InterruptInUseConnections
+        );
+
+        server.s.pool.clear({ interruptInUseConnections });
       } else if (incomingServerDescription.error == null) {
         const newTopologyType = topology.s.description.type;
         const shouldMarkPoolReady =

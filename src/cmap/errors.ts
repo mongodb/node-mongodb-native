@@ -1,4 +1,4 @@
-import { MongoDriverError, MongoNetworkError } from '../error';
+import { MongoDriverError, MongoErrorLabel, MongoNetworkError } from '../error';
 import type { ConnectionPool } from './connection_pool';
 
 /**
@@ -49,6 +49,8 @@ export class PoolClearedOnNetworkError extends MongoNetworkError {
   constructor(pool: ConnectionPool) {
     super(`Connection to ${pool.address} interrupted due to server monitor timeout`);
     this.address = pool.address;
+
+    this.addErrorLabel(MongoErrorLabel.RetryableWriteError);
   }
 
   override get name(): string {
