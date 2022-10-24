@@ -408,7 +408,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * Pool reset is handled by incrementing the pool's generation count. Any existing connection of a
    * previous generation will eventually be pruned during subsequent checkouts.
    */
-  clear(serviceId?: ObjectId): void {
+  clear(options: { serviceId?: ObjectId } = {}): void {
+    const { serviceId } = options;
     if (this.closed) {
       return;
     }

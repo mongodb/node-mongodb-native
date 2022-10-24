@@ -537,7 +537,7 @@ export function maybeClearPinnedConnection(
       );
 
       if (options?.forceClear) {
-        loadBalancer.s.pool.clear(conn.serviceId);
+        loadBalancer.s.pool.clear({ serviceId: conn.serviceId });
       }
     }
 
