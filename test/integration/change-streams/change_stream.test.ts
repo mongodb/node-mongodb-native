@@ -73,6 +73,7 @@ describe('Change Streams', function () {
   });
 
   afterEach(async () => {
+    sinon.restore();
     await changeStream.close();
     await client.close();
     await mock.cleanup();
@@ -952,7 +953,7 @@ describe('Change Streams', function () {
       'This test only worked because of timing, changeStream.close does not remove the change listener';
   });
 
-  context('iterator api', function () {
+  describe('iterator api', function () {
     describe('#tryNext()', function () {
       it('should return null on single iteration of empty cursor', {
         metadata: { requires: { topology: 'replicaset' } },
@@ -998,8 +999,6 @@ describe('Change Streams', function () {
             const { fullDocument } = change.value;
             expect(fullDocument.city).to.equal(doc.city);
           }
-
-          changeStream.close();
         }
       );
 
@@ -1009,18 +1008,12 @@ describe('Change Streams', function () {
         async function () {
           changeStream = collection.watch([]);
           await initIteratorMode(changeStream);
+          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
           const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
           await collection.insertMany(docs);
 
-          const changeStreamAsyncIteratorHelper = async function (changeStream: ChangeStream) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for await (const change of changeStream) {
-              return;
-            }
-          };
-
-          await changeStreamAsyncIteratorHelper(changeStream);
+          await changeStreamIterator.return();
           expect(changeStream.closed).to.be.true;
           expect(changeStream.cursor.closed).to.be.true;
         }
@@ -1111,6 +1104,24 @@ describe('Change Streams', function () {
             expect(fullDocument.city).to.equal(docs[1].city);
           } catch (error) {
             expect.fail('Async could not be used with raw iterator API');
+          }
+        }
+      );
+
+      it(
+        'ignores errors thrown from close',
+        { requires: { topology: '!single' } },
+        async function () {
+          changeStream = collection.watch([]);
+          await initIteratorMode(changeStream);
+          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+          sinon.stub(changeStream.cursor, 'close').throws(new MongoAPIError('testing'));
+
+          try {
+            await changeStreamIterator.return();
+          } catch (error) {
+            expect.fail('Async iterator threw an error on close');
           }
         }
       );
@@ -2362,8 +2373,6 @@ describe('ChangeStream resumability', function () {
             await changeStreamIterator.next();
 
             expect(aggregateEvents).to.have.lengthOf(2);
-
-            changeStream.close();
           }
         );
       }
@@ -2397,8 +2406,6 @@ describe('ChangeStream resumability', function () {
             await changeStreamIterator.next();
 
             expect(aggregateEvents).to.have.lengthOf(2);
-
-            changeStream.close();
           }
         );
       }
@@ -2467,8 +2474,6 @@ describe('ChangeStream resumability', function () {
               expect(error).to.be.instanceOf(MongoServerError);
               expect(aggregateEvents).to.have.lengthOf(1);
             }
-
-            changeStream.close();
           }
         );
       });
