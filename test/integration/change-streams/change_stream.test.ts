@@ -41,6 +41,9 @@ const initIteratorMode = async (cs: ChangeStream) => {
   return;
 };
 
+const is4_2Server = (serverVersion: string) =>
+  gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
+
 // Define the pipeline processing changes
 const pipeline = [
   { $addFields: { addedField: 'This is a field added using $addFields' } },
@@ -53,9 +56,6 @@ describe('Change Streams', function () {
   let collection: Collection;
   let changeStream: ChangeStream;
   let db: Db;
-
-  const is4_2Server = (serverVersion: string) =>
-    gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
 
   beforeEach(async function () {
     const configuration = this.configuration;
@@ -1790,9 +1790,6 @@ describe('ChangeStream resumability', function () {
     },
     { error: 'CursorNotFound', code: 43, message: 'cursor not found' }
   ];
-
-  const is4_2Server = (serverVersion: string) =>
-    gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
 
   beforeEach(function () {
     assert(this.currentTest != null);
