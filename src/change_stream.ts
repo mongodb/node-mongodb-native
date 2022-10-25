@@ -737,7 +737,6 @@ export class ChangeStream<
     }, callback);
   }
 
-  // TODO(andymina): ask about never as third template parameter
   async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, never> {
     if (this.closed) {
       return;

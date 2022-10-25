@@ -22,7 +22,6 @@ import {
   ReadPreference,
   ResumeToken
 } from '../../../src';
-import { next } from '../../../src/cursor/abstract_cursor';
 import { isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import {
@@ -953,7 +952,6 @@ describe('Change Streams', function () {
       'This test only worked because of timing, changeStream.close does not remove the change listener';
   });
 
-  // TODO(andymina): ask about testing word semantics here
   context('iterator api', function () {
     describe('#tryNext()', function () {
       it('should return null on single iteration of empty cursor', {
@@ -1092,7 +1090,7 @@ describe('Change Streams', function () {
         }
       );
 
-      it.only(
+      it(
         'can be used with raw iterator API',
         { requires: { topology: '!single' } },
         async function () {
@@ -1112,7 +1110,7 @@ describe('Change Streams', function () {
             const { fullDocument } = change.value;
             expect(fullDocument.city).to.equal(docs[1].city);
           } catch (error) {
-            expect.fail('Async could not be used with raw iterator API')
+            expect.fail('Async could not be used with raw iterator API');
           }
         }
       );
@@ -2464,7 +2462,7 @@ describe('ChangeStream resumability', function () {
 
             await collection.insertOne({ city: 'New York City' });
             try {
-              const change = await changeStreamIterator.next();
+              await changeStreamIterator.next();
               expect.fail(
                 'Change stream did not throw unresumable error and did not produce any events'
               );
