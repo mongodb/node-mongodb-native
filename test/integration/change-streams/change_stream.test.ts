@@ -948,31 +948,57 @@ describe('Change Streams', function () {
       'This test only worked because of timing, changeStream.close does not remove the change listener';
   });
 
-  describe('#tryNext()', function () {
-    it('should return null on single iteration of empty cursor', {
-      metadata: { requires: { topology: 'replicaset' } },
-      async test() {
-        const doc = await changeStream.tryNext();
-        expect(doc).to.be.null;
-      }
+  // TODO(andymina): ask about testing word semantics here
+  context('iterator api', function () {
+    describe('#tryNext()', function () {
+      it('should return null on single iteration of empty cursor', {
+        metadata: { requires: { topology: 'replicaset' } },
+        async test() {
+          const doc = await changeStream.tryNext();
+          expect(doc).to.be.null;
+        }
+      });
+
+      it('should iterate a change stream until first empty batch', {
+        metadata: { requires: { topology: 'replicaset' } },
+        async test() {
+          // tryNext doesn't send the initial agg, just checks the driver document batch cache
+          const firstTry = await changeStream.tryNext();
+          expect(firstTry).to.be.null;
+
+          await initIteratorMode(changeStream);
+          await collection.insertOne({ a: 42 });
+
+          const secondTry = await changeStream.tryNext();
+          expect(secondTry).to.be.an('object');
+
+          const thirdTry = await changeStream.tryNext();
+          expect(thirdTry).to.be.null;
+        }
+      });
     });
 
-    it('should iterate a change stream until first empty batch', {
-      metadata: { requires: { topology: 'replicaset' } },
-      async test() {
-        // tryNext doesn't send the initial agg, just checks the driver document batch cache
-        const firstTry = await changeStream.tryNext();
-        expect(firstTry).to.be.null;
+    describe('#asyncIterator', function () {
+      it(
+        'can iterate through changes',
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
+        async function () {
+          changeStream = collection.watch([]);
+          await initIteratorMode(changeStream);
+          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
-        await initIteratorMode(changeStream);
-        await collection.insertOne({ a: 42 });
+          const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+          await collection.insertMany(docs);
 
-        const secondTry = await changeStream.tryNext();
-        expect(secondTry).to.be.an('object');
+          for (const doc of docs) {
+            const change = await changeStreamIterator.next();
+            const { fullDocument } = change;
+            expect(fullDocument.city).to.equal(doc.city);
+          }
 
-        const thirdTry = await changeStream.tryNext();
-        expect(thirdTry).to.be.null;
-      }
+          changeStream.close();
+        }
+      );
     });
   });
 
@@ -2206,6 +2232,7 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
@@ -2220,16 +2247,11 @@ describe('ChangeStream resumability', function () {
             } as FailPoint);
 
             await collection.insertOne({ city: 'New York City' });
-
-            let total_changes = 0;
-            for await (const change of changeStream) {
-              total_changes++;
-              if (total_changes === 1) {
-                changeStream.close();
-              }
-            }
+            await changeStreamIterator.next();
 
             expect(aggregateEvents).to.have.lengthOf(2);
+
+            changeStream.close();
           }
         );
       }
@@ -2241,13 +2263,14 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
             // on 3.6 servers, no postBatchResumeToken is sent back in the initial aggregate response.
             // This means that a resume token isn't cached until the first change has been iterated.
             // In order to test the resume, we need to ensure that at least one document has
             // been iterated so we have a resume token to resume on.
-
             await collection.insertOne({ city: 'New York City' });
+            await changeStreamIterator.next();
 
             const mock = sinon
               .stub(changeStream.cursor, '_getMore')
@@ -2258,46 +2281,15 @@ describe('ChangeStream resumability', function () {
                 callback(error);
               });
 
-            // insert another doc
             await collection.insertOne({ city: 'New York City' });
-
-            let total_changes = 0;
-            for await (const change of changeStream) {
-              total_changes++;
-              if (total_changes === 2) {
-                changeStream.close();
-              }
-            }
+            await changeStreamIterator.next();
 
             expect(aggregateEvents).to.have.lengthOf(2);
+
+            changeStream.close();
           }
         );
       }
-
-      it(
-        'can iterate through changes',
-        { requires: { topology: '!single', mongodb: '>=4.2' } },
-        async function () {
-          changeStream = collection.watch([]);
-          await initIteratorMode(changeStream);
-
-          const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
-          await collection.insertMany(docs);
-
-          let count = 0;
-          for await (const change of changeStream) {
-            const { fullDocument } = change;
-            expect(fullDocument.city).to.equal(docs[count].city);
-
-            count++;
-            if (count === 3) {
-              changeStream.close();
-            }
-          }
-
-          expect(docs.length).to.equal(count);
-        }
-      );
 
       it(
         'maintains change stream options on resume',
@@ -2305,6 +2297,7 @@ describe('ChangeStream resumability', function () {
         async function () {
           changeStream = collection.watch([], changeStreamResumeOptions);
           await initIteratorMode(changeStream);
+          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
           await client.db('admin').command({
             configureFailPoint: is4_2Server(this.configuration.version)
@@ -2323,14 +2316,7 @@ describe('ChangeStream resumability', function () {
             .that.containSubset(changeStreamResumeOptions);
 
           await collection.insertOne({ city: 'New York City' });
-
-          let total_changes = 0;
-          for await (const change of changeStream) {
-            total_changes++;
-            if (total_changes === 1) {
-              changeStream.close();
-            }
-          }
+          await changeStreamIterator.next();
 
           expect(changeStream.cursor)
             .to.have.property('options')
@@ -2358,13 +2344,11 @@ describe('ChangeStream resumability', function () {
             } as FailPoint);
 
             await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
             await collection.insertOne({ city: 'New York City' });
             try {
-              for await (const change of changeStream) {
-                expect.fail('Change stream produced events on an unresumable error');
-              }
-
+              const change = await changeStreamIterator.next();
               expect.fail(
                 'Change stream did not throw unresumable error and did not produce any events'
               );

@@ -742,8 +742,12 @@ export class ChangeStream<
       return;
     }
 
-    while (await this.hasNext()) {
-      yield await this.next();
+    try {
+      while (await this.hasNext()) {
+        yield await this.next();
+      }
+    } finally {
+      await this.close();
     }
   }
 
