@@ -237,8 +237,7 @@ export type {
   ConnectionOptions,
   DestroyOptions,
   GetMoreOptions,
-  ProxyOptions,
-  QueryOptions
+  ProxyOptions
 } from './cmap/connection';
 export type {
   CloseOptions,

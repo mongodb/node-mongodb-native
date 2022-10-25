@@ -69,23 +69,6 @@ const kAutoEncrypter = Symbol('autoEncrypter');
 const kDelayedTimeoutId = Symbol('delayedTimeoutId');
 
 /** @internal */
-export interface QueryOptions extends BSONSerializeOptions {
-  readPreference: ReadPreference;
-  documentsReturnedIn?: string;
-  batchSize?: number;
-  limit?: number;
-  skip?: number;
-  projection?: Document;
-  tailable?: boolean;
-  awaitData?: boolean;
-  noCursorTimeout?: boolean;
-  /** @deprecated use `noCursorTimeout` instead */
-  timeout?: boolean;
-  partial?: boolean;
-  oplogReplay?: boolean;
-}
-
-/** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
   command?: boolean;
   secondaryOk?: boolean;
