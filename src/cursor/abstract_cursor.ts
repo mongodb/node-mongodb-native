@@ -297,7 +297,7 @@ export abstract class AbstractCursor<
     return bufferedDocs;
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
+  [Symbol.asyncIterator](): AsyncIterator<TSchema, void, never> {
     async function* nativeAsyncIterator(this: AbstractCursor<TSchema>) {
       if (this.closed) {
         return;

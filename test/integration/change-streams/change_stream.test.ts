@@ -15,12 +15,14 @@ import {
   CommandStartedEvent,
   Db,
   Long,
+  MongoAPIError,
   MongoChangeStreamError,
   MongoClient,
   MongoServerError,
   ReadPreference,
   ResumeToken
 } from '../../../src';
+import { next } from '../../../src/cursor/abstract_cursor';
 import { isHello } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
 import {
@@ -995,7 +997,7 @@ describe('Change Streams', function () {
 
           for (const doc of docs) {
             const change = await changeStreamIterator.next();
-            const { fullDocument } = change;
+            const { fullDocument } = change.value;
             expect(fullDocument.city).to.equal(doc.city);
           }
 
@@ -1003,40 +1005,117 @@ describe('Change Streams', function () {
         }
       );
 
-      context('when an error is thrown', function () {
-        it(
-          'should close the change stream',
-          { requires: { topology: '!single', mongodb: '>=4.2' } },
-          async function () {
-            changeStream = collection.watch([]);
-            await initIteratorMode(changeStream);
-            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+      it(
+        'should close the change stream when return is called',
+        { requires: { topology: '!single' } },
+        async function () {
+          changeStream = collection.watch([]);
+          await initIteratorMode(changeStream);
 
-            const unresumableErrorCode = 1000;
-            await client.db('admin').command({
-              configureFailPoint: is4_2Server(this.configuration.version)
-                ? 'failCommand'
-                : 'failGetMoreAfterCursorCheckout',
-              mode: { times: 1 },
-              data: {
-                failCommands: ['getMore'],
-                errorCode: unresumableErrorCode
-              }
-            } as FailPoint);
+          const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+          await collection.insertMany(docs);
 
-            await collection.insertOne({ city: 'New York City' });
-            try {
-              const change = await changeStreamIterator.next();
-              expect.fail(
-                'Change stream did not throw unresumable error and did not produce any events'
-              );
-            } catch (error) {
-              expect(changeStream.closed).to.be.true;
-              expect(changeStream.cursor.closed).to.be.true;
+          const changeStreamAsyncIteratorHelper = async function (changeStream: ChangeStream) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            for await (const change of changeStream) {
+              return;
             }
+          };
+
+          await changeStreamAsyncIteratorHelper(changeStream);
+          expect(changeStream.closed).to.be.true;
+          expect(changeStream.cursor.closed).to.be.true;
+        }
+      );
+
+      it(
+        'should close the change stream when an error is thrown',
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
+        async function () {
+          changeStream = collection.watch([]);
+          await initIteratorMode(changeStream);
+          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+          const unresumableErrorCode = 1000;
+          await client.db('admin').command({
+            configureFailPoint: is4_2Server(this.configuration.version)
+              ? 'failCommand'
+              : 'failGetMoreAfterCursorCheckout',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['getMore'],
+              errorCode: unresumableErrorCode
+            }
+          } as FailPoint);
+
+          await collection.insertOne({ city: 'New York City' });
+          try {
+            await changeStreamIterator.next();
+            expect.fail(
+              'Change stream did not throw unresumable error and did not produce any events'
+            );
+          } catch (error) {
+            expect(changeStream.closed).to.be.true;
+            expect(changeStream.cursor.closed).to.be.true;
           }
-        );
-      });
+        }
+      );
+
+      it(
+        'should not produce events on closed stream',
+        { requires: { topology: '!single' } },
+        async function () {
+          changeStream = collection.watch([]);
+          changeStream.close();
+
+          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+          const change = await changeStreamIterator.next();
+
+          expect(change.value).to.be.undefined;
+        }
+      );
+
+      it(
+        'cannot be used with emitter-based iteration',
+        { requires: { topology: '!single' } },
+        async function () {
+          changeStream = collection.watch([]);
+          changeStream.on('change', sinon.stub());
+          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+          try {
+            await changeStreamIterator.next();
+            expect.fail('Async iterator was used with emitter-based iteration');
+          } catch (error) {
+            expect(error).to.be.instanceOf(MongoAPIError);
+          }
+        }
+      );
+
+      it.only(
+        'can be used with raw iterator API',
+        { requires: { topology: '!single' } },
+        async function () {
+          changeStream = collection.watch([]);
+          await initIteratorMode(changeStream);
+          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+          const docs = [{ city: 'Los Angeles' }, { city: 'Miami' }];
+          await collection.insertMany(docs);
+
+          await changeStream.next();
+
+          try {
+            const change = await changeStreamIterator.next();
+            expect(change.value).to.not.be.undefined;
+
+            const { fullDocument } = change.value;
+            expect(fullDocument.city).to.equal(docs[1].city);
+          } catch (error) {
+            expect.fail('Async could not be used with raw iterator API')
+          }
+        }
+      );
     });
   });
 

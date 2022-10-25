@@ -737,7 +737,8 @@ export class ChangeStream<
     }, callback);
   }
 
-  async *[Symbol.asyncIterator](): AsyncIterator<TChange, void> {
+  // TODO(andymina): ask about never as third template parameter
+  async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, never> {
     if (this.closed) {
       return;
     }
@@ -747,7 +748,11 @@ export class ChangeStream<
         yield await this.next();
       }
     } finally {
-      await this.close();
+      try {
+        await this.close();
+      } catch (error) {
+        // we're not concerned with errors from close()
+      }
     }
   }
 
