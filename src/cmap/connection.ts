@@ -22,7 +22,7 @@ import {
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   calculateDurationInMs,
@@ -67,23 +67,6 @@ const kHello = Symbol('hello');
 const kAutoEncrypter = Symbol('autoEncrypter');
 /** @internal */
 const kDelayedTimeoutId = Symbol('delayedTimeoutId');
-
-/** @internal */
-export interface QueryOptions extends BSONSerializeOptions {
-  readPreference: ReadPreference;
-  documentsReturnedIn?: string;
-  batchSize?: number;
-  limit?: number;
-  skip?: number;
-  projection?: Document;
-  tailable?: boolean;
-  awaitData?: boolean;
-  noCursorTimeout?: boolean;
-  /** @deprecated use `noCursorTimeout` instead */
-  timeout?: boolean;
-  partial?: boolean;
-  oplogReplay?: boolean;
-}
 
 /** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
