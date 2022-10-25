@@ -22,7 +22,7 @@ import {
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   calculateDurationInMs,
