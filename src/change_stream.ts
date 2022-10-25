@@ -648,7 +648,11 @@ export class ChangeStream<
   hasNext(callback?: Callback): Promise<boolean> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      for (;;) {
+      // Change streams must resume indefinitely while each resume event succeeds.
+      // This loop continues until either a change event is received or until a resume attempt
+      // fails.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
         try {
           const hasNext = await this.cursor.hasNext();
           return hasNext;
@@ -675,7 +679,11 @@ export class ChangeStream<
   next(callback?: Callback<TChange>): Promise<TChange> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      for (;;) {
+      // Change streams must resume indefinitely while each resume event succeeds.
+      // This loop continues until either a change event is received or until a resume attempt
+      // fails.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
         try {
           const change = await this.cursor.next();
           const processedChange = this._processChange(change ?? null);
@@ -705,7 +713,11 @@ export class ChangeStream<
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      for (;;) {
+      // Change streams must resume indefinitely while each resume event succeeds.
+      // This loop continues until either a change event is received or until a resume attempt
+      // fails.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
         try {
           const change = await this.cursor.tryNext();
           return change ?? null;
