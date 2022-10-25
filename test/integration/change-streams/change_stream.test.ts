@@ -53,6 +53,9 @@ describe('Change Streams', function () {
   let changeStream: ChangeStream;
   let db: Db;
 
+  const is4_2Server = (serverVersion: string) =>
+    gte(serverVersion, '4.2.0') && lt(serverVersion, '4.3.0');
+
   beforeEach(async function () {
     const configuration = this.configuration;
     client = configuration.newClient();
@@ -999,6 +1002,41 @@ describe('Change Streams', function () {
           changeStream.close();
         }
       );
+
+      context('when an error is thrown', function () {
+        it(
+          'should close the change stream',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+            const unresumableErrorCode = 1000;
+            await client.db('admin').command({
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 1 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: unresumableErrorCode
+              }
+            } as FailPoint);
+
+            await collection.insertOne({ city: 'New York City' });
+            try {
+              const change = await changeStreamIterator.next();
+              expect.fail(
+                'Change stream did not throw unresumable error and did not produce any events'
+              );
+            } catch (error) {
+              expect(changeStream.closed).to.be.true;
+              expect(changeStream.cursor.closed).to.be.true;
+            }
+          }
+        );
+      });
     });
   });
 
@@ -2330,6 +2368,8 @@ describe('ChangeStream resumability', function () {
           { requires: { topology: '!single', mongodb: '>=4.2' } },
           async function () {
             changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
@@ -2342,9 +2382,6 @@ describe('ChangeStream resumability', function () {
                 errorCode: unresumableErrorCode
               }
             } as FailPoint);
-
-            await initIteratorMode(changeStream);
-            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
             await collection.insertOne({ city: 'New York City' });
             try {
