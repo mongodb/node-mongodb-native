@@ -10,6 +10,7 @@ import { promisify } from 'util';
 import {
   AbstractCursor,
   ChangeStream,
+  ChangeStreamDocument,
   ChangeStreamOptions,
   Collection,
   CommandStartedEvent,
@@ -1037,56 +1038,6 @@ describe('Change Streams', function () {
   });
 
   describe('Change Stream Resume Error Tests', function () {
-    describe('TODO(NODE-4670): fix consecutive resumes unified tests', function () {
-      let client: MongoClient;
-      let changeStream: ChangeStream;
-
-      beforeEach(async function () {
-        client = this.configuration.newClient();
-        await client.connect();
-      });
-
-      afterEach(async function () {
-        await changeStream.close();
-        await client.close();
-      });
-
-      it('should support consecutive resumes', {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=4.2' } },
-        async test() {
-          const failCommand: FailPoint = {
-            configureFailPoint: 'failCommand',
-            mode: {
-              times: 2
-            },
-            data: {
-              failCommands: ['getMore'],
-              closeConnection: true
-            }
-          };
-
-          await client.db('admin').command(failCommand);
-
-          const collection = client.db('test_consecutive_resume').collection('collection');
-
-          changeStream = collection.watch([], { batchSize: 1 });
-
-          await initIteratorMode(changeStream);
-
-          await collection.insertOne({ name: 'bumpy' });
-          await collection.insertOne({ name: 'bumpy' });
-          await collection.insertOne({ name: 'bumpy' });
-
-          await sleep(1000);
-
-          for (let i = 0; i < 3; ++i) {
-            const change = await changeStream.next();
-            expect(change).not.to.be.null;
-          }
-        }
-      });
-    });
-
     it.skip('should continue piping changes after a resumable error', {
       metadata: { requires: { topology: 'replicaset' } },
       test: done => {
@@ -1767,7 +1718,44 @@ describe('ChangeStream resumability', function () {
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
+
+        it(
+          `supports consecutive resumes on error code ${code} ${error}`,
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await client.db('admin').command({
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 5 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: code,
+                errmsg: message
+              }
+            } as FailPoint);
+
+            // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
+            // resuming a change stream don't return the change event.  So we defer the insert until a period of time
+            // after the change stream has started listening for a change.  2000ms is long enough for the change
+            // stream to attempt to resume and fail multiple times before exhausting the failpoint and succeeding.
+            const [, value] = await Promise.allSettled([
+              sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
+              changeStream.next()
+            ]);
+
+            const change = (value as PromiseFulfilledResult<ChangeStreamDocument>).value;
+
+            expect(change).to.have.property('operationType', 'insert');
+
+            expect(aggregateEvents).to.have.lengthOf(6);
+          }
+        );
       }
+
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -1894,6 +1882,42 @@ describe('ChangeStream resumability', function () {
             expect(hasNext).to.be.true;
 
             expect(aggregateEvents).to.have.lengthOf(2);
+          }
+        );
+
+        it(
+          `supports consecutive resumes on error code ${code} ${error}`,
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await client.db('admin').command({
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 5 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: code,
+                errmsg: message
+              }
+            } as FailPoint);
+
+            // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
+            // resuming a change stream don't return the change event.  So we defer the insert until a period of time
+            // after the change stream has started listening for a change.  2000ms is long enough for the change
+            // stream to attempt to resume and fail multiple times before exhausting the failpoint and succeeding.
+            const [, value] = await Promise.allSettled([
+              sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
+              changeStream.hasNext()
+            ]);
+
+            const change = (value as PromiseFulfilledResult<boolean>).value;
+
+            expect(change).to.be.true;
+
+            expect(aggregateEvents).to.have.lengthOf(6);
           }
         );
       }
@@ -2033,6 +2057,42 @@ describe('ChangeStream resumability', function () {
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
+
+        it(
+          `supports consecutive resumes on error code ${code} ${error}`,
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            await client.db('admin').command({
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 5 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: code,
+                errmsg: message
+              }
+            } as FailPoint);
+
+            try {
+              // tryNext is not blocking and on sharded clusters we don't have control of when
+              // the actual change event will be ready on the change stream pipeline. This introduces
+              // a race condition, where sometimes we receive the change event and sometimes
+              // we don't when we call tryNext, depending on the timing of the sharded cluster.
+
+              // Since we really only care about the resumability, it's enough for this test to throw
+              // if tryNext ever throws and assert on the number of aggregate events.
+              await changeStream.tryNext();
+            } catch (err) {
+              expect.fail(`expected tryNext to resume, received error instead: ${err}`);
+            }
+
+            expect(aggregateEvents).to.have.lengthOf(6);
+          }
+        );
       }
 
       for (const { error, code, message } of resumableErrorCodes) {
@@ -2169,6 +2229,43 @@ describe('ChangeStream resumability', function () {
           expect(change).to.have.property('operationType', 'insert');
 
           expect(aggregateEvents).to.have.lengthOf(2);
+        }
+      );
+
+      it(
+        `supports consecutive resumes on error code ${code} (${error})`,
+        { requires: { topology: '!single', mongodb: '>=4.2' } },
+        async function () {
+          changeStream = collection.watch([]);
+
+          await client.db('admin').command({
+            configureFailPoint: is4_2Server(this.configuration.version)
+              ? 'failCommand'
+              : 'failGetMoreAfterCursorCheckout',
+            mode: { times: 5 },
+            data: {
+              failCommands: ['getMore'],
+              errorCode: code,
+              errmsg: message
+            }
+          } as FailPoint);
+
+          const changes = once(changeStream, 'change');
+          await once(changeStream.cursor, 'init');
+
+          // There's an inherent race condition here because we need to make sure that the `aggregates` that succeed when
+          // resuming a change stream don't return the change event.  So we defer the insert until a period of time
+          // after the change stream has started listening for a change.  2000ms is long enough for the change
+          // stream to attempt to resume and fail multiple times before exhausting the failpoint and succeeding.
+          const [, value] = await Promise.allSettled([
+            sleep(2000).then(() => collection.insertOne({ name: 'bailey' })),
+            changes
+          ]);
+
+          const [change] = (value as PromiseFulfilledResult<ChangeStreamDocument[]>).value;
+          expect(change).to.have.property('operationType', 'insert');
+
+          expect(aggregateEvents).to.have.lengthOf(6);
         }
       );
     }

@@ -23,10 +23,6 @@ const filter: TestFilter = ({ description }) => {
     return 'TODO(NODE-3308): failures due unnecessary getMore and killCursors calls in 5.0';
   }
 
-  if (description === 'Test consecutive resume') {
-    return 'TODO(NODE-4670): fix consecutive resume change stream test';
-  }
-
   if (
     process.env.AUTH === 'auth' &&
     [
