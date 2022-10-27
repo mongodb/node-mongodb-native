@@ -1013,6 +1013,7 @@ describe('Change Streams', function () {
           const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
           await collection.insertMany(docs);
 
+          await changeStreamIterator.next();
           await changeStreamIterator.return();
           expect(changeStream.closed).to.be.true;
           expect(changeStream.cursor.closed).to.be.true;
@@ -1074,12 +1075,8 @@ describe('Change Streams', function () {
           changeStream.on('change', sinon.stub());
           const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
-          try {
-            await changeStreamIterator.next();
-            expect.fail('Async iterator was used with emitter-based iteration');
-          } catch (error) {
-            expect(error).to.be.instanceOf(MongoAPIError);
-          }
+          const error = await changeStreamIterator.next().catch(e => e);
+          expect(error).to.be.instanceOf(MongoAPIError);
         }
       );
 
@@ -2465,15 +2462,10 @@ describe('ChangeStream resumability', function () {
             } as FailPoint);
 
             await collection.insertOne({ city: 'New York City' });
-            try {
-              await changeStreamIterator.next();
-              expect.fail(
-                'Change stream did not throw unresumable error and did not produce any events'
-              );
-            } catch (error) {
-              expect(error).to.be.instanceOf(MongoServerError);
-              expect(aggregateEvents).to.have.lengthOf(1);
-            }
+
+            const error = await changeStreamIterator.next().catch(e => e);
+            expect(error).to.be.instanceOf(MongoServerError);
+            expect(aggregateEvents).to.have.lengthOf(1);
           }
         );
       });

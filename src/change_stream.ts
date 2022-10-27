@@ -737,13 +737,15 @@ export class ChangeStream<
     }, callback);
   }
 
-  async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, never> {
+  async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, void> {
     if (this.closed) {
       return;
     }
 
     try {
-      while (await this.hasNext()) {
+      // Change streams run indefinitely as long as errors are resumable
+      // So the only loop breaking condition is if `next()` throws
+      while (true) {
         yield await this.next();
       }
     } finally {
