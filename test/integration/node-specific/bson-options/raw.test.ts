@@ -42,24 +42,19 @@ describe('raw bson support', () => {
     describe('returns shared buffer', () => {
       let client: MongoClient;
       let collection: Collection<{ _id: number; myData: string }>;
-      let oldPoolSize = 0;
       beforeEach(async function () {
         client = this.configuration.newClient();
         collection = client.db('test_raw').collection('test_raw');
         await collection.drop().catch(() => null);
         await collection.insertOne({ _id: 1, myData: 'hello' });
         await collection.insertOne({ _id: 2, myData: 'bye bye' });
-        oldPoolSize = Buffer.poolSize;
-        Buffer.poolSize = 4 ** 1024;
       });
 
       afterEach(async function () {
         await client?.close();
-        Buffer.poolSize = oldPoolSize;
-        oldPoolSize = 0;
       });
 
-      it('returned Uint8Array should be backed by the same ArrayBuffer', async () => {
+      it('returned Buffer should not overwrite previously returned Buffer', async () => {
         const resultOne = (await collection.findOne(
           { _id: 1 },
           { raw: true }
@@ -75,7 +70,12 @@ describe('raw bson support', () => {
         expect(resultTwo).to.be.instanceOf(Buffer);
         expect(resultTwo.indexOf(Buffer.from('bye bye'))).to.be.greaterThan(5);
 
-        expect(resultOne.buffer).to.equal(resultTwo.buffer);
+        // From the Node.js Docs for allocUnsafeSlow:
+        // However, in the case where a developer may need to retain a small chunk of memory from a pool for an indeterminate amount of time,
+        // it may be appropriate to create an un-pooled Buffer instance using Buffer.allocUnsafeSlow() and then copying out the relevant bits.
+
+        // The following expectation is mostly always true however it is possible that our call to allocUnsafe does not use the same pooled buffer depending on the allocation size
+        // expect(resultOne.buffer).to.equal(resultTwo.buffer);
       });
     });
   });
