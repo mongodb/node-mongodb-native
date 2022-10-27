@@ -74,7 +74,6 @@ export interface CommandOptions extends BSONSerializeOptions {
   secondaryOk?: boolean;
   /** Specify read preference if command supports it */
   readPreference?: ReadPreferenceLike;
-  raw?: boolean;
   monitoring?: boolean;
   socketTimeoutMS?: number;
   /** Session to use for the operation */

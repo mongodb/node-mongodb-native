@@ -225,8 +225,6 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   keepAliveInitialDelay?: number;
   /** Force server to assign `_id` values instead of driver */
   forceServerObjectId?: boolean;
-  /** Return document results as raw BSON buffers */
-  raw?: boolean;
   /** A primary key factory function for generation of custom `_id` keys */
   pkFactory?: PkFactory;
   /**
