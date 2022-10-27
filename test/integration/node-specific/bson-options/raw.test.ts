@@ -42,16 +42,21 @@ describe('raw bson support', () => {
     describe('returns shared buffer', () => {
       let client: MongoClient;
       let collection: Collection<{ _id: number; myData: string }>;
+      let oldPoolSize = 0;
       beforeEach(async function () {
         client = this.configuration.newClient();
         collection = client.db('test_raw').collection('test_raw');
         await collection.drop().catch(() => null);
         await collection.insertOne({ _id: 1, myData: 'hello' });
         await collection.insertOne({ _id: 2, myData: 'bye bye' });
+        oldPoolSize = Buffer.poolSize;
+        Buffer.poolSize = 4 ** 1024;
       });
 
       afterEach(async function () {
         await client?.close();
+        Buffer.poolSize = oldPoolSize;
+        oldPoolSize = 0;
       });
 
       it('returned Uint8Array should be backed by the same ArrayBuffer', async () => {
