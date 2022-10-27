@@ -74,7 +74,8 @@ describe('raw bson support', () => {
         // However, in the case where a developer may need to retain a small chunk of memory from a pool for an indeterminate amount of time,
         // it may be appropriate to create an un-pooled Buffer instance using Buffer.allocUnsafeSlow() and then copying out the relevant bits.
 
-        // The following expectation is mostly always true however it is possible that our call to allocUnsafe does not use the same pooled buffer depending on the allocation size
+        // The following expectation is mostly always true however it is possible that our
+        // call to allocUnsafe does not use the same pooled buffer depending on the allocation size
         // expect(resultOne.buffer).to.equal(resultTwo.buffer);
       });
     });
