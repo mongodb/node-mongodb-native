@@ -989,16 +989,20 @@ describe('Change Streams', function () {
         async function () {
           changeStream = collection.watch([]);
           await initIteratorMode(changeStream);
-          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
           const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
           await collection.insertMany(docs);
 
-          for (const doc of docs) {
-            const change = await changeStreamIterator.next();
-            const { fullDocument } = change.value;
-            expect(fullDocument.city).to.equal(doc.city);
+          for await (const change of changeStream) {
+            const { fullDocument } = change;
+            const expectedDoc = docs.shift();
+            expect(fullDocument.city).to.equal(expectedDoc.city);
+            if (docs.length === 0) {
+              break;
+            }
           }
+
+          expect(docs).to.have.length(0, 'expected to find all docs before exiting loop');
         }
       );
 
@@ -1046,7 +1050,7 @@ describe('Change Streams', function () {
             expect.fail(
               'Change stream did not throw unresumable error and did not produce any events'
             );
-          } catch (error) {
+          } catch {
             expect(changeStream.closed).to.be.true;
             expect(changeStream.cursor).property('closed', true);
           }
@@ -1099,7 +1103,7 @@ describe('Change Streams', function () {
 
             const { fullDocument } = change.value;
             expect(fullDocument.city).to.equal(docs[1].city);
-          } catch (error) {
+          } catch {
             expect.fail('Async could not be used with raw iterator API');
           }
         }
@@ -1117,9 +1121,34 @@ describe('Change Streams', function () {
 
           try {
             await changeStreamIterator.return();
-          } catch (error) {
+          } catch {
             expect.fail('Async iterator threw an error on close');
           }
+        }
+      );
+
+      it(
+        'cannot be resumed from partial iteration',
+        { requires: { topology: '!single' } },
+        async function () {
+          changeStream = collection.watch([]);
+          await initIteratorMode(changeStream);
+
+          const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+          await collection.insertMany(docs);
+
+          for await (const change of changeStream) {
+            const { fullDocument } = change;
+            const expectedDoc = docs.shift();
+            expect(fullDocument.city).to.equal(expectedDoc.city);
+            break;
+          }
+
+          for await (const change of changeStream) {
+            expect.fail('Change stream was resumed after partial iteration');
+          }
+
+          expect(docs).to.have.length(2, 'expected to find remaining docs after partial iteration');
         }
       );
     });
@@ -2344,7 +2373,7 @@ describe('ChangeStream resumability', function () {
       });
     });
 
-    context('#asyncIterator', function () {
+    context.only('#asyncIterator', function () {
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
@@ -2352,7 +2381,9 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+            const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+            await collection.insertMany(docs);
 
             await client.db('admin').command({
               configureFailPoint: is4_2Server(this.configuration.version)
@@ -2366,9 +2397,16 @@ describe('ChangeStream resumability', function () {
               }
             } as FailPoint);
 
-            await collection.insertOne({ city: 'New York City' });
-            await changeStreamIterator.next();
+            for await (const change of changeStream) {
+              const { fullDocument } = change;
+              const expectedDoc = docs.shift();
+              expect(fullDocument.city).to.equal(expectedDoc.city);
+              if (docs.length === 0) {
+                break;
+              }
+            }
 
+            expect(docs).to.have.length(0, 'expected to find all docs before exiting loop');
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
@@ -2399,9 +2437,19 @@ describe('ChangeStream resumability', function () {
                 callback(error);
               });
 
-            await collection.insertOne({ city: 'New York City' });
-            await changeStreamIterator.next();
+            const docs = [{ city: 'Seattle' }, { city: 'Boston' }];
+            await collection.insertMany(docs);
 
+            for await (const change of changeStream) {
+              const { fullDocument } = change;
+              const expectedDoc = docs.shift();
+              expect(fullDocument.city).to.equal(expectedDoc.city);
+              if (docs.length === 0) {
+                break;
+              }
+            }
+
+            expect(docs).to.have.length(0, 'expected to find all docs before exiting loop');
             expect(aggregateEvents).to.have.lengthOf(2);
           }
         );
@@ -2447,7 +2495,9 @@ describe('ChangeStream resumability', function () {
           async function () {
             changeStream = collection.watch([]);
             await initIteratorMode(changeStream);
-            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+            const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+            await collection.insertMany(docs);
 
             const unresumableErrorCode = 1000;
             await client.db('admin').command({
@@ -2461,11 +2511,14 @@ describe('ChangeStream resumability', function () {
               }
             } as FailPoint);
 
-            await collection.insertOne({ city: 'New York City' });
-
-            const error = await changeStreamIterator.next().catch(e => e);
-            expect(error).to.be.instanceOf(MongoServerError);
-            expect(aggregateEvents).to.have.lengthOf(1);
+            try {
+              for await (const change of changeStream) {
+                expect.fail('Change stream produced events on an unresumable error');
+              }
+            } catch (error) {
+              expect(error).to.be.instanceOf(MongoServerError);
+              expect(aggregateEvents).to.have.lengthOf(1);
+            }
           }
         );
       });
