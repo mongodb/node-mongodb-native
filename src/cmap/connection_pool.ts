@@ -500,7 +500,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         }
       }
 
-      // TODO(NODE-xxxx): track pending connections and cancel
+      // TODO(NODE-4784): track pending connections and cancel
       // this[kCancellationToken].emit('cancel');
     }
   }
