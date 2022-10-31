@@ -1143,7 +1143,7 @@ describe('Change Streams', function () {
             expect(fullDocument.city).to.equal(expectedDoc.city);
             break;
           }
-
+          // eslint-disable-next-line no-unused-vars
           for await (const change of changeStream) {
             expect.fail('Change stream was resumed after partial iteration');
           }
@@ -2512,6 +2512,7 @@ describe('ChangeStream resumability', function () {
             } as FailPoint);
 
             try {
+              // eslint-disable-next-line no-unused-vars
               for await (const change of changeStream) {
                 expect.fail('Change stream produced events on an unresumable error');
               }
