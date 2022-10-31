@@ -6,7 +6,6 @@ import { deserialize, serialize } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
-import { PoolClearedOnNetworkError } from '../cmap/errors';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
   CLOSE,
