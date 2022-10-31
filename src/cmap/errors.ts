@@ -27,10 +27,11 @@ export class PoolClearedError extends MongoNetworkError {
   /** The address of the connection pool */
   address: string;
 
-  constructor(pool: ConnectionPool) {
-    super(
-      `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`
-    );
+  constructor(pool: ConnectionPool, message?: string) {
+    const errorMessage = message
+      ? message
+      : `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`;
+    super(errorMessage);
     this.address = pool.address;
   }
 
@@ -43,12 +44,9 @@ export class PoolClearedError extends MongoNetworkError {
  * An error indicating that a connection pool has been cleared after the monitor for that server timed out.
  * @category Error
  */
-export class PoolClearedOnNetworkError extends MongoNetworkError {
-  /** The address of the connection pool */
-  address: string;
+export class PoolClearedOnNetworkError extends PoolClearedError {
   constructor(pool: ConnectionPool) {
-    super(`Connection to ${pool.address} interrupted due to server monitor timeout`);
-    this.address = pool.address;
+    super(pool, `Connection to ${pool.address} interrupted due to server monitor timeout`);
 
     this.addErrorLabel(MongoErrorLabel.RetryableWriteError);
   }
