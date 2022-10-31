@@ -751,7 +751,7 @@ export class ChangeStream<
     } finally {
       try {
         await this.close();
-      } catch (error) {
+      } catch {
         // we're not concerned with errors from close()
       }
     }

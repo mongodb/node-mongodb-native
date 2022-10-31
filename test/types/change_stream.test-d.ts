@@ -214,3 +214,7 @@ expectError(collection.watch<number, number>());
 collection
   .watch<{ a: number }, { b: boolean }>()
   .on('change', change => expectType<{ b: boolean }>(change));
+
+expectType<AsyncGenerator<ChangeStreamDocument<Schema>, void, void>>(
+  collection.watch()[Symbol.asyncIterator]()
+);
