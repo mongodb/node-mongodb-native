@@ -2373,7 +2373,7 @@ describe('ChangeStream resumability', function () {
       });
     });
 
-    context.only('#asyncIterator', function () {
+    context('#asyncIterator', function () {
       for (const { error, code, message } of resumableErrorCodes) {
         it(
           `resumes on error code ${code} (${error})`,
