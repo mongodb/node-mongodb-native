@@ -367,7 +367,7 @@ describe('Change Streams', function () {
 
           // Check the cursor is closed
           expect(changeStream.closed).to.be.true;
-          expect(changeStream.cursor.closed).to.be.true;
+          expect(changeStream.cursor).property('closed', true);
           done();
         });
       });
@@ -1016,7 +1016,7 @@ describe('Change Streams', function () {
           await changeStreamIterator.next();
           await changeStreamIterator.return();
           expect(changeStream.closed).to.be.true;
-          expect(changeStream.cursor.closed).to.be.true;
+          expect(changeStream.cursor).property('closed', true);
         }
       );
 
@@ -1048,7 +1048,7 @@ describe('Change Streams', function () {
             );
           } catch (error) {
             expect(changeStream.closed).to.be.true;
-            expect(changeStream.cursor.closed).to.be.true;
+            expect(changeStream.cursor).property('closed', true);
           }
         }
       );
