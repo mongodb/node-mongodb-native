@@ -23,7 +23,7 @@ const INTERRUPT_IN_USE_SKIPPED_TESTS: SkipDescription[] = [
   {
     description: 'clear with interruptInUseConnections = true closes pending connections',
     skipIfCondition: 'always',
-    skipReason: 'TODO(NODE-xxxx): track and kill pending connections'
+    skipReason: 'TODO(NODE-4784): track and kill pending connections'
   }
 ];
 
