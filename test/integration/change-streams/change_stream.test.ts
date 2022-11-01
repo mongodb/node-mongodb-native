@@ -983,174 +983,192 @@ describe('Change Streams', function () {
     });
 
     describe('#asyncIterator', function () {
-      it(
-        'can iterate through changes',
-        { requires: { topology: '!single', mongodb: '>=4.2' } },
-        async function () {
-          changeStream = collection.watch([]);
-          await initIteratorMode(changeStream);
+      describe('for-await iteration', function () {
+        it(
+          'can iterate through changes',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
 
-          const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
-          await collection.insertMany(docs);
+            const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+            await collection.insertMany(docs);
 
-          for await (const change of changeStream) {
-            const { fullDocument } = change;
-            const expectedDoc = docs.shift();
-            expect(fullDocument.city).to.equal(expectedDoc.city);
-            if (docs.length === 0) {
+            for await (const change of changeStream) {
+              const { fullDocument } = change;
+              const expectedDoc = docs.shift();
+              expect(fullDocument.city).to.equal(expectedDoc.city);
+              if (docs.length === 0) {
+                break;
+              }
+            }
+
+            expect(docs).to.have.length(0, 'expected to find all docs before exiting loop');
+          }
+        );
+
+        it(
+          'cannot be resumed from partial iteration',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+            await collection.insertMany(docs);
+
+            for await (const change of changeStream) {
+              const { fullDocument } = change;
+              const expectedDoc = docs.shift();
+              expect(fullDocument.city).to.equal(expectedDoc.city);
               break;
             }
-          }
-
-          expect(docs).to.have.length(0, 'expected to find all docs before exiting loop');
-        }
-      );
-
-      it(
-        'should close the change stream when return is called',
-        { requires: { topology: '!single' } },
-        async function () {
-          changeStream = collection.watch([]);
-          await initIteratorMode(changeStream);
-          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-
-          const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
-          await collection.insertMany(docs);
-
-          await changeStreamIterator.next();
-          await changeStreamIterator.return();
-          expect(changeStream.closed).to.be.true;
-          expect(changeStream.cursor).property('closed', true);
-        }
-      );
-
-      it(
-        'should close the change stream when an error is thrown',
-        { requires: { topology: '!single', mongodb: '>=4.2' } },
-        async function () {
-          changeStream = collection.watch([]);
-          await initIteratorMode(changeStream);
-          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-
-          const unresumableErrorCode = 1000;
-          await client.db('admin').command({
-            configureFailPoint: is4_2Server(this.configuration.version)
-              ? 'failCommand'
-              : 'failGetMoreAfterCursorCheckout',
-            mode: { times: 1 },
-            data: {
-              failCommands: ['getMore'],
-              errorCode: unresumableErrorCode
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            for await (const change of changeStream) {
+              expect.fail('Change stream was resumed after partial iteration');
             }
-          } as FailPoint);
 
-          await collection.insertOne({ city: 'New York City' });
-          try {
-            await changeStreamIterator.next();
-            expect.fail(
-              'Change stream did not throw unresumable error and did not produce any events'
+            expect(docs).to.have.length(
+              2,
+              'expected to find remaining docs after partial iteration'
             );
-          } catch {
+          }
+        );
+
+        it(
+          'cannot be used with emitter-based iteration',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch([]);
+            changeStream.on('change', sinon.stub());
+
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              for await (const change of changeStream) {
+                expect.fail('Async iterator was used with emitter-based iteration');
+              }
+            } catch (error) {
+              expect(error).to.be.instanceOf(MongoAPIError);
+            }
+          }
+        );
+
+        it(
+          'can be used with raw iterator API',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+
+            const docs = [{ city: 'Los Angeles' }, { city: 'Miami' }];
+            await collection.insertMany(docs);
+
+            await changeStream.next();
+            docs.shift();
+
+            try {
+              for await (const change of changeStream) {
+                const { fullDocument } = change;
+                const expectedDoc = docs.shift();
+                expect(fullDocument.city).to.equal(expectedDoc.city);
+
+                if (docs.length === 0) {
+                  break;
+                }
+              }
+            } catch {
+              expect.fail('Async could not be used with raw iterator API');
+            }
+          }
+        );
+      });
+
+      describe('#return', function () {
+        it(
+          'should close the change stream when return is called',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+
+            const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
+            await collection.insertMany(docs);
+
+            await changeStreamIterator.next();
+            await changeStreamIterator.return();
             expect(changeStream.closed).to.be.true;
             expect(changeStream.cursor).property('closed', true);
           }
-        }
-      );
+        );
 
-      it(
-        'should not produce events on closed stream',
-        { requires: { topology: '!single' } },
-        async function () {
-          changeStream = collection.watch([]);
-          changeStream.close();
+        it(
+          'ignores errors thrown from close',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
-          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-          const change = await changeStreamIterator.next();
+            sinon.stub(changeStream.cursor, 'close').throws(new MongoAPIError('testing'));
 
-          expect(change.value).to.be.undefined;
-        }
-      );
+            try {
+              await changeStreamIterator.return();
+            } catch {
+              expect.fail('Async iterator threw an error on close');
+            }
+          }
+        );
+      });
 
-      it(
-        'cannot be used with emitter-based iteration',
-        { requires: { topology: '!single' } },
-        async function () {
-          changeStream = collection.watch([]);
-          changeStream.on('change', sinon.stub());
-          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+      describe('#next', function () {
+        it(
+          'should close the change stream when an error is thrown',
+          { requires: { topology: '!single', mongodb: '>=4.2' } },
+          async function () {
+            changeStream = collection.watch([]);
+            await initIteratorMode(changeStream);
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
 
-          const error = await changeStreamIterator.next().catch(e => e);
-          expect(error).to.be.instanceOf(MongoAPIError);
-        }
-      );
+            const unresumableErrorCode = 1000;
+            await client.db('admin').command({
+              configureFailPoint: is4_2Server(this.configuration.version)
+                ? 'failCommand'
+                : 'failGetMoreAfterCursorCheckout',
+              mode: { times: 1 },
+              data: {
+                failCommands: ['getMore'],
+                errorCode: unresumableErrorCode
+              }
+            } as FailPoint);
 
-      it(
-        'can be used with raw iterator API',
-        { requires: { topology: '!single' } },
-        async function () {
-          changeStream = collection.watch([]);
-          await initIteratorMode(changeStream);
-          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
+            await collection.insertOne({ city: 'New York City' });
+            try {
+              await changeStreamIterator.next();
+              expect.fail(
+                'Change stream did not throw unresumable error and did not produce any events'
+              );
+            } catch {
+              expect(changeStream.closed).to.be.true;
+              expect(changeStream.cursor).property('closed', true);
+            }
+          }
+        );
 
-          const docs = [{ city: 'Los Angeles' }, { city: 'Miami' }];
-          await collection.insertMany(docs);
+        it(
+          'should not produce events on closed stream',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch([]);
+            changeStream.close();
 
-          await changeStream.next();
-
-          try {
+            const changeStreamIterator = changeStream[Symbol.asyncIterator]();
             const change = await changeStreamIterator.next();
-            expect(change.value).to.not.be.undefined;
 
-            const { fullDocument } = change.value;
-            expect(fullDocument.city).to.equal(docs[1].city);
-          } catch {
-            expect.fail('Async could not be used with raw iterator API');
+            expect(change.value).to.be.undefined;
           }
-        }
-      );
-
-      it(
-        'ignores errors thrown from close',
-        { requires: { topology: '!single' } },
-        async function () {
-          changeStream = collection.watch([]);
-          await initIteratorMode(changeStream);
-          const changeStreamIterator = changeStream[Symbol.asyncIterator]();
-
-          sinon.stub(changeStream.cursor, 'close').throws(new MongoAPIError('testing'));
-
-          try {
-            await changeStreamIterator.return();
-          } catch {
-            expect.fail('Async iterator threw an error on close');
-          }
-        }
-      );
-
-      it(
-        'cannot be resumed from partial iteration',
-        { requires: { topology: '!single' } },
-        async function () {
-          changeStream = collection.watch([]);
-          await initIteratorMode(changeStream);
-
-          const docs = [{ city: 'New York City' }, { city: 'Seattle' }, { city: 'Boston' }];
-          await collection.insertMany(docs);
-
-          for await (const change of changeStream) {
-            const { fullDocument } = change;
-            const expectedDoc = docs.shift();
-            expect(fullDocument.city).to.equal(expectedDoc.city);
-            break;
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          for await (const change of changeStream) {
-            expect.fail('Change stream was resumed after partial iteration');
-          }
-
-          expect(docs).to.have.length(2, 'expected to find remaining docs after partial iteration');
-        }
-      );
+        );
+      });
     });
   });
 
