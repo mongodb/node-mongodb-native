@@ -176,6 +176,7 @@ export class Batch<T = Document> {
  * The result of a bulk write.
  */
 export class BulkWriteResult {
+  /** @deprecated Will be removed in 5.0 */
   result: BulkResult;
 
   /**
@@ -295,7 +296,11 @@ export class BulkWriteResult {
     return this.result.writeErrors;
   }
 
-  /** Retrieve lastOp if available */
+  /**
+   * Retrieve lastOp if available
+   *
+   * @deprecated Will be removed in 5.0
+   */
   getLastOp(): Document | undefined {
     return this.result.opTime;
   }
