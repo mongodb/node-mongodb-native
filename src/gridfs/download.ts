@@ -19,9 +19,14 @@ import type { GridFSChunk } from './upload';
 export interface GridFSBucketReadStreamOptions {
   sort?: Sort;
   skip?: number;
-  /** 0-based offset in bytes to start streaming from */
+  /**
+   * 0-indexed non-negative byte offset from the beginning of the file
+   */
   start?: number;
-  /** 0-based offset in bytes to stop streaming before */
+  /**
+   * 0-indexed non-negative byte offset to the end of the file contents
+   * to be returned by the stream. `end` is non-inclusive
+   */
   end?: number;
 }
 
