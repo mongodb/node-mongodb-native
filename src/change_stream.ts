@@ -737,6 +737,26 @@ export class ChangeStream<
     }, callback);
   }
 
+  async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, void> {
+    if (this.closed) {
+      return;
+    }
+
+    try {
+      // Change streams run indefinitely as long as errors are resumable
+      // So the only loop breaking condition is if `next()` throws
+      while (true) {
+        yield await this.next();
+      }
+    } finally {
+      try {
+        await this.close();
+      } catch {
+        // we're not concerned with errors from close()
+      }
+    }
+  }
+
   /** Is the cursor closed */
   get closed(): boolean {
     return this[kClosed] || this.cursor.closed;
