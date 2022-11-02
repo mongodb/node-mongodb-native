@@ -348,3 +348,21 @@ expectType<WithId<{ a: number; b: string }> | null>(
 expectType<WithId<{ a: number; b: string }> | null>(
   (await coll.findOneAndDelete({ a: 3 }, { projection: { _id: 0 } })).value
 );
+
+// NODE-3568: Uncomment when ModifyResult is removed in 5.0
+// expectType<Document> | null>((await coll.findOneAndDelete({ a: 3 })));
+// expectType<Document | null>(
+//   (await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' }))
+// );
+// expectType<Document | null>(
+//   (
+//     await coll.findOneAndUpdate(
+//       { a: 3 },
+//       {
+//         $set: {
+//           a: 5
+//         }
+//       }
+//     )
+//   )
+// );

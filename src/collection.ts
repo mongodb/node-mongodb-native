@@ -99,7 +99,10 @@ import {
 } from './utils';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 
-/** @public */
+/**
+ * @public
+ * @deprecated Will return the actual result document in 5.0
+ */
 export interface ModifyResult<TSchema = Document> {
   value: WithId<TSchema> | null;
   lastErrorObject?: Document;
