@@ -248,9 +248,9 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param callback - Optional callback for completion of this operation
    */
   endSession(): Promise<void>;
+  endSession(options: EndSessionOptions): Promise<void>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   endSession(callback: Callback<void>): void;
-  endSession(options: EndSessionOptions): Promise<void>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   endSession(options: EndSessionOptions, callback: Callback<void>): void;
   endSession(
