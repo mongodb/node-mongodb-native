@@ -130,7 +130,11 @@ export type AnyBulkWriteOperation<TSchema extends Document = Document> =
   | { deleteOne: DeleteOneModel<TSchema> }
   | { deleteMany: DeleteManyModel<TSchema> };
 
-/** @public */
+/**
+ * @public
+ *
+ * @deprecated Will be made internal in 5.0
+ */
 export interface BulkResult {
   ok: number;
   writeErrors: WriteError[];
