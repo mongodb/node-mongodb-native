@@ -327,6 +327,7 @@ export class BulkWriteResult {
     }
   }
 
+  /* @deprecated Will be removed in 5.0 release */
   toJSON(): BulkResult {
     return this.result;
   }
