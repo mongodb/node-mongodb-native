@@ -281,7 +281,6 @@ export interface MessageHeader {
 
 /** @internal */
 export interface OpResponseOptions extends BSONSerializeOptions {
-  raw?: boolean;
   documentsReturnedIn?: string | null;
 }
 
