@@ -99,7 +99,12 @@ import {
 } from './utils';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 
-/** @public */
+/**
+ * @public
+ * @deprecated This type will be completely removed in 5.0 and findOneAndUpdate,
+ *             findOneAndDelete, and findOneAndReplace will then return the
+ *             actual result document.
+ */
 export interface ModifyResult<TSchema = Document> {
   value: WithId<TSchema> | null;
   lastErrorObject?: Document;
