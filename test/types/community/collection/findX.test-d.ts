@@ -350,11 +350,11 @@ expectType<WithId<{ a: number; b: string }> | null>(
 );
 
 // NODE-3568: Uncomment when ModifyResult is removed in 5.0
-// expectType<Document> | null>((await coll.findOneAndDelete({ a: 3 })));
-// expectType<Document | null>(
+// expectType<WithId<TSchema> | null> | null>((await coll.findOneAndDelete({ a: 3 })));
+// expectType<WithId<TSchema> | null>(
 //   (await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' }))
 // );
-// expectType<Document | null>(
+// expectType<WithId<TSchema> | null>(
 //   (
 //     await coll.findOneAndUpdate(
 //       { a: 3 },
