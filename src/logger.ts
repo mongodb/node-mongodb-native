@@ -41,6 +41,7 @@ export interface LoggerOptions {
 
 /**
  * @public
+ * @deprecated This logger will be removed in the next major version and replaced by [NODE-3974](https://jira.mongodb.org/browse/NODE-3974).
  */
 export class Logger {
   className: string;
