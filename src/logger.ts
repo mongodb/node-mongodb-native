@@ -41,6 +41,7 @@ export interface LoggerOptions {
 
 /**
  * @public
+ * @deprecated This logger is unused and will be removed in the next major version.
  */
 export class Logger {
   className: string;
