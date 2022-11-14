@@ -210,8 +210,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
     return this;
   }
 
-  // deprecated methods
-  /** @deprecated Add a geoNear stage to the aggregation pipeline */
+  /** Add a geoNear stage to the aggregation pipeline */
   geoNear($geoNear: Document): this {
     assertUninitialized(this);
     this[kPipeline].push({ $geoNear });
