@@ -78,7 +78,10 @@ export type ResumeToken = unknown;
  */
 export type OperationTime = Timestamp;
 
-/** @public */
+/**
+ * @public
+ * @deprecated This interface is unused and will be removed in the next major version of the driver.
+ */
 export interface PipeOptions {
   end?: boolean;
 }
