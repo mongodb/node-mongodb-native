@@ -5,6 +5,7 @@ import { Db, WithId, WriteConcern, WriteConcernSettings } from '../../src';
 import * as MongoDBDriver from '../../src';
 import type { ChangeStreamDocument } from '../../src/change_stream';
 import { Collection } from '../../src/collection';
+import type { AggregationCursor } from '../../src/cursor/aggregation_cursor';
 import { FindCursor } from '../../src/cursor/find_cursor';
 import { MongoClient } from '../../src/mongo_client';
 import { Topology } from '../../src/sdam/topology';
