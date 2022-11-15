@@ -374,23 +374,24 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.emit('message', message);
     let operationDescription = this[kQueue].get(message.responseTo);
 
+    // Protect against multiplexing.
+    if (this[kQueue].size > 1) {
+      this.onError(new MongoRuntimeError(INVALID_QUEUE_SIZE));
+      return;
+    }
+
     if (!operationDescription && this.isMonitoringConnection) {
       // This is how we recover when the initial hello's requestId is not
       // the responseTo when hello responses have been skipped:
 
-      // First check if the map is of invalid size
-      if (this[kQueue].size > 1) {
-        this.onError(new MongoRuntimeError(INVALID_QUEUE_SIZE));
-      } else {
-        // Get the first orphaned operation description.
-        const entry = this[kQueue].entries().next();
-        if (entry) {
-          const [requestId, orphaned]: [number, OperationDescription] = entry.value;
-          // If the orphaned operation description exists then set it.
-          operationDescription = orphaned;
-          // Remove the entry with the bad request id from the queue.
-          this[kQueue].delete(requestId);
-        }
+      // Get the first orphaned operation description.
+      const entry = this[kQueue].entries().next();
+      if (entry) {
+        const [requestId, orphaned]: [number, OperationDescription] = entry.value;
+        // If the orphaned operation description exists then set it.
+        operationDescription = orphaned;
+        // Remove the entry with the bad request id from the queue.
+        this[kQueue].delete(requestId);
       }
     }
 
