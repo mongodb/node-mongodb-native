@@ -234,7 +234,7 @@ describe('new Connection()', function () {
         });
 
         it('calls the operation description callback with the document', function () {
-          expect(callbackSpy).to.be.calledWith(undefined, document);
+          expect(callbackSpy).to.be.calledExactlyOnceWith(undefined, document);
         });
       });
     });
