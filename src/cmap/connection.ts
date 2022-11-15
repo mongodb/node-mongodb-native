@@ -17,6 +17,7 @@ import {
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoRuntimeError,
   MongoServerError,
   MongoWriteConcernError
 } from '../error';
@@ -67,6 +68,8 @@ const kHello = Symbol('hello');
 const kAutoEncrypter = Symbol('autoEncrypter');
 /** @internal */
 const kDelayedTimeoutId = Symbol('delayedTimeoutId');
+
+const INVALID_QUEUE_SIZE = 'Connection internal queue contains more than 1 operation description';
 
 /** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
@@ -374,15 +377,20 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (!operationDescription && this.isMonitoringConnection) {
       // NODE-4783: How do we recover from this when the initial hello's requestId is not
       // the responseTo when hello responses have been skipped?
-      //
-      // Get the first orphaned operation description.
-      const entry = this[kQueue].entries().next();
-      if (entry) {
-        const [requestId, orphaned]: [number, OperationDescription] = entry.value;
-        // If the orphaned operation description exists then set it.
-        operationDescription = orphaned;
-        // Remove the entry with the bad request id from the queue.
-        this[kQueue].delete(requestId);
+
+      // First check if the map is of invalid size
+      if (this[kQueue].size > 1) {
+        this.onError(new MongoRuntimeError(INVALID_QUEUE_SIZE));
+      } else {
+        // Get the first orphaned operation description.
+        const entry = this[kQueue].entries().next();
+        if (entry) {
+          const [requestId, orphaned]: [number, OperationDescription] = entry.value;
+          // If the orphaned operation description exists then set it.
+          operationDescription = orphaned;
+          // Remove the entry with the bad request id from the queue.
+          this[kQueue].delete(requestId);
+        }
       }
     }
 
