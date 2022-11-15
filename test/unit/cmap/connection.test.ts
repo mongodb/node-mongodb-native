@@ -1,7 +1,8 @@
 import { expect } from 'chai';
-import { EventEmitter } from 'events';
+import { EventEmitter, on } from 'events';
 import { Socket } from 'net';
 import * as sinon from 'sinon';
+import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 
 import { BinMsg } from '../../../src/cmap/commands';
@@ -165,11 +166,44 @@ describe('new Connection()', function () {
 
       beforeEach(function () {
         driverSocket = sinon.spy(new FakeSocket());
-        // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
-        connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
-        connection.isMonitoringConnection = true;
-        const queueSymbol = getSymbolFrom(connection, 'queue');
-        queue = connection[queueSymbol];
+      });
+
+      context('when multiple hellos exist on the stream', function () {
+        let callbackSpy;
+        const inputStream = new Readable();
+        const document = { ok: 1 };
+
+        beforeEach(function () {
+          callbackSpy = sinon.spy();
+          const firstHello = generateOpMsgBuffer(document);
+          const secondHello = generateOpMsgBuffer(document);
+          const thirdHello = generateOpMsgBuffer(document);
+          const buffer = Buffer.concat([firstHello, secondHello, thirdHello]);
+
+          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+          connection = sinon.spy(new Connection(inputStream, connectionOptionsDefaults));
+          connection.isMonitoringConnection = true;
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+
+          // Create the operation description.
+          const operationDescription: OperationDescription = {
+            requestId: 1,
+            cb: callbackSpy
+          };
+
+          // Stick an operation description in the queue.
+          queue.set(1, operationDescription);
+
+          // Push the buffer of 3 hellos to the input stream
+          inputStream.push(buffer);
+          inputStream.push(null);
+        });
+
+        it('calls the operation description callback with the document', async function () {
+          await on(inputStream, 'message');
+          expect(callbackSpy).to.be.calledOnceWith(undefined, document);
+        });
       });
 
       context('when requestId/responseTo do not match', function () {
@@ -178,6 +212,13 @@ describe('new Connection()', function () {
 
         beforeEach(function () {
           callbackSpy = sinon.spy();
+
+          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+          connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+          connection.isMonitoringConnection = true;
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+
           // Create the operation description.
           const operationDescription: OperationDescription = {
             requestId: 1,
@@ -201,7 +242,7 @@ describe('new Connection()', function () {
         });
 
         it('calls the operation description callback with the document', function () {
-          expect(callbackSpy).to.be.calledExactlyOnceWith(undefined, document);
+          expect(callbackSpy).to.be.calledOnceWith(undefined, document);
         });
       });
 
@@ -211,6 +252,13 @@ describe('new Connection()', function () {
 
         beforeEach(function () {
           callbackSpy = sinon.spy();
+
+          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+          connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+          connection.isMonitoringConnection = true;
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+
           // Create the operation description.
           const operationDescription: OperationDescription = {
             requestId: 1,
@@ -234,7 +282,7 @@ describe('new Connection()', function () {
         });
 
         it('calls the operation description callback with the document', function () {
-          expect(callbackSpy).to.be.calledExactlyOnceWith(undefined, document);
+          expect(callbackSpy).to.be.calledOnceWith(undefined, document);
         });
       });
     });

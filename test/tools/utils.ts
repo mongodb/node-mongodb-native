@@ -354,6 +354,18 @@ export class TestBuilder {
   }
 }
 
+export function bufferToStream(buffer) {
+  const stream = new Readable();
+  if (Array.isArray(buffer)) {
+    buffer.forEach(b => stream.push(b));
+  } else {
+    stream.push(buffer);
+  }
+
+  stream.push(null);
+  return stream;
+}
+
 export function generateOpMsgBuffer(document: Document): Buffer {
   const header = Buffer.alloc(4 * 4 + 4);
 
