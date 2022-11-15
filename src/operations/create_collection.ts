@@ -58,7 +58,7 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   strict?: boolean;
   /** Create a capped collection */
   capped?: boolean;
-  /** @deprecated Create an index on the _id field of the document, True by default on MongoDB 2.6 - 3.0 */
+  /** @deprecated Create an index on the _id field of the document. This option is deprecated in MongoDB 3.2+ and will be removed once no longer supported by the server. */
   autoIndexId?: boolean;
   /** The size of the capped collection in bytes */
   size?: number;
@@ -66,19 +66,19 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   max?: number;
   /** Available for the MMAPv1 storage engine only to set the usePowerOf2Sizes and the noPadding flag */
   flags?: number;
-  /** Allows users to specify configuration to the storage engine on a per-collection basis when creating a collection on MongoDB 3.0 or higher */
+  /** Allows users to specify configuration to the storage engine on a per-collection basis when creating a collection */
   storageEngine?: Document;
-  /** Allows users to specify validation rules or expressions for the collection. For more information, see Document Validation on MongoDB 3.2 or higher */
+  /** Allows users to specify validation rules or expressions for the collection. For more information, see Document Validation */
   validator?: Document;
-  /** Determines how strictly MongoDB applies the validation rules to existing documents during an update on MongoDB 3.2 or higher */
+  /** Determines how strictly MongoDB applies the validation rules to existing documents during an update */
   validationLevel?: string;
-  /** Determines whether to error on invalid documents or just warn about the violations but allow invalid documents to be inserted on MongoDB 3.2 or higher */
+  /** Determines whether to error on invalid documents or just warn about the violations but allow invalid documents to be inserted */
   validationAction?: string;
-  /** Allows users to specify a default configuration for indexes when creating a collection on MongoDB 3.2 or higher */
+  /** Allows users to specify a default configuration for indexes when creating a collection */
   indexOptionDefaults?: Document;
-  /** The name of the source collection or view from which to create the view. The name is not the full namespace of the collection or view; i.e. does not include the database name and implies the same database as the view to create on MongoDB 3.4 or higher */
+  /** The name of the source collection or view from which to create the view. The name is not the full namespace of the collection or view (i.e., does not include the database name and implies the same database as the view to create) */
   viewOn?: string;
-  /** An array that consists of the aggregation pipeline stage. Creates the view by applying the specified pipeline to the viewOn collection or view on MongoDB 3.4 or higher */
+  /** An array that consists of the aggregation pipeline stage. Creates the view by applying the specified pipeline to the viewOn collection or view */
   pipeline?: Document[];
   /** A primary key factory function for generation of custom _id keys. */
   pkFactory?: PkFactory;
