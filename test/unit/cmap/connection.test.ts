@@ -180,7 +180,6 @@ describe('new Connection()', function () {
           const thirdHello = generateOpMsgBuffer(document);
           const buffer = Buffer.concat([firstHello, secondHello, thirdHello]);
 
-          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
           connection = sinon.spy(new Connection(inputStream, connectionOptionsDefaults));
           connection.isMonitoringConnection = true;
           const queueSymbol = getSymbolFrom(connection, 'queue');
