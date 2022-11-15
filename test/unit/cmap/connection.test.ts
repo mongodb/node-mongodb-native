@@ -159,6 +159,67 @@ describe('new Connection()', function () {
   });
 
   describe('#onMessage', function () {
+    context('when the connection is not a monitoring connection', function () {
+      let queue: Map<number, OperationDescription>;
+      let driverSocket: FakeSocket;
+      let connection: Connection;
+
+      beforeEach(function () {
+        driverSocket = sinon.spy(new FakeSocket());
+      });
+
+      context('when more than one operation description is in the queue', function () {
+        let spyOne;
+        let spyTwo;
+        const document = { ok: 1 };
+
+        beforeEach(function () {
+          spyOne = sinon.spy();
+          spyTwo = sinon.spy();
+
+          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+          connection = new Connection(driverSocket, connectionOptionsDefaults);
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+
+          // Create the operation descriptions.
+          const descriptionOne: OperationDescription = {
+            requestId: 1,
+            cb: spyOne
+          };
+          const descriptionTwo: OperationDescription = {
+            requestId: 2,
+            cb: spyTwo
+          };
+
+          // Stick an operation description in the queue.
+          queue.set(2, descriptionOne);
+          queue.set(3, descriptionTwo);
+          // Emit a message that matches the existing operation description.
+          const msg = generateOpMsgBuffer(document);
+          const msgHeader: MessageHeader = {
+            length: msg.readInt32LE(0),
+            requestId: 2,
+            responseTo: 1,
+            opCode: msg.readInt32LE(12)
+          };
+          const msgBody = msg.subarray(16);
+
+          const message = new BinMsg(msg, msgHeader, msgBody);
+          connection.onMessage(message);
+        });
+
+        it('calls all operation description callbacks with an error', function () {
+          expect(spyOne).to.be.calledOnce;
+          expect(spyTwo).to.be.calledOnce;
+          const errorOne = spyOne.firstCall.args[0];
+          const errorTwo = spyTwo.firstCall.args[0];
+          expect(errorOne).to.be.instanceof(MongoRuntimeError);
+          expect(errorTwo).to.be.instanceof(MongoRuntimeError);
+        });
+      });
+    });
+
     context('when the connection is a monitoring connection', function () {
       let queue: Map<number, OperationDescription>;
       let driverSocket: FakeSocket;
