@@ -375,8 +375,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let operationDescription = this[kQueue].get(message.responseTo);
 
     if (!operationDescription && this.isMonitoringConnection) {
-      // NODE-4783: How do we recover from this when the initial hello's requestId is not
-      // the responseTo when hello responses have been skipped?
+      // This is how we recover when the initial hello's requestId is not
+      // the responseTo when hello responses have been skipped:
 
       // First check if the map is of invalid size
       if (this[kQueue].size > 1) {
