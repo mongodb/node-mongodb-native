@@ -405,7 +405,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     // making the `responseTo` change on each response
     this[kQueue].delete(message.responseTo);
     if ('moreToCome' in message && message.moreToCome) {
-      // NODE-4783: If the operation description check above does find an orphaned
+      // If the operation description check above does find an orphaned
       // description and sets the operationDescription then this line will put one
       // back in the queue with the correct requestId and will resolve not being able
       // to find the next one via the responseTo of the next streaming hello.
