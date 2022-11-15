@@ -4,13 +4,14 @@ import { Socket } from 'net';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
+import { BinMsg } from '../../../src/cmap/commands';
 import { connect } from '../../../src/cmap/connect';
 import { Connection, hasSessionSupport } from '../../../src/cmap/connection';
 import { MessageStream } from '../../../src/cmap/message_stream';
 import { MongoNetworkTimeoutError } from '../../../src/error';
 import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
-import { getSymbolFrom } from '../../tools/utils';
+import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
 
 const connectionOptionsDefaults = {
@@ -21,6 +22,25 @@ const connectionOptionsDefaults = {
   metadata: undefined,
   loadBalanced: false
 };
+
+/** The absolute minimum socket API needed by Connection as of writing this test */
+class FakeSocket extends EventEmitter {
+  address() {
+    // is never called
+  }
+  pipe() {
+    // does not need to do anything
+  }
+  destroy() {
+    // is called, has no side effects
+  }
+  get remoteAddress() {
+    return 'iLoveJavaScript';
+  }
+  get remotePort() {
+    return 123;
+  }
+}
 
 describe('new Connection()', function () {
   let server;
@@ -137,6 +157,89 @@ describe('new Connection()', function () {
     });
   });
 
+  describe('#onMessage', function () {
+    context('when the connection is a monitoring connection', function () {
+      let queue: Map<number, OperationDescription>;
+      let driverSocket: FakeSocket;
+      let connection: Connection;
+
+      beforeEach(function () {
+        driverSocket = sinon.spy(new FakeSocket());
+        // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+        connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+        connection.isMonitoringConnection = true;
+        const queueSymbol = getSymbolFrom(connection, 'queue');
+        queue = connection[queueSymbol];
+      });
+
+      context('when requestId/responseTo do not match', function () {
+        let callbackSpy;
+        const document = { ok: 1 };
+
+        beforeEach(function () {
+          callbackSpy = sinon.spy();
+          // Create the operation description.
+          const operationDescription: OperationDescription = {
+            requestId: 1,
+            cb: callbackSpy
+          };
+
+          // Stick an operation description in the queue.
+          queue.set(1, operationDescription);
+          // Emit a message that won't match the existing operation description.
+          const msg = generateOpMsgBuffer(document);
+          const msgHeader: MessageHeader = {
+            length: msg.readInt32LE(0),
+            requestId: msg.readInt32LE(4),
+            responseTo: msg.readInt32LE(8),
+            opCode: msg.readInt32LE(12)
+          };
+          const msgBody = msg.subarray(16);
+
+          const message = new BinMsg(msg, msgHeader, msgBody);
+          connection.onMessage(message);
+        });
+
+        it('calls the operation description callback with the document', function () {
+          expect(callbackSpy).to.be.calledWith(undefined, document);
+        });
+      });
+
+      context('when requestId/reponseTo match', function () {
+        let callbackSpy;
+        const document = { ok: 1 };
+
+        beforeEach(function () {
+          callbackSpy = sinon.spy();
+          // Create the operation description.
+          const operationDescription: OperationDescription = {
+            requestId: 1,
+            cb: callbackSpy
+          };
+
+          // Stick an operation description in the queue.
+          queue.set(1, operationDescription);
+          // Emit a message that matches the existing operation description.
+          const msg = generateOpMsgBuffer(document);
+          const msgHeader: MessageHeader = {
+            length: msg.readInt32LE(0),
+            requestId: 2,
+            responseTo: 1,
+            opCode: msg.readInt32LE(12)
+          };
+          const msgBody = msg.subarray(16);
+
+          const message = new BinMsg(msg, msgHeader, msgBody);
+          connection.onMessage(message);
+        });
+
+        it('calls the operation description callback with the document', function () {
+          expect(callbackSpy).to.be.calledWith(undefined, document);
+        });
+      });
+    });
+  });
+
   describe('onTimeout()', () => {
     let connection: sinon.SinonSpiedInstance<Connection>;
     let clock: sinon.SinonFakeTimers;
@@ -145,25 +248,6 @@ describe('new Connection()', function () {
     let messageStream: MessageStream;
     let kDelayedTimeoutId: symbol;
     let NodeJSTimeoutClass: any;
-
-    /** The absolute minimum socket API needed by Connection as of writing this test */
-    class FakeSocket extends EventEmitter {
-      address() {
-        // is never called
-      }
-      pipe() {
-        // does not need to do anything
-      }
-      destroy() {
-        // is called, has no side effects
-      }
-      get remoteAddress() {
-        return 'iLoveJavaScript';
-      }
-      get remotePort() {
-        return 123;
-      }
-    }
 
     beforeEach(() => {
       timerSandbox = createTimerSandbox();
