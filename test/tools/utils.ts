@@ -1,6 +1,7 @@
 import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
+import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
@@ -352,6 +353,18 @@ export class TestBuilder {
 
     return test;
   }
+}
+
+export function bufferToStream(buffer) {
+  const stream = new Readable();
+  if (Array.isArray(buffer)) {
+    buffer.forEach(b => stream.push(b));
+  } else {
+    stream.push(buffer);
+  }
+
+  stream.push(null);
+  return stream;
 }
 
 export function generateOpMsgBuffer(document: Document): Buffer {
