@@ -69,7 +69,7 @@ const kAutoEncrypter = Symbol('autoEncrypter');
 /** @internal */
 const kDelayedTimeoutId = Symbol('delayedTimeoutId');
 
-const INVALID_QUEUE_SIZE = 'Connection internal queue contains more than 1 operation description';
+const INVALID_QUEUE_SIZE = 'Connection internal queue already contains 1 operation description';
 
 /** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
@@ -678,6 +678,12 @@ function write(
   options: CommandOptions,
   callback: Callback
 ) {
+  // NODE-4820: We cannot multiplex so check if there is an operation already
+  // in flight for monitoring connections only in at this time.
+  if (conn.isMonitoringConnection && conn[kQueue].size > 1);
+    return callback(new MongoRuntimeError(INVALID_QUEUE_SIZE));
+  }
+
   options = options ?? {};
   const operationDescription: OperationDescription = {
     requestId: command.requestId,
