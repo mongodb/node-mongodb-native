@@ -24,6 +24,13 @@ const INTERRUPT_IN_USE_SKIPPED_TESTS: SkipDescription[] = [
     description: 'clear with interruptInUseConnections = true closes pending connections',
     skipIfCondition: 'always',
     skipReason: 'TODO(NODE-4784): track and kill pending connections'
+  },
+  {
+    description:
+      'Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections: false)',
+    skipIfCondition: 'always',
+    skipReason:
+      'NodeJS does not have a background thread responsible for managing connections, and so already checked in connections are not pruned when in-use connections are interrupted.'
   }
 ];
 

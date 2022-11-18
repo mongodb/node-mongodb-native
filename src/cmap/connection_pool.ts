@@ -415,7 +415,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    */
   clear(options: { serviceId?: ObjectId; interruptInUseConnections?: boolean } = {}): void {
     const { serviceId } = options;
-    const interruptInUseConnections = options.interruptInUseConnections ?? false;
     if (this.closed) {
       return;
     }
@@ -438,10 +437,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
       return;
     }
-
-    const oldGeneration = this[kGeneration];
-
     // handle non load-balanced case
+    const interruptInUseConnections = options.interruptInUseConnections ?? false;
+    const oldGeneration = this[kGeneration];
     this[kGeneration] += 1;
     const alreadyPaused = this[kPoolState] === PoolState.paused;
     this[kPoolState] = PoolState.paused;
@@ -454,9 +452,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
     }
 
-    process.nextTick(() =>
-      this.pruneConnections({ minGeneration: oldGeneration, interruptInUseConnections })
-    );
+    if (interruptInUseConnections) {
+      process.nextTick(() => this.interruptInUseConnections(oldGeneration));
+    }
 
     this.processWaitQueue();
   }
@@ -468,41 +466,20 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * Only connections where `connection.generation <= minGeneration` are killed.  Connections are closed with a
    * resumable PoolClearedOnNetworkTimeoutError.
    */
-  private pruneConnections({
-    interruptInUseConnections,
-    minGeneration
-  }: {
-    interruptInUseConnections: boolean;
-    minGeneration: number;
-  }) {
-    this[kConnections].prune(connection => {
+  private interruptInUseConnections(minGeneration: number) {
+    for (const connection of this[kCheckedOut]) {
       if (connection.generation <= minGeneration) {
+        this[kCheckedOut].delete(connection);
         connection.onError(new PoolClearedOnNetworkError(this));
         this.emit(
           ConnectionPool.CONNECTION_CLOSED,
           new ConnectionClosedEvent(this, connection, 'stale')
         );
-
-        return true;
       }
-      return false;
-    });
-
-    if (interruptInUseConnections) {
-      for (const connection of this[kCheckedOut]) {
-        if (connection.generation <= minGeneration) {
-          this[kCheckedOut].delete(connection);
-          connection.onError(new PoolClearedOnNetworkError(this));
-          this.emit(
-            ConnectionPool.CONNECTION_CLOSED,
-            new ConnectionClosedEvent(this, connection, 'stale')
-          );
-        }
-      }
-
-      // TODO(NODE-4784): track pending connections and cancel
-      // this[kCancellationToken].emit('cancel');
     }
+
+    // TODO(NODE-4784): track pending connections and cancel
+    // this[kCancellationToken].emit('cancel');
   }
 
   /** Close the pool */
