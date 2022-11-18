@@ -72,18 +72,22 @@ type CredentialProvider = {
   fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;
 };
 
-export let credentialProvider: CredentialProvider | { kModuleError: MongoMissingDependencyError } =
-  makeErrorModule(
-    new MongoMissingDependencyError(
-      'Optional module `@aws-sdk/credential-providers` not found.' +
-        ' Please install it to enable getting aws credentials via the official sdk.'
-    )
-  );
-
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  credentialProvider = require('@aws-sdk/credential-providers');
-} catch {} // eslint-disable-line
+export function getAwsCredentialProvider():
+  | CredentialProvider
+  | { kModuleError: MongoMissingDependencyError } {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    const credentialProvider = require('@aws-sdk/credential-providers');
+    return credentialProvider;
+  } catch {
+    return makeErrorModule(
+      new MongoMissingDependencyError(
+        'Optional module `@aws-sdk/credential-providers` not found.' +
+          ' Please install it to enable getting aws credentials via the official sdk.'
+      )
+    );
+  }
+}
 
 type SnappyLib = {
   [PKG_VERSION]: { major: number; minor: number; patch: number };

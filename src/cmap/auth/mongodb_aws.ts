@@ -4,7 +4,7 @@ import * as url from 'url';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { aws4, credentialProvider } from '../../deps';
+import { aws4, getAwsCredentialProvider } from '../../deps';
 import {
   MongoAWSError,
   MongoCompatibilityError,
@@ -197,6 +197,8 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
       })
     );
   }
+
+  const credentialProvider = getAwsCredentialProvider();
 
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
