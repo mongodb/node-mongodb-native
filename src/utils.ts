@@ -897,98 +897,250 @@ export function deepCopy<T>(value: T): T {
   return value;
 }
 
-/** @internal */
-const kBuffers = Symbol('buffers');
-/** @internal */
-const kLength = Symbol('length');
+type ListNode<T> = {
+  value: T;
+  next: ListNode<T> | HeadNode<T>;
+  prev: ListNode<T> | HeadNode<T>;
+};
+
+type HeadNode<T> = {
+  value: null;
+  next: ListNode<T>;
+  prev: ListNode<T>;
+};
+
+/**
+ * When a list is empty the head is a reference with pointers to itself
+ * So this type represents that self referential state
+ */
+type EmptyNode = {
+  value: null;
+  next: EmptyNode;
+  prev: EmptyNode;
+};
+
+/**
+ * A sequential list of items in a circularly linked list
+ * @remarks
+ * The head node is special, it is always defined and has a value of null.
+ * It is never "included" in the list, in that, it is not returned by pop/shift or yielded by the iterator.
+ * The circular linkage and always defined head node are to reduce checks for null next/prev references to zero.
+ * New nodes are declared as object literals with keys always in the same order: next, prev, value.
+ * @internal
+ */
+export class List<T = unknown> {
+  private readonly head: HeadNode<T> | EmptyNode;
+  private count: number;
+
+  get length() {
+    return this.count;
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'List' as const;
+  }
+
+  constructor() {
+    this.count = 0;
+
+    // this is carefully crafted:
+    // declaring a complete and consistently key ordered
+    // object is beneficial to the runtime optimizations
+    this.head = {
+      next: null,
+      prev: null,
+      value: null
+    } as unknown as EmptyNode;
+    this.head.next = this.head;
+    this.head.prev = this.head;
+  }
+
+  toArray() {
+    return Array.from(this);
+  }
+
+  toString() {
+    return `head <=> ${this.toArray().join(' <=> ')} <=> head`;
+  }
+
+  *[Symbol.iterator](): Generator<T, void, void> {
+    for (const node of this.nodes()) {
+      yield node.value;
+    }
+  }
+
+  private *nodes(): Generator<ListNode<T>, void, void> {
+    let ptr: HeadNode<T> | ListNode<T> | EmptyNode = this.head.next;
+    while (ptr !== this.head) {
+      // Save next before yielding so that we make removing within iteration safe
+      const { next } = ptr as ListNode<T>;
+      yield ptr as ListNode<T>;
+      ptr = next;
+    }
+  }
+
+  /** Insert at end of list */
+  push(value: T) {
+    this.count += 1;
+    const newNode: ListNode<T> = {
+      next: this.head as HeadNode<T>,
+      prev: this.head.prev as ListNode<T>,
+      value
+    };
+    this.head.prev.next = newNode;
+    this.head.prev = newNode;
+  }
+
+  /** Inserts every item inside an iterable instead of the iterable itself */
+  pushMany(iterable: Iterable<T>) {
+    for (const value of iterable) {
+      this.push(value);
+    }
+  }
+
+  /** Insert at front of list */
+  unshift(value: T) {
+    this.count += 1;
+    const newNode: ListNode<T> = {
+      next: this.head.next as ListNode<T>,
+      prev: this.head as HeadNode<T>,
+      value
+    };
+    this.head.next.prev = newNode;
+    this.head.next = newNode;
+  }
+
+  private remove(node: ListNode<T> | EmptyNode): T | null {
+    if (node === this.head || this.length === 0) {
+      return null;
+    }
+
+    this.count -= 1;
+
+    const prevNode = node.prev;
+    const nextNode = node.next;
+    prevNode.next = nextNode;
+    nextNode.prev = prevNode;
+
+    return node.value;
+  }
+
+  /** Removes the first node at the front of the list */
+  shift(): T | null {
+    return this.remove(this.head.next);
+  }
+
+  /** Removes the last node at the end of the list */
+  pop(): T | null {
+    return this.remove(this.head.prev);
+  }
+
+  /** Iterates through the list and removes nodes where filter returns true */
+  prune(filter: (value: T) => boolean) {
+    for (const node of this.nodes()) {
+      if (filter(node.value)) {
+        this.remove(node);
+      }
+    }
+  }
+
+  clear() {
+    this.count = 0;
+    this.head.next = this.head as EmptyNode;
+    this.head.prev = this.head as EmptyNode;
+  }
+
+  /** Returns the first item in the list, does not remove */
+  first(): T | null {
+    // If the list is empty, value will be the head's null
+    return this.head.next.value;
+  }
+
+  /** Returns the last item in the list, does not remove */
+  last(): T | null {
+    // If the list is empty, value will be the head's null
+    return this.head.prev.value;
+  }
+}
 
 /**
  * A pool of Buffers which allow you to read them as if they were one
  * @internal
  */
 export class BufferPool {
-  [kBuffers]: Buffer[];
-  [kLength]: number;
+  private buffers: List<Buffer>;
+  private totalByteLength: number;
 
   constructor() {
-    this[kBuffers] = [];
-    this[kLength] = 0;
+    this.buffers = new List();
+    this.totalByteLength = 0;
   }
 
   get length(): number {
-    return this[kLength];
+    return this.totalByteLength;
   }
 
   /** Adds a buffer to the internal buffer pool list */
   append(buffer: Buffer): void {
-    this[kBuffers].push(buffer);
-    this[kLength] += buffer.length;
+    this.buffers.push(buffer);
+    this.totalByteLength += buffer.length;
   }
 
-  /** Returns the requested number of bytes without consuming them */
-  peek(size: number): Buffer {
-    return this.read(size, false);
+  /**
+   * If BufferPool contains 4 bytes or more construct an int32 from the leading bytes,
+   * otherwise return null. Size can be negative, caller should error check.
+   */
+  getInt32(): number | null {
+    if (this.totalByteLength < 4) {
+      return null;
+    }
+    const firstBuffer = this.buffers.first();
+    if (firstBuffer != null && firstBuffer.byteLength >= 4) {
+      return firstBuffer.readInt32LE(0);
+    }
+
+    // Unlikely case: an int32 is split across buffers.
+    // Use read and put the returned buffer back on top
+    const top4Bytes = this.read(4);
+    const value = top4Bytes.readInt32LE(0);
+
+    // Put it back.
+    this.totalByteLength += 4;
+    this.buffers.unshift(top4Bytes);
+
+    return value;
   }
 
   /** Reads the requested number of bytes, optionally consuming them */
-  read(size: number, consume = true): Buffer {
+  read(size: number): Buffer {
     if (typeof size !== 'number' || size < 0) {
       throw new MongoInvalidArgumentError('Argument "size" must be a non-negative number');
     }
 
-    if (size > this[kLength]) {
+    // oversized request returns empty buffer
+    if (size > this.totalByteLength) {
       return Buffer.alloc(0);
     }
 
-    let result: Buffer;
+    // We know we have enough, we just don't know how it is spread across chunks
+    // TODO(NODE-4732): alloc API should change based on raw option
+    const result = Buffer.allocUnsafe(size);
 
-    // read the whole buffer
-    if (size === this.length) {
-      result = Buffer.concat(this[kBuffers]);
-
-      if (consume) {
-        this[kBuffers] = [];
-        this[kLength] = 0;
+    for (let bytesRead = 0; bytesRead < size; ) {
+      const buffer = this.buffers.shift();
+      if (buffer == null) {
+        break;
       }
-    }
+      const bytesRemaining = size - bytesRead;
+      const bytesReadable = Math.min(bytesRemaining, buffer.byteLength);
+      const bytes = buffer.subarray(0, bytesReadable);
 
-    // size is within first buffer, no need to concat
-    else if (size <= this[kBuffers][0].length) {
-      result = this[kBuffers][0].slice(0, size);
-      if (consume) {
-        this[kBuffers][0] = this[kBuffers][0].slice(size);
-        this[kLength] -= size;
-      }
-    }
+      result.set(bytes, bytesRead);
 
-    // size is beyond first buffer, need to track and copy
-    else {
-      result = Buffer.allocUnsafe(size);
-
-      let idx;
-      let offset = 0;
-      let bytesToCopy = size;
-      for (idx = 0; idx < this[kBuffers].length; ++idx) {
-        let bytesCopied;
-        if (bytesToCopy > this[kBuffers][idx].length) {
-          bytesCopied = this[kBuffers][idx].copy(result, offset, 0);
-          offset += bytesCopied;
-        } else {
-          bytesCopied = this[kBuffers][idx].copy(result, offset, 0, bytesToCopy);
-          if (consume) {
-            this[kBuffers][idx] = this[kBuffers][idx].slice(bytesCopied);
-          }
-          offset += bytesCopied;
-          break;
-        }
-
-        bytesToCopy -= bytesCopied;
-      }
-
-      // compact the internal buffer array
-      if (consume) {
-        this[kBuffers] = this[kBuffers].slice(idx);
-        this[kLength] -= size;
+      bytesRead += bytesReadable;
+      this.totalByteLength -= bytesReadable;
+      if (bytesReadable < buffer.byteLength) {
+        this.buffers.unshift(buffer.subarray(bytesReadable));
       }
     }
 

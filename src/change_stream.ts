@@ -78,7 +78,10 @@ export type ResumeToken = unknown;
  */
 export type OperationTime = Timestamp;
 
-/** @public */
+/**
+ * @public
+ * @deprecated This interface is unused and will be removed in the next major version of the driver.
+ */
 export interface PipeOptions {
   end?: boolean;
 }
@@ -648,21 +651,25 @@ export class ChangeStream<
   hasNext(callback?: Callback): Promise<boolean> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      try {
-        const hasNext = await this.cursor.hasNext();
-        return hasNext;
-      } catch (error) {
+      // Change streams must resume indefinitely while each resume event succeeds.
+      // This loop continues until either a change event is received or until a resume attempt
+      // fails.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
           const hasNext = await this.cursor.hasNext();
           return hasNext;
         } catch (error) {
           try {
-            await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+            await this._processErrorIteratorMode(error);
+          } catch (error) {
+            try {
+              await this.close();
+            } catch {
+              // We are not concerned with errors from close()
+            }
+            throw error;
           }
-          throw error;
         }
       }
     }, callback);
@@ -675,23 +682,26 @@ export class ChangeStream<
   next(callback?: Callback<TChange>): Promise<TChange> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      try {
-        const change = await this.cursor.next();
-        const processedChange = this._processChange(change ?? null);
-        return processedChange;
-      } catch (error) {
+      // Change streams must resume indefinitely while each resume event succeeds.
+      // This loop continues until either a change event is received or until a resume attempt
+      // fails.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
           const change = await this.cursor.next();
           const processedChange = this._processChange(change ?? null);
           return processedChange;
         } catch (error) {
           try {
-            await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+            await this._processErrorIteratorMode(error);
+          } catch (error) {
+            try {
+              await this.close();
+            } catch {
+              // We are not concerned with errors from close()
+            }
+            throw error;
           }
-          throw error;
         }
       }
     }, callback);
@@ -706,24 +716,48 @@ export class ChangeStream<
   tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
     this._setIsIterator();
     return maybeCallback(async () => {
-      try {
-        const change = await this.cursor.tryNext();
-        return change ?? null;
-      } catch (error) {
+      // Change streams must resume indefinitely while each resume event succeeds.
+      // This loop continues until either a change event is received or until a resume attempt
+      // fails.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
         try {
-          await this._processErrorIteratorMode(error);
           const change = await this.cursor.tryNext();
           return change ?? null;
         } catch (error) {
           try {
-            await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+            await this._processErrorIteratorMode(error);
+          } catch (error) {
+            try {
+              await this.close();
+            } catch {
+              // We are not concerned with errors from close()
+            }
+            throw error;
           }
-          throw error;
         }
       }
     }, callback);
+  }
+
+  async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, void> {
+    if (this.closed) {
+      return;
+    }
+
+    try {
+      // Change streams run indefinitely as long as errors are resumable
+      // So the only loop breaking condition is if `next()` throws
+      while (true) {
+        yield await this.next();
+      }
+    } finally {
+      try {
+        await this.close();
+      } catch {
+        // we're not concerned with errors from close()
+      }
+    }
   }
 
   /** Is the cursor closed */

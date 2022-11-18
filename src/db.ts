@@ -277,9 +277,9 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   command(command: Document): Promise<Document>;
+  command(command: Document, options: RunCommandOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   command(command: Document, callback: Callback<Document>): void;
-  command(command: Document, options: RunCommandOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   command(command: Document, options: RunCommandOptions, callback: Callback<Document>): void;
   command(
@@ -354,9 +354,9 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   stats(): Promise<Document>;
+  stats(options: DbStatsOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   stats(callback: Callback<Document>): void;
-  stats(options: DbStatsOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   stats(options: DbStatsOptions, callback: Callback<Document>): void;
   stats(
@@ -413,17 +413,17 @@ export class Db {
     fromCollection: string,
     toCollection: string
   ): Promise<Collection<TSchema>>;
+  renameCollection<TSchema extends Document = Document>(
+    fromCollection: string,
+    toCollection: string,
+    options: RenameOptions
+  ): Promise<Collection<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   renameCollection<TSchema extends Document = Document>(
     fromCollection: string,
     toCollection: string,
     callback: Callback<Collection<TSchema>>
   ): void;
-  renameCollection<TSchema extends Document = Document>(
-    fromCollection: string,
-    toCollection: string,
-    options: RenameOptions
-  ): Promise<Collection<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   renameCollection<TSchema extends Document = Document>(
     fromCollection: string,
@@ -464,9 +464,9 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   dropCollection(name: string): Promise<boolean>;
+  dropCollection(name: string, options: DropCollectionOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   dropCollection(name: string, callback: Callback<boolean>): void;
-  dropCollection(name: string, options: DropCollectionOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   dropCollection(name: string, options: DropCollectionOptions, callback: Callback<boolean>): void;
   dropCollection(
@@ -490,9 +490,9 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   dropDatabase(): Promise<boolean>;
+  dropDatabase(options: DropDatabaseOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   dropDatabase(callback: Callback<boolean>): void;
-  dropDatabase(options: DropDatabaseOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   dropDatabase(options: DropDatabaseOptions, callback: Callback<boolean>): void;
   dropDatabase(
@@ -515,9 +515,9 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   collections(): Promise<Collection[]>;
+  collections(options: ListCollectionsOptions): Promise<Collection[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   collections(callback: Callback<Collection[]>): void;
-  collections(options: ListCollectionsOptions): Promise<Collection[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   collections(options: ListCollectionsOptions, callback: Callback<Collection[]>): void;
   collections(
@@ -542,13 +542,13 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   createIndex(name: string, indexSpec: IndexSpecification): Promise<string>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  createIndex(name: string, indexSpec: IndexSpecification, callback: Callback<string>): void;
   createIndex(
     name: string,
     indexSpec: IndexSpecification,
     options: CreateIndexesOptions
   ): Promise<string>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  createIndex(name: string, indexSpec: IndexSpecification, callback: Callback<string>): void;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   createIndex(
     name: string,
@@ -580,15 +580,15 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   addUser(username: string): Promise<Document>;
+  addUser(username: string, password: string): Promise<Document>;
+  addUser(username: string, options: AddUserOptions): Promise<Document>;
+  addUser(username: string, password: string, options: AddUserOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   addUser(username: string, callback: Callback<Document>): void;
-  addUser(username: string, password: string): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   addUser(username: string, password: string, callback: Callback<Document>): void;
-  addUser(username: string, options: AddUserOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   addUser(username: string, options: AddUserOptions, callback: Callback<Document>): void;
-  addUser(username: string, password: string, options: AddUserOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   addUser(
     username: string,
@@ -629,9 +629,9 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   removeUser(username: string): Promise<boolean>;
+  removeUser(username: string, options: RemoveUserOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   removeUser(username: string, callback: Callback<boolean>): void;
-  removeUser(username: string, options: RemoveUserOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   removeUser(username: string, options: RemoveUserOptions, callback: Callback<boolean>): void;
   removeUser(
@@ -656,12 +656,12 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   setProfilingLevel(level: ProfilingLevel): Promise<ProfilingLevel>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  setProfilingLevel(level: ProfilingLevel, callback: Callback<ProfilingLevel>): void;
   setProfilingLevel(
     level: ProfilingLevel,
     options: SetProfilingLevelOptions
   ): Promise<ProfilingLevel>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  setProfilingLevel(level: ProfilingLevel, callback: Callback<ProfilingLevel>): void;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   setProfilingLevel(
     level: ProfilingLevel,
@@ -689,9 +689,9 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   profilingLevel(): Promise<string>;
+  profilingLevel(options: ProfilingLevelOptions): Promise<string>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   profilingLevel(callback: Callback<string>): void;
-  profilingLevel(options: ProfilingLevelOptions): Promise<string>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   profilingLevel(options: ProfilingLevelOptions, callback: Callback<string>): void;
   profilingLevel(
@@ -715,9 +715,9 @@ export class Db {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   indexInformation(name: string): Promise<Document>;
+  indexInformation(name: string, options: IndexInformationOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   indexInformation(name: string, callback: Callback<Document>): void;
-  indexInformation(name: string, options: IndexInformationOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   indexInformation(
     name: string,

@@ -35,6 +35,7 @@ import {
   Callback,
   commandSupportsReadConcern,
   isPromiseLike,
+  List,
   maxWireVersion,
   maybeCallback,
   now,
@@ -247,9 +248,9 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param callback - Optional callback for completion of this operation
    */
   endSession(): Promise<void>;
+  endSession(options: EndSessionOptions): Promise<void>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   endSession(callback: Callback<void>): void;
-  endSession(options: EndSessionOptions): Promise<void>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   endSession(options: EndSessionOptions, callback: Callback<void>): void;
   endSession(
@@ -878,7 +879,7 @@ export class ServerSession {
  */
 export class ServerSessionPool {
   client: MongoClient;
-  sessions: ServerSession[];
+  sessions: List<ServerSession>;
 
   constructor(client: MongoClient) {
     if (client == null) {
@@ -886,7 +887,7 @@ export class ServerSessionPool {
     }
 
     this.client = client;
-    this.sessions = [];
+    this.sessions = new List<ServerSession>();
   }
 
   /**
@@ -939,14 +940,7 @@ export class ServerSessionPool {
       return;
     }
 
-    while (this.sessions.length) {
-      const pooledSession = this.sessions[this.sessions.length - 1];
-      if (pooledSession.hasTimedOut(sessionTimeoutMinutes)) {
-        this.sessions.pop();
-      } else {
-        break;
-      }
-    }
+    this.sessions.prune(session => session.hasTimedOut(sessionTimeoutMinutes));
 
     if (!session.hasTimedOut(sessionTimeoutMinutes)) {
       if (session.isDirty) {

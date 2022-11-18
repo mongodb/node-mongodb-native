@@ -17,12 +17,13 @@ import {
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoRuntimeError,
   MongoServerError,
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   calculateDurationInMs,
@@ -68,22 +69,7 @@ const kAutoEncrypter = Symbol('autoEncrypter');
 /** @internal */
 const kDelayedTimeoutId = Symbol('delayedTimeoutId');
 
-/** @internal */
-export interface QueryOptions extends BSONSerializeOptions {
-  readPreference: ReadPreference;
-  documentsReturnedIn?: string;
-  batchSize?: number;
-  limit?: number;
-  skip?: number;
-  projection?: Document;
-  tailable?: boolean;
-  awaitData?: boolean;
-  noCursorTimeout?: boolean;
-  /** @deprecated use `noCursorTimeout` instead */
-  timeout?: boolean;
-  partial?: boolean;
-  oplogReplay?: boolean;
-}
+const INVALID_QUEUE_SIZE = 'Connection internal queue contains more than 1 operation description';
 
 /** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
@@ -91,7 +77,6 @@ export interface CommandOptions extends BSONSerializeOptions {
   secondaryOk?: boolean;
   /** Specify read preference if command supports it */
   readPreference?: ReadPreferenceLike;
-  raw?: boolean;
   monitoring?: boolean;
   socketTimeoutMS?: number;
   /** Session to use for the operation */
@@ -387,7 +372,28 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // always emit the message, in case we are streaming
     this.emit('message', message);
-    const operationDescription = this[kQueue].get(message.responseTo);
+    let operationDescription = this[kQueue].get(message.responseTo);
+
+    if (!operationDescription && this.isMonitoringConnection) {
+      // This is how we recover when the initial hello's requestId is not
+      // the responseTo when hello responses have been skipped:
+
+      // First check if the map is of invalid size
+      if (this[kQueue].size > 1) {
+        this.onError(new MongoRuntimeError(INVALID_QUEUE_SIZE));
+      } else {
+        // Get the first orphaned operation description.
+        const entry = this[kQueue].entries().next();
+        if (entry) {
+          const [requestId, orphaned]: [number, OperationDescription] = entry.value;
+          // If the orphaned operation description exists then set it.
+          operationDescription = orphaned;
+          // Remove the entry with the bad request id from the queue.
+          this[kQueue].delete(requestId);
+        }
+      }
+    }
+
     if (!operationDescription) {
       return;
     }
@@ -399,7 +405,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     // making the `responseTo` change on each response
     this[kQueue].delete(message.responseTo);
     if ('moreToCome' in message && message.moreToCome) {
-      // requeue the callback for next synthetic request
+      // If the operation description check above does find an orphaned
+      // description and sets the operationDescription then this line will put one
+      // back in the queue with the correct requestId and will resolve not being able
+      // to find the next one via the responseTo of the next streaming hello.
       this[kQueue].set(message.requestId, operationDescription);
     } else if (operationDescription.socketTimeoutOverride) {
       this[kStream].setTimeout(this.socketTimeoutMS);

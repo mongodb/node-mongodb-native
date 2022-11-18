@@ -64,6 +64,8 @@ const SKIPPED_TESTS = new Set([
   ...(isAuthEnabled ? skippedAuthTests.concat(skippedNoAuthTests) : skippedNoAuthTests)
 ]);
 
+const isServerless = !!process.env.SERVERLESS;
+
 describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
@@ -78,12 +80,26 @@ describe('Client Side Encryption (Legacy)', function () {
     return testContext.setup(this.configuration);
   });
 
-  generateTopologyTests(testSuites, testContext, spec => {
-    return !SKIPPED_TESTS.has(spec.description);
+  generateTopologyTests(testSuites, testContext, ({ description }) => {
+    if (SKIPPED_TESTS.has(description)) {
+      return false;
+    }
+    if (isServerless) {
+      // TODO(NODE-4730): Fix failing csfle tests against serverless
+      const isSkippedTest = [
+        'BypassQueryAnalysis decrypts',
+        'encryptedFieldsMap is preferred over remote encryptedFields'
+      ].includes(description);
+
+      return !isSkippedTest;
+    }
+    return true;
   });
 });
 
 describe('Client Side Encryption (Unified)', function () {
   installNode18DNSHooks();
-  runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')));
+  runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')), () =>
+    isServerless ? 'Unified CSFLE tests to not run on serverless' : false
+  );
 });

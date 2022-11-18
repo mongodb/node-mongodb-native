@@ -1,16 +1,18 @@
 import { expect } from 'chai';
-import { EventEmitter } from 'events';
+import { EventEmitter, once } from 'events';
 import { Socket } from 'net';
 import * as sinon from 'sinon';
+import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 
+import { BinMsg } from '../../../src/cmap/commands';
 import { connect } from '../../../src/cmap/connect';
 import { Connection, hasSessionSupport } from '../../../src/cmap/connection';
 import { MessageStream } from '../../../src/cmap/message_stream';
-import { MongoNetworkTimeoutError } from '../../../src/error';
+import { MongoNetworkTimeoutError, MongoRuntimeError } from '../../../src/error';
 import { isHello, ns } from '../../../src/utils';
 import * as mock from '../../tools/mongodb-mock/index';
-import { getSymbolFrom } from '../../tools/utils';
+import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
 
 const connectionOptionsDefaults = {
@@ -21,6 +23,25 @@ const connectionOptionsDefaults = {
   metadata: undefined,
   loadBalanced: false
 };
+
+/** The absolute minimum socket API needed by Connection as of writing this test */
+class FakeSocket extends EventEmitter {
+  address() {
+    // is never called
+  }
+  pipe() {
+    // does not need to do anything
+  }
+  destroy() {
+    // is called, has no side effects
+  }
+  get remoteAddress() {
+    return 'iLoveJavaScript';
+  }
+  get remotePort() {
+    return 123;
+  }
+}
 
 describe('new Connection()', function () {
   let server;
@@ -137,6 +158,189 @@ describe('new Connection()', function () {
     });
   });
 
+  describe('#onMessage', function () {
+    context('when the connection is a monitoring connection', function () {
+      let queue: Map<number, OperationDescription>;
+      let driverSocket: FakeSocket;
+      let connection: Connection;
+
+      beforeEach(function () {
+        driverSocket = sinon.spy(new FakeSocket());
+      });
+
+      context('when multiple hellos exist on the stream', function () {
+        let callbackSpy;
+        const inputStream = new Readable();
+        const document = { ok: 1 };
+        const last = { isWritablePrimary: true };
+
+        beforeEach(function () {
+          callbackSpy = sinon.spy();
+          const firstHello = generateOpMsgBuffer(document);
+          const secondHello = generateOpMsgBuffer(document);
+          const thirdHello = generateOpMsgBuffer(last);
+          const buffer = Buffer.concat([firstHello, secondHello, thirdHello]);
+
+          connection = sinon.spy(new Connection(inputStream, connectionOptionsDefaults));
+          connection.isMonitoringConnection = true;
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+
+          // Create the operation description.
+          const operationDescription: OperationDescription = {
+            requestId: 1,
+            cb: callbackSpy
+          };
+
+          // Stick an operation description in the queue.
+          queue.set(1, operationDescription);
+
+          // Push the buffer of 3 hellos to the input stream
+          inputStream.push(buffer);
+          inputStream.push(null);
+        });
+
+        it('calls the callback with the last hello document', async function () {
+          const messages = await once(connection, 'message');
+          expect(messages[0].responseTo).to.equal(0);
+          expect(callbackSpy).to.be.calledOnceWith(undefined, last);
+        });
+      });
+
+      context('when requestId/responseTo do not match', function () {
+        let callbackSpy;
+        const document = { ok: 1 };
+
+        beforeEach(function () {
+          callbackSpy = sinon.spy();
+
+          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+          connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+          connection.isMonitoringConnection = true;
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+
+          // Create the operation description.
+          const operationDescription: OperationDescription = {
+            requestId: 1,
+            cb: callbackSpy
+          };
+
+          // Stick an operation description in the queue.
+          queue.set(1, operationDescription);
+          // Emit a message that won't match the existing operation description.
+          const msg = generateOpMsgBuffer(document);
+          const msgHeader: MessageHeader = {
+            length: msg.readInt32LE(0),
+            requestId: 1,
+            responseTo: 0, // This will not match.
+            opCode: msg.readInt32LE(12)
+          };
+          const msgBody = msg.subarray(16);
+
+          const message = new BinMsg(msg, msgHeader, msgBody);
+          connection.onMessage(message);
+        });
+
+        it('calls the operation description callback with the document', function () {
+          expect(callbackSpy).to.be.calledOnceWith(undefined, document);
+        });
+      });
+
+      context('when requestId/reponseTo match', function () {
+        let callbackSpy;
+        const document = { ok: 1 };
+
+        beforeEach(function () {
+          callbackSpy = sinon.spy();
+
+          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+          connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+          connection.isMonitoringConnection = true;
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+
+          // Create the operation description.
+          const operationDescription: OperationDescription = {
+            requestId: 1,
+            cb: callbackSpy
+          };
+
+          // Stick an operation description in the queue.
+          queue.set(1, operationDescription);
+          // Emit a message that matches the existing operation description.
+          const msg = generateOpMsgBuffer(document);
+          const msgHeader: MessageHeader = {
+            length: msg.readInt32LE(0),
+            requestId: 2,
+            responseTo: 1,
+            opCode: msg.readInt32LE(12)
+          };
+          const msgBody = msg.subarray(16);
+
+          const message = new BinMsg(msg, msgHeader, msgBody);
+          connection.onMessage(message);
+        });
+
+        it('calls the operation description callback with the document', function () {
+          expect(callbackSpy).to.be.calledOnceWith(undefined, document);
+        });
+      });
+
+      context('when more than one operation description is in the queue', function () {
+        let spyOne;
+        let spyTwo;
+        const document = { ok: 1 };
+
+        beforeEach(function () {
+          spyOne = sinon.spy();
+          spyTwo = sinon.spy();
+
+          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+          connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+          connection.isMonitoringConnection = true;
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+
+          // Create the operation descriptions.
+          const descriptionOne: OperationDescription = {
+            requestId: 1,
+            cb: spyOne
+          };
+          const descriptionTwo: OperationDescription = {
+            requestId: 2,
+            cb: spyTwo
+          };
+
+          // Stick an operation description in the queue.
+          queue.set(2, descriptionOne);
+          queue.set(3, descriptionTwo);
+          // Emit a message that matches the existing operation description.
+          const msg = generateOpMsgBuffer(document);
+          const msgHeader: MessageHeader = {
+            length: msg.readInt32LE(0),
+            requestId: 2,
+            responseTo: 1,
+            opCode: msg.readInt32LE(12)
+          };
+          const msgBody = msg.subarray(16);
+
+          const message = new BinMsg(msg, msgHeader, msgBody);
+          connection.onMessage(message);
+        });
+
+        it('calls all operation description callbacks with an error', function () {
+          expect(spyOne).to.be.calledOnce;
+          expect(spyTwo).to.be.calledOnce;
+          const errorOne = spyOne.firstCall.args[0];
+          const errorTwo = spyTwo.firstCall.args[0];
+          expect(errorOne).to.be.instanceof(MongoRuntimeError);
+          expect(errorTwo).to.be.instanceof(MongoRuntimeError);
+        });
+      });
+    });
+  });
+
   describe('onTimeout()', () => {
     let connection: sinon.SinonSpiedInstance<Connection>;
     let clock: sinon.SinonFakeTimers;
@@ -145,25 +349,6 @@ describe('new Connection()', function () {
     let messageStream: MessageStream;
     let kDelayedTimeoutId: symbol;
     let NodeJSTimeoutClass: any;
-
-    /** The absolute minimum socket API needed by Connection as of writing this test */
-    class FakeSocket extends EventEmitter {
-      address() {
-        // is never called
-      }
-      pipe() {
-        // does not need to do anything
-      }
-      destroy() {
-        // is called, has no side effects
-      }
-      get remoteAddress() {
-        return 'iLoveJavaScript';
-      }
-      get remotePort() {
-        return 123;
-      }
-    }
 
     beforeEach(() => {
       timerSandbox = createTimerSandbox();

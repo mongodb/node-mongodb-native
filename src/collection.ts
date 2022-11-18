@@ -99,7 +99,12 @@ import {
 } from './utils';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 
-/** @public */
+/**
+ * @public
+ * @deprecated This type will be completely removed in 5.0 and findOneAndUpdate,
+ *             findOneAndDelete, and findOneAndReplace will then return the
+ *             actual result document.
+ */
 export interface ModifyResult<TSchema = Document> {
   value: WithId<TSchema> | null;
   lastErrorObject?: Document;
@@ -263,15 +268,15 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   insertOne(doc: OptionalUnlessRequiredId<TSchema>): Promise<InsertOneResult<TSchema>>;
+  insertOne(
+    doc: OptionalUnlessRequiredId<TSchema>,
+    options: InsertOneOptions
+  ): Promise<InsertOneResult<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   insertOne(
     doc: OptionalUnlessRequiredId<TSchema>,
     callback: Callback<InsertOneResult<TSchema>>
   ): void;
-  insertOne(
-    doc: OptionalUnlessRequiredId<TSchema>,
-    options: InsertOneOptions
-  ): Promise<InsertOneResult<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   insertOne(
     doc: OptionalUnlessRequiredId<TSchema>,
@@ -315,15 +320,15 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   insertMany(docs: OptionalUnlessRequiredId<TSchema>[]): Promise<InsertManyResult<TSchema>>;
+  insertMany(
+    docs: OptionalUnlessRequiredId<TSchema>[],
+    options: BulkWriteOptions
+  ): Promise<InsertManyResult<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   insertMany(
     docs: OptionalUnlessRequiredId<TSchema>[],
     callback: Callback<InsertManyResult<TSchema>>
   ): void;
-  insertMany(
-    docs: OptionalUnlessRequiredId<TSchema>[],
-    options: BulkWriteOptions
-  ): Promise<InsertManyResult<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   insertMany(
     docs: OptionalUnlessRequiredId<TSchema>[],
@@ -372,15 +377,15 @@ export class Collection<TSchema extends Document = Document> {
    * @throws MongoDriverError if operations is not an array
    */
   bulkWrite(operations: AnyBulkWriteOperation<TSchema>[]): Promise<BulkWriteResult>;
+  bulkWrite(
+    operations: AnyBulkWriteOperation<TSchema>[],
+    options: BulkWriteOptions
+  ): Promise<BulkWriteResult>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   bulkWrite(
     operations: AnyBulkWriteOperation<TSchema>[],
     callback: Callback<BulkWriteResult>
   ): void;
-  bulkWrite(
-    operations: AnyBulkWriteOperation<TSchema>[],
-    options: BulkWriteOptions
-  ): Promise<BulkWriteResult>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   bulkWrite(
     operations: AnyBulkWriteOperation<TSchema>[],
@@ -422,17 +427,17 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Partial<TSchema>
   ): Promise<UpdateResult>;
+  updateOne(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema> | Partial<TSchema>,
+    options: UpdateOptions
+  ): Promise<UpdateResult>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   updateOne(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Partial<TSchema>,
     callback: Callback<UpdateResult>
   ): void;
-  updateOne(
-    filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema> | Partial<TSchema>,
-    options: UpdateOptions
-  ): Promise<UpdateResult>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   updateOne(
     filter: Filter<TSchema>,
@@ -472,17 +477,17 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>
   ): Promise<UpdateResult | Document>;
+  replaceOne(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
+    options: ReplaceOptions
+  ): Promise<UpdateResult | Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   replaceOne(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
     callback: Callback<UpdateResult | Document>
   ): void;
-  replaceOne(
-    filter: Filter<TSchema>,
-    replacement: WithoutId<TSchema>,
-    options: ReplaceOptions
-  ): Promise<UpdateResult | Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   replaceOne(
     filter: Filter<TSchema>,
@@ -522,17 +527,17 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>
   ): Promise<UpdateResult | Document>;
+  updateMany(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>,
+    options: UpdateOptions
+  ): Promise<UpdateResult | Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   updateMany(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
     callback: Callback<UpdateResult | Document>
   ): void;
-  updateMany(
-    filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
-    options: UpdateOptions
-  ): Promise<UpdateResult | Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   updateMany(
     filter: Filter<TSchema>,
@@ -568,9 +573,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   deleteOne(filter: Filter<TSchema>): Promise<DeleteResult>;
+  deleteOne(filter: Filter<TSchema>, options: DeleteOptions): Promise<DeleteResult>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   deleteOne(filter: Filter<TSchema>, callback: Callback<DeleteResult>): void;
-  deleteOne(filter: Filter<TSchema>, options: DeleteOptions): Promise<DeleteResult>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   deleteOne(
     filter: Filter<TSchema>,
@@ -599,9 +604,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   deleteMany(filter: Filter<TSchema>): Promise<DeleteResult>;
+  deleteMany(filter: Filter<TSchema>, options: DeleteOptions): Promise<DeleteResult>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   deleteMany(filter: Filter<TSchema>, callback: Callback<DeleteResult>): void;
-  deleteMany(filter: Filter<TSchema>, options: DeleteOptions): Promise<DeleteResult>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   deleteMany(
     filter: Filter<TSchema>,
@@ -644,9 +649,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   rename(newName: string): Promise<Collection>;
+  rename(newName: string, options: RenameOptions): Promise<Collection>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   rename(newName: string, callback: Callback<Collection>): void;
-  rename(newName: string, options: RenameOptions): Promise<Collection>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   rename(newName: string, options: RenameOptions, callback: Callback<Collection>): void;
   rename(
@@ -674,9 +679,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   drop(): Promise<boolean>;
+  drop(options: DropCollectionOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   drop(callback: Callback<boolean>): void;
-  drop(options: DropCollectionOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   drop(options: DropCollectionOptions, callback: Callback<boolean>): void;
   drop(
@@ -701,12 +706,12 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   findOne(): Promise<WithId<TSchema> | null>;
+  findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
+  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<WithId<TSchema> | null>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   findOne(callback: Callback<WithId<TSchema> | null>): void;
-  findOne(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   findOne(filter: Filter<TSchema>, callback: Callback<WithId<TSchema> | null>): void;
-  findOne(filter: Filter<TSchema>, options: FindOptions): Promise<WithId<TSchema> | null>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   findOne(
     filter: Filter<TSchema>,
@@ -716,10 +721,10 @@ export class Collection<TSchema extends Document = Document> {
 
   // allow an override of the schema.
   findOne<T = TSchema>(): Promise<T | null>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  findOne<T = TSchema>(callback: Callback<T | null>): void;
   findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
   findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | null>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  findOne<T = TSchema>(callback: Callback<T | null>): void;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   findOne<T = TSchema>(
     filter: Filter<TSchema>,
@@ -786,9 +791,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   options(): Promise<Document>;
+  options(options: OperationOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   options(callback: Callback<Document>): void;
-  options(options: OperationOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   options(options: OperationOptions, callback: Callback<Document>): void;
   options(
@@ -811,9 +816,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   isCapped(): Promise<boolean>;
+  isCapped(options: OperationOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   isCapped(callback: Callback<boolean>): void;
-  isCapped(options: OperationOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   isCapped(options: OperationOptions, callback: Callback<boolean>): void;
   isCapped(
@@ -859,9 +864,9 @@ export class Collection<TSchema extends Document = Document> {
    * ```
    */
   createIndex(indexSpec: IndexSpecification): Promise<string>;
+  createIndex(indexSpec: IndexSpecification, options: CreateIndexesOptions): Promise<string>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   createIndex(indexSpec: IndexSpecification, callback: Callback<string>): void;
-  createIndex(indexSpec: IndexSpecification, options: CreateIndexesOptions): Promise<string>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   createIndex(
     indexSpec: IndexSpecification,
@@ -920,9 +925,9 @@ export class Collection<TSchema extends Document = Document> {
    * ```
    */
   createIndexes(indexSpecs: IndexDescription[]): Promise<string[]>;
+  createIndexes(indexSpecs: IndexDescription[], options: CreateIndexesOptions): Promise<string[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   createIndexes(indexSpecs: IndexDescription[], callback: Callback<string[]>): void;
-  createIndexes(indexSpecs: IndexDescription[], options: CreateIndexesOptions): Promise<string[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   createIndexes(
     indexSpecs: IndexDescription[],
@@ -958,9 +963,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   dropIndex(indexName: string): Promise<Document>;
+  dropIndex(indexName: string, options: DropIndexesOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   dropIndex(indexName: string, callback: Callback<Document>): void;
-  dropIndex(indexName: string, options: DropIndexesOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   dropIndex(indexName: string, options: DropIndexesOptions, callback: Callback<Document>): void;
   dropIndex(
@@ -988,9 +993,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   dropIndexes(): Promise<Document>;
+  dropIndexes(options: DropIndexesOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   dropIndexes(callback: Callback<Document>): void;
-  dropIndexes(options: DropIndexesOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   dropIndexes(options: DropIndexesOptions, callback: Callback<Document>): void;
   dropIndexes(
@@ -1023,9 +1028,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   indexExists(indexes: string | string[]): Promise<boolean>;
+  indexExists(indexes: string | string[], options: IndexInformationOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   indexExists(indexes: string | string[], callback: Callback<boolean>): void;
-  indexExists(indexes: string | string[], options: IndexInformationOptions): Promise<boolean>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   indexExists(
     indexes: string | string[],
@@ -1053,9 +1058,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   indexInformation(): Promise<Document>;
+  indexInformation(options: IndexInformationOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   indexInformation(callback: Callback<Document>): void;
-  indexInformation(options: IndexInformationOptions): Promise<Document>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   indexInformation(options: IndexInformationOptions, callback: Callback<Document>): void;
   indexInformation(
@@ -1086,9 +1091,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   estimatedDocumentCount(): Promise<number>;
+  estimatedDocumentCount(options: EstimatedDocumentCountOptions): Promise<number>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   estimatedDocumentCount(callback: Callback<number>): void;
-  estimatedDocumentCount(options: EstimatedDocumentCountOptions): Promise<number>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   estimatedDocumentCount(options: EstimatedDocumentCountOptions, callback: Callback<number>): void;
   estimatedDocumentCount(
@@ -1130,20 +1135,18 @@ export class Collection<TSchema extends Document = Document> {
    * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
   countDocuments(): Promise<number>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  countDocuments(callback: Callback<number>): void;
   countDocuments(filter: Filter<TSchema>): Promise<number>;
+  countDocuments(filter: Filter<TSchema>, options: CountDocumentsOptions): Promise<number>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   countDocuments(callback: Callback<number>): void;
-  countDocuments(filter: Filter<TSchema>, options: CountDocumentsOptions): Promise<number>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  countDocuments(filter: Filter<TSchema>, callback: Callback<number>): void;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   countDocuments(
     filter: Filter<TSchema>,
     options: CountDocumentsOptions,
     callback: Callback<number>
   ): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  countDocuments(filter: Filter<TSchema>, callback: Callback<number>): void;
   countDocuments(
     filter?: Document | CountDocumentsOptions | Callback<number>,
     options?: CountDocumentsOptions | Callback<number>,
@@ -1182,26 +1185,26 @@ export class Collection<TSchema extends Document = Document> {
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key
   ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  distinct<Key extends keyof WithId<TSchema>>(
-    key: Key,
-    callback: Callback<Array<Flatten<WithId<TSchema>[Key]>>>
-  ): void;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>
   ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  distinct<Key extends keyof WithId<TSchema>>(
-    key: Key,
-    filter: Filter<TSchema>,
-    callback: Callback<Array<Flatten<WithId<TSchema>[Key]>>>
-  ): void;
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
     filter: Filter<TSchema>,
     options: DistinctOptions
   ): Promise<Array<Flatten<WithId<TSchema>[Key]>>>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  distinct<Key extends keyof WithId<TSchema>>(
+    key: Key,
+    callback: Callback<Array<Flatten<WithId<TSchema>[Key]>>>
+  ): void;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  distinct<Key extends keyof WithId<TSchema>>(
+    key: Key,
+    filter: Filter<TSchema>,
+    callback: Callback<Array<Flatten<WithId<TSchema>[Key]>>>
+  ): void;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
@@ -1212,12 +1215,12 @@ export class Collection<TSchema extends Document = Document> {
 
   // Embedded documents overload
   distinct(key: string): Promise<any[]>;
+  distinct(key: string, filter: Filter<TSchema>): Promise<any[]>;
+  distinct(key: string, filter: Filter<TSchema>, options: DistinctOptions): Promise<any[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   distinct(key: string, callback: Callback<any[]>): void;
-  distinct(key: string, filter: Filter<TSchema>): Promise<any[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   distinct(key: string, filter: Filter<TSchema>, callback: Callback<any[]>): void;
-  distinct(key: string, filter: Filter<TSchema>, options: DistinctOptions): Promise<any[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   distinct(
     key: string,
@@ -1260,9 +1263,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   indexes(): Promise<Document[]>;
+  indexes(options: IndexInformationOptions): Promise<Document[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   indexes(callback: Callback<Document[]>): void;
-  indexes(options: IndexInformationOptions): Promise<Document[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   indexes(options: IndexInformationOptions, callback: Callback<Document[]>): void;
   indexes(
@@ -1285,9 +1288,9 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   stats(): Promise<CollStats>;
+  stats(options: CollStatsOptions): Promise<CollStats>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   stats(callback: Callback<CollStats>): void;
-  stats(options: CollStatsOptions): Promise<CollStats>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   stats(options: CollStatsOptions, callback: Callback<CollStats>): void;
   stats(
@@ -1354,17 +1357,17 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>
   ): Promise<ModifyResult<TSchema>>;
+  findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
+    options: FindOneAndReplaceOptions
+  ): Promise<ModifyResult<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   findOneAndReplace(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
-  findOneAndReplace(
-    filter: Filter<TSchema>,
-    replacement: WithoutId<TSchema>,
-    options: FindOneAndReplaceOptions
-  ): Promise<ModifyResult<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   findOneAndReplace(
     filter: Filter<TSchema>,
@@ -1404,17 +1407,17 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>
   ): Promise<ModifyResult<TSchema>>;
+  findOneAndUpdate(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>,
+    options: FindOneAndUpdateOptions
+  ): Promise<ModifyResult<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   findOneAndUpdate(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
     callback: Callback<ModifyResult<TSchema>>
   ): void;
-  findOneAndUpdate(
-    filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
-    options: FindOneAndUpdateOptions
-  ): Promise<ModifyResult<TSchema>>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   findOneAndUpdate(
     filter: Filter<TSchema>,
@@ -1538,17 +1541,17 @@ export class Collection<TSchema extends Document = Document> {
     map: string | MapFunction<TSchema>,
     reduce: string | ReduceFunction<TKey, TValue>
   ): Promise<Document | Document[]>;
+  mapReduce<TKey = any, TValue = any>(
+    map: string | MapFunction<TSchema>,
+    reduce: string | ReduceFunction<TKey, TValue>,
+    options: MapReduceOptions<TKey, TValue>
+  ): Promise<Document | Document[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   mapReduce<TKey = any, TValue = any>(
     map: string | MapFunction<TSchema>,
     reduce: string | ReduceFunction<TKey, TValue>,
     callback: Callback<Document | Document[]>
   ): void;
-  mapReduce<TKey = any, TValue = any>(
-    map: string | MapFunction<TSchema>,
-    reduce: string | ReduceFunction<TKey, TValue>,
-    options: MapReduceOptions<TKey, TValue>
-  ): Promise<Document | Document[]>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   mapReduce<TKey = any, TValue = any>(
     map: string | MapFunction<TSchema>,
@@ -1720,12 +1723,12 @@ export class Collection<TSchema extends Document = Document> {
    * @param callback - An optional callback, a Promise will be returned if none is provided
    */
   count(): Promise<number>;
+  count(filter: Filter<TSchema>): Promise<number>;
+  count(filter: Filter<TSchema>, options: CountOptions): Promise<number>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   count(callback: Callback<number>): void;
-  count(filter: Filter<TSchema>): Promise<number>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   count(filter: Filter<TSchema>, callback: Callback<number>): void;
-  count(filter: Filter<TSchema>, options: CountOptions): Promise<number>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   count(
     filter: Filter<TSchema>,

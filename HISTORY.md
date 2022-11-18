@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.12.0](https://github.com/mongodb/node-mongodb-native/compare/v4.11.0...v4.12.0) (2022-11-16)
+
+
+### Features
+
+* **NODE-4681:** deprecate modify result ([#3459](https://github.com/mongodb/node-mongodb-native/issues/3459)) ([6a8776c](https://github.com/mongodb/node-mongodb-native/commit/6a8776c32c8c63beb7871458413baadd9e126efa))
+* **NODE-4683:** make ChangeStream an async iterable ([#3454](https://github.com/mongodb/node-mongodb-native/issues/3454)) ([df8d9a4](https://github.com/mongodb/node-mongodb-native/commit/df8d9a4f2bb68f747ecb2b4d88a9137ca4f6ecb4))
+* **NODE-4733:** deprecate result and getLastOp ([#3458](https://github.com/mongodb/node-mongodb-native/issues/3458)) ([a143d3b](https://github.com/mongodb/node-mongodb-native/commit/a143d3bc6768076fe65368feac0726ca201d4bb0))
+* **NODE-4757:** deprecate unused PipeOptions ([#3466](https://github.com/mongodb/node-mongodb-native/issues/3466)) ([1a5e619](https://github.com/mongodb/node-mongodb-native/commit/1a5e619f13c3112d75f7b40d2e2cbde027de7f0b))
+* **NODE-4809:** deprecate the existing logger ([#3464](https://github.com/mongodb/node-mongodb-native/issues/3464)) ([1eea4f0](https://github.com/mongodb/node-mongodb-native/commit/1eea4f0f5821bb44c86f653d5a3a6c022a5cf55b))
+
+
+### Bug Fixes
+
+* **NODE-4609:** allow mapping to falsey non-null values in cursors ([#3452](https://github.com/mongodb/node-mongodb-native/issues/3452)) ([1bf6ef1](https://github.com/mongodb/node-mongodb-native/commit/1bf6ef1792deb108f3fc58429b165e9bdd06b4a7))
+* **NODE-4735:** fix change stream consecutive resumabilty ([#3453](https://github.com/mongodb/node-mongodb-native/issues/3453)) ([89b27e9](https://github.com/mongodb/node-mongodb-native/commit/89b27e93e5416fb74ec716f3dc541c104c3a90ce))
+* **NODE-4753:** remove erroneous deprecation of geoNear ([#3465](https://github.com/mongodb/node-mongodb-native/issues/3465)) ([199dcaf](https://github.com/mongodb/node-mongodb-native/commit/199dcaf7b462b1c488544cbdbaecaad0417c62d7))
+* **NODE-4783:** handle orphaned operation descriptions ([#3463](https://github.com/mongodb/node-mongodb-native/issues/3463)) ([4c9b4d8](https://github.com/mongodb/node-mongodb-native/commit/4c9b4d846e5ba6e86d0d0592ff8bf76654d0fa51))
+
 ## [4.11.0](https://github.com/mongodb/node-mongodb-native/compare/v4.10.0...v4.11.0) (2022-10-19)
 
 

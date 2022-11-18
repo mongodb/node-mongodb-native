@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { dependencies } from '../../package.json';
 
-const EXPECTED_DEPENDENCIES = ['bson', 'denque', 'mongodb-connection-string-url', 'socks'];
+const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url', 'socks'];
 
 describe('package.json', function () {
   describe('dependencies', function () {

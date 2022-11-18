@@ -10,6 +10,8 @@ if [ -z ${MONGODB_URI+omitted} ]; then echo "MONGODB_URI is unset" && exit 1; fi
 if [ -z ${SERVERLESS_ATLAS_USER+omitted} ]; then echo "SERVERLESS_ATLAS_USER is unset" && exit 1; fi
 if [ -z ${SERVERLESS_ATLAS_PASSWORD+omitted} ]; then echo "SERVERLESS_ATLAS_PASSWORD is unset" && exit 1; fi
 
+npm install mongodb-client-encryption@">=2.3.0"
+
 npx mocha \
   --config test/mocha_mongodb.json \
   test/integration/crud/crud.spec.test.js \
@@ -21,4 +23,5 @@ npx mocha \
   test/integration/transactions/transactions.spec.test.js \
   test/integration/transactions/transactions.test.ts \
   test/integration/versioned-api/versioned_api.spec.test.js \
-  test/integration/load-balancers/load_balancers.spec.test.js
+  test/integration/load-balancers/load_balancers.spec.test.js \
+  test/integration/client-side-encryption/client_side_encryption.spec.test.ts

@@ -1,4 +1,3 @@
-import Denque = require('denque');
 import { clearTimeout, setTimeout } from 'timers';
 
 import type { ObjectId } from '../bson';
@@ -26,7 +25,7 @@ import {
 import { Logger } from '../logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { Callback, eachAsync, makeCounter } from '../utils';
+import { Callback, eachAsync, List, makeCounter } from '../utils';
 import { connect } from './connect';
 import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import {
@@ -137,7 +136,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   [kPoolState]: typeof PoolState[keyof typeof PoolState];
   [kServer]: Server;
   [kLogger]: Logger;
-  [kConnections]: Denque<Connection>;
+  [kConnections]: List<Connection>;
   [kPending]: number;
   [kCheckedOut]: Set<Connection>;
   [kMinPoolSizeTimer]?: NodeJS.Timeout;
@@ -151,7 +150,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   [kServiceGenerations]: Map<string, number>;
   [kConnectionCounter]: Generator<number>;
   [kCancellationToken]: CancellationToken;
-  [kWaitQueue]: Denque<WaitQueueMember>;
+  [kWaitQueue]: List<WaitQueueMember>;
   [kMetrics]: ConnectionPoolMetrics;
   [kProcessingWaitQueue]: boolean;
 
@@ -236,7 +235,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kPoolState] = PoolState.paused;
     this[kServer] = server;
     this[kLogger] = new Logger('ConnectionPool');
-    this[kConnections] = new Denque();
+    this[kConnections] = new List();
     this[kPending] = 0;
     this[kCheckedOut] = new Set();
     this[kMinPoolSizeTimer] = undefined;
@@ -245,7 +244,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kConnectionCounter] = makeCounter(1);
     this[kCancellationToken] = new CancellationToken();
     this[kCancellationToken].setMaxListeners(Infinity);
-    this[kWaitQueue] = new Denque();
+    this[kWaitQueue] = new List();
     this[kMetrics] = new ConnectionPoolMetrics();
     this[kProcessingWaitQueue] = false;
 
@@ -659,12 +658,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       return;
     }
 
-    for (let i = 0; i < this[kConnections].length; i++) {
-      const connection = this[kConnections].peekAt(i);
-      if (connection && this.connectionIsPerished(connection)) {
-        this[kConnections].removeOne(i);
-      }
-    }
+    this[kConnections].prune(connection => this.connectionIsPerished(connection));
 
     if (
       this.totalConnectionCount < minPoolSize &&
@@ -705,7 +699,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kProcessingWaitQueue] = true;
 
     while (this.waitQueueSize) {
-      const waitQueueMember = this[kWaitQueue].peekFront();
+      const waitQueueMember = this[kWaitQueue].first();
       if (!waitQueueMember) {
         this[kWaitQueue].shift();
         continue;

@@ -132,31 +132,28 @@ function canCompress(command: WriteProtocolMessageType) {
   return !uncompressibleCommands.has(commandName);
 }
 
-function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) {
+function processIncomingData(stream: MessageStream, callback: Callback<Buffer>): void {
   const buffer = stream[kBuffer];
-  if (buffer.length < 4) {
-    callback();
-    return;
+  const sizeOfMessage = buffer.getInt32();
+
+  if (sizeOfMessage == null) {
+    return callback();
   }
 
-  const sizeOfMessage = buffer.peek(4).readInt32LE();
   if (sizeOfMessage < 0) {
-    callback(new MongoParseError(`Invalid message size: ${sizeOfMessage}`));
-    return;
+    return callback(new MongoParseError(`Invalid message size: ${sizeOfMessage}`));
   }
 
   if (sizeOfMessage > stream.maxBsonMessageSize) {
-    callback(
+    return callback(
       new MongoParseError(
         `Invalid message size: ${sizeOfMessage}, max allowed: ${stream.maxBsonMessageSize}`
       )
     );
-    return;
   }
 
   if (sizeOfMessage > buffer.length) {
-    callback();
-    return;
+    return callback();
   }
 
   const message = buffer.read(sizeOfMessage);
@@ -170,11 +167,9 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
   const monitorHasAnotherHello = () => {
     if (stream.isMonitoringConnection) {
       // Can we read the next message size?
-      if (buffer.length >= 4) {
-        const sizeOfMessage = buffer.peek(4).readInt32LE();
-        if (sizeOfMessage <= buffer.length) {
-          return true;
-        }
+      const sizeOfMessage = buffer.getInt32();
+      if (sizeOfMessage != null && sizeOfMessage <= buffer.length) {
+        return true;
       }
     }
     return false;
@@ -182,24 +177,21 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
 
   let ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
   if (messageHeader.opCode !== OP_COMPRESSED) {
-    const messageBody = message.slice(MESSAGE_HEADER_SIZE);
+    const messageBody = message.subarray(MESSAGE_HEADER_SIZE);
 
     // If we are a monitoring connection message stream and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
     if (monitorHasAnotherHello()) {
-      processIncomingData(stream, callback);
-    } else {
-      stream.emit('message', new ResponseType(message, messageHeader, messageBody));
-
-      if (buffer.length >= 4) {
-        processIncomingData(stream, callback);
-      } else {
-        callback();
-      }
+      return processIncomingData(stream, callback);
     }
 
-    return;
+    stream.emit('message', new ResponseType(message, messageHeader, messageBody));
+
+    if (buffer.length >= 4) {
+      return processIncomingData(stream, callback);
+    }
+    return callback();
   }
 
   messageHeader.fromCompressed = true;
@@ -210,33 +202,28 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>) 
 
   // recalculate based on wrapped opcode
   ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
-  decompress(compressorID, compressedBuffer, (err, messageBody) => {
+  return decompress(compressorID, compressedBuffer, (err, messageBody) => {
     if (err || !messageBody) {
-      callback(err);
-      return;
+      return callback(err);
     }
 
     if (messageBody.length !== messageHeader.length) {
-      callback(
+      return callback(
         new MongoDecompressionError('Message body and message header must be the same length')
       );
-
-      return;
     }
 
     // If we are a monitoring connection message stream and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
     if (monitorHasAnotherHello()) {
-      processIncomingData(stream, callback);
-    } else {
-      stream.emit('message', new ResponseType(message, messageHeader, messageBody));
-
-      if (buffer.length >= 4) {
-        processIncomingData(stream, callback);
-      } else {
-        callback();
-      }
+      return processIncomingData(stream, callback);
     }
+    stream.emit('message', new ResponseType(message, messageHeader, messageBody));
+
+    if (buffer.length >= 4) {
+      return processIncomingData(stream, callback);
+    }
+    return callback();
   });
 }

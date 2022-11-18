@@ -6,19 +6,7 @@ const { MessageStream } = require('../../../src/cmap/message_stream');
 const { Msg } = require('../../../src/cmap/commands');
 const expect = require('chai').expect;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
-const { generateOpMsgBuffer } = require('../../tools/utils');
-
-function bufferToStream(buffer) {
-  const stream = new Readable();
-  if (Array.isArray(buffer)) {
-    buffer.forEach(b => stream.push(b));
-  } else {
-    stream.push(buffer);
-  }
-
-  stream.push(null);
-  return stream;
-}
+const { bufferToStream, generateOpMsgBuffer } = require('../../tools/utils');
 
 describe('MessageStream', function () {
   context('when the stream is for a monitoring connection', function () {
