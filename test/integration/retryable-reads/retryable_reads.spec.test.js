@@ -29,6 +29,18 @@ describe('Retryable Reads (legacy)', function () {
   });
 });
 
+const UNIMPLEMENTED_APIS = [
+  'collection.listIndexNames',
+  'database.listCollectionNames',
+  'client.listDatabaseNames'
+];
+
 describe('Retryable Reads (unified)', function () {
-  runUnifiedSuite(loadSpecTests(path.join('retryable-reads', 'unified')));
+  runUnifiedSuite(loadSpecTests(path.join('retryable-reads', 'unified')), ({ description }) => {
+    for (const apiName of UNIMPLEMENTED_APIS) {
+      if (description.startsWith(apiName)) {
+        return `The Node.js Driver does not support ${apiName}`;
+      }
+    }
+  });
 });
