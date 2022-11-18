@@ -294,6 +294,12 @@ operations.set('find', async ({ entities, operation }) => {
   return collection.find(filter, opts).toArray();
 });
 
+operations.set('findOne', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { filter, ...opts } = operation.arguments!;
+  return collection.findOne(filter, opts);
+});
+
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, replacement, ...opts } = operation.arguments!;
