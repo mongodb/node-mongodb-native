@@ -14,10 +14,10 @@ import {
 import type { AutoEncrypter } from '../deps';
 import {
   MongoCompatibilityError,
+  MongoDriverError,
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoRuntimeError,
   MongoServerError,
   MongoWriteConcernError
 } from '../error';
@@ -51,7 +51,7 @@ import { getReadPreference, isSharded } from './wire_protocol/shared';
 /** @internal */
 const kStream = Symbol('stream');
 /** @internal */
-const kQueue = Symbol('queue');
+const kOperationDescription = Symbol('operationDescription');
 /** @internal */
 const kMessageStream = Symbol('messageStream');
 /** @internal */
@@ -185,7 +185,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   [kLastUseTime]: number;
   /** @internal */
-  [kQueue]: Map<number, OperationDescription>;
+  [kOperationDescription]: OperationDescription | null;
   /** @internal */
   [kMessageStream]: MessageStream;
   /** @internal */
@@ -229,7 +229,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
 
     // setup parser stream and message handling
-    this[kQueue] = new Map();
+    this[kOperationDescription] = null;
     this[kMessageStream] = new MessageStream({
       ...options,
       maxBsonMessageSize: this.hello?.maxBsonMessageSize
@@ -318,11 +318,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this.closed = true;
 
-    for (const op of this[kQueue].values()) {
-      op.cb(error);
-    }
+    this[kOperationDescription]?.cb(error);
 
-    this[kQueue].clear();
+    this[kOperationDescription] = null;
     this.emit(Connection.CLOSE);
   }
 
@@ -334,11 +332,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.closed = true;
 
     const message = `connection ${this.id} to ${this.address} closed`;
-    for (const op of this[kQueue].values()) {
-      op.cb(new MongoNetworkError(message));
-    }
 
-    this[kQueue].clear();
+    this[kOperationDescription]?.cb(new MongoNetworkError(message));
+
+    this[kOperationDescription] = null;
+
     this.emit(Connection.CLOSE);
   }
 
@@ -354,11 +352,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
-      for (const op of this[kQueue].values()) {
-        op.cb(new MongoNetworkTimeoutError(message, { beforeHandshake }));
-      }
+      this[kOperationDescription]?.cb(new MongoNetworkTimeoutError(message, { beforeHandshake }));
 
-      this[kQueue].clear();
+      this[kOperationDescription] = null;
       this.emit(Connection.CLOSE);
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
@@ -372,45 +368,19 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // always emit the message, in case we are streaming
     this.emit('message', message);
-    let operationDescription = this[kQueue].get(message.responseTo);
-
-    if (!operationDescription && this.isMonitoringConnection) {
-      // This is how we recover when the initial hello's requestId is not
-      // the responseTo when hello responses have been skipped:
-
-      // First check if the map is of invalid size
-      if (this[kQueue].size > 1) {
-        this.onError(new MongoRuntimeError(INVALID_QUEUE_SIZE));
-      } else {
-        // Get the first orphaned operation description.
-        const entry = this[kQueue].entries().next();
-        if (entry) {
-          const [requestId, orphaned]: [number, OperationDescription] = entry.value;
-          // If the orphaned operation description exists then set it.
-          operationDescription = orphaned;
-          // Remove the entry with the bad request id from the queue.
-          this[kQueue].delete(requestId);
-        }
-      }
-    }
+    const operationDescription = this[kOperationDescription];
 
     if (!operationDescription) {
       return;
     }
 
     const callback = operationDescription.cb;
+    const isStreamingProtocol = 'moreToCome' in message && message.moreToCome;
+    if (!isStreamingProtocol) {
+      this[kOperationDescription] = null;
+    }
 
-    // SERVER-45775: For exhaust responses we should be able to use the same requestId to
-    // track response, however the server currently synthetically produces remote requests
-    // making the `responseTo` change on each response
-    this[kQueue].delete(message.responseTo);
-    if ('moreToCome' in message && message.moreToCome) {
-      // If the operation description check above does find an orphaned
-      // description and sets the operationDescription then this line will put one
-      // back in the queue with the correct requestId and will resolve not being able
-      // to find the next one via the responseTo of the next streaming hello.
-      this[kQueue].set(message.requestId, operationDescription);
-    } else if (operationDescription.socketTimeoutOverride) {
+    if (operationDescription.socketTimeoutOverride) {
       this[kStream].setTimeout(this.socketTimeoutMS);
     }
 
@@ -502,6 +472,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     options: CommandOptions | undefined,
     callback: Callback
   ): void {
+    if (this[kOperationDescription] != null) {
+      callback(
+        new MongoDriverError('Attempted to run a command on a connection that is already in use.')
+      );
+      return;
+    }
     const readPreference = getReadPreference(cmd, options);
     const shouldUseOpMsg = supportsOpMsg(this);
     const session = options?.session;
@@ -743,14 +719,14 @@ function write(
   }
 
   if (!operationDescription.noResponse) {
-    conn[kQueue].set(operationDescription.requestId, operationDescription);
+    conn[kOperationDescription] = operationDescription;
   }
 
   try {
     conn[kMessageStream].writeCommand(command, operationDescription);
   } catch (e) {
     if (!operationDescription.noResponse) {
-      conn[kQueue].delete(operationDescription.requestId);
+      conn[kOperationDescription] = null;
       operationDescription.cb(e);
       return;
     }
