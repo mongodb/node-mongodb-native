@@ -1,6 +1,7 @@
 import * as dns from 'dns';
 import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
+import type { WritableStream } from 'stream/web';
 import { URLSearchParams } from 'url';
 
 import type { Document } from './bson';
@@ -15,6 +16,11 @@ import {
   MongoParseError
 } from './error';
 import { Logger, LoggerLevel } from './logger';
+import {
+  Logger as LoggingApi,
+  LoggerOptions as LoggingApiOptions,
+  SeverityLevel
+} from './logging_api';
 import {
   DriverInfo,
   MongoClient,
@@ -507,6 +513,36 @@ export function parseOptions(
     );
   }
 
+  mongoOptions.loggingApiOptions = {
+    MONGODB_LOG_COMMAND: getSeverityForComponent(process.env.MONGODB_LOG_COMMAND ?? ''),
+    MONGODB_LOG_TOPOLOGY: getSeverityForComponent(process.env.MONGODB_LOG_TOPOLOGY ?? ''),
+    MONGODB_LOG_SERVER_SELECTION: getSeverityForComponent(
+      process.env.MONGODB_LOG_SERVER_SELECTION ?? ''
+    ),
+    MONGODB_LOG_CONNECTION: getSeverityForComponent(process.env.MONGODB_LOG_CONNECTION ?? ''),
+    MONGODB_LOG_ALL: getSeverityForComponent(process.env.MONGODB_LOG_ALL ?? ''),
+    MONGODB_LOG_MAX_DOCUMENT_LENGTH:
+      typeof process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string'
+        ? Number.parseInt(process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH)
+        : 1000,
+    MONGODB_LOG_PATH:
+      typeof process.env.MONGODB_LOG_PATH === 'string'
+        ? process.env.MONGODB_LOG_PATH
+        : mongoOptions.mongodbLogPath ?? 'stderr'
+  };
+
+  const loggingComponents = [
+    mongoOptions.loggingApiOptions.MONGODB_LOG_COMMAND,
+    mongoOptions.loggingApiOptions.MONGODB_LOG_TOPOLOGY,
+    mongoOptions.loggingApiOptions.MONGODB_LOG_SERVER_SELECTION,
+    mongoOptions.loggingApiOptions.MONGODB_LOG_CONNECTION,
+    mongoOptions.loggingApiOptions.MONGODB_LOG_ALL
+  ];
+
+  if (loggingComponents.some(element => typeof element === 'string')) {
+    mongoOptions.loggingApi = new LoggingApi(mongoOptions.loggingApiOptions);
+  }
+
   return mongoOptions;
 }
 
@@ -590,6 +626,11 @@ function setOption(
       break;
     }
   }
+}
+
+function getSeverityForComponent(rawComponent: string): SeverityLevel | undefined {
+  const validSeverities = Object.values(SeverityLevel);
+  return validSeverities.find(severity => severity === rawComponent);
 }
 
 interface OptionDescriptor {
@@ -865,6 +906,12 @@ export const OPTIONS = {
     transform({ values: [value] }) {
       return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
     }
+  },
+  loggingApi: {
+    target: 'loggingApi'
+  },
+  loggingApiOptions: {
+    target: 'loggingApi'
   },
   maxConnecting: {
     default: 2,

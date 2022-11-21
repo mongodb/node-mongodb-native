@@ -15,7 +15,12 @@ import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
-import type { Logger, LoggerLevel } from './logger';
+import type { Logger, LoggerLevel, LoggerOptions } from './logger';
+import type {
+  Logger as LoggingApi,
+  LoggerOptions as LoggingApiOptions,
+  SeverityLevel as LoggingApiSeverity
+} from './logging_api';
 import { TypedEventEmitter } from './mongo_types';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -772,6 +777,7 @@ export interface MongoOptions
   proxyPort?: number;
   proxyUsername?: string;
   proxyPassword?: string;
+  loggerOptions?: LoggingApiOptions;
   /** @internal */
   connectionType?: typeof Connection;
 
