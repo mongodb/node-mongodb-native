@@ -164,16 +164,16 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>):
     opCode: message.readInt32LE(12)
   };
 
-  const monitorHasAnotherHello = () => {
-    if (stream.isMonitoringConnection) {
-      // Can we read the next message size?
-      const sizeOfMessage = buffer.getInt32();
-      if (sizeOfMessage != null && sizeOfMessage <= buffer.length) {
-        return true;
-      }
-    }
-    return false;
-  };
+  // const monitorHasAnotherHello = () => {
+  //   if (stream.isMonitoringConnection) {
+  //     // Can we read the next message size?
+  //     const sizeOfMessage = buffer.getInt32();
+  //     if (sizeOfMessage != null && sizeOfMessage <= buffer.length) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // };
 
   let ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
   if (messageHeader.opCode !== OP_COMPRESSED) {
@@ -182,9 +182,9 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>):
     // If we are a monitoring connection message stream and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
-    if (monitorHasAnotherHello()) {
-      return processIncomingData(stream, callback);
-    }
+    // if (monitorHasAnotherHello()) {
+    // return processIncomingData(stream, callback);
+    // }
 
     stream.emit('message', new ResponseType(message, messageHeader, messageBody));
 
@@ -216,9 +216,9 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>):
     // If we are a monitoring connection message stream and
     // there is more in the buffer that can be read, skip processing since we
     // want the last hello command response that is in the buffer.
-    if (monitorHasAnotherHello()) {
-      return processIncomingData(stream, callback);
-    }
+    // if (monitorHasAnotherHello()) {
+    //   return processIncomingData(stream, callback);
+    // }
     stream.emit('message', new ResponseType(message, messageHeader, messageBody));
 
     if (buffer.length >= 4) {
