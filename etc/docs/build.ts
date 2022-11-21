@@ -73,6 +73,8 @@ async function updateSiteTemplateForNewVersion(
 }
 
 async function main() {
+  await exec('bash ./etc/check-remote.sh');
+
   chdir(__dirname);
 
   const { tag, status, skipPrompts } = getCommandLineArguments();
