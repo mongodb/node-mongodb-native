@@ -434,6 +434,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       throw new MongoInvalidArgumentError('Method `connect` only accepts a callback');
     }
 
+    console.error('connecting');
+
     return maybeCallback(async () => {
       if (this.topology && this.topology.isConnected()) {
         return this;
