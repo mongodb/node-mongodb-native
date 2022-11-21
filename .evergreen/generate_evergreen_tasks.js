@@ -446,19 +446,19 @@ SINGLETON_TASKS.push(
         { func: 'run lint checks' }
       ]
     },
-    {
-      name: 'run-typescript-next',
-      tags: ['run-typescript-next'],
-      commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_NAME: LOWEST_LTS
-          }
-        },
-        { func: 'run typescript next' }
-      ]
-    },
+    // {
+    //   name: 'run-typescript-next',
+    //   tags: ['run-typescript-next'],
+    //   commands: [
+    //     {
+    //       func: 'install dependencies',
+    //       vars: {
+    //         NODE_LTS_NAME: LOWEST_LTS
+    //       }
+    //     },
+    //     { func: 'run typescript next' }
+    //   ]
+    // },
     {
       name: 'run-typescript-current',
       tags: ['run-typescript-current'],
