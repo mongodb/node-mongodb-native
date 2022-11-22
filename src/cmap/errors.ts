@@ -33,6 +33,8 @@ export class PoolClearedError extends MongoNetworkError {
       : `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`;
     super(errorMessage);
     this.address = pool.address;
+
+    this.addErrorLabel(MongoErrorLabel.RetryableWriteError);
   }
 
   override get name(): string {
@@ -47,8 +49,6 @@ export class PoolClearedError extends MongoNetworkError {
 export class PoolClearedOnNetworkError extends PoolClearedError {
   constructor(pool: ConnectionPool) {
     super(pool, `Connection to ${pool.address} interrupted due to server monitor timeout`);
-
-    this.addErrorLabel(MongoErrorLabel.RetryableWriteError);
   }
 
   override get name(): string {

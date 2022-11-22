@@ -354,8 +354,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           }
           if (!(err instanceof PoolClearedError)) {
             this.handleError(err);
-          } else {
-            err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
           }
           return cb(err);
         }
