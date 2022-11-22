@@ -514,13 +514,13 @@ export function parseOptions(
   }
 
   mongoOptions.loggingApiOptions = {
-    MONGODB_LOG_COMMAND: getSeverityForComponent(process.env.MONGODB_LOG_COMMAND ?? ''),
-    MONGODB_LOG_TOPOLOGY: getSeverityForComponent(process.env.MONGODB_LOG_TOPOLOGY ?? ''),
+    MONGODB_LOG_COMMAND: getSeverityForComponent(process.env.MONGODB_LOG_COMMAND ?? 'off'),
+    MONGODB_LOG_TOPOLOGY: getSeverityForComponent(process.env.MONGODB_LOG_TOPOLOGY ?? 'off'),
     MONGODB_LOG_SERVER_SELECTION: getSeverityForComponent(
-      process.env.MONGODB_LOG_SERVER_SELECTION ?? ''
+      process.env.MONGODB_LOG_SERVER_SELECTION ?? 'off'
     ),
-    MONGODB_LOG_CONNECTION: getSeverityForComponent(process.env.MONGODB_LOG_CONNECTION ?? ''),
-    MONGODB_LOG_ALL: getSeverityForComponent(process.env.MONGODB_LOG_ALL ?? ''),
+    MONGODB_LOG_CONNECTION: getSeverityForComponent(process.env.MONGODB_LOG_CONNECTION ?? 'off'),
+    MONGODB_LOG_ALL: getSeverityForComponent(process.env.MONGODB_LOG_ALL ?? 'off'),
     MONGODB_LOG_MAX_DOCUMENT_LENGTH:
       typeof process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string'
         ? Number.parseInt(process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH)
@@ -539,7 +539,7 @@ export function parseOptions(
     mongoOptions.loggingApiOptions.MONGODB_LOG_ALL
   ];
 
-  if (loggingComponents.some(element => typeof element === 'string')) {
+  if (loggingComponents.some(severity => severity !== SeverityLevel.OFF)) {
     mongoOptions.loggingApi = new LoggingApi(mongoOptions.loggingApiOptions);
   }
 

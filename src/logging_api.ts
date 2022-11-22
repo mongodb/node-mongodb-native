@@ -1,5 +1,7 @@
 import * as fs from 'fs';
-import type { WritableStream } from 'stream/web';
+import type { Writable } from 'stream';
+
+import { MongoInvalidArgumentError } from './error';
 
 /** @public */
 export const SeverityLevel = Object.freeze({
@@ -24,43 +26,66 @@ const LoggableComponent = Object.freeze({
   TOPOLOGY: 'topology',
   SERVER_SELECTION: 'serverSelection',
   CONNECTION: 'connection'
-});
+} as const);
 
 /** @internal */
 type LoggableComponent = typeof LoggableComponent[keyof typeof LoggableComponent];
 
 /** @public */
 export interface LoggerOptions {
-  MONGODB_LOG_COMMAND?: SeverityLevel;
-  MONGODB_LOG_TOPOLOGY?: SeverityLevel;
-  MONGODB_LOG_SERVER_SELECTION?: SeverityLevel;
-  MONGODB_LOG_CONNECTION?: SeverityLevel;
-  MONGODB_LOG_ALL?: SeverityLevel;
-  MONGODB_LOG_MAX_DOCUMENT_LENGTH?: number;
-
-  /**
-   * TODO(andymina): make this a WritableStream only when used within the class.
-   * the i can always call .getWriter().write();
-   */
-  MONGODB_LOG_PATH?: string | WritableStream;
+  MONGODB_LOG_COMMAND: SeverityLevel;
+  MONGODB_LOG_TOPOLOGY: SeverityLevel;
+  MONGODB_LOG_SERVER_SELECTION: SeverityLevel;
+  MONGODB_LOG_CONNECTION: SeverityLevel;
+  MONGODB_LOG_ALL: SeverityLevel;
+  MONGODB_LOG_MAX_DOCUMENT_LENGTH: number;
+  MONGODB_LOG_PATH: string | Writable;
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-function */
 /** @public */
 export class Logger {
   /** @internal */
-  componentSeverities: Map<LoggableComponent, SeverityLevel>;
-  options: LoggerOptions;
+  componentSeverities: Map<LoggableComponent, SeverityLevel | undefined> = new Map();
+  maxDocumentLength: number;
+  logDestination: Writable;
 
   constructor(options: LoggerOptions) {
     // validate log path
-    if (typeof options.MONGODB_LOG_PATH === 'string' && options.MONGODB_LOG_PATH !== 'stderr' && options.MONGODB_LOG_PATH !== 'stdout') {
-      fs.createWriteStream(options.MONGODB_LOG_PATH, { flags: 'a+' });
+    if (typeof options.MONGODB_LOG_PATH === 'string') {
+      this.logDestination =
+        options.MONGODB_LOG_PATH === 'stderr' || options.MONGODB_LOG_PATH === 'stdout'
+          ? process[options.MONGODB_LOG_PATH]
+          : fs.createWriteStream(options.MONGODB_LOG_PATH, { flags: 'a+' });
+    } else {
+      this.logDestination = options.MONGODB_LOG_PATH;
     }
-    
+
+    // fill component severities
+    this.componentSeverities.set(
+      LoggableComponent.COMMAND,
+      options.MONGODB_LOG_COMMAND ?? options.MONGODB_LOG_ALL
+    );
+    this.componentSeverities.set(
+      LoggableComponent.TOPOLOGY,
+      options.MONGODB_LOG_TOPOLOGY ?? options.MONGODB_LOG_ALL
+    );
+    this.componentSeverities.set(
+      LoggableComponent.SERVER_SELECTION,
+      options.MONGODB_LOG_SERVER_SELECTION ?? options.MONGODB_LOG_ALL
+    );
+    this.componentSeverities.set(
+      LoggableComponent.CONNECTION,
+      options.MONGODB_LOG_CONNECTION ?? options.MONGODB_LOG_ALL
+    );
+
+    // fill max doc length
+    if (options.MONGODB_LOG_MAX_DOCUMENT_LENGTH < 0)
+      throw new MongoInvalidArgumentError('MONGODB_LOG_MAX_DOCUMENT_LENGTH must be >= 0');
+    this.maxDocumentLength = options.MONGODB_LOG_MAX_DOCUMENT_LENGTH;
   }
 
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  /* eslint-disable @typescript-eslint/no-empty-function */
   emergency(component: any, message: any): void {}
 
   alert(component: any, message: any): void {}
@@ -78,10 +103,6 @@ export class Logger {
   debug(component: any, message: any): void {}
 
   trace(component: any, message: any): void {}
-
-  #validateOptions(): void {
-    if 
-  }
 }
 
 /**
