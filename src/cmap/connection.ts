@@ -384,7 +384,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       } else {
         // Get the first orphaned operation description.
         const entry = this[kQueue].entries().next();
-        if (entry) {
+        /* eslint no-restricted-syntax: 0 */
+        if (entry.value !== undefined) {
           const [requestId, orphaned]: [number, OperationDescription] = entry.value;
           // If the orphaned operation description exists then set it.
           operationDescription = orphaned;
