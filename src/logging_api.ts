@@ -21,7 +21,7 @@ export const SeverityLevel = Object.freeze({
 export type SeverityLevel = typeof SeverityLevel[keyof typeof SeverityLevel];
 
 /** @internal */
-const LoggableComponent = Object.freeze({
+export const LoggableComponent = Object.freeze({
   COMMAND: 'command',
   TOPOLOGY: 'topology',
   SERVER_SELECTION: 'serverSelection',
@@ -32,56 +32,103 @@ const LoggableComponent = Object.freeze({
 type LoggableComponent = typeof LoggableComponent[keyof typeof LoggableComponent];
 
 /** @public */
+export interface LoggerMongoClientOptions {
+  mongodbLogPath?: string | Writable;
+}
+
+/** @public */
 export interface LoggerOptions {
-  MONGODB_LOG_COMMAND: SeverityLevel;
-  MONGODB_LOG_TOPOLOGY: SeverityLevel;
-  MONGODB_LOG_SERVER_SELECTION: SeverityLevel;
-  MONGODB_LOG_CONNECTION: SeverityLevel;
-  MONGODB_LOG_ALL: SeverityLevel;
-  MONGODB_LOG_MAX_DOCUMENT_LENGTH: number;
-  MONGODB_LOG_PATH: string | Writable;
+  commandSeverity: SeverityLevel;
+  topologySeverity: SeverityLevel;
+  serverSelectionSeverity: SeverityLevel;
+  connectionSeverity: SeverityLevel;
+  defaultSeverity: SeverityLevel;
+  maxDocumentLength: number;
+  logDestination: string | Writable;
+}
+
+/**
+ * @public
+ * TODO(andymina): add docs for this
+ */
+export function extractLoggerOptions(clientOptions?: LoggerMongoClientOptions): LoggerOptions {
+  const validSeverities = Object.values(SeverityLevel);
+
+  return {
+    commandSeverity:
+      validSeverities.find(severity => severity === process.env.MONGODB_LOG_COMMAND) ??
+      SeverityLevel.OFF,
+    topologySeverity:
+      validSeverities.find(severity => severity === process.env.MONGODB_LOG_TOPOLOGY) ??
+      SeverityLevel.OFF,
+    serverSelectionSeverity:
+      validSeverities.find(severity => severity === process.env.MONGODB_LOG_SERVER_SELECTION) ??
+      SeverityLevel.OFF,
+    connectionSeverity:
+      validSeverities.find(severity => severity === process.env.MONGODB_LOG_CONNECTION) ??
+      SeverityLevel.OFF,
+    defaultSeverity:
+      validSeverities.find(severity => severity === process.env.MONGODB_LOG_COMMAND) ??
+      SeverityLevel.OFF,
+    maxDocumentLength:
+      typeof process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string'
+        ? Number.parseInt(process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH)
+        : 1000,
+    logDestination:
+      typeof process.env.MONGODB_LOG_PATH === 'string'
+        ? process.env.MONGODB_LOG_PATH
+        : clientOptions?.mongodbLogPath ?? 'stderr'
+  };
 }
 
 /** @public */
 export class Logger {
   /** @internal */
-  componentSeverities: Map<LoggableComponent, SeverityLevel | undefined> = new Map();
+  componentSeverities: Map<LoggableComponent, SeverityLevel> = new Map();
   maxDocumentLength: number;
   logDestination: Writable;
 
   constructor(options: LoggerOptions) {
     // validate log path
-    if (typeof options.MONGODB_LOG_PATH === 'string') {
+    if (typeof options.logDestination === 'string') {
       this.logDestination =
-        options.MONGODB_LOG_PATH === 'stderr' || options.MONGODB_LOG_PATH === 'stdout'
-          ? process[options.MONGODB_LOG_PATH]
-          : fs.createWriteStream(options.MONGODB_LOG_PATH, { flags: 'a+' });
+        options.logDestination === 'stderr' || options.logDestination === 'stdout'
+          ? process[options.logDestination]
+          : fs.createWriteStream(options.logDestination, { flags: 'a+' });
     } else {
-      this.logDestination = options.MONGODB_LOG_PATH;
+      this.logDestination = options.logDestination;
     }
 
     // fill component severities
     this.componentSeverities.set(
       LoggableComponent.COMMAND,
-      options.MONGODB_LOG_COMMAND ?? options.MONGODB_LOG_ALL
+      options.commandSeverity !== SeverityLevel.OFF
+        ? options.commandSeverity
+        : options.defaultSeverity
     );
     this.componentSeverities.set(
       LoggableComponent.TOPOLOGY,
-      options.MONGODB_LOG_TOPOLOGY ?? options.MONGODB_LOG_ALL
+      options.topologySeverity !== SeverityLevel.OFF
+        ? options.topologySeverity
+        : options.defaultSeverity
     );
     this.componentSeverities.set(
       LoggableComponent.SERVER_SELECTION,
-      options.MONGODB_LOG_SERVER_SELECTION ?? options.MONGODB_LOG_ALL
+      options.serverSelectionSeverity !== SeverityLevel.OFF
+        ? options.serverSelectionSeverity
+        : options.defaultSeverity
     );
     this.componentSeverities.set(
       LoggableComponent.CONNECTION,
-      options.MONGODB_LOG_CONNECTION ?? options.MONGODB_LOG_ALL
+      options.connectionSeverity !== SeverityLevel.OFF
+        ? options.connectionSeverity
+        : options.defaultSeverity
     );
 
     // fill max doc length
-    if (options.MONGODB_LOG_MAX_DOCUMENT_LENGTH < 0)
+    if (options.maxDocumentLength < 0)
       throw new MongoInvalidArgumentError('MONGODB_LOG_MAX_DOCUMENT_LENGTH must be >= 0');
-    this.maxDocumentLength = options.MONGODB_LOG_MAX_DOCUMENT_LENGTH;
+    this.maxDocumentLength = options.maxDocumentLength;
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -104,13 +151,3 @@ export class Logger {
 
   trace(component: any, message: any): void {}
 }
-
-/**
-  MONGODB_LOG_COMMAND
-  MONGODB_LOG_TOPOLOGY
-  MONGODB_LOG_SERVER_SELECTION
-  MONGODB_LOG_CONNECTION
-  MONGODB_LOG_ALL
-  MONGODB_LOG_MAX_DOCUMENT_LENGTH
-  MONGODB_LOG_PATH
- */

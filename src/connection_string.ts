@@ -1,7 +1,6 @@
 import * as dns from 'dns';
 import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
-import type { WritableStream } from 'stream/web';
 import { URLSearchParams } from 'url';
 
 import type { Document } from './bson';
@@ -16,11 +15,7 @@ import {
   MongoParseError
 } from './error';
 import { Logger, LoggerLevel } from './logger';
-import {
-  Logger as LoggingApi,
-  LoggerOptions as LoggingApiOptions,
-  SeverityLevel
-} from './logging_api';
+import { extractLoggerOptions, Logger as LoggingApi, SeverityLevel } from './logging_api';
 import {
   DriverInfo,
   MongoClient,
@@ -513,34 +508,18 @@ export function parseOptions(
     );
   }
 
-  mongoOptions.loggingApiOptions = {
-    MONGODB_LOG_COMMAND: getSeverityForComponent(process.env.MONGODB_LOG_COMMAND ?? 'off'),
-    MONGODB_LOG_TOPOLOGY: getSeverityForComponent(process.env.MONGODB_LOG_TOPOLOGY ?? 'off'),
-    MONGODB_LOG_SERVER_SELECTION: getSeverityForComponent(
-      process.env.MONGODB_LOG_SERVER_SELECTION ?? 'off'
-    ),
-    MONGODB_LOG_CONNECTION: getSeverityForComponent(process.env.MONGODB_LOG_CONNECTION ?? 'off'),
-    MONGODB_LOG_ALL: getSeverityForComponent(process.env.MONGODB_LOG_ALL ?? 'off'),
-    MONGODB_LOG_MAX_DOCUMENT_LENGTH:
-      typeof process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string'
-        ? Number.parseInt(process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH)
-        : 1000,
-    MONGODB_LOG_PATH:
-      typeof process.env.MONGODB_LOG_PATH === 'string'
-        ? process.env.MONGODB_LOG_PATH
-        : mongoOptions.mongodbLogPath ?? 'stderr'
-  };
-
+  const loggingApiMongoClientOptions = { mongodbLogPath: mongoOptions.mongodbLogPath };
+  const loggingApiOptions = extractLoggerOptions(loggingApiMongoClientOptions);
   const loggingComponents = [
-    mongoOptions.loggingApiOptions.MONGODB_LOG_COMMAND,
-    mongoOptions.loggingApiOptions.MONGODB_LOG_TOPOLOGY,
-    mongoOptions.loggingApiOptions.MONGODB_LOG_SERVER_SELECTION,
-    mongoOptions.loggingApiOptions.MONGODB_LOG_CONNECTION,
-    mongoOptions.loggingApiOptions.MONGODB_LOG_ALL
+    loggingApiOptions.commandSeverity,
+    loggingApiOptions.topologySeverity,
+    loggingApiOptions.serverSelectionSeverity,
+    loggingApiOptions.connectionSeverity,
+    loggingApiOptions.defaultSeverity
   ];
 
   if (loggingComponents.some(severity => severity !== SeverityLevel.OFF)) {
-    mongoOptions.loggingApi = new LoggingApi(mongoOptions.loggingApiOptions);
+    mongoOptions.loggingApi = new LoggingApi(loggingApiOptions);
   }
 
   return mongoOptions;
@@ -626,11 +605,6 @@ function setOption(
       break;
     }
   }
-}
-
-function getSeverityForComponent(rawComponent: string): SeverityLevel | undefined {
-  const validSeverities = Object.values(SeverityLevel);
-  return validSeverities.find(severity => severity === rawComponent);
 }
 
 interface OptionDescriptor {
@@ -908,9 +882,6 @@ export const OPTIONS = {
     }
   },
   loggingApi: {
-    target: 'loggingApi'
-  },
-  loggingApiOptions: {
     target: 'loggingApi'
   },
   maxConnecting: {
