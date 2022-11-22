@@ -414,13 +414,18 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * previous generation will eventually be pruned during subsequent checkouts.
    */
   clear(options: { serviceId?: ObjectId; interruptInUseConnections?: boolean } = {}): void {
-    const { serviceId } = options;
     if (this.closed) {
       return;
     }
 
     // handle load balanced case
-    if (this.loadBalanced && serviceId) {
+    if (this.loadBalanced) {
+      const { serviceId } = options;
+      if (!serviceId) {
+        throw new MongoRuntimeError(
+          'ConnectionPool.clear() called in load balanced mode with no serviceId.'
+        );
+      }
       const sid = serviceId.toHexString();
       const generation = this.serviceGenerations.get(sid);
       // Only need to worry if the generation exists, since it should
