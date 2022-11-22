@@ -387,6 +387,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * @param connection - The connection to check in
    */
   checkIn(connection: Connection): void {
+    if (!this[kCheckedOut].has(connection)) {
+      return;
+    }
     const poolClosed = this.closed;
     const stale = this.connectionIsStale(connection);
     const willDestroy = !!(poolClosed || stale || connection.closed);
@@ -472,12 +475,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   private interruptInUseConnections(minGeneration: number) {
     for (const connection of this[kCheckedOut]) {
       if (connection.generation <= minGeneration) {
-        this[kCheckedOut].delete(connection);
+        this.checkIn(connection);
         connection.onError(new PoolClearedOnNetworkError(this));
-        this.emit(
-          ConnectionPool.CONNECTION_CLOSED,
-          new ConnectionClosedEvent(this, connection, 'stale')
-        );
       }
     }
 
