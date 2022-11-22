@@ -465,11 +465,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   /**
-   * Closes all checked in perished connections in the pool with a resumable PoolClearedOnNetworkError.
+   * Closes all stale in-use connections in the pool with a resumable PoolClearedOnNetworkError.
    *
-   * If interruptInUseConnections is `true`, this method attempts to kill checked out connections as well.
-   * Only connections where `connection.generation <= minGeneration` are killed.  Connections are closed with a
-   * resumable PoolClearedOnNetworkTimeoutError.
+   * Only connections where `connection.generation <= minGeneration` are killed.
    */
   private interruptInUseConnections(minGeneration: number) {
     for (const connection of this[kCheckedOut]) {
