@@ -1,15 +1,17 @@
 'use strict';
 const os = require('os');
 const fs = require('fs');
+const { env } = require('process');
 const { expect } = require('chai');
 const { getSymbolFrom } = require('../tools/utils');
 const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
 const { ReadConcern } = require('../../src/read_concern');
 const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
-const { Logger } = require('../../src/logger');
+const { Logger } = require('../../src/mongo_logger');
 const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
 const { MongoClient, MongoParseError, ServerApiVersion } = require('../../src');
+const { SeverityLevel } = require('../../src/mongo_logger');
 
 describe('MongoOptions', function () {
   it('MongoClient should always freeze public options', function () {
@@ -846,5 +848,33 @@ describe('MongoOptions', function () {
         expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
       });
     });
+  });
+
+  context('logger', function () {
+    const severityVars = [
+      'MONGODB_LOG_COMMAND',
+      'MONGODB_LOG_TOPOLOGY',
+      'MONGODB_LOG_SERVER_SELECTION',
+      'MONGODB_LOG_CONNECTION',
+      'MONGODB_LOG_ALL'
+    ];
+
+    for (const name of severityVars) {
+      it(`should enable logging if at least ${name} is set to a valid value`, function () {
+        env[name] = SeverityLevel.CRITICAL;
+        const client = new MongoClient('mongodb://localhost:27017');
+        expect(client.mongoLogger).to.be.instanceOf(Logger);
+        env[name] = undefined;
+      });
+    }
+
+    for (const name of severityVars) {
+      it(`should not enable logging if ${name} is set to an invalid value`, function () {
+        env[name] = 'invalid';
+        const client = new MongoClient('mongodb://localhost:27017');
+        expect(client).property('mongoLogger', null);
+        env[name] = undefined;
+      });
+    }
   });
 });

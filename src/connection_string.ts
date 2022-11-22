@@ -14,8 +14,7 @@ import {
   MongoMissingCredentialsError,
   MongoParseError
 } from './error';
-import { Logger, LoggerLevel } from './logger';
-import { extractLoggerOptions, Logger as LoggingApi, SeverityLevel } from './logging_api';
+import { Logger as LegacyLogger, LoggerLevel as LegacyLoggerLevel } from './logger';
 import {
   DriverInfo,
   MongoClient,
@@ -25,6 +24,7 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
+import { Logger, SeverityLevel } from './mongo_logger';
 import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -207,7 +207,7 @@ function getInt(name: string, value: unknown): number {
   throw new MongoParseError(`Expected ${name} to be stringified int value, got: ${value}`);
 }
 
-function getUint(name: string, value: unknown): number {
+export function getUint(name: string, value: unknown): number {
   const parsedValue = getInt(name, value);
   if (parsedValue < 0) {
     throw new MongoParseError(`${name} can only be a positive int value, got: ${value}`);
@@ -508,18 +508,18 @@ export function parseOptions(
     );
   }
 
-  const loggingApiMongoClientOptions = { mongodbLogPath: mongoOptions.mongodbLogPath };
-  const loggingApiOptions = extractLoggerOptions(loggingApiMongoClientOptions);
+  const loggerMongoClientOptions = { mongodbLogPath: mongoOptions.mongodbLogPath };
+  const loggerOptions = Logger.resolveOptions(loggerMongoClientOptions);
   const loggingComponents = [
-    loggingApiOptions.commandSeverity,
-    loggingApiOptions.topologySeverity,
-    loggingApiOptions.serverSelectionSeverity,
-    loggingApiOptions.connectionSeverity,
-    loggingApiOptions.defaultSeverity
+    loggerOptions.command,
+    loggerOptions.topology,
+    loggerOptions.serverSelection,
+    loggerOptions.connection,
+    loggerOptions.defaultSeverity
   ];
 
   if (loggingComponents.some(severity => severity !== SeverityLevel.OFF)) {
-    mongoOptions.loggingApi = new LoggingApi(loggingApiOptions);
+    mongoOptions.mongoLogger = new Logger(loggerOptions);
   }
 
   return mongoOptions;
@@ -864,9 +864,9 @@ export const OPTIONS = {
     type: 'uint'
   },
   logger: {
-    default: new Logger('MongoClient'),
+    default: new LegacyLogger('MongoClient'),
     transform({ values: [value] }) {
-      if (value instanceof Logger) {
+      if (value instanceof LegacyLogger) {
         return value;
       }
       emitWarning('Alternative loggers might not be supported');
@@ -878,11 +878,11 @@ export const OPTIONS = {
   loggerLevel: {
     target: 'logger',
     transform({ values: [value] }) {
-      return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
+      return new LegacyLogger('MongoClient', { loggerLevel: value as LegacyLoggerLevel });
     }
   },
-  loggingApi: {
-    target: 'loggingApi'
+  mongoLogger: {
+    target: 'mongoLogger'
   },
   maxConnecting: {
     default: 2,
