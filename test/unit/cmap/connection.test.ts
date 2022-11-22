@@ -311,7 +311,7 @@ describe('new Connection()', function () {
           const message = new BinMsg(msg, msgHeader, msgBody);
           expect(() => {
             connection.onMessage(message);
-          }).to.not.throw(/undefined is not iterable/);
+          }).to.not.throw();
         });
       });
 
