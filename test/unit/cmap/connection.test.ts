@@ -287,6 +287,34 @@ describe('new Connection()', function () {
         });
       });
 
+      context('when no operation description is in the queue', function () {
+        const document = { ok: 1 };
+
+        beforeEach(function () {
+          // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+          connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+          connection.isMonitoringConnection = true;
+          const queueSymbol = getSymbolFrom(connection, 'queue');
+          queue = connection[queueSymbol];
+        });
+
+        it('does not error', function () {
+          const msg = generateOpMsgBuffer(document);
+          const msgHeader: MessageHeader = {
+            length: msg.readInt32LE(0),
+            requestId: 2,
+            responseTo: 1,
+            opCode: msg.readInt32LE(12)
+          };
+          const msgBody = msg.subarray(16);
+
+          const message = new BinMsg(msg, msgHeader, msgBody);
+          expect(() => {
+            connection.onMessage(message);
+          }).to.not.throw();
+        });
+      });
+
       context('when more than one operation description is in the queue', function () {
         let spyOne;
         let spyTwo;
