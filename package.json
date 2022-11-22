@@ -121,7 +121,7 @@
     "fix:eslint": "npm run check:eslint -- --fix",
     "prepare": "node etc/prepare.js",
     "preview:docs": "ts-node etc/docs/preview.ts",
-    "release": "standard-version -a -i HISTORY.md",
+    "release": "bash etc/check-remote.sh && standard-version -a -i HISTORY.md",
     "test": "npm run check:lint && npm run test:all",
     "test:all": "npm run check:unit && npm run check:test",
     "update:docs": "npm run build:docs -- --yes"
