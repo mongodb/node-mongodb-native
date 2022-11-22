@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import { env } from 'process';
 import type { Writable } from 'stream';
 
 import { getUint } from './connection_string';
@@ -109,22 +108,22 @@ export class Logger {
   trace(component: any, message: any): void {}
 
   static resolveOptions(clientOptions?: LoggerMongoClientOptions): LoggerOptions {
-    const defaultSeverity = toValidSeverity(env.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
+    const defaultSeverity = toValidSeverity(process.env.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
 
     return {
-      command: toValidSeverity(env.MONGODB_LOG_COMMAND) ?? defaultSeverity,
-      topology: toValidSeverity(env.MONGODB_LOG_TOPOLOGY) ?? defaultSeverity,
-      serverSelection: toValidSeverity(env.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
-      connection: toValidSeverity(env.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
+      command: toValidSeverity(process.env.MONGODB_LOG_COMMAND) ?? defaultSeverity,
+      topology: toValidSeverity(process.env.MONGODB_LOG_TOPOLOGY) ?? defaultSeverity,
+      serverSelection: toValidSeverity(process.env.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
+      connection: toValidSeverity(process.env.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
       defaultSeverity,
       maxDocumentLength:
-        typeof env.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string' &&
-        env.MONGODB_LOG_MAX_DOCUMENT_LENGTH !== ''
-          ? getUint('MONGODB_LOG_MAX_DOCUMENT_LENGTH', env.MONGODB_LOG_MAX_DOCUMENT_LENGTH)
+        typeof process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string' &&
+        process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH !== ''
+          ? getUint('MONGODB_LOG_MAX_DOCUMENT_LENGTH', process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH)
           : 1000,
       logPath:
-        typeof env.MONGODB_LOG_PATH === 'string' && env.MONGODB_LOG_PATH !== ''
-          ? env.MONGODB_LOG_PATH
+        typeof process.env.MONGODB_LOG_PATH === 'string' && process.env.MONGODB_LOG_PATH !== ''
+          ? process.env.MONGODB_LOG_PATH
           : clientOptions?.mongodbLogPath ?? 'stderr'
     };
   }

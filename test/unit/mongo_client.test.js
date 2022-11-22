@@ -1,7 +1,6 @@
 'use strict';
 const os = require('os');
 const fs = require('fs');
-const { env } = require('process');
 const { expect } = require('chai');
 const { getSymbolFrom } = require('../tools/utils');
 const { parseOptions, resolveSRVRecord } = require('../../src/connection_string');
@@ -861,19 +860,19 @@ describe('MongoOptions', function () {
 
     for (const name of severityVars) {
       it(`should enable logging if at least ${name} is set to a valid value`, function () {
-        env[name] = SeverityLevel.CRITICAL;
+        process.env[name] = SeverityLevel.CRITICAL;
         const client = new MongoClient('mongodb://localhost:27017');
         expect(client.mongoLogger).to.be.instanceOf(Logger);
-        env[name] = undefined;
+        process.env[name] = undefined;
       });
     }
 
     for (const name of severityVars) {
       it(`should not enable logging if ${name} is set to an invalid value`, function () {
-        env[name] = 'invalid';
+        process.env[name] = 'invalid';
         const client = new MongoClient('mongodb://localhost:27017');
         expect(client).property('mongoLogger', null);
-        env[name] = undefined;
+        process.env[name] = undefined;
       });
     }
   });
