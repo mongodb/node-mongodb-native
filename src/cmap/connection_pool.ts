@@ -399,10 +399,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       this[kConnections].unshift(connection);
     }
 
-    const wasConnectionDeleted = this[kCheckedOut].delete(connection);
+    this[kCheckedOut].delete(connection);
     this.emit(ConnectionPool.CONNECTION_CHECKED_IN, new ConnectionCheckedInEvent(this, connection));
 
-    if (wasConnectionDeleted && willDestroy) {
+    if (willDestroy) {
       const reason = connection.closed ? 'error' : poolClosed ? 'poolClosed' : 'stale';
       this.destroyConnection(connection, reason);
     }
