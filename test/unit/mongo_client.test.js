@@ -7,10 +7,10 @@ const { parseOptions, resolveSRVRecord } = require('../../src/connection_string'
 const { ReadConcern } = require('../../src/read_concern');
 const { WriteConcern } = require('../../src/write_concern');
 const { ReadPreference } = require('../../src/read_preference');
-const { Logger } = require('../../src/mongo_logger');
+const { Logger } = require('../../src/logger');
 const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
 const { MongoClient, MongoParseError, ServerApiVersion } = require('../../src');
-const { SeverityLevel } = require('../../src/mongo_logger');
+const { MongoLogger, SeverityLevel } = require('../../src/mongo_logger');
 
 describe('MongoOptions', function () {
   it('MongoClient should always freeze public options', function () {
@@ -849,7 +849,7 @@ describe('MongoOptions', function () {
     });
   });
 
-  context('logger', function () {
+  context('MongoLogger', function () {
     const severityVars = [
       'MONGODB_LOG_COMMAND',
       'MONGODB_LOG_TOPOLOGY',
@@ -862,7 +862,7 @@ describe('MongoOptions', function () {
       it(`should enable logging if at least ${name} is set to a valid value`, function () {
         process.env[name] = SeverityLevel.CRITICAL;
         const client = new MongoClient('mongodb://localhost:27017');
-        expect(client.mongoLogger).to.be.instanceOf(Logger);
+        expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
         process.env[name] = undefined;
       });
     }
