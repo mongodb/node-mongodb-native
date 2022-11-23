@@ -1,10 +1,15 @@
 import { expect } from 'chai';
 
-import { LoggableComponent, Logger, LoggerOptions, SeverityLevel } from '../../src/mongo_logger';
+import {
+  MongoLoggableComponent,
+  MongoLogger,
+  MongoLoggerOptions,
+  SeverityLevel
+} from '../../src/mongo_logger';
 
 describe('Logger', function () {
   describe('options parsing', function () {
-    let loggerOptions: LoggerOptions;
+    let loggerOptions: MongoLoggerOptions;
 
     before(function () {
       // MONGODB_LOG_COMMAND is not set so it defaults to undefined
@@ -15,7 +20,7 @@ describe('Logger', function () {
       process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '100';
       process.env.MONGODB_LOG_PATH = 'stderr';
 
-      loggerOptions = Logger.resolveOptions();
+      loggerOptions = MongoLogger.resolveOptions();
     });
 
     it('treats severity values as case-insensitive', function () {
@@ -30,12 +35,18 @@ describe('Logger', function () {
     });
 
     it('can set severity levels per component', function () {
-      const { componentSeverities } = new Logger(loggerOptions);
+      const { componentSeverities } = new MongoLogger(loggerOptions);
 
-      expect(componentSeverities).property(LoggableComponent.COMMAND, SeverityLevel.ERROR);
-      expect(componentSeverities).property(LoggableComponent.TOPOLOGY, SeverityLevel.ERROR);
-      expect(componentSeverities).property(LoggableComponent.SERVER_SELECTION, SeverityLevel.ERROR);
-      expect(componentSeverities).property(LoggableComponent.CONNECTION, SeverityLevel.CRITICAL);
+      expect(componentSeverities).property(MongoLoggableComponent.COMMAND, SeverityLevel.ERROR);
+      expect(componentSeverities).property(MongoLoggableComponent.TOPOLOGY, SeverityLevel.ERROR);
+      expect(componentSeverities).property(
+        MongoLoggableComponent.SERVER_SELECTION,
+        SeverityLevel.ERROR
+      );
+      expect(componentSeverities).property(
+        MongoLoggableComponent.CONNECTION,
+        SeverityLevel.CRITICAL
+      );
     });
   });
 });
