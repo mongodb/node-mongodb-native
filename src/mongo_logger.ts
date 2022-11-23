@@ -114,6 +114,7 @@ export class MongoLogger {
    * when both are set, and substituting defaults for values not set. Options set in constructor
    * take precedence over both environment variables and MongoClient options.
    *
+   * @remarks
    * When parsing component severity levels, invalid values are treated as unset and replaced with
    * the default severity.
    *
