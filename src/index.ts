@@ -303,6 +303,7 @@ export type {
 export type {
   MongoLoggableComponent,
   MongoLogger,
+  MongoLoggerEnvOptions,
   MongoLoggerMongoClientOptions,
   MongoLoggerOptions,
   SeverityLevel

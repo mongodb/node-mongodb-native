@@ -24,7 +24,12 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
-import { MongoLogger, SeverityLevel } from './mongo_logger';
+import {
+  MongoLogger,
+  MongoLoggerEnvOptions,
+  MongoLoggerMongoClientOptions,
+  SeverityLevel
+} from './mongo_logger';
 import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -33,6 +38,8 @@ import {
   DEFAULT_PK_FACTORY,
   emitWarning,
   emitWarningOnce,
+  getInt,
+  getUint,
   HostAddress,
   isRecord,
   makeClientMetadata,
@@ -198,21 +205,6 @@ function getBoolean(name: string, value: unknown): boolean {
     return false;
   }
   throw new MongoParseError(`Expected ${name} to be stringified boolean value, got: ${value}`);
-}
-
-function getInt(name: string, value: unknown): number {
-  if (typeof value === 'number') return Math.trunc(value);
-  const parsedValue = Number.parseInt(String(value), 10);
-  if (!Number.isNaN(parsedValue)) return parsedValue;
-  throw new MongoParseError(`Expected ${name} to be stringified int value, got: ${value}`);
-}
-
-export function getUint(name: string, value: unknown): number {
-  const parsedValue = getInt(name, value);
-  if (parsedValue < 0) {
-    throw new MongoParseError(`${name} can only be a positive int value, got: ${value}`);
-  }
-  return parsedValue;
 }
 
 function* entriesFromString(value: string): Generator<[string, string]> {
@@ -508,8 +500,19 @@ export function parseOptions(
     );
   }
 
-  const loggerMongoClientOptions = { mongodbLogPath: mongoOptions.mongodbLogPath };
-  const loggerOptions = MongoLogger.resolveOptions(loggerMongoClientOptions);
+  const loggerEnvOptions: MongoLoggerEnvOptions = {
+    MONGODB_LOG_COMMAND: process.env.MONGODB_LOG_COMMAND,
+    MONGODB_LOG_TOPOLOGY: process.env.MONGODB_LOG_TOPOLOGY,
+    MONGODB_LOG_SERVER_SELECTION: process.env.MONGODB_LOG_SERVER_SELECTION,
+    MONGODB_LOG_CONNECTION: process.env.MONGODB_LOG_CONNECTION,
+    MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
+    MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
+    MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH
+  };
+  const loggerMongoClientOptions: MongoLoggerMongoClientOptions = {
+    mongodbLogPath: mongoOptions.mongodbLogPath
+  };
+  const loggerOptions = MongoLogger.resolveOptions(loggerEnvOptions, loggerMongoClientOptions);
   const loggingComponents = [
     loggerOptions.command,
     loggerOptions.topology,
