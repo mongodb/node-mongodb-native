@@ -858,21 +858,21 @@ describe('MongoOptions', function () {
       'MONGODB_LOG_ALL'
     ];
 
-    for (const name of severityVars) {
-      it(`should enable logging if at least ${name} is set to a valid value`, function () {
-        process.env[name] = SeverityLevel.CRITICAL;
+    for (const envName of severityVars) {
+      it(`should enable logging if ${envName} is set to a valid value`, function () {
+        const previousValue = process.env[envName];
+        process.env[envName] = SeverityLevel.CRITICAL;
         const client = new MongoClient('mongodb://localhost:27017');
         expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
-        process.env[name] = undefined;
+        process.env[envName] = previousValue;
       });
-    }
 
-    for (const name of severityVars) {
-      it(`should not enable logging if ${name} is set to an invalid value`, function () {
-        process.env[name] = 'invalid';
+      it(`should not enable logging if ${envName} is the only variable set and it is set to an invalid value`, function () {
+        const previousValue = process.env[envName];
+        process.env[envName] = 'invalid';
         const client = new MongoClient('mongodb://localhost:27017');
         expect(client).property('mongoLogger', null);
-        process.env[name] = undefined;
+        process.env[envName] = previousValue;
       });
     }
   });
