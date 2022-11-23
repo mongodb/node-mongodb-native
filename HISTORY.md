@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.12.1](https://github.com/mongodb/node-mongodb-native/compare/v4.12.0...v4.12.1) (2022-11-23)
+
+
+### Bug Fixes
+
+* **NODE-4830:** lazily import aws module ([#3476](https://github.com/mongodb/node-mongodb-native/issues/3476)) ([ff375e9](https://github.com/mongodb/node-mongodb-native/commit/ff375e9cfb84c85b7036a7ef0f87385d3ec126bb))
+* **NODE-4831:** check map value is not undefined ([#3477](https://github.com/mongodb/node-mongodb-native/issues/3477)) ([9795cdb](https://github.com/mongodb/node-mongodb-native/commit/9795cdb19f8e652b4dc4badd4fe8e6d1a7b837a6))
+
 ## [4.12.0](https://github.com/mongodb/node-mongodb-native/compare/v4.11.0...v4.12.0) (2022-11-16)
 
 
