@@ -24,7 +24,7 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
-import { Logger, SeverityLevel } from './mongo_logger';
+import { MongoLogger, SeverityLevel } from './mongo_logger';
 import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -509,7 +509,7 @@ export function parseOptions(
   }
 
   const loggerMongoClientOptions = { mongodbLogPath: mongoOptions.mongodbLogPath };
-  const loggerOptions = Logger.resolveOptions(loggerMongoClientOptions);
+  const loggerOptions = MongoLogger.resolveOptions(loggerMongoClientOptions);
   const loggingComponents = [
     loggerOptions.command,
     loggerOptions.topology,
@@ -519,7 +519,7 @@ export function parseOptions(
   ];
 
   if (loggingComponents.some(severity => severity !== SeverityLevel.OFF)) {
-    mongoOptions.mongoLogger = new Logger(loggerOptions);
+    mongoOptions.mongoLogger = new MongoLogger(loggerOptions);
   }
 
   return mongoOptions;
