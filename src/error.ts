@@ -91,6 +91,7 @@ export const MongoErrorLabel = Object.freeze({
   ResumableChangeStreamError: 'ResumableChangeStreamError',
   HandshakeError: 'HandshakeError',
   ResetPool: 'ResetPool',
+  InterruptInUseConnections: 'InterruptInUseConnections',
   NoWritesPerformed: 'NoWritesPerformed'
 } as const);
 

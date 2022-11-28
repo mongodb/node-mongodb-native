@@ -41,7 +41,12 @@ import {
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './connection_pool_events';
-import { PoolClearedError, PoolClosedError, WaitQueueTimeoutError } from './errors';
+import {
+  PoolClearedError,
+  PoolClearedOnNetworkError,
+  PoolClosedError,
+  WaitQueueTimeoutError
+} from './errors';
 import { ConnectionPoolMetrics } from './metrics';
 
 /** @internal */
@@ -382,6 +387,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * @param connection - The connection to check in
    */
   checkIn(connection: Connection): void {
+    if (!this[kCheckedOut].has(connection)) {
+      return;
+    }
     const poolClosed = this.closed;
     const stale = this.connectionIsStale(connection);
     const willDestroy = !!(poolClosed || stale || connection.closed);
@@ -408,13 +416,19 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * Pool reset is handled by incrementing the pool's generation count. Any existing connection of a
    * previous generation will eventually be pruned during subsequent checkouts.
    */
-  clear(serviceId?: ObjectId): void {
+  clear(options: { serviceId?: ObjectId; interruptInUseConnections?: boolean } = {}): void {
     if (this.closed) {
       return;
     }
 
     // handle load balanced case
-    if (this.loadBalanced && serviceId) {
+    if (this.loadBalanced) {
+      const { serviceId } = options;
+      if (!serviceId) {
+        throw new MongoRuntimeError(
+          'ConnectionPool.clear() called in load balanced mode with no serviceId.'
+        );
+      }
       const sid = serviceId.toHexString();
       const generation = this.serviceGenerations.get(sid);
       // Only need to worry if the generation exists, since it should
@@ -431,17 +445,40 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
       return;
     }
-
     // handle non load-balanced case
+    const interruptInUseConnections = options.interruptInUseConnections ?? false;
+    const oldGeneration = this[kGeneration];
     this[kGeneration] += 1;
     const alreadyPaused = this[kPoolState] === PoolState.paused;
     this[kPoolState] = PoolState.paused;
 
     this.clearMinPoolSizeTimer();
     if (!alreadyPaused) {
-      this.emit(ConnectionPool.CONNECTION_POOL_CLEARED, new ConnectionPoolClearedEvent(this));
+      this.emit(
+        ConnectionPool.CONNECTION_POOL_CLEARED,
+        new ConnectionPoolClearedEvent(this, { interruptInUseConnections })
+      );
     }
+
+    if (interruptInUseConnections) {
+      process.nextTick(() => this.interruptInUseConnections(oldGeneration));
+    }
+
     this.processWaitQueue();
+  }
+
+  /**
+   * Closes all stale in-use connections in the pool with a resumable PoolClearedOnNetworkError.
+   *
+   * Only connections where `connection.generation <= minGeneration` are killed.
+   */
+  private interruptInUseConnections(minGeneration: number) {
+    for (const connection of this[kCheckedOut]) {
+      if (connection.generation <= minGeneration) {
+        this.checkIn(connection);
+        connection.onError(new PoolClearedOnNetworkError(this));
+      }
+    }
   }
 
   /** Close the pool */
@@ -572,7 +609,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return !!(this.options.maxIdleTimeMS && connection.idleTime > this.options.maxIdleTimeMS);
   }
 
-  private connectionIsPerished(connection: Connection) {
+  /**
+   * Destroys a connection if the connection is perished.
+   *
+   * @returns `true` if the connection was destroyed, `false` otherwise.
+   */
+  private destroyConnectionIfPerished(connection: Connection): boolean {
     const isStale = this.connectionIsStale(connection);
     const isIdle = this.connectionIsIdle(connection);
     if (!isStale && !isIdle && !connection.closed) {
@@ -658,7 +700,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       return;
     }
 
-    this[kConnections].prune(connection => this.connectionIsPerished(connection));
+    this[kConnections].prune(connection => this.destroyConnectionIfPerished(connection));
 
     if (
       this.totalConnectionCount < minPoolSize &&
@@ -734,7 +776,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         break;
       }
 
-      if (!this.connectionIsPerished(connection)) {
+      if (!this.destroyConnectionIfPerished(connection)) {
         this[kCheckedOut].add(connection);
         this.emit(
           ConnectionPool.CONNECTION_CHECKED_OUT,
