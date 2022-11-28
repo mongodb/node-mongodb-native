@@ -617,7 +617,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    *
    * @returns `true` if the connection was destroyed, `false` otherwise.
    */
-  private destroyConnectionIfPerished(connection: Connection) {
+  private destroyConnectionIfPerished(connection: Connection): boolean {
     const isStale = this.connectionIsStale(connection);
     const isIdle = this.connectionIsIdle(connection);
     if (!isStale && !isIdle && !connection.closed) {
