@@ -354,8 +354,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           }
           if (!(err instanceof PoolClearedError)) {
             this.handleError(err);
-          } else {
-            err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
           }
           return cb(err);
         }
@@ -400,14 +398,14 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         error.addErrorLabel(MongoErrorLabel.ResetPool);
         markServerUnknown(this, error);
       } else if (connection) {
-        this.s.pool.clear(connection.serviceId);
+        this.s.pool.clear({ serviceId: connection.serviceId });
       }
     } else {
       if (isSDAMUnrecoverableError(error)) {
         if (shouldHandleStateChangeError(this, error)) {
           const shouldClearPool = maxWireVersion(this) <= 7 || isNodeShuttingDownError(error);
           if (this.loadBalanced && connection && shouldClearPool) {
-            this.s.pool.clear(connection.serviceId);
+            this.s.pool.clear({ serviceId: connection.serviceId });
           }
 
           if (!this.loadBalanced) {

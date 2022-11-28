@@ -12,34 +12,43 @@ const LB_SKIP_TESTS: SkipDescription[] = [
   'clearing a paused pool emits no events',
   'after clear, cannot check out connections until pool ready',
   'readying a ready pool emits no events',
-  'error during minPoolSize population clears pool'
+  'error during minPoolSize population clears pool',
+  'Connections MUST be interrupted as soon as possible (interruptInUseConnections=true)'
 ].map(description => ({
   description,
   skipIfCondition: 'loadBalanced',
   skipReason: 'cannot run against a load balanced environment'
 }));
 
-const INTERRUPT_IN_USE_CONNECTIONS_TESTS: SkipDescription[] = [
-  'Connections MUST be interrupted as soon as possible (interruptInUseConnections=true)',
-  'Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections: false)',
-  'clear with interruptInUseConnections = true closes pending connections'
-].map(description => ({
-  description,
-  skipIfCondition: 'always',
-  skipReason: 'TODO(NODE-4691): cancel inflight operations when heartbeat fails'
-}));
+const INTERRUPT_IN_USE_SKIPPED_TESTS: SkipDescription[] = [
+  {
+    description: 'clear with interruptInUseConnections = true closes pending connections',
+    skipIfCondition: 'always',
+    skipReason: 'TODO(NODE-4784): track and kill pending connections'
+  },
+  {
+    description:
+      'Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections: false)',
+    skipIfCondition: 'always',
+    skipReason:
+      'NodeJS does not have a background thread responsible for managing connections, and so already checked in connections are not pruned when in-use connections are interrupted.'
+  }
+];
 
 describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
   const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
 
   runCmapTestSuite(tests, {
-    testsToSkip: LB_SKIP_TESTS.concat([
-      {
-        description: 'waiting on maxConnecting is limited by WaitQueueTimeoutMS',
-        skipIfCondition: 'always',
-        skipReason:
-          'not applicable: waitQueueTimeoutMS limits connection establishment time in our driver'
-      }
-    ]).concat(INTERRUPT_IN_USE_CONNECTIONS_TESTS)
+    testsToSkip: LB_SKIP_TESTS.concat(
+      [
+        {
+          description: 'waiting on maxConnecting is limited by WaitQueueTimeoutMS',
+          skipIfCondition: 'always',
+          skipReason:
+            'not applicable: waitQueueTimeoutMS limits connection establishment time in our driver'
+        }
+      ],
+      INTERRUPT_IN_USE_SKIPPED_TESTS
+    )
   });
 });

@@ -839,7 +839,11 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
         incomingServerDescription.error instanceof MongoError &&
         incomingServerDescription.error.hasErrorLabel(MongoErrorLabel.ResetPool)
       ) {
-        server.s.pool.clear();
+        const interruptInUseConnections = incomingServerDescription.error.hasErrorLabel(
+          MongoErrorLabel.InterruptInUseConnections
+        );
+
+        server.s.pool.clear({ interruptInUseConnections });
       } else if (incomingServerDescription.error == null) {
         const newTopologyType = topology.s.description.type;
         const shouldMarkPoolReady =

@@ -105,7 +105,9 @@ describe('Server', () => {
               expect(newDescription).to.have.nested.property('[0].type', ServerType.Unknown);
             } else {
               expect(newDescription).to.be.undefined;
-              expect(server.s.pool.clear).to.have.been.calledOnceWith(connection!.serviceId);
+              expect(server.s.pool.clear).to.have.been.calledOnceWith({
+                serviceId: connection!.serviceId
+              });
             }
           });
 
