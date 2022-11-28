@@ -19,42 +19,42 @@ mkdir -p ${NODE_ARTIFACTS_PATH}
 mkdir -p ${NPM_CACHE_DIR}
 mkdir -p "${NPM_TMP_DIR}"
 
-case $NODE_LTS_NAME in
-  "argon")
-    VERSION=4
-    ;;
-  "boron")
-    VERSION=6
-    ;;
-  "carbon")
-    VERSION=8
-    ;;
-  "dubnium")
-    VERSION=10
-    ;;
-  "erbium")
-    VERSION=12
-    ;;
-  "fermium")
-    VERSION=14
-    ;;
-  "gallium")
-    VERSION=16
-    ;;
-  "hydrogen")
-    VERSION=18
-    ;;
-  "iron")
-    VERSION=20
-    ;;
-  *)
-    echo "Unsupported Node LTS version $1"
-    exit 1
-    ;;
-esac
+get_node_version() {
+  case $NODE_LTS_NAME in
+    "erbium")
+      VERSION=12
+      ;;
+    "fermium")
+      VERSION=14
+      ;;
+    "gallium")
+      VERSION=16
+      ;;
+    "hydrogen")
+      VERSION=18
+      ;;
+    "iron")
+      VERSION=20
+      ;;
+    "latest")
+      VERSION='node'
+      ;;
+    *)
+      echo "Unsupported Node LTS version $1"
+      exit 1
+      ;;
+  esac
 
-NODE_VERSION=$(curl --retry 8 --retry-delay 5  --max-time 50 --silent -o- https://nodejs.org/download/release/latest-v${VERSION}.x/SHASUMS256.txt | head -n 1 | awk '{print $2};' | cut -d- -f2)
-export NODE_VERSION=${NODE_VERSION:1} # :1 gets rid of the leading 'v'
+  export NODE_VERSION=$VERSION
+
+  if [ $VERSION != 'node' ]
+  then
+    NODE_VERSION=$(curl --retry 8 --retry-delay 5  --max-time 50 --silent -o- https://nodejs.org/download/release/latest-v${VERSION}.x/SHASUMS256.txt | head -n 1 | awk '{print $2};' | cut -d- -f2)
+    export NODE_VERSION=${NODE_VERSION:1} # :1 gets rid of the leading 'v'
+  fi
+}
+
+get_node_version
 
 # output node version to expansions file for use in subsequent scripts
 cat <<EOT > deps-expansion.yml

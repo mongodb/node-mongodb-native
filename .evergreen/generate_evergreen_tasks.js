@@ -389,7 +389,7 @@ for (const
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
     const nodeVersionNumber = versions.find(({ codeName }) => codeName === NODE_LTS_NAME).versionNumber;
-    const nodeLtsDisplayName = `Node${nodeVersionNumber}`;
+    const nodeLtsDisplayName = nodeVersionNumber === undefined ? `Node Latest` : `Node${nodeVersionNumber}`;
     const name = `${osName}-${NODE_LTS_NAME}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_NAME };
@@ -404,11 +404,27 @@ for (const
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
   };
+
+  const configureLatestNodeSmokeTest = os.match(/^rhel/);
+  if (configureLatestNodeSmokeTest) {
+    const buildVariantData = {
+      name: `${osName}-node-latest`,
+      display_name: `${osDisplayName} Node Latest`,
+      run_on,
+      expansions: { NODE_LTS_NAME: 'latest' },
+      tasks: tasks.map(({ name }) => name)
+    }
+    if (clientEncryption) {
+      buildVariantData.expansions.CLIENT_ENCRYPTION = true;
+    }
+
+    BUILD_VARIANTS.push(buildVariantData)
+  }
 }
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node${versions[versions.length - 1].versionNumber}`,
+  display_name: `MacOS 11 Node${versions.find(version => version.codeName === LATEST_LTS).versionNumber}`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_NAME: LATEST_LTS,
