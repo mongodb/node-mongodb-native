@@ -859,7 +859,7 @@ describe('MongoOptions', function () {
     ];
 
     for (const envName of severityVars) {
-      it(`should enable logging if ${envName} is set to a valid value`, function () {
+      it(`should instantiate a MongoLogger if ${envName} is set to a valid value`, function () {
         const previousValue = process.env[envName];
         process.env[envName] = SeverityLevel.CRITICAL;
         const client = new MongoClient('mongodb://localhost:27017');
@@ -867,7 +867,7 @@ describe('MongoOptions', function () {
         process.env[envName] = previousValue;
       });
 
-      it(`should not enable logging if ${envName} is the only variable set and it is set to an invalid value`, function () {
+      it(`should not instatiate a MongoLogger if ${envName} is the only variable set and it is set to an invalid value`, function () {
         const previousValue = process.env[envName];
         process.env[envName] = 'invalid';
         const client = new MongoClient('mongodb://localhost:27017');
@@ -875,5 +875,22 @@ describe('MongoOptions', function () {
         process.env[envName] = previousValue;
       });
     }
+
+    it('should not instatiate a MongoLogger if environment variables are not set', function () {
+      const client = new MongoClient('mongodb://localhost:27017');
+      expect(client).property('mongoLogger', null);
+    });
+
+    it('should instantiate a MongoLogger if there is a mix of environment vairables with valid and invalid options', function () {
+      const { MONGODB_LOG_COMMAND, MONGODB_LOG_TOPOLOGY } = process.env;
+      process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.CRITICAL;
+      process.env['MONGODB_LOG_TOPOLOGY'] = 'invalid';
+
+      const client = new MongoClient('mongodb://localhost:27017');
+      expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
+
+      process.env['MONGODB_LOG_COMMAND'] = MONGODB_LOG_COMMAND;
+      process.env['MONGODB_LOG_TOPOLOGY'] = MONGODB_LOG_TOPOLOGY;
+    });
   });
 });

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import type { Writable } from 'stream';
 
-import { emitWarning, enumToString, getUint } from './utils';
+import { emitWarning, emitWarningOnce, enumToString } from './utils';
 
 /** @internal */
 export const SeverityLevel = Object.freeze({
@@ -36,6 +36,7 @@ function parseSeverityFromString(name: string, s?: string): SeverityLevel | null
       return lowerSeverity as SeverityLevel;
     }
 
+    // TODO(andymina): revisit this after settling notifying about invalid values
     emitWarning(`Value for ${name} must be one of ${enumToString(SeverityLevel)}`);
   }
 
@@ -105,9 +106,10 @@ export class MongoLogger {
   constructor(options: MongoLoggerOptions) {
     // validate log path
     if (typeof options.logDestination === 'string') {
+      const lowerLogDestination = options.logDestination.toLowerCase();
       this.logDestination =
-        options.logDestination === 'stderr' || options.logDestination === 'stdout'
-          ? process[options.logDestination]
+        lowerLogDestination === 'stderr' || lowerLogDestination === 'stdout'
+          ? process[lowerLogDestination]
           : fs.createWriteStream(options.logDestination, { flags: 'a+' });
       // TODO(NODE-4816): add error handling for creating a write stream
     } else {
@@ -159,6 +161,22 @@ export class MongoLogger {
     const defaultSeverity =
       parseSeverityFromString('MONGODB_LOG_ALL', envOptions.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
 
+    let maxDocumentLength = 1000;
+    if (
+      typeof envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string' &&
+      envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH !== ''
+    ) {
+      const parsedValue = Number.parseInt(envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH, 10);
+      if (!Number.isNaN(parsedValue) && parsedValue >= 0) {
+        maxDocumentLength = parsedValue;
+      } else {
+        // TODO(andymina): revisit this after settling notifying about invalid values
+        emitWarningOnce(
+          `MONGODB_MAX_DOCUMENT_LENGTH can only be a positive int value, got: ${envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH}`
+        );
+      }
+    }
+
     return {
       command:
         parseSeverityFromString('MONGODB_LOG_COMMAND', envOptions.MONGODB_LOG_COMMAND) ??
@@ -175,15 +193,21 @@ export class MongoLogger {
         parseSeverityFromString('MONGODB_LOG_CONNECTION', envOptions.MONGODB_LOG_CONNECTION) ??
         defaultSeverity,
       defaultSeverity,
-      maxDocumentLength:
-        typeof envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string' &&
-        envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH !== ''
-          ? getUint('MONGODB_LOG_MAX_DOCUMENT_LENGTH', envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH)
-          : 1000,
+      maxDocumentLength,
       logDestination:
         typeof envOptions.MONGODB_LOG_PATH === 'string' && envOptions.MONGODB_LOG_PATH !== ''
           ? envOptions.MONGODB_LOG_PATH
           : clientOptions?.mongodbLogPath ?? 'stderr'
     };
+  }
+
+  parseMaxDocumentLength(s?: string): number {
+    if (typeof s === 'string' && s !== '') {
+      const parsedValue = Number.parseInt(s, 10);
+      if (!Number.isNaN(parsedValue) && parsedValue >= 0) return parsedValue;
+      emitWarningOnce(`MONGODB_MAX_DOCUMENT_LENGTH can only be a positive int value, got: ${s}`);
+    }
+
+    return 1000;
   }
 }
