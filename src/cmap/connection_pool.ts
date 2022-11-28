@@ -479,9 +479,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         connection.onError(new PoolClearedOnNetworkError(this));
       }
     }
-
-    // TODO(NODE-4784): track pending connections and cancel
-    // this[kCancellationToken].emit('cancel');
   }
 
   /** Close the pool */
