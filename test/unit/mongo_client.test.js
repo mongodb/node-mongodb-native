@@ -849,7 +849,7 @@ describe('MongoOptions', function () {
     });
   });
 
-  context.only('MongoLogger', function () {
+  context('MongoLogger', function () {
     const severityVars = [
       'MONGODB_LOG_COMMAND',
       'MONGODB_LOG_TOPOLOGY',
