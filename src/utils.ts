@@ -1421,18 +1421,3 @@ export function compareObjectId(oid1?: ObjectId | null, oid2?: ObjectId | null):
 
   return oid1.id.compare(oid2.id);
 }
-
-export function getInt(name: string, value: unknown): number {
-  if (typeof value === 'number') return Math.trunc(value);
-  const parsedValue = Number.parseInt(String(value), 10);
-  if (!Number.isNaN(parsedValue)) return parsedValue;
-  throw new MongoParseError(`Expected ${name} to be stringified int value, got: ${value}`);
-}
-
-export function getUint(name: string, value: unknown): number {
-  const parsedValue = getInt(name, value);
-  if (parsedValue < 0) {
-    throw new MongoParseError(`${name} can only be a positive int value, got: ${value}`);
-  }
-  return parsedValue;
-}

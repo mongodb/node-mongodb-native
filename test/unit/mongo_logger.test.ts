@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { MongoLogger, SeverityLevel } from '../../src/mongo_logger';
 
-describe.only('class MongoLogger', function () {
+describe('class MongoLogger', function () {
   describe('static #resolveOptions', function () {
     it('treats severity values as case-insensitive', function () {
       const loggerOptions = MongoLogger.resolveOptions(
