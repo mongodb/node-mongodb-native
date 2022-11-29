@@ -19,7 +19,7 @@ export XDG_CONFIG_HOME=${NODE_ARTIFACTS_PATH}
 # mkdir -p ${NPM_CACHE_DIR}
 # mkdir -p "${NPM_TMP_DIR}"
 
-node_lts_to_version() {
+function node_lts_to_version() {
   case $1 in
     "erbium")
       echo 12
@@ -45,7 +45,7 @@ node_lts_to_version() {
   esac
 }
 
-latest_version_for_node_major() {
+function latest_version_for_node_major() {
   local __NODE_MAJOR_VERSION=$1
   local NODE_DOWNLOAD_URI="https://nodejs.org/download/release/latest-v${__NODE_MAJOR_VERSION}.x/SHASUMS256.txt"
 
