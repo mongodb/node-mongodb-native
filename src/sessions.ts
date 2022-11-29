@@ -169,10 +169,10 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this[kServerSession] = this.explicit ? this.sessionPool.acquire() : null;
     this[kTxnNumberIncrement] = 0;
 
-    const canEnableCausalConsistency = this.explicit && options.snapshot !== true;
+    const defaultCausalConsistencyValue = this.explicit && options.snapshot !== true;
     this.supports = {
       // if we can enable causal consistency, do so by default
-      causalConsistency: canEnableCausalConsistency && options.causalConsistency !== false
+      causalConsistency: options.causalConsistency ?? defaultCausalConsistencyValue
     };
 
     this.clusterTime = options.initialClusterTime;

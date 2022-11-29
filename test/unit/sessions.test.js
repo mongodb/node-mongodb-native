@@ -193,18 +193,20 @@ describe('Sessions - unit', function () {
         expect(session.supports).property('causalConsistency', false);
       });
 
-      it('should set `causalConsistency` to `false` in implicit sessions regardless of options', function () {
-        const sessionTrue = new ClientSession(client, serverSessionPool, {
-          explicit: false,
-          causalConsistency: true
-        });
-        expect(sessionTrue.supports).property('causalConsistency', false);
-
-        const sessionFalse = new ClientSession(client, serverSessionPool, {
+      it('should respect `causalConsistency=false` option in implicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
           explicit: false,
           causalConsistency: false
         });
-        expect(sessionFalse.supports).property('causalConsistency', false);
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should respect `causalConsistency=true` option in implicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: false,
+          causalConsistency: true
+        });
+        expect(session.supports).property('causalConsistency', true);
       });
 
       it('should default to `null` for `clusterTime`', function () {
