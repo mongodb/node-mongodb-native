@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import type { Writable } from 'stream';
 
 /** @internal */
