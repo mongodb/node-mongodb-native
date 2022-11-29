@@ -167,6 +167,46 @@ describe('Sessions - unit', function () {
         ).to.throw('Properties "causalConsistency" and "snapshot" are mutually exclusive');
       });
 
+      it('should default `causalConsistency` to `true` for explicit non-snapshot sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, { explicit: true });
+        expect(session.supports).property('causalConsistency', true);
+      });
+
+      it('should respect `causalConsistency=false` option in explicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: true,
+          causalConsistency: false
+        });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should respect `causalConsistency=true` option in explicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: true,
+          causalConsistency: true
+        });
+        expect(session.supports).property('causalConsistency', true);
+      });
+
+      it('should default `causalConsistency` to `false` for implicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, { explicit: false });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should set `causalConsistency` to `false` in implicit sessions regardless of options', function () {
+        const sessionTrue = new ClientSession(client, serverSessionPool, {
+          explicit: false,
+          causalConsistency: true
+        });
+        expect(sessionTrue.supports).property('causalConsistency', false);
+
+        const sessionFalse = new ClientSession(client, serverSessionPool, {
+          explicit: false,
+          causalConsistency: false
+        });
+        expect(sessionFalse.supports).property('causalConsistency', false);
+      });
+
       it('should default to `null` for `clusterTime`', function () {
         const session = new ClientSession(client, serverSessionPool);
         expect(session.clusterTime).to.not.exist;
