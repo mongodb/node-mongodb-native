@@ -1,5 +1,8 @@
 import { expect } from 'chai';
 
+import { MongoClient } from '../../../src';
+import { MongoLogger } from '../../../src/mongo_logger';
+
 describe('Feature Flags', () => {
   describe('@@mdb.skipPingOnConnect', () => {
     beforeEach(function () {
@@ -43,5 +46,34 @@ describe('Feature Flags', () => {
     }
   });
 
-  describe('@@mdb.enableMongoLogger', () => {});
+  describe('@@mdb.enableMongoLogger', () => {
+    let cachedEnv;
+    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+
+    before(() => {
+      cachedEnv = process.env;
+      process.env['MONGODB_LOG_COMMAND'] = 'emergency';
+    });
+
+    after(() => {
+      process.env = cachedEnv;
+    });
+
+    it('should instantiate a MongoLogger when set to true', () => {
+      const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
+      expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
+    });
+
+    it('should not instantiate a MongoLogger when set to false', () => {
+      const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: false });
+      expect(client).property('mongoLogger', null);
+    });
+
+    it('should instantiate a MongoLogger when set to undefined', () => {
+      const client = new MongoClient('mongodb://localhost:27017', {
+        [loggerFeatureFlag]: undefined
+      });
+      expect(client).property('mongoLogger', null);
+    });
+  });
 });
