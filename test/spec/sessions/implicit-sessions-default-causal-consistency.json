@@ -1,0 +1,318 @@
+{
+  "description": "implicit sessions default causal consistency",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.2",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "implicit-cc-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collectionDefault",
+        "database": "database0",
+        "collectionName": "coll-default"
+      }
+    },
+    {
+      "collection": {
+        "id": "collectionSnapshot",
+        "database": "database0",
+        "collectionName": "coll-snapshot",
+        "collectionOptions": {
+          "readConcern": {
+            "level": "snapshot"
+          }
+        }
+      }
+    },
+    {
+      "collection": {
+        "id": "collectionlinearizable",
+        "database": "database0",
+        "collectionName": "coll-linearizable",
+        "collectionOptions": {
+          "readConcern": {
+            "level": "linearizable"
+          }
+        }
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll-default",
+      "databaseName": "implicit-cc-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": "default"
+        }
+      ]
+    },
+    {
+      "collectionName": "coll-snapshot",
+      "databaseName": "implicit-cc-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": "snapshot"
+        }
+      ]
+    },
+    {
+      "collectionName": "coll-linearizable",
+      "databaseName": "implicit-cc-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": "linearizable"
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "readConcern is not sent on retried read in implicit session when readConcern level is not specified",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 11600
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collectionDefault",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "x": "default"
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll-default",
+                  "filter": {},
+                  "readConcern": {
+                    "$$exists": false
+                  }
+                },
+                "databaseName": "implicit-cc-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll-default",
+                  "filter": {},
+                  "readConcern": {
+                    "$$exists": false
+                  }
+                },
+                "databaseName": "implicit-cc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "afterClusterTime is not sent on retried read in implicit session when readConcern level is snapshot",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 11600
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collectionSnapshot",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "x": "snapshot"
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll-snapshot",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "snapshot",
+                    "afterClusterTime": {
+                      "$$exists": false
+                    }
+                  }
+                },
+                "databaseName": "implicit-cc-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll-snapshot",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "snapshot",
+                    "afterClusterTime": {
+                      "$$exists": false
+                    }
+                  }
+                },
+                "databaseName": "implicit-cc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "afterClusterTime is not sent on retried read in implicit session when readConcern level is linearizable",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 11600
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collectionlinearizable",
+          "arguments": {
+            "filter": {}
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "x": "linearizable"
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll-linearizable",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "linearizable",
+                    "afterClusterTime": {
+                      "$$exists": false
+                    }
+                  }
+                },
+                "databaseName": "implicit-cc-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "coll-linearizable",
+                  "filter": {},
+                  "readConcern": {
+                    "level": "linearizable",
+                    "afterClusterTime": {
+                      "$$exists": false
+                    }
+                  }
+                },
+                "databaseName": "implicit-cc-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
