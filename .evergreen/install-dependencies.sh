@@ -15,46 +15,56 @@ export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 export XDG_CONFIG_HOME=${NODE_ARTIFACTS_PATH}
 
 # create node artifacts path if needed
-mkdir -p ${NODE_ARTIFACTS_PATH}
-mkdir -p ${NPM_CACHE_DIR}
-mkdir -p "${NPM_TMP_DIR}"
+# mkdir -p ${NODE_ARTIFACTS_PATH}
+# mkdir -p ${NPM_CACHE_DIR}
+# mkdir -p "${NPM_TMP_DIR}"
 
-get_node_version() {
-  case $NODE_LTS_NAME in
+node_lts_to_version() {
+  case $1 in
     "erbium")
-      VERSION=12
+      echo 12
       ;;
     "fermium")
-      VERSION=14
+      echo 14
       ;;
     "gallium")
-      VERSION=16
+      echo 16
       ;;
     "hydrogen")
-      VERSION=18
+      echo 18
       ;;
     "iron")
-      VERSION=20
+      echo 20
       ;;
     "latest")
-      VERSION='node'
+      echo 'latest'
       ;;
     *)
       echo "Unsupported Node LTS version $1"
-      exit 1
       ;;
   esac
-
-  export NODE_VERSION=$VERSION
-
-  if [ $VERSION != 'node' ]
-  then
-    NODE_VERSION=$(curl --retry 8 --retry-delay 5  --max-time 50 --silent -o- https://nodejs.org/download/release/latest-v${VERSION}.x/SHASUMS256.txt | head -n 1 | awk '{print $2};' | cut -d- -f2)
-    export NODE_VERSION=${NODE_VERSION:1} # :1 gets rid of the leading 'v'
-  fi
 }
 
-get_node_version
+latest_version_for_node_major() {
+  local __NODE_MAJOR_VERSION=$1
+  local NODE_DOWNLOAD_URI="https://nodejs.org/download/release/latest-v${__NODE_MAJOR_VERSION}.x/SHASUMS256.txt"
+
+  if [ $__NODE_MAJOR_VERSION == 'latest' ]
+  then
+    NODE_DOWNLOAD_URI="https://nodejs.org/download/release/latest/SHASUMS256.txt"
+  fi
+
+  # check that the requested version does exist
+  curl --silent --fail $NODE_DOWNLOAD_URI &> /dev/null
+
+  echo $(curl --retry 8 --retry-delay 5  --max-time 50 --silent -o- $NODE_DOWNLOAD_URI | head -n 1 | awk '{print $2};' | cut -d- -f2)
+}
+
+NODE_MAJOR_VERSION=$(node_lts_to_version $NODE_LTS_NAME)
+NODE_VERSION=$(latest_version_for_node_major $NODE_MAJOR_VERSION)
+NODE_VERSION=${NODE_VERSION:1} # :1 gets rid of the leading 'v'
+
+echo "set version to $NODE_VERSION"
 
 # output node version to expansions file for use in subsequent scripts
 cat <<EOT > deps-expansion.yml
