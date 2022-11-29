@@ -142,15 +142,21 @@ describe('class MongoLogger', function () {
     });
   });
 
-  it('treats loggerOptions.logDestination value of stderr as case-insensitve', function () {
+  it('treats the log destination value of stderr as case-insensitve', function () {
     const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'STDERR' }, {});
     const logger = new MongoLogger(loggerOptions);
     expect(logger.logDestination).to.equal(process['stderr']);
   });
 
-  it('treats loggerOptions.logDestination value of stdout as case-insensitve', function () {
+  it('treats the log destination value of stdout as case-insensitve', function () {
     const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'STDOUT' }, {});
     const logger = new MongoLogger(loggerOptions);
     expect(logger.logDestination).to.equal(process['stdout']);
+  });
+
+  it('sets the log destination to stderr if an invalid value is passed', function () {
+    const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'invalid' }, {});
+    const logger = new MongoLogger(loggerOptions);
+    expect(logger.logDestination).to.equal(process['stderr']);
   });
 });

@@ -82,8 +82,8 @@ export interface MongoLoggerEnvOptions {
 
 /** @internal */
 export interface MongoLoggerMongoClientOptions {
-  /** Destination for log messages. Must be 'stderr', 'stdout', a file path, or a Writable. Defaults to 'stderr'. */
-  mongodbLogPath?: string | Writable;
+  /** Destination for log messages. Must be 'stderr' or 'stdout'. Defaults to 'stderr'. */
+  mongodbLogPath?: string;
 }
 
 /** @internal */
@@ -100,8 +100,8 @@ export interface MongoLoggerOptions {
   defaultSeverity: SeverityLevel;
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
-  /** Destination for log messages. Must be 'stderr', 'stdout', a file path, or a Writable. Defaults to 'stderr'. */
-  logDestination: string | Writable;
+  /** Destination for log messages. Must be 'stderr' or 'stdout'. Defaults to 'stderr'. */
+  logDestination: string;
 }
 
 /** @internal */
@@ -111,18 +111,9 @@ export class MongoLogger {
   logDestination: Writable;
 
   constructor(options: MongoLoggerOptions) {
-    // validate log path
-    if (typeof options.logDestination === 'string') {
-      const lowerLogDestination = options.logDestination.toLowerCase();
-      this.logDestination =
-        lowerLogDestination === 'stderr' || lowerLogDestination === 'stdout'
-          ? process[lowerLogDestination]
-          : fs.createWriteStream(options.logDestination, { flags: 'a+' });
-      // TODO(NODE-4816): add error handling for creating a write stream
-    } else {
-      this.logDestination = options.logDestination;
-    }
-
+    // TODO(NODE-4849): add filepath and Writable support
+    this.logDestination =
+      options.logDestination.toLowerCase() === 'stdout' ? process['stdout'] : process['stderr'];
     this.componentSeverities = options;
     this.maxDocumentLength = options.maxDocumentLength;
   }
