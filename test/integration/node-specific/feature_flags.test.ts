@@ -42,4 +42,6 @@ describe('Feature Flags', () => {
       });
     }
   });
+
+  describe('@@mdb.enableMongoLogger', () => {});
 });

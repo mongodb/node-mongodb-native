@@ -498,29 +498,34 @@ export function parseOptions(
     );
   }
 
-  const loggerEnvOptions: MongoLoggerEnvOptions = {
-    MONGODB_LOG_COMMAND: process.env.MONGODB_LOG_COMMAND,
-    MONGODB_LOG_TOPOLOGY: process.env.MONGODB_LOG_TOPOLOGY,
-    MONGODB_LOG_SERVER_SELECTION: process.env.MONGODB_LOG_SERVER_SELECTION,
-    MONGODB_LOG_CONNECTION: process.env.MONGODB_LOG_CONNECTION,
-    MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
-    MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
-    MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH
-  };
-  const loggerMongoClientOptions: MongoLoggerMongoClientOptions = {
-    mongodbLogPath: mongoOptions.mongodbLogPath
-  };
-  const loggerOptions = MongoLogger.resolveOptions(loggerEnvOptions, loggerMongoClientOptions);
-  const loggingComponents = [
-    loggerOptions.command,
-    loggerOptions.topology,
-    loggerOptions.serverSelection,
-    loggerOptions.connection,
-    loggerOptions.defaultSeverity
-  ];
+  const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+  mongoOptions[loggerFeatureFlag] = mongoOptions[loggerFeatureFlag] ?? false;
 
-  if (loggingComponents.some(severity => severity !== SeverityLevel.OFF)) {
-    mongoOptions.mongoLogger = new MongoLogger(loggerOptions);
+  if (mongoOptions[loggerFeatureFlag]) {
+    const loggerEnvOptions: MongoLoggerEnvOptions = {
+      MONGODB_LOG_COMMAND: process.env.MONGODB_LOG_COMMAND,
+      MONGODB_LOG_TOPOLOGY: process.env.MONGODB_LOG_TOPOLOGY,
+      MONGODB_LOG_SERVER_SELECTION: process.env.MONGODB_LOG_SERVER_SELECTION,
+      MONGODB_LOG_CONNECTION: process.env.MONGODB_LOG_CONNECTION,
+      MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
+      MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
+      MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH
+    };
+    const loggerMongoClientOptions: MongoLoggerMongoClientOptions = {
+      mongodbLogPath: mongoOptions.mongodbLogPath
+    };
+    const loggerOptions = MongoLogger.resolveOptions(loggerEnvOptions, loggerMongoClientOptions);
+    const loggingComponents = [
+      loggerOptions.command,
+      loggerOptions.topology,
+      loggerOptions.serverSelection,
+      loggerOptions.connection,
+      loggerOptions.defaultSeverity
+    ];
+
+    if (loggingComponents.some(severity => severity !== SeverityLevel.OFF)) {
+      mongoOptions.mongoLogger = new MongoLogger(loggerOptions);
+    }
   }
 
   return mongoOptions;
@@ -1308,4 +1313,7 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
  * Set of permitted feature flags
  * @internal
  */
-export const FEATURE_FLAGS = new Set([Symbol.for('@@mdb.skipPingOnConnect')]);
+export const FEATURE_FLAGS = new Set([
+  Symbol.for('@@mdb.skipPingOnConnect'),
+  Symbol.for('@@mdb.enableMongoLogger')
+]);
