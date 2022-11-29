@@ -168,7 +168,11 @@ const beforeAllPluginImports = () => {
 };
 
 function installNode18DNSHooks() {
-  if (process.version.startsWith('v18')) {
+  if (
+    process.version.startsWith('v18') ||
+    process.version.startsWith('v19') ||
+    process.env.startsWith('v20')
+  ) {
     beforeEach(() => {
       setDefaultResultOrder('ipv4first');
     });
