@@ -27,20 +27,29 @@ export type SeverityLevel = typeof SeverityLevel[keyof typeof SeverityLevel];
  * @param s - the value to be parsed
  * @returns one of SeverityLevel if value can be parsed as such, otherwise null
  */
-function parseSeverityFromString(name: string, s?: string): SeverityLevel | null {
+function parseSeverityFromString(s?: string): SeverityLevel | null {
   const validSeverities: string[] = Object.values(SeverityLevel);
   const lowerSeverity = s?.toLowerCase();
 
-  if (lowerSeverity != null) {
-    if (validSeverities.includes(lowerSeverity)) {
-      return lowerSeverity as SeverityLevel;
-    }
-
-    // TODO(andymina): revisit this after settling notifying about invalid values
-    emitWarning(`Value for ${name} must be one of ${enumToString(SeverityLevel)}`);
+  if (lowerSeverity != null && validSeverities.includes(lowerSeverity)) {
+    return lowerSeverity as SeverityLevel;
   }
 
   return null;
+}
+
+/**
+ * Parses a string to be a number greater than or equal to 0 for maxDocumentLength.
+ *
+ * @param s - the value to be parsed
+ * @returns the int value parsed or 1000 if the value could not be parsed
+ */
+function parseMaxDocumentLength(s?: string): number {
+  if (typeof s === 'string' && s !== '') {
+    const parsedValue = Number.parseInt(s, 10);
+    return !Number.isNaN(parsedValue) && parsedValue >= 0 ? parsedValue : 1000;
+  }
+  return 1000;
 }
 
 /** @internal */
@@ -152,62 +161,26 @@ export class MongoLogger {
    * @param envOptions - options set for the logger from the environment
    * @param clientOptions - options set for the logger in the MongoClient options
    * @returns a MongoLoggerOptions object to be used when instantiating a new MongoLogger
-   * @throws MongoParseError if MONGODB_LOG_MAX_DOCUMENT_LENGTH is not a non-negative number
    */
   static resolveOptions(
     envOptions: MongoLoggerEnvOptions,
     clientOptions: MongoLoggerMongoClientOptions
   ): MongoLoggerOptions {
     const defaultSeverity =
-      parseSeverityFromString('MONGODB_LOG_ALL', envOptions.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
-
-    let maxDocumentLength = 1000;
-    if (
-      typeof envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH === 'string' &&
-      envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH !== ''
-    ) {
-      const parsedValue = Number.parseInt(envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH, 10);
-      if (!Number.isNaN(parsedValue) && parsedValue >= 0) {
-        maxDocumentLength = parsedValue;
-      } else {
-        // TODO(andymina): revisit this after settling notifying about invalid values
-        emitWarningOnce(
-          `MONGODB_MAX_DOCUMENT_LENGTH can only be a positive int value, got: ${envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH}`
-        );
-      }
-    }
+      parseSeverityFromString(envOptions.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
 
     return {
-      command:
-        parseSeverityFromString('MONGODB_LOG_COMMAND', envOptions.MONGODB_LOG_COMMAND) ??
-        defaultSeverity,
-      topology:
-        parseSeverityFromString('MONGODB_LOG_TOPOLOGY', envOptions.MONGODB_LOG_TOPOLOGY) ??
-        defaultSeverity,
+      command: parseSeverityFromString(envOptions.MONGODB_LOG_COMMAND) ?? defaultSeverity,
+      topology: parseSeverityFromString(envOptions.MONGODB_LOG_TOPOLOGY) ?? defaultSeverity,
       serverSelection:
-        parseSeverityFromString(
-          'MONGODB_LOG_SERVER_SELECTION',
-          envOptions.MONGODB_LOG_SERVER_SELECTION
-        ) ?? defaultSeverity,
-      connection:
-        parseSeverityFromString('MONGODB_LOG_CONNECTION', envOptions.MONGODB_LOG_CONNECTION) ??
-        defaultSeverity,
+        parseSeverityFromString(envOptions.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
+      connection: parseSeverityFromString(envOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
       defaultSeverity,
-      maxDocumentLength,
+      maxDocumentLength: parseMaxDocumentLength(envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH),
       logDestination:
         typeof envOptions.MONGODB_LOG_PATH === 'string' && envOptions.MONGODB_LOG_PATH !== ''
           ? envOptions.MONGODB_LOG_PATH
           : clientOptions?.mongodbLogPath ?? 'stderr'
     };
-  }
-
-  parseMaxDocumentLength(s?: string): number {
-    if (typeof s === 'string' && s !== '') {
-      const parsedValue = Number.parseInt(s, 10);
-      if (!Number.isNaN(parsedValue) && parsedValue >= 0) return parsedValue;
-      emitWarningOnce(`MONGODB_MAX_DOCUMENT_LENGTH can only be a positive int value, got: ${s}`);
-    }
-
-    return 1000;
   }
 }
