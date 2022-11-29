@@ -1,8 +1,6 @@
 import * as fs from 'fs';
 import type { Writable } from 'stream';
 
-import { emitWarning, emitWarningOnce, enumToString } from './utils';
-
 /** @internal */
 export const SeverityLevel = Object.freeze({
   EMERGENCY: 'emergency',
