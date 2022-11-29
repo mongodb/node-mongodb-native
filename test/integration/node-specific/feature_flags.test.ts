@@ -25,7 +25,7 @@ describe('Feature Flags', () => {
     for (const { description, value, expectEvents } of tests) {
       it(description, async function () {
         const options =
-        value === undefined ? {} : { [Symbol.for('@@mdb.skipPingOnConnect')]: value };
+          value === undefined ? {} : { [Symbol.for('@@mdb.skipPingOnConnect')]: value };
         const client = this.configuration.newClient({}, { ...options, monitorCommands: true });
         const events = [];
         client.on('commandStarted', event => events.push(event));
