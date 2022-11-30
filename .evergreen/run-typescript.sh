@@ -14,7 +14,7 @@ if [ ! -f "mongodb.d.ts" ]; then
     npm i
 fi
 
-function get_ts_version {
+function get_ts_version() {
     if [ "$TS_VERSION" == "current" ]; then
         echo $(node -e "console.log(require('./package-lock.json').dependencies.typescript.version)")
     else
