@@ -2867,7 +2867,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel80-large-latest-node
+  - name: rhel80-large-node-latest
     display_name: rhel8 Node Latest
     run_on: rhel80-large
     expansions:
