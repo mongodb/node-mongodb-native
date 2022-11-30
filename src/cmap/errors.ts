@@ -1,4 +1,4 @@
-import { MongoDriverError, MongoNetworkError } from '../error';
+import { MongoDriverError, MongoErrorLabel, MongoNetworkError } from '../error';
 import type { ConnectionPool } from './connection_pool';
 
 /**
@@ -27,15 +27,32 @@ export class PoolClearedError extends MongoNetworkError {
   /** The address of the connection pool */
   address: string;
 
-  constructor(pool: ConnectionPool) {
-    super(
-      `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`
-    );
+  constructor(pool: ConnectionPool, message?: string) {
+    const errorMessage = message
+      ? message
+      : `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`;
+    super(errorMessage);
     this.address = pool.address;
+
+    this.addErrorLabel(MongoErrorLabel.RetryableWriteError);
   }
 
   override get name(): string {
     return 'MongoPoolClearedError';
+  }
+}
+
+/**
+ * An error indicating that a connection pool has been cleared after the monitor for that server timed out.
+ * @category Error
+ */
+export class PoolClearedOnNetworkError extends PoolClearedError {
+  constructor(pool: ConnectionPool) {
+    super(pool, `Connection to ${pool.address} interrupted due to server monitor timeout`);
+  }
+
+  override get name(): string {
+    return 'PoolClearedOnNetworkError';
   }
 }
 

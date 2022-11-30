@@ -73,7 +73,13 @@ async function updateSiteTemplateForNewVersion(
 }
 
 async function main() {
-  await exec('bash ./etc/check-remote.sh');
+  try {
+    await exec('bash ./etc/check-remote.sh');
+  } catch (error) {
+    console.error(error.stderr);
+    console.error(error.stdout);
+    process.exit(1);
+  }
 
   chdir(__dirname);
 
