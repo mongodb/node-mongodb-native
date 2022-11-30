@@ -52,6 +52,16 @@ function parseMaxDocumentLength(s?: string): number {
   }
 }
 
+function parseLogDestination(envDestination?: string, clientDestination?: string): string {
+  if (typeof envDestination === 'string' && envDestination !== '') {
+    return envDestination;
+  } else if (typeof clientDestination === 'string' && clientDestination !== '') {
+    return clientDestination;
+  }
+
+  return 'stderr';
+}
+
 /** @internal */
 export const MongoLoggableComponent = Object.freeze({
   COMMAND: 'command',
@@ -168,10 +178,7 @@ export class MongoLogger {
       connection: parseSeverityFromString(envOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
       defaultSeverity,
       maxDocumentLength: parseMaxDocumentLength(envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH),
-      logDestination:
-        typeof envOptions.MONGODB_LOG_PATH === 'string' && envOptions.MONGODB_LOG_PATH !== ''
-          ? envOptions.MONGODB_LOG_PATH
-          : clientOptions.mongodbLogPath ?? 'stderr'
+      logDestination: parseLogDestination(envOptions.MONGODB_LOG_PATH, clientOptions.mongodbLogPath)
     };
   }
 }
