@@ -3,6 +3,26 @@ import { expect } from 'chai';
 import { MongoLogger, SeverityLevel } from '../../src/mongo_logger';
 
 describe('class MongoLogger', function () {
+  describe('#constructor', function () {
+    it('treats the log destination value of stderr as case-insensitve', function () {
+      const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'STDERR' }, {});
+      const logger = new MongoLogger(loggerOptions);
+      expect(logger.logDestination).to.equal(process['stderr']);
+    });
+
+    it('treats the log destination value of stdout as case-insensitve', function () {
+      const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'STDOUT' }, {});
+      const logger = new MongoLogger(loggerOptions);
+      expect(logger.logDestination).to.equal(process['stdout']);
+    });
+
+    it('sets the log destination to stderr if an invalid value is passed', function () {
+      const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'invalid' }, {});
+      const logger = new MongoLogger(loggerOptions);
+      expect(logger.logDestination).to.equal(process['stderr']);
+    });
+  });
+
   describe('static #resolveOptions', function () {
     it('treats severity values as case-insensitive', function () {
       const loggerOptions = MongoLogger.resolveOptions(
@@ -140,23 +160,5 @@ describe('class MongoLogger', function () {
         expect(loggerOptions.logDestination).to.equal('file.txt');
       });
     });
-  });
-
-  it('treats the log destination value of stderr as case-insensitve', function () {
-    const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'STDERR' }, {});
-    const logger = new MongoLogger(loggerOptions);
-    expect(logger.logDestination).to.equal(process['stderr']);
-  });
-
-  it('treats the log destination value of stdout as case-insensitve', function () {
-    const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'STDOUT' }, {});
-    const logger = new MongoLogger(loggerOptions);
-    expect(logger.logDestination).to.equal(process['stdout']);
-  });
-
-  it('sets the log destination to stderr if an invalid value is passed', function () {
-    const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'invalid' }, {});
-    const logger = new MongoLogger(loggerOptions);
-    expect(logger.logDestination).to.equal(process['stderr']);
   });
 });

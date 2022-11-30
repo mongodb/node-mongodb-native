@@ -1,5 +1,7 @@
 import type { Writable } from 'stream';
 
+import { getUint } from './utils';
+
 /** @internal */
 export const SeverityLevel = Object.freeze({
   EMERGENCY: 'emergency',
@@ -42,11 +44,12 @@ function parseSeverityFromString(s?: string): SeverityLevel | null {
  * @returns the int value parsed or 1000 if the value could not be parsed
  */
 function parseMaxDocumentLength(s?: string): number {
-  if (typeof s === 'string' && s !== '') {
-    const parsedValue = Number.parseInt(s, 10);
-    return !Number.isNaN(parsedValue) && parsedValue >= 0 ? parsedValue : 1000;
+  try {
+    const maxDocumentLength = getUint('MONGODB_LOG_MAX_DOCUMENT_LENGTH', s);
+    return maxDocumentLength;
+  } catch {
+    return 1000;
   }
-  return 1000;
 }
 
 /** @internal */
@@ -168,7 +171,7 @@ export class MongoLogger {
       logDestination:
         typeof envOptions.MONGODB_LOG_PATH === 'string' && envOptions.MONGODB_LOG_PATH !== ''
           ? envOptions.MONGODB_LOG_PATH
-          : clientOptions?.mongodbLogPath ?? 'stderr'
+          : clientOptions.mongodbLogPath ?? 'stderr'
     };
   }
 }

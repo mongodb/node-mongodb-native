@@ -872,30 +872,44 @@ describe('MongoOptions', function () {
       process.env = {};
     });
 
-    for (const envName of severityVars) {
-      it(`should instantiate a MongoLogger if ${envName} is set to a valid value`, function () {
-        process.env[envName] = SeverityLevel.CRITICAL;
-        const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
-        expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
-      });
+    context('when only a single severity enviroment variable is set', function () {
+      for (const envName of severityVars) {
+        context(`when ${envName} is set to a valid value`, function () {
+          it('instantiates a MongoLogger', function () {
+            process.env[envName] = SeverityLevel.CRITICAL;
+            const client = new MongoClient('mongodb://localhost:27017', {
+              [loggerFeatureFlag]: true
+            });
+            expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
+          });
+        });
 
-      it(`should not instatiate a MongoLogger if ${envName} is the only variable set and it is set to an invalid value`, function () {
-        process.env[envName] = 'invalid';
+        context(`when ${envName} is set to an invalid value`, function () {
+          it('does not instatiate a MongoLogger', function () {
+            process.env[envName] = 'invalid';
+            const client = new MongoClient('mongodb://localhost:27017', {
+              [loggerFeatureFlag]: true
+            });
+            expect(client).property('mongoLogger', null);
+          });
+        });
+      }
+    });
+
+    context('when there are no environment variables set', function () {
+      it('should not instatiate a MongoLogger if environment variables are not set', function () {
         const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
         expect(client).property('mongoLogger', null);
       });
-    }
-
-    it('should not instatiate a MongoLogger if environment variables are not set', function () {
-      const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
-      expect(client).property('mongoLogger', null);
     });
 
-    it('should instantiate a MongoLogger if there is a mix of environment vairables with valid and invalid options', function () {
-      process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.CRITICAL;
-      process.env['MONGODB_LOG_TOPOLOGY'] = 'invalid';
-      const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
-      expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
+    context('when there are environment variables with both valid and invalid options', () => {
+      it('instantiates a MongoLogger', function () {
+        process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.CRITICAL;
+        process.env['MONGODB_LOG_TOPOLOGY'] = 'invalid';
+        const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
+        expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
+      });
     });
   });
 });

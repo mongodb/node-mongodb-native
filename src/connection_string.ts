@@ -38,6 +38,8 @@ import {
   DEFAULT_PK_FACTORY,
   emitWarning,
   emitWarningOnce,
+  getInt,
+  getUint,
   HostAddress,
   isRecord,
   makeClientMetadata,
@@ -611,21 +613,6 @@ function setOption(
       break;
     }
   }
-}
-
-function getInt(name: string, value: unknown): number {
-  if (typeof value === 'number') return Math.trunc(value);
-  const parsedValue = Number.parseInt(String(value), 10);
-  if (!Number.isNaN(parsedValue)) return parsedValue;
-  throw new MongoParseError(`Expected ${name} to be stringified int value, got: ${value}`);
-}
-
-function getUint(name: string, value: unknown): number {
-  const parsedValue = getInt(name, value);
-  if (parsedValue < 0) {
-    throw new MongoParseError(`${name} can only be a positive int value, got: ${value}`);
-  }
-  return parsedValue;
 }
 
 interface OptionDescriptor {

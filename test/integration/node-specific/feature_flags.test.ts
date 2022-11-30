@@ -69,7 +69,7 @@ describe('Feature Flags', () => {
       expect(client).property('mongoLogger', null);
     });
 
-    it('should instantiate a MongoLogger when set to undefined', () => {
+    it('should not instantiate a MongoLogger when set to undefined', () => {
       const client = new MongoClient('mongodb://localhost:27017', {
         [loggerFeatureFlag]: undefined
       });
