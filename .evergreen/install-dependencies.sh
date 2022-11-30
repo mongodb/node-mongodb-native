@@ -15,9 +15,9 @@ export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 export XDG_CONFIG_HOME=${NODE_ARTIFACTS_PATH}
 
 # create node artifacts path if needed
-# mkdir -p ${NODE_ARTIFACTS_PATH}
-# mkdir -p ${NPM_CACHE_DIR}
-# mkdir -p "${NPM_TMP_DIR}"
+mkdir -p ${NODE_ARTIFACTS_PATH}
+mkdir -p ${NPM_CACHE_DIR}
+mkdir -p "${NPM_TMP_DIR}"
 
 function node_lts_to_version() {
   case $1 in
