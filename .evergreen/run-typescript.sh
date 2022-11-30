@@ -5,12 +5,18 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
 set -o xtrace
 
-if [ -z "$TS_CHECK" ]; then echo "TS_CHECK must be set to either COMPILE_DRIVER or CHECK_TYPES"; exit 1; fi
+case $TS_CHECK in
+    COMPILE_DRIVER|CHECK_TYPES)  # Ok
+        ;;
+    *)
+        echo "TS_CHECK must be set to either COMPILE_DRIVER or CHECK_TYPES - received '$TS_CHECK'"
+        exit 1
+esac
+
 if [ -z "$TS_VERSION" ]; then echo "TS_VERSION must be set"; exit 1; fi
 
 if [ ! -f "mongodb.d.ts" ]; then
-    # mongodb.d.ts should always exist because of the installation in prior steps
-    # but in case it doesn't, build it
+    echo "mongodb.d.ts should always exist because of the installation in prior steps but in case it doesn't, build it"
     npm i
 fi
 
