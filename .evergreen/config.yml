@@ -255,7 +255,7 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh
-  run typescript next:
+  check types:
     - command: subprocess.exec
       type: test
       params:
@@ -263,11 +263,12 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TS_VERSION: next
+          TS_VERSION: ${TS_VERSION}
+          TS_CHECK: CHECK_TYPES
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
-  run typescript oldest:
+  compile driver:
     - command: subprocess.exec
       type: test
       params:
@@ -275,20 +276,8 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TS_VERSION: 4.1.6
-          TRY_COMPILING_DRIVER: 'false'
-        binary: bash
-        args:
-          - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
-  run typescript current:
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: src
-        timeout_secs: 60
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TS_VERSION: ''
+          TS_VERSION: ${TS_VERSION}
+          TS_CHECK: COMPILE_DRIVER
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
@@ -2090,30 +2079,46 @@ tasks:
         vars:
           NODE_LTS_NAME: erbium
       - func: run lint checks
-  - name: run-typescript-next
+  - name: check-types-typescript-next
     tags:
-      - run-typescript-next
+      - check-types-typescript-next
     commands:
       - func: install dependencies
         vars:
           NODE_LTS_NAME: erbium
-      - func: run typescript next
-  - name: run-typescript-current
+      - func: check types
+        vars:
+          TS_VERSION: next
+  - name: compile-driver-typescript-current
     tags:
-      - run-typescript-current
+      - compile-driver-typescript-current
     commands:
       - func: install dependencies
         vars:
           NODE_LTS_NAME: erbium
-      - func: run typescript current
-  - name: run-typescript-oldest
+      - func: compile driver
+        vars:
+          TS_VERSION: current
+  - name: check-types-typescript-current
     tags:
-      - run-typescript-oldest
+      - check-types-typescript-current
     commands:
       - func: install dependencies
         vars:
           NODE_LTS_NAME: erbium
-      - func: run typescript oldest
+      - func: check types
+        vars:
+          TS_VERSION: current
+  - name: check-types-typescript-4.1.6
+    tags:
+      - check-types-typescript-4.1.6
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: erbium
+      - func: check types
+        vars:
+          TS_VERSION: 4.1.6
   - name: run-mongosh-integration-tests
     tags:
       - run-mongosh-integration-tests
@@ -3084,9 +3089,10 @@ buildvariants:
     tasks:
       - run-unit-tests
       - run-lint-checks
-      - run-typescript-current
-      - run-typescript-oldest
-      - run-typescript-next
+      - check-types-typescript-next
+      - compile-driver-typescript-current
+      - check-types-typescript-current
+      - check-types-typescript-4.1.6
   - name: generate-combined-coverage
     display_name: Generate Combined Coverage
     run_on: rhel80-large

@@ -462,47 +462,68 @@ SINGLETON_TASKS.push(
         { func: 'run lint checks' }
       ]
     },
-    {
-      name: 'run-typescript-next',
-      tags: ['run-typescript-next'],
-      commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_NAME: LOWEST_LTS
-          }
-        },
-        { func: 'run typescript next' }
-      ]
-    },
-    {
-      name: 'run-typescript-current',
-      tags: ['run-typescript-current'],
-      commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_NAME: LOWEST_LTS
-          }
-        },
-        { func: 'run typescript current' }
-      ]
-    },
-    {
-      name: 'run-typescript-oldest',
-      tags: ['run-typescript-oldest'],
-      commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_NAME: LOWEST_LTS
-          }
-        },
-        { func: 'run typescript oldest' }
-      ]
-    }
+    ...Array.from(makeTypescriptTasks())
   ]
 );
+
+function* makeTypescriptTasks() {
+  for (const TS_VERSION of ["next", "current", "4.1.6"]) {
+    // 4.1.6 can consume the public API but not compile the driver
+    if (TS_VERSION !== '4.1.6'
+      && TS_VERSION !== 'next')  {
+      yield {
+          name: `compile-driver-typescript-${TS_VERSION}`,
+          tags: [`compile-driver-typescript-${TS_VERSION}`],
+          commands: [
+            {
+              func: 'install dependencies',
+              vars: {
+                NODE_LTS_NAME: LOWEST_LTS
+              }
+            },
+            {
+              func: 'compile driver',
+              vars: {
+                TS_VERSION
+              }
+            }
+          ]
+      }
+    }
+
+    yield {
+      name: `check-types-typescript-${TS_VERSION}`,
+      tags: [`check-types-typescript-${TS_VERSION}`],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        {
+          func: 'check types',
+          vars: {
+            TS_VERSION
+          }
+        }
+      ]
+  }
+  }
+  return {
+    name: 'run-typescript-next',
+    tags: ['run-typescript-next'],
+    commands: [
+      {
+        func: 'install dependencies',
+        vars: {
+          NODE_LTS_NAME: LOWEST_LTS
+        }
+      },
+      { func: 'run typescript next' }
+    ]
+  }
+}
 
 BUILD_VARIANTS.push({
   name: 'lint',
@@ -511,9 +532,7 @@ BUILD_VARIANTS.push({
   tasks: [
     'run-unit-tests',
     'run-lint-checks',
-    'run-typescript-current',
-    'run-typescript-oldest',
-    'run-typescript-next'
+    ...Array.from(makeTypescriptTasks()).map(({ name }) => name)
   ]
 });
 
