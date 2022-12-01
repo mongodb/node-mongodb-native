@@ -172,6 +172,23 @@ describe('Sessions - unit', function () {
         expect(session.supports).property('causalConsistency', true);
       });
 
+      it('should default `causalConsistency` to `false` for explicit snapshot sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: true,
+          snapshot: true
+        });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should allow `causalConsistency=false` option in explicit snapshot sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: true,
+          causalConsistency: false,
+          snapshot: true
+        });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
       it('should respect `causalConsistency=false` option in explicit sessions', function () {
         const session = new ClientSession(client, serverSessionPool, {
           explicit: true,
@@ -180,7 +197,7 @@ describe('Sessions - unit', function () {
         expect(session.supports).property('causalConsistency', false);
       });
 
-      it('should respect `causalConsistency=true` option in explicit sessions', function () {
+      it('should respect `causalConsistency=true` option in explicit non-snapshot sessions', function () {
         const session = new ClientSession(client, serverSessionPool, {
           explicit: true,
           causalConsistency: true
