@@ -4,22 +4,12 @@ import { MongoLogger, SeverityLevel } from '../../src/mongo_logger';
 
 describe('class MongoLogger', function () {
   describe('#constructor', function () {
-    it('treats the log destination value of stderr as case-insensitve', function () {
-      const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'STDERR' }, {});
-      const logger = new MongoLogger(loggerOptions);
-      expect(logger.logDestination).to.equal(process['stderr']);
-    });
-
-    it('treats the log destination value of stdout as case-insensitve', function () {
-      const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'STDOUT' }, {});
-      const logger = new MongoLogger(loggerOptions);
-      expect(logger.logDestination).to.equal(process['stdout']);
-    });
-
-    it('sets the log destination to stderr if an invalid value is passed', function () {
-      const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'invalid' }, {});
-      const logger = new MongoLogger(loggerOptions);
-      expect(logger.logDestination).to.equal(process['stderr']);
+    context('when an invalid value is passed', function () {
+      it('sets the log destination to stderr if an invalid value is passed', function () {
+        const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'invalid' }, {});
+        const logger = new MongoLogger(loggerOptions);
+        expect(logger.logDestination).to.equal(process.stderr);
+      });
     });
   });
 
@@ -33,9 +23,18 @@ describe('class MongoLogger', function () {
         },
         {}
       );
-      expect(loggerOptions.command).to.equal(SeverityLevel.EMERGENCY);
-      expect(loggerOptions.topology).to.equal(SeverityLevel.CRITICAL);
-      expect(loggerOptions.serverSelection).to.equal(SeverityLevel.ALERT);
+      expect(loggerOptions).to.have.nested.property(
+        'severitySettings.command',
+        SeverityLevel.EMERGENCY
+      );
+      expect(loggerOptions).to.have.nested.property(
+        'severitySettings.topology',
+        SeverityLevel.CRITICAL
+      );
+      expect(loggerOptions).to.have.nested.property(
+        'severitySettings.serverSelection',
+        SeverityLevel.ALERT
+      );
     });
 
     it('treats invalid severity values as off', function () {
@@ -45,7 +44,7 @@ describe('class MongoLogger', function () {
         },
         {}
       );
-      expect(loggerOptions.command).to.equal(SeverityLevel.OFF);
+      expect(loggerOptions).to.have.nested.property('severitySettings.command', SeverityLevel.OFF);
     });
 
     it('can set severity levels per component', function () {
@@ -59,11 +58,26 @@ describe('class MongoLogger', function () {
         },
         {}
       );
-      expect(loggerOptions.command).to.equal(SeverityLevel.EMERGENCY);
-      expect(loggerOptions.topology).to.equal(SeverityLevel.CRITICAL);
-      expect(loggerOptions.serverSelection).to.equal(SeverityLevel.ALERT);
-      expect(loggerOptions.connection).to.equal(SeverityLevel.DEBUG);
-      expect(loggerOptions.defaultSeverity).to.equal(SeverityLevel.WARNING);
+      expect(loggerOptions).to.have.nested.property(
+        'severitySettings.command',
+        SeverityLevel.EMERGENCY
+      );
+      expect(loggerOptions).to.have.nested.property(
+        'severitySettings.topology',
+        SeverityLevel.CRITICAL
+      );
+      expect(loggerOptions).to.have.nested.property(
+        'severitySettings.serverSelection',
+        SeverityLevel.ALERT
+      );
+      expect(loggerOptions).to.have.nested.property(
+        'severitySettings.connection',
+        SeverityLevel.DEBUG
+      );
+      expect(loggerOptions).to.have.nested.property(
+        'severitySettings.default',
+        SeverityLevel.WARNING
+      );
     });
 
     context('when component severities are not set or invalid', function () {
@@ -78,10 +92,22 @@ describe('class MongoLogger', function () {
           },
           {}
         );
-        expect(loggerOptions.command).to.equal(loggerOptions.defaultSeverity);
-        expect(loggerOptions.topology).to.equal(loggerOptions.defaultSeverity);
-        expect(loggerOptions.serverSelection).to.equal(loggerOptions.defaultSeverity);
-        expect(loggerOptions.connection).to.equal(SeverityLevel.EMERGENCY);
+        expect(loggerOptions).to.nested.property(
+          'severitySettings.command',
+          loggerOptions.severitySettings.default
+        );
+        expect(loggerOptions).to.nested.property(
+          'severitySettings.topology',
+          loggerOptions.severitySettings.default
+        );
+        expect(loggerOptions).to.nested.property(
+          'severitySettings.serverSelection',
+          loggerOptions.severitySettings.default
+        );
+        expect(loggerOptions).to.nested.property(
+          'severitySettings.connection',
+          loggerOptions.severitySettings.default
+        );
       });
     });
 
@@ -167,13 +193,33 @@ describe('class MongoLogger', function () {
           });
         });
 
-        context('when MONGODB_LOG_PATH is not an empty string', function () {
-          it('uses the passed value', function () {
+        context('when MONGODB_LOG_PATH is stdout', function () {
+          it('treats the value as case-insensitive', function () {
             const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: 'stdout' },
+              { MONGODB_LOG_PATH: 'STDOUT' },
               { mongodbLogPath: undefined }
             );
-            expect(loggerOptions.logDestination).to.equal('stdout');
+            expect(loggerOptions).to.have.property('logDestination', 'stdout');
+          });
+        });
+
+        context('when MONGODB_LOG_PATH is stderr', function () {
+          it('treats the value as case-insensitive', function () {
+            const loggerOptions = MongoLogger.resolveOptions(
+              { MONGODB_LOG_PATH: 'STDERR' },
+              { mongodbLogPath: undefined }
+            );
+            expect(loggerOptions).to.have.property('logDestination', 'stderr');
+          });
+        });
+
+        context('when MONGODB_LOG_PATH is a non-empty string', function () {
+          it('uses the passed value', function () {
+            const loggerOptions = MongoLogger.resolveOptions(
+              { MONGODB_LOG_PATH: '/path/to/file.txt' },
+              { mongodbLogPath: undefined }
+            );
+            expect(loggerOptions.logDestination).to.equal('/path/to/file.txt');
           });
         });
       });
@@ -189,7 +235,27 @@ describe('class MongoLogger', function () {
           });
         });
 
-        context('when mongodbLogPath is not an empty string', function () {
+        context('when mongodbLogPath is stdout', function () {
+          it('treats the value as case-insensitive', function () {
+            const loggerOptions = MongoLogger.resolveOptions(
+              { MONGODB_LOG_PATH: undefined },
+              { mongodbLogPath: 'STDOUT' }
+            );
+            expect(loggerOptions).to.have.property('logDestination', 'stdout');
+          });
+        });
+
+        context('when mongodbLogPath is stderr', function () {
+          it('treats the value as case-insensitive', function () {
+            const loggerOptions = MongoLogger.resolveOptions(
+              { MONGODB_LOG_PATH: undefined },
+              { mongodbLogPath: 'STDERR' }
+            );
+            expect(loggerOptions).to.have.property('logDestination', 'stderr');
+          });
+        });
+
+        context('when mongodbLogPath is a non-empty string', function () {
           it('uses the passed value ', function () {
             const loggerOptions = MongoLogger.resolveOptions(
               { MONGODB_LOG_PATH: undefined },

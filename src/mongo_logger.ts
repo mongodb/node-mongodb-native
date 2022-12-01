@@ -22,7 +22,6 @@ export type SeverityLevel = typeof SeverityLevel[keyof typeof SeverityLevel];
 /**
  * Parses a string as one of SeverityLevel
  *
- * @param name - the name of the variable to be parsed
  * @param s - the value to be parsed
  * @returns one of SeverityLevel if value can be parsed as such, otherwise null
  */
@@ -52,11 +51,12 @@ function parseMaxDocumentLength(s?: string): number {
   }
 }
 
-function parseLogDestination(envDestination?: string, clientDestination?: string): string {
-  if (typeof envDestination === 'string' && envDestination !== '') {
-    return envDestination;
-  } else if (typeof clientDestination === 'string' && clientDestination !== '') {
-    return clientDestination;
+function parseLogDestination(logDestination?: string): string {
+  if (typeof logDestination === 'string' && logDestination !== '') {
+    const lowerLogDestination = logDestination.toLowerCase();
+    return lowerLogDestination === 'stdout' || lowerLogDestination === 'stderr'
+      ? lowerLogDestination
+      : logDestination;
   }
 
   return 'stderr';
@@ -100,16 +100,19 @@ export interface MongoLoggerMongoClientOptions {
 
 /** @internal */
 export interface MongoLoggerOptions {
-  /** Severity level for command component */
-  command: SeverityLevel;
-  /** Severity level for topology component */
-  topology: SeverityLevel;
-  /** Severity level for server selection component */
-  serverSelection: SeverityLevel;
-  /** Severity level for CMAP */
-  connection: SeverityLevel;
-  /** Default severity level to be if any of the above are unset */
-  defaultSeverity: SeverityLevel;
+  severitySettings: {
+    /** Severity level for command component */
+    command: SeverityLevel;
+    /** Severity level for topology component */
+    topology: SeverityLevel;
+    /** Severity level for server selection component */
+    serverSelection: SeverityLevel;
+    /** Severity level for connection component */
+    connection: SeverityLevel;
+    /** Default severity level to be used if any of the above are unset */
+    default: SeverityLevel;
+  };
+
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
   /** Destination for log messages. Must be 'stderr' or 'stdout'. Defaults to 'stderr'. */
@@ -123,11 +126,9 @@ export class MongoLogger {
   logDestination: Writable;
 
   constructor(options: MongoLoggerOptions) {
-    // TODO(NODE-4849): add filepath and Writable support
-    this.logDestination =
-      options.logDestination.toLowerCase() === 'stdout' ? process['stdout'] : process['stderr'];
-    this.componentSeverities = options;
+    this.componentSeverities = options.severitySettings;
     this.maxDocumentLength = options.maxDocumentLength;
+    this.logDestination = options.logDestination === 'stdout' ? process.stdout : process.stderr;
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -151,6 +152,20 @@ export class MongoLogger {
   trace(component: any, message: any): void {}
 
   /**
+   * Creates and returns a new MongoLogger object if logging is enabled by setting
+   * at least one value in options.severitySetting to a SeverityLevel other than SeverityLevel.OFF.
+   *
+   * @param options - a well-formatted MongoLoggerOptions object
+   * @returns a new MongoLogger if logging is enabled, otherwise null
+   */
+  static create(options?: MongoLoggerOptions): MongoLogger | null {
+    if (options == null) return null;
+    return Object.values(options.severitySettings).some(severity => severity !== SeverityLevel.OFF)
+      ? new MongoLogger(options)
+      : null;
+  }
+
+  /**
    * Merges options set through environment variables and the MongoClient, preferring environment
    * variables when both are set, and substituting defaults for values not set. Options set in
    * constructor take precedence over both environment variables and MongoClient options.
@@ -171,14 +186,19 @@ export class MongoLogger {
       parseSeverityFromString(envOptions.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
 
     return {
-      command: parseSeverityFromString(envOptions.MONGODB_LOG_COMMAND) ?? defaultSeverity,
-      topology: parseSeverityFromString(envOptions.MONGODB_LOG_TOPOLOGY) ?? defaultSeverity,
-      serverSelection:
-        parseSeverityFromString(envOptions.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
-      connection: parseSeverityFromString(envOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
-      defaultSeverity,
+      severitySettings: {
+        command: parseSeverityFromString(envOptions.MONGODB_LOG_COMMAND) ?? defaultSeverity,
+        topology: parseSeverityFromString(envOptions.MONGODB_LOG_TOPOLOGY) ?? defaultSeverity,
+        serverSelection:
+          parseSeverityFromString(envOptions.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
+        connection: parseSeverityFromString(envOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
+        default: defaultSeverity
+      },
       maxDocumentLength: parseMaxDocumentLength(envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH),
-      logDestination: parseLogDestination(envOptions.MONGODB_LOG_PATH, clientOptions.mongodbLogPath)
+      logDestination:
+        envOptions != null
+          ? parseLogDestination(envOptions.MONGODB_LOG_PATH)
+          : parseLogDestination(clientOptions.mongodbLogPath)
     };
   }
 }

@@ -16,7 +16,7 @@ import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import type { Logger as LegacyLogger, LoggerLevel as LegacyLoggerLevel } from './logger';
-import type { MongoLogger } from './mongo_logger';
+import { MongoLogger, MongoLoggerOptions } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -348,7 +348,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     super();
 
     this[kOptions] = parseOptions(url, this, options);
-    this.mongoLogger = this[kOptions].mongoLogger ?? null;
+    this.mongoLogger = MongoLogger.create(this[kOptions].mongoLoggerOptions);
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
@@ -809,5 +809,5 @@ export interface MongoOptions
   [featureFlag: symbol]: any;
 
   /** @internal */
-  mongoLogger?: MongoLogger;
+  mongoLoggerOptions?: MongoLoggerOptions;
 }

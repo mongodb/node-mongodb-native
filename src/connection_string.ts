@@ -24,12 +24,7 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
-import {
-  MongoLogger,
-  MongoLoggerEnvOptions,
-  MongoLoggerMongoClientOptions,
-  SeverityLevel
-} from './mongo_logger';
+import { MongoLogger, MongoLoggerEnvOptions, MongoLoggerMongoClientOptions } from './mongo_logger';
 import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -516,18 +511,10 @@ export function parseOptions(
     const loggerMongoClientOptions: MongoLoggerMongoClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath
     };
-    const loggerOptions = MongoLogger.resolveOptions(loggerEnvOptions, loggerMongoClientOptions);
-    const loggingComponents = [
-      loggerOptions.command,
-      loggerOptions.topology,
-      loggerOptions.serverSelection,
-      loggerOptions.connection,
-      loggerOptions.defaultSeverity
-    ];
-
-    if (loggingComponents.some(severity => severity !== SeverityLevel.OFF)) {
-      mongoOptions.mongoLogger = new MongoLogger(loggerOptions);
-    }
+    mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
+      loggerEnvOptions,
+      loggerMongoClientOptions
+    );
   }
 
   return mongoOptions;
@@ -888,9 +875,6 @@ export const OPTIONS = {
     transform({ values: [value] }) {
       return new LegacyLogger('MongoClient', { loggerLevel: value as LegacyLoggerLevel });
     }
-  },
-  mongoLogger: {
-    target: 'mongoLogger'
   },
   maxConnecting: {
     default: 2,

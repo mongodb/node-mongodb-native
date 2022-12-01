@@ -872,7 +872,7 @@ describe('MongoOptions', function () {
       process.env = {};
     });
 
-    context('when only a single severity enviroment variable is set', function () {
+    context('when only a single severity environment variable is set', function () {
       for (const envName of severityVars) {
         context(`when ${envName} is set to a valid value`, function () {
           it('instantiates a MongoLogger', function () {
@@ -885,7 +885,7 @@ describe('MongoOptions', function () {
         });
 
         context(`when ${envName} is set to an invalid value`, function () {
-          it('does not instatiate a MongoLogger', function () {
+          it('does not instantiate a MongoLogger', function () {
             process.env[envName] = 'invalid';
             const client = new MongoClient('mongodb://localhost:27017', {
               [loggerFeatureFlag]: true
@@ -897,7 +897,7 @@ describe('MongoOptions', function () {
     });
 
     context('when there are no environment variables set', function () {
-      it('should not instatiate a MongoLogger if environment variables are not set', function () {
+      it('should not instantiate a MongoLogger', function () {
         const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
         expect(client).property('mongoLogger', null);
       });

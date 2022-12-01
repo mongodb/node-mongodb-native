@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { MongoClient } from '../../../src';
-import { MongoLogger } from '../../../src/mongo_logger';
+import { MongoLogger, SeverityLevel } from '../../../src/mongo_logger';
 
 describe('Feature Flags', () => {
   describe('@@mdb.skipPingOnConnect', () => {
@@ -52,28 +52,48 @@ describe('Feature Flags', () => {
 
     before(() => {
       cachedEnv = process.env;
-      process.env['MONGODB_LOG_COMMAND'] = 'emergency';
     });
 
     after(() => {
       process.env = cachedEnv;
     });
 
-    it('should instantiate a MongoLogger when set to true', () => {
-      const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
-      expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
-    });
-
-    it('should not instantiate a MongoLogger when set to false', () => {
-      const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: false });
-      expect(client).property('mongoLogger', null);
-    });
-
-    it('should not instantiate a MongoLogger when set to undefined', () => {
-      const client = new MongoClient('mongodb://localhost:27017', {
-        [loggerFeatureFlag]: undefined
+    context('when logging for a component is enabled', () => {
+      before(() => {
+        process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
       });
-      expect(client).property('mongoLogger', null);
+
+      it('should instantiate a MongoLogger when set to true', () => {
+        const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
+        expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
+      });
+
+      it('should not instantiate a MongoLogger when set to false', () => {
+        const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: false });
+        expect(client).property('mongoLogger', null);
+      });
+
+      it('should not instantiate a MongoLogger when set to undefined', () => {
+        const client = new MongoClient('mongodb://localhost:27017', {
+          [loggerFeatureFlag]: undefined
+        });
+        expect(client).property('mongoLogger', null);
+      });
+    });
+
+    context('when logging for a component is not enabled', () => {
+      before(() => {
+        process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.OFF;
+      });
+
+      for (const featureFlagValue of [true, false, undefined]) {
+        it(`should not instantiate a MongoLogger when set to ${featureFlagValue}`, () => {
+          const client = new MongoClient('mongodb://localhost:27017', {
+            [loggerFeatureFlag]: featureFlagValue
+          });
+          expect(client).property('mongoLogger', null);
+        });
+      }
     });
   });
 });
