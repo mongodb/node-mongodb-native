@@ -92,19 +92,19 @@ describe('class MongoLogger', function () {
           },
           {}
         );
-        expect(loggerOptions).to.nested.property(
+        expect(loggerOptions).to.have.nested.property(
           'severitySettings.command',
           loggerOptions.severitySettings.default
         );
-        expect(loggerOptions).to.nested.property(
+        expect(loggerOptions).to.have.nested.property(
           'severitySettings.topology',
           loggerOptions.severitySettings.default
         );
-        expect(loggerOptions).to.nested.property(
+        expect(loggerOptions).to.have.nested.property(
           'severitySettings.serverSelection',
           loggerOptions.severitySettings.default
         );
-        expect(loggerOptions).to.nested.property(
+        expect(loggerOptions).to.have.nested.property(
           'severitySettings.connection',
           loggerOptions.severitySettings.default
         );

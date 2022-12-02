@@ -51,6 +51,13 @@ function parseMaxDocumentLength(s?: string): number {
   }
 }
 
+/**
+ * Parses a string for logDestination. Strings containing 'stderr' or 'stdout' are treated as
+ * case-insensitive.
+ *
+ * @param logDestination - the destination to write logs to
+ * @returns the original string if a file path was passed. Otherwise one of ['stderr', 'stdout'].
+ */
 function parseLogDestination(logDestination?: string): string {
   if (typeof logDestination === 'string' && logDestination !== '') {
     const lowerLogDestination = logDestination.toLowerCase();
@@ -150,20 +157,6 @@ export class MongoLogger {
   debug(component: any, message: any): void {}
 
   trace(component: any, message: any): void {}
-
-  /**
-   * Creates and returns a new MongoLogger object if logging is enabled by setting
-   * at least one value in options.severitySetting to a SeverityLevel other than SeverityLevel.OFF.
-   *
-   * @param options - a well-formatted MongoLoggerOptions object
-   * @returns a new MongoLogger if logging is enabled, otherwise null
-   */
-  static create(options?: MongoLoggerOptions): MongoLogger | null {
-    if (options == null) return null;
-    return Object.values(options.severitySettings).some(severity => severity !== SeverityLevel.OFF)
-      ? new MongoLogger(options)
-      : null;
-  }
 
   /**
    * Merges options set through environment variables and the MongoClient, preferring environment
