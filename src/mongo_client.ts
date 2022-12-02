@@ -336,7 +336,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */
   topology?: Topology;
   /** @internal */
-  readonly mongoLogger: MongoLogger | null;
+  readonly mongoLogger?: MongoLogger;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -348,7 +348,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     super();
 
     this[kOptions] = parseOptions(url, this, options);
-    this.mongoLogger = MongoLogger.create(this[kOptions].mongoLoggerOptions);
+    const mongoLogger = MongoLogger.create(this[kOptions].mongoLoggerOptions);
+    if (mongoLogger != null) this.mongoLogger = mongoLogger;
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
