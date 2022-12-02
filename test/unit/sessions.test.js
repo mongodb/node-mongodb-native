@@ -167,6 +167,65 @@ describe('Sessions - unit', function () {
         ).to.throw('Properties "causalConsistency" and "snapshot" are mutually exclusive');
       });
 
+      it('should default `causalConsistency` to `true` for explicit non-snapshot sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, { explicit: true });
+        expect(session.supports).property('causalConsistency', true);
+      });
+
+      it('should default `causalConsistency` to `false` for explicit snapshot sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: true,
+          snapshot: true
+        });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should allow `causalConsistency=false` option in explicit snapshot sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: true,
+          causalConsistency: false,
+          snapshot: true
+        });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should respect `causalConsistency=false` option in explicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: true,
+          causalConsistency: false
+        });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should respect `causalConsistency=true` option in explicit non-snapshot sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: true,
+          causalConsistency: true
+        });
+        expect(session.supports).property('causalConsistency', true);
+      });
+
+      it('should default `causalConsistency` to `false` for implicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, { explicit: false });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should respect `causalConsistency=false` option in implicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: false,
+          causalConsistency: false
+        });
+        expect(session.supports).property('causalConsistency', false);
+      });
+
+      it('should respect `causalConsistency=true` option in implicit sessions', function () {
+        const session = new ClientSession(client, serverSessionPool, {
+          explicit: false,
+          causalConsistency: true
+        });
+        expect(session.supports).property('causalConsistency', true);
+      });
+
       it('should default to `null` for `clusterTime`', function () {
         const session = new ClientSession(client, serverSessionPool);
         expect(session.clusterTime).to.not.exist;

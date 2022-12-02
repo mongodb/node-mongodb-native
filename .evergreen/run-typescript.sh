@@ -5,14 +5,31 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
 set -o xtrace
 
-function get_current_ts_version {
-    node -e "console.log(require('./package-lock.json').dependencies.typescript.version)"
+case $TS_CHECK in
+    COMPILE_DRIVER|CHECK_TYPES)  # Ok
+        ;;
+    *)
+        echo "TS_CHECK must be set to either COMPILE_DRIVER or CHECK_TYPES - received '$TS_CHECK'"
+        exit 1
+esac
+
+if [ -z "$TS_VERSION" ]; then echo "TS_VERSION must be set"; exit 1; fi
+
+if [ ! -f "mongodb.d.ts" ]; then
+    echo "mongodb.d.ts should always exist because of the installation in prior steps but in case it doesn't, build it"
+    npm i
+fi
+
+function get_ts_version() {
+    if [ "$TS_VERSION" == "current" ]; then
+        echo $(node -e "console.log(require('./package-lock.json').dependencies.typescript.version)")
+    else
+        echo $TS_VERSION
+    fi
 }
 
-CURRENT_TS_VERSION=$(get_current_ts_version)
-
 export TSC="./node_modules/typescript/bin/tsc"
-export TS_VERSION=${TS_VERSION:=$CURRENT_TS_VERSION}
+export TS_VERSION=$(get_ts_version)
 
 npm install --no-save --force typescript@"$TS_VERSION"
 
@@ -21,9 +38,14 @@ echo "Typescript $($TSC -v)"
 # check resolution uses the default latest types
 echo "import * as mdb from '.'" > file.ts && node $TSC --noEmit --traceResolution file.ts | grep 'mongodb.d.ts' && rm file.ts
 
-# check compilation
-node $TSC mongodb.d.ts
-
-if [[ $TRY_COMPILING_DRIVER != "false" ]]; then
+if [ "$TS_CHECK" == "COMPILE_DRIVER" ]; then
+    echo "compiling driver"
     npm run build:ts
+elif [ "$TS_CHECK" == "CHECK_TYPES" ]; then
+    echo "checking driver types"
+    # check compilation
+    node $TSC mongodb.d.ts
+else
+    "Invalid value $TS_CHECK for TS_CHECK environment variable."
+    exit 1
 fi

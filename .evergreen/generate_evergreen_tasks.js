@@ -389,7 +389,7 @@ for (const
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
     const nodeVersionNumber = versions.find(({ codeName }) => codeName === NODE_LTS_NAME).versionNumber;
-    const nodeLtsDisplayName = `Node${nodeVersionNumber}`;
+    const nodeLtsDisplayName = nodeVersionNumber === undefined ? `Node Latest` : `Node${nodeVersionNumber}`;
     const name = `${osName}-${NODE_LTS_NAME}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_NAME };
@@ -404,11 +404,27 @@ for (const
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
   };
+
+  const configureLatestNodeSmokeTest = os.match(/^rhel/);
+  if (configureLatestNodeSmokeTest) {
+    const buildVariantData = {
+      name: `${osName}-node-latest`,
+      display_name: `${osDisplayName} Node Latest`,
+      run_on,
+      expansions: { NODE_LTS_NAME: 'latest' },
+      tasks: tasks.map(({ name }) => name)
+    }
+    if (clientEncryption) {
+      buildVariantData.expansions.CLIENT_ENCRYPTION = true;
+    }
+
+    BUILD_VARIANTS.push(buildVariantData)
+  }
 }
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node${versions[versions.length - 1].versionNumber}`,
+  display_name: `MacOS 11 Node${versions.find(version => version.codeName === LATEST_LTS).versionNumber}`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_NAME: LATEST_LTS,
@@ -446,47 +462,68 @@ SINGLETON_TASKS.push(
         { func: 'run lint checks' }
       ]
     },
-    {
-      name: 'run-typescript-next',
-      tags: ['run-typescript-next'],
-      commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_NAME: LOWEST_LTS
-          }
-        },
-        { func: 'run typescript next' }
-      ]
-    },
-    {
-      name: 'run-typescript-current',
-      tags: ['run-typescript-current'],
-      commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_NAME: LOWEST_LTS
-          }
-        },
-        { func: 'run typescript current' }
-      ]
-    },
-    {
-      name: 'run-typescript-oldest',
-      tags: ['run-typescript-oldest'],
-      commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_NAME: LOWEST_LTS
-          }
-        },
-        { func: 'run typescript oldest' }
-      ]
-    }
+    ...Array.from(makeTypescriptTasks())
   ]
 );
+
+function* makeTypescriptTasks() {
+  for (const TS_VERSION of ["next", "current", "4.1.6"]) {
+    // 4.1.6 can consume the public API but not compile the driver
+    if (TS_VERSION !== '4.1.6'
+      && TS_VERSION !== 'next')  {
+      yield {
+          name: `compile-driver-typescript-${TS_VERSION}`,
+          tags: [`compile-driver-typescript-${TS_VERSION}`],
+          commands: [
+            {
+              func: 'install dependencies',
+              vars: {
+                NODE_LTS_NAME: LOWEST_LTS
+              }
+            },
+            {
+              func: 'compile driver',
+              vars: {
+                TS_VERSION
+              }
+            }
+          ]
+      }
+    }
+
+    yield {
+      name: `check-types-typescript-${TS_VERSION}`,
+      tags: [`check-types-typescript-${TS_VERSION}`],
+      commands: [
+        {
+          func: 'install dependencies',
+          vars: {
+            NODE_LTS_NAME: LOWEST_LTS
+          }
+        },
+        {
+          func: 'check types',
+          vars: {
+            TS_VERSION
+          }
+        }
+      ]
+  }
+  }
+  return {
+    name: 'run-typescript-next',
+    tags: ['run-typescript-next'],
+    commands: [
+      {
+        func: 'install dependencies',
+        vars: {
+          NODE_LTS_NAME: LOWEST_LTS
+        }
+      },
+      { func: 'run typescript next' }
+    ]
+  }
+}
 
 BUILD_VARIANTS.push({
   name: 'lint',
@@ -495,9 +532,7 @@ BUILD_VARIANTS.push({
   tasks: [
     'run-unit-tests',
     'run-lint-checks',
-    'run-typescript-current',
-    'run-typescript-oldest',
-    'run-typescript-next'
+    ...Array.from(makeTypescriptTasks()).map(({ name }) => name)
   ]
 });
 
@@ -680,6 +715,21 @@ for (const variant of BUILD_VARIANTS.filter(
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && variant.expansions.NODE_LTS_NAME === 'hydrogen'
 )) {
+  variant.tasks = variant.tasks.filter(
+    name => ![
+      'test-zstd-compression',
+      'test-snappy-compression',
+      'test-atlas-data-lake',
+      'test-socks5',
+      'test-socks5-tls',
+      'test-auth-kerberos'
+    ].includes(name)
+  );
+}
+
+// TODO(NODE-4667): debug failing tests on Node18
+// latest is currently Node19, so these tests fail
+for (const variant of BUILD_VARIANTS.filter(({ name }) => name.includes('node-latest'))) {
   variant.tasks = variant.tasks.filter(
     name => ![
       'test-zstd-compression',

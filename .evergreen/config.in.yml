@@ -289,7 +289,7 @@ functions:
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-unit-tests.sh"
 
-  "run typescript next":
+  "check types":
     - command: subprocess.exec
       type: test
       params:
@@ -297,12 +297,13 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TS_VERSION: "next"
+          TS_VERSION: ${TS_VERSION}
+          TS_CHECK: CHECK_TYPES
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
 
-  "run typescript oldest":
+  "compile driver":
     - command: subprocess.exec
       type: test
       params:
@@ -310,21 +311,8 @@ functions:
         timeout_secs: 60
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TS_VERSION: "4.1.6"
-          TRY_COMPILING_DRIVER: "false" # 4.1.6 can consume the public API but not compile the driver
-        binary: bash
-        args:
-          - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
-
-  "run typescript current":
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: "src"
-        timeout_secs: 60
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TS_VERSION: "" # leaving this empty will use the version in package-lock.json
+          TS_VERSION: ${TS_VERSION}
+          TS_CHECK: COMPILE_DRIVER
         binary: bash
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
@@ -886,7 +874,7 @@ functions:
         local_file:  src/coverage/coverage-final.json
         optional: true
         # Upload the coverage report for all tasks in a single build to the same directory.
-        # TODO NODE-4707 - change upload directory to ${UPLOAD_BUCKET} 
+        # TODO NODE-4707 - change upload directory to ${UPLOAD_BUCKET}
         # This change will require changing the `download and merge coverage` func as well
         remote_file: mongo-node-driver/${revision}/${version_id}/coverage.${build_variant}.${task_name}.json
         bucket: mciuploads

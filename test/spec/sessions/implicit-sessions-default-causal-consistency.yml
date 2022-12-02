@@ -1,0 +1,119 @@
+description: "implicit sessions default causal consistency"
+
+schemaVersion: "1.3"
+
+runOnRequirements:
+  - minServerVersion: "4.2"
+    topologies: [replicaset, sharded, load-balanced]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [commandStartedEvent]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName implicit-cc-tests
+  - collection:
+      id: &collectionDefault collectionDefault
+      database: *database0
+      collectionName: &collectionNameDefault coll-default
+  - collection:
+      id: &collectionSnapshot collectionSnapshot
+      database: *database0
+      collectionName: &collectionNameSnapshot coll-snapshot
+      collectionOptions:
+        readConcern: { level: snapshot }
+  - collection:
+      id: &collectionlinearizable collectionlinearizable
+      database: *database0
+      collectionName: &collectionNamelinearizable coll-linearizable
+      collectionOptions:
+        readConcern: { level: linearizable }
+
+initialData:
+  - collectionName: *collectionNameDefault
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: default }
+  - collectionName: *collectionNameSnapshot
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: snapshot }
+  - collectionName: *collectionNamelinearizable
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: linearizable }
+
+tests:
+  - description: "readConcern is not sent on retried read in implicit session when readConcern level is not specified"
+    operations:
+      - &failPointCommand
+        name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [find]
+              errorCode: 11600 #InterruptedAtShutdown
+      - name: find
+        object: *collectionDefault
+        arguments:
+          filter: {}
+        expectResult: [{ _id: 1, x: default }]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &commandStartedEventDefault
+              command:
+                find: *collectionNameDefault
+                filter: {}
+                readConcern: { $$exists: false }
+              databaseName: *databaseName
+          - commandStartedEvent: *commandStartedEventDefault
+
+  - description: "afterClusterTime is not sent on retried read in implicit session when readConcern level is snapshot"
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - *failPointCommand
+      - name: find
+        object: *collectionSnapshot
+        arguments:
+          filter: {}
+        expectResult: [{ _id: 1, x: snapshot }]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &commandStartedEventSnapshot
+              command:
+                find: *collectionNameSnapshot
+                filter: {}
+                readConcern:
+                  { level: snapshot, afterClusterTime: { $$exists: false } }
+              databaseName: *databaseName
+          - commandStartedEvent: *commandStartedEventSnapshot
+
+  - description: "afterClusterTime is not sent on retried read in implicit session when readConcern level is linearizable"
+    operations:
+      - *failPointCommand
+      - name: find
+        object: *collectionlinearizable
+        arguments:
+          filter: {}
+        expectResult: [{ _id: 1, x: linearizable }]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent: &commandStartedEventLinearizable
+              command:
+                find: *collectionNamelinearizable
+                filter: {}
+                readConcern:
+                  { level: linearizable, afterClusterTime: { $$exists: false } }
+              databaseName: *databaseName
+          - commandStartedEvent: *commandStartedEventLinearizable
