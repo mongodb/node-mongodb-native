@@ -498,8 +498,10 @@ export function parseOptions(
   const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
   mongoOptions[loggerFeatureFlag] = mongoOptions[loggerFeatureFlag] ?? false;
 
+  let loggerEnvOptions: MongoLoggerEnvOptions = {};
+  let loggerClientOptions: MongoLoggerMongoClientOptions = {};
   if (mongoOptions[loggerFeatureFlag]) {
-    const loggerEnvOptions: MongoLoggerEnvOptions = {
+    loggerEnvOptions = {
       MONGODB_LOG_COMMAND: process.env.MONGODB_LOG_COMMAND,
       MONGODB_LOG_TOPOLOGY: process.env.MONGODB_LOG_TOPOLOGY,
       MONGODB_LOG_SERVER_SELECTION: process.env.MONGODB_LOG_SERVER_SELECTION,
@@ -508,14 +510,14 @@ export function parseOptions(
       MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
       MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH
     };
-    const loggerMongoClientOptions: MongoLoggerMongoClientOptions = {
+    loggerClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath
     };
-    mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
-      loggerEnvOptions,
-      loggerMongoClientOptions
-    );
   }
+  mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
+    loggerEnvOptions,
+    loggerClientOptions
+  );
 
   return mongoOptions;
 }

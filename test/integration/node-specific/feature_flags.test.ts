@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { MongoClient } from '../../../src';
-import { MongoLogger, SeverityLevel } from '../../../src/mongo_logger';
+import { SeverityLevel } from '../../../src/mongo_logger';
 
 describe('Feature Flags', () => {
   describe('@@mdb.skipPingOnConnect', () => {
@@ -46,9 +46,20 @@ describe('Feature Flags', () => {
     }
   });
 
-  describe('@@mdb.enableMongoLogger', () => {
+  describe.only('@@mdb.enableMongoLogger', () => {
     let cachedEnv;
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+    const severityMethods = [
+      'emergency',
+      'alert',
+      'critical',
+      'error',
+      'warn',
+      'notice',
+      'info',
+      'debug',
+      'trace'
+    ];
 
     before(() => {
       cachedEnv = process.env;
@@ -58,42 +69,90 @@ describe('Feature Flags', () => {
       process.env = cachedEnv;
     });
 
-    context('when logging for a component is enabled', () => {
-      before(() => {
-        process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
-      });
-
-      it('should instantiate a MongoLogger when set to true', () => {
-        const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
-        expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
-      });
-
-      it('should not instantiate a MongoLogger when set to false', () => {
-        const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: false });
-        expect(client).property('mongoLogger', null);
-      });
-
-      it('should not instantiate a MongoLogger when set to undefined', () => {
-        const client = new MongoClient('mongodb://localhost:27017', {
-          [loggerFeatureFlag]: undefined
+    context('when set to true', () => {
+      context('when logging for a component is enabled', () => {
+        before(() => {
+          process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
         });
-        expect(client).property('mongoLogger', null);
-      });
-    });
 
-    context('when logging for a component is not enabled', () => {
-      before(() => {
-        process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.OFF;
-      });
-
-      for (const featureFlagValue of [true, false, undefined]) {
-        it(`should not instantiate a MongoLogger when set to ${featureFlagValue}`, () => {
-          const client = new MongoClient('mongodb://localhost:27017', {
-            [loggerFeatureFlag]: featureFlagValue
+        for (const severity of severityMethods) {
+          context(`${severity} severity logging method`, () => {
+            const skipReason =
+              severity === SeverityLevel.EMERGENCY
+                ? 'TODO(NODE-4813): implement the emergency severity logging method'
+                : 'TODO(NODE-4814): implement the remaining severity loggers';
+            it.skip('should not be a no-op', () => {
+              const client = new MongoClient('mongodb://localhost:27017', {
+                [loggerFeatureFlag]: true
+              });
+              const stringifiedMethod = client.mongoLogger[severity].toString();
+              const expectedStringifiedMethod = `${severity}(component, message) { }`;
+              expect(stringifiedMethod).to.not.equal(expectedStringifiedMethod);
+            }).skipReason = skipReason;
           });
-          expect(client).property('mongoLogger', null);
+        }
+      });
+
+      context('when logging for a component is not enabled', () => {
+        before(() => {
+          process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.OFF;
         });
-      }
+
+        for (const severity of severityMethods) {
+          context(`${severity} severity logging method`, () => {
+            it('should be a no-op', () => {
+              const client = new MongoClient('mongodb://localhost:27017', {
+                [loggerFeatureFlag]: true
+              });
+              const stringifiedMethod = client.mongoLogger[severity].toString();
+              const expectedStringifiedMethod = `${severity}(component, message) { }`;
+              expect(stringifiedMethod).to.equal(expectedStringifiedMethod);
+            });
+          });
+        }
+      });
     });
+
+    for (const featureFlagValue of [false, undefined]) {
+      context(`when set to ${featureFlagValue}`, () => {
+        context('when logging for a component is enabled', () => {
+          before(() => {
+            process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
+          });
+
+          for (const severity of severityMethods) {
+            context(`${severity} severity logging method`, () => {
+              it('should be a no-op', () => {
+                const client = new MongoClient('mongodb://localhost:27017', {
+                  [loggerFeatureFlag]: true
+                });
+                const stringifiedMethod = client.mongoLogger[severity].toString();
+                const expectedStringifiedMethod = `${severity}(component, message) { }`;
+                expect(stringifiedMethod).to.equal(expectedStringifiedMethod);
+              });
+            });
+          }
+        });
+
+        context('when logging for a component is not enabled', () => {
+          before(() => {
+            process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.OFF;
+          });
+
+          for (const severity of severityMethods) {
+            context(`${severity} severity logging method`, () => {
+              it('should be a no-op', () => {
+                const client = new MongoClient('mongodb://localhost:27017', {
+                  [loggerFeatureFlag]: true
+                });
+                const stringifiedMethod = client.mongoLogger[severity].toString();
+                const expectedStringifiedMethod = `${severity}(component, message) { }`;
+                expect(stringifiedMethod).to.equal(expectedStringifiedMethod);
+              });
+            });
+          }
+        });
+      });
+    }
   });
 });
