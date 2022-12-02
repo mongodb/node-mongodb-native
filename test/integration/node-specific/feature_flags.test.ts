@@ -46,7 +46,7 @@ describe('Feature Flags', () => {
     }
   });
 
-  describe.only('@@mdb.enableMongoLogger', () => {
+  describe('@@mdb.enableMongoLogger', () => {
     let cachedEnv;
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
     const severityMethods = [
