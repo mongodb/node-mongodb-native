@@ -314,6 +314,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       return;
     }
 
+    this[kMessageStream].destroy(error);
     this[kStream].destroy(error);
 
     this.closed = true;
@@ -330,6 +331,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (this.closed) {
       return;
     }
+    this[kMessageStream].destroy();
 
     this.closed = true;
 
@@ -348,6 +350,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     this[kDelayedTimeoutId] = setTimeout(() => {
+      this[kMessageStream].destroy();
       this[kStream].destroy();
 
       this.closed = true;
@@ -467,6 +470,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
+    
+    this[kMessageStream].destroy();
 
     options = Object.assign({ force: false }, options);
     if (this[kStream] == null || this.destroyed) {
