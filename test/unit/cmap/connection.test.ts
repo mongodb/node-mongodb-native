@@ -43,12 +43,12 @@ class FakeSocket extends EventEmitter {
   }
 }
 
-describe('new Connection()', function () {
+describe('new Connection()', function() {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
 
-  it('should support fire-and-forget messages', function (done) {
+  it('should support fire-and-forget messages', function(done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -77,7 +77,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it('should destroy streams which time out', function (done) {
+  it('should destroy streams which time out', function(done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -108,7 +108,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it('should throw a network error with kBeforeHandshake set to false on timeout after handshake', function (done) {
+  it('should throw a network error with kBeforeHandshake set to false on timeout after handshake', function(done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -137,7 +137,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it('should throw a network error with kBeforeHandshake set to true on timeout before handshake', function (done) {
+  it('should throw a network error with kBeforeHandshake set to true on timeout before handshake', function(done) {
     server.setMessageHandler(() => {
       // respond to no requests to trigger timeout event
     });
@@ -158,23 +158,23 @@ describe('new Connection()', function () {
     });
   });
 
-  describe('#onMessage', function () {
-    context('when the connection is a monitoring connection', function () {
+  describe('#onMessage', function() {
+    context('when the connection is a monitoring connection', function() {
       let queue: Map<number, OperationDescription>;
       let driverSocket: FakeSocket;
       let connection: Connection;
 
-      beforeEach(function () {
+      beforeEach(function() {
         driverSocket = sinon.spy(new FakeSocket());
       });
 
-      context('when multiple hellos exist on the stream', function () {
+      context('when multiple hellos exist on the stream', function() {
         let callbackSpy;
         const inputStream = new Readable();
         const document = { ok: 1 };
         const last = { isWritablePrimary: true };
 
-        beforeEach(function () {
+        beforeEach(function() {
           callbackSpy = sinon.spy();
           const firstHello = generateOpMsgBuffer(document);
           const secondHello = generateOpMsgBuffer(document);
@@ -200,18 +200,18 @@ describe('new Connection()', function () {
           inputStream.push(null);
         });
 
-        it('calls the callback with the last hello document', async function () {
+        it('calls the callback with the last hello document', async function() {
           const messages = await once(connection, 'message');
           expect(messages[0].responseTo).to.equal(0);
           expect(callbackSpy).to.be.calledOnceWith(undefined, last);
         });
       });
 
-      context('when requestId/responseTo do not match', function () {
+      context('when requestId/responseTo do not match', function() {
         let callbackSpy;
         const document = { ok: 1 };
 
-        beforeEach(function () {
+        beforeEach(function() {
           callbackSpy = sinon.spy();
 
           // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
@@ -242,16 +242,16 @@ describe('new Connection()', function () {
           connection.onMessage(message);
         });
 
-        it('calls the operation description callback with the document', function () {
+        it('calls the operation description callback with the document', function() {
           expect(callbackSpy).to.be.calledOnceWith(undefined, document);
         });
       });
 
-      context('when requestId/reponseTo match', function () {
+      context('when requestId/reponseTo match', function() {
         let callbackSpy;
         const document = { ok: 1 };
 
-        beforeEach(function () {
+        beforeEach(function() {
           callbackSpy = sinon.spy();
 
           // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
@@ -282,15 +282,15 @@ describe('new Connection()', function () {
           connection.onMessage(message);
         });
 
-        it('calls the operation description callback with the document', function () {
+        it('calls the operation description callback with the document', function() {
           expect(callbackSpy).to.be.calledOnceWith(undefined, document);
         });
       });
 
-      context('when no operation description is in the queue', function () {
+      context('when no operation description is in the queue', function() {
         const document = { ok: 1 };
 
-        beforeEach(function () {
+        beforeEach(function() {
           // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
           connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
           connection.isMonitoringConnection = true;
@@ -298,7 +298,7 @@ describe('new Connection()', function () {
           queue = connection[queueSymbol];
         });
 
-        it('does not error', function () {
+        it('does not error', function() {
           const msg = generateOpMsgBuffer(document);
           const msgHeader: MessageHeader = {
             length: msg.readInt32LE(0),
@@ -315,12 +315,12 @@ describe('new Connection()', function () {
         });
       });
 
-      context('when more than one operation description is in the queue', function () {
+      context('when more than one operation description is in the queue', function() {
         let spyOne;
         let spyTwo;
         const document = { ok: 1 };
 
-        beforeEach(function () {
+        beforeEach(function() {
           spyOne = sinon.spy();
           spyTwo = sinon.spy();
 
@@ -357,7 +357,7 @@ describe('new Connection()', function () {
           connection.onMessage(message);
         });
 
-        it('calls all operation description callbacks with an error', function () {
+        it('calls all operation description callbacks with an error', function() {
           expect(spyOne).to.be.calledOnce;
           expect(spyTwo).to.be.calledOnce;
           const errorOne = spyOne.firstCall.args[0];
@@ -389,7 +389,7 @@ describe('new Connection()', function () {
       connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
       const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
       kDelayedTimeoutId = getSymbolFrom(connection, 'delayedTimeoutId');
-      messageStream = connection[messageStreamSymbol];
+      messageStream = sinon.spy(connection[messageStreamSymbol]);
     });
 
     afterEach(() => {
@@ -433,14 +433,106 @@ describe('new Connection()', function () {
       expect(connection).to.have.property('closed', false);
       expect(connection).to.have.property(kDelayedTimeoutId, null);
     });
+
+    // TODO(NODE-4834): Ask if this test should go in the test above
+    it('should destroy message stream and socket', () => {
+      expect(connection).to.have.property(kDelayedTimeoutId, null);
+
+      driverSocket.emit('timeout');
+
+      clock.tick(1);
+
+      expect(connection.onTimeout).to.have.been.calledOnce;
+      expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
+
+      expect(messageStream.destroy).to.have.been.calledOnce;
+      expect(driverSocket.destroy).to.have.been.calledOnce;
+    });
   });
 
-  describe('.hasSessionSupport', function () {
+  describe('onError()', () => {
+    let connection: sinon.SinonSpiedInstance<Connection>;
+    let clock: sinon.SinonFakeTimers;
+    let timerSandbox: sinon.SinonFakeTimers;
+    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
+    let messageStream: MessageStream;
+    let kDelayedTimeoutId: symbol;
+    let NodeJSTimeoutClass: any;
+    beforeEach(() => {
+      timerSandbox = createTimerSandbox();
+      clock = sinon.useFakeTimers();
+
+      NodeJSTimeoutClass = setTimeout(() => null, 1).constructor;
+
+      driverSocket = sinon.spy(new FakeSocket());
+      // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+      const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
+      kDelayedTimeoutId = getSymbolFrom(connection, 'delayedTimeoutId');
+      messageStream = sinon.spy(connection[messageStreamSymbol]);
+    });
+
+    afterEach(() => {
+      timerSandbox.restore();
+      clock.restore();
+    });
+
+    it('should destroy message stream and socket', () => {
+      messageStream.emit('error');
+
+      clock.tick(1);
+
+      expect(connection.onError).to.have.been.calledOnce;
+
+      expect(messageStream.destroy).to.have.been.calledOnce;
+      expect(driverSocket.destroy).to.have.been.calledOnce;
+    })
+  });
+
+  describe('onClose()', () => {
+    let connection: sinon.SinonSpiedInstance<Connection>;
+    let clock: sinon.SinonFakeTimers;
+    let timerSandbox: sinon.SinonFakeTimers;
+    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
+    let messageStream: MessageStream;
+    let kDelayedTimeoutId: symbol;
+    let NodeJSTimeoutClass: any;
+    beforeEach(() => {
+      timerSandbox = createTimerSandbox();
+      clock = sinon.useFakeTimers();
+
+      NodeJSTimeoutClass = setTimeout(() => null, 1).constructor;
+
+      driverSocket = sinon.spy(new FakeSocket());
+      // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
+      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+      const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
+      kDelayedTimeoutId = getSymbolFrom(connection, 'delayedTimeoutId');
+      messageStream = sinon.spy(connection[messageStreamSymbol]);
+    });
+
+    afterEach(() => {
+      timerSandbox.restore();
+      clock.restore();
+    });
+
+    it('should destroy message stream', () => {
+      driverSocket.emit('close');
+
+      clock.tick(1);
+
+      expect(connection.onClose).to.have.been.calledOnce;
+
+      expect(messageStream.destroy).to.have.been.calledOnce;
+    })
+  });
+
+  describe('.hasSessionSupport', function() {
     let connection;
     const stream = new Socket();
 
-    context('when logicalSessionTimeoutMinutes is present', function () {
-      beforeEach(function () {
+    context('when logicalSessionTimeoutMinutes is present', function() {
+      beforeEach(function() {
         const options = {
           ...connectionOptionsDefaults,
           hostAddress: server.hostAddress(),
@@ -449,14 +541,14 @@ describe('new Connection()', function () {
         connection = new Connection(stream, options);
       });
 
-      it('returns true', function () {
+      it('returns true', function() {
         expect(hasSessionSupport(connection)).to.be.true;
       });
     });
 
-    context('when logicalSessionTimeoutMinutes is not present', function () {
-      context('when in load balancing mode', function () {
-        beforeEach(function () {
+    context('when logicalSessionTimeoutMinutes is not present', function() {
+      context('when in load balancing mode', function() {
+        beforeEach(function() {
           const options = {
             ...connectionOptionsDefaults,
             hostAddress: server.hostAddress(),
@@ -465,13 +557,13 @@ describe('new Connection()', function () {
           connection = new Connection(stream, options);
         });
 
-        it('returns true', function () {
+        it('returns true', function() {
           expect(hasSessionSupport(connection)).to.be.true;
         });
       });
 
-      context('when not in load balancing mode', function () {
-        beforeEach(function () {
+      context('when not in load balancing mode', function() {
+        beforeEach(function() {
           const options = {
             ...connectionOptionsDefaults,
             hostAddress: server.hostAddress(),
@@ -480,10 +572,15 @@ describe('new Connection()', function () {
           connection = new Connection(stream, options);
         });
 
-        it('returns false', function () {
+        it('returns false', function() {
           expect(hasSessionSupport(connection)).to.be.false;
         });
       });
     });
+  });
+
+  // TODO(NODE-4834): Implement me
+  describe('destroy()', () => {
+    it('should end tcp socket and destroy messageStream', () => { });
   });
 });
