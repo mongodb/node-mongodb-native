@@ -489,7 +489,7 @@ describe('new Connection()', function () {
       expect(driverSocket.destroy).to.have.been.calledOnce;
     });
 
-    it.only('should not call stream.end after onClose, onTimeout, or onError', () => {
+    it('should not call stream.end after onClose, onTimeout, or onError', () => {
       messageStream.emit('error');
       clock.tick(1);
       expect(connection.onError).to.have.been.calledOnce;
@@ -607,7 +607,7 @@ describe('new Connection()', function () {
       clock.restore();
     });
 
-    it.only('should end tcp socket and destroy messageStream', () => {
+    it('should end tcp socket and destroy messageStream', () => {
       connection.destroy({ force: true });
       clock.tick(1);
       expect(messageStream.destroy).to.have.been.calledOnce;
