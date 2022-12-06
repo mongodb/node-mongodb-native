@@ -310,7 +310,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   onError(error: Error) {
-    if (this.closed) {
+    if (this.closed || this.destroyed) {
       return;
     }
 
@@ -328,7 +328,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   onClose() {
-    if (this.closed) {
+    if (this.closed || this.destroyed) {
       return;
     }
     this[kMessageStream].destroy();
@@ -345,7 +345,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   onTimeout() {
-    if (this.closed) {
+    if (this.closed || this.destroyed) {
       return;
     }
 
@@ -493,12 +493,19 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       return;
     }
 
-    this[kStream].end(() => {
+    if (this[kStream].destroyed) {
       this.destroyed = true;
       if (typeof callback === 'function') {
         callback();
       }
-    });
+    } else {
+      this[kStream].end(() => {
+        this.destroyed = true;
+        if (typeof callback === 'function') {
+          callback();
+        }
+      });
+    }
   }
 
   command(
