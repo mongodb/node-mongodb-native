@@ -39,7 +39,6 @@ class FakeSocket extends EventEmitter {
   }
   end(cb) {
     cb();
-    // is called, 
   }
   get remoteAddress() {
     return 'iLoveJavaScript';
@@ -489,15 +488,6 @@ describe('new Connection()', function () {
       expect(driverSocket.destroy).to.have.been.calledOnce;
     });
 
-    it('should not call stream.end after onClose, onTimeout, or onError', () => {
-      messageStream.emit('error');
-      clock.tick(1);
-      expect(connection.onError).to.have.been.calledOnce;
-      expect(driverSocket.destroy).to.have.been.calledOnce;
-      connection.destroy();
-      clock.tick(1);
-      expect(driverSocket.end).to.not.have.been.called;
-    });
   });
 
   describe('onClose()', () => {
@@ -608,10 +598,20 @@ describe('new Connection()', function () {
     });
 
     it('should end tcp socket and destroy messageStream', () => {
-      connection.destroy({ force: true });
+      connection.destroy();
       clock.tick(1);
       expect(messageStream.destroy).to.have.been.calledOnce;
+      expect(driverSocket.end).to.have.been.calledOnce;
+    });
+
+    it('should not call stream.end after onClose, onTimeout, or onError', () => {
+      messageStream.emit('error');
+      clock.tick(1);
+      expect(connection.onError).to.have.been.calledOnce;
       expect(driverSocket.destroy).to.have.been.calledOnce;
+      connection.destroy();
+      clock.tick(1);
+      expect(driverSocket.end).to.not.have.been.called;
     });
   });
 });
