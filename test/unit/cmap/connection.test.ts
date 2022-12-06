@@ -574,7 +574,6 @@ describe('new Connection()', function () {
     });
   });
 
-  // TODO(NODE-4834): Implement me
   describe('destroy()', () => {
     let connection: sinon.SinonSpiedInstance<Connection>;
     let clock: sinon.SinonFakeTimers;
