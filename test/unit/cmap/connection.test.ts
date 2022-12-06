@@ -460,8 +460,6 @@ describe('new Connection()', function () {
     let timerSandbox: sinon.SinonFakeTimers;
     let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
     let messageStream: MessageStream;
-    let kDelayedTimeoutId: symbol;
-    let NodeJSTimeoutClass: any;
     beforeEach(() => {
       timerSandbox = createTimerSandbox();
       clock = sinon.useFakeTimers();
@@ -487,7 +485,6 @@ describe('new Connection()', function () {
       expect(messageStream.destroy).to.have.been.calledOnce;
       expect(driverSocket.destroy).to.have.been.calledOnce;
     });
-
   });
 
   describe('onClose()', () => {

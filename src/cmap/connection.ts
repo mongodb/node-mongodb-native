@@ -488,7 +488,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
-    
+
     this[kMessageStream].destroy();
 
     options = Object.assign({ force: false }, options);
