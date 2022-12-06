@@ -10,7 +10,9 @@ const { ReadPreference } = require('../../src/read_preference');
 const { Logger } = require('../../src/logger');
 const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
 const { MongoClient, MongoParseError, ServerApiVersion } = require('../../src');
-const { MongoLogger, SeverityLevel } = require('../../src/mongo_logger');
+const { MongoLogger } = require('../../src/mongo_logger');
+const sinon = require('sinon');
+const { Writable } = require('stream');
 
 describe('MongoOptions', function () {
   it('MongoClient should always freeze public options', function () {
@@ -849,67 +851,25 @@ describe('MongoOptions', function () {
     });
   });
 
-  context('MongoLogger', function () {
-    let cachedEnvironment;
-    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-    const severityVars = [
-      'MONGODB_LOG_COMMAND',
-      'MONGODB_LOG_TOPOLOGY',
-      'MONGODB_LOG_SERVER_SELECTION',
-      'MONGODB_LOG_CONNECTION',
-      'MONGODB_LOG_ALL'
-    ];
+  context('loggingOptions', function () {
+    const expectedLoggingObject = {
+      maxDocumentLength: 20,
+      logDestination: new Writable()
+    };
 
     before(() => {
-      cachedEnvironment = process.env;
+      sinon.stub(MongoLogger, 'resolveOptions').callsFake(() => {
+        return expectedLoggingObject;
+      });
     });
 
     after(() => {
-      process.env = cachedEnvironment;
+      sinon.restore();
     });
 
-    beforeEach(() => {
-      process.env = {};
-    });
-
-    context('when only a single severity environment variable is set', function () {
-      for (const envName of severityVars) {
-        context(`when ${envName} is set to a valid value`, function () {
-          it('instantiates a MongoLogger', function () {
-            process.env[envName] = SeverityLevel.CRITICAL;
-            const client = new MongoClient('mongodb://localhost:27017', {
-              [loggerFeatureFlag]: true
-            });
-            expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
-          });
-        });
-
-        context(`when ${envName} is set to an invalid value`, function () {
-          it('does not instantiate a MongoLogger', function () {
-            process.env[envName] = 'invalid';
-            const client = new MongoClient('mongodb://localhost:27017', {
-              [loggerFeatureFlag]: true
-            });
-            expect(client).property('mongoLogger', null);
-          });
-        });
-      }
-    });
-
-    context('when there are no environment variables set', function () {
-      it('should not instantiate a MongoLogger', function () {
-        const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
-        expect(client).property('mongoLogger', null);
-      });
-    });
-
-    context('when there are environment variables with both valid and invalid options', () => {
-      it('instantiates a MongoLogger', function () {
-        process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.CRITICAL;
-        process.env['MONGODB_LOG_TOPOLOGY'] = 'invalid';
-        const client = new MongoClient('mongodb://localhost:27017', { [loggerFeatureFlag]: true });
-        expect(client.mongoLogger).to.be.instanceOf(MongoLogger);
-      });
+    it('assigns the parsed options to the mongoLoggerOptions option', function () {
+      const client = new MongoClient('mongodb://localhost:27017');
+      expect(client.options).to.have.property('mongoLoggerOptions').to.equal(expectedLoggingObject);
     });
   });
 });
