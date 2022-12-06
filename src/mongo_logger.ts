@@ -101,13 +101,13 @@ export interface MongoLoggerEnvOptions {
 
 /** @internal */
 export interface MongoLoggerMongoClientOptions {
-  /** Destination for log messages. Must be 'stderr' or 'stdout'. Defaults to 'stderr'. */
-  mongodbLogPath?: string;
+  /** Destination for log messages */
+  mongodbLogPath?: 'stdout' | 'stderr' | Writable;
 }
 
 /** @internal */
 export interface MongoLoggerOptions {
-  severitySettings: {
+  componentSeverities: {
     /** Severity level for command component */
     command: SeverityLevel;
     /** Severity level for topology component */
@@ -122,8 +122,8 @@ export interface MongoLoggerOptions {
 
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
-  /** Destination for log messages. Must be 'stderr' or 'stdout'. Defaults to 'stderr'. */
-  logDestination: string;
+  /** Destination for log messages. */
+  logDestination: Writable;
 }
 
 /** @internal */
@@ -133,9 +133,9 @@ export class MongoLogger {
   logDestination: Writable;
 
   constructor(options: MongoLoggerOptions) {
-    this.componentSeverities = options.severitySettings;
+    this.componentSeverities = options.componentSeverities;
     this.maxDocumentLength = options.maxDocumentLength;
-    this.logDestination = options.logDestination === 'stdout' ? process.stdout : process.stderr;
+    this.logDestination = options.logDestination;
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -175,23 +175,38 @@ export class MongoLogger {
     envOptions: MongoLoggerEnvOptions,
     clientOptions: MongoLoggerMongoClientOptions
   ): MongoLoggerOptions {
+    // client options take precedence over env options
+    const combinedOptions = {
+      ...envOptions,
+      ...clientOptions,
+      mongodbLogPath:
+        clientOptions.mongodbLogPath != null
+          ? clientOptions.mongodbLogPath
+          : envOptions.MONGODB_LOG_PATH != null
+          ? envOptions.MONGODB_LOG_PATH
+          : 'stderr'
+    };
     const defaultSeverity =
-      parseSeverityFromString(envOptions.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
+      parseSeverityFromString(combinedOptions.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
+    const logDestination: MongoLoggerOptions['logDestination'] =
+      typeof combinedOptions.mongodbLogPath !== 'string'
+        ? combinedOptions.mongodbLogPath
+        : combinedOptions.mongodbLogPath === 'stderr'
+        ? process.stderr
+        : process.stdout;
 
     return {
-      severitySettings: {
-        command: parseSeverityFromString(envOptions.MONGODB_LOG_COMMAND) ?? defaultSeverity,
-        topology: parseSeverityFromString(envOptions.MONGODB_LOG_TOPOLOGY) ?? defaultSeverity,
+      componentSeverities: {
+        command: parseSeverityFromString(combinedOptions.MONGODB_LOG_COMMAND) ?? defaultSeverity,
+        topology: parseSeverityFromString(combinedOptions.MONGODB_LOG_TOPOLOGY) ?? defaultSeverity,
         serverSelection:
-          parseSeverityFromString(envOptions.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
-        connection: parseSeverityFromString(envOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
+          parseSeverityFromString(combinedOptions.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
+        connection:
+          parseSeverityFromString(combinedOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
         default: defaultSeverity
       },
-      maxDocumentLength: parseMaxDocumentLength(envOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH),
-      logDestination:
-        envOptions != null
-          ? parseLogDestination(envOptions.MONGODB_LOG_PATH)
-          : parseLogDestination(clientOptions.mongodbLogPath)
+      maxDocumentLength: parseMaxDocumentLength(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH),
+      logDestination
     };
   }
 }

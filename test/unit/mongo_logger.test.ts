@@ -1,270 +1,302 @@
 import { expect } from 'chai';
+import { Writable } from 'stream';
 
-import { MongoLogger, SeverityLevel } from '../../src/mongo_logger';
+import {
+  MongoLogger,
+  MongoLoggerMongoClientOptions,
+  MongoLoggerOptions,
+  SeverityLevel
+} from '../../src/mongo_logger';
 
 describe('class MongoLogger', function () {
-  describe('#constructor', function () {
-    context('when an invalid value is passed', function () {
-      it('sets the log destination to stderr if an invalid value is passed', function () {
-        const loggerOptions = MongoLogger.resolveOptions({ MONGODB_LOG_PATH: 'invalid' }, {});
-        const logger = new MongoLogger(loggerOptions);
-        expect(logger.logDestination).to.equal(process.stderr);
+  describe('#constructor()', function () {
+    it('assigns each property from the options object onto the logging class', function () {
+      const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
+        command: 'alert'
+      } as any;
+      const stream = new Writable();
+      const logger = new MongoLogger({
+        componentSeverities,
+        maxDocumentLength: 10,
+        logDestination: stream
       });
+
+      expect(logger).to.have.property('componentSeverities', componentSeverities);
+      expect(logger).to.have.property('maxDocumentLength', 10);
+      expect(logger).to.have.property('logDestination', stream);
     });
   });
 
-  describe('static #resolveOptions', function () {
-    it('treats severity values as case-insensitive', function () {
-      const loggerOptions = MongoLogger.resolveOptions(
-        {
-          MONGODB_LOG_COMMAND: 'EMERGENCY',
-          MONGODB_LOG_TOPOLOGY: 'critical',
-          MONGODB_LOG_SERVER_SELECTION: 'aLeRt'
-        },
-        {}
-      );
-      expect(loggerOptions).to.have.nested.property(
-        'severitySettings.command',
-        SeverityLevel.EMERGENCY
-      );
-      expect(loggerOptions).to.have.nested.property(
-        'severitySettings.topology',
-        SeverityLevel.CRITICAL
-      );
-      expect(loggerOptions).to.have.nested.property(
-        'severitySettings.serverSelection',
-        SeverityLevel.ALERT
-      );
-    });
+  describe('static #resolveOptions()', function () {
+    describe('componentSeverities', function () {
+      const components = [
+        'MONGODB_LOG_COMMAND',
+        'MONGODB_LOG_TOPOLOGY',
+        'MONGODB_LOG_SERVER_SELECTION',
+        'MONGODB_LOG_CONNECTION'
+      ];
+      const componentToInternalRepresentation = (component: string) => {
+        const options: Record<string, string> = {
+          MONGODB_LOG_COMMAND: 'command',
+          MONGODB_LOG_TOPOLOGY: 'topology',
+          MONGODB_LOG_SERVER_SELECTION: 'serverSelection',
+          MONGODB_LOG_CONNECTION: 'connection'
+        };
+        return options[component];
+      };
 
-    it('treats invalid severity values as off', function () {
-      const loggerOptions = MongoLogger.resolveOptions(
-        {
-          MONGODB_LOG_COMMAND: 'invalid'
-        },
-        {}
-      );
-      expect(loggerOptions).to.have.nested.property('severitySettings.command', SeverityLevel.OFF);
-    });
+      context('MONGODB_LOG_ALL', () => {
+        context('when a default is provided', () => {
+          it('sets default to the provided value', () => {
+            const options = MongoLogger.resolveOptions(
+              { MONGODB_LOG_ALL: SeverityLevel.ALERT },
+              {}
+            );
+            expect(options.componentSeverities).to.have.property('default', SeverityLevel.ALERT);
+          });
+        });
+        context('when no value is provided', () => {
+          it('sets default to off', () => {
+            const options = MongoLogger.resolveOptions({ MONGODB_LOG_ALL: SeverityLevel.OFF }, {});
+            expect(options.componentSeverities).to.have.property('default', SeverityLevel.OFF);
+          });
+        });
 
-    it('can set severity levels per component', function () {
-      const loggerOptions = MongoLogger.resolveOptions(
-        {
-          MONGODB_LOG_COMMAND: SeverityLevel.EMERGENCY,
-          MONGODB_LOG_TOPOLOGY: SeverityLevel.CRITICAL,
-          MONGODB_LOG_SERVER_SELECTION: SeverityLevel.ALERT,
-          MONGODB_LOG_CONNECTION: SeverityLevel.DEBUG,
-          MONGODB_LOG_ALL: SeverityLevel.WARNING
-        },
-        {}
-      );
-      expect(loggerOptions).to.have.nested.property(
-        'severitySettings.command',
-        SeverityLevel.EMERGENCY
-      );
-      expect(loggerOptions).to.have.nested.property(
-        'severitySettings.topology',
-        SeverityLevel.CRITICAL
-      );
-      expect(loggerOptions).to.have.nested.property(
-        'severitySettings.serverSelection',
-        SeverityLevel.ALERT
-      );
-      expect(loggerOptions).to.have.nested.property(
-        'severitySettings.connection',
-        SeverityLevel.DEBUG
-      );
-      expect(loggerOptions).to.have.nested.property(
-        'severitySettings.default',
-        SeverityLevel.WARNING
-      );
-    });
-
-    context('when component severities are not set or invalid', function () {
-      it('only uses the default severity for those components', function () {
-        const loggerOptions = MongoLogger.resolveOptions(
-          {
-            MONGODB_LOG_COMMAND: '',
-            MONGODB_LOG_TOPOLOGY: undefined,
-            MONGODB_LOG_SERVER_SELECTION: 'invalid',
-            MONGODB_LOG_CONNECTION: SeverityLevel.EMERGENCY,
-            MONGODB_LOG_ALL: SeverityLevel.CRITICAL
-          },
-          {}
-        );
-        expect(loggerOptions).to.have.nested.property(
-          'severitySettings.command',
-          loggerOptions.severitySettings.default
-        );
-        expect(loggerOptions).to.have.nested.property(
-          'severitySettings.topology',
-          loggerOptions.severitySettings.default
-        );
-        expect(loggerOptions).to.have.nested.property(
-          'severitySettings.serverSelection',
-          loggerOptions.severitySettings.default
-        );
-        expect(loggerOptions).to.have.nested.property(
-          'severitySettings.connection',
-          loggerOptions.severitySettings.default
-        );
+        it('is case insensitive', () => {
+          const options = MongoLogger.resolveOptions({ MONGODB_LOG_ALL: 'dEbUg' }, {});
+          expect(options.componentSeverities).to.have.property('default', SeverityLevel.DEBUG);
+        });
       });
-    });
 
-    context('when environment variables and client options are both set', function () {
-      it('gives precedence to environment variables', function () {
-        const loggerOptions = MongoLogger.resolveOptions(
-          { MONGODB_LOG_PATH: 'env' },
-          { mongodbLogPath: 'client' }
-        );
-        expect(loggerOptions.logDestination).to.equal('env');
-      });
+      for (const component of components) {
+        const internalRepresentationOfLogComponent = componentToInternalRepresentation(component);
+        context(`${component}`, function () {
+          context(`when set to a valid value in the environment`, function () {
+            context('when there is a default provided', function () {
+              it(`sets ${internalRepresentationOfLogComponent} to the provided value and ignores the default`, function () {
+                const options = MongoLogger.resolveOptions(
+                  { [component]: SeverityLevel.ALERT, MONGODB_LOG_ALL: SeverityLevel.OFF },
+                  {}
+                );
+                expect(options.componentSeverities).to.have.property(
+                  internalRepresentationOfLogComponent,
+                  SeverityLevel.ALERT
+                );
+              });
+            });
+            context('when there is no default provided', function () {
+              it(`sets ${internalRepresentationOfLogComponent} to the provided value`, function () {
+                const options = MongoLogger.resolveOptions(
+                  { [component]: SeverityLevel.ALERT, MONGODB_LOG_ALL: SeverityLevel.OFF },
+                  {}
+                );
+                expect(options.componentSeverities).to.have.property(
+                  internalRepresentationOfLogComponent,
+                  SeverityLevel.ALERT
+                );
+              });
+            });
+          });
+
+          context(`when set to an invalid value in the environment`, function () {
+            context('when there is a default provided', function () {
+              it(`sets ${internalRepresentationOfLogComponent} to the the default`, function () {
+                const options = MongoLogger.resolveOptions(
+                  { [component]: 'invalid value' as any, MONGODB_LOG_ALL: SeverityLevel.ALERT },
+                  {}
+                );
+                expect(options.componentSeverities).to.have.property(
+                  internalRepresentationOfLogComponent,
+                  SeverityLevel.ALERT
+                );
+              });
+            });
+            context('when there is no default provided', function () {
+              it(`sets ${internalRepresentationOfLogComponent} to the off`, function () {
+                const options = MongoLogger.resolveOptions(
+                  { [component]: 'invalid value' as any },
+                  {}
+                );
+                expect(options.componentSeverities).to.have.property(
+                  internalRepresentationOfLogComponent,
+                  SeverityLevel.OFF
+                );
+              });
+            });
+          });
+
+          context(`when unset`, () => {
+            context(`when there is no default set`, () => {
+              it(`does not set ${internalRepresentationOfLogComponent}`, () => {
+                const options = MongoLogger.resolveOptions({}, {});
+                expect(options.componentSeverities).to.have.property(
+                  internalRepresentationOfLogComponent,
+                  SeverityLevel.OFF
+                );
+              });
+            });
+
+            context(`when there is a default set`, () => {
+              it(`sets ${internalRepresentationOfLogComponent} to the default`, () => {
+                const options = MongoLogger.resolveOptions(
+                  { MONGODB_LOG_ALL: SeverityLevel.DEBUG },
+                  {}
+                );
+                expect(options.componentSeverities).to.have.property(
+                  internalRepresentationOfLogComponent,
+                  SeverityLevel.DEBUG
+                );
+              });
+            });
+          });
+
+          it('is case insensitive', function () {
+            const options = MongoLogger.resolveOptions({ MONGODB_LOG_ALL: 'dEbUg' as any }, {});
+            expect(options.componentSeverities).to.have.property(
+              internalRepresentationOfLogComponent,
+              SeverityLevel.DEBUG
+            );
+          });
+        });
+      }
     });
 
     context('maxDocumentLength', function () {
-      context('when MONGODB_LOG_MAX_DOCUMENT_LENGTH is undefined', function () {
-        it('defaults to 1000', function () {
-          const loggerOptions = MongoLogger.resolveOptions(
-            {
-              MONGODB_LOG_MAX_DOCUMENT_LENGTH: undefined
-            },
-            {}
-          );
-          expect(loggerOptions.maxDocumentLength).to.equal(1000);
-        });
-      });
+      const tests: Array<{
+        input: undefined | string;
+        expected: number;
+        context: string;
+        outcome: string;
+      }> = [
+        {
+          input: undefined,
+          expected: 1000,
+          context: 'when unset',
+          outcome: 'defaults to 1000'
+        },
+        {
+          input: '33',
+          context: 'when set to parsable uint',
+          outcome: 'sets `maxDocumentLength` to the parsed value',
+          expected: 33
+        },
+        {
+          input: '',
+          context: 'when set to an empty string',
+          outcome: 'defaults to 1000',
+          expected: 1000
+        },
+        {
+          input: 'asdf',
+          context: 'when set to a non-integer string',
+          outcome: 'defaults to 1000',
+          expected: 1000
+        }
+      ];
 
-      context('when MONGODB_LOG_MAX_DOCUMENT_LENGTH is an empty string', function () {
-        it('defaults to 1000', function () {
-          const loggerOptions = MongoLogger.resolveOptions(
-            {
-              MONGODB_LOG_MAX_DOCUMENT_LENGTH: ''
-            },
-            {}
-          );
-          expect(loggerOptions.maxDocumentLength).to.equal(1000);
+      for (const { input, outcome, expected, context: _context } of tests) {
+        context(_context, () => {
+          it(outcome, () => {
+            const options = MongoLogger.resolveOptions(
+              { MONGODB_LOG_MAX_DOCUMENT_LENGTH: input },
+              {}
+            );
+            expect(options.maxDocumentLength).to.equal(expected);
+          });
         });
-      });
-
-      context('when MONGODB_LOG_MAX_DOCUMENT_LENGTH cannot be parsed as a uint', function () {
-        it('defaults to 1000', function () {
-          const loggerOptions = MongoLogger.resolveOptions(
-            {
-              MONGODB_LOG_MAX_DOCUMENT_LENGTH: 'invalid'
-            },
-            {}
-          );
-          expect(loggerOptions.maxDocumentLength).to.equal(1000);
-        });
-      });
-
-      context('when MONGODB_LOG_MAX_DOCUMENT_LENGTH can be parsed as a uint', function () {
-        it('uses the passed value', function () {
-          const loggerOptions = MongoLogger.resolveOptions(
-            {
-              MONGODB_LOG_MAX_DOCUMENT_LENGTH: '500'
-            },
-            {}
-          );
-          expect(loggerOptions.maxDocumentLength).to.equal(500);
-        });
-      });
+      }
     });
 
     context('logDestination', function () {
-      context('when mongodbLogPath is undefined', function () {
-        context('when MONGODB_LOG_PATH is undefined', function () {
-          it('defaults to stderr', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: undefined },
-              { mongodbLogPath: undefined }
-            );
-            expect(loggerOptions.logDestination).to.equal('stderr');
-          });
-        });
+      const stream = new Writable();
+      const tests: Array<{
+        env: 'stderr' | 'stdout' | undefined;
+        client: MongoLoggerMongoClientOptions['mongodbLogPath'] | undefined;
+        expectedLogDestination: MongoLoggerOptions['logDestination'];
+      }> = [
+        {
+          env: undefined,
+          client: undefined,
+          expectedLogDestination: process.stderr
+        },
+        {
+          env: 'stderr',
+          client: undefined,
+          expectedLogDestination: process.stderr
+        },
+        {
+          env: 'stdout',
+          client: undefined,
+          expectedLogDestination: process.stdout
+        },
+        {
+          env: undefined,
+          client: 'stdout',
+          expectedLogDestination: process.stdout
+        },
+        {
+          env: 'stderr',
+          client: 'stdout',
+          expectedLogDestination: process.stdout
+        },
+        {
+          env: 'stdout',
+          client: 'stdout',
+          expectedLogDestination: process.stdout
+        },
+        {
+          env: undefined,
+          client: 'stderr',
+          expectedLogDestination: process.stderr
+        },
+        {
+          env: 'stderr',
+          client: 'stderr',
+          expectedLogDestination: process.stderr
+        },
+        {
+          env: 'stdout',
+          client: 'stderr',
+          expectedLogDestination: process.stderr
+        },
+        {
+          env: undefined,
+          client: stream,
+          expectedLogDestination: stream
+        },
+        {
+          env: 'stderr',
+          client: stream,
+          expectedLogDestination: stream
+        },
+        {
+          env: 'stdout',
+          client: stream,
+          expectedLogDestination: stream
+        }
+      ];
 
-        context('when MONGODB_LOG_PATH is an empty string', function () {
-          it('defaults to stderr', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: '' },
-              { mongodbLogPath: undefined }
-            );
-            expect(loggerOptions.logDestination).to.equal('stderr');
-          });
-        });
+      for (const { env, client, expectedLogDestination } of tests) {
+        context(
+          `environment option=${env}, client option=${
+            client instanceof Writable ? 'a writable stream' : client
+          }`,
+          () => {
+            it(`sets the log destination to ${
+              expectedLogDestination instanceof Writable
+                ? 'the provided writable stream'
+                : expectedLogDestination
+            }`, () => {
+              const options = MongoLogger.resolveOptions(
+                { MONGODB_LOG_PATH: env },
+                { mongodbLogPath: client }
+              );
 
-        context('when MONGODB_LOG_PATH is stdout', function () {
-          it('treats the value as case-insensitive', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: 'STDOUT' },
-              { mongodbLogPath: undefined }
-            );
-            expect(loggerOptions).to.have.property('logDestination', 'stdout');
-          });
-        });
-
-        context('when MONGODB_LOG_PATH is stderr', function () {
-          it('treats the value as case-insensitive', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: 'STDERR' },
-              { mongodbLogPath: undefined }
-            );
-            expect(loggerOptions).to.have.property('logDestination', 'stderr');
-          });
-        });
-
-        context('when MONGODB_LOG_PATH is a non-empty string', function () {
-          it('uses the passed value', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: '/path/to/file.txt' },
-              { mongodbLogPath: undefined }
-            );
-            expect(loggerOptions.logDestination).to.equal('/path/to/file.txt');
-          });
-        });
-      });
-
-      context('when MONGODB_LOG_PATH is undefined', function () {
-        context('when mongodbLogPath is an empty string', function () {
-          it('defaults to stderr', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: undefined },
-              { mongodbLogPath: '' }
-            );
-            expect(loggerOptions.logDestination).to.equal('stderr');
-          });
-        });
-
-        context('when mongodbLogPath is stdout', function () {
-          it('treats the value as case-insensitive', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: undefined },
-              { mongodbLogPath: 'STDOUT' }
-            );
-            expect(loggerOptions).to.have.property('logDestination', 'stdout');
-          });
-        });
-
-        context('when mongodbLogPath is stderr', function () {
-          it('treats the value as case-insensitive', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: undefined },
-              { mongodbLogPath: 'STDERR' }
-            );
-            expect(loggerOptions).to.have.property('logDestination', 'stderr');
-          });
-        });
-
-        context('when mongodbLogPath is a non-empty string', function () {
-          it('uses the passed value ', function () {
-            const loggerOptions = MongoLogger.resolveOptions(
-              { MONGODB_LOG_PATH: undefined },
-              { mongodbLogPath: 'stdout' }
-            );
-            expect(loggerOptions.logDestination).to.equal('stdout');
-          });
-        });
-      });
+              expect(options).to.have.property('logDestination', expectedLogDestination);
+            });
+          }
+        );
+      }
     });
   });
 });
