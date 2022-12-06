@@ -158,7 +158,7 @@ describe('class MongoLogger', function () {
         });
       });
 
-      context('when MONGODB_LOG_MAX_DOCUMENT_LENGTH can be parsed a uint', function () {
+      context('when MONGODB_LOG_MAX_DOCUMENT_LENGTH can be parsed as a uint', function () {
         it('uses the passed value', function () {
           const loggerOptions = MongoLogger.resolveOptions(
             {
