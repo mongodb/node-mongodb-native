@@ -49,17 +49,6 @@ describe('Feature Flags', () => {
   describe('@@mdb.enableMongoLogger', () => {
     let cachedEnv;
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-    const severityMethods = [
-      'emergency',
-      'alert',
-      'critical',
-      'error',
-      'warn',
-      'notice',
-      'info',
-      'debug',
-      'trace'
-    ];
 
     before(() => {
       cachedEnv = process.env;
@@ -69,88 +58,72 @@ describe('Feature Flags', () => {
       process.env = cachedEnv;
     });
 
-    context('when set to true', () => {
-      context('when logging for a component is enabled', () => {
+    context('when enabled', () => {
+      context('when logging is enabled for any component', () => {
         before(() => {
-          process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
+          process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
         });
 
-        for (const severity of severityMethods) {
-          context(`${severity} severity logging method`, () => {
-            const skipReason =
-              severity === SeverityLevel.EMERGENCY
-                ? 'TODO(NODE-4813): implement the emergency severity logging method'
-                : 'TODO(NODE-4814): implement the remaining severity loggers';
-            it.skip('should not be a no-op', () => {
-              const client = new MongoClient('mongodb://localhost:27017', {
-                [loggerFeatureFlag]: true
-              });
-              const stringifiedMethod = client.mongoLogger[severity].toString();
-              const expectedStringifiedMethod = `${severity}(component, message) { }`;
-              expect(stringifiedMethod).to.not.equal(expectedStringifiedMethod);
-            }).skipReason = skipReason;
+        it('enables logging for MONGODB_LOG_COMMAND', () => {
+          const client = new MongoClient('mongodb://localhost:27017', {
+            [loggerFeatureFlag]: true
           });
-        }
+          expect(client.mongoLogger.componentSeverities).to.have.property(
+            'command',
+            SeverityLevel.EMERGENCY
+          );
+        });
       });
 
-      context('when logging for a component is not enabled', () => {
+      context('when logging is not enabled for any component', () => {
         before(() => {
-          process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.OFF;
+          process.env = {};
         });
 
-        for (const severity of severityMethods) {
-          context(`${severity} severity logging method`, () => {
-            it('should be a no-op', () => {
-              const client = new MongoClient('mongodb://localhost:27017', {
-                [loggerFeatureFlag]: true
-              });
-              const stringifiedMethod = client.mongoLogger[severity].toString();
-              const expectedStringifiedMethod = `${severity}(component, message) { }`;
-              expect(stringifiedMethod).to.equal(expectedStringifiedMethod);
-            });
+        it('does not enable logging', () => {
+          const client = new MongoClient('mongodb://localhost:27017', {
+            [loggerFeatureFlag]: true
           });
-        }
+          expect(client.mongoLogger.componentSeverities).to.have.property(
+            'command',
+            SeverityLevel.OFF
+          );
+        });
       });
     });
 
     for (const featureFlagValue of [false, undefined]) {
       context(`when set to ${featureFlagValue}`, () => {
-        context('when logging for a component is enabled', () => {
+        context('when logging is enabled for any component', () => {
           before(() => {
             process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
           });
 
-          for (const severity of severityMethods) {
-            context(`${severity} severity logging method`, () => {
-              it('should be a no-op', () => {
-                const client = new MongoClient('mongodb://localhost:27017', {
-                  [loggerFeatureFlag]: true
-                });
-                const stringifiedMethod = client.mongoLogger[severity].toString();
-                const expectedStringifiedMethod = `${severity}(component, message) { }`;
-                expect(stringifiedMethod).to.equal(expectedStringifiedMethod);
-              });
+          it('does not enable logging', () => {
+            const client = new MongoClient('mongodb://localhost:27017', {
+              [loggerFeatureFlag]: featureFlagValue
             });
-          }
+            expect(client.mongoLogger.componentSeverities).to.have.property(
+              'command',
+              SeverityLevel.OFF
+            );
+          });
         });
 
-        context('when logging for a component is not enabled', () => {
+        context('when logging is not enabled for any component', () => {
           before(() => {
-            process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.OFF;
+            process.env = {};
           });
 
-          for (const severity of severityMethods) {
-            context(`${severity} severity logging method`, () => {
-              it('should be a no-op', () => {
-                const client = new MongoClient('mongodb://localhost:27017', {
-                  [loggerFeatureFlag]: true
-                });
-                const stringifiedMethod = client.mongoLogger[severity].toString();
-                const expectedStringifiedMethod = `${severity}(component, message) { }`;
-                expect(stringifiedMethod).to.equal(expectedStringifiedMethod);
-              });
+          it('does not enable logging', () => {
+            const client = new MongoClient('mongodb://localhost:27017', {
+              [loggerFeatureFlag]: featureFlagValue
             });
-          }
+            expect(client.mongoLogger.componentSeverities).to.have.property(
+              'command',
+              SeverityLevel.OFF
+            );
+          });
         });
       });
     }
