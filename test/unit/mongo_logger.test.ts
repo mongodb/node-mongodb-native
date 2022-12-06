@@ -8,6 +8,31 @@ import {
   SeverityLevel
 } from '../../src/mongo_logger';
 
+class BufferingStream extends Writable {
+  buffer: string[] = [];
+
+  constructor(options = {}) {
+    super({ ...options, objectMode: true });
+  }
+
+  override _write(chunk, encoding, callback) {
+    this.buffer.push(chunk);
+    callback();
+  }
+}
+
+describe('meta tests for BufferingStream', function () {
+  it('the buffer is empty on construction', function () {
+    const stream = new BufferingStream();
+    expect(stream.buffer).to.have.lengthOf(0);
+  });
+  it('pushes messages to the buffer when written to', function () {
+    const stream = new BufferingStream();
+    stream.write('message');
+    expect(stream.buffer).to.deep.equal(['message']);
+  });
+});
+
 describe('class MongoLogger', function () {
   describe('#constructor()', function () {
     it('assigns each property from the options object onto the logging class', function () {
@@ -298,5 +323,25 @@ describe('class MongoLogger', function () {
         );
       }
     });
+  });
+
+  describe('severity helpers', function () {
+    const severities = Object.values(SeverityLevel).filter(severity => severity !== 'off');
+    for (const severityLevel of severities) {
+      describe(`${severityLevel}()`, function () {
+        it('does not log when logging for the component is disabled', () => {
+          const stream = new BufferingStream();
+          const logger = new MongoLogger({
+            componentSeverities: {
+              topology: 'off'
+            } as any,
+            logDestination: stream
+          } as any);
+
+          logger[severityLevel]('topology', 'message');
+          expect(stream.buffer).to.have.lengthOf(0);
+        });
+      });
+    }
   });
 });
