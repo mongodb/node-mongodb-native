@@ -35,7 +35,7 @@ describe('class MongoLogger', function () {
         'MONGODB_LOG_SERVER_SELECTION',
         'MONGODB_LOG_CONNECTION'
       ];
-      const componentToInternalRepresentation = (component: string) => {
+      const mapToInternalRepresentation = (component: string) => {
         const options: Record<string, string> = {
           MONGODB_LOG_COMMAND: 'command',
           MONGODB_LOG_TOPOLOGY: 'topology',
@@ -69,29 +69,29 @@ describe('class MongoLogger', function () {
       });
 
       for (const component of components) {
-        const internalRepresentationOfLogComponent = componentToInternalRepresentation(component);
+        const mappedComponent = mapToInternalRepresentation(component);
         context(`${component}`, function () {
           context(`when set to a valid value in the environment`, function () {
             context('when there is a default provided', function () {
-              it(`sets ${internalRepresentationOfLogComponent} to the provided value and ignores the default`, function () {
+              it(`sets ${mappedComponent} to the provided value and ignores the default`, function () {
                 const options = MongoLogger.resolveOptions(
                   { [component]: SeverityLevel.ALERT, MONGODB_LOG_ALL: SeverityLevel.OFF },
                   {}
                 );
                 expect(options.componentSeverities).to.have.property(
-                  internalRepresentationOfLogComponent,
+                  mappedComponent,
                   SeverityLevel.ALERT
                 );
               });
             });
             context('when there is no default provided', function () {
-              it(`sets ${internalRepresentationOfLogComponent} to the provided value`, function () {
+              it(`sets ${mappedComponent} to the provided value`, function () {
                 const options = MongoLogger.resolveOptions(
                   { [component]: SeverityLevel.ALERT, MONGODB_LOG_ALL: SeverityLevel.OFF },
                   {}
                 );
                 expect(options.componentSeverities).to.have.property(
-                  internalRepresentationOfLogComponent,
+                  mappedComponent,
                   SeverityLevel.ALERT
                 );
               });
@@ -100,25 +100,25 @@ describe('class MongoLogger', function () {
 
           context(`when set to an invalid value in the environment`, function () {
             context('when there is a default provided', function () {
-              it(`sets ${internalRepresentationOfLogComponent} to the the default`, function () {
+              it(`sets ${mappedComponent} to the the default`, function () {
                 const options = MongoLogger.resolveOptions(
                   { [component]: 'invalid value' as any, MONGODB_LOG_ALL: SeverityLevel.ALERT },
                   {}
                 );
                 expect(options.componentSeverities).to.have.property(
-                  internalRepresentationOfLogComponent,
+                  mappedComponent,
                   SeverityLevel.ALERT
                 );
               });
             });
             context('when there is no default provided', function () {
-              it(`sets ${internalRepresentationOfLogComponent} to the off`, function () {
+              it(`sets ${mappedComponent} to the off`, function () {
                 const options = MongoLogger.resolveOptions(
                   { [component]: 'invalid value' as any },
                   {}
                 );
                 expect(options.componentSeverities).to.have.property(
-                  internalRepresentationOfLogComponent,
+                  mappedComponent,
                   SeverityLevel.OFF
                 );
               });
@@ -127,23 +127,23 @@ describe('class MongoLogger', function () {
 
           context(`when unset`, () => {
             context(`when there is no default set`, () => {
-              it(`does not set ${internalRepresentationOfLogComponent}`, () => {
+              it(`does not set ${mappedComponent}`, () => {
                 const options = MongoLogger.resolveOptions({}, {});
                 expect(options.componentSeverities).to.have.property(
-                  internalRepresentationOfLogComponent,
+                  mappedComponent,
                   SeverityLevel.OFF
                 );
               });
             });
 
             context(`when there is a default set`, () => {
-              it(`sets ${internalRepresentationOfLogComponent} to the default`, () => {
+              it(`sets ${mappedComponent} to the default`, () => {
                 const options = MongoLogger.resolveOptions(
                   { MONGODB_LOG_ALL: SeverityLevel.DEBUG },
                   {}
                 );
                 expect(options.componentSeverities).to.have.property(
-                  internalRepresentationOfLogComponent,
+                  mappedComponent,
                   SeverityLevel.DEBUG
                 );
               });
@@ -153,7 +153,7 @@ describe('class MongoLogger', function () {
           it('is case insensitive', function () {
             const options = MongoLogger.resolveOptions({ MONGODB_LOG_ALL: 'dEbUg' as any }, {});
             expect(options.componentSeverities).to.have.property(
-              internalRepresentationOfLogComponent,
+              mappedComponent,
               SeverityLevel.DEBUG
             );
           });
