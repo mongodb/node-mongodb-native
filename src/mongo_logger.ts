@@ -1,4 +1,4 @@
-import type { Writable } from 'stream';
+import { Writable } from 'stream';
 
 import { getUint } from './utils';
 
@@ -49,6 +49,37 @@ function parseMaxDocumentLength(s?: string): number {
   } catch {
     return 1000;
   }
+}
+
+/**
+ * resolves the MONGODB_LOG_PATH and mongodbLogPath options from the environment and the
+ * mongo client options respectively.
+ *
+ * @returns the Writable stream to write logs to
+ */
+function resolveLogPath(
+  { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
+  {
+    mongodbLogPath
+  }: {
+    mongodbLogPath?: unknown;
+  }
+): Writable {
+  const isValidLogDestinationString = (destination: string) =>
+    ['stdout', 'stderr'].includes(destination.toLowerCase());
+  if (typeof mongodbLogPath === 'string' && isValidLogDestinationString(mongodbLogPath)) {
+    return mongodbLogPath.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
+  }
+
+  if (typeof mongodbLogPath === 'object' && mongodbLogPath instanceof Writable) {
+    return mongodbLogPath;
+  }
+
+  if (typeof MONGODB_LOG_PATH === 'string' && isValidLogDestinationString(MONGODB_LOG_PATH)) {
+    return MONGODB_LOG_PATH.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
+  }
+
+  return process.stderr;
 }
 
 /** @internal */
@@ -161,21 +192,10 @@ export class MongoLogger {
     const combinedOptions = {
       ...envOptions,
       ...clientOptions,
-      mongodbLogPath:
-        clientOptions.mongodbLogPath != null
-          ? clientOptions.mongodbLogPath
-          : envOptions.MONGODB_LOG_PATH != null
-          ? envOptions.MONGODB_LOG_PATH
-          : 'stderr'
+      mongodbLogPath: resolveLogPath(envOptions, clientOptions)
     };
     const defaultSeverity =
       parseSeverityFromString(combinedOptions.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
-    const logDestination: MongoLoggerOptions['logDestination'] =
-      typeof combinedOptions.mongodbLogPath !== 'string'
-        ? combinedOptions.mongodbLogPath
-        : combinedOptions.mongodbLogPath === 'stderr'
-        ? process.stderr
-        : process.stdout;
 
     return {
       componentSeverities: {
@@ -188,7 +208,7 @@ export class MongoLogger {
         default: defaultSeverity
       },
       maxDocumentLength: parseMaxDocumentLength(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH),
-      logDestination
+      logDestination: combinedOptions.mongodbLogPath
     };
   }
 }

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
-import { Writable } from 'stream';
+import { Readable, Writable } from 'stream';
 
+import { CaseInsensitiveMap } from '../../src/connection_string';
 import {
   MongoLogger,
   MongoLoggerMongoClientOptions,
@@ -234,90 +235,181 @@ describe('class MongoLogger', function () {
 
     context('logDestination', function () {
       const stream = new Writable();
-      const tests: Array<{
-        env: 'stderr' | 'stdout' | undefined;
-        client: MongoLoggerMongoClientOptions['mongodbLogPath'] | undefined;
-        expectedLogDestination: MongoLoggerOptions['logDestination'];
-      }> = [
-        {
-          env: undefined,
-          client: undefined,
-          expectedLogDestination: process.stderr
-        },
-        {
-          env: 'stderr',
-          client: undefined,
-          expectedLogDestination: process.stderr
-        },
-        {
-          env: 'stdout',
-          client: undefined,
-          expectedLogDestination: process.stdout
-        },
-        {
-          env: undefined,
-          client: 'stdout',
-          expectedLogDestination: process.stdout
-        },
-        {
-          env: 'stderr',
-          client: 'stdout',
-          expectedLogDestination: process.stdout
-        },
-        {
-          env: 'stdout',
-          client: 'stdout',
-          expectedLogDestination: process.stdout
-        },
-        {
-          env: undefined,
-          client: 'stderr',
-          expectedLogDestination: process.stderr
-        },
-        {
-          env: 'stderr',
-          client: 'stderr',
-          expectedLogDestination: process.stderr
-        },
-        {
-          env: 'stdout',
-          client: 'stderr',
-          expectedLogDestination: process.stderr
-        },
-        {
-          env: undefined,
-          client: stream,
-          expectedLogDestination: stream
-        },
-        {
-          env: 'stderr',
-          client: stream,
-          expectedLogDestination: stream
-        },
-        {
-          env: 'stdout',
-          client: stream,
-          expectedLogDestination: stream
+      const validOptions: Map<any, Writable> = new Map([
+        ['stdout', process.stdout],
+        ['stderr', process.stderr],
+        [stream, stream],
+        ['stdOut', process.stdout],
+        ['stdErr', process.stderr]
+      ] as Array<[any, Writable]>);
+      const unsetOptions = ['', undefined];
+      const invalidEnvironmentOptions = ['non-acceptable-string'];
+      const invalidClientOptions = ['', '     ', undefined, null, 0, false, new Readable()];
+      const validClientOptions = ['stderr', 'stdout', stream, 'stdErr', 'stdOut'];
+      const validEnvironmentOptions = ['stderr', 'stdout', 'stdOut', 'stdErr'];
+      context('when MONGODB_LOG_DESTINATION is unset in the environment', function () {
+        context('when mongodbLogPath is unset as a client option', function () {
+          for (const unsetEnvironmentOption of unsetOptions) {
+            for (const unsetOption of unsetOptions) {
+              it(`{environment: "${unsetEnvironmentOption}", client: "${unsetOption}"} defaults to process.stderr`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: unsetEnvironmentOption
+                  },
+                  { mongodbLogPath: unsetOption as any }
+                );
+                expect(options.logDestination).to.equal(process.stderr);
+              });
+            }
+          }
+        });
+
+        context('when mongodbLogPath is an invalid client option', function () {
+          for (const unsetEnvironmentOption of unsetOptions) {
+            for (const invalidOption of invalidClientOptions) {
+              it(`{environment: "${unsetEnvironmentOption}", client: "${invalidOption}"} defaults to process.stderr`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: unsetEnvironmentOption
+                  },
+                  { mongodbLogPath: invalidOption as any }
+                );
+                expect(options.logDestination).to.equal(process.stderr);
+              });
+            }
+          }
+        });
+
+        context('when mongodbLogPath is a valid client option', function () {
+          for (const unsetEnvironmentOption of unsetOptions) {
+            for (const validOption of validClientOptions) {
+              it(`{environment: "${unsetEnvironmentOption}", client: "${validOption}"} uses the value from the client options`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: unsetEnvironmentOption
+                  },
+                  { mongodbLogPath: validOption as any }
+                );
+                const correctDestination = validOptions.get(validOption);
+                expect(options.logDestination).to.equal(correctDestination);
+              });
+            }
+          }
+        });
+      });
+
+      context(
+        'when MONGODB_LOG_DESTINATION is set to an invalid value in the environment',
+        function () {
+          context('when mongodbLogPath is unset on the client options', function () {
+            for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
+              for (const unsetClientOption of unsetOptions) {
+                it(`{environment: "${invalidEnvironmentOption}", client: "${unsetClientOption}"} defaults to process.stderr`, function () {
+                  const options = MongoLogger.resolveOptions(
+                    {
+                      MONGODB_LOG_PATH: invalidEnvironmentOption
+                    },
+                    { mongodbLogPath: unsetClientOption as any }
+                  );
+                  expect(options.logDestination).to.equal(process.stderr);
+                });
+              }
+            }
+          });
+
+          context(
+            'when mongodbLogPath is set to an invalid value on the client options',
+            function () {
+              for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
+                for (const invalidOption of invalidClientOptions) {
+                  it(`{environment: "${invalidEnvironmentOption}", client: "${invalidOption}"} defaults to process.stderr`, function () {
+                    const options = MongoLogger.resolveOptions(
+                      {
+                        MONGODB_LOG_PATH: invalidEnvironmentOption
+                      },
+                      { mongodbLogPath: invalidOption as any }
+                    );
+                    expect(options.logDestination).to.equal(process.stderr);
+                  });
+                }
+              }
+            }
+          );
+
+          context('when mongodbLogPath is set to a valid value on the client options', function () {
+            for (const invalidEnvironmentOption of invalidEnvironmentOptions) {
+              for (const validOption of validClientOptions) {
+                it(`{environment: "${invalidEnvironmentOption}", client: "${validOption}"} uses the value from the client options`, function () {
+                  const options = MongoLogger.resolveOptions(
+                    {
+                      MONGODB_LOG_PATH: invalidEnvironmentOption
+                    },
+                    { mongodbLogPath: validOption as any }
+                  );
+                  const correctDestination = validOptions.get(validOption);
+                  expect(options.logDestination).to.equal(correctDestination);
+                });
+              }
+            }
+          });
         }
-      ];
+      );
 
-      for (const { env, client, expectedLogDestination } of tests) {
+      context('when MONGODB_LOG_PATH is set to a valid option in the environment', function () {
+        context('when mongodbLogPath is unset on the client options', function () {
+          for (const validEnvironmentOption of validEnvironmentOptions) {
+            for (const unsetOption of unsetOptions) {
+              it(`{environment: "${validEnvironmentOption}", client: "${unsetOption}"} uses process.${validEnvironmentOption}`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: validEnvironmentOption
+                  },
+                  { mongodbLogPath: unsetOption as any }
+                );
+                const correctDestination = validOptions.get(validEnvironmentOption);
+                expect(options.logDestination).to.equal(correctDestination);
+              });
+            }
+          }
+        });
+
         context(
-          `environment option=${env}, client option=${
-            client instanceof Writable ? 'a writable stream' : client
-          }`,
-          () => {
-            it('sets the log destination to the provided writable stream', () => {
-              const options = MongoLogger.resolveOptions(
-                { MONGODB_LOG_PATH: env },
-                { mongodbLogPath: client }
-              );
-
-              expect(options).to.have.property('logDestination', expectedLogDestination);
-            });
+          'when mongodbLogPath is set to an invalid value on the client options',
+          function () {
+            for (const validEnvironmentOption of validEnvironmentOptions) {
+              for (const invalidValue of invalidClientOptions) {
+                it(`{environment: "${validEnvironmentOption}", client: "${invalidValue}"} uses process.${validEnvironmentOption}`, function () {
+                  const options = MongoLogger.resolveOptions(
+                    {
+                      MONGODB_LOG_PATH: validEnvironmentOption
+                    },
+                    { mongodbLogPath: invalidValue as any }
+                  );
+                  const correctDestination = validOptions.get(validEnvironmentOption);
+                  expect(options.logDestination).to.equal(correctDestination);
+                });
+              }
+            }
           }
         );
-      }
+
+        context('when mongodbLogPath is set to valid client option', function () {
+          for (const validEnvironmentOption of validEnvironmentOptions) {
+            for (const validValue of validClientOptions) {
+              it(`{environment: "${validEnvironmentOption}", client: "${validValue}"} uses the value from the client options`, function () {
+                const options = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_PATH: validEnvironmentOption
+                  },
+                  { mongodbLogPath: validValue as any }
+                );
+                const correctDestination = validOptions.get(validValue);
+                expect(options.logDestination).to.equal(correctDestination);
+              });
+            }
+          }
+        });
+      });
     });
   });
 
