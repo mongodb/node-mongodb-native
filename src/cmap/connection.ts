@@ -170,9 +170,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   address: string;
   socketTimeoutMS: number;
   monitorCommands: boolean;
-  /** True when after of onClose, onError, or onTimeout was called */
+  /** Indicates that the connection (including underlying TCP socket) has been closed. */
   closed: boolean;
-  /** True only after destroy has been called */
+  /** Indicates that the connection has been explicitly destroyed. In the destroyed state, the connection is also closed */
   destroyed: boolean;
   lastHelloMS?: number;
   serverApi?: ServerApi;
