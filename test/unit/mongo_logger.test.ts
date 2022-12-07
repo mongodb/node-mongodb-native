@@ -307,11 +307,7 @@ describe('class MongoLogger', function () {
             client instanceof Writable ? 'a writable stream' : client
           }`,
           () => {
-            it(`sets the log destination to ${
-              expectedLogDestination instanceof Writable
-                ? 'the provided writable stream'
-                : expectedLogDestination
-            }`, () => {
+            it('sets the log destination to the provided writable stream', () => {
               const options = MongoLogger.resolveOptions(
                 { MONGODB_LOG_PATH: env },
                 { mongodbLogPath: client }
