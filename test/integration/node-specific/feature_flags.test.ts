@@ -80,7 +80,7 @@ describe('Feature Flags', () => {
           process.env = {};
         });
 
-        it('does not enable logging', () => {
+        it('does not enable logging for any component', () => {
           const client = new MongoClient('mongodb://localhost:27017', {
             [loggerFeatureFlag]: true
           });
