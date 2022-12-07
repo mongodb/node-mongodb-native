@@ -439,7 +439,7 @@ describe('new Connection()', function () {
       expect(connection).to.have.property(kDelayedTimeoutId, null);
     });
 
-    it('should destroy message stream and socket', () => {
+    it('destroys the message stream and socket', () => {
       expect(connection).to.have.property(kDelayedTimeoutId, null);
 
       driverSocket.emit('timeout');
@@ -475,7 +475,7 @@ describe('new Connection()', function () {
       clock.restore();
     });
 
-    it('should destroy message stream and socket', () => {
+    it('destroys the message stream and socket', () => {
       messageStream.emit('error');
 
       clock.tick(1);
@@ -509,7 +509,7 @@ describe('new Connection()', function () {
       clock.restore();
     });
 
-    it('should destroy message stream', () => {
+    it('destroys the message stream', () => {
       driverSocket.emit('close');
 
       clock.tick(1);
@@ -593,14 +593,14 @@ describe('new Connection()', function () {
       clock.restore();
     });
 
-    it('should end tcp socket and destroy messageStream', () => {
+    it('ends the tcp socket and destroys the messageStream', () => {
       connection.destroy();
       clock.tick(1);
       expect(messageStream.destroy).to.have.been.calledOnce;
       expect(driverSocket.end).to.have.been.calledOnce;
     });
 
-    it('should not call stream.end after onClose, onTimeout, or onError', () => {
+    it('does not call stream.end after onClose, onTimeout, or onError', () => {
       messageStream.emit('error');
       clock.tick(1);
       expect(connection.onError).to.have.been.calledOnce;
