@@ -64,7 +64,7 @@ describe('Feature Flags', () => {
           process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
         });
 
-        it('enables logging for MONGODB_LOG_COMMAND', () => {
+        it('enables logging for the specified component', () => {
           const client = new MongoClient('mongodb://localhost:27017', {
             [loggerFeatureFlag]: true
           });
