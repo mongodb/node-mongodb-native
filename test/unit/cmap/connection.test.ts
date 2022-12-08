@@ -26,7 +26,7 @@ const connectionOptionsDefaults = {
 
 /** The absolute minimum socket API needed by Connection as of writing this test */
 class FakeSocket extends EventEmitter {
-  destroyed: boolean;
+  writableEnded: boolean;
   address() {
     // is never called
   }
@@ -35,10 +35,11 @@ class FakeSocket extends EventEmitter {
   }
   destroy() {
     // is called, has no side effects
-    this.destroyed = true;
+    this.writableEnded = true;
   }
   end(cb) {
-    cb();
+    // nextTick to simulate I/O delay
+    process.nextTick(cb);
   }
   get remoteAddress() {
     return 'iLoveJavaScript';
