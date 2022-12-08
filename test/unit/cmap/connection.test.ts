@@ -38,6 +38,7 @@ class FakeSocket extends EventEmitter {
     this.writableEnded = true;
   }
   end(cb) {
+    this.writableEnded = true;
     // nextTick to simulate I/O delay
     process.nextTick(cb);
   }
