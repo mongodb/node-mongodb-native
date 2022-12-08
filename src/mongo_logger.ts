@@ -19,6 +19,63 @@ export const SeverityLevel = Object.freeze({
 /** @internal */
 export type SeverityLevel = typeof SeverityLevel[keyof typeof SeverityLevel];
 
+/** @internal */
+export const MongoLoggableComponent = Object.freeze({
+  COMMAND: 'command',
+  TOPOLOGY: 'topology',
+  SERVER_SELECTION: 'serverSelection',
+  CONNECTION: 'connection'
+} as const);
+
+/** @internal */
+export type MongoLoggableComponent =
+  typeof MongoLoggableComponent[keyof typeof MongoLoggableComponent];
+
+/** @internal */
+export interface MongoLoggerEnvOptions {
+  /** Severity level for command component */
+  MONGODB_LOG_COMMAND?: string;
+  /** Severity level for topology component */
+  MONGODB_LOG_TOPOLOGY?: string;
+  /** Severity level for server selection component */
+  MONGODB_LOG_SERVER_SELECTION?: string;
+  /** Severity level for CMAP */
+  MONGODB_LOG_CONNECTION?: string;
+  /** Default severity level to be if any of the above are unset */
+  MONGODB_LOG_ALL?: string;
+  /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
+  MONGODB_LOG_MAX_DOCUMENT_LENGTH?: string;
+  /** Destination for log messages. Must be 'stderr', 'stdout'. Defaults to 'stderr'. */
+  MONGODB_LOG_PATH?: string;
+}
+
+/** @internal */
+export interface MongoLoggerMongoClientOptions {
+  /** Destination for log messages */
+  mongodbLogPath?: 'stdout' | 'stderr' | Writable;
+}
+
+/** @internal */
+export interface MongoLoggerOptions {
+  componentSeverities: {
+    /** Severity level for command component */
+    command: SeverityLevel;
+    /** Severity level for topology component */
+    topology: SeverityLevel;
+    /** Severity level for server selection component */
+    serverSelection: SeverityLevel;
+    /** Severity level for connection component */
+    connection: SeverityLevel;
+    /** Default severity level to be used if any of the above are unset */
+    default: SeverityLevel;
+  };
+
+  /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
+  maxDocumentLength: number;
+  /** Destination for log messages. */
+  logDestination: Writable;
+}
+
 /**
  * Parses a string as one of SeverityLevel
  *
@@ -80,63 +137,6 @@ function resolveLogPath(
   }
 
   return process.stderr;
-}
-
-/** @internal */
-export const MongoLoggableComponent = Object.freeze({
-  COMMAND: 'command',
-  TOPOLOGY: 'topology',
-  SERVER_SELECTION: 'serverSelection',
-  CONNECTION: 'connection'
-} as const);
-
-/** @internal */
-export type MongoLoggableComponent =
-  typeof MongoLoggableComponent[keyof typeof MongoLoggableComponent];
-
-/** @internal */
-export interface MongoLoggerEnvOptions {
-  /** Severity level for command component */
-  MONGODB_LOG_COMMAND?: string;
-  /** Severity level for topology component */
-  MONGODB_LOG_TOPOLOGY?: string;
-  /** Severity level for server selection component */
-  MONGODB_LOG_SERVER_SELECTION?: string;
-  /** Severity level for CMAP */
-  MONGODB_LOG_CONNECTION?: string;
-  /** Default severity level to be if any of the above are unset */
-  MONGODB_LOG_ALL?: string;
-  /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
-  MONGODB_LOG_MAX_DOCUMENT_LENGTH?: string;
-  /** Destination for log messages. Must be 'stderr', 'stdout'. Defaults to 'stderr'. */
-  MONGODB_LOG_PATH?: string;
-}
-
-/** @internal */
-export interface MongoLoggerMongoClientOptions {
-  /** Destination for log messages */
-  mongodbLogPath?: 'stdout' | 'stderr' | Writable;
-}
-
-/** @internal */
-export interface MongoLoggerOptions {
-  componentSeverities: {
-    /** Severity level for command component */
-    command: SeverityLevel;
-    /** Severity level for topology component */
-    topology: SeverityLevel;
-    /** Severity level for server selection component */
-    serverSelection: SeverityLevel;
-    /** Severity level for connection component */
-    connection: SeverityLevel;
-    /** Default severity level to be used if any of the above are unset */
-    default: SeverityLevel;
-  };
-
-  /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
-  maxDocumentLength: number;
-  /** Destination for log messages. */
-  logDestination: Writable;
 }
 
 /** @internal */
