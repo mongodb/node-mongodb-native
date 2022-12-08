@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { valid } from 'semver';
 import { Readable, Writable } from 'stream';
 
 import { CaseInsensitiveMap } from '../../src/connection_string';
@@ -55,136 +56,232 @@ describe('class MongoLogger', function () {
 
   describe('static #resolveOptions()', function () {
     describe('componentSeverities', function () {
-      const components = [
-        'MONGODB_LOG_COMMAND',
-        'MONGODB_LOG_TOPOLOGY',
-        'MONGODB_LOG_SERVER_SELECTION',
-        'MONGODB_LOG_CONNECTION'
-      ];
-      const mapToInternalRepresentation = (component: string) => {
-        const options: Record<string, string> = {
-          MONGODB_LOG_COMMAND: 'command',
-          MONGODB_LOG_TOPOLOGY: 'topology',
-          MONGODB_LOG_SERVER_SELECTION: 'serverSelection',
-          MONGODB_LOG_CONNECTION: 'connection'
-        };
-        return options[component];
-      };
+      const components = new Map([
+        ['MONGODB_LOG_COMMAND', 'command'],
+        ['MONGODB_LOG_TOPOLOGY', 'topology'],
+        ['MONGODB_LOG_SERVER_SELECTION', 'serverSelection'],
+        ['MONGODB_LOG_CONNECTION', 'connection']
+      ]);
 
-      context('MONGODB_LOG_ALL', () => {
-        context('when a default is provided', () => {
-          it('sets default to the provided value', () => {
-            const options = MongoLogger.resolveOptions(
-              { MONGODB_LOG_ALL: SeverityLevel.ALERT },
-              {}
-            );
-            expect(options.componentSeverities).to.have.property('default', SeverityLevel.ALERT);
-          });
-        });
-        context('when no value is provided', () => {
-          it('sets default to off', () => {
-            const options = MongoLogger.resolveOptions({ MONGODB_LOG_ALL: SeverityLevel.OFF }, {});
-            expect(options.componentSeverities).to.have.property('default', SeverityLevel.OFF);
-          });
-        });
-
-        it('is case insensitive', () => {
-          const options = MongoLogger.resolveOptions({ MONGODB_LOG_ALL: 'dEbUg' }, {});
-          expect(options.componentSeverities).to.have.property('default', SeverityLevel.DEBUG);
-        });
-      });
-
-      for (const component of components) {
-        const mappedComponent = mapToInternalRepresentation(component);
-        context(`${component}`, function () {
-          context(`when set to a valid value in the environment`, function () {
-            context('when there is a default provided', function () {
-              it(`sets ${mappedComponent} to the provided value and ignores the default`, function () {
-                const options = MongoLogger.resolveOptions(
-                  { [component]: SeverityLevel.ALERT, MONGODB_LOG_ALL: SeverityLevel.OFF },
-                  {}
-                );
-                expect(options.componentSeverities).to.have.property(
-                  mappedComponent,
-                  SeverityLevel.ALERT
-                );
-              });
-            });
-            context('when there is no default provided', function () {
-              it(`sets ${mappedComponent} to the provided value`, function () {
-                const options = MongoLogger.resolveOptions(
-                  { [component]: SeverityLevel.ALERT, MONGODB_LOG_ALL: SeverityLevel.OFF },
-                  {}
-                );
-                expect(options.componentSeverities).to.have.property(
-                  mappedComponent,
-                  SeverityLevel.ALERT
-                );
-              });
-            });
-          });
-
-          context(`when set to an invalid value in the environment`, function () {
-            context('when there is a default provided', function () {
-              it(`sets ${mappedComponent} to the the default`, function () {
-                const options = MongoLogger.resolveOptions(
-                  { [component]: 'invalid value' as any, MONGODB_LOG_ALL: SeverityLevel.ALERT },
-                  {}
-                );
-                expect(options.componentSeverities).to.have.property(
-                  mappedComponent,
-                  SeverityLevel.ALERT
-                );
-              });
-            });
-            context('when there is no default provided', function () {
-              it(`sets ${mappedComponent} to the off`, function () {
-                const options = MongoLogger.resolveOptions(
-                  { [component]: 'invalid value' as any },
-                  {}
-                );
-                expect(options.componentSeverities).to.have.property(
-                  mappedComponent,
-                  SeverityLevel.OFF
-                );
-              });
-            });
-          });
-
-          context(`when unset`, () => {
-            context(`when there is no default set`, () => {
-              it(`does not set ${mappedComponent}`, () => {
-                const options = MongoLogger.resolveOptions({}, {});
-                expect(options.componentSeverities).to.have.property(
-                  mappedComponent,
-                  SeverityLevel.OFF
-                );
-              });
-            });
-
-            context(`when there is a default set`, () => {
-              it(`sets ${mappedComponent} to the default`, () => {
-                const options = MongoLogger.resolveOptions(
-                  { MONGODB_LOG_ALL: SeverityLevel.DEBUG },
-                  {}
-                );
-                expect(options.componentSeverities).to.have.property(
-                  mappedComponent,
-                  SeverityLevel.DEBUG
-                );
-              });
-            });
-          });
-
-          it('is case insensitive', function () {
-            const options = MongoLogger.resolveOptions({ MONGODB_LOG_ALL: 'dEbUg' as any }, {});
-            expect(options.componentSeverities).to.have.property(
-              mappedComponent,
-              SeverityLevel.DEBUG
-            );
-          });
-        });
+      function* makeValidOptions(): Generator<[string, string]> {
+        const validOptions = Object.values(SeverityLevel).filter(
+          option => option !== SeverityLevel.OFF
+        );
+        for (const option of validOptions) {
+          yield [option, option];
+          yield [option.toUpperCase(), option];
+        }
       }
+
+      const invalidOptions = ['', 'invalid-string'];
+      const validNonDefaultOptions = new Map(makeValidOptions());
+
+      context('default', () => {
+        context('when MONGODB_LOG_ALL is unset', () => {
+          it('sets default to OFF', () => {
+            const { componentSeverities } = MongoLogger.resolveOptions({}, {});
+            expect(componentSeverities.default).to.equal(SeverityLevel.OFF);
+          });
+        });
+        context('when MONGODB_LOG_ALL is invalid', () => {
+          for (const invalidOption of invalidOptions) {
+            context(`{ MONGODB_LOG_ALL: '${invalidOption} }'`, () => {
+              it('sets default to OFF', () => {
+                const { componentSeverities } = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_ALL: invalidOption
+                  },
+                  {}
+                );
+                expect(componentSeverities.default).to.equal(SeverityLevel.OFF);
+              });
+            });
+          }
+        });
+        context('when MONGODB_LOG_ALL is valid', () => {
+          for (const [validOption, expectedValue] of validNonDefaultOptions) {
+            context(`{ MONGODB_LOG_ALL: '${validOption} }'`, () => {
+              it('sets default to the value of MONGODB_LOG_ALL', () => {
+                const { componentSeverities } = MongoLogger.resolveOptions(
+                  {
+                    MONGODB_LOG_ALL: validOption
+                  },
+                  {}
+                );
+                expect(componentSeverities.default).to.equal(expectedValue);
+              });
+            });
+          }
+        });
+        for (const [loggingComponent, componentSeverityOption] of components) {
+          context(`when ${loggingComponent} is unset`, () => {
+            context(`when MONGODB_LOG_ALL is unset`, () => {
+              it(`sets ${componentSeverityOption} to OFF`, () => {
+                const { componentSeverities } = MongoLogger.resolveOptions({}, {});
+                expect(componentSeverities[componentSeverityOption]).to.equal(SeverityLevel.OFF);
+              });
+            });
+            context(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
+              for (const invalidOption of invalidOptions) {
+                context(`{ MONGODB_LOG_ALL: ${invalidOption} }`, () => {
+                  it(`sets ${invalidOption} to OFF`, () => {
+                    const { componentSeverities } = MongoLogger.resolveOptions(
+                      {
+                        MONGODB_LOG_ALL: invalidOption
+                      },
+                      {}
+                    );
+                    expect(componentSeverities[componentSeverityOption]).to.equal(
+                      SeverityLevel.OFF
+                    );
+                  });
+                });
+              }
+            });
+            context(`when MONGODB_LOG_ALL is set to a valid value`, () => {
+              for (const [option, expectedValue] of validNonDefaultOptions) {
+                context(`{ MONGODB_LOG_ALL: ${option} }`, () => {
+                  it(`sets ${option} to the value of MONGODB_LOG_ALL`, () => {
+                    const { componentSeverities } = MongoLogger.resolveOptions(
+                      {
+                        MONGODB_LOG_ALL: option
+                      },
+                      {}
+                    );
+                    expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
+                  });
+                });
+              }
+            });
+          });
+          context(`when ${loggingComponent} is set to an invalid value in the environment`, () => {
+            context(`when MONGODB_LOG_ALL is unset`, () => {
+              for (const invalidOption of invalidOptions) {
+                context(`{ ${loggingComponent}: ${invalidOption} }`, () => {
+                  it(`sets ${componentSeverityOption} to OFF`, () => {
+                    const { componentSeverities } = MongoLogger.resolveOptions(
+                      {
+                        [loggingComponent]: invalidOption
+                      },
+                      {}
+                    );
+
+                    expect(componentSeverities[componentSeverityOption]).to.equal(
+                      SeverityLevel.OFF
+                    );
+                  });
+                });
+              }
+            });
+            context(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
+              for (const invalidOption of invalidOptions) {
+                context(
+                  `{ ${loggingComponent}: ${invalidOption}, MONGODB_LOG_ALL: ${invalidOption} }`,
+                  () => {
+                    it(`sets ${componentSeverityOption} to OFF`, () => {
+                      const { componentSeverities } = MongoLogger.resolveOptions(
+                        {
+                          [loggingComponent]: invalidOption,
+                          MONGODB_LOG_ALL: invalidOption
+                        },
+                        {}
+                      );
+
+                      expect(componentSeverities[componentSeverityOption]).to.equal(
+                        SeverityLevel.OFF
+                      );
+                    });
+                  }
+                );
+              }
+            });
+            context(`when MONGODB_LOG_ALL is set to a valid value`, () => {
+              const invalidOption = invalidOptions[0];
+
+              for (const [option, expectedValue] of validNonDefaultOptions) {
+                context(
+                  `{ MONGODB_LOG_ALL: ${option}, ${componentSeverityOption}: ${option} }`,
+                  () => {
+                    it(`sets ${componentSeverityOption} to the value of MONGODB_LOG_ALL`, () => {
+                      const { componentSeverities } = MongoLogger.resolveOptions(
+                        {
+                          [loggingComponent]: invalidOption,
+                          MONGODB_LOG_ALL: option
+                        },
+                        {}
+                      );
+                      expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
+                    });
+                  }
+                );
+              }
+              it(`sets ${componentSeverityOption} to the value of MONGODB_LOG_ALL`, () => {
+                expect(true).to.be.true;
+              });
+            });
+          });
+          context(`when ${loggingComponent} is set to a valid value in the environment`, () => {
+            context(`when MONGODB_LOG_ALL is unset`, () => {
+              for (const [option, expectedValue] of validNonDefaultOptions) {
+                context(`{ ${loggingComponent}: ${option} }`, () => {
+                  it(`sets ${componentSeverityOption} to the value of ${loggingComponent}`, () => {
+                    const { componentSeverities } = MongoLogger.resolveOptions(
+                      {
+                        [loggingComponent]: option
+                      },
+                      {}
+                    );
+
+                    expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
+                  });
+                });
+              }
+            });
+            context(`when MONGODB_LOG_ALL is set to an invalid value`, () => {
+              const invalidValue = invalidOptions[0];
+              for (const [option, expectedValue] of validNonDefaultOptions) {
+                context(
+                  `{ ${loggingComponent}: ${option}, MONGODB_LOG_ALL: ${invalidValue} }`,
+                  () => {
+                    it(`sets ${componentSeverityOption} to the value of ${loggingComponent}`, () => {
+                      const { componentSeverities } = MongoLogger.resolveOptions(
+                        {
+                          [loggingComponent]: option,
+                          MONGODB_LOG_ALL: invalidValue
+                        },
+                        {}
+                      );
+
+                      expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
+                    });
+                  }
+                );
+              }
+            });
+            context(`when MONGODB_LOG_ALL is set to a valid value`, () => {
+              const validOption = validNonDefaultOptions.keys()[0];
+              for (const [option, expectedValue] of validNonDefaultOptions) {
+                context(
+                  `{ ${loggingComponent}: ${option}, MONGODB_LOG_ALL: ${validOption} }`,
+                  () => {
+                    it(`sets ${componentSeverityOption} to the value of ${loggingComponent}`, () => {
+                      const { componentSeverities } = MongoLogger.resolveOptions(
+                        {
+                          [loggingComponent]: option,
+                          MONGODB_LOG_ALL: validOption
+                        },
+                        {}
+                      );
+
+                      expect(componentSeverities[componentSeverityOption]).to.equal(expectedValue);
+                    });
+                  }
+                );
+              }
+            });
+          });
+        }
+      });
     });
 
     context('maxDocumentLength', function () {
