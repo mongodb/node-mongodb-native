@@ -122,8 +122,8 @@ export interface ProxyOptions {
 /** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
-    StreamDescriptionOptions,
-    ProxyOptions {
+  StreamDescriptionOptions,
+  ProxyOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -360,7 +360,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   /**
    * @remarks
    * onTimeout is called when the tcp socket underlying kStream times out. This
-   * occurs prior to the closing of the socket, so the resouce must be returned
+   * occurs prior to the closing of the socket, so the resource must be returned
    * to the operating system here */
   onTimeout() {
     if (this.closed || this.destroyed) {
@@ -492,36 +492,23 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kMessageStream].destroy();
 
     options = Object.assign({ force: false }, options);
-    if (this[kStream] == null || this.destroyed) {
-      this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
-      }
-
-      return;
+    if (this.destroyed) {
+      return callback?.();
     }
 
     if (options.force) {
       this[kStream].destroy();
       this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
-      }
-
-      return;
+      return callback?.();
     }
 
-    if (this[kStream].destroyed) {
+    if (this[kStream].writableEnded) {
       this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
-      }
+      return callback?.();
     } else {
       this[kStream].end(() => {
         this.destroyed = true;
-        if (typeof callback === 'function') {
-          callback();
-        }
+        callback?.();
       });
     }
   }
