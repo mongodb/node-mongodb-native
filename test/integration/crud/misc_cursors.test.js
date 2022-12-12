@@ -13,6 +13,7 @@ const { ReadPreference } = require('../../../src/read_preference');
 const { ServerType } = require('../../../src/sdam/common');
 const { formatSort } = require('../../../src/sort');
 const { getSymbolFrom } = require('../../tools/utils');
+const { MongoExpiredSessionError } = require('../../../src/error');
 
 describe('Cursor', function () {
   before(function () {
@@ -1905,62 +1906,38 @@ describe('Cursor', function () {
     }
   });
 
-  it('should close dead tailable cursors', {
-    metadata: {
-      os: '!win32' // NODE-2943: timeout on windows
-    },
+  it.only('closes cursors when client is closed even if it has not been exhausted', {
+      metadata: {
+        os: '!win32' // NODE-2943: timeout on windows
+      },
 
-    test: function (done) {
-      // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+      async test() {
+        await client
+          .db()
+          .dropCollection('test_cleanup_tailable')
+          .catch(() => null);
 
-      const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+        const collection = await client
+          .db()
+          .createCollection('test_cleanup_tailable', { capped: true, size: 1000, max: 3 });
 
-        const db = client.db(configuration.db);
-        const options = { capped: true, size: 10000000 };
-        db.createCollection(
-          'test_if_dead_tailable_cursors_close',
-          options,
-          function (err, collection) {
-            expect(err).to.not.exist;
+        // insert only 2 docs in capped coll of 3
+        await collection.insertMany([{ a: 1 }, { a: 1 }]);
 
-            let closeCount = 0;
-            const docs = Array.from({ length: 100 }).map(() => ({ a: 1 }));
-            collection.insertMany(docs, { w: 'majority', wtimeoutMS: 5000 }, err => {
-              expect(err).to.not.exist;
+        const cursor = collection.find({}, { tailable: true, awaitData: true, maxAwaitTimeMS: 2000 });
 
-              const cursor = collection.find({}, { tailable: true, awaitData: true });
-              const stream = cursor.stream();
+        await cursor.next();
+        await cursor.next();
+        // will block for maxAwaitTimeMS (except we are closing the client)
+        const rejectedEarlyBecauseClientClosed = cursor.next().catch(error => error);
 
-              stream.resume();
+        await client.close();
+        expect(cursor).to.have.property('killed', true);
 
-              var validator = () => {
-                closeCount++;
-                if (closeCount === 2) {
-                  done();
-                }
-              };
-
-              // we validate that the stream "ends" either cleanly or with an error
-              stream.on('end', validator);
-              stream.on('error', validator);
-
-              cursor.on('close', validator);
-
-              const docs = Array.from({ length: 100 }).map(() => ({ a: 1 }));
-              collection.insertMany(docs, err => {
-                expect(err).to.not.exist;
-
-                setTimeout(() => client.close());
-              });
-            });
-          }
-        );
-      });
-    }
-  });
+        const error = await rejectedEarlyBecauseClientClosed;
+        expect(error).to.be.instanceOf(MongoExpiredSessionError);
+      }
+    });
 
   it('shouldAwaitData', {
     // Add a tag that our runner can trigger on
