@@ -10,7 +10,10 @@ import type {
   WithoutId
 } from '../../src/mongo_types';
 
-// InferIdType
+/** ----------------------------------------------------------------------
+ * InferIdType
+ */
+
 expectType<InferIdType<Document>>(new ObjectId());
 expectType<InferIdType<{ _id: number }>>(1 + 1);
 expectType<InferIdType<{ a: number } | { b: string }>>(new ObjectId());
@@ -22,12 +25,19 @@ expectError<InferIdType<{ _id: Record<string, any> }>>({});
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(new ObjectId());
 expectAssignable<InferIdType<{ _id: number } | { b: string }>>(1 + 1);
 
-// WithId
+/** ----------------------------------------------------------------------
+ * WithId
+ */
+
 expectAssignable<WithId<Document>>({ _id: new ObjectId() });
 expectAssignable<WithId<{ a: number }>>({ _id: new ObjectId(), a: 3 });
 expectAssignable<WithId<{ _id: ObjectId }>>({ _id: new ObjectId() });
 expectAssignable<WithId<{ _id: number }>>({ _id: 5 });
 expectNotType<WithId<Document>>({ _id: 3 });
+
+/** ----------------------------------------------------------------------
+ * OptionalId
+ */
 
 // Changing _id to a type other than ObjectId makes it required:
 expectNotType<OptionalId<{ _id: number; a: number }>>({ a: 3 });
@@ -44,20 +54,33 @@ class MyId {}
 expectNotType<OptionalId<{ _id: MyId; a: number }>>({ a: 3 });
 expectNotType<OptionalId<{ _id: MyId; a: number }>>({ _id: new ObjectId(), a: 3 });
 
+/** ----------------------------------------------------------------------
+ * OptionalUnlessRequiredId
+ */
+
 declare function functionReturningOptionalId(): OptionalId<{
   _id?: ObjectId | undefined;
   a: number;
 }>;
-// OptionalUnlessRequiredId
 expectType<OptionalUnlessRequiredId<{ _id: ObjectId; a: number }>>({ a: 3, _id: new ObjectId() });
 expectType<OptionalUnlessRequiredId<{ _id?: ObjectId; a: number }>>(functionReturningOptionalId());
 
-// WithoutId removes _id whether defined in the schema or not
+/** ----------------------------------------------------------------------
+ * WithoutId
+ *
+ * WithoutId removes _id whether defined in the schema or not
+ */
+
 expectType<WithoutId<{ _id: number; a: number }>>({ a: 2 });
 expectNotType<WithoutId<{ _id: number; a: number }>>({ _id: 3, a: 2 });
 expectNotType<WithoutId<{ a: number }>>({ _id: 3, a: 2 });
 
-// EnhancedOmit fixes a problem with Typescript's built in Omit that breaks discriminated unions
+/** ----------------------------------------------------------------------
+ * EnhancedOmit
+ *
+ * EnhancedOmit fixes a problem with Typescript's built in Omit that breaks discriminated unions
+ */
+
 // NODE-3287
 // expectNotAssignable<EnhancedOmit<{ a: 'one' } | { b: 'two' }, 'a'>>({
 //   a: 'one' as const
