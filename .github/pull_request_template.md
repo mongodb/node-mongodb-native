@@ -20,6 +20,7 @@ You can do that here: https://jira.mongodb.org/projects/NODE
 
 - [ ] Ran `npm run check:lint` script
 - [ ] Self-review completed using the [steps outlined here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md#reviewer-guidelines)
-- [ ] PR title follows the correct format: `<type>(NODE-xxxx)<!>: <description>`
+- [ ] PR title follows the [correct format](https://www.conventionalcommits.org/en/v1.0.0/): `type(NODE-xxxx)[!]: description`
+  - Example: `feat(NODE-1234)!: rewriting everything in coffeescript`
 - [ ] Changes are covered by tests
 - [ ] New TODOs have a related JIRA ticket
