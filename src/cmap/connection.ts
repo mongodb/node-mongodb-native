@@ -458,18 +458,21 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this[kMessageStream].destroy();
     this.closed = true;
+    callback = callback
+      ? callback
+      : () => {
+          /* Ignore */
+        };
 
     if (options.force) {
       this[kStream].destroy();
-      return callback?.();
+      return process.nextTick(callback);
     }
 
     if (!this[kStream].writableEnded) {
-      this[kStream].end(() => {
-        callback?.();
-      });
+      this[kStream].end(callback);
     } else {
-      callback?.();
+      process.nextTick(callback);
     }
   }
 
