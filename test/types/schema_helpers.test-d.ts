@@ -90,6 +90,48 @@ expectAssignable<SchemaWithIdInterface | null>(
   (await interfaceTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })).value
 );
 
+// OptionalId assignability when wrapping a schema with _id: number
+type SchemaWithIdNumberType = {
+  _id: number;
+  a: number;
+};
+interface SchemaWithIdNumberInterface {
+  _id: number;
+  a: number;
+}
+const typeNumberTestCollection = new Collection<OptionalId<SchemaWithIdNumberType>>(
+  {} as Db,
+  'test'
+);
+const interfaceNumberTestCollection = new Collection<OptionalId<SchemaWithIdNumberInterface>>(
+  {} as Db,
+  'test'
+);
+expectAssignable<SchemaWithIdNumberType | null>(await typeNumberTestCollection.findOne());
+expectAssignable<SchemaWithIdNumberInterface | null>(await interfaceNumberTestCollection.findOne());
+expectAssignable<SchemaWithIdNumberType>((await typeNumberTestCollection.find().toArray())[0]);
+expectAssignable<SchemaWithIdNumberInterface>(
+  (await interfaceNumberTestCollection.find().toArray())[0]
+);
+expectAssignable<SchemaWithIdNumberType | null>(
+  (await typeNumberTestCollection.findOneAndDelete({ a: 1 })).value
+);
+expectAssignable<SchemaWithIdNumberInterface | null>(
+  (await interfaceNumberTestCollection.findOneAndDelete({ a: 1 })).value
+);
+expectAssignable<SchemaWithIdNumberType | null>(
+  (await typeNumberTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })).value
+);
+expectAssignable<SchemaWithIdNumberInterface | null>(
+  (await interfaceNumberTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })).value
+);
+expectAssignable<SchemaWithIdNumberType | null>(
+  (await typeNumberTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })).value
+);
+expectAssignable<SchemaWithIdNumberInterface | null>(
+  (await interfaceNumberTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })).value
+);
+
 /** ----------------------------------------------------------------------
  * OptionalUnlessRequiredId
  */
