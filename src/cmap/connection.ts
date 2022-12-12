@@ -122,8 +122,8 @@ export interface ProxyOptions {
 /** @public */
 export interface ConnectionOptions
   extends SupportedNodeConnectionOptions,
-  StreamDescriptionOptions,
-  ProxyOptions {
+    StreamDescriptionOptions,
+    ProxyOptions {
   // Internal creation info
   id: number | '<monitor>';
   generation: number;
@@ -471,7 +471,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   destroy(options: DestroyOptions, callback?: Callback): void {
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
-
 
     this[kMessageStream].destroy();
     this.closed = true;
