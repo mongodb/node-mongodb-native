@@ -1,6 +1,7 @@
 import { Document, ObjectId } from 'bson';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
+import { Collection, Db } from '../../src';
 import type {
   EnhancedOmit,
   InferIdType,
@@ -53,6 +54,41 @@ expectNotType<OptionalId<{ _id: number; [x: string]: number }>>({ a: 3 });
 class MyId {}
 expectNotType<OptionalId<{ _id: MyId; a: number }>>({ a: 3 });
 expectNotType<OptionalId<{ _id: MyId; a: number }>>({ _id: new ObjectId(), a: 3 });
+
+// OptionalId assignability when wrapping a schema with _id: ObjectId
+type SchemaWithIdType = {
+  _id: ObjectId;
+  a: number;
+};
+interface SchemaWithIdInterface {
+  _id: ObjectId;
+  a: number;
+}
+
+const typeTestCollection = new Collection<OptionalId<SchemaWithIdType>>({} as Db, 'test');
+const interfaceTestCollection = new Collection<OptionalId<SchemaWithIdInterface>>({} as Db, 'test');
+expectAssignable<SchemaWithIdType | null>(await typeTestCollection.findOne());
+expectAssignable<SchemaWithIdInterface | null>(await interfaceTestCollection.findOne());
+expectAssignable<SchemaWithIdType>((await typeTestCollection.find().toArray())[0]);
+expectAssignable<SchemaWithIdInterface>((await interfaceTestCollection.find().toArray())[0]);
+expectAssignable<SchemaWithIdType | null>(
+  (await typeTestCollection.findOneAndDelete({ a: 1 })).value
+);
+expectAssignable<SchemaWithIdInterface | null>(
+  (await interfaceTestCollection.findOneAndDelete({ a: 1 })).value
+);
+expectAssignable<SchemaWithIdType | null>(
+  (await typeTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })).value
+);
+expectAssignable<SchemaWithIdInterface | null>(
+  (await interfaceTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })).value
+);
+expectAssignable<SchemaWithIdType | null>(
+  (await typeTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })).value
+);
+expectAssignable<SchemaWithIdInterface | null>(
+  (await interfaceTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })).value
+);
 
 /** ----------------------------------------------------------------------
  * OptionalUnlessRequiredId
