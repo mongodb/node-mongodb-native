@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { MongoClient } from '../../../src';
-import { SeverityLevel } from '../../../src/mongo_logger';
+import { MongoLoggableComponent, SeverityLevel } from '../../../src/mongo_logger';
 
 describe('Feature Flags', () => {
   describe('@@mdb.skipPingOnConnect', () => {
@@ -49,6 +49,13 @@ describe('Feature Flags', () => {
   describe('@@mdb.enableMongoLogger', () => {
     let cachedEnv;
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+    const components: Array<MongoLoggableComponent | 'default'> = [
+      'default',
+      'topology',
+      'serverSelection',
+      'connection',
+      'command'
+    ];
 
     before(() => {
       cachedEnv = process.env;
@@ -84,17 +91,19 @@ describe('Feature Flags', () => {
           const client = new MongoClient('mongodb://localhost:27017', {
             [loggerFeatureFlag]: true
           });
-          expect(client.mongoLogger.componentSeverities).to.have.property(
-            'command',
-            SeverityLevel.OFF
-          );
+          for (const component of components) {
+            expect(client.mongoLogger.componentSeverities).to.have.property(
+              component,
+              SeverityLevel.OFF
+            );
+          }
         });
       });
     });
 
     for (const featureFlagValue of [false, undefined]) {
       context(`when set to ${featureFlagValue}`, () => {
-        context('when logging is enabled for any component', () => {
+        context('when logging is enabled for a component', () => {
           before(() => {
             process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
           });
@@ -103,10 +112,12 @@ describe('Feature Flags', () => {
             const client = new MongoClient('mongodb://localhost:27017', {
               [loggerFeatureFlag]: featureFlagValue
             });
-            expect(client.mongoLogger.componentSeverities).to.have.property(
-              'command',
-              SeverityLevel.OFF
-            );
+            for (const component of components) {
+              expect(client.mongoLogger.componentSeverities).to.have.property(
+                component,
+                SeverityLevel.OFF
+              );
+            }
           });
         });
 
@@ -115,14 +126,16 @@ describe('Feature Flags', () => {
             process.env = {};
           });
 
-          it('does not enable logging for any component', () => {
+          it('does not enable logging', () => {
             const client = new MongoClient('mongodb://localhost:27017', {
               [loggerFeatureFlag]: featureFlagValue
             });
-            expect(client.mongoLogger.componentSeverities).to.have.property(
-              'command',
-              SeverityLevel.OFF
-            );
+            for (const component of components) {
+              expect(client.mongoLogger.componentSeverities).to.have.property(
+                component,
+                SeverityLevel.OFF
+              );
+            }
           });
         });
       });
