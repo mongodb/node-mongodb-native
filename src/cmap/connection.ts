@@ -308,12 +308,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
-  /**
-   * @remarks
-   * onError is called when an error is propagated up from the socket behind
-   * kStream to kMessageStream. This occurs prior to the closing of the socket,
-   * so the resource must be return to the operating system here.
-   */
   onError(error: Error) {
     if (this.closed) {
       return;
@@ -328,11 +322,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.emit(Connection.CLOSE);
   }
 
-  /**
-   * @remarks
-   * onClose is called when the socket underlying kStream has been closed and
-   * the resource is returned to the operating system
-   */
   onClose() {
     if (this.closed) {
       return;
@@ -348,11 +337,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.emit(Connection.CLOSE);
   }
 
-  /**
-   * @remarks
-   * onTimeout is called when the tcp socket underlying kStream times out. This
-   * occurs prior to the closing of the socket, so the resource must be returned
-   * to the operating system here */
   onTimeout() {
     if (this.closed) {
       return;
