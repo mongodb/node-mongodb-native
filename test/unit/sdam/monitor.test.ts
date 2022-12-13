@@ -52,7 +52,7 @@ describe('monitoring', function () {
         const serverDescription = Array.from(topology.description.servers.values())[0];
         expect(serverDescription).property('roundTripTime').to.be.greaterThan(0);
 
-        topology.close(done as any);
+        topology.close({}, done as any);
       }, 500);
     });
   }).skipReason = 'TODO(NODE-3819): Unskip flaky tests';
@@ -92,7 +92,7 @@ describe('monitoring', function () {
       const serverDescription = Array.from(topology.description.servers.values())[0];
       expect(serverDescription).property('roundTripTime').to.be.greaterThan(0);
 
-      topology.close(done);
+      topology.close({}, done);
     });
   }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
 

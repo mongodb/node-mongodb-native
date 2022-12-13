@@ -1906,7 +1906,7 @@ describe('Cursor', function () {
     }
   });
 
- it('closes cursors when client is closed even if it has not been exhausted', async function () {
+  it('closes cursors when client is closed even if it has not been exhausted', async function () {
     await client
       .db()
       .dropCollection('test_cleanup_tailable')
