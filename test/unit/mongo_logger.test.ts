@@ -212,9 +212,6 @@ describe('class MongoLogger', function () {
                 }
               );
             }
-            it(`sets ${componentSeverityOption} to the value of MONGODB_LOG_ALL`, () => {
-              expect(true).to.be.true;
-            });
           });
         });
 
