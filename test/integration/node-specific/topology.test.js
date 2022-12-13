@@ -5,6 +5,7 @@ describe('Topology', function () {
   it('should correctly track states of a topology', {
     metadata: { requires: { apiVersion: false, topology: '!load-balanced' } }, // apiVersion not supported by newTopology()
     test: function (done) {
+      debugger;
       const topology = this.configuration.newTopology();
 
       const states = [];
@@ -15,7 +16,9 @@ describe('Topology', function () {
         } catch (error) {
           done(error);
         }
+        console.log('before close');
         topology.close({}, err => {
+          console.log('In close');
           try {
             expect(err).to.not.exist;
             expect(topology.isDestroyed()).to.be.true;
