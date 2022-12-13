@@ -40,7 +40,9 @@ class FakeSocket extends EventEmitter {
   end(cb) {
     this.writableEnded = true;
     // nextTick to simulate I/O delay
-    process.nextTick(cb);
+    if (typeof cb === 'function') {
+      process.nextTick(cb);
+    }
   }
   get remoteAddress() {
     return 'iLoveJavaScript';
@@ -58,7 +60,9 @@ class InputStream extends Readable {
 
   end(cb) {
     this.writableEnded = true;
-    process.nextTick(cb);
+    if (typeof cb === 'function') {
+      process.nextTick(cb);
+    }
   }
 }
 
