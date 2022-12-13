@@ -5,7 +5,6 @@ describe('Topology', function () {
   it('should correctly track states of a topology', {
     metadata: { requires: { apiVersion: false, topology: '!load-balanced' } }, // apiVersion not supported by newTopology()
     test: function (done) {
-      debugger;
       const topology = this.configuration.newTopology();
 
       const states = [];
