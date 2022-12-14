@@ -1,7 +1,7 @@
 import { Document, ObjectId } from 'bson';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
-import { Collection, Db } from '../../src';
+import type { Collection } from '../../src';
 import type {
   EnhancedOmit,
   InferIdType,
@@ -64,9 +64,9 @@ interface SchemaWithIdInterface {
   _id: ObjectId;
   a: number;
 }
+declare const typeTestCollection: Collection<OptionalId<SchemaWithIdType>>;
+declare const interfaceTestCollection: Collection<OptionalId<SchemaWithIdInterface>>;
 
-const typeTestCollection = new Collection<OptionalId<SchemaWithIdType>>({} as Db, 'test');
-const interfaceTestCollection = new Collection<OptionalId<SchemaWithIdInterface>>({} as Db, 'test');
 expectAssignable<SchemaWithIdType | null>(await typeTestCollection.findOne());
 expectAssignable<SchemaWithIdInterface | null>(await interfaceTestCollection.findOne());
 expectAssignable<SchemaWithIdType>((await typeTestCollection.find().toArray())[0]);
@@ -99,14 +99,9 @@ interface SchemaWithIdNumberInterface {
   _id: number;
   a: number;
 }
-const typeNumberTestCollection = new Collection<OptionalId<SchemaWithIdNumberType>>(
-  {} as Db,
-  'test'
-);
-const interfaceNumberTestCollection = new Collection<OptionalId<SchemaWithIdNumberInterface>>(
-  {} as Db,
-  'test'
-);
+declare const typeNumberTestCollection: Collection<OptionalId<SchemaWithIdNumberType>>;
+declare const interfaceNumberTestCollection: Collection<OptionalId<SchemaWithIdNumberInterface>>;
+
 expectAssignable<SchemaWithIdNumberType | null>(await typeNumberTestCollection.findOne());
 expectAssignable<SchemaWithIdNumberInterface | null>(await interfaceNumberTestCollection.findOne());
 expectAssignable<SchemaWithIdNumberType>((await typeNumberTestCollection.find().toArray())[0]);
