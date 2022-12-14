@@ -128,6 +128,7 @@ function resolveLogPath(
     return mongodbLogPath.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
   }
 
+  // TODO(NODE-4886): check for minimal interface instead of instanceof Writable
   if (typeof mongodbLogPath === 'object' && mongodbLogPath instanceof Writable) {
     return mongodbLogPath;
   }
