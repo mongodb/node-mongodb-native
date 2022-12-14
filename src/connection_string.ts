@@ -33,8 +33,6 @@ import {
   DEFAULT_PK_FACTORY,
   emitWarning,
   emitWarningOnce,
-  getInt as getIntFromOptions,
-  getUint as getUIntFromOptions,
   HostAddress,
   isRecord,
   makeClientMetadata,

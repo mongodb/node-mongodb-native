@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { getUint, parseUInt } from './utils';
+import { parseUInt } from './utils';
 
 /** @internal */
 export const SeverityLevel = Object.freeze({
