@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { getUint } from './utils';
+import { getUint, parseUInt } from './utils';
 
 /** @internal */
 export const SeverityLevel = Object.freeze({
@@ -94,21 +94,6 @@ function parseSeverityFromString(s?: string): SeverityLevel | null {
 }
 
 /**
- * Parses a string to be a number greater than or equal to 0 for maxDocumentLength.
- *
- * @param s - the value to be parsed
- * @returns the int value parsed or 1000 if the value could not be parsed
- */
-function parseMaxDocumentLength(s?: string): number {
-  try {
-    const maxDocumentLength = getUint('MONGODB_LOG_MAX_DOCUMENT_LENGTH', s);
-    return maxDocumentLength;
-  } catch {
-    return 1000;
-  }
-}
-
-/**
  * resolves the MONGODB_LOG_PATH and mongodbLogPath options from the environment and the
  * mongo client options respectively.
  *
@@ -128,7 +113,7 @@ function resolveLogPath(
     return mongodbLogPath.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
   }
 
-  // TODO(NODE-4886): check for minimal interface instead of instanceof Writable
+  // TODO(NODE-4813): check for minimal interface instead of instanceof Writable
   if (typeof mongodbLogPath === 'object' && mongodbLogPath instanceof Writable) {
     return mongodbLogPath;
   }
@@ -208,7 +193,7 @@ export class MongoLogger {
           parseSeverityFromString(combinedOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
         default: defaultSeverity
       },
-      maxDocumentLength: parseMaxDocumentLength(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH),
+      maxDocumentLength: parseUInt(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH) ?? 1000,
       logDestination: combinedOptions.mongodbLogPath
     };
   }

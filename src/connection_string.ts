@@ -33,11 +33,12 @@ import {
   DEFAULT_PK_FACTORY,
   emitWarning,
   emitWarningOnce,
-  getInt,
-  getUint,
+  getInt as getIntFromOptions,
+  getUint as getUIntFromOptions,
   HostAddress,
   isRecord,
   makeClientMetadata,
+  parseInt,
   setDifference
 } from './utils';
 import { W, WriteConcern } from './write_concern';
@@ -200,6 +201,22 @@ function getBoolean(name: string, value: unknown): boolean {
     return false;
   }
   throw new MongoParseError(`Expected ${name} to be stringified boolean value, got: ${value}`);
+}
+
+function getIntFromOptions(name: string, value: unknown): number {
+  const parsedInt = parseInt(value);
+  if (parsedInt != null) {
+    return parsedInt;
+  }
+  throw new MongoParseError(`Expected ${name} to be stringified int value, got: ${value}`);
+}
+
+function getUIntFromOptions(name: string, value: unknown): number {
+  const parsedValue = getIntFromOptions(name, value);
+  if (parsedValue < 0) {
+    throw new MongoParseError(`${name} can only be a positive int value, got: ${value}`);
+  }
+  return parsedValue;
 }
 
 function* entriesFromString(value: string): Generator<[string, string]> {
@@ -573,10 +590,10 @@ function setOption(
       mongoOptions[name] = getBoolean(name, values[0]);
       break;
     case 'int':
-      mongoOptions[name] = getInt(name, values[0]);
+      mongoOptions[name] = getIntFromOptions(name, values[0]);
       break;
     case 'uint':
-      mongoOptions[name] = getUint(name, values[0]);
+      mongoOptions[name] = getUIntFromOptions(name, values[0]);
       break;
     case 'string':
       if (values[0] == null) {
@@ -782,7 +799,7 @@ export const OPTIONS = {
   enableUtf8Validation: { type: 'boolean', default: true },
   family: {
     transform({ name, values: [value] }): 4 | 6 {
-      const transformValue = getInt(name, value);
+      const transformValue = getIntFromOptions(name, value);
       if (transformValue === 4 || transformValue === 6) {
         return transformValue;
       }
@@ -881,7 +898,7 @@ export const OPTIONS = {
   maxConnecting: {
     default: 2,
     transform({ name, values: [value] }): number {
-      const maxConnecting = getUint(name, value);
+      const maxConnecting = getUIntFromOptions(name, value);
       if (maxConnecting === 0) {
         throw new MongoInvalidArgumentError('maxConnecting must be > 0 if specified');
       }
@@ -899,7 +916,7 @@ export const OPTIONS = {
   maxStalenessSeconds: {
     target: 'readPreference',
     transform({ name, options, values: [value] }) {
-      const maxStalenessSeconds = getUint(name, value);
+      const maxStalenessSeconds = getUIntFromOptions(name, value);
       if (options.readPreference) {
         return ReadPreference.fromOptions({
           readPreference: { ...options.readPreference, maxStalenessSeconds }
@@ -1218,7 +1235,7 @@ export const OPTIONS = {
       const wc = WriteConcern.fromOptions({
         writeConcern: {
           ...options.writeConcern,
-          wtimeout: getUint('wtimeout', value)
+          wtimeout: getUIntFromOptions('wtimeout', value)
         }
       });
       if (wc) return wc;
@@ -1231,7 +1248,7 @@ export const OPTIONS = {
       const wc = WriteConcern.fromOptions({
         writeConcern: {
           ...options.writeConcern,
-          wtimeoutMS: getUint('wtimeoutMS', value)
+          wtimeoutMS: getUIntFromOptions('wtimeoutMS', value)
         }
       });
       if (wc) return wc;
