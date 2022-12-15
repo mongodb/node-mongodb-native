@@ -36,7 +36,7 @@ import {
   HostAddress,
   isRecord,
   makeClientMetadata,
-  parseInt,
+  parseInteger,
   setDifference
 } from './utils';
 import { W, WriteConcern } from './write_concern';
@@ -202,7 +202,7 @@ function getBoolean(name: string, value: unknown): boolean {
 }
 
 function getIntFromOptions(name: string, value: unknown): number {
-  const parsedInt = parseInt(value);
+  const parsedInt = parseInteger(value);
   if (parsedInt != null) {
     return parsedInt;
   }

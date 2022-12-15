@@ -1422,15 +1422,15 @@ export function compareObjectId(oid1?: ObjectId | null, oid2?: ObjectId | null):
   return oid1.id.compare(oid2.id);
 }
 
-export function parseInt(value: unknown): number | null {
+export function parseInteger(value: unknown): number | null {
   if (typeof value === 'number') return Math.trunc(value);
   const parsedValue = Number.parseInt(String(value), 10);
 
   return Number.isNaN(parsedValue) ? null : parsedValue;
 }
 
-export function parseUInt(value: unknown): number | null {
-  const parsedInt = parseInt(value);
+export function parseUnsignedInteger(value: unknown): number | null {
+  const parsedInt = parseInteger(value);
 
   return parsedInt != null && parsedInt >= 0 ? parsedInt : null;
 }

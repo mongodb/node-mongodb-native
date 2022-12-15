@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { parseUInt } from './utils';
+import { parseUnsignedInteger } from './utils';
 
 /** @internal */
 export const SeverityLevel = Object.freeze({
@@ -193,7 +193,8 @@ export class MongoLogger {
           parseSeverityFromString(combinedOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
         default: defaultSeverity
       },
-      maxDocumentLength: parseUInt(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH) ?? 1000,
+      maxDocumentLength:
+        parseUnsignedInteger(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH) ?? 1000,
       logDestination: combinedOptions.mongodbLogPath
     };
   }
