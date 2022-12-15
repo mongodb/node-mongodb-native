@@ -620,15 +620,44 @@ describe('new Connection()', function () {
       expect(driverSocket.end).to.have.been.calledOnce;
     });
 
-    it('does not call stream.end after onClose, onTimeout, or onError', () => {
+    it('calls stream.end exactly once when onError is called', () => {
       messageStream.emit('error');
       clock.tick(1);
       expect(connection.onError).to.have.been.calledOnce;
-      clock.tick(1);
-      expect(driverSocket.destroy).to.not.have.been.calledOnce;
       connection.destroy({ force: false });
       clock.tick(1);
-      expect(driverSocket.end).to.have.been.called;
+      expect(driverSocket.destroy).to.not.have.been.called;
+      expect(driverSocket.end).to.have.been.calledOnce;
+    });
+
+    it('calls stream.end exactly once when onClose is called', () => {
+      driverSocket.emit('close');
+      clock.tick(1);
+      expect(connection.onClose).to.have.been.calledOnce;
+      connection.destroy({ force: false });
+      clock.tick(1);
+      expect(driverSocket.destroy).to.not.have.been.called;
+      expect(driverSocket.end).to.have.been.calledOnce;
+    });
+
+    it('calls stream.end exactly once when onTimeout is called', () => {
+      driverSocket.emit('timeout');
+      clock.tick(1);
+      expect(connection.onTimeout).to.have.been.calledOnce;
+      connection.destroy({ force: false });
+      clock.tick(1);
+      expect(driverSocket.destroy).to.not.have.been.called;
+      expect(driverSocket.end).to.have.been.calledOnce;
+    });
+
+    it('calls stream.end exactly once when destroy is called multiple times', () => {
+      connection.destroy({ force: false });
+      connection.destroy({ force: false });
+      connection.destroy({ force: false });
+      connection.destroy({ force: false });
+      clock.tick(1);
+      expect(driverSocket.destroy).to.not.have.been.called;
+      expect(driverSocket.end).to.have.been.calledOnce;
     });
 
     it('does not call stream.end if options.force == true', () => {
