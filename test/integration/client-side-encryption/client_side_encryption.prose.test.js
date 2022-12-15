@@ -11,7 +11,7 @@ const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const { MongoNetworkError, MongoServerError } = require('../../../src/error');
 const { getEncryptExtraOptions } = require('../../tools/utils');
-const { installNode18DNSHooks } = require('../../tools/runner/hooks/configuration');
+const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -70,7 +70,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     'base64'
   );
 
-  installNode18DNSHooks();
+  installNodeDNSWorkaroundHooks();
 
   describe('Data key and double encryption', function () {
     // Data key and double encryption
