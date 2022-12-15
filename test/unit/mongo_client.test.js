@@ -10,6 +10,9 @@ const { ReadPreference } = require('../../src/read_preference');
 const { Logger } = require('../../src/logger');
 const { MongoCredentials } = require('../../src/cmap/auth/mongo_credentials');
 const { MongoClient, MongoParseError, ServerApiVersion } = require('../../src');
+const { MongoLogger } = require('../../src/mongo_logger');
+const sinon = require('sinon');
+const { Writable } = require('stream');
 
 describe('MongoOptions', function () {
   it('MongoClient should always freeze public options', function () {
@@ -845,6 +848,28 @@ describe('MongoOptions', function () {
         expect(db).to.have.property('databaseName', 'myDb');
         expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
       });
+    });
+  });
+
+  context('loggingOptions', function () {
+    const expectedLoggingObject = {
+      maxDocumentLength: 20,
+      logDestination: new Writable()
+    };
+
+    before(() => {
+      sinon.stub(MongoLogger, 'resolveOptions').callsFake(() => {
+        return expectedLoggingObject;
+      });
+    });
+
+    after(() => {
+      sinon.restore();
+    });
+
+    it('assigns the parsed options to the mongoLoggerOptions option', function () {
+      const client = new MongoClient('mongodb://localhost:27017');
+      expect(client.options).to.have.property('mongoLoggerOptions').to.equal(expectedLoggingObject);
     });
   });
 });

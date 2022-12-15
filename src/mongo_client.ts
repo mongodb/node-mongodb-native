@@ -15,7 +15,8 @@ import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
-import type { Logger, LoggerLevel } from './logger';
+import type { Logger as LegacyLogger, LoggerLevel as LegacyLoggerLevel } from './logger';
+import { MongoLogger, MongoLoggerOptions } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -233,9 +234,9 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    */
   promiseLibrary?: any;
   /** The logging level */
-  loggerLevel?: LoggerLevel;
+  loggerLevel?: LegacyLoggerLevel;
   /** Custom logger object */
-  logger?: Logger;
+  logger?: LegacyLogger;
   /** Enable command monitoring for this client */
   monitorCommands?: boolean;
   /** Server API version */
@@ -296,7 +297,7 @@ export interface MongoClientPrivate {
   readonly readConcern?: ReadConcern;
   readonly writeConcern?: WriteConcern;
   readonly readPreference: ReadPreference;
-  readonly logger: Logger;
+  readonly logger: LegacyLogger;
   readonly isMongoClient: true;
 }
 
@@ -334,6 +335,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   s: MongoClientPrivate;
   /** @internal */
   topology?: Topology;
+  /** @internal */
+  readonly mongoLogger: MongoLogger;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -345,6 +348,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     super();
 
     this[kOptions] = parseOptions(url, this, options);
+    this.mongoLogger = new MongoLogger(this[kOptions].mongoLoggerOptions);
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
@@ -417,7 +421,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return this.s.bsonOptions;
   }
 
-  get logger(): Logger {
+  get logger(): LegacyLogger {
     return this.s.logger;
   }
 
@@ -708,7 +712,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   }
 
   /** Return the mongo client logger */
-  getLogger(): Logger {
+  getLogger(): LegacyLogger {
     return this.s.logger;
   }
 }
@@ -803,4 +807,7 @@ export interface MongoOptions
 
   /** @internal */
   [featureFlag: symbol]: any;
+
+  /** @internal */
+  mongoLoggerOptions: MongoLoggerOptions;
 }

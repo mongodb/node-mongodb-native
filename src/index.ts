@@ -301,6 +301,14 @@ export type {
   WithSessionCallback
 } from './mongo_client';
 export type {
+  MongoLoggableComponent,
+  MongoLogger,
+  MongoLoggerEnvOptions,
+  MongoLoggerMongoClientOptions,
+  MongoLoggerOptions,
+  SeverityLevel
+} from './mongo_logger';
+export type {
   CommonEvents,
   EventsDescription,
   GenericListener,
