@@ -1,0 +1,99 @@
+# This test only applies to drivers that generate operationIds to enable users to link
+# together bulk writes.
+description: "operation-id"
+
+schemaVersion: "1.13"
+
+createEntities:
+  - client:
+      id: &client client
+      observeLogMessages:
+        command: debug
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName logging-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName logging-tests-collection
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  - description: "Successful bulk write command log messages include operationIds"
+    operations:
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { x: 1 }
+            - deleteOne:
+                filter: { x: 1 }
+
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: insert
+              operationId: { $$type: [int, long] }
+
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: insert
+              operationId: { $$type: [int, long] }
+
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: delete
+              operationId: { $$type: [int, long] }
+
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: delete
+              operationId: { $$type: [int, long] }
+        
+  - description: "Failed bulk write command log message includes operationId"
+    operations:
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - updateOne:
+                filter: { x: 1 }
+                update: [{ $invalidOperator: true }]
+        expectError:
+          isClientError: false
+
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: update
+              operationId: { $$type: [int, long] }
+          - level: debug
+            component: command
+            data:
+              message: "Command failed"
+              commandName: update
+              operationId: { $$type: [int, long] }

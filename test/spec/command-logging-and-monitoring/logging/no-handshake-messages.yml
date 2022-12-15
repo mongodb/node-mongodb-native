@@ -1,0 +1,58 @@
+description: "no-handshake-command-logs"
+
+schemaVersion: "1.13"
+
+tests:
+  - description: "Handshake commands should not generate log messages"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeLogMessages:
+                  command: debug
+                observeEvents:
+                  - connectionCreatedEvent
+                  - connectionReadyEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: &databaseName logging-tests
+      - name: runCommand
+        object: *database
+        arguments:
+          command: { ping: 1 }
+          commandName: &commandName ping
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            connectionCreatedEvent: {}
+          count: 1
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            connectionReadyEvent: {}
+          count: 1
+    expectLogMessages:
+      # since the ping happens after the handshake, seeing events for only the ping
+      # implies the driver did not emit any log messages for the handshake.
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: *commandName
+
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: *commandName

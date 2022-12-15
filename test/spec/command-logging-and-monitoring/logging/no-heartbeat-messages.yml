@@ -1,0 +1,58 @@
+description: "no-heartbeat-command-logs"
+
+schemaVersion: "1.13"
+
+# no heartbeats in load balanced mode.
+runOnRequirements:
+  - topologies:
+      - single
+      - replicaset
+      - sharded
+
+tests:
+  - description: "Heartbeat commands should not generate log messages"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeLogMessages:
+                  command: debug
+                observeEvents:
+                  - serverDescriptionChangedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: &databaseName logging-tests
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            # a server description change implies that a heartbeat has happened.
+            serverDescriptionChangedEvent: {}
+          count: 1
+      - name: runCommand
+        object: *database
+        arguments:
+          command: { ping: 1 }
+          commandName: &commandName ping
+    expectLogMessages:
+      # since the ping happens after the heartbeat, seeing events for only the ping
+      # implies the driver did not emit a log message for the heartbeat.
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: *commandName
+
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: *commandName

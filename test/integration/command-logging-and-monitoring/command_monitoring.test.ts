@@ -366,14 +366,14 @@ describe('Command Monitoring', function () {
         { maxPoolSize: 1, monitorCommands: true }
       );
 
-      const desiredEvents = ['getnonce'];
+      const desiredEvents = ['hello'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
       client.on('commandFailed', filterForCommands(desiredEvents, failed));
 
       return client
         .db(this.configuration.db)
-        .command({ getnonce: true })
+        .command({ hello: 1, speculativeAuthenticate: { saslStart: 1 } })
         .then(r => {
           expect(r).to.exist;
           expect(started).to.have.length(1);
