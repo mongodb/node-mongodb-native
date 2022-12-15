@@ -470,7 +470,7 @@ describe('new Connection()', function () {
       expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
 
       expect(messageStream.destroy).to.have.been.calledOnce;
-      expect(driverSocket.destroy).to.not.have.been.calledOnce;
+      expect(driverSocket.destroy).to.not.have.been.called;
       expect(driverSocket.end).to.have.been.calledOnce;
     });
   });
@@ -502,7 +502,7 @@ describe('new Connection()', function () {
       expect(connection.onError).to.have.been.calledOnce;
       connection.destroy({ force: false });
       clock.tick(1);
-      expect(messageStream.destroy).to.not.have.been.calledOnce;
+      expect(messageStream.destroy).to.have.been.called;
       expect(driverSocket.destroy).to.not.have.been.called;
       expect(driverSocket.end).to.have.been.calledOnce;
     });
@@ -536,7 +536,7 @@ describe('new Connection()', function () {
       expect(connection.onClose).to.have.been.calledOnce;
       connection.destroy({ force: false });
       clock.tick(1);
-      expect(messageStream.destroy).to.not.have.been.calledOnce;
+      expect(messageStream.destroy).to.have.been.called;
       expect(driverSocket.destroy).to.not.have.been.called;
       expect(driverSocket.end).to.have.been.calledOnce;
     });
