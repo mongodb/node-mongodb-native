@@ -1,0 +1,131 @@
+{
+  "description": "server-connection-id",
+  "schemaVersion": "1.13",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.2"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeLogMessages": {
+          "command": "debug"
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "logging-server-connection-id-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "logging-tests-collection"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "databaseName": "logging-server-connection-id-tests",
+      "collectionName": "logging-tests-collection",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "command log messages include server connection id",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "$or": true
+            }
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ],
+      "expectLogMessages": [
+        {
+          "client": "client",
+          "messages": [
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "commandName": "insert",
+                "serverConnectionId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command succeeded",
+                "commandName": "insert",
+                "serverConnectionId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "commandName": "find",
+                "serverConnectionId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command failed",
+                "commandName": "find",
+                "serverConnectionId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

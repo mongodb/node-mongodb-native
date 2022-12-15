@@ -1,0 +1,94 @@
+description: "command-logging"
+
+schemaVersion: "1.13"
+
+createEntities:
+  - client:
+      id: &client client
+      observeLogMessages:
+        command: debug
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName logging-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName logging-tests-collection
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  - description: "A successful command"
+    operations:
+      - name: runCommand
+        object: *database
+        arguments:
+          command: { ping: 1 }
+          commandName: &commandName ping
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: *commandName
+              command:
+                $$matchAsDocument:
+                  $$matchAsRoot:
+                    ping: 1
+                    $db: *databaseName
+              requestId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: *commandName
+              reply: { $$type: string }
+              requestId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              durationMS: { $$type: [double, int, long] }
+        
+  - description: "A failed command"
+    operations:
+      - name: &commandName find
+        object: *collection
+        arguments:
+          filter: { $or: true }
+        expectError:
+          isClientError: false
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: *commandName
+              command: { $$type: string }
+              requestId:  { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: command
+            data:
+              message: "Command failed"
+              commandName: *commandName
+              failure: { $$exists: true }
+              requestId:  { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              durationMS: { $$type: [double, int, long] }
+

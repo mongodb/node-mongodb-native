@@ -162,6 +162,11 @@
     },
     {
       "description": "getnonce",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "6.1.99"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -293,6 +298,11 @@
     },
     {
       "description": "copydbgetnonce",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "3.6.99"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -328,6 +338,11 @@
     },
     {
       "description": "copydbsaslstart",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.0.99"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -363,6 +378,11 @@
     },
     {
       "description": "copydb",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.0.99"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
