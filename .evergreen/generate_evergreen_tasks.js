@@ -711,7 +711,7 @@ for (const variant of BUILD_VARIANTS.filter(
   );
 }
 
-// TODO(NODE-4669): fix kerberos tests on Node18
+// TODO(NODE-4894): fix kerberos tests on Node18
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && ['hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
 )) {
