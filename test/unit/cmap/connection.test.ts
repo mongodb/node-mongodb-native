@@ -616,23 +616,6 @@ describe('new Connection()', function () {
       clock.restore();
     });
 
-    it('ends the tcp socket and destroys the messageStream', () => {
-      connection.destroy({ force: false });
-      clock.tick(1);
-      expect(messageStream.destroy).to.have.been.calledOnce;
-      expect(driverSocket.end).to.have.been.calledOnce;
-    });
-
-    it('calls stream.end exactly once when destroy is called multiple times', () => {
-      connection.destroy({ force: false });
-      connection.destroy({ force: false });
-      connection.destroy({ force: false });
-      connection.destroy({ force: false });
-      clock.tick(1);
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(driverSocket.end).to.have.been.calledOnce;
-    });
-
     context('when options.force == true', function () {
       it('calls steam.destroy', () => {
         connection.destroy({ force: true });
@@ -644,6 +627,26 @@ describe('new Connection()', function () {
         connection.destroy({ force: true });
         clock.tick(1);
         expect(driverSocket.end).to.not.have.been.called;
+      });
+
+      it('destroys the tcp socket', () => {
+        connection.destroy({ force: true });
+        clock.tick(1);
+        expect(driverSocket.destroy).to.have.been.calledOnce;
+      });
+
+      it('destroys the messageStream', () => {
+        connection.destroy({ force: true });
+        clock.tick(1);
+        expect(messageStream.destroy).to.have.been.calledOnce;
+      });
+
+      it('calls stream.destroy whenever destroy is called ', () => {
+        connection.destroy({ force: true });
+        connection.destroy({ force: true });
+        connection.destroy({ force: true });
+        clock.tick(1);
+        expect(driverSocket.destroy).to.have.been.calledThrice;
       });
     });
 
@@ -658,6 +661,27 @@ describe('new Connection()', function () {
         connection.destroy({ force: false });
         clock.tick(1);
         expect(driverSocket.destroy).to.not.have.been.called;
+      });
+
+      it('ends the tcp socket', () => {
+        connection.destroy({ force: false });
+        clock.tick(1);
+        expect(driverSocket.end).to.have.been.calledOnce;
+      });
+
+      it('destroys the messageStream', () => {
+        connection.destroy({ force: false });
+        clock.tick(1);
+        expect(messageStream.destroy).to.have.been.calledOnce;
+      });
+
+      it('calls stream.end exactly once when destroy is called multiple times', () => {
+        connection.destroy({ force: false });
+        connection.destroy({ force: false });
+        connection.destroy({ force: false });
+        connection.destroy({ force: false });
+        clock.tick(1);
+        expect(driverSocket.end).to.have.been.calledOnce;
       });
     });
   });
