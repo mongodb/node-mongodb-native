@@ -633,18 +633,32 @@ describe('new Connection()', function () {
       expect(driverSocket.end).to.have.been.calledOnce;
     });
 
-    it('does not call stream.end if options.force == true', () => {
-      connection.destroy({ force: true });
-      clock.tick(1);
-      expect(driverSocket.destroy).to.have.been.calledOnce;
-      expect(driverSocket.end).to.not.have.been.called;
+    context('when options.force == true', function () {
+      it('calls steam.destroy', () => {
+        connection.destroy({ force: true });
+        clock.tick(1);
+        expect(driverSocket.destroy).to.have.been.calledOnce;
+      });
+
+      it('does not call stream.end', () => {
+        connection.destroy({ force: true });
+        clock.tick(1);
+        expect(driverSocket.end).to.not.have.been.called;
+      });
     });
 
-    it('does not call stream.destroy if options.force == false', () => {
-      connection.destroy({ force: false });
-      clock.tick(1);
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(driverSocket.end).to.have.been.calledOnce;
+    context('when options.force == false', function () {
+      it('calls stream.end', () => {
+        connection.destroy({ force: false });
+        clock.tick(1);
+        expect(driverSocket.end).to.have.been.calledOnce;
+      });
+
+      it('does not call stream.destroy', () => {
+        connection.destroy({ force: false });
+        clock.tick(1);
+        expect(driverSocket.destroy).to.not.have.been.called;
+      });
     });
   });
 });
