@@ -1,5 +1,5 @@
 cd ${DRIVERS_TOOLS}/.evergreen/csfle
-. ./activate_venv.sh
+. ./activate-kmstlsvenv.sh
 # by default it always runs on port 5698
 ./kmstlsvenv/bin/python3 -u kms_kmip_server.py &
 ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000 &
