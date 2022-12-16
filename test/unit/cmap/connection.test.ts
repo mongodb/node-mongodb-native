@@ -617,7 +617,7 @@ describe('new Connection()', function () {
     });
 
     context('when options.force == true', function () {
-      it('calls steam.destroy', () => {
+      it('calls stream.destroy', () => {
         connection.destroy({ force: true });
         clock.tick(1);
         expect(driverSocket.destroy).to.have.been.calledOnce;
