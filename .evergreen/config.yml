@@ -2913,7 +2913,6 @@ buildvariants:
       - test-6.0-load-balanced
       - test-latest-load-balanced
       - test-auth-ldap
-      - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
