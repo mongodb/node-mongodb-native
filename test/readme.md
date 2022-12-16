@@ -422,7 +422,7 @@ The following steps will walk you through how to run the tests for CSFLE.
 #### KMIP FLE support tests
 
 1. Install virtualenv: `pip install virtualenv`
-2. Source the ./activate_venv.sh script in driver evergreen tools `.evergreen/csfle/activate_venv.sh`
+2. Source the ./activate-kmstlsvenv.sh script in driver evergreen tools `.evergreen/csfle/activate-kmstlsvenv.sh`
     1. This will install all the dependencies needed to run a python kms_kmip simulated server
 3. In 4 separate terminals launch the following:
     - `./kmstlsvenv/bin/python3 -u kms_kmip_server.py` # by default it always runs on port 5698

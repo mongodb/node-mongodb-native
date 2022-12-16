@@ -14,7 +14,7 @@ import {
   MongoMissingCredentialsError,
   MongoParseError
 } from './error';
-import { Logger, LoggerLevel } from './logger';
+import { Logger as LegacyLogger, LoggerLevel as LegacyLoggerLevel } from './logger';
 import {
   DriverInfo,
   MongoClient,
@@ -24,6 +24,7 @@ import {
   ServerApi,
   ServerApiVersion
 } from './mongo_client';
+import { MongoLogger, MongoLoggerEnvOptions, MongoLoggerMongoClientOptions } from './mongo_logger';
 import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -35,6 +36,7 @@ import {
   HostAddress,
   isRecord,
   makeClientMetadata,
+  parseInteger,
   setDifference
 } from './utils';
 import { W, WriteConcern } from './write_concern';
@@ -199,15 +201,16 @@ function getBoolean(name: string, value: unknown): boolean {
   throw new MongoParseError(`Expected ${name} to be stringified boolean value, got: ${value}`);
 }
 
-function getInt(name: string, value: unknown): number {
-  if (typeof value === 'number') return Math.trunc(value);
-  const parsedValue = Number.parseInt(String(value), 10);
-  if (!Number.isNaN(parsedValue)) return parsedValue;
+function getIntFromOptions(name: string, value: unknown): number {
+  const parsedInt = parseInteger(value);
+  if (parsedInt != null) {
+    return parsedInt;
+  }
   throw new MongoParseError(`Expected ${name} to be stringified int value, got: ${value}`);
 }
 
-function getUint(name: string, value: unknown): number {
-  const parsedValue = getInt(name, value);
+function getUIntFromOptions(name: string, value: unknown): number {
+  const parsedValue = getIntFromOptions(name, value);
   if (parsedValue < 0) {
     throw new MongoParseError(`${name} can only be a positive int value, got: ${value}`);
   }
@@ -507,6 +510,30 @@ export function parseOptions(
     );
   }
 
+  const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+  mongoOptions[loggerFeatureFlag] = mongoOptions[loggerFeatureFlag] ?? false;
+
+  let loggerEnvOptions: MongoLoggerEnvOptions = {};
+  let loggerClientOptions: MongoLoggerMongoClientOptions = {};
+  if (mongoOptions[loggerFeatureFlag]) {
+    loggerEnvOptions = {
+      MONGODB_LOG_COMMAND: process.env.MONGODB_LOG_COMMAND,
+      MONGODB_LOG_TOPOLOGY: process.env.MONGODB_LOG_TOPOLOGY,
+      MONGODB_LOG_SERVER_SELECTION: process.env.MONGODB_LOG_SERVER_SELECTION,
+      MONGODB_LOG_CONNECTION: process.env.MONGODB_LOG_CONNECTION,
+      MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
+      MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
+      MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH
+    };
+    loggerClientOptions = {
+      mongodbLogPath: mongoOptions.mongodbLogPath
+    };
+  }
+  mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
+    loggerEnvOptions,
+    loggerClientOptions
+  );
+
   return mongoOptions;
 }
 
@@ -561,10 +588,10 @@ function setOption(
       mongoOptions[name] = getBoolean(name, values[0]);
       break;
     case 'int':
-      mongoOptions[name] = getInt(name, values[0]);
+      mongoOptions[name] = getIntFromOptions(name, values[0]);
       break;
     case 'uint':
-      mongoOptions[name] = getUint(name, values[0]);
+      mongoOptions[name] = getUIntFromOptions(name, values[0]);
       break;
     case 'string':
       if (values[0] == null) {
@@ -770,7 +797,7 @@ export const OPTIONS = {
   enableUtf8Validation: { type: 'boolean', default: true },
   family: {
     transform({ name, values: [value] }): 4 | 6 {
-      const transformValue = getInt(name, value);
+      const transformValue = getIntFromOptions(name, value);
       if (transformValue === 4 || transformValue === 6) {
         return transformValue;
       }
@@ -849,9 +876,9 @@ export const OPTIONS = {
     type: 'uint'
   },
   logger: {
-    default: new Logger('MongoClient'),
+    default: new LegacyLogger('MongoClient'),
     transform({ values: [value] }) {
-      if (value instanceof Logger) {
+      if (value instanceof LegacyLogger) {
         return value;
       }
       emitWarning('Alternative loggers might not be supported');
@@ -863,13 +890,13 @@ export const OPTIONS = {
   loggerLevel: {
     target: 'logger',
     transform({ values: [value] }) {
-      return new Logger('MongoClient', { loggerLevel: value as LoggerLevel });
+      return new LegacyLogger('MongoClient', { loggerLevel: value as LegacyLoggerLevel });
     }
   },
   maxConnecting: {
     default: 2,
     transform({ name, values: [value] }): number {
-      const maxConnecting = getUint(name, value);
+      const maxConnecting = getUIntFromOptions(name, value);
       if (maxConnecting === 0) {
         throw new MongoInvalidArgumentError('maxConnecting must be > 0 if specified');
       }
@@ -887,7 +914,7 @@ export const OPTIONS = {
   maxStalenessSeconds: {
     target: 'readPreference',
     transform({ name, options, values: [value] }) {
-      const maxStalenessSeconds = getUint(name, value);
+      const maxStalenessSeconds = getUIntFromOptions(name, value);
       if (options.readPreference) {
         return ReadPreference.fromOptions({
           readPreference: { ...options.readPreference, maxStalenessSeconds }
@@ -1206,7 +1233,7 @@ export const OPTIONS = {
       const wc = WriteConcern.fromOptions({
         writeConcern: {
           ...options.writeConcern,
-          wtimeout: getUint('wtimeout', value)
+          wtimeout: getUIntFromOptions('wtimeout', value)
         }
       });
       if (wc) return wc;
@@ -1219,7 +1246,7 @@ export const OPTIONS = {
       const wc = WriteConcern.fromOptions({
         writeConcern: {
           ...options.writeConcern,
-          wtimeoutMS: getUint('wtimeoutMS', value)
+          wtimeoutMS: getUIntFromOptions('wtimeoutMS', value)
         }
       });
       if (wc) return wc;
@@ -1274,4 +1301,7 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
  * Set of permitted feature flags
  * @internal
  */
-export const FEATURE_FLAGS = new Set([Symbol.for('@@mdb.skipPingOnConnect')]);
+export const FEATURE_FLAGS = new Set([
+  Symbol.for('@@mdb.skipPingOnConnect'),
+  Symbol.for('@@mdb.enableMongoLogger')
+]);

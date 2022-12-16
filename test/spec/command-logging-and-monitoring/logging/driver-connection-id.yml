@@ -1,0 +1,76 @@
+# This is a separate test so that drivers that do not implement CMAP can easily skip it.
+description: "driver-connection-id"
+
+schemaVersion: "1.13"
+
+createEntities:
+  - client:
+      id: &client client
+      observeLogMessages:
+        command: debug
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName logging-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName logging-tests-collection
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  - description: "A successful command"
+    operations:
+      - name: runCommand
+        object: *database
+        arguments:
+          command: { ping: 1 }
+          commandName: &commandName ping
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: *commandName
+              driverConnectionId: { $$type: [int, long] }
+
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: *commandName
+              driverConnectionId: { $$type: [int, long] }
+        
+  - description: "A failed command"
+    operations:
+      - name: &commandName find
+        object: *collection
+        arguments:
+          filter: { $or: true }
+        expectError:
+          isClientError: false
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              databaseName: *databaseName
+              commandName: *commandName
+              driverConnectionId: { $$type: [int, long] }
+
+          - level: debug
+            component: command
+            data:
+              message: "Command failed"
+              commandName: *commandName
+              driverConnectionId: { $$type: [int, long] }

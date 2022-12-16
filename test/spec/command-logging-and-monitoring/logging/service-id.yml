@@ -1,0 +1,111 @@
+description: "service-id"
+
+schemaVersion: "1.13"
+
+createEntities:
+  - client:
+      id: &client client
+      observeLogMessages:
+        command: debug
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName logging-server-connection-id-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName logging-tests-collection
+
+initialData:
+  - databaseName: *databaseName
+    collectionName: *collectionName
+    documents: []
+
+tests:
+  - description: "command log messages include serviceId when in LB mode"
+    runOnRequirements:
+      - topologies:
+          - load-balanced
+    operations:
+      - name: insertOne
+        object: *collection
+        arguments:
+            document: { x: 1 }
+      - name: find
+        object: *collection
+        arguments:
+          filter: { $or: true }
+        expectError:
+          isError: true
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              commandName: insert
+              serviceId: { $$type: string }
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: insert
+              serviceId: { $$type: string }
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              commandName: find
+              serviceId: { $$type: string }
+          - level: debug
+            component: command
+            data:
+              message: "Command failed"
+              commandName: find
+              serviceId: { $$type: string }
+
+  - description: "command log messages omit serviceId when not in LB mode"
+    runOnRequirements:
+      - topologies:
+          - single
+          - replicaset
+          - sharded
+    operations:
+      - name: insertOne
+        object: *collection
+        arguments:
+            document: { x: 1 }
+      - name: find
+        object: *collection
+        arguments:
+          filter: { $or: true }
+        expectError:
+          isError: true
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              commandName: insert
+              serviceId: { $$exists: false }
+          - level: debug
+            component: command
+            data:
+              message: "Command succeeded"
+              commandName: insert
+              serviceId: { $$exists: false }
+          - level: debug
+            component: command
+            data:
+              message: "Command started"
+              commandName: find
+              serviceId: { $$exists: false }
+          - level: debug
+            component: command
+            data:
+              message: "Command failed"
+              commandName: find
+              serviceId: { $$exists: false }

@@ -527,10 +527,11 @@ functions:
       type: test
       params:
         working_dir: "src"
+        shell: bash
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate_venv.sh
+          . ./activate-authawsvenv.sh
           cd -
 
   "run aws auth test with regular aws credentials":
@@ -538,10 +539,11 @@ functions:
       type: test
       params:
         working_dir: "src"
+        shell: bash
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate_venv.sh
+          . ./activate-authawsvenv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_regular_aws.js
     - command: shell.exec
       type: test
@@ -568,10 +570,11 @@ functions:
       type: test
       params:
         working_dir: "src"
+        shell: bash
         script: |
           ${PREPARE_SHELL}
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate_venv.sh
+          . ./activate-authawsvenv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_assume_role.js
     - command: shell.exec
       type: test
@@ -602,13 +605,14 @@ functions:
       type: test
       params:
         working_dir: "src"
+        shell: bash
         script: |
           ${PREPARE_SHELL}
           # Write an empty prepare_mongodb_aws so no auth environment variables
           # are set.
           echo "" > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
-          . ./activate_venv.sh
+          . ./activate-authawsvenv.sh
           ${MONGODB_BINARIES}/mongo aws_e2e_ec2.js
     - command: shell.exec
       type: test
@@ -671,6 +675,7 @@ functions:
       type: test
       params:
         working_dir: src
+        shell: bash
         script: |
           ${PREPARE_SHELL}
           AUTH_AWS_DIR=${DRIVERS_TOOLS}/.evergreen/auth_aws
@@ -691,7 +696,7 @@ functions:
           EOF
 
           cat setup.js
-          . ./activate_venv.sh
+          . ./activate-authawsvenv.sh
           ${MONGODB_BINARIES}/mongo --nodb setup.js aws_e2e_ecs.js
 
   "run-ocsp-test":

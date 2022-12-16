@@ -1,0 +1,198 @@
+{
+  "description": "operation-id",
+  "schemaVersion": "1.13",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeLogMessages": {
+          "command": "debug"
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "logging-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "logging-tests-collection"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "logging-tests-collection",
+      "databaseName": "logging-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Successful bulk write command log messages include operationIds",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "arguments": {
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "x": 1
+                  }
+                }
+              },
+              {
+                "deleteOne": {
+                  "filter": {
+                    "x": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectLogMessages": [
+        {
+          "client": "client",
+          "messages": [
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "databaseName": "logging-tests",
+                "commandName": "insert",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command succeeded",
+                "commandName": "insert",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "databaseName": "logging-tests",
+                "commandName": "delete",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command succeeded",
+                "commandName": "delete",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Failed bulk write command log message includes operationId",
+      "operations": [
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "arguments": {
+            "requests": [
+              {
+                "updateOne": {
+                  "filter": {
+                    "x": 1
+                  },
+                  "update": [
+                    {
+                      "$invalidOperator": true
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "isClientError": false
+          }
+        }
+      ],
+      "expectLogMessages": [
+        {
+          "client": "client",
+          "messages": [
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command started",
+                "databaseName": "logging-tests",
+                "commandName": "update",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "command",
+              "data": {
+                "message": "Command failed",
+                "commandName": "update",
+                "operationId": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
