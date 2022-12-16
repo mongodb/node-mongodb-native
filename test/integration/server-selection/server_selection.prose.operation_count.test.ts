@@ -4,6 +4,7 @@ import { on } from 'events';
 import { CommandStartedEvent } from '../../../src';
 import { Collection } from '../../../src/collection';
 import { MongoClient } from '../../../src/mongo_client';
+import { HostAddress } from '../../../src/utils';
 import { sleep } from '../../tools/utils';
 
 const failPoint = {
@@ -44,10 +45,11 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
   let seeds: Array<string>;
   let counts: Record<string, number> = {};
   const updateCount = ({ address }: CommandStartedEvent) => {
-    const portRegex = /(\d{5})/;
-    const [mongosPort] = portRegex.exec(address) ?? [''];
-    const count = counts[mongosPort] ?? 0;
-    counts[mongosPort] = count + 1;
+    const hostAddress = HostAddress.fromString(address);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const port = hostAddress.port!.toString();
+    const count = counts[port] ?? 0;
+    counts[port] = count + 1;
   };
 
   beforeEach(async function () {
