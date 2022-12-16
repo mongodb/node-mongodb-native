@@ -244,7 +244,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
   /** Destroy the server connection */
   destroy(options?: DestroyOptions, callback?: Callback): void {
-    if (typeof options === 'function') (callback = options), (options = {});
+    if (typeof options === 'function') {
+      callback = options;
+      options = { force: false };
+    }
     options = Object.assign({}, { force: false }, options);
 
     if (this.s.state === STATE_CLOSED) {

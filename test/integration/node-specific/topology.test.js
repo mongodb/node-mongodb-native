@@ -10,12 +10,20 @@ describe('Topology', function () {
       const states = [];
       topology.on('stateChanged', (_, newState) => states.push(newState));
       topology.connect(err => {
-        expect(err).to.not.exist;
-        topology.close(err => {
+        try {
           expect(err).to.not.exist;
-          expect(topology.isDestroyed()).to.be.true;
-          expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);
-          done();
+        } catch (error) {
+          done(error);
+        }
+        topology.close({}, err => {
+          try {
+            expect(err).to.not.exist;
+            expect(topology.isDestroyed()).to.be.true;
+            expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);
+            done();
+          } catch (error) {
+            done(error);
+          }
         });
       });
     }
