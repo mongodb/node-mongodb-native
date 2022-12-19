@@ -1305,15 +1305,6 @@ export function supportsRetryableWrites(server?: Server): boolean {
   return false;
 }
 
-export function parsePackageVersion({ version }: { version: string }): {
-  major: number;
-  minor: number;
-  patch: number;
-} {
-  const [major, minor, patch] = version.split('.').map((n: string) => Number.parseInt(n, 10));
-  return { major, minor, patch };
-}
-
 /**
  * Fisher–Yates Shuffle
  *

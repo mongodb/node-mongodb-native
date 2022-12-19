@@ -579,10 +579,6 @@ BUILD_VARIANTS.push({
 
 const oneOffFuncs = [
   {
-    name: 'run-custom-snappy-tests',
-    func: 'run custom snappy tests'
-  },
-  {
     name: 'run-bson-ext-integration',
     func: 'run bson-ext test',
     vars: {
