@@ -1,5 +1,6 @@
 'use strict';
 const path = require('path');
+const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 const {
   TestRunnerContext,
   gatherTestSuites,
@@ -19,9 +20,17 @@ describe('Atlas Data Lake - spec', function () {
     path.resolve(__dirname, '../../spec/atlas-data-lake-testing')
   );
 
-  after(() => testContext.teardown());
+  // These tests timeout connecting to on localhost mongohoused in CI on Node18+.
+  // Manually setting the ip address resolution is safe for testing purposes
+  // because in production, mongohoused will never be running on localhost.
+  installNodeDNSWorkaroundHooks();
+
   before(function () {
     return testContext.setup(this.configuration);
+  });
+
+  after(() => {
+    testContext.teardown();
   });
 
   for (const suite of testSuites) suite.runOn = []; // patched in for the spec runner

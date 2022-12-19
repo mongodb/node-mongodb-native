@@ -623,7 +623,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
 }));
 
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of ['5745f374109346a2597405f2251a178d463a14e1', 'master']) {
+  for (const ref of ['ddb19ae22dc4a5f8b9208096f69fc23e19bae6c9', 'master']) {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests'],
@@ -704,41 +704,28 @@ BUILD_VARIANTS.push({
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && variant.expansions.NODE_LTS_NAME === 'gallium'
+  variant => variant.expansions && ['gallium', 'hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
   );
 }
 
-// TODO(NODE-4667): debug failing tests on Node18
+// TODO(NODE-4894): fix kerberos tests on Node18
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && variant.expansions.NODE_LTS_NAME === 'hydrogen'
+  variant => variant.expansions && ['hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
 )) {
   variant.tasks = variant.tasks.filter(
-    name => ![
-      'test-zstd-compression',
-      'test-snappy-compression',
-      'test-atlas-data-lake',
-      'test-socks5',
-      'test-socks5-tls',
-      'test-auth-kerberos'
-    ].includes(name)
+    name => !['test-auth-kerberos'].includes(name)
   );
 }
 
-// TODO(NODE-4667): debug failing tests on Node18
-// latest is currently Node19, so these tests fail
-for (const variant of BUILD_VARIANTS.filter(({ name }) => name.includes('node-latest'))) {
+// TODO(NODE-4897): Debug socks5 tests on node latest
+for (const variant of BUILD_VARIANTS.filter(
+  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
+)) {
   variant.tasks = variant.tasks.filter(
-    name => ![
-      'test-zstd-compression',
-      'test-snappy-compression',
-      'test-atlas-data-lake',
-      'test-socks5',
-      'test-socks5-tls',
-      'test-auth-kerberos'
-    ].includes(name)
+    name => !['test-socks5'].includes(name)
   );
 }
 
