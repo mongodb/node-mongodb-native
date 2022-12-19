@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.13.0](https://github.com/mongodb/node-mongodb-native/compare/v4.12.1...v4.13.0) (2022-12-19)
+
+
+### Features
+
+* **NODE-4691:** interrupt in-flight operations on heartbeat failure ([#3457](https://github.com/mongodb/node-mongodb-native/issues/3457)) ([e641bd4](https://github.com/mongodb/node-mongodb-native/commit/e641bd44ef39d64b8b572e7a8ab6bfc71a2b4bed))
+* **NODE-4810:** define the new Logger ([#3475](https://github.com/mongodb/node-mongodb-native/issues/3475)) ([6ef11d7](https://github.com/mongodb/node-mongodb-native/commit/6ef11d70c07e2e223d376e7527354ddf758a163a))
+
+
+### Bug Fixes
+
+* **NODE-4447:** disable causal consistency in implicit sessions ([#3479](https://github.com/mongodb/node-mongodb-native/issues/3479)) ([6566fb5](https://github.com/mongodb/node-mongodb-native/commit/6566fb58400c956bb5e56bd7c8affe2ebf2ce558))
+* **NODE-4834:** ensure that MessageStream is destroyed when connections are destroyed ([#3482](https://github.com/mongodb/node-mongodb-native/issues/3482)) ([8338bae](https://github.com/mongodb/node-mongodb-native/commit/8338bae933c777dee4e7e49dbcf52c4fd7047528))
+
 ### [4.12.1](https://github.com/mongodb/node-mongodb-native/compare/v4.12.0...v4.12.1) (2022-11-23)
 
 
