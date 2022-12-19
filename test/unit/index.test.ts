@@ -63,7 +63,6 @@ const EXPECTED_EXPORTS = [
   'Logger',
   'LoggerLevel',
   'Long',
-  'Map',
   'MaxKey',
   'MinKey',
   'MongoAPIError',

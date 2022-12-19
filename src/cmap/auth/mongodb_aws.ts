@@ -11,7 +11,7 @@ import {
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { Callback, maxWireVersion, ns } from '../../utils';
+import { ByteUtils, Callback, maxWireVersion, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
@@ -108,7 +108,7 @@ export class MongoDBAWS extends AuthProvider {
           return;
         }
 
-        if (serverNonce.compare(nonce, 0, nonce.length, 0, nonce.length) !== 0) {
+        if (!ByteUtils.equals(serverNonce.subarray(0, nonce.byteLength), nonce)) {
           // TODO(NODE-3483)
           callback(new MongoRuntimeError('Server nonce does not begin with client nonce'));
           return;
@@ -130,7 +130,7 @@ export class MongoDBAWS extends AuthProvider {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
               'Content-Length': body.length,
-              'X-MongoDB-Server-Nonce': serverNonce.toString('base64'),
+              'X-MongoDB-Server-Nonce': ByteUtils.toBase64(serverNonce),
               'X-MongoDB-GS2-CB-Flag': 'n'
             },
             path: '/',

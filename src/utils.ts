@@ -37,9 +37,29 @@ import { W, WriteConcern, WriteConcernOptions } from './write_concern';
  */
 export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 
-export const MAX_JS_INT = Number.MAX_SAFE_INTEGER + 1;
-
 export type AnyOptions = Document;
+
+export const ByteUtils = {
+  equals(seqA: Uint8Array, seqB: Uint8Array) {
+    return (
+      Buffer.isBuffer(seqA) ? seqA : Buffer.from(seqA.buffer, seqA.byteOffset, seqA.byteLength)
+    ).equals(seqB);
+  },
+
+  compare(seqA: Uint8Array, seqB: Uint8Array) {
+    return (
+      Buffer.isBuffer(seqA) ? seqA : Buffer.from(seqA.buffer, seqA.byteOffset, seqA.byteLength)
+    ).compare(seqB);
+  },
+
+  toBase64(uint8array: Uint8Array) {
+    return (
+      Buffer.isBuffer(uint8array)
+        ? uint8array
+        : Buffer.from(uint8array.buffer, uint8array.byteOffset, uint8array.byteLength)
+    ).toString('base64');
+  }
+};
 
 /**
  * Throws if collectionName is not a valid mongodb collection namespace.
@@ -1401,7 +1421,7 @@ export function compareObjectId(oid1?: ObjectId | null, oid2?: ObjectId | null):
     return 1;
   }
 
-  return oid1.id.compare(oid2.id);
+  return ByteUtils.compare(oid1.id, oid2.id);
 }
 
 export function parseInteger(value: unknown): number | null {
