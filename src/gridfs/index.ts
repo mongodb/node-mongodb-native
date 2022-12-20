@@ -7,7 +7,6 @@ import type { Logger } from '../logger';
 import { Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { Callback, maybeCallback } from '../utils';
 import { WriteConcern, WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
@@ -140,22 +139,17 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    *
    * @param id - The id of the file doc
    */
-  delete(id: ObjectId): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  delete(id: ObjectId, callback: Callback<void>): void;
-  delete(id: ObjectId, callback?: Callback<void>): Promise<void> | void {
-    return maybeCallback(async () => {
-      const { deletedCount } = await this.s._filesCollection.deleteOne({ _id: id });
+  async delete(id: ObjectId): Promise<void> {
+    const { deletedCount } = await this.s._filesCollection.deleteOne({ _id: id });
 
-      // Delete orphaned chunks before returning FileNotFound
-      await this.s._chunksCollection.deleteMany({ files_id: id });
+    // Delete orphaned chunks before returning FileNotFound
+    await this.s._chunksCollection.deleteMany({ files_id: id });
 
-      if (deletedCount === 0) {
-        // TODO(NODE-3483): Replace with more appropriate error
-        // Consider creating new error MongoGridFSFileNotFoundError
-        throw new MongoRuntimeError(`File not found for id ${id}`);
-      }
-    }, callback);
+    if (deletedCount === 0) {
+      // TODO(NODE-3483): Replace with more appropriate error
+      // Consider creating new error MongoGridFSFileNotFoundError
+      throw new MongoRuntimeError(`File not found for id ${id}`);
+    }
   }
 
   /** Convenience wrapper around find on the files collection */
@@ -201,29 +195,19 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
    * @param id - the id of the file to rename
    * @param filename - new name for the file
    */
-  rename(id: ObjectId, filename: string): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  rename(id: ObjectId, filename: string, callback: Callback<void>): void;
-  rename(id: ObjectId, filename: string, callback?: Callback<void>): Promise<void> | void {
-    return maybeCallback(async () => {
-      const filter = { _id: id };
-      const update = { $set: { filename } };
-      const { matchedCount } = await this.s._filesCollection.updateOne(filter, update);
-      if (matchedCount === 0) {
-        throw new MongoRuntimeError(`File with id ${id} not found`);
-      }
-    }, callback);
+  async rename(id: ObjectId, filename: string): Promise<void> {
+    const filter = { _id: id };
+    const update = { $set: { filename } };
+    const { matchedCount } = await this.s._filesCollection.updateOne(filter, update);
+    if (matchedCount === 0) {
+      throw new MongoRuntimeError(`File with id ${id} not found`);
+    }
   }
 
   /** Removes this bucket's files collection, followed by its chunks collection. */
-  drop(): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  drop(callback: Callback<void>): void;
-  drop(callback?: Callback<void>): Promise<void> | void {
-    return maybeCallback(async () => {
-      await this.s._filesCollection.drop();
-      await this.s._chunksCollection.drop();
-    }, callback);
+  async drop(): Promise<void> {
+    await this.s._filesCollection.drop();
+    await this.s._chunksCollection.drop();
   }
 
   /** Get the Db scoped logger. */

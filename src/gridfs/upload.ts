@@ -4,7 +4,7 @@ import type { Document } from '../bson';
 import { ObjectId } from '../bson';
 import type { Collection } from '../collection';
 import { AnyError, MongoAPIError, MONGODB_ERROR_CODES, MongoError } from '../error';
-import { Callback, maybeCallback } from '../utils';
+import type { Callback } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
 import type { GridFSFile } from './download';
@@ -144,27 +144,20 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
   /**
    * Places this write stream into an aborted state (all future writes fail)
    * and deletes all chunks that have already been written.
-   *
-   * @param callback - called when chunks are successfully removed or error occurred
    */
-  abort(): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  abort(callback: Callback<void>): void;
-  abort(callback?: Callback<void>): Promise<void> | void {
-    return maybeCallback(async () => {
-      if (this.state.streamEnd) {
-        // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
-        throw new MongoAPIError('Cannot abort a stream that has already completed');
-      }
+  async abort(): Promise<void> {
+    if (this.state.streamEnd) {
+      // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
+      throw new MongoAPIError('Cannot abort a stream that has already completed');
+    }
 
-      if (this.state.aborted) {
-        // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
-        throw new MongoAPIError('Cannot call abort() on a stream twice');
-      }
+    if (this.state.aborted) {
+      // TODO(NODE-3485): Replace with MongoGridFSStreamClosed
+      throw new MongoAPIError('Cannot call abort() on a stream twice');
+    }
 
-      this.state.aborted = true;
-      await this.chunks.deleteMany({ files_id: this.id });
-    }, callback);
+    this.state.aborted = true;
+    await this.chunks.deleteMany({ files_id: this.id });
   }
 
   /**
