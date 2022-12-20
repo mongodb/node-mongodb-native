@@ -739,14 +739,6 @@ export class Db {
   }
 
   /**
-   * Unref all sockets
-   * @deprecated This function is deprecated and will be removed in the next major version.
-   */
-  unref(): void {
-    getTopology(this).unref();
-  }
-
-  /**
    * Create a new Change Stream, watching for new changes (insertions, updates,
    * replacements, deletions, and invalidations) in this database. Will ignore all
    * changes to system collections.

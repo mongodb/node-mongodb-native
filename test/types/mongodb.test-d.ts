@@ -1,14 +1,13 @@
 import type { Document } from 'bson';
 import { expectDeprecated, expectError, expectNotDeprecated, expectType } from 'tsd';
 
-import { Db, WithId, WriteConcern, WriteConcernSettings } from '../../src';
+import type { WithId, WriteConcern, WriteConcernSettings } from '../../src';
 import * as MongoDBDriver from '../../src';
 import type { ChangeStreamDocument } from '../../src/change_stream';
 import { Collection } from '../../src/collection';
 import type { AggregationCursor } from '../../src/cursor/aggregation_cursor';
 import { FindCursor } from '../../src/cursor/find_cursor';
 import { MongoClient } from '../../src/mongo_client';
-import { Topology } from '../../src/sdam/topology';
 
 // We wish to keep these APIs but continue to ensure they are marked as deprecated.
 expectDeprecated(Collection.prototype.insert);
@@ -17,8 +16,6 @@ expectDeprecated(Collection.prototype.remove);
 expectDeprecated(Collection.prototype.count);
 expectDeprecated(Collection.prototype.mapReduce);
 expectDeprecated(FindCursor.prototype.count);
-expectDeprecated(Topology.prototype.unref);
-expectDeprecated(Db.prototype.unref);
 expectDeprecated(MongoDBDriver.ObjectID);
 expectNotDeprecated(MongoDBDriver.ObjectId);
 
