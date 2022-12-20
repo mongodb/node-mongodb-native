@@ -41,7 +41,6 @@ import { DbStatsOperation, DbStatsOptions } from './operations/stats';
 import { ReadConcern } from './read_concern';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import {
-  Callback,
   DEFAULT_PK_FACTORY,
   filterOptions,
   MongoDBNamespace,
@@ -226,35 +225,15 @@ export class Db {
    *
    * @param name - The name of the collection to create
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  createCollection<TSchema extends Document = Document>(
+  async createCollection<TSchema extends Document = Document>(
     name: string,
     options?: CreateCollectionOptions
-  ): Promise<Collection<TSchema>>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  createCollection<TSchema extends Document = Document>(
-    name: string,
-    callback: Callback<Collection<TSchema>>
-  ): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  createCollection<TSchema extends Document = Document>(
-    name: string,
-    options: CreateCollectionOptions | undefined,
-    callback: Callback<Collection<TSchema>>
-  ): void;
-  createCollection<TSchema extends Document = Document>(
-    name: string,
-    options?: CreateCollectionOptions | Callback<Collection>,
-    callback?: Callback<Collection>
-  ): Promise<Collection<TSchema>> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+  ): Promise<Collection<TSchema>> {
     return executeOperation(
       this.s.client,
-      new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_3286,
-      callback
-    ) as TODO_NODE_3286;
+      new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_3286
+    );
   }
 
   /**
@@ -265,27 +244,10 @@ export class Db {
    *
    * @param command - The command to run
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  command(command: Document): Promise<Document>;
-  command(command: Document, options: RunCommandOptions): Promise<Document>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  command(command: Document, callback: Callback<Document>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  command(command: Document, options: RunCommandOptions, callback: Callback<Document>): void;
-  command(
-    command: Document,
-    options?: RunCommandOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+  async command(command: Document, options?: RunCommandOptions): Promise<Document> {
     // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(
-      this.s.client,
-      new RunCommandOperation(this, command, options ?? {}),
-      callback
-    );
+    return executeOperation(this.s.client, new RunCommandOperation(this, command, options));
   }
 
   /**
@@ -298,16 +260,6 @@ export class Db {
     pipeline: Document[] = [],
     options?: AggregateOptions
   ): AggregationCursor<T> {
-    if (arguments.length > 2) {
-      throw new MongoInvalidArgumentError('Method "db.aggregate()" accepts at most two arguments');
-    }
-    if (typeof pipeline === 'function') {
-      throw new MongoInvalidArgumentError('Argument "pipeline" must not be function');
-    }
-    if (typeof options === 'function') {
-      throw new MongoInvalidArgumentError('Argument "options" must not be function');
-    }
-
     return new AggregationCursor(
       this.s.client,
       this.s.namespace,
@@ -334,31 +286,18 @@ export class Db {
     if (typeof options === 'function') {
       throw new MongoInvalidArgumentError('The callback form of this helper has been removed.');
     }
-    const finalOptions = resolveOptions(this, options);
-    return new Collection<TSchema>(this, name, finalOptions);
+    return new Collection<TSchema>(this, name, resolveOptions(this, options));
   }
 
   /**
    * Get all the db statistics.
    *
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  stats(): Promise<Document>;
-  stats(options: DbStatsOptions): Promise<Document>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  stats(callback: Callback<Document>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  stats(options: DbStatsOptions, callback: Callback<Document>): void;
-  stats(
-    options?: DbStatsOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
+  async stats(options?: DbStatsOptions): Promise<Document> {
     return executeOperation(
       this.s.client,
-      new DbStatsOperation(this, resolveOptions(this, options)),
-      callback
+      new DbStatsOperation(this, resolveOptions(this, options))
     );
   }
 
@@ -398,52 +337,20 @@ export class Db {
    * @param fromCollection - Name of current collection to rename
    * @param toCollection - New name of of the collection
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  renameCollection<TSchema extends Document = Document>(
-    fromCollection: string,
-    toCollection: string
-  ): Promise<Collection<TSchema>>;
-  renameCollection<TSchema extends Document = Document>(
+  async renameCollection<TSchema extends Document = Document>(
     fromCollection: string,
     toCollection: string,
-    options: RenameOptions
-  ): Promise<Collection<TSchema>>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  renameCollection<TSchema extends Document = Document>(
-    fromCollection: string,
-    toCollection: string,
-    callback: Callback<Collection<TSchema>>
-  ): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  renameCollection<TSchema extends Document = Document>(
-    fromCollection: string,
-    toCollection: string,
-    options: RenameOptions,
-    callback: Callback<Collection<TSchema>>
-  ): void;
-  renameCollection<TSchema extends Document = Document>(
-    fromCollection: string,
-    toCollection: string,
-    options?: RenameOptions | Callback<Collection<TSchema>>,
-    callback?: Callback<Collection<TSchema>>
-  ): Promise<Collection<TSchema>> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+    options?: RenameOptions
+  ): Promise<Collection<TSchema>> {
     // Intentionally, we do not inherit options from parent for this operation.
-    options = { ...options, readPreference: ReadPreference.PRIMARY };
-
-    // Add return new collection
-    options.new_collection = true;
-
     return executeOperation(
       this.s.client,
       new RenameOperation(
         this.collection<TSchema>(fromCollection) as TODO_NODE_3286,
         toCollection,
-        options
-      ) as TODO_NODE_3286,
-      callback
+        { ...options, new_collection: true, readPreference: ReadPreference.primary }
+      ) as TODO_NODE_3286
     );
   }
 
@@ -452,25 +359,11 @@ export class Db {
    *
    * @param name - Name of collection to drop
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  dropCollection(name: string): Promise<boolean>;
-  dropCollection(name: string, options: DropCollectionOptions): Promise<boolean>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  dropCollection(name: string, callback: Callback<boolean>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  dropCollection(name: string, options: DropCollectionOptions, callback: Callback<boolean>): void;
-  dropCollection(
-    name: string,
-    options?: DropCollectionOptions | Callback<boolean>,
-    callback?: Callback<boolean>
-  ): Promise<boolean> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+  async dropCollection(name: string, options?: DropCollectionOptions): Promise<boolean> {
     return executeOperation(
       this.s.client,
-      new DropCollectionOperation(this, name, resolveOptions(this, options)),
-      callback
+      new DropCollectionOperation(this, name, resolveOptions(this, options))
     );
   }
 
@@ -478,24 +371,11 @@ export class Db {
    * Drop a database, removing it permanently from the server.
    *
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  dropDatabase(): Promise<boolean>;
-  dropDatabase(options: DropDatabaseOptions): Promise<boolean>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  dropDatabase(callback: Callback<boolean>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  dropDatabase(options: DropDatabaseOptions, callback: Callback<boolean>): void;
-  dropDatabase(
-    options?: DropDatabaseOptions | Callback<boolean>,
-    callback?: Callback<boolean>
-  ): Promise<boolean> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+  async dropDatabase(options?: DropDatabaseOptions): Promise<boolean> {
     return executeOperation(
       this.s.client,
-      new DropDatabaseOperation(this, resolveOptions(this, options)),
-      callback
+      new DropDatabaseOperation(this, resolveOptions(this, options))
     );
   }
 
@@ -503,24 +383,11 @@ export class Db {
    * Fetch all collections for the current db.
    *
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  collections(): Promise<Collection[]>;
-  collections(options: ListCollectionsOptions): Promise<Collection[]>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  collections(callback: Callback<Collection[]>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  collections(options: ListCollectionsOptions, callback: Callback<Collection[]>): void;
-  collections(
-    options?: ListCollectionsOptions | Callback<Collection[]>,
-    callback?: Callback<Collection[]>
-  ): Promise<Collection[]> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+  async collections(options?: ListCollectionsOptions): Promise<Collection[]> {
     return executeOperation(
       this.s.client,
-      new CollectionsOperation(this, resolveOptions(this, options)),
-      callback
+      new CollectionsOperation(this, resolveOptions(this, options))
     );
   }
 
@@ -530,35 +397,15 @@ export class Db {
    * @param name - Name of the collection to create the index on.
    * @param indexSpec - Specify the field to index, or an index specification
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  createIndex(name: string, indexSpec: IndexSpecification): Promise<string>;
-  createIndex(
+  async createIndex(
     name: string,
     indexSpec: IndexSpecification,
-    options: CreateIndexesOptions
-  ): Promise<string>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  createIndex(name: string, indexSpec: IndexSpecification, callback: Callback<string>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  createIndex(
-    name: string,
-    indexSpec: IndexSpecification,
-    options: CreateIndexesOptions,
-    callback: Callback<string>
-  ): void;
-  createIndex(
-    name: string,
-    indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions | Callback<string>,
-    callback?: Callback<string>
-  ): Promise<string> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+    options?: CreateIndexesOptions
+  ): Promise<string> {
     return executeOperation(
       this.s.client,
-      new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options)),
-      callback
+      new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options))
     );
   }
 
@@ -568,47 +415,22 @@ export class Db {
    * @param username - The username for the new user
    * @param password - An optional password for the new user
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  addUser(username: string): Promise<Document>;
-  addUser(username: string, password: string): Promise<Document>;
-  addUser(username: string, options: AddUserOptions): Promise<Document>;
-  addUser(username: string, password: string, options: AddUserOptions): Promise<Document>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  addUser(username: string, callback: Callback<Document>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  addUser(username: string, password: string, callback: Callback<Document>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  addUser(username: string, options: AddUserOptions, callback: Callback<Document>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  addUser(
+  async addUser(
     username: string,
-    password: string,
-    options: AddUserOptions,
-    callback: Callback<Document>
-  ): void;
-  addUser(
-    username: string,
-    password?: string | AddUserOptions | Callback<Document>,
-    options?: AddUserOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof password === 'function') {
-      (callback = password), (password = undefined), (options = {});
-    } else if (typeof password !== 'string') {
-      if (typeof options === 'function') {
-        (callback = options), (options = password), (password = undefined);
-      } else {
-        (options = password), (callback = undefined), (password = undefined);
-      }
-    } else {
-      if (typeof options === 'function') (callback = options), (options = {});
-    }
-
+    password?: string | AddUserOptions,
+    options?: AddUserOptions
+  ): Promise<Document> {
+    options =
+      options != null && typeof options === 'object'
+        ? options
+        : password != null && typeof password === 'object'
+        ? password
+        : undefined;
+    password = typeof password === 'string' ? password : undefined;
     return executeOperation(
       this.s.client,
-      new AddUserOperation(this, username, password, resolveOptions(this, options)),
-      callback
+      new AddUserOperation(this, username, password, resolveOptions(this, options))
     );
   }
 
@@ -617,25 +439,11 @@ export class Db {
    *
    * @param username - The username to remove
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  removeUser(username: string): Promise<boolean>;
-  removeUser(username: string, options: RemoveUserOptions): Promise<boolean>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  removeUser(username: string, callback: Callback<boolean>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  removeUser(username: string, options: RemoveUserOptions, callback: Callback<boolean>): void;
-  removeUser(
-    username: string,
-    options?: RemoveUserOptions | Callback<boolean>,
-    callback?: Callback<boolean>
-  ): Promise<boolean> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+  async removeUser(username: string, options?: RemoveUserOptions): Promise<boolean> {
     return executeOperation(
       this.s.client,
-      new RemoveUserOperation(this, username, resolveOptions(this, options)),
-      callback
+      new RemoveUserOperation(this, username, resolveOptions(this, options))
     );
   }
 
@@ -644,32 +452,14 @@ export class Db {
    *
    * @param level - The new profiling level (off, slow_only, all).
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  setProfilingLevel(level: ProfilingLevel): Promise<ProfilingLevel>;
-  setProfilingLevel(
+  async setProfilingLevel(
     level: ProfilingLevel,
-    options: SetProfilingLevelOptions
-  ): Promise<ProfilingLevel>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  setProfilingLevel(level: ProfilingLevel, callback: Callback<ProfilingLevel>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  setProfilingLevel(
-    level: ProfilingLevel,
-    options: SetProfilingLevelOptions,
-    callback: Callback<ProfilingLevel>
-  ): void;
-  setProfilingLevel(
-    level: ProfilingLevel,
-    options?: SetProfilingLevelOptions | Callback<ProfilingLevel>,
-    callback?: Callback<ProfilingLevel>
-  ): Promise<ProfilingLevel> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+    options?: SetProfilingLevelOptions
+  ): Promise<ProfilingLevel> {
     return executeOperation(
       this.s.client,
-      new SetProfilingLevelOperation(this, level, resolveOptions(this, options)),
-      callback
+      new SetProfilingLevelOperation(this, level, resolveOptions(this, options))
     );
   }
 
@@ -677,24 +467,11 @@ export class Db {
    * Retrieve the current profiling Level for MongoDB
    *
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  profilingLevel(): Promise<string>;
-  profilingLevel(options: ProfilingLevelOptions): Promise<string>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  profilingLevel(callback: Callback<string>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  profilingLevel(options: ProfilingLevelOptions, callback: Callback<string>): void;
-  profilingLevel(
-    options?: ProfilingLevelOptions | Callback<string>,
-    callback?: Callback<string>
-  ): Promise<string> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+  async profilingLevel(options?: ProfilingLevelOptions): Promise<string> {
     return executeOperation(
       this.s.client,
-      new ProfilingLevelOperation(this, resolveOptions(this, options)),
-      callback
+      new ProfilingLevelOperation(this, resolveOptions(this, options))
     );
   }
 
@@ -703,29 +480,11 @@ export class Db {
    *
    * @param name - The name of the collection.
    * @param options - Optional settings for the command
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  indexInformation(name: string): Promise<Document>;
-  indexInformation(name: string, options: IndexInformationOptions): Promise<Document>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  indexInformation(name: string, callback: Callback<Document>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  indexInformation(
-    name: string,
-    options: IndexInformationOptions,
-    callback: Callback<Document>
-  ): void;
-  indexInformation(
-    name: string,
-    options?: IndexInformationOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-
+  async indexInformation(name: string, options?: IndexInformationOptions): Promise<Document> {
     return executeOperation(
       this.s.client,
-      new IndexInformationOperation(this, name, resolveOptions(this, options)),
-      callback
+      new IndexInformationOperation(this, name, resolveOptions(this, options))
     );
   }
 
