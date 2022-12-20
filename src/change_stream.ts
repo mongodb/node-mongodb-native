@@ -19,7 +19,7 @@ import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
 import type { ServerSessionId } from './sessions';
-import { Callback, filterOptions, getTopology, maybeCallback, MongoDBNamespace } from './utils';
+import { filterOptions, getTopology, MongoDBNamespace } from './utils';
 
 /** @internal */
 const kCursorStream = Symbol('cursorStream');
@@ -637,99 +637,84 @@ export class ChangeStream<
   }
 
   /** Check if there is any document still available in the Change Stream */
-  hasNext(): Promise<boolean>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  hasNext(callback: Callback<boolean>): void;
-  hasNext(callback?: Callback): Promise<boolean> | void {
+  async hasNext(): Promise<boolean> {
     this._setIsIterator();
-    return maybeCallback(async () => {
-      // Change streams must resume indefinitely while each resume event succeeds.
-      // This loop continues until either a change event is received or until a resume attempt
-      // fails.
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
+    // Change streams must resume indefinitely while each resume event succeeds.
+    // This loop continues until either a change event is received or until a resume attempt
+    // fails.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        const hasNext = await this.cursor.hasNext();
+        return hasNext;
+      } catch (error) {
         try {
-          const hasNext = await this.cursor.hasNext();
-          return hasNext;
+          await this._processErrorIteratorMode(error);
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error);
-          } catch (error) {
-            try {
-              await this.close();
-            } catch {
-              // We are not concerned with errors from close()
-            }
-            throw error;
+            await this.close();
+          } catch {
+            // We are not concerned with errors from close()
           }
+          throw error;
         }
       }
-    }, callback);
+    }
   }
 
   /** Get the next available document from the Change Stream. */
-  next(): Promise<TChange>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  next(callback: Callback<TChange>): void;
-  next(callback?: Callback<TChange>): Promise<TChange> | void {
+  async next(): Promise<TChange> {
     this._setIsIterator();
-    return maybeCallback(async () => {
-      // Change streams must resume indefinitely while each resume event succeeds.
-      // This loop continues until either a change event is received or until a resume attempt
-      // fails.
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
+    // Change streams must resume indefinitely while each resume event succeeds.
+    // This loop continues until either a change event is received or until a resume attempt
+    // fails.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        const change = await this.cursor.next();
+        const processedChange = this._processChange(change ?? null);
+        return processedChange;
+      } catch (error) {
         try {
-          const change = await this.cursor.next();
-          const processedChange = this._processChange(change ?? null);
-          return processedChange;
+          await this._processErrorIteratorMode(error);
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error);
-          } catch (error) {
-            try {
-              await this.close();
-            } catch {
-              // We are not concerned with errors from close()
-            }
-            throw error;
+            await this.close();
+          } catch {
+            // We are not concerned with errors from close()
           }
+          throw error;
         }
       }
-    }, callback);
+    }
   }
 
   /**
    * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
    */
-  tryNext(): Promise<Document | null>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  tryNext(callback: Callback<Document | null>): void;
-  tryNext(callback?: Callback<Document | null>): Promise<Document | null> | void {
+  async tryNext(): Promise<Document | null> {
     this._setIsIterator();
-    return maybeCallback(async () => {
-      // Change streams must resume indefinitely while each resume event succeeds.
-      // This loop continues until either a change event is received or until a resume attempt
-      // fails.
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
+    // Change streams must resume indefinitely while each resume event succeeds.
+    // This loop continues until either a change event is received or until a resume attempt
+    // fails.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        const change = await this.cursor.tryNext();
+        return change ?? null;
+      } catch (error) {
         try {
-          const change = await this.cursor.tryNext();
-          return change ?? null;
+          await this._processErrorIteratorMode(error);
         } catch (error) {
           try {
-            await this._processErrorIteratorMode(error);
-          } catch (error) {
-            try {
-              await this.close();
-            } catch {
-              // We are not concerned with errors from close()
-            }
-            throw error;
+            await this.close();
+          } catch {
+            // We are not concerned with errors from close()
           }
+          throw error;
         }
       }
-    }, callback);
+    }
   }
 
   async *[Symbol.asyncIterator](): AsyncGenerator<TChange, void, void> {
@@ -758,20 +743,15 @@ export class ChangeStream<
   }
 
   /** Close the Change Stream */
-  close(): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  close(callback: Callback): void;
-  close(callback?: Callback): Promise<void> | void {
+  async close(): Promise<void> {
     this[kClosed] = true;
 
-    return maybeCallback(async () => {
-      const cursor = this.cursor;
-      try {
-        await cursor.close();
-      } finally {
-        this._endStream();
-      }
-    }, callback);
+    const cursor = this.cursor;
+    try {
+      await cursor.close();
+    } finally {
+      this._endStream();
+    }
   }
 
   /**
@@ -864,9 +844,7 @@ export class ChangeStream<
   private _closeEmitterModeWithError(error: AnyError): void {
     this.emit(ChangeStream.ERROR, error);
 
-    this.close(() => {
-      // nothing to do
-    });
+    this.close().catch(() => null);
   }
 
   /** @internal */
