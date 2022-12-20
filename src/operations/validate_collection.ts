@@ -18,8 +18,9 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
   collectionName: string;
   command: Document;
 
-  constructor(admin: Admin, collectionName: string, options: ValidateCollectionOptions) {
+  constructor(admin: Admin, collectionName: string, options?: ValidateCollectionOptions) {
     // Decorate command with extra options
+    options ??= {};
     const command: Document = { validate: collectionName };
     const keys = Object.keys(options);
     for (let i = 0; i < keys.length; i++) {
