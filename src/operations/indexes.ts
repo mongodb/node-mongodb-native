@@ -330,11 +330,11 @@ export class EnsureIndexOperation extends CreateIndexOperation {
         super.execute(server, session, callback);
       },
       error => {
-        if (error instanceof MongoError && error.code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
+        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
           // ignore "NamespaceNotFound" errors
-          return callback(error);
+          return super.execute(server, session, callback);
         }
-        super.execute(server, session, callback);
+        return callback(error);
       }
     );
   }
