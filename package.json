@@ -33,7 +33,7 @@
     "saslprep": "^1.0.3"
   },
   "peerDependencies": {
-    "@aws-sdk/credential-providers": "^3.186.0",
+    "@aws-sdk/credential-providers": "^3.201.0",
     "snappy": "7.x.x"
   },
   "peerDependenciesMeta": {
@@ -45,7 +45,7 @@
     }
   },
   "devDependencies": {
-    "@aws-sdk/credential-providers": "^3.186.0",
+    "@aws-sdk/credential-providers": "^3.201.0",
     "@iarna/toml": "^2.2.5",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@microsoft/api-extractor": "^7.33.3",
