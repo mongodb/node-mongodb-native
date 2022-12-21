@@ -102,7 +102,6 @@ const EXPECTED_EXPORTS = [
   'ObjectID',
   'OrderedBulkOperation',
   'ProfilingLevel',
-  'Promise',
   'ReadConcern',
   'ReadConcernLevel',
   'ReadPreference',

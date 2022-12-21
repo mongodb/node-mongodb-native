@@ -16,7 +16,6 @@ import { GridFSBucketWriteStream } from './gridfs/upload';
 import { Logger } from './logger';
 import { MongoClient } from './mongo_client';
 import { CancellationToken } from './mongo_types';
-import { PromiseProvider } from './promise_provider';
 import { ClientSession } from './sessions';
 
 /** @internal */
@@ -99,9 +98,6 @@ export {
   OrderedBulkOperation,
   UnorderedBulkOperation
 };
-
-// Deprecated, remove in next major
-export { PromiseProvider as Promise };
 
 // enums
 export { BatchType } from './bulk/common';

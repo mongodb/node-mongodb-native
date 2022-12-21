@@ -25,7 +25,6 @@ import {
   ServerApiVersion
 } from './mongo_client';
 import { MongoLogger, MongoLoggerEnvOptions, MongoLoggerMongoClientOptions } from './mongo_logger';
-import { PromiseProvider } from './promise_provider';
 import { ReadConcern, ReadConcernLevel } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
@@ -429,10 +428,6 @@ export function parseOptions(
   if (!mongoOptions.dbName) {
     // dbName default is applied here because of the credential validation above
     mongoOptions.dbName = 'test';
-  }
-
-  if (options.promiseLibrary) {
-    PromiseProvider.set(options.promiseLibrary);
   }
 
   validateLoadBalancedOptions(hosts, mongoOptions, isSRV);
@@ -959,10 +954,6 @@ export const OPTIONS = {
         `Option pkFactory must be an object with a createPk function, got ${value}`
       );
     }
-  },
-  promiseLibrary: {
-    deprecated: true,
-    type: 'any'
   },
   promoteBuffers: {
     type: 'boolean'

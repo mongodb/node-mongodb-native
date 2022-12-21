@@ -1,9 +1,8 @@
-import { Promise as BluebirdPromise } from 'bluebird';
 import { expect } from 'chai';
 
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 import { MongoRuntimeError } from '../../src/error';
-import { ObjectId, Promise as PromiseProvider } from '../../src/index';
+import { ObjectId } from '../../src/index';
 import {
   BufferPool,
   compareObjectId,
@@ -773,44 +772,6 @@ describe('driver utils', function () {
         const result = maybeCallback(() => superPromiseSuccess);
         expect(result).to.equal(superPromiseSuccess);
         expect(await result).to.equal(2);
-      });
-    });
-
-    describe('when a custom promise constructor is set', () => {
-      beforeEach(() => {
-        PromiseProvider.set(BluebirdPromise);
-      });
-
-      afterEach(() => {
-        PromiseProvider.set(null);
-      });
-
-      it('should return the custom promise if no callback is provided', async () => {
-        const superPromiseSuccess = Promise.resolve(2);
-        const result = maybeCallback(() => superPromiseSuccess);
-        expect(result).to.not.equal(superPromiseSuccess);
-        expect(result).to.be.instanceOf(BluebirdPromise);
-      });
-
-      it('should return a rejected custom promise instance if promiseFn rejects', async () => {
-        const superPromiseFailure = Promise.reject(new Error('ah!'));
-        const result = maybeCallback(() => superPromiseFailure);
-        expect(result).to.not.equal(superPromiseFailure);
-        expect(result).to.be.instanceOf(BluebirdPromise);
-        // @ts-expect-error: There is no overload to change the return type not be nullish,
-        // and we do not want to add one in fear of making it too easy to neglect adding the callback argument
-        expect(await result.catch(e => e)).to.have.property('message', 'ah!');
-      });
-
-      it('should return void even if a custom promise is set and a callback is provided', async () => {
-        const superPromiseSuccess = Promise.resolve(2);
-        const result = maybeCallback(
-          () => superPromiseSuccess,
-          () => {
-            // ignore
-          }
-        );
-        expect(result).to.be.undefined;
       });
     });
   });

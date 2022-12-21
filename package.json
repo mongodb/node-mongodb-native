@@ -60,7 +60,6 @@
     "@types/whatwg-url": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
-    "bluebird": "^3.7.2",
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
     "chalk": "^4.1.2",
