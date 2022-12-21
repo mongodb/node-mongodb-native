@@ -25,6 +25,15 @@ This means `npm` will let you know if the version of snappy you have installed i
 npm install --save snappy@7
 ```
 
+### @aws-sdk/credential-providers v3.186.0 or later and optional peerDependency
+
+`@aws-sdk/credential-providers` has been added to the package.json as a peerDependency that is **optional**.
+This means `npm` will let you know if the version of the sdk you have installed is incompatible with the driver.
+
+```sh
+npm install --save @aws-sdk/credential-providers@3.186.0
+```
+
 ### Minimum supported Node version
 
 The new minimum supported Node.js version is now 14.20.1.
