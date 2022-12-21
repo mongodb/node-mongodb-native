@@ -44,7 +44,6 @@ import {
   Callback,
   DEFAULT_PK_FACTORY,
   filterOptions,
-  getTopology,
   MongoDBNamespace,
   resolveOptions
 } from './utils';

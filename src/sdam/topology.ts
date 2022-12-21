@@ -39,7 +39,6 @@ import type { Transaction } from '../transactions';
 import {
   Callback,
   ClientMetadata,
-  emitWarning,
   EventEmitterWithState,
   HostAddress,
   List,
