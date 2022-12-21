@@ -69,12 +69,15 @@ export function indexInformation(
   // Get the list of indexes of the specified collection
   db.collection(name)
     .listIndexes(options)
-    .toArray((err, indexes) => {
-      if (err) return callback(err);
-      if (!Array.isArray(indexes)) return callback(undefined, []);
-      if (full) return callback(undefined, indexes);
-      callback(undefined, processResults(indexes));
-    });
+    .toArray()
+    .then(
+      indexes => {
+        if (!Array.isArray(indexes)) return callback(undefined, []);
+        if (full) return callback(undefined, indexes);
+        callback(undefined, processResults(indexes));
+      },
+      error => callback(error)
+    );
 }
 
 export function prepareDocs(

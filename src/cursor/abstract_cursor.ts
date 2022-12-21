@@ -853,7 +853,10 @@ function cleanupCursor(
 
     if (session) {
       if (session.owner === cursor) {
-        return session.endSession({ error }, callback);
+        session.endSession({ error }).finally(() => {
+          callback();
+        });
+        return;
       }
 
       if (!session.inTransaction()) {
@@ -867,10 +870,11 @@ function cleanupCursor(
   function completeCleanup() {
     if (session) {
       if (session.owner === cursor) {
-        return session.endSession({ error }, () => {
+        session.endSession({ error }).finally(() => {
           cursor.emit(AbstractCursor.CLOSE);
           callback();
         });
+        return;
       }
 
       if (!session.inTransaction()) {
@@ -884,11 +888,13 @@ function cleanupCursor(
 
   cursor[kKilled] = true;
 
-  return executeOperation(
+  executeOperation(
     cursor[kClient],
-    new KillCursorsOperation(cursorId, cursorNs, server, { session }),
-    completeCleanup
-  );
+    new KillCursorsOperation(cursorId, cursorNs, server, { session })
+  ).finally(() => {
+    completeCleanup();
+  });
+  return;
 }
 
 /** @internal */

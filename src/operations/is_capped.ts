@@ -28,15 +28,17 @@ export class IsCappedOperation extends AbstractOperation<boolean> {
         { name: coll.collectionName },
         { ...this.options, nameOnly: false, readPreference: this.readPreference, session }
       )
-      .toArray((err, collections) => {
-        if (err || !collections) return callback(err);
-        if (collections.length === 0) {
-          // TODO(NODE-3485)
-          return callback(new MongoAPIError(`collection ${coll.namespace} not found`));
-        }
+      .toArray()
+      .then(
+        collections => {
+          if (collections.length === 0) {
+            // TODO(NODE-3485)
+            return callback(new MongoAPIError(`collection ${coll.namespace} not found`));
+          }
 
-        const collOptions = collections[0].options;
-        callback(undefined, !!(collOptions && collOptions.capped));
-      });
+          callback(undefined, !!collections[0].options?.capped);
+        },
+        error => callback(error)
+      );
   }
 }
