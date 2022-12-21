@@ -5,9 +5,13 @@
     "ts-node/register",
     "test/tools/runner/chai-addons.js",
     "test/tools/runner/hooks/configuration.js",
-    "test/tools/runner/hooks/leak_checker.ts"
+    "test/tools/runner/hooks/leak_checker.ts",
+    "test/tools/runner/hooks/legacy.ts"
   ],
-  "extension": ["js", "ts"],
+  "extension": [
+    "js",
+    "ts"
+  ],
   "ui": "test/tools/runner/metadata_ui.js",
   "recursive": true,
   "timeout": 60000,

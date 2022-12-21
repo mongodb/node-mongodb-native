@@ -572,29 +572,26 @@ describe('crud - insert', function () {
 
       test: function (done) {
         var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_should_throw_error_if_serializing_function');
-          var func = function () {
-            return 1;
-          };
-          // Insert the update
-          collection.insert(
-            { i: 1, z: func },
-            { writeConcern: { w: 1 }, serializeFunctions: true },
-            function (err, result) {
-              expect(err).to.not.exist;
+        var db = client.db(configuration.db);
+        var collection = db.collection('test_should_throw_error_if_serializing_function');
+        var func = function () {
+          return 1;
+        };
+        // Insert the update
+        collection.insert(
+          { i: 1, z: func },
+          { writeConcern: { w: 1 }, serializeFunctions: true },
+          function (err, result) {
+            expect(err).to.not.exist;
 
-              collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
-                expect(err).to.not.exist;
-                test.equal(normalizedFunctionString(func), object.z.code);
-                test.equal(1, object.i);
-                client.close(done);
-              });
-            }
-          );
-        });
+            collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
+              expect(err).to.not.exist;
+              test.equal(normalizedFunctionString(func), object.z.code);
+              test.equal(1, object.i);
+              client.close(done);
+            });
+          }
+        );
       }
     });
 
@@ -607,29 +604,26 @@ describe('crud - insert', function () {
 
       test: function (done) {
         var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_should_throw_error_if_serializing_function_1');
-          var func = function () {
-            return 1;
-          };
-          // Insert the update
-          collection.insert(
-            { i: 1, z: func },
-            { writeConcern: { w: 1 }, serializeFunctions: true, ordered: false },
-            function (err, result) {
-              expect(err).to.not.exist;
+        var db = client.db(configuration.db);
+        var collection = db.collection('test_should_throw_error_if_serializing_function_1');
+        var func = function () {
+          return 1;
+        };
+        // Insert the update
+        collection.insert(
+          { i: 1, z: func },
+          { writeConcern: { w: 1 }, serializeFunctions: true, ordered: false },
+          function (err, result) {
+            expect(err).to.not.exist;
 
-              collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
-                expect(err).to.not.exist;
-                test.equal(normalizedFunctionString(func), object.z.code);
-                test.equal(1, object.i);
-                client.close(done);
-              });
-            }
-          );
-        });
+            collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
+              expect(err).to.not.exist;
+              test.equal(normalizedFunctionString(func), object.z.code);
+              test.equal(1, object.i);
+              client.close(done);
+            });
+          }
+        );
       }
     });
 

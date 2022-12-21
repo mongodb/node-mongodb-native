@@ -10,9 +10,6 @@ import { FindCursor } from '../../src/cursor/find_cursor';
 import { MongoClient } from '../../src/mongo_client';
 
 // We wish to keep these APIs but continue to ensure they are marked as deprecated.
-expectDeprecated(Collection.prototype.insert);
-expectDeprecated(Collection.prototype.update);
-expectDeprecated(Collection.prototype.remove);
 expectDeprecated(Collection.prototype.count);
 expectDeprecated(Collection.prototype.mapReduce);
 expectDeprecated(FindCursor.prototype.count);

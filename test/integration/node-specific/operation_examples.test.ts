@@ -1857,7 +1857,7 @@ describe('Operations', function () {
                 { name: 'Sarah', title: 'Princess' },
                 { name: 'Gump', title: 'Gump' }
               ],
-              { writeConcern: { w: 1 }, ordered: false }
+              { writeConcern: { w: 1 }, keepGoing: true }
             );
           })
           .catch(function () {

@@ -1,92 +1,43 @@
 'use strict';
 var test = require('./shared').assert;
 const { expect } = require('chai');
-var setupDatabase = require('./shared').setupDatabase;
 const { ObjectId } = require('../../src');
-const { clearInterval, setInterval } = require('timers');
 const { sleep } = require('../tools/utils');
 
 describe('ObjectId', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
+  let client;
+  beforeEach(async function () {
+    client = this.configuration.newClient();
   });
 
-  it('shouldCorrectlyGenerateObjectId', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  afterEach(async function () {
+    await client.close();
+  });
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var number_of_tests_done = 0;
+  it('generates new ObjectId for documents without _id property', async function () {
+    const db = client.db();
+    const collection = db.collection('test_object_id_generation');
+    await collection.drop().catch(() => null);
 
-      var collection = db.collection('test_object_id_generation.data');
-      // Insert test documents (creates collections and test fetch by query)
-      collection.insertMany(
-        [{ name: 'Fred', age: 42 }],
-        { writeConcern: { w: 1 } },
-        function (err, r) {
-          expect(r).property('insertedCount').to.equal(1);
+    const documents = [{ a: 1 }, { a: 1 }, { a: 1 }];
 
-          const id = r.insertedIds[0];
-          expect(id.toHexString().length).to.equal(24);
-          // Locate the first document inserted
-          collection.findOne({ name: 'Fred' }, function (err, document) {
-            expect(err).to.not.exist;
-            expect(id.toHexString()).to.equal(document._id.toHexString());
-            number_of_tests_done++;
-          });
-        }
-      );
+    const parallelInserts = await Promise.all([
+      collection.insertOne(documents[0]),
+      collection.insertOne(documents[1]),
+      collection.insertOne(documents[2])
+    ]);
 
-      // Insert another test document and collect using ObjectId
-      collection.insert({ name: 'Pat', age: 21 }, { writeConcern: { w: 1 } }, function (err, r) {
-        expect(r).property('insertedCount').to.equal(1);
+    expect(parallelInserts).to.have.lengthOf(3);
 
-        const id = r.insertedIds[0];
-        expect(id.toHexString().length).to.equal(24);
+    // Input documents are modified
+    expect(documents[0]).to.have.deep.property('_id', parallelInserts[0].insertedId);
+    expect(documents[1]).to.have.deep.property('_id', parallelInserts[1].insertedId);
+    expect(documents[2]).to.have.deep.property('_id', parallelInserts[2].insertedId);
 
-        // Locate the first document inserted
-        collection.findOne(id, function (err, document) {
-          expect(err).to.not.exist;
-          expect(id.toHexString()).to.equal(document._id.toHexString());
-          number_of_tests_done++;
-        });
-      });
-
-      // Manually created id
-      var objectId = new ObjectId(null);
-      // Insert a manually created document with generated oid
-      collection.insert(
-        { _id: objectId, name: 'Donald', age: 95 },
-        { writeConcern: { w: 1 } },
-        function (err, r) {
-          expect(err).to.not.exist;
-          expect(r).property('insertedCount').to.equal(1);
-
-          const id = r.insertedIds[0];
-          expect(id.toHexString().length).to.equal(24);
-          expect(id.toHexString()).to.equal(objectId.toHexString());
-
-          // Locate the first document inserted
-          collection.findOne(id, function (err, document) {
-            expect(err).to.not.exist;
-            expect(id.toHexString()).to.equal(document._id.toHexString());
-            expect(objectId.toHexString()).to.equal(document._id.toHexString());
-            number_of_tests_done++;
-          });
-        }
-      );
-
-      var intervalId = setInterval(function () {
-        if (number_of_tests_done === 3) {
-          clearInterval(intervalId);
-          client.close(done);
-        }
-      }, 100);
-    }
+    // ObjectIds are generated in a predictable order
+    expect(documents[0]._id.id.compare(documents[1]._id.id)).to.equal(-1);
+    expect(documents[1]._id.id.compare(documents[2]._id.id)).to.equal(-1);
+    expect(documents[2]._id.id.compare(documents[0]._id.id)).to.equal(1);
   });
 
   it('shouldCorrectlyRetrieve24CharacterHexStringFromToString', {
