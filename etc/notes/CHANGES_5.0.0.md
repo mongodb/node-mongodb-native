@@ -24,3 +24,7 @@ This means `npm` will let you know if the version of snappy you have installed i
 ```sh
 npm install --save snappy@7
 ```
+
+### Minimum supported Node version
+
+The new minimum supported Node.js version is now 14.20.1.

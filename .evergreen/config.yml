@@ -2063,7 +2063,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: run unit tests
   - name: run-lint-checks
     tags:
@@ -2071,7 +2071,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: run lint checks
   - name: check-types-typescript-next
     tags:
@@ -2079,7 +2079,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: check types
         vars:
           TS_VERSION: next
@@ -2089,7 +2089,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: compile driver
         vars:
           TS_VERSION: current
@@ -2099,7 +2099,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: check types
         vars:
           TS_VERSION: current
@@ -2109,7 +2109,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: check types
         vars:
           TS_VERSION: 4.1.6
@@ -2137,7 +2137,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2146,7 +2146,7 @@ tasks:
       - name: run-bson-ext-integration
         func: run bson-ext test
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
           TEST_NPM_SCRIPT: check:test
   - name: run-bson-ext-unit
     tags:
@@ -2154,7 +2154,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2163,7 +2163,7 @@ tasks:
       - name: run-bson-ext-unit
         func: run bson-ext test
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
           TEST_NPM_SCRIPT: check:unit
   - name: run-custom-csfle-tests-5.0-pinned-commit
     tags:
@@ -2171,7 +2171,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2186,7 +2186,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2201,7 +2201,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2216,7 +2216,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2231,7 +2231,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -2246,7 +2246,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: fermium
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -2668,54 +2668,6 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - run-spec-benchmark-tests
-  - name: rhel80-large-erbium
-    display_name: rhel8 Node12
-    run_on: rhel80-large
-    expansions:
-      NODE_LTS_NAME: erbium
-      CLIENT_ENCRYPTION: true
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-rapid-server
-      - test-rapid-replica_set
-      - test-rapid-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-5.0-load-balanced
-      - test-6.0-load-balanced
-      - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-socks5
-      - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: rhel80-large-fermium
     display_name: rhel8 Node14
     run_on: rhel80-large
@@ -2899,48 +2851,6 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-erbium
-    display_name: Windows (VS2019) Node12
-    run_on: windows-64-vs2019-large
-    expansions:
-      NODE_LTS_NAME: erbium
-      MSVS_VERSION: 2019
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-rapid-server
-      - test-rapid-replica_set
-      - test-rapid-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-data-lake
-      - test-socks5
-      - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: windows-64-vs2019-fermium
     display_name: Windows (VS2019) Node14
     run_on: windows-64-vs2019-large
@@ -3095,7 +3005,7 @@ buildvariants:
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-large
     expansions:
-      NODE_LTS_NAME: erbium
+      NODE_LTS_NAME: fermium
     tasks:
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
@@ -3162,7 +3072,7 @@ buildvariants:
     display_name: Serverless Test
     run_on: rhel80-large
     expansions:
-      NODE_LTS_NAME: erbium
+      NODE_LTS_NAME: fermium
     tasks:
       - serverless_task_group
   - name: rhel8-no-auth-tests
