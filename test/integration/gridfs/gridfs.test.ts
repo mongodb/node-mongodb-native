@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { once } from 'events';
 
 import { type Db, type MongoClient, CommandStartedEvent, GridFSBucket } from '../../../src';
 import { sleep } from '../../tools/utils';
@@ -12,7 +13,12 @@ describe('GridFS', () => {
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
     db = client.db('gridfsTest');
+
+    // Reset namespace
+    await db.dropCollection('fs.files').catch(() => null);
+    await db.dropCollection('fs.chunks').catch(() => null);
     await db.dropDatabase().catch(() => null);
+    await sleep(100);
 
     commandStartedEvents = [];
     client.on('commandStarted', e => commandStartedEvents.push(e));
@@ -26,6 +32,8 @@ describe('GridFS', () => {
 
   describe('class GridFSBucket', () => {
     const assertIndexesExist = () => {
+      expect(bucket.s).to.have.property('checkedIndexes', true);
+
       const listIndexes = commandStartedEvents.filter(e => e.commandName === 'listIndexes');
       expect(listIndexes).to.have.lengthOf(2);
 
@@ -56,9 +64,9 @@ describe('GridFS', () => {
       ).to.have.lengthOf(0);
 
       const upload = bucket.openUploadStream('test.txt');
+      await once(bucket, 'index');
       await upload.abort();
 
-      await sleep(100);
       assertIndexesExist();
     });
 
@@ -68,9 +76,9 @@ describe('GridFS', () => {
       await db.createCollection('fs.chunks');
 
       const upload = bucket.openUploadStream('test.txt');
+      await once(bucket, 'index');
       await upload.abort();
 
-      await sleep(100);
       assertIndexesExist();
     });
 
@@ -96,9 +104,8 @@ describe('GridFS', () => {
       commandStartedEvents = [];
 
       const upload = bucket.openUploadStream('test.txt');
+      await once(bucket, 'index');
       await upload.abort();
-
-      await sleep(100);
 
       // Still listed indexes
       const listIndexes = commandStartedEvents.filter(e => e.commandName === 'listIndexes');
