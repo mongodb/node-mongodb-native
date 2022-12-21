@@ -92,7 +92,7 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=12.9.0"
+    "node": ">=14.20.1"
   },
   "bugs": {
     "url": "https://jira.mongodb.org/projects/NODE/issues/"
