@@ -798,18 +798,6 @@ functions:
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
 
-  "run custom snappy tests":
-    - command: subprocess.exec
-      params:
-        working_dir: "src"
-        timeout_secs: 60
-        env:
-          MONGODB_URI: ${MONGODB_URI}
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-        binary: bash
-        args:
-          - "${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh"
-
   "run lambda handler example tests":
     - command: subprocess.exec
       params:
