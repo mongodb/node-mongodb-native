@@ -29,6 +29,18 @@
     "mongodb-connection-string-url": "^2.6.0",
     "socks": "^2.7.1"
   },
+  "optionalDependencies": {
+    "@aws-sdk/credential-providers": "^3.186.0",
+    "saslprep": "^1.0.3"
+  },
+  "peerDependencies": {
+    "snappy": "7.x.x"
+  },
+  "peerDependenciesMeta": {
+    "snappy": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@iarna/toml": "^2.2.5",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
@@ -68,6 +80,7 @@
     "semver": "^7.3.8",
     "sinon": "^13.0.1",
     "sinon-chai": "^3.7.0",
+    "snappy": "^7.2.2",
     "source-map-support": "^0.5.21",
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.1",
@@ -85,10 +98,6 @@
     "url": "https://jira.mongodb.org/projects/NODE/issues/"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
-  "optionalDependencies": {
-    "@aws-sdk/credential-providers": "^3.186.0",
-    "saslprep": "^1.0.3"
-  },
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "node ./node_modules/typescript/bin/tsc",

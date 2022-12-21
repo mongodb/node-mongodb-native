@@ -16,6 +16,15 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### Snappy v7.x.x or later and optional peerDependency
+
+`snappy` compression has been added to the package.json as a peerDependency that is **optional**.
+This means `npm` will let you know if the version of snappy you have installed is incompatible with the driver.
+
+```sh
+npm install --save snappy@7
+```
+
 ### `.unref()` removed from `Db`
 
 The `.unref()` method was a no-op and has now been removed from the Db class.

@@ -758,17 +758,6 @@ functions:
           echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh
-  run custom snappy tests:
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        timeout_secs: 60
-        env:
-          MONGODB_URI: ${MONGODB_URI}
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-        binary: bash
-        args:
-          - ${PROJECT_DIRECTORY}/.evergreen/run-snappy-version-test.sh
   run lambda handler example tests:
     - command: subprocess.exec
       params:
@@ -2142,20 +2131,6 @@ tasks:
         variant: '*'
         status: '*'
         patch_optional: true
-  - name: run-custom-snappy-tests
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_NAME: erbium
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: server
-          AUTH: auth
-      - name: run-custom-snappy-tests
-        func: run custom snappy tests
   - name: run-bson-ext-integration
     tags:
       - run-custom-dependency-tests
@@ -3175,7 +3150,6 @@ buildvariants:
     display_name: Custom Dependency Version Test
     run_on: rhel80-large
     tasks:
-      - run-custom-snappy-tests
       - run-bson-ext-integration
       - run-bson-ext-unit
       - run-custom-csfle-tests-5.0-pinned-commit
