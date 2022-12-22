@@ -3,9 +3,6 @@ const { assert: test, setupDatabase } = require('../shared');
 const f = require('util').format;
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
-class CustomPromise extends Promise {}
-CustomPromise.prototype.isCustomMongo = true;
-
 describe('Handshake', function () {
   before(function () {
     return setupDatabase(this.configuration);

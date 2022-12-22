@@ -1,9 +1,6 @@
 'use strict';
 
 const { expect } = require('chai');
-const Sinon = require('sinon');
-const { Promise: BluebirdPromise } = require('bluebird');
-const { PromiseProvider } = require('../../../src/promise_provider');
 
 describe('Cursor Async Iterator Tests', function () {
   context('default promise library', function () {
@@ -81,60 +78,6 @@ describe('Cursor Async Iterator Tests', function () {
       }
 
       expect(count).to.equal(1);
-    });
-  });
-  context('custom promise library', () => {
-    let client, collection, promiseSpy;
-    beforeEach(async function () {
-      promiseSpy = Sinon.spy(BluebirdPromise.prototype, 'then');
-      client = this.configuration.newClient({}, { promiseLibrary: BluebirdPromise });
-
-      const connectPromise = client.connect();
-      expect(connectPromise).to.be.instanceOf(BluebirdPromise);
-      await connectPromise;
-      const docs = Array.from({ length: 1 }).map((_, index) => ({ foo: index, bar: 1 }));
-
-      collection = client.db(this.configuration.db).collection('async_cursor_tests');
-
-      await collection.deleteMany({});
-      await collection.insertMany(docs);
-      await client.close();
-    });
-
-    beforeEach(async function () {
-      client = this.configuration.newClient();
-      await client.connect();
-      collection = client.db(this.configuration.db).collection('async_cursor_tests');
-    });
-
-    afterEach(() => {
-      promiseSpy.restore();
-      PromiseProvider.set(null);
-      return client.close();
-    });
-
-    it('should properly use custom promise', async function () {
-      const cursor = collection.find();
-      const countBeforeIteration = promiseSpy.callCount;
-      for await (const doc of cursor) {
-        expect(doc).to.exist;
-      }
-      expect(countBeforeIteration).to.not.equal(promiseSpy.callCount);
-      expect(promiseSpy.called).to.equal(true);
-    });
-
-    it('should properly use custom promise manual iteration', async function () {
-      const cursor = collection.find();
-
-      const iterator = cursor[Symbol.asyncIterator]();
-      let isDone;
-      do {
-        const promiseFromIterator = iterator.next();
-        expect(promiseFromIterator).to.be.instanceOf(BluebirdPromise);
-        const { done, value } = await promiseFromIterator;
-        if (done) expect(value).to.be.a('undefined');
-        isDone = done;
-      } while (!isDone);
     });
   });
 });

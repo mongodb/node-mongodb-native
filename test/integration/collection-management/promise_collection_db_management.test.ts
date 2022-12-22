@@ -1,9 +1,5 @@
 import { assert as test, setupDatabase } from '../shared';
 
-class CustomPromise extends Promise<void> {}
-// @ts-expect-error: Dynamic addition to detect custom promise
-CustomPromise.prototype.isCustomMongo = true;
-
 describe('Collection Management and Db Management (promise tests)', function () {
   before(function () {
     return setupDatabase(this.configuration);

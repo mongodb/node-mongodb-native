@@ -30,18 +30,22 @@
     "socks": "^2.7.1"
   },
   "optionalDependencies": {
-    "@aws-sdk/credential-providers": "^3.186.0",
     "saslprep": "^1.0.3"
   },
   "peerDependencies": {
+    "@aws-sdk/credential-providers": "^3.201.0",
     "snappy": "7.x.x"
   },
   "peerDependenciesMeta": {
+    "@aws-sdk/credential-providers": {
+      "optional": true
+    },
     "snappy": {
       "optional": true
     }
   },
   "devDependencies": {
+    "@aws-sdk/credential-providers": "^3.201.0",
     "@iarna/toml": "^2.2.5",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@microsoft/api-extractor": "^7.33.3",
@@ -60,7 +64,6 @@
     "@types/whatwg-url": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
-    "bluebird": "^3.7.2",
     "chai": "^4.3.6",
     "chai-subset": "^1.6.0",
     "chalk": "^4.1.2",
@@ -92,7 +95,7 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=12.9.0"
+    "node": ">=14.20.1"
   },
   "bugs": {
     "url": "https://jira.mongodb.org/projects/NODE/issues/"

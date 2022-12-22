@@ -3,9 +3,6 @@
 const { assert: test, setupDatabase } = require('../shared');
 const f = require('util').format;
 
-class CustomPromise extends Promise {}
-CustomPromise.prototype.isCustomMongo = true;
-
 describe('stats', function () {
   before(function () {
     return setupDatabase(this.configuration);

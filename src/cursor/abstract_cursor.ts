@@ -17,7 +17,6 @@ import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
-import { PromiseProvider } from '../promise_provider';
 import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -297,47 +296,36 @@ export abstract class AbstractCursor<
     return bufferedDocs;
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
-    async function* nativeAsyncIterator(this: AbstractCursor<TSchema>) {
-      if (this.closed) {
-        return;
-      }
-
-      while (true) {
-        const document = await this.next();
-
-        // Intentional strict null check, because users can map cursors to falsey values.
-        // We allow mapping to all values except for null.
-        // eslint-disable-next-line no-restricted-syntax
-        if (document === null) {
-          if (!this.closed) {
-            const message =
-              'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
-
-            await cleanupCursorAsync(this, { needsToEmitClosed: true }).catch(() => null);
-
-            throw new MongoAPIError(message);
-          }
-          break;
-        }
-
-        yield document;
-
-        if (this[kId] === Long.ZERO) {
-          // Cursor exhausted
-          break;
-        }
-      }
+  async *[Symbol.asyncIterator](): AsyncIterator<TSchema, void> {
+    if (this.closed) {
+      return;
     }
 
-    const iterator = nativeAsyncIterator.call(this);
+    while (true) {
+      const document = await this.next();
 
-    if (PromiseProvider.get() == null) {
-      return iterator;
+      // Intentional strict null check, because users can map cursors to falsey values.
+      // We allow mapping to all values except for null.
+      // eslint-disable-next-line no-restricted-syntax
+      if (document === null) {
+        if (!this.closed) {
+          const message =
+            'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
+
+          await cleanupCursorAsync(this, { needsToEmitClosed: true }).catch(() => null);
+
+          throw new MongoAPIError(message);
+        }
+        break;
+      }
+
+      yield document;
+
+      if (this[kId] === Long.ZERO) {
+        // Cursor exhausted
+        break;
+      }
     }
-    return {
-      next: () => maybeCallback(() => iterator.next(), null)
-    };
   }
 
   stream(options?: CursorStreamOptions): Readable & AsyncIterable<TSchema> {
@@ -853,7 +841,10 @@ function cleanupCursor(
 
     if (session) {
       if (session.owner === cursor) {
-        return session.endSession({ error }, callback);
+        session.endSession({ error }).finally(() => {
+          callback();
+        });
+        return;
       }
 
       if (!session.inTransaction()) {
@@ -867,10 +858,11 @@ function cleanupCursor(
   function completeCleanup() {
     if (session) {
       if (session.owner === cursor) {
-        return session.endSession({ error }, () => {
+        session.endSession({ error }).finally(() => {
           cursor.emit(AbstractCursor.CLOSE);
           callback();
         });
+        return;
       }
 
       if (!session.inTransaction()) {
@@ -884,11 +876,13 @@ function cleanupCursor(
 
   cursor[kKilled] = true;
 
-  return executeOperation(
+  executeOperation(
     cursor[kClient],
-    new KillCursorsOperation(cursorId, cursorNs, server, { session }),
-    completeCleanup
-  );
+    new KillCursorsOperation(cursorId, cursorNs, server, { session })
+  ).finally(() => {
+    completeCleanup();
+  });
+  return;
 }
 
 /** @internal */

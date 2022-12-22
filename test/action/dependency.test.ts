@@ -7,7 +7,7 @@ import { expect } from 'chai';
 import { dependencies, peerDependencies, peerDependenciesMeta } from '../../package.json';
 
 const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url', 'socks'];
-const EXPECTED_PEER_DEPENDENCIES = ['snappy'];
+const EXPECTED_PEER_DEPENDENCIES = ['@aws-sdk/credential-providers', 'snappy'];
 
 describe('package.json', function () {
   describe('dependencies', function () {

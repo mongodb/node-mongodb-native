@@ -23,7 +23,6 @@ import type { Explain } from './explain';
 import type { MongoClient } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
-import { PromiseProvider } from './promise_provider';
 import { ReadConcern } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { ServerType } from './sdam/common';
@@ -445,17 +444,9 @@ export function maybeCallback<T>(
   promiseFn: () => Promise<T>,
   callback?: Callback<T> | null
 ): Promise<T> | void {
-  const PromiseConstructor = PromiseProvider.get();
-
   const promise = promiseFn();
   if (callback == null) {
-    if (PromiseConstructor == null) {
-      return promise;
-    } else {
-      return new PromiseConstructor((resolve, reject) => {
-        promise.then(resolve, reject);
-      });
-    }
+    return promise;
   }
 
   promise.then(

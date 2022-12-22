@@ -25,7 +25,6 @@ import type { MongoClient, MongoOptions } from './mongo_client';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
-import { PromiseProvider } from './promise_provider';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
 import { _advanceClusterTime, ClusterTime, TopologyType } from './sdam/common';
@@ -605,8 +604,7 @@ function attemptTransaction<TSchema>(
   try {
     promise = fn(session);
   } catch (err) {
-    const PromiseConstructor = PromiseProvider.get() ?? Promise;
-    promise = PromiseConstructor.reject(err);
+    promise = Promise.reject(err);
   }
 
   if (!isPromiseLike(promise)) {
