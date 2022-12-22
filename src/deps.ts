@@ -4,9 +4,7 @@ import type { AWSCredentials } from './cmap/auth/mongodb_aws';
 import type { ProxyOptions } from './cmap/connection';
 import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
-import { Callback, parsePackageVersion } from './utils';
-
-export const PKG_VERSION = Symbol('kPkgVersion');
+import type { Callback } from './utils';
 
 function makeErrorModule(error: any) {
   const props = error ? { kModuleError: error } : {};
@@ -90,33 +88,17 @@ export function getAwsCredentialProvider():
 }
 
 type SnappyLib = {
-  [PKG_VERSION]: { major: number; minor: number; patch: number };
-
   /**
-   * - Snappy 6.x takes a callback and returns void
-   * - Snappy 7.x returns a promise
-   *
    * In order to support both we must check the return value of the function
    * @param buf - Buffer to be compressed
-   * @param callback - ONLY USED IN SNAPPY 6.x
    */
   compress(buf: Buffer): Promise<Buffer>;
-  compress(buf: Buffer, callback: (error?: Error, buffer?: Buffer) => void): void;
 
   /**
-   * - Snappy 6.x takes a callback and returns void
-   * - Snappy 7.x returns a promise
-   *
    * In order to support both we must check the return value of the function
    * @param buf - Buffer to be compressed
-   * @param callback - ONLY USED IN SNAPPY 6.x
    */
   uncompress(buf: Buffer, opt: { asBuffer: true }): Promise<Buffer>;
-  uncompress(
-    buf: Buffer,
-    opt: { asBuffer: true },
-    callback: (error?: Error, buffer?: Buffer) => void
-  ): void;
 };
 
 export let Snappy: SnappyLib | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
@@ -128,9 +110,6 @@ export let Snappy: SnappyLib | { kModuleError: MongoMissingDependencyError } = m
 try {
   // Ensure you always wrap an optional require in the try block NODE-3199
   Snappy = require('snappy');
-  try {
-    (Snappy as any)[PKG_VERSION] = parsePackageVersion(require('snappy/package.json'));
-  } catch {} // eslint-disable-line
 } catch {} // eslint-disable-line
 
 export let saslprep: typeof import('saslprep') | { kModuleError: MongoMissingDependencyError } =

@@ -5,7 +5,7 @@ const { setupDatabase } = require('./../shared');
 const { expect } = require('chai');
 const { GridFSBucket } = require('../../../src');
 
-describe('GridFS', function () {
+describe('GridFS spec', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

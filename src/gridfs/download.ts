@@ -189,10 +189,16 @@ export class GridFSBucketReadStream extends Readable implements NodeJS.ReadableS
     this.push(null);
     this.destroyed = true;
     if (this.s.cursor) {
-      this.s.cursor.close(error => {
-        this.emit(GridFSBucketReadStream.CLOSE);
-        callback && callback(error);
-      });
+      this.s.cursor.close().then(
+        () => {
+          this.emit(GridFSBucketReadStream.CLOSE);
+          callback?.();
+        },
+        error => {
+          this.emit(GridFSBucketReadStream.CLOSE);
+          callback?.(error);
+        }
+      );
     } else {
       if (!this.s.init) {
         // If not initialized, fire close event because we will never
@@ -215,7 +221,10 @@ function doRead(stream: GridFSBucketReadStream): void {
   if (!stream.s.cursor) return;
   if (!stream.s.file) return;
 
-  stream.s.cursor.next((error, doc) => {
+  const handleReadResult = ({
+    error,
+    doc
+  }: { error: Error; doc: null } | { error: null; doc: any }) => {
     if (stream.destroyed) {
       return;
     }
@@ -226,16 +235,14 @@ function doRead(stream: GridFSBucketReadStream): void {
     if (!doc) {
       stream.push(null);
 
-      if (!stream.s.cursor) return;
-      stream.s.cursor.close(error => {
-        if (error) {
+      stream.s.cursor?.close().then(
+        () => {
+          stream.emit(GridFSBucketReadStream.CLOSE);
+        },
+        error => {
           stream.emit(GridFSBucketReadStream.ERROR, error);
-          return;
         }
-
-        stream.emit(GridFSBucketReadStream.CLOSE);
-      });
-
+      );
       return;
     }
 
@@ -308,7 +315,12 @@ function doRead(stream: GridFSBucketReadStream): void {
 
     stream.push(buf);
     return;
-  });
+  };
+
+  stream.s.cursor.next().then(
+    doc => handleReadResult({ error: null, doc }),
+    error => handleReadResult({ error, doc: null })
+  );
 }
 
 function init(stream: GridFSBucketReadStream): void {
@@ -323,7 +335,10 @@ function init(stream: GridFSBucketReadStream): void {
     findOneOptions.skip = stream.s.options.skip;
   }
 
-  stream.s.files.findOne(stream.s.filter, findOneOptions, (error, doc) => {
+  const handleReadResult = ({
+    error,
+    doc
+  }: { error: Error; doc: null } | { error: null; doc: any }) => {
     if (error) {
       return stream.emit(GridFSBucketReadStream.ERROR, error);
     }
@@ -388,7 +403,12 @@ function init(stream: GridFSBucketReadStream): void {
 
     stream.emit(GridFSBucketReadStream.FILE, doc);
     return;
-  });
+  };
+
+  stream.s.files.findOne(stream.s.filter, findOneOptions).then(
+    doc => handleReadResult({ error: null, doc }),
+    error => handleReadResult({ error, doc: null })
+  );
 }
 
 function waitForFile(stream: GridFSBucketReadStream, callback: Callback): void {

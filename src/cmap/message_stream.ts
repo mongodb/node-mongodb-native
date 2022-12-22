@@ -80,12 +80,8 @@ export class MessageStream extends Duplex {
     command: WriteProtocolMessageType,
     operationDescription: OperationDescription
   ): void {
-    // TODO: agreed compressor should live in `StreamDescription`
-    const compressorName: CompressorName =
-      operationDescription && operationDescription.agreedCompressor
-        ? operationDescription.agreedCompressor
-        : 'none';
-    if (compressorName === 'none' || !canCompress(command)) {
+    const agreedCompressor = operationDescription.agreedCompressor ?? 'none';
+    if (agreedCompressor === 'none' || !canCompress(command)) {
       const data = command.toBin();
       this.push(Array.isArray(data) ? Buffer.concat(data) : data);
       return;
@@ -97,30 +93,34 @@ export class MessageStream extends Duplex {
     // Extract information needed for OP_COMPRESSED from the uncompressed message
     const originalCommandOpCode = concatenatedOriginalCommandBuffer.readInt32LE(12);
 
+    const options = {
+      agreedCompressor,
+      zlibCompressionLevel: operationDescription.zlibCompressionLevel ?? 0
+    };
     // Compress the message body
-    compress({ options: operationDescription }, messageToBeCompressed, (err, compressedMessage) => {
-      if (err || !compressedMessage) {
-        operationDescription.cb(err);
-        return;
+    compress(options, messageToBeCompressed).then(
+      compressedMessage => {
+        // Create the msgHeader of OP_COMPRESSED
+        const msgHeader = Buffer.alloc(MESSAGE_HEADER_SIZE);
+        msgHeader.writeInt32LE(
+          MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length,
+          0
+        ); // messageLength
+        msgHeader.writeInt32LE(command.requestId, 4); // requestID
+        msgHeader.writeInt32LE(0, 8); // responseTo (zero)
+        msgHeader.writeInt32LE(OP_COMPRESSED, 12); // opCode
+
+        // Create the compression details of OP_COMPRESSED
+        const compressionDetails = Buffer.alloc(COMPRESSION_DETAILS_SIZE);
+        compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
+        compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
+        compressionDetails.writeUInt8(Compressor[agreedCompressor], 8); // compressorID
+        this.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage]));
+      },
+      error => {
+        operationDescription.cb(error);
       }
-
-      // Create the msgHeader of OP_COMPRESSED
-      const msgHeader = Buffer.alloc(MESSAGE_HEADER_SIZE);
-      msgHeader.writeInt32LE(
-        MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length,
-        0
-      ); // messageLength
-      msgHeader.writeInt32LE(command.requestId, 4); // requestID
-      msgHeader.writeInt32LE(0, 8); // responseTo (zero)
-      msgHeader.writeInt32LE(OP_COMPRESSED, 12); // opCode
-
-      // Create the compression details of OP_COMPRESSED
-      const compressionDetails = Buffer.alloc(COMPRESSION_DETAILS_SIZE);
-      compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
-      compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
-      compressionDetails.writeUInt8(Compressor[compressorName], 8); // compressorID
-      this.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage]));
-    });
+    );
   }
 }
 
@@ -197,33 +197,34 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>):
   messageHeader.fromCompressed = true;
   messageHeader.opCode = message.readInt32LE(MESSAGE_HEADER_SIZE);
   messageHeader.length = message.readInt32LE(MESSAGE_HEADER_SIZE + 4);
-  const compressorID: Compressor = message[MESSAGE_HEADER_SIZE + 8] as Compressor;
+  const compressorID = message[MESSAGE_HEADER_SIZE + 8];
   const compressedBuffer = message.slice(MESSAGE_HEADER_SIZE + 9);
 
   // recalculate based on wrapped opcode
   ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
-  return decompress(compressorID, compressedBuffer, (err, messageBody) => {
-    if (err || !messageBody) {
-      return callback(err);
-    }
+  decompress(compressorID, compressedBuffer).then(
+    messageBody => {
+      if (messageBody.length !== messageHeader.length) {
+        return callback(
+          new MongoDecompressionError('Message body and message header must be the same length')
+        );
+      }
 
-    if (messageBody.length !== messageHeader.length) {
-      return callback(
-        new MongoDecompressionError('Message body and message header must be the same length')
-      );
-    }
+      // If we are a monitoring connection message stream and
+      // there is more in the buffer that can be read, skip processing since we
+      // want the last hello command response that is in the buffer.
+      if (monitorHasAnotherHello()) {
+        return processIncomingData(stream, callback);
+      }
+      stream.emit('message', new ResponseType(message, messageHeader, messageBody));
 
-    // If we are a monitoring connection message stream and
-    // there is more in the buffer that can be read, skip processing since we
-    // want the last hello command response that is in the buffer.
-    if (monitorHasAnotherHello()) {
-      return processIncomingData(stream, callback);
+      if (buffer.length >= 4) {
+        return processIncomingData(stream, callback);
+      }
+      return callback();
+    },
+    error => {
+      return callback(error);
     }
-    stream.emit('message', new ResponseType(message, messageHeader, messageBody));
-
-    if (buffer.length >= 4) {
-      return processIncomingData(stream, callback);
-    }
-    return callback();
-  });
+  );
 }

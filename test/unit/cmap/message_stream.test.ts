@@ -1,12 +1,11 @@
-'use strict';
-const { on, once } = require('events');
-const { Readable, Writable } = require('stream');
+import { expect } from 'chai';
+import { on, once } from 'events';
+import { Readable, Writable } from 'stream';
 
-const { MessageStream } = require('../../../src/cmap/message_stream');
-const { Msg } = require('../../../src/cmap/commands');
-const expect = require('chai').expect;
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
-const { bufferToStream, generateOpMsgBuffer } = require('../../tools/utils');
+import { Msg } from '../../../src/cmap/commands';
+import { MessageStream } from '../../../src/cmap/message_stream';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { bufferToStream, generateOpMsgBuffer } from '../../tools/utils';
 
 describe('MessageStream', function () {
   context('when the stream is for a monitoring connection', function () {
@@ -119,7 +118,11 @@ describe('MessageStream', function () {
 
   context('when writing to the message stream', function () {
     it('pushes the message', function (done) {
-      const readableStream = new Readable({ read() {} });
+      const readableStream = new Readable({
+        read() {
+          // ignore
+        }
+      });
       const writeableStream = new Writable({
         write: (chunk, _, callback) => {
           readableStream.push(chunk);
@@ -139,8 +142,15 @@ describe('MessageStream', function () {
       messageStream.pipe(writeableStream);
 
       const command = new Msg('admin.$cmd', { [LEGACY_HELLO_COMMAND]: 1 }, { requestId: 3 });
-      messageStream.writeCommand(command, null, err => {
-        done(err);
+      messageStream.writeCommand(command, {
+        started: 0,
+        command: true,
+        noResponse: false,
+        raw: false,
+        requestId: command.requestId,
+        cb: err => {
+          done(err);
+        }
       });
     });
   });

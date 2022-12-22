@@ -105,10 +105,13 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
     if (!this.bucket.s.calledOpenUploadStream) {
       this.bucket.s.calledOpenUploadStream = true;
 
-      checkIndexes(this, () => {
-        this.bucket.s.checkedIndexes = true;
-        this.bucket.emit('index');
-      });
+      checkIndexes(this).then(
+        () => {
+          this.bucket.s.checkedIndexes = true;
+          this.bucket.emit('index');
+        },
+        () => null
+      );
     }
   }
 
@@ -244,54 +247,36 @@ function createChunkDoc(filesId: ObjectId, n: number, data: Buffer): GridFSChunk
   };
 }
 
-function checkChunksIndex(stream: GridFSBucketWriteStream, callback: Callback): void {
-  stream.chunks.listIndexes().toArray((error?: AnyError, indexes?: Document[]) => {
-    let index: { files_id: number; n: number };
-    if (error) {
-      // Collection doesn't exist so create index
-      if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
-        index = { files_id: 1, n: 1 };
-        stream.chunks.createIndex(index, { background: false, unique: true }, error => {
-          if (error) {
-            return callback(error);
-          }
+async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> {
+  const index = { files_id: 1, n: 1 };
 
-          callback();
-        });
-        return;
-      }
-      return callback(error);
-    }
-
-    let hasChunksIndex = false;
-    if (indexes) {
-      indexes.forEach((index: Document) => {
-        if (index.key) {
-          const keys = Object.keys(index.key);
-          if (keys.length === 2 && index.key.files_id === 1 && index.key.n === 1) {
-            hasChunksIndex = true;
-          }
-        }
-      });
-    }
-
-    if (hasChunksIndex) {
-      callback();
+  let indexes;
+  try {
+    indexes = await stream.chunks.listIndexes().toArray();
+  } catch (error) {
+    if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
+      indexes = [];
     } else {
-      index = { files_id: 1, n: 1 };
-      const writeConcernOptions = getWriteOptions(stream);
-
-      stream.chunks.createIndex(
-        index,
-        {
-          ...writeConcernOptions,
-          background: true,
-          unique: true
-        },
-        callback
-      );
+      throw error;
     }
+  }
+
+  const hasChunksIndex = !!indexes.find(index => {
+    const keys = Object.keys(index.key);
+    if (keys.length === 2 && index.key.files_id === 1 && index.key.n === 1) {
+      return true;
+    }
+    return false;
   });
+
+  if (!hasChunksIndex) {
+    const writeConcernOptions = getWriteOptions(stream);
+    await stream.chunks.createIndex(index, {
+      ...writeConcernOptions,
+      background: true,
+      unique: true
+    });
+  }
 }
 
 function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolean {
@@ -314,13 +299,15 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
       return false;
     }
 
-    stream.files.insertOne(filesDoc, getWriteOptions(stream), (error?: AnyError) => {
-      if (error) {
+    stream.files.insertOne(filesDoc, getWriteOptions(stream)).then(
+      () => {
+        stream.emit(GridFSBucketWriteStream.FINISH, filesDoc);
+        stream.emit(GridFSBucketWriteStream.CLOSE);
+      },
+      error => {
         return __handleError(stream, error, callback);
       }
-      stream.emit(GridFSBucketWriteStream.FINISH, filesDoc);
-      stream.emit(GridFSBucketWriteStream.CLOSE);
-    });
+    );
 
     return true;
   }
@@ -328,67 +315,39 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
   return false;
 }
 
-function checkIndexes(stream: GridFSBucketWriteStream, callback: Callback): void {
-  stream.files.findOne({}, { projection: { _id: 1 } }, (error, doc) => {
-    if (error) {
-      return callback(error);
+async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
+  const doc = await stream.files.findOne({}, { projection: { _id: 1 } });
+  if (doc != null) {
+    // If at least one document exists assume the collection has the required index
+    return;
+  }
+
+  const index = { filename: 1, uploadDate: 1 };
+
+  let indexes;
+  try {
+    indexes = await stream.files.listIndexes().toArray();
+  } catch (error) {
+    if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
+      indexes = [];
+    } else {
+      throw error;
     }
-    if (doc) {
-      return callback();
+  }
+
+  const hasFileIndex = !!indexes.find(index => {
+    const keys = Object.keys(index.key);
+    if (keys.length === 2 && index.key.filename === 1 && index.key.uploadDate === 1) {
+      return true;
     }
-
-    stream.files.listIndexes().toArray((error?: AnyError, indexes?: Document) => {
-      let index: { filename: number; uploadDate: number };
-      if (error) {
-        // Collection doesn't exist so create index
-        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
-          index = { filename: 1, uploadDate: 1 };
-          stream.files.createIndex(index, { background: false }, (error?: AnyError) => {
-            if (error) {
-              return callback(error);
-            }
-
-            checkChunksIndex(stream, callback);
-          });
-          return;
-        }
-        return callback(error);
-      }
-
-      let hasFileIndex = false;
-      if (indexes) {
-        indexes.forEach((index: Document) => {
-          const keys = Object.keys(index.key);
-          if (keys.length === 2 && index.key.filename === 1 && index.key.uploadDate === 1) {
-            hasFileIndex = true;
-          }
-        });
-      }
-
-      if (hasFileIndex) {
-        checkChunksIndex(stream, callback);
-      } else {
-        index = { filename: 1, uploadDate: 1 };
-
-        const writeConcernOptions = getWriteOptions(stream);
-
-        stream.files.createIndex(
-          index,
-          {
-            ...writeConcernOptions,
-            background: false
-          },
-          (error?: AnyError) => {
-            if (error) {
-              return callback(error);
-            }
-
-            checkChunksIndex(stream, callback);
-          }
-        );
-      }
-    });
+    return false;
   });
+
+  if (!hasFileIndex) {
+    await stream.files.createIndex(index, { background: false });
+  }
+
+  await checkChunksIndex(stream);
 }
 
 function createFilesDoc(
@@ -471,19 +430,21 @@ function doWrite(
         return false;
       }
 
-      stream.chunks.insertOne(doc, getWriteOptions(stream), (error?: AnyError) => {
-        if (error) {
+      stream.chunks.insertOne(doc, getWriteOptions(stream)).then(
+        () => {
+          --stream.state.outstandingRequests;
+          --outstandingRequests;
+
+          if (!outstandingRequests) {
+            stream.emit('drain', doc);
+            callback && callback();
+            checkDone(stream);
+          }
+        },
+        error => {
           return __handleError(stream, error);
         }
-        --stream.state.outstandingRequests;
-        --outstandingRequests;
-
-        if (!outstandingRequests) {
-          stream.emit('drain', doc);
-          callback && callback();
-          checkDone(stream);
-        }
-      });
+      );
 
       spaceRemaining = stream.chunkSizeBytes;
       stream.pos = 0;
@@ -545,13 +506,15 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boo
     return false;
   }
 
-  stream.chunks.insertOne(doc, getWriteOptions(stream), (error?: AnyError) => {
-    if (error) {
+  stream.chunks.insertOne(doc, getWriteOptions(stream)).then(
+    () => {
+      --stream.state.outstandingRequests;
+      checkDone(stream);
+    },
+    error => {
       return __handleError(stream, error);
     }
-    --stream.state.outstandingRequests;
-    checkDone(stream);
-  });
+  );
   return true;
 }
 
