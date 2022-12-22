@@ -79,5 +79,16 @@ describe('Cursor Async Iterator Tests', function () {
 
       expect(count).to.equal(1);
     });
+
+    it('cleans up cursor when breaking out of for await of loops', async function () {
+      const cursor = collection.find();
+
+      for await (const doc of cursor) {
+        expect(doc).to.exist;
+        break;
+      }
+
+      expect(cursor.closed).to.be.true;
+    });
   });
 });
