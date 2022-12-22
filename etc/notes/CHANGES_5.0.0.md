@@ -47,3 +47,17 @@ The new minimum supported Node.js version is now 14.20.1.
 
 The MongoClient option `promiseLibrary` along with the `Promise.set` export that allows specifying a custom promise library has been removed.
 This allows the driver to adopt async/await syntax which has [performance benefits](https://v8.dev/blog/fast-async) over manual promise construction.
+
+### Cursor closes on exit of for await of loops
+
+Cursors will now automatically close when exiting a for await of loop on the cursor itself.
+
+```js
+const cursor = collection.find({});
+for await (const doc of cursor) {
+  console.log(doc);
+  break;
+}
+
+cursor.closed // true
+```
