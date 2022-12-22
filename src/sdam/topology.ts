@@ -39,7 +39,6 @@ import type { Transaction } from '../transactions';
 import {
   Callback,
   ClientMetadata,
-  emitWarning,
   EventEmitterWithState,
   HostAddress,
   List,
@@ -709,13 +708,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   isDestroyed(): boolean {
     return this.s.state === STATE_CLOSED;
-  }
-
-  /**
-   * @deprecated This function is deprecated and will be removed in the next major version.
-   */
-  unref(): void {
-    emitWarning('`unref` is a noop and will be removed in the next major version');
   }
 
   // NOTE: There are many places in code where we explicitly check the last hello

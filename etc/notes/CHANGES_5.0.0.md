@@ -25,6 +25,11 @@ This means `npm` will let you know if the version of snappy you have installed i
 npm install --save snappy@7
 ```
 
+### `.unref()` removed from `Db`
+
+The `.unref()` method was a no-op and has now been removed from the Db class.
+
+
 ### @aws-sdk/credential-providers v3.201.0 or later and optional peerDependency
 
 `@aws-sdk/credential-providers` has been added to the package.json as a peerDependency that is **optional**.

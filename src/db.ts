@@ -44,7 +44,6 @@ import {
   Callback,
   DEFAULT_PK_FACTORY,
   filterOptions,
-  getTopology,
   MongoDBNamespace,
   resolveOptions
 } from './utils';
@@ -736,14 +735,6 @@ export class Db {
       new IndexInformationOperation(this, name, resolveOptions(this, options)),
       callback
     );
-  }
-
-  /**
-   * Unref all sockets
-   * @deprecated This function is deprecated and will be removed in the next major version.
-   */
-  unref(): void {
-    getTopology(this).unref();
   }
 
   /**
