@@ -1,7 +1,7 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
-import { MongoCompatibilityError, MONGODB_ERROR_CODES, MongoServerError } from '../error';
+import { MongoCompatibilityError, MONGODB_ERROR_CODES, MongoError } from '../error';
 import type { OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -320,22 +320,23 @@ export class EnsureIndexOperation extends CreateIndexOperation {
   override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
     const indexName = this.indexes[0].name;
     const cursor = this.db.collection(this.collectionName).listIndexes({ session });
-    cursor.toArray((err, indexes) => {
-      /// ignore "NamespaceNotFound" errors
-      if (err && (err as MongoServerError).code !== MONGODB_ERROR_CODES.NamespaceNotFound) {
-        return callback(err);
-      }
-
-      if (indexes) {
+    cursor.toArray().then(
+      indexes => {
         indexes = Array.isArray(indexes) ? indexes : [indexes];
         if (indexes.some(index => index.name === indexName)) {
           callback(undefined, indexName);
           return;
         }
+        super.execute(server, session, callback);
+      },
+      error => {
+        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
+          // ignore "NamespaceNotFound" errors
+          return super.execute(server, session, callback);
+        }
+        return callback(error);
       }
-
-      super.execute(server, session, callback);
-    });
+    );
   }
 }
 

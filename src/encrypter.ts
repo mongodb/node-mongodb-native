@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+
 import { deserialize, serialize } from './bson';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
@@ -114,7 +115,11 @@ export class Encrypter {
     this.autoEncrypter.teardown(!!force, e => {
       const internalClient = this[kInternalClient];
       if (internalClient != null && client !== internalClient) {
-        return internalClient.close(force, callback);
+        internalClient.close(force).then(
+          () => callback(),
+          error => callback(error)
+        );
+        return;
       }
       callback(e);
     });
