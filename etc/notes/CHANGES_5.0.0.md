@@ -16,6 +16,11 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### Bulk results no longer contain `lastOp()` and `opTime`
+
+The `lastOp()` method and `opTime` property on the `BulkResult` have been removed. Merging of bulk results
+no longer normalizes the values. There is no new method or property to replace them.
+
 ### Snappy v7.x.x or later and optional peerDependency
 
 `snappy` compression has been added to the package.json as a peerDependency that is **optional**.
