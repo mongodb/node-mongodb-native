@@ -16,6 +16,11 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### salveOk options removed
+
+The deprecated `slaveOk` option and `slaveOk()` method on the `Collection` class have been removed. Please
+now use `secondaryOk` as the replacement for the option and the method.
+
 ### Snappy v7.x.x or later and optional peerDependency
 
 `snappy` compression has been added to the package.json as a peerDependency that is **optional**.
