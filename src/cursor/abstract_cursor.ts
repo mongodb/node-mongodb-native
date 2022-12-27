@@ -58,14 +58,6 @@ export const CURSOR_FLAGS = [
   'partial'
 ] as const;
 
-/** @public
- * @deprecated This interface is deprecated */
-export interface CursorCloseOptions {
-  /** Bypass calling killCursors when closing the cursor. */
-  /** @deprecated  the skipKillCursors option is deprecated */
-  skipKillCursors?: boolean;
-}
-
 /** @public */
 export interface CursorStreamOptions {
   /** A transformation method applied to each document emitted by the stream */
@@ -447,18 +439,7 @@ export abstract class AbstractCursor<
   close(): Promise<void>;
   /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   close(callback: Callback): void;
-  /**
-   * @deprecated options argument is deprecated
-   */
-  close(options: CursorCloseOptions): Promise<void>;
-  /**
-   * @deprecated options argument is deprecated. Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance
-   */
-  close(options: CursorCloseOptions, callback: Callback): void;
-  close(options?: CursorCloseOptions | Callback, callback?: Callback): Promise<void> | void {
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
-
+  close(callback?: Callback): Promise<void> | void {
     const needsToEmitClosed = !this[kClosed];
     this[kClosed] = true;
 
