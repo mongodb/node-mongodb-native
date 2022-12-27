@@ -1,11 +1,4 @@
-import {
-  BSONSerializeOptions,
-  Document,
-  Long,
-  ObjectId,
-  resolveBSONOptions,
-  Timestamp
-} from '../bson';
+import { BSONSerializeOptions, Document, ObjectId, resolveBSONOptions } from '../bson';
 import type { Collection } from '../collection';
 import {
   AnyError,
@@ -146,7 +139,6 @@ export interface BulkResult {
   nModified: number;
   nRemoved: number;
   upserted: Document[];
-  opTime?: Document;
 }
 
 /**
@@ -300,15 +292,6 @@ export class BulkWriteResult {
     return this.result.writeErrors;
   }
 
-  /**
-   * Retrieve lastOp if available
-   *
-   * @deprecated Will be removed in 5.0
-   */
-  getLastOp(): Document | undefined {
-    return this.result.opTime;
-  }
-
   /** Retrieve the write concern error if one exists */
   getWriteConcernError(): WriteConcernError | undefined {
     if (this.result.writeConcernErrors.length === 0) {
@@ -449,12 +432,6 @@ export class WriteError {
   }
 }
 
-/** Converts the number to a Long or returns it. */
-function longOrConvert(value: number | Long | Timestamp): Long | Timestamp {
-  // TODO(NODE-2674): Preserve int64 sent from MongoDB
-  return typeof value === 'number' ? Long.fromNumber(value) : value;
-}
-
 /** Merges results into shared data structure */
 export function mergeBatchResults(
   batch: Batch,
@@ -489,44 +466,6 @@ export function mergeBatchResults(
     return;
   } else if (result.ok === 0 && bulkResult.ok === 0) {
     return;
-  }
-
-  // The server write command specification states that lastOp is an optional
-  // mongod only field that has a type of timestamp. Across various scarce specs
-  // where opTime is mentioned, it is an "opaque" object that can have a "ts" and
-  // "t" field with Timestamp and Long as their types respectively.
-  // The "lastOp" field of the bulk write result is never mentioned in the driver
-  // specifications or the bulk write spec, so we should probably just keep its
-  // value consistent since it seems to vary.
-  // See: https://github.com/mongodb/specifications/blob/master/source/driver-bulk-update.rst#results-object
-  if (result.opTime || result.lastOp) {
-    let opTime = result.lastOp || result.opTime;
-
-    // If the opTime is a Timestamp, convert it to a consistent format to be
-    // able to compare easily. Converting to the object from a timestamp is
-    // much more straightforward than the other direction.
-    if (opTime._bsontype === 'Timestamp') {
-      opTime = { ts: opTime, t: Long.ZERO };
-    }
-
-    // If there's no lastOp, just set it.
-    if (!bulkResult.opTime) {
-      bulkResult.opTime = opTime;
-    } else {
-      // First compare the ts values and set if the opTimeTS value is greater.
-      const lastOpTS = longOrConvert(bulkResult.opTime.ts);
-      const opTimeTS = longOrConvert(opTime.ts);
-      if (opTimeTS.greaterThan(lastOpTS)) {
-        bulkResult.opTime = opTime;
-      } else if (opTimeTS.equals(lastOpTS)) {
-        // If the ts values are equal, then compare using the t values.
-        const lastOpT = longOrConvert(bulkResult.opTime.t);
-        const opTimeT = longOrConvert(opTime.t);
-        if (opTimeT.greaterThan(lastOpT)) {
-          bulkResult.opTime = opTime;
-        }
-      }
-    }
   }
 
   // If we have an insert Batch type
