@@ -25,6 +25,11 @@ This means `npm` will let you know if the version of snappy you have installed i
 npm install --save snappy@7
 ```
 
+### `.unref()` removed from `Db`
+
+The `.unref()` method was a no-op and has now been removed from the Db class.
+
+
 ### @aws-sdk/credential-providers v3.201.0 or later and optional peerDependency
 
 `@aws-sdk/credential-providers` has been added to the package.json as a peerDependency that is **optional**.
@@ -42,3 +47,17 @@ The new minimum supported Node.js version is now 14.20.1.
 
 The MongoClient option `promiseLibrary` along with the `Promise.set` export that allows specifying a custom promise library has been removed.
 This allows the driver to adopt async/await syntax which has [performance benefits](https://v8.dev/blog/fast-async) over manual promise construction.
+
+### Cursor closes on exit of for await of loops
+
+Cursors will now automatically close when exiting a for await of loop on the cursor itself.
+
+```js
+const cursor = collection.find({});
+for await (const doc of cursor) {
+  console.log(doc);
+  break;
+}
+
+cursor.closed // true
+```

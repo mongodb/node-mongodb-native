@@ -52,15 +52,10 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
     }
 
     // Execute the bulk
-    bulk.execute({ ...options, session }, (err, r) => {
-      // We have connection level error
-      if (!r && err) {
-        return callback(err);
-      }
-
-      // Return the results
-      callback(undefined, r);
-    });
+    bulk.execute({ ...options, session }).then(
+      result => callback(undefined, result),
+      error => callback(error)
+    );
   }
 }
 

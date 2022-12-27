@@ -301,29 +301,37 @@ export abstract class AbstractCursor<
       return;
     }
 
-    while (true) {
-      const document = await this.next();
+    try {
+      while (true) {
+        const document = await this.next();
 
-      // Intentional strict null check, because users can map cursors to falsey values.
-      // We allow mapping to all values except for null.
-      // eslint-disable-next-line no-restricted-syntax
-      if (document === null) {
-        if (!this.closed) {
-          const message =
-            'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
+        // Intentional strict null check, because users can map cursors to falsey values.
+        // We allow mapping to all values except for null.
+        // eslint-disable-next-line no-restricted-syntax
+        if (document === null) {
+          if (!this.closed) {
+            const message =
+              'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
 
-          await cleanupCursorAsync(this, { needsToEmitClosed: true }).catch(() => null);
+            await cleanupCursorAsync(this, { needsToEmitClosed: true }).catch(() => null);
 
-          throw new MongoAPIError(message);
+            throw new MongoAPIError(message);
+          }
+          break;
         }
-        break;
+
+        yield document;
+
+        if (this[kId] === Long.ZERO) {
+          // Cursor exhausted
+          break;
+        }
       }
-
-      yield document;
-
-      if (this[kId] === Long.ZERO) {
-        // Cursor exhausted
-        break;
+    } finally {
+      // Only close the cursor if it has not already been closed. This finally clause handles
+      // the case when a user would break out of a for await of loop early.
+      if (!this.closed) {
+        await this.close().catch(() => null);
       }
     }
   }
@@ -841,7 +849,10 @@ function cleanupCursor(
 
     if (session) {
       if (session.owner === cursor) {
-        return session.endSession({ error }, callback);
+        session.endSession({ error }).finally(() => {
+          callback();
+        });
+        return;
       }
 
       if (!session.inTransaction()) {
@@ -855,10 +866,11 @@ function cleanupCursor(
   function completeCleanup() {
     if (session) {
       if (session.owner === cursor) {
-        return session.endSession({ error }, () => {
+        session.endSession({ error }).finally(() => {
           cursor.emit(AbstractCursor.CLOSE);
           callback();
         });
+        return;
       }
 
       if (!session.inTransaction()) {
@@ -872,11 +884,13 @@ function cleanupCursor(
 
   cursor[kKilled] = true;
 
-  return executeOperation(
+  executeOperation(
     cursor[kClient],
-    new KillCursorsOperation(cursorId, cursorNs, server, { session }),
-    completeCleanup
-  );
+    new KillCursorsOperation(cursorId, cursorNs, server, { session })
+  ).finally(() => {
+    completeCleanup();
+  });
+  return;
 }
 
 /** @internal */

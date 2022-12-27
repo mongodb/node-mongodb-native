@@ -29,14 +29,17 @@ export class OptionsOperation extends AbstractOperation<Document> {
         { name: coll.collectionName },
         { ...this.options, nameOnly: false, readPreference: this.readPreference, session }
       )
-      .toArray((err, collections) => {
-        if (err || !collections) return callback(err);
-        if (collections.length === 0) {
-          // TODO(NODE-3485)
-          return callback(new MongoAPIError(`collection ${coll.namespace} not found`));
-        }
+      .toArray()
+      .then(
+        collections => {
+          if (collections.length === 0) {
+            // TODO(NODE-3485)
+            return callback(new MongoAPIError(`collection ${coll.namespace} not found`));
+          }
 
-        callback(err, collections[0].options);
-      });
+          callback(undefined, collections[0].options);
+        },
+        error => callback(error)
+      );
   }
 }

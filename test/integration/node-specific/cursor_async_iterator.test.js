@@ -1,6 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
+const sinon = require('sinon');
 
 describe('Cursor Async Iterator Tests', function () {
   context('default promise library', function () {
@@ -36,6 +37,7 @@ describe('Cursor Async Iterator Tests', function () {
       }
 
       expect(counter).to.equal(1000);
+      expect(cursor.closed).to.be.true;
     });
 
     it('should be able to use a for-await loop on an aggregation cursor', async function () {
@@ -48,6 +50,7 @@ describe('Cursor Async Iterator Tests', function () {
       }
 
       expect(counter).to.equal(1000);
+      expect(cursor.closed).to.be.true;
     });
 
     it('should be able to use a for-await loop on a command cursor', {
@@ -64,6 +67,8 @@ describe('Cursor Async Iterator Tests', function () {
         }
 
         expect(counter).to.equal(indexes.length);
+        expect(cursor1.closed).to.be.true;
+        expect(cursor2.closed).to.be.true;
       }
     });
 
@@ -78,6 +83,36 @@ describe('Cursor Async Iterator Tests', function () {
       }
 
       expect(count).to.equal(1);
+      expect(cursor.closed).to.be.true;
+    });
+
+    it('cleans up cursor when breaking out of for await of loops', async function () {
+      const cursor = collection.find();
+
+      for await (const doc of cursor) {
+        expect(doc).to.exist;
+        break;
+      }
+
+      expect(cursor.closed).to.be.true;
+    });
+
+    it('returns when attempting to reuse the cursor after a break', async function () {
+      const cursor = collection.find();
+      const spy = sinon.spy(cursor);
+
+      for await (const doc of cursor) {
+        expect(doc).to.exist;
+        break;
+      }
+
+      expect(cursor.closed).to.be.true;
+
+      for await (const doc of cursor) {
+        expect.fail('Async generator returns immediately if cursor is closed', doc);
+      }
+      // cursor.close() should only be called once.
+      expect(spy.close.calledOnce).to.be.true;
     });
   });
 });
