@@ -133,6 +133,17 @@ Add code to connect to the server and the database **myProject**:
 > However, all async API calls support an optional callback as the final argument,
 > if a callback is provided a Promise will not be returned.
 
+> **NOTE** Resolving DNS Connection issues
+>
+> Node18 changed the default dns resolution ordering from ipv4 first always to the ordering
+> that dns provider returns them in.  In some environments, this can result in `localhost` resolving to
+> an ipv6 address instead of ipv4 and can result in a failure to connect to the server.
+>
+> This can be resolved by:
+> - specifying the ip address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
+> - launching mongod or mongos with the ipv6 flag enabled (https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6)
+> - using a host of `127.0.0.1` in place of localhost
+
 ```js
 const { MongoClient } = require('mongodb');
 // or as an es module:
