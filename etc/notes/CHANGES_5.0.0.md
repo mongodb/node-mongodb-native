@@ -21,6 +21,16 @@ The following is a detailed collection of the changes in the major v5 release of
 The deprecated `slaveOk` option and `slaveOk()` method on the `Collection` class have been removed. Please
 now use `secondaryOk` as the replacement for the option and the method.
 
+### Bulk results no longer contain `lastOp()` and `opTime`
+
+The `lastOp()` method and `opTime` property on the `BulkResult` have been removed. Merging of bulk results
+no longer normalizes the values. There is no new method or property to replace them.
+
+### `CursorCloseOptions` removed
+
+When calling `close()` on a `Cursor`, no more options can be provided. This removes support for the
+`skipKillCursors` option that was unused.
+
 ### Snappy v7.x.x or later and optional peerDependency
 
 `snappy` compression has been added to the package.json as a peerDependency that is **optional**.
