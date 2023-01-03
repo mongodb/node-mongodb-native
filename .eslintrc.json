@@ -169,6 +169,7 @@
           {
             "patterns": [
               "**/../lib/**",
+              "**/../src/**",
               "mongodb-mock-server"
             ]
           }
@@ -220,6 +221,16 @@
         "@typescript-eslint/return-await": [
           "error",
           "in-try-catch"
+        ],
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              "**/../lib/**",
+              "**/../src/**",
+              "mongodb-mock-server"
+            ]
+          }
         ]
       }
     },
