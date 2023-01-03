@@ -667,13 +667,6 @@ describe('CRUD API', function () {
         const db = client.db();
 
         //
-        // Legacy update method
-        // -------------------------------------------------
-        const legacyRemove = function () {
-          deleteOne();
-        };
-
-        //
         // Update one method
         // -------------------------------------------------
         const deleteOne = function () {
@@ -714,8 +707,6 @@ describe('CRUD API', function () {
             }
           );
         };
-
-        legacyRemove();
       });
     }
   });

@@ -323,7 +323,7 @@ describe('crud - insert', function () {
           db.createCollection(
             'users',
             getResult(function (user_collection) {
-              user_collection.remove({}, configuration.writeConcernMax(), function (err) {
+              user_collection.deleteMany({}, configuration.writeConcernMax(), function (err) {
                 expect(err).to.not.exist;
 
                 //first, create a user object
@@ -804,7 +804,7 @@ describe('crud - insert', function () {
                 expect(err).to.not.exist;
                 test.ok(result);
 
-                collection.remove(
+                collection.deleteMany(
                   { a: 2 },
                   configuration.writeConcernMax(),
                   function (err, result) {
@@ -1520,7 +1520,7 @@ describe('crud - insert', function () {
         client.connect(function (err, client) {
           var db = client.db(configuration.db);
           var collection = db.collection('gh-completely1');
-          collection.remove({ a: 1 }, { writeConcern: { w: 0 } }, cb);
+          collection.deleteMany({ a: 1 }, { writeConcern: { w: 0 } }, cb);
         });
       }
     });

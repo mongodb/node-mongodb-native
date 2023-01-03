@@ -35,7 +35,7 @@ describe('Remove', function () {
               expect(count).to.equal(2);
 
               // Clear the collection
-              collection.remove({}, { writeConcern: { w: 1 } }, function (err, r) {
+              collection.deleteMany({}, { writeConcern: { w: 1 } }, function (err, r) {
                 expect(err).to.not.exist;
                 expect(r).property('deletedCount').to.equal(2);
 
@@ -81,7 +81,7 @@ describe('Remove', function () {
               expect(err).to.not.exist;
 
               // Clear the collection
-              collection.remove(
+              collection.deleteMany(
                 { address: /485 7th ave/ },
                 { writeConcern: { w: 1 } },
                 function (err, r) {
@@ -92,6 +92,52 @@ describe('Remove', function () {
                     expect(count).to.equal(0);
 
                     // Let's close the db
+                    client.close(done);
+                  });
+                }
+              );
+            }
+          );
+        });
+      });
+    }
+  });
+
+  it('should correctly remove only first document', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    test: function (done) {
+      const self = this;
+      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+        maxPoolSize: 1
+      });
+
+      client.connect(function (err, client) {
+        const db = client.db(self.configuration.db);
+        expect(err).to.not.exist;
+
+        db.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function (err) {
+          expect(err).to.not.exist;
+
+          const collection = db.collection('shouldCorrectlyRemoveOnlyFirstDocument');
+
+          collection.insert(
+            [{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }],
+            { writeConcern: { w: 1 } },
+            function (err) {
+              expect(err).to.not.exist;
+
+              // Remove the first
+              collection.deleteMany(
+                { a: 1 },
+                { writeConcern: { w: 1 }, single: true },
+                function (err, r) {
+                  expect(r).property('deletedCount').to.equal(1);
+
+                  collection.find({ a: 1 }).count(function (err, result) {
+                    expect(result).to.equal(3);
                     client.close(done);
                   });
                 }

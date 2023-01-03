@@ -235,7 +235,7 @@ describe('Collection', function () {
           expect(err).to.not.exist;
           collection.insertOne({ c: 1 }, configuration.writeConcernMax(), err => {
             expect(err).to.not.exist;
-            collection.remove({ a: 1 }, configuration.writeConcernMax(), err => {
+            collection.deleteMany({ a: 1 }, configuration.writeConcernMax(), err => {
               expect(err).to.not.exist;
               // Let's perform a count
               collection.countDocuments((err, count) => {
