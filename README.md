@@ -135,9 +135,9 @@ Add code to connect to the server and the database **myProject**:
 
 > **NOTE:** Resolving DNS Connection issues
 >
-> Node18 changed the default dns resolution ordering from ipv4 first always to the ordering
-> that dns provider returns them in.  In some environments, this can result in `localhost` resolving to
-> an ipv6 address instead of ipv4 and can result in a failure to connect to the server.
+> Node.js 18 changed the default DNS resolution ordering from always prioritizing ipv4 to the ordering
+> returned by the DNS provider.  In some environments, this can result in `localhost` resolving to
+> an ipv6 address instead of ipv4 and a consequent failure to connect to the server.
 >
 > This can be resolved by:
 > - specifying the ip address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
