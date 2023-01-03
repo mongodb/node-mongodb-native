@@ -16,6 +16,11 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### salveOk options removed
+
+The deprecated `slaveOk` option and `slaveOk()` method on the `Collection` class have been removed. Please
+now use `secondaryOk` as the replacement for the option and the method.
+
 ### Bulk results no longer contain `lastOp()` and `opTime`
 
 The `lastOp()` method and `opTime` property on the `BulkResult` have been removed. Merging of bulk results
