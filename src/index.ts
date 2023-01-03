@@ -257,7 +257,6 @@ export type { MONGO_CLIENT_EVENTS } from './constants';
 export type {
   AbstractCursorEvents,
   AbstractCursorOptions,
-  CursorCloseOptions,
   CursorFlag,
   CursorStreamOptions
 } from './cursor/abstract_cursor';
