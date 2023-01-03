@@ -239,7 +239,7 @@ describe('monitoring', function () {
         if (docs.length === 2) {
           expect(docs[0]).to.have.property(LEGACY_HELLO_COMMAND, 1);
           expect(docs[0]).to.have.property('helloOk', true);
-          expect(docs[1]).to.have.property('hello', true);
+          expect(docs[1]).to.have.property('hello', 1);
           done();
         } else if (isHello(doc)) {
           setTimeout(() => request.reply(Object.assign({ helloOk: true }, mock.HELLO)), 250);
