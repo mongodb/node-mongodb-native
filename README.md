@@ -133,7 +133,7 @@ Add code to connect to the server and the database **myProject**:
 > However, all async API calls support an optional callback as the final argument,
 > if a callback is provided a Promise will not be returned.
 
-> **NOTE** Resolving DNS Connection issues
+> **NOTE:** Resolving DNS Connection issues
 >
 > Node18 changed the default dns resolution ordering from ipv4 first always to the ordering
 > that dns provider returns them in.  In some environments, this can result in `localhost` resolving to
