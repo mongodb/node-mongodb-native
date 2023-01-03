@@ -238,7 +238,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     const isAwaitable = topologyVersion != null;
 
     const cmd = {
-      [serverApi?.version || helloOk ? 'hello' : LEGACY_HELLO_COMMAND]: true,
+      [serverApi?.version || helloOk ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
       ...(isAwaitable && topologyVersion
         ? { maxAwaitTimeMS, topologyVersion: makeTopologyVersion(topologyVersion) }
         : {})

@@ -120,6 +120,32 @@ describe('Connect Tests', function () {
   context('prepareHandshakeDocument', () => {
     const prepareHandshakeDocument = promisify(prepareHandshakeDocumentCb);
 
+    context('when serverApi.version is present', () => {
+      const options = {};
+      const authContext = {
+        connection: { serverApi: { version: '1' } },
+        options
+      };
+
+      it('sets the hello parameter to 1', async () => {
+        const handshakeDocument = await prepareHandshakeDocument(authContext);
+        expect(handshakeDocument).to.have.property('hello', 1);
+      });
+    });
+
+    context('when serverApi is not present', () => {
+      const options = {};
+      const authContext = {
+        connection: {},
+        options
+      };
+
+      it('sets the legacy hello parameter to 1', async () => {
+        const handshakeDocument = await prepareHandshakeDocument(authContext);
+        expect(handshakeDocument).to.have.property(LEGACY_HELLO_COMMAND, 1);
+      });
+    });
+
     context('loadBalanced option', () => {
       context('when loadBalanced is not set as an option', () => {
         it('does not set loadBalanced on the handshake document', async () => {
