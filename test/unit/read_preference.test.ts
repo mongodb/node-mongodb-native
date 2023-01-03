@@ -139,7 +139,6 @@ describe('class ReadPreference', function () {
         readPreference: PRIMARY
       });
       expect(readPreference.secondaryOk()).to.be.false;
-      expect(readPreference.slaveOk()).to.be.false;
     });
 
     it('should be true when readPreference is Primary Preferred', function () {
@@ -147,7 +146,6 @@ describe('class ReadPreference', function () {
         readPreference: PRIMARY_PREFERRED
       });
       expect(readPreference.secondaryOk()).to.be.true;
-      expect(readPreference.slaveOk()).to.be.true;
     });
 
     it('should be true when readPreference is Secondary', function () {
@@ -155,7 +153,6 @@ describe('class ReadPreference', function () {
         readPreference: SECONDARY
       });
       expect(readPreference.secondaryOk()).to.be.true;
-      expect(readPreference.slaveOk()).to.be.true;
     });
 
     it('should be true when readPreference is Secondary Preferred', function () {
@@ -163,7 +160,6 @@ describe('class ReadPreference', function () {
         readPreference: SECONDARY_PREFERRED
       });
       expect(readPreference.secondaryOk()).to.be.true;
-      expect(readPreference.slaveOk()).to.be.true;
     });
 
     it('should be true when readPreference is Nearest', function () {
@@ -171,7 +167,6 @@ describe('class ReadPreference', function () {
         readPreference: NEAREST
       });
       expect(readPreference.secondaryOk()).to.be.true;
-      expect(readPreference.slaveOk()).to.be.true;
     });
   });
 });

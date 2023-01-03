@@ -185,14 +185,6 @@ export class Db {
   }
 
   /**
-   * slaveOk specified
-   * @deprecated Use secondaryOk instead
-   */
-  get slaveOk(): boolean {
-    return this.secondaryOk;
-  }
-
-  /**
    * Check if a secondary can be used (because the read preference is *not* set to primary)
    */
   get secondaryOk(): boolean {
