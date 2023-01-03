@@ -76,3 +76,8 @@ for await (const doc of cursor) {
 
 cursor.closed // true
 ```
+
+### Driver now sends `1` instead of `true` for hello commands
+
+Everywhere the driver sends a `hello` command (initial handshake and monitoring), it will now pass the command value as `1` instead of the
+previous `true` for spec compliance.
