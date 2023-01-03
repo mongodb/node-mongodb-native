@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import * as BSON from '../../../../src/bson';
+import * as BSON from '../../../mongodb';
 
 const EXPECTED_VALIDATION_DISABLED_ARGUMENT = {
   utf8: false

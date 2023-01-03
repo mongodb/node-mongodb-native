@@ -29,7 +29,7 @@ import type {
   ChangeStreamRefineCollectionShardKeyDocument,
   ChangeStreamReshardCollectionDocument,
   ChangeStreamShardCollectionDocument
-} from '../../src/change_stream';
+} from '../mongodb';
 
 declare const changeStreamOptions: ChangeStreamOptions;
 type ChangeStreamOperationType =

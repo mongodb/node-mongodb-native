@@ -2,7 +2,7 @@
 
 const MongoClient = require('../../src').MongoClient;
 const expect = require('chai').expect;
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../mongodb');
 
 const OCSP_TLS_SHOULD_SUCCEED = process.env.OCSP_TLS_SHOULD_SUCCEED;
 const CA_FILE = process.env.CA_FILE;

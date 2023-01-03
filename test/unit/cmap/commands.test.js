@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { Response } = require('../../../src/cmap/commands');
+const { Response } = require('../../mongodb');
 
 describe('commands', function () {
   describe('Response', function () {

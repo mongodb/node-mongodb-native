@@ -1,6 +1,6 @@
 import { expectType } from 'tsd';
 
-import { MongoClient, ObjectId } from '../../../../src/index';
+import { MongoClient, ObjectId } from '../../../mongodb';
 
 // test collection.distinct functions
 interface Collection {

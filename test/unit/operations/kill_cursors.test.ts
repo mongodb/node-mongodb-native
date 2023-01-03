@@ -2,13 +2,16 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { promisify } from 'util';
 
-import { Long } from '../../../src/bson';
-import { MongoRuntimeError } from '../../../src/error';
-import { KillCursorsOperation } from '../../../src/operations/kill_cursors';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
-import { MongoDBNamespace, ns } from '../../../src/utils';
+import {
+  KillCursorsOperation,
+  Long,
+  MongoDBNamespace,
+  MongoRuntimeError,
+  ns,
+  Server,
+  ServerDescription,
+  Topology
+} from '../../mongodb';
 
 describe('class KillCursorsOperation', () => {
   afterEach(function () {

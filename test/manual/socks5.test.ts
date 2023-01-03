@@ -2,8 +2,7 @@ import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
 
 import { MongoClient } from '../../src';
-import { LEGACY_HELLO_COMMAND } from '../../src/constants';
-import { MongoParseError } from '../../src/error';
+import { LEGACY_HELLO_COMMAND, MongoParseError } from '../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../tools/runner/hooks/configuration';
 
 /**

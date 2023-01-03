@@ -9,7 +9,7 @@ import {
   MongoServerError,
   MongoWriteConcernError
 } from '../../../src';
-import { Server } from '../../../src/sdam/server';
+import { Server } from '../../mongodb';
 
 describe('Retryable Writes Spec Prose', () => {
   describe('1. Test that retryable writes raise an exception when using the MMAPv1 storage engine.', () => {

@@ -2,9 +2,7 @@ import { expect } from 'chai';
 import { on, once } from 'events';
 import { Readable, Writable } from 'stream';
 
-import { Msg } from '../../../src/cmap/commands';
-import { MessageStream } from '../../../src/cmap/message_stream';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { LEGACY_HELLO_COMMAND, MessageStream, Msg } from '../../mongodb';
 import { bufferToStream, generateOpMsgBuffer } from '../../tools/utils';
 
 describe('MessageStream', function () {

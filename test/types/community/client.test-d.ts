@@ -10,7 +10,7 @@ import {
   ReadPreference,
   ReadPreferenceMode,
   W
-} from '../../../src/index';
+} from '../../mongodb';
 
 // TODO(NODE-3348): Improve the tests to expectType assertions
 

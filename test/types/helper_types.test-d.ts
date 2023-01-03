@@ -1,6 +1,5 @@
 import { expectAssignable, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
-import { Decimal128, Document, Double, Int32, Long } from '../../src/index';
 import type {
   AcceptedFields,
   FilterOperations,
@@ -12,7 +11,8 @@ import type {
   NumericType,
   OneOrMore,
   OnlyFieldsOfType
-} from '../../src/mongo_types';
+} from '../mongodb';
+import { Decimal128, Document, Double, Int32, Long } from '../mongodb';
 
 expectType<IsAny<any, true, false>>(true);
 expectNotType<IsAny<number, true, false>>(true);

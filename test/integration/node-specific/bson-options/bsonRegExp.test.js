@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { BSONRegExp } = require('../../../../src/index');
+const { BSONRegExp } = require('../../../mongodb');
 
 describe('BSONRegExp', () => {
   describe('bsonRegExp option', () => {

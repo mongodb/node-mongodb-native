@@ -3,7 +3,7 @@
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
 const { MongoClient } = require('../../../src');
-const { isHello } = require('../../../src/utils');
+const { isHello } = require('../../mongodb');
 
 describe('Bulk Writes', function () {
   const test = {};

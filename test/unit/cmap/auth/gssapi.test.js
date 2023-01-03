@@ -7,7 +7,7 @@ const {
   GSSAPICanonicalizationValue,
   performGSSAPICanonicalizeHostName,
   resolveCname
-} = require('../../../../src/cmap/auth/gssapi');
+} = require('../../../mongodb');
 
 const expect = chai.expect;
 chai.use(sinonChai);

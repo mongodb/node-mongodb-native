@@ -13,9 +13,7 @@ import {
   ServerType,
   TopologyType
 } from '../../../src';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
+import { Server, ServerDescription, Topology } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 const handledErrors = [

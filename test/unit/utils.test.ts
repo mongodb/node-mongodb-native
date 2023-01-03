@@ -1,19 +1,19 @@
 import { expect } from 'chai';
 
-import { LEGACY_HELLO_COMMAND } from '../../src/constants';
-import { MongoRuntimeError } from '../../src/error';
-import { ObjectId } from '../../src/index';
 import {
   BufferPool,
   compareObjectId,
   eachAsync,
   HostAddress,
   isHello,
+  LEGACY_HELLO_COMMAND,
   List,
   maybeCallback,
   MongoDBNamespace,
+  MongoRuntimeError,
+  ObjectId,
   shuffle
-} from '../../src/utils';
+} from '../mongodb';
 
 describe('driver utils', function () {
   context('eachAsync()', function () {

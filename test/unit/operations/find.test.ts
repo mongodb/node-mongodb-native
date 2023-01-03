@@ -2,11 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { promisify } from 'util';
 
-import { FindOperation } from '../../../src/operations/find';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
-import { ns } from '../../../src/utils';
+import { FindOperation, ns, Server, ServerDescription, Topology } from '../../mongodb';
 
 describe('FindOperation', function () {
   const namespace = ns('db.coll');

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { MongoClient } from '../../src';
-import { isHello } from '../../src/utils';
+import { isHello } from '../mongodb';
 import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {

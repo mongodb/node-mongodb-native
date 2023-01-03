@@ -1,10 +1,10 @@
 'use strict';
-const { Topology } = require('../../../src/sdam/topology');
-const { ServerType, TopologyType } = require('../../../src/sdam/common');
-const { ServerDescription } = require('../../../src/sdam/server_description');
-const { ReadPreference } = require('../../../src/read_preference');
-const { MongoServerSelectionError } = require('../../../src/error');
-const ServerSelectors = require('../../../src/sdam/server_selection');
+const { Topology } = require('../../mongodb');
+const { ServerType, TopologyType } = require('../../mongodb');
+const { ServerDescription } = require('../../mongodb');
+const { ReadPreference } = require('../../mongodb');
+const { MongoServerSelectionError } = require('../../mongodb');
+const ServerSelectors = require('../../mongodb');
 
 const sinon = require('sinon');
 const { expect } = require('chai');

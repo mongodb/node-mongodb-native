@@ -2,11 +2,8 @@
 import { expect } from 'chai';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
-import { MONGODB_ERROR_CODES } from '../../../src/error';
-import type { MongoClient } from '../../../src/mongo_client';
-import { ReadPreference } from '../../../src/read_preference';
-import { TopologyType } from '../../../src/sdam/common';
-import { ns } from '../../../src/utils';
+import type { MongoClient } from '../../mongodb';
+import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mongodb';
 import { ejson } from '../utils';
 import { EntitiesMap, UnifiedMongoClient } from './entities';
 import { matchesEvents } from './match';

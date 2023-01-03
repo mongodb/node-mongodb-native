@@ -1,4 +1,4 @@
-import { MongoClient } from '../../../../src/index';
+import { MongoClient } from '../../../mongodb';
 
 // Declare emit function to be called inside map function
 declare function emit(key: any, value: any): void;

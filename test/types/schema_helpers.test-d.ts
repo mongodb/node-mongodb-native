@@ -9,7 +9,7 @@ import type {
   OptionalUnlessRequiredId,
   WithId,
   WithoutId
-} from '../../src/mongo_types';
+} from '../mongodb';
 
 /** ----------------------------------------------------------------------
  * InferIdType

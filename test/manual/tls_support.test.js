@@ -1,6 +1,6 @@
 'use strict';
 const { MongoClient } = require('../../src');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../mongodb');
 
 const REQUIRED_ENV = ['MONGODB_URI', 'SSL_KEY_FILE', 'SSL_CA_FILE'];
 

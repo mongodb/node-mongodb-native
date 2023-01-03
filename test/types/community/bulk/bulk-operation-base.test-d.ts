@@ -1,9 +1,10 @@
 import { expectType } from 'tsd';
 
-import { Batch, BulkOperationBase } from '../../../../src/bulk/common';
 import {
   AnyError,
+  Batch,
   BatchType,
+  BulkOperationBase,
   BulkWriteOptions,
   BulkWriteResult,
   Callback,
@@ -11,7 +12,7 @@ import {
   Document,
   MongoClient,
   UpdateStatement
-} from '../../../../src/index';
+} from '../../../mongodb';
 
 const client = new MongoClient('');
 const db = client.db('test');

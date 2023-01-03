@@ -1,14 +1,14 @@
 'use strict';
 
-const { ConnectionPool } = require('../../../src/cmap/connection_pool');
-const { WaitQueueTimeoutError } = require('../../../src/cmap/errors');
+const { ConnectionPool } = require('../../mongodb');
+const { WaitQueueTimeoutError } = require('../../mongodb');
 const mock = require('../../tools/mongodb-mock/index');
-const cmapEvents = require('../../../src/cmap/connection_pool_events');
+const cmapEvents = require('../../mongodb');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const { setImmediate } = require('timers');
-const { ns, isHello } = require('../../../src/utils');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { ns, isHello } = require('../../mongodb');
+const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
 
 describe('Connection Pool', function () {

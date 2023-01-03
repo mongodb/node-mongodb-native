@@ -3,7 +3,7 @@ const { Long } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
 const { ReadPreference } = require('../../../src');
-const { isHello } = require('../../../src/utils');
+const { isHello } = require('../../mongodb');
 
 const test = {};
 // TODO (NODE-3799): convert these to run against a real server

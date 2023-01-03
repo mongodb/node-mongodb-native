@@ -2,7 +2,7 @@
 const { Timestamp } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
-const { isHello } = require('../../../src/utils');
+const { isHello } = require('../../mongodb');
 const { MongoClient } = require('../../../src');
 
 const test = {};

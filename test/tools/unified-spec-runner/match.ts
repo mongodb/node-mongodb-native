@@ -16,9 +16,7 @@ import {
 import {
   CommandFailedEvent,
   CommandStartedEvent,
-  CommandSucceededEvent
-} from '../../../src/cmap/command_monitoring_events';
-import {
+  CommandSucceededEvent,
   ConnectionCheckedInEvent,
   ConnectionCheckedOutEvent,
   ConnectionCheckOutFailedEvent,
@@ -30,7 +28,7 @@ import {
   ConnectionPoolCreatedEvent,
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
-} from '../../../src/cmap/connection_pool_events';
+} from '../../mongodb';
 import { ejson } from '../utils';
 import { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import {

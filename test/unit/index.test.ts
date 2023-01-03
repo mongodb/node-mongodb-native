@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import * as mongodb from '../../src/index';
+import * as mongodb from '../mongodb';
 import { byStrings, sorted } from '../tools/utils';
 
 /**

@@ -2,9 +2,7 @@ import { Long, Timestamp } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { ChangeStreamCursor } from '../../src/cursor/change_stream_cursor';
-import { MongoClient } from '../../src/mongo_client';
-import { MongoDBNamespace } from '../../src/utils';
+import { ChangeStreamCursor, MongoClient, MongoDBNamespace } from '../mongodb';
 
 describe('ChangeStreamCursor', function () {
   afterEach(function () {
