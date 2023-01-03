@@ -28,7 +28,7 @@ describe('Handshake', function () {
         // Execute legacy hello command
         client
           .db(configuration.db)
-          .command({ [LEGACY_HELLO_COMMAND]: true })
+          .command({ [LEGACY_HELLO_COMMAND]: 1 })
           .then(function (result) {
             test.ok(result !== null);
 

@@ -231,7 +231,7 @@ export function prepareHandshakeDocument(
   const { serverApi } = authContext.connection;
 
   const handshakeDoc: HandshakeDocument = {
-    [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: true,
+    [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
     helloOk: true,
     client: options.metadata || makeClientMetadata(options),
     compression: compressors
