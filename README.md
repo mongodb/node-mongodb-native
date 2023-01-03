@@ -141,7 +141,7 @@ Add code to connect to the server and the database **myProject**:
 >
 > This can be resolved by:
 > - specifying the ip address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
-> - launching mongod or mongos with the ipv6 flag enabled (https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6)
+> - launching mongod or mongos with the ipv6 flag enabled ([--ipv6 mongod option documentation](https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6))
 > - using a host of `127.0.0.1` in place of localhost
 
 ```js
