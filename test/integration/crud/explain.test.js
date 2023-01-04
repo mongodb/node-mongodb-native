@@ -222,38 +222,6 @@ describe('Explain', function () {
     }
   });
 
-  it('should honor boolean explain with mapReduce', {
-    metadata: {
-      requires: {
-        mongodb: '>=4.4'
-      }
-    },
-    test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithMapReduce');
-      var collection = db.collection('test');
-
-      collection.insertMany([{ user_id: 1 }, { user_id: 2 }], (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
-
-        var map = 'function() { emit(this.user_id, 1); }';
-        var reduce = 'function(k,vals) { return 1; }';
-
-        collection.mapReduce(
-          map,
-          reduce,
-          { out: { replace: 'tempCollection' }, explain: true },
-          (err, explanation) => {
-            expect(err).to.not.exist;
-            expect(explanation).to.exist;
-            expect(explanation).property('stages').to.exist;
-            done();
-          }
-        );
-      });
-    }
-  });
-
   it('should use allPlansExecution as true explain verbosity', {
     metadata: {
       requires: {
@@ -432,38 +400,6 @@ describe('Explain', function () {
             expect(err).to.not.exist;
             expect(explanation).to.exist;
             expect(explanation).property('queryPlanner').to.exist;
-            done();
-          }
-        );
-      });
-    }
-  });
-
-  it('should honor string explain with mapReduce', {
-    metadata: {
-      requires: {
-        mongodb: '>=4.4'
-      }
-    },
-    test: function (done) {
-      var db = client.db('shouldHonorStringExplainWithMapReduce');
-      var collection = db.collection('test');
-
-      collection.insertMany([{ user_id: 1 }, { user_id: 2 }], (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
-
-        var map = 'function() { emit(this.user_id, 1); }';
-        var reduce = 'function(k,vals) { return 1; }';
-
-        collection.mapReduce(
-          map,
-          reduce,
-          { out: { replace: 'tempCollection' }, explain: 'executionStats' },
-          (err, explanation) => {
-            expect(err).to.not.exist;
-            expect(explanation).to.exist;
-            expect(explanation).property('stages').to.exist;
             done();
           }
         );

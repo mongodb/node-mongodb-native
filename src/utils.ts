@@ -1328,21 +1328,8 @@ export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
 
 // TODO: this should be codified in command construction
 // @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern
-export function commandSupportsReadConcern(command: Document, options?: Document): boolean {
-  if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
-    return true;
-  }
-
-  if (
-    command.mapReduce &&
-    options &&
-    options.out &&
-    (options.out.inline === 1 || options.out === 'inline')
-  ) {
-    return true;
-  }
-
-  return false;
+export function commandSupportsReadConcern(command: Document): boolean {
+  return command.aggregate || command.count || command.distinct || command.find || command.geoNear;
 }
 
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */

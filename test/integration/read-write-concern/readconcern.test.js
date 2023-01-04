@@ -343,51 +343,6 @@ describe('ReadConcern', function () {
     }
   });
 
-  it('Should set majority readConcern mapReduce command but be ignored', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
-
-    test: function (done) {
-      const started = [];
-      const succeeded = [];
-      // Get a new instance
-      const configuration = this.configuration;
-      client = configuration.newClient(
-        { w: 1 },
-        { maxPoolSize: 1, readConcern: { level: 'majority' }, monitorCommands: true }
-      );
-
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-
-        const db = client.db(configuration.db);
-        expect(db.readConcern).to.deep.equal({ level: 'majority' });
-
-        // Get the collection
-        const collection = db.collection('test_map_reduce_read_concern');
-        collection.insertMany(
-          [{ user_id: 1 }, { user_id: 2 }],
-          configuration.writeConcernMax(),
-          err => {
-            expect(err).to.not.exist;
-            // String functions
-            const map = 'function() { emit(this.user_id, 1); }';
-            const reduce = 'function(k,vals) { return 1; }';
-
-            // Listen to apm events
-            client.on('commandStarted', filterForCommands('mapReduce', started));
-            client.on('commandSucceeded', filterForCommands('mapReduce', succeeded));
-
-            // Execute mapReduce
-            collection.mapReduce(map, reduce, { out: { replace: 'tempCollection' } }, err => {
-              expect(err).to.not.exist;
-              validateTestResults(started, succeeded, 'mapReduce');
-              done();
-            });
-          }
-        );
-      });
-    }
-  });
   it('Should set local readConcern on db level when using createCollection method', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2' } },
 

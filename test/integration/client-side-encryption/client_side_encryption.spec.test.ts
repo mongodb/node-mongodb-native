@@ -61,7 +61,11 @@ const skippedAuthTests = [
 const skippedNoAuthTests = ['getMore with encryption', 'operation fails with maxWireVersion < 8'];
 
 const SKIPPED_TESTS = new Set([
-  ...(isAuthEnabled ? skippedAuthTests.concat(skippedNoAuthTests) : skippedNoAuthTests)
+  ...(isAuthEnabled ? skippedAuthTests.concat(skippedNoAuthTests) : skippedNoAuthTests),
+  [
+    // the node driver does not have a mapReduce helper
+    'mapReduce deterministic encryption (unsupported)'
+  ]
 ]);
 
 const isServerless = !!process.env.SERVERLESS;

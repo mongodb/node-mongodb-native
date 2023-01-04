@@ -699,13 +699,11 @@ const kOperations = new Map([
   ],
   [
     'mapReduce',
+    // eslint-disable-next-line no-unused-vars
     (operation, collection, context /*, options */) => {
-      const args = operation.arguments;
-      const map = args.map;
-      const reduce = args.reduce;
-      const options = { session: maybeSession(operation, context) };
-      if (args.out) options.out = args.out;
-      return collection.mapReduce(map, reduce, options);
+      throw new Error(
+        'The Node driver no longer supports a MapReduce helper.  This operation should never be run.'
+      );
     }
   ],
   [
@@ -812,10 +810,6 @@ function testOperation(operation, obj, context, options) {
           }
 
           if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].indexOf(key) !== -1) {
-            return args.unshift(operation.arguments[key]);
-          }
-
-          if ((key === 'map' || key === 'reduce') && operationName === 'mapReduce') {
             return args.unshift(operation.arguments[key]);
           }
 
