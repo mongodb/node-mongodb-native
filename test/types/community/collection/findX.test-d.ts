@@ -1,6 +1,6 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 
-import type { Filter, Projection, ProjectionOperators } from '../../../../src';
+import type { Filter } from '../../../../src';
 import {
   Collection,
   Db,
@@ -231,9 +231,6 @@ colorCollection.find<{ color: string }>({ color: { $in: ['regularArray'] } });
 // This is a regression test that we don't remove the unused generic in FindOptions
 const findOptions: FindOptions<{ a: number }> = {};
 expectType<FindOptions>(findOptions);
-// This is just to check that we still export these type symbols
-expectAssignable<Projection>({});
-expectAssignable<ProjectionOperators>({});
 
 // Ensure users can create a custom Db type that only contains specific
 // collections (which are, in turn, strongly typed):

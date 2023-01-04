@@ -332,8 +332,6 @@ export type {
   OnlyFieldsOfType,
   OptionalId,
   OptionalUnlessRequiredId,
-  Projection,
-  ProjectionOperators,
   PropertyType,
   PullAllOperator,
   PullOperator,
