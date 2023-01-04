@@ -99,7 +99,6 @@ const EXPECTED_EXPORTS = [
   'MongoUnexpectedServerResponseError',
   'MongoWriteConcernError',
   'ObjectId',
-  'ObjectID',
   'OrderedBulkOperation',
   'ProfilingLevel',
   'ReadConcern',

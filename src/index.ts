@@ -36,14 +36,8 @@ export {
   ObjectId,
   Timestamp
 } from './bson';
-export { ChangeStreamCursor } from './cursor/change_stream_cursor';
-/**
- * @public
- * @deprecated Please use `ObjectId`
- */
-export const ObjectID = ObjectId;
-
 export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
+export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
   MongoAPIError,
   MongoAWSError,
