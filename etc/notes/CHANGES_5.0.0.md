@@ -16,6 +16,14 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### WriteConcernError.err() has been removed
+
+The `err()` getter on the WriteConcernError class has been removed.  The `toJSON()` method can be in place
+of `err()`.
+
+If `mapReduce` functionality is needed, the (`mapReduce` command)[https://www.mongodb.com/docs/manual/reference/command/mapReduce/] can be
+used manually with the `Collection.runCommand` helper.
+
 ### salveOk options removed
 
 The deprecated `slaveOk` option and `slaveOk()` method on the `Collection` class have been removed. Please

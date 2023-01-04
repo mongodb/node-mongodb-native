@@ -363,11 +363,6 @@ export class WriteConcernError {
     return this[kServerError].errInfo;
   }
 
-  /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
-  get err(): WriteConcernErrorData {
-    return this[kServerError];
-  }
-
   toJSON(): WriteConcernErrorData {
     return this[kServerError];
   }
