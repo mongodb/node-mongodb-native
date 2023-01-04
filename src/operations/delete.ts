@@ -18,9 +18,6 @@ export interface DeleteOptions extends CommandOperationOptions, WriteConcernOpti
   hint?: string | Document;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
-
-  /** @deprecated use `removeOne` or `removeMany` to implicitly specify the limit */
-  single?: boolean;
 }
 
 /** @public */
