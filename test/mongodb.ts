@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as vm from 'node:vm';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function printExports() {
@@ -21,6 +22,29 @@ function printExports() {
   for (const srcFile of driverSourceFiles) {
     console.log(`export * from '${path.relative(__dirname, srcFile)}';`);
   }
+}
+
+function importMongoDBLegacy() {
+  const mongodbLegacyEntryPoint = require.resolve('mongodb-legacy');
+  const mongodbLegacyLocation = path.dirname(mongodbLegacyEntryPoint);
+  const mongodbLegacyIndex = fs.readFileSync(mongodbLegacyEntryPoint, {
+    encoding: 'utf8'
+  });
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const localMongoDB = require('../src/index');
+  const ctx = vm.createContext({
+    module: { exports: null },
+    require: (mod: string) => {
+      if (mod === 'mongodb') {
+        return localMongoDB;
+      } else if (mod.startsWith('.')) {
+        return require(path.join(mongodbLegacyLocation, mod));
+      }
+      return require(mod);
+    }
+  });
+  vm.runInContext(mongodbLegacyIndex, ctx);
+  return ctx.module.exports;
 }
 
 export * from '../src/admin';
@@ -125,3 +149,32 @@ export * from '../src/write_concern';
 
 // Must be last for precedence
 export * from '../src/index';
+// Override our own exports with the legacy patched ones
+const mongodbLegacy = importMongoDBLegacy();
+Object.defineProperty(module.exports, 'Admin', { get: () => mongodbLegacy.Admin });
+Object.defineProperty(module.exports, 'FindCursor', { get: () => mongodbLegacy.FindCursor });
+Object.defineProperty(module.exports, 'ListCollectionsCursor', {
+  get: () => mongodbLegacy.ListCollectionsCursor
+});
+Object.defineProperty(module.exports, 'ListIndexesCursor', {
+  get: () => mongodbLegacy.ListIndexesCursor
+});
+Object.defineProperty(module.exports, 'AggregationCursor', {
+  get: () => mongodbLegacy.AggregationCursor
+});
+Object.defineProperty(module.exports, 'ChangeStream', { get: () => mongodbLegacy.ChangeStream });
+Object.defineProperty(module.exports, 'Collection', { get: () => mongodbLegacy.Collection });
+Object.defineProperty(module.exports, 'Db', { get: () => mongodbLegacy.Db });
+Object.defineProperty(module.exports, 'GridFSBucket', { get: () => mongodbLegacy.GridFSBucket });
+Object.defineProperty(module.exports, 'ClientSession', { get: () => mongodbLegacy.ClientSession });
+Object.defineProperty(module.exports, 'MongoClient', { get: () => mongodbLegacy.MongoClient });
+Object.defineProperty(module.exports, 'ClientSession', { get: () => mongodbLegacy.ClientSession });
+Object.defineProperty(module.exports, 'GridFSBucketWriteStream', {
+  get: () => mongodbLegacy.GridFSBucketWriteStream
+});
+Object.defineProperty(module.exports, 'OrderedBulkOperation', {
+  get: () => mongodbLegacy.OrderedBulkOperation
+});
+Object.defineProperty(module.exports, 'UnorderedBulkOperation', {
+  get: () => mongodbLegacy.UnorderedBulkOperation
+});
