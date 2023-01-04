@@ -65,21 +65,6 @@ describe('Kerberos', function () {
     });
   });
 
-  it('validate that gssapiCanonicalizeHostName can be passed in', function (done) {
-    if (process.platform === 'darwin') {
-      this.test.skipReason = 'DNS does not resolve with proper CNAME record on evergreen MacOS';
-      this.skip();
-    }
-    const client = new MongoClient(
-      `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,gssapiCanonicalizeHostName:true&maxPoolSize=1`
-    );
-    client.connect(function (err, client) {
-      if (err) return done(err);
-      expect(dns.resolveCname).to.be.calledOnceWith(host);
-      verifyKerberosAuthentication(client, done);
-    });
-  });
-
   context('when passing in CANONICALIZE_HOST_NAME', function () {
     beforeEach(function () {
       if (process.platform === 'darwin') {

@@ -26,8 +26,6 @@ export type GSSAPICanonicalizationValue =
   typeof GSSAPICanonicalizationValue[keyof typeof GSSAPICanonicalizationValue];
 
 type MechanismProperties = {
-  /** @deprecated use `CANONICALIZE_HOST_NAME` instead */
-  gssapiCanonicalizeHostName?: boolean;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;

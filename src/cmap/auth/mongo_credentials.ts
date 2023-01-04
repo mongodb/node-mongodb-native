@@ -91,14 +91,6 @@ export class MongoCredentials {
       }
     }
 
-    if ('gssapiCanonicalizeHostName' in this.mechanismProperties) {
-      emitWarningOnce(
-        'gssapiCanonicalizeHostName is deprecated. Please use CANONICALIZE_HOST_NAME instead.'
-      );
-      this.mechanismProperties.CANONICALIZE_HOST_NAME =
-        this.mechanismProperties.gssapiCanonicalizeHostName;
-    }
-
     Object.freeze(this.mechanismProperties);
     Object.freeze(this);
   }
