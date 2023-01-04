@@ -149,10 +149,6 @@ export function makeDeleteStatement(
     limit: typeof options.limit === 'number' ? options.limit : 0
   };
 
-  if (options.single === true) {
-    op.limit = 1;
-  }
-
   if (options.collation) {
     op.collation = options.collation;
   }
