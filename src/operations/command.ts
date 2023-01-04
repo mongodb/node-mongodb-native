@@ -36,8 +36,6 @@ export interface CommandOperationOptions
   extends OperationOptions,
     WriteConcernOptions,
     ExplainOptions {
-  /** @deprecated This option does nothing */
-  fullResponse?: boolean;
   /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** Collation */
