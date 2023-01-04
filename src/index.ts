@@ -204,7 +204,6 @@ export type {
   ChangeStreamShardCollectionDocument,
   ChangeStreamUpdateDocument,
   OperationTime,
-  PipeOptions,
   ResumeOptions,
   ResumeToken,
   UpdateDescription

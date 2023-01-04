@@ -79,14 +79,6 @@ export type ResumeToken = unknown;
 export type OperationTime = Timestamp;
 
 /**
- * @public
- * @deprecated This interface is unused and will be removed in the next major version of the driver.
- */
-export interface PipeOptions {
-  end?: boolean;
-}
-
-/**
  * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
  * @public
  */
