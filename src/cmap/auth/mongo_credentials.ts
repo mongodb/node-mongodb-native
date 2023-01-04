@@ -1,7 +1,6 @@
 // Resolves the default auth mechanism according to
 import type { Document } from '../../bson';
 import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
-import { emitWarningOnce } from '../../utils';
 import { GSSAPICanonicalizationValue } from './gssapi';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 

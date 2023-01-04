@@ -1,5 +1,4 @@
 import { Admin } from './admin';
-import { ObjectId } from './bson';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { ChangeStream } from './change_stream';
