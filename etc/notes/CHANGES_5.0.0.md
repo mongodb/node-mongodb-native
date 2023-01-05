@@ -35,7 +35,7 @@ TODO - merge in Neal's removal of `collection.remove` and combine notes
 
 ### Remove of `ObjectID` Type in Favor Of `ObjectId`
 
-`ObjectID` was exported for legacy reasons and has been removed.  Please use `ObjectId` instead.
+For clarity the deprecated and duplicate export ObjectID has been removed. ObjectId matches the class name and is equal in every way to the capital "D" export.
 
 ### Kerberos Option `gssapiCanonicalizeHostName` Removed
 
