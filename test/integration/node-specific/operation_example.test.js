@@ -2541,7 +2541,7 @@ describe('Operation Examples', function () {
                   { name: 'Sarah', title: 'Princess' },
                   { name: 'Gump', title: 'Gump' }
                 ],
-                { writeConcern: { w: 1 }, keepGoing: true },
+                { writeConcern: { w: 1 }, ordered: false },
                 function (err, result) {
                   expect(result).to.not.exist;
                   test.ok(err);

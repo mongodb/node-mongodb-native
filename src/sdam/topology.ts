@@ -127,7 +127,7 @@ export interface TopologyPrivate {
   detectSrvRecords: (event: SrvPollingEvent) => void;
 }
 
-/** @public */
+/** @internal */
 export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   srvMaxHosts: number;
   srvServiceName: string;

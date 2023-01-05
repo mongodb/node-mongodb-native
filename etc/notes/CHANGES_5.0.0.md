@@ -16,7 +16,50 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
-### salveOk options removed
+### `AddUserOptions.digestPassword` removed
+
+The `digestPassword` option has been removed from the add user helper.
+
+### Removal of Internal Types from Public API
+
+The following types are used internally the driver but were accidentally exported.  They have now been
+marked internal and are no longer exported.
+
+- ServerSelector
+- PipeOptions
+- ServerOptions
+
+### `DeleteOptions.single` Option Removed
+
+TODO - merge in Neal's removal of `collection.remove` and combine notes
+
+### Remove of `ObjectID` Type in Favor Of `ObjectId`
+
+For clarity the deprecated and duplicate export ObjectID has been removed. ObjectId matches the class name and is equal in every way to the capital "D" export.
+
+### Kerberos Option `gssapiCanonicalizeHostName` Removed
+
+`gssapiCanonicalizeHostName` has been removed in favor of the `CANONICALIZE_HOST_NAME` value.
+
+### `Projection` and `ProjectionOperations` Types Removed
+
+Both of these types were unused but exported.  These types have been removed.  Please
+use `Document` instead.
+
+### `CommandOperationOptions.fullResponse` Option Removed
+
+The `fullResponse` option on the `CommandOperationOptions` as unused in the driver and has been removed.
+
+### `BulkWriteOptions.keepGoing` Option Removed
+
+The `keepGoing` option on the `BulkWriteOptions` has been removed.  Please use the `ordered` option instead.
+
+### `WriteConcernError.err()` Removed
+
+The `err()` getter on the WriteConcernError class has been removed.  The `toJSON()` method can be in place
+of `err()`.
+
+### slaveOk options removed
 
 The deprecated `slaveOk` option and `slaveOk()` method on the `Collection` class have been removed. Please
 now use `secondaryOk` as the replacement for the option and the method.

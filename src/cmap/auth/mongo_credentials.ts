@@ -1,7 +1,6 @@
 // Resolves the default auth mechanism according to
 import type { Document } from '../../bson';
 import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
-import { emitWarningOnce } from '../../utils';
 import { GSSAPICanonicalizationValue } from './gssapi';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
@@ -89,14 +88,6 @@ export class MongoCredentials {
           AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN
         };
       }
-    }
-
-    if ('gssapiCanonicalizeHostName' in this.mechanismProperties) {
-      emitWarningOnce(
-        'gssapiCanonicalizeHostName is deprecated. Please use CANONICALIZE_HOST_NAME instead.'
-      );
-      this.mechanismProperties.CANONICALIZE_HOST_NAME =
-        this.mechanismProperties.gssapiCanonicalizeHostName;
     }
 
     Object.freeze(this.mechanismProperties);

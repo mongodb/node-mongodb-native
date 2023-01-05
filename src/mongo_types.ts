@@ -192,20 +192,6 @@ export type BSONType = typeof BSONType[keyof typeof BSONType];
 /** @public */
 export type BSONTypeAlias = keyof typeof BSONType;
 
-/**
- * @public
- * Projection is flexible to permit the wide array of aggregation operators
- * @deprecated since v4.1.0: Since projections support all aggregation operations we have no plans to narrow this type further
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type Projection<TSchema extends Document = Document> = Document;
-
-/**
- * @public
- * @deprecated since v4.1.0: Since projections support all aggregation operations we have no plans to narrow this type further
- */
-export type ProjectionOperators = Document;
-
 /** @public */
 export type IsAny<Type, ResultIfAny, ResultIfNotAny> = true extends false & Type
   ? ResultIfAny

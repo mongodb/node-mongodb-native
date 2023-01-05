@@ -1,5 +1,4 @@
 import { Admin } from './admin';
-import { ObjectId } from './bson';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { UnorderedBulkOperation } from './bulk/unordered';
 import { ChangeStream } from './change_stream';
@@ -36,14 +35,8 @@ export {
   ObjectId,
   Timestamp
 } from './bson';
-export { ChangeStreamCursor } from './cursor/change_stream_cursor';
-/**
- * @public
- * @deprecated Please use `ObjectId`
- */
-export const ObjectID = ObjectId;
-
 export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
+export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
   MongoAPIError,
   MongoAWSError,
@@ -204,7 +197,6 @@ export type {
   ChangeStreamShardCollectionDocument,
   ChangeStreamUpdateDocument,
   OperationTime,
-  PipeOptions,
   ResumeOptions,
   ResumeToken,
   UpdateDescription
@@ -339,8 +331,6 @@ export type {
   OnlyFieldsOfType,
   OptionalId,
   OptionalUnlessRequiredId,
-  Projection,
-  ProjectionOperators,
   PropertyType,
   PullAllOperator,
   PullOperator,
