@@ -130,6 +130,7 @@ tests:
             deletedCount: 0
             upsertedCount: 0
             upsertedIds: {}
+            insertedIds: { $$unsetOrMatches: {} }
     expectEvents:
       - client: *client0
         events:
@@ -182,6 +183,7 @@ tests:
             deletedCount: 0
             upsertedCount: 0
             upsertedIds: {}
+            insertedIds: { $$unsetOrMatches: {} }
     expectEvents:
       - client: *client0
         events:
@@ -236,6 +238,7 @@ tests:
             deletedCount: 0
             upsertedCount: 0
             upsertedIds: {}
+            insertedIds: { $$unsetOrMatches: {} }
     expectEvents:
       - client: *client0
         events:
@@ -285,6 +288,7 @@ tests:
             deletedCount: 0
             upsertedCount: 0
             upsertedIds: {}
+            insertedIds: { $$unsetOrMatches: {} }
     expectEvents:
       - client: *client0
         events:
@@ -334,6 +338,7 @@ tests:
             deletedCount: 0
             upsertedCount: 0
             upsertedIds: {}
+            insertedIds: { $$unsetOrMatches: {} }
     expectEvents:
       - client: *client0
         events:
@@ -381,6 +386,7 @@ tests:
             deletedCount: 0
             upsertedCount: 0
             upsertedIds: {}
+            insertedIds: { $$unsetOrMatches: {} }
       - name: find
         object: *collection0
         arguments:
