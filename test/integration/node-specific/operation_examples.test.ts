@@ -9,6 +9,15 @@ import { sleep as delay } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('Operations', function () {
+  let client;
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
+  });
+
   before(function () {
     return setupDatabase(this.configuration, ['integration_tests_2', 'hr', 'reporting']);
   });
@@ -3391,82 +3400,73 @@ describe('Operations', function () {
    * example-class Db
    * example-method setProfilingLevel
    */
-  it('shouldCorrectlyChangeProfilingLevelWithPromises', {
-    metadata: { requires: { topology: 'single' } },
+  it('setProfilingLevel changes profiling level', async function () {
+    const configuration = this.configuration;
 
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+    const db = client.db(configuration.db);
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+    // LINE client.connect().then(() => {
+    // LINE   var db = client.db('test);
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
+    // REMOVE-LINE done();
+    // BEGIN
 
-      return client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // BEGIN
+    // Grab a collection object
+    const collection = db.collection('test_with_promise');
+    const adminDb = client.db('admin');
 
-        // Grab a collection object
-        const collection = db.collection('test_with_promise');
-        const adminDb = client.db('admin');
+    // Force the creation of the collection by inserting a document
+    // Collections are not created until the first document is inserted
+    await collection
+      .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
+      .then(function (doc) {
+        expect(doc).to.exist;
+        // Set the profiling level to only profile slow queries
+        return adminDb.setProfilingLevel('slow_only');
+      })
+      .then(function (level) {
+        expect(level).to.exist;
+        // Retrieve the profiling level and verify that it's set to slow_only
+        return adminDb.profilingLevel();
+      })
+      .then(function (level) {
+        expect(level).to.equal('slow_only');
 
-        // Force the creation of the collection by inserting a document
-        // Collections are not created until the first document is inserted
-        return collection
-          .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
-          .then(function (doc) {
-            expect(doc).to.exist;
-            // Set the profiling level to only profile slow queries
-            return adminDb.setProfilingLevel('slow_only');
-          })
-          .then(function (level) {
-            expect(level).to.exist;
-            // Retrieve the profiling level and verify that it's set to slow_only
-            return adminDb.profilingLevel();
-          })
-          .then(function (level) {
-            expect(level).to.equal('slow_only');
+        // Turn profiling off
+        return adminDb.setProfilingLevel('off');
+      })
+      .then(function (level) {
+        expect(level).to.exist;
+        // Retrieve the profiling level and verify that it's set to off
+        return adminDb.profilingLevel();
+      })
+      .then(function (level) {
+        expect(level).to.equal('off');
 
-            // Turn profiling off
-            return adminDb.setProfilingLevel('off');
-          })
-          .then(function (level) {
-            expect(level).to.exist;
-            // Retrieve the profiling level and verify that it's set to off
-            return adminDb.profilingLevel();
-          })
-          .then(function (level) {
-            expect(level).to.equal('off');
+        // Set the profiling level to log all queries
+        return adminDb.setProfilingLevel('all');
+      })
+      .then(function (level) {
+        expect(level).to.exist;
+        // Retrieve the profiling level and verify that it's set to all
+        return adminDb.profilingLevel();
+      })
+      .then(function (level) {
+        expect(level).to.equal('all');
 
-            // Set the profiling level to log all queries
-            return adminDb.setProfilingLevel('all');
-          })
-          .then(function (level) {
-            expect(level).to.exist;
-            // Retrieve the profiling level and verify that it's set to all
-            return adminDb.profilingLevel();
-          })
-          .then(function (level) {
-            expect(level).to.equal('all');
-
-            // Attempt to set an illegal profiling level
-            return adminDb.setProfilingLevel('medium');
-          })
-          .catch(function (err) {
-            expect(err instanceof Error).to.exist;
-            test.equal(
-              `Profiling level must be one of "${enumToString(ProfilingLevel)}"`,
-              err.message
-            );
-            return client.close();
-          });
+        // Attempt to set an illegal profiling level
+        return adminDb.setProfilingLevel('medium');
+      })
+      .catch(function (err) {
+        expect(err).to.be.instanceOf(Error);
+        expect(`Profiling level must be one of "${enumToString(ProfilingLevel)}"`).to.equal(
+          err.message
+        );
       });
-      // END
-    }
+    // END
   });
 
   /**
