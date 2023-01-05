@@ -8,7 +8,7 @@ describe('Indexes', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('Should correctly execute createIndex using Promise', {
+  it('Should correctly execute createIndex', {
     metadata: {
       requires: {
         topology: ['single']

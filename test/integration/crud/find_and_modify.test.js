@@ -36,7 +36,7 @@ describe('Find and Modify', function () {
     });
   });
 
-  it('Should correctly execute findOneAndUpate operation With Promises and no options passed in', function (done) {
+  it('Should correctly execute findOneAndUpate operation and no options passed in', function (done) {
     var configuration = this.configuration;
     var client = configuration.newClient(configuration.writeConcernMax(), {
       maxPoolSize: 1
@@ -63,7 +63,7 @@ describe('Find and Modify', function () {
     });
   });
 
-  it('Should correctly execute findOneAndReplace operation With Promises and no options passed in', function (done) {
+  it('Should correctly execute findOneAndReplace operation and no options passed in', function (done) {
     var configuration = this.configuration;
     var client = configuration.newClient(configuration.writeConcernMax(), {
       maxPoolSize: 1
