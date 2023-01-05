@@ -16,6 +16,15 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### `Collection.mapReduce()` helper removed
+
+The `mapReduce` helper has been removed from the `Collection` class.  The `mapReduce` operation has been
+deprecated in favor of the aggregation pipeline since MongoDB server version 5.0.  It is recommended
+to migrate code that uses `Collection.mapReduce` to use the aggregation pipeline.
+
+If the `mapReduce` command must be used, the `Db.command()` helper can be used to run the raw
+`mapReduce` command.
+
 ### `AddUserOptions.digestPassword` removed
 
 The `digestPassword` option has been removed from the add user helper.
