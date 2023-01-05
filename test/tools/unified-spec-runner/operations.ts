@@ -659,21 +659,7 @@ operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
   const { filter, opts } = operation.arguments!;
 
-  const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey(filter, opts);
-  if (rewrapManyDataKeyResult.bulkWriteResult != null) {
-    // TODO: Can be removed with DRIVERS-2523
-    //
-    // The unified spec runner match function will assert that documents have no extra
-    // keys.  For `rewrapManyDataKey` operations, our unifed tests will fail because
-    // our BulkWriteResult class has an insertedIds property, which is correct by the
-    // spec but not defined in the spec tests.
-    const { bulkWriteResult } = rewrapManyDataKeyResult;
-    Object.defineProperty(bulkWriteResult, 'insertedIds', {
-      value: bulkWriteResult.insertedIds,
-      enumerable: false
-    });
-  }
-  return rewrapManyDataKeyResult;
+  return await clientEncryption.rewrapManyDataKey(filter, opts);
 });
 
 operations.set('deleteKey', async ({ entities, operation }) => {
