@@ -88,7 +88,7 @@ describe('Errors', function () {
   ]);
 
   it('should return an error object with message when mixing included and excluded fields', async () => {
-    const db = client.db(this.configuration.db);
+    const db = client.db();
     const c = db.collection('test_error_object_should_include_message');
     await c.insertOne({ a: 2, b: 5 }, { writeConcern: { w: 1 } });
     const error = await c.findOne({ a: 2 }, { projection: { a: 1, b: 0 } }).catch(error => error);
@@ -97,7 +97,7 @@ describe('Errors', function () {
   });
 
   it('should reject promise with projection errors', async () => {
-    const db = client.db(this.configuration.db);
+    const db = client.db();
     const c = db.collection('test_error_object_should_include_message');
     const error = await c.findOne({}, { projection: { a: 1, b: 0 } }).catch(error => error);
     expect(error).to.be.instanceOf(MongoServerError);

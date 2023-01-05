@@ -1774,7 +1774,7 @@ describe('Operations', function () {
           .insertOne(
             {
               hello: 'world',
-              func: function () {}
+              func: new Code('function () {}')
             },
             o
           )
@@ -1824,7 +1824,7 @@ describe('Operations', function () {
 
         return collection
           .drop()
-          .catch(function () {})
+          .catch(() => null)
           .then(function () {
             // Add an unique index to title to force errors in the batch insert
             return collection.createIndex({ title: 1 }, { unique: true });
