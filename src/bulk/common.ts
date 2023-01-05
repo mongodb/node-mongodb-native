@@ -530,8 +530,8 @@ function executeCommands(
     }
 
     // Merge the results together
-    const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult);
     const mergeResult = mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
+    const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult);
     if (mergeResult != null) {
       return callback(undefined, writeResult);
     }
@@ -1226,7 +1226,6 @@ export abstract class BulkOperationBase {
       this.s.executed = true;
       const finalOptions = { ...this.s.options, ...options };
       const operation = new BulkWriteShimOperation(this, finalOptions);
-
       return executeOperation(this.s.collection.s.db.s.client, operation);
     }, callback);
   }
