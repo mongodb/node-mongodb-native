@@ -119,7 +119,7 @@ describe('Bulk', function () {
     test.deepEqual({ w: 1 }, bulk.s.writeConcern);
   });
 
-  it('Should correctly execute ordered bulk operation, async function () {
+  it('Should correctly execute ordered bulk operation', async function () {
     const db = client.db();
     const bulk = db
       .collection('unordered_bulk_promise_form')
