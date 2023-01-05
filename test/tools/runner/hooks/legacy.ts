@@ -1,15 +1,21 @@
+import { expect } from 'chai';
+
 import { Collection } from '../../../../src';
 
 // Setup legacy shims for tests that use removed or changed APIs
-const counts = {
+const legacyUsageCounts = {
   insert: 0,
-  update: 0,
-  remove: 0
+  update: 0
+};
+
+const legacyUsageMaximums = {
+  insert: 326,
+  update: 19
 };
 
 // @ts-expect-error: Method no longer exists on Collection
 Collection.prototype.insert = function (docs, options, callback) {
-  counts.insert += 1;
+  legacyUsageCounts.insert += 1;
   callback =
     typeof callback === 'function' ? callback : typeof options === 'function' ? options : undefined;
   options = options != null && typeof options === 'object' ? options : { ordered: false };
@@ -21,7 +27,7 @@ Collection.prototype.insert = function (docs, options, callback) {
 
 // @ts-expect-error: Method no longer exists on Collection
 Collection.prototype.update = function (filter, update, options, callback) {
-  counts.update += 1;
+  legacyUsageCounts.update += 1;
   callback =
     typeof callback === 'function' ? callback : typeof options === 'function' ? options : undefined;
   options = options != null && typeof options === 'object' ? options : {};
@@ -29,6 +35,17 @@ Collection.prototype.update = function (filter, update, options, callback) {
   return this.updateMany(filter, update, options, callback);
 };
 
-process.on('beforeExit', () => {
-  console.dir(counts);
-});
+function assertLegacyAPIUsageDoesNotIncrease() {
+  expect(
+    legacyUsageCounts.insert,
+    'Please do not use more instance of the legacy CRUD API: insert'
+  ).is.lessThanOrEqual(legacyUsageMaximums.insert);
+  expect(
+    legacyUsageCounts.update,
+    'Please do not use more instance of the legacy CRUD API: update'
+  ).is.lessThanOrEqual(legacyUsageMaximums.update);
+}
+
+export const mochaHooks = {
+  afterAll: [assertLegacyAPIUsageDoesNotIncrease]
+};
