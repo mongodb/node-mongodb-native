@@ -123,11 +123,7 @@ export type AnyBulkWriteOperation<TSchema extends Document = Document> =
   | { deleteOne: DeleteOneModel<TSchema> }
   | { deleteMany: DeleteManyModel<TSchema> };
 
-/**
- * @public
- *
- * @deprecated Will be made internal in 5.0
- */
+/** @internal */
 export interface BulkResult {
   ok: number;
   writeErrors: WriteError[];
@@ -172,8 +168,7 @@ export class Batch<T = Document> {
  * The result of a bulk write.
  */
 export class BulkWriteResult {
-  /** @deprecated Will be removed in 5.0 */
-  result: BulkResult;
+  private result: BulkResult;
 
   /**
    * Create a new BulkWriteResult instance
@@ -181,6 +176,7 @@ export class BulkWriteResult {
    */
   constructor(bulkResult: BulkResult) {
     this.result = bulkResult;
+    Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
   }
 
   /** Number of documents inserted. */
@@ -314,13 +310,8 @@ export class BulkWriteResult {
     }
   }
 
-  /* @deprecated Will be removed in 5.0 release */
-  toJSON(): BulkResult {
-    return this.result;
-  }
-
   toString(): string {
-    return `BulkWriteResult(${this.toJSON()})`;
+    return `BulkWriteResult(${this.result})`;
   }
 
   isOk(): boolean {
