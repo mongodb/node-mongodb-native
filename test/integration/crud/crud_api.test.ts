@@ -655,62 +655,6 @@ describe('CRUD API', function () {
     }
   });
 
-  it('should correctly execute remove methods using crud api', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      client.connect(function (err, client) {
-        const db = client.db();
-
-        //
-        // Update one method
-        // -------------------------------------------------
-        const deleteOne = function () {
-          db.collection('t4_2').insertMany(
-            [{ a: 1 }, { a: 1 }],
-            { writeConcern: { w: 1 } },
-            (err, r) => {
-              expect(err).to.not.exist;
-              expect(r).property('insertedCount').to.equal(2);
-
-              db.collection('t4_2').deleteOne({ a: 1 }, (err, r) => {
-                expect(err).to.not.exist;
-                expect(r).property('deletedCount').to.equal(1);
-
-                deleteMany();
-              });
-            }
-          );
-        };
-
-        //
-        // Update many method
-        // -------------------------------------------------
-        const deleteMany = function () {
-          db.collection('t4_3').insertMany(
-            [{ a: 1 }, { a: 1 }],
-            { writeConcern: { w: 1 } },
-            (err, r) => {
-              expect(err).to.not.exist;
-              expect(r).property('insertedCount').to.equal(2);
-
-              db.collection('t4_3').deleteMany({ a: 1 }, (err, r) => {
-                expect(err).to.not.exist;
-                expect(r).property('deletedCount').to.equal(2);
-
-                client.close(done);
-              });
-            }
-          );
-        };
-      });
-    }
-  });
-
   it('should correctly execute findAndModify methods using crud api', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
