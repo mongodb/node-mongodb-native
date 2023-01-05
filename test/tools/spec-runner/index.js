@@ -141,6 +141,9 @@ function legacyRunOnToRunOnRequirement(runOn) {
   return runOnRequirement;
 }
 
+/**
+ * @param {((suite: Mocha.Test) => boolean)?} filter a function that returns true for any tests that should run, false otherwise.
+ */
 function generateTopologyTests(testSuites, testContext, filter) {
   for (const testSuite of testSuites) {
     let runOn = testSuite.runOn;
