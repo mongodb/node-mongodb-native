@@ -107,7 +107,7 @@ describe('Bulk', function () {
     });
   });
 
-  it('Should correctly execute unordered bulk operation in promise form', async function () {
+  it('Should correctly execute unordered bulk operation', async function () {
     const db = client.db();
     const bulk = db
       .collection('unordered_bulk_promise_form')

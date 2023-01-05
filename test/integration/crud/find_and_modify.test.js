@@ -9,7 +9,7 @@ describe('Find and Modify', function () {
     return setupDatabase(this.configuration);
   });
 
-  it('Should correctly execute findOneAndDelete operation With Promises and no options passed in', function (done) {
+  it('Should correctly execute findOneAndDelete operation and no options passed in', function (done) {
     var configuration = this.configuration;
     var client = configuration.newClient(configuration.writeConcernMax(), {
       maxPoolSize: 1
