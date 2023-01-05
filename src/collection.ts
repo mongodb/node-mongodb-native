@@ -1652,10 +1652,6 @@ export class Collection<TSchema extends Document = Document> {
     options = options || { ordered: false };
     docs = !Array.isArray(docs) ? [docs] : docs;
 
-    if (options.keepGoing === true) {
-      options.ordered = false;
-    }
-
     return this.insertMany(docs, options, callback);
   }
 

@@ -363,11 +363,6 @@ export class WriteConcernError {
     return this[kServerError].errInfo;
   }
 
-  /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
-  get err(): WriteConcernErrorData {
-    return this[kServerError];
-  }
-
   toJSON(): WriteConcernErrorData {
     return this[kServerError];
   }
@@ -876,8 +871,6 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   bypassDocumentValidation?: boolean;
   /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
   ordered?: boolean;
-  /** @deprecated use `ordered` instead */
-  keepGoing?: boolean;
   /** Force server to assign _id values instead of driver. */
   forceServerObjectId?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */

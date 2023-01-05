@@ -75,7 +75,7 @@ const stateTransition = makeStateMachine({
 /** @internal */
 const kMonitor = Symbol('monitor');
 
-/** @public */
+/** @internal */
 export type ServerOptions = Omit<ConnectionPoolOptions, 'id' | 'generation' | 'hostAddress'> &
   MonitorOptions;
 

@@ -11,7 +11,7 @@ const SMALLEST_MAX_STALENESS_SECONDS = 90;
 //  Minimum version to try writes on secondaries.
 export const MIN_SECONDARY_WRITE_WIRE_VERSION = 13;
 
-/** @public */
+/** @internal */
 export type ServerSelector = (
   topologyDescription: TopologyDescription,
   servers: ServerDescription[]

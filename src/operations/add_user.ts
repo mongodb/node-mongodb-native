@@ -22,8 +22,6 @@ export interface RoleSpecification {
 
 /** @public */
 export interface AddUserOptions extends CommandOperationOptions {
-  /** @deprecated Please use db.command('createUser', ...) instead for this option */
-  digestPassword?: null;
   /** Roles associated with the created user */
   roles?: string | string[] | RoleSpecification | RoleSpecification[];
   /** Custom data associated with the user (only Mongodb 2.6 or higher) */
@@ -57,7 +55,9 @@ export class AddUserOperation extends CommandOperation<Document> {
     const options = this.options;
 
     // Error out if digestPassword set
-    if (options.digestPassword != null) {
+    // v5 removed the digestPassword option from AddUserOptions but we still want to throw
+    // an error when digestPassword is provided.
+    if ('digestPassword' in options && options.digestPassword != null) {
       return callback(
         new MongoInvalidArgumentError(
           'Option "digestPassword" not supported via addUser, use db.command(...) instead'

@@ -670,21 +670,7 @@ describe('CRUD API', function () {
         // Legacy update method
         // -------------------------------------------------
         const legacyRemove = function () {
-          db.collection('t4_1').insertMany(
-            [{ a: 1 }, { a: 1 }],
-            { writeConcern: { w: 1 } },
-            function (err, r) {
-              expect(err).to.not.exist;
-              test.equal(2, r.insertedCount);
-
-              db.collection('t4_1').remove({ a: 1 }, { single: true }, function (err, r) {
-                expect(err).to.not.exist;
-                test.equal(1, r.deletedCount);
-
-                deleteOne();
-              });
-            }
-          );
+          deleteOne();
         };
 
         //
