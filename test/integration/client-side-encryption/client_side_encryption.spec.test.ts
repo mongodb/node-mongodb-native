@@ -62,7 +62,7 @@ const skippedNoAuthTests = ['getMore with encryption', 'operation fails with max
 
 const SKIPPED_TESTS = new Set([
   ...(isAuthEnabled ? skippedAuthTests.concat(skippedNoAuthTests) : skippedNoAuthTests),
-  [
+  ...[
     // the node driver does not have a mapReduce helper
     'mapReduce deterministic encryption (unsupported)'
   ]

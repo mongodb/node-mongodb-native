@@ -142,7 +142,7 @@ function legacyRunOnToRunOnRequirement(runOn) {
 }
 
 /**
- * @param {((suite: Mocha.Test) => boolean)?} filter a function that returns true for any tests that should run, false otherwise.
+ * @param {((test: { description: string }) => boolean)?} filter a function that returns true for any tests that should run, false otherwise.
  */
 function generateTopologyTests(testSuites, testContext, filter) {
   for (const testSuite of testSuites) {
