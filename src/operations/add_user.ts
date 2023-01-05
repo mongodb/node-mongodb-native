@@ -57,7 +57,7 @@ export class AddUserOperation extends CommandOperation<Document> {
     // Error out if digestPassword set
     // v5 removed the digestPassword option from AddUserOptions but we still want to throw
     // an error when digestPassword is provided.
-    if ((options as any).digestPassword != null) {
+    if ('digestPassword' in options && options.digestPassword != null) {
       return callback(
         new MongoInvalidArgumentError(
           'Option "digestPassword" not supported via addUser, use db.command(...) instead'
