@@ -103,50 +103,19 @@ describe('Remove', function () {
     }
   });
 
-  it('should correctly remove only first document', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const self = this;
-      const client = self.configuration.newClient(self.configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
-
-      client.connect(function (err, client) {
-        const db = client.db(self.configuration.db);
-        expect(err).to.not.exist;
-
-        db.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function (err) {
-          expect(err).to.not.exist;
-
-          const collection = db.collection('shouldCorrectlyRemoveOnlyFirstDocument');
-
-          collection.insert(
-            [{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }],
-            { writeConcern: { w: 1 } },
-            function (err) {
-              expect(err).to.not.exist;
-
-              // Remove the first
-              collection.deleteMany(
-                { a: 1 },
-                { writeConcern: { w: 1 }, single: true },
-                function (err, r) {
-                  expect(r).property('deletedCount').to.equal(1);
-
-                  collection.find({ a: 1 }).count(function (err, result) {
-                    expect(result).to.equal(3);
-                    client.close(done);
-                  });
-                }
-              );
-            }
-          );
-        });
-      });
-    }
+  it('deleteOne', async () => {
+    const collection = client.db().collection('test');
+    await collection.drop().catch(() => null);
+    await collection.insertMany([
+      { a: 1, i: 0 },
+      { a: 1, i: 1 },
+      { a: 1, i: 2 }
+    ]);
+    const delRes = await collection.deleteOne({ a: 1 });
+    expect(delRes).property('deletedCount', 1);
+    const docs = await collection.find().toArray();
+    expect(docs).to.have.lengthOf(2);
+    expect(docs.map(({ i }) => i)).to.deep.equal([1, 2]);
   });
 
   it('should not error on empty remove', {

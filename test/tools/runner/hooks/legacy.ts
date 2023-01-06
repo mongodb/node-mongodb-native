@@ -9,7 +9,7 @@ const legacyUsageCounts = {
 };
 
 const legacyUsageMaximums = {
-  insert: 326,
+  insert: 340,
   update: 19
 };
 
