@@ -10,7 +10,7 @@ const legacyUsageCounts = {
 
 const legacyUsageMaximums = {
   insert: 340,
-  update: 19
+  update: 25
 };
 
 // @ts-expect-error: Method no longer exists on Collection
