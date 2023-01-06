@@ -8,51 +8,49 @@ describe('Indexes', function () {
     return setupDatabase(this.configuration);
   });
 
-  context('promise tests', () => {
-    it('Should correctly execute createIndex using Promise', {
-      metadata: {
-        requires: {
-          topology: ['single']
-        }
-      },
-
-      test: function (done) {
-        var configuration = this.configuration;
-        const client = configuration.newClient({ maxPoolSize: 5 });
-        // Create an index
-        client
-          .db(configuration.db)
-          .createIndex('promiseCollectionCollections1', { a: 1 })
-          .then(function (r) {
-            test.ok(r != null);
-
-            client.close(done);
-          });
+  it('Should correctly execute createIndex', {
+    metadata: {
+      requires: {
+        topology: ['single']
       }
-    });
+    },
 
-    it('Should correctly execute ensureIndex using Promise', {
-      metadata: {
-        requires: {
-          topology: ['single']
-        }
-      },
+    test: function (done) {
+      var configuration = this.configuration;
+      const client = configuration.newClient({ maxPoolSize: 5 });
+      // Create an index
+      client
+        .db(configuration.db)
+        .createIndex('promiseCollectionCollections1', { a: 1 })
+        .then(function (r) {
+          test.ok(r != null);
 
-      test: function (done) {
-        var configuration = this.configuration;
-        const client = configuration.newClient({ maxPoolSize: 5 });
+          client.close(done);
+        });
+    }
+  });
 
-        // Create an index
-        client
-          .db(configuration.db)
-          .createIndex('promiseCollectionCollections2', { a: 1 })
-          .then(function (r) {
-            test.ok(r != null);
-
-            client.close(done);
-          });
+  it('Should correctly execute ensureIndex using Promise', {
+    metadata: {
+      requires: {
+        topology: ['single']
       }
-    });
+    },
+
+    test: function (done) {
+      var configuration = this.configuration;
+      const client = configuration.newClient({ maxPoolSize: 5 });
+
+      // Create an index
+      client
+        .db(configuration.db)
+        .createIndex('promiseCollectionCollections2', { a: 1 })
+        .then(function (r) {
+          test.ok(r != null);
+
+          client.close(done);
+        });
+    }
   });
 
   it('shouldCorrectlyExtractIndexInformation', {

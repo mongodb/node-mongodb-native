@@ -744,7 +744,7 @@ describe('Explain', function () {
     });
   });
 
-  it('should throw a catchable error with invalid explain string (promise)', {
+  it('should throw a catchable error with invalid explain string', {
     metadata: {
       requires: {
         mongodb: '>=3.4'
@@ -762,24 +762,6 @@ describe('Explain', function () {
           expect(err).to.be.instanceOf(MongoServerError);
           done();
         });
-    }
-  });
-
-  it('should throw a catchable error with invalid explain string (callback)', {
-    metadata: {
-      requires: {
-        mongodb: '>=3.4'
-      }
-    },
-    test: function (done) {
-      const db = client.db('shouldThrowCatchableError');
-      const collection = db.collection('test');
-      collection.find({ a: 1 }).explain('invalidExplain', (err, result) => {
-        expect(err).to.exist;
-        expect(result).to.not.exist;
-        expect(err).to.be.instanceOf(MongoServerError);
-        done();
-      });
     }
   });
 });

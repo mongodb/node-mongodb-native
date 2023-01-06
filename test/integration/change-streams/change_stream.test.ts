@@ -214,66 +214,6 @@ describe('Change Streams', function () {
     }
   });
 
-  it(
-    'should create a ChangeStream on a collection and get change events through imperative callback form',
-    {
-      metadata: { requires: { topology: 'replicaset' } },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient();
-
-        client.connect((err, client) => {
-          expect(err).to.not.exist;
-          this.defer(() => client.close());
-
-          const collection = client.db('integration_tests').collection('docsCallback');
-          const changeStream = collection.watch(pipeline);
-          this.defer(() => changeStream.close());
-
-          // Fetch the change notification
-          changeStream.hasNext((err, hasNext) => {
-            expect(err).to.not.exist;
-
-            assert.equal(true, hasNext);
-            changeStream.next((err, change) => {
-              expect(err).to.not.exist;
-              expect(change).to.have.property('operationType', 'insert');
-              expect(change).to.have.nested.property('fullDocument.e', 5);
-              expect(change).to.have.nested.property('ns.db', 'integration_tests');
-              expect(change).to.have.nested.property('ns.coll', 'docsCallback');
-              expect(change).to.not.have.property('documentKey');
-              expect(change).to.have.property(
-                'comment',
-                'The documentKey field has been projected out of this document.'
-              );
-
-              // Trigger the second database event
-              collection.updateOne({ e: 5 }, { $inc: { e: 2 } }, err => {
-                expect(err).to.not.exist;
-                changeStream.hasNext((err, hasNext) => {
-                  expect(err).to.not.exist;
-                  assert.equal(true, hasNext);
-                  changeStream.next((err, change) => {
-                    expect(err).to.not.exist;
-                    assert.equal(change.operationType, 'update');
-
-                    done();
-                  });
-                });
-              });
-            });
-          });
-
-          // Trigger the first database event
-          // NOTE: this needs to be triggered after the changeStream call so
-          // that the cursor is run
-          this.defer(collection.insertOne({ e: 5 }));
-        });
-      }
-    }
-  );
-
   it('should support creating multiple simultaneous ChangeStreams', {
     metadata: { requires: { topology: 'replicaset' } },
 
