@@ -4,6 +4,7 @@ const chai = require('chai');
 
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
+const { MongoServerError } = require('../../../src');
 
 chai.use(sinonChai);
 
@@ -86,30 +87,20 @@ describe('Errors', function () {
     'Cannot do exclusion on field b in inclusion projection'
   ]);
 
-  it('should return an error object with message when mixing included and excluded fields', {
-    metadata: { requires: { mongodb: '>3.0' } },
-    test: function (done) {
-      const db = client.db(this.configuration.db);
-      const c = db.collection('test_error_object_should_include_message');
-      c.insertOne({ a: 2, b: 5 }, { writeConcern: { w: 1 } }, err => {
-        expect(err).to.not.exist;
-        c.findOne({ a: 2 }, { projection: { a: 1, b: 0 } }, err => {
-          expect(PROJECTION_ERRORS).to.include(err.errmsg);
-          done();
-        });
-      });
-    }
+  it('should return an error object with message when mixing included and excluded fields', async () => {
+    const db = client.db();
+    const c = db.collection('test_error_object_should_include_message');
+    await c.insertOne({ a: 2, b: 5 }, { writeConcern: { w: 1 } });
+    const error = await c.findOne({ a: 2 }, { projection: { a: 1, b: 0 } }).catch(error => error);
+    expect(error).to.be.instanceOf(MongoServerError);
+    expect(PROJECTION_ERRORS).to.include(error.errmsg);
   });
 
-  it('should handle error throw in user callback', {
-    metadata: { requires: { mongodb: '>3.0' } },
-    test: function (done) {
-      const db = client.db(this.configuration.db);
-      const c = db.collection('test_error_object_should_include_message');
-      c.findOne({}, { projection: { a: 1, b: 0 } }, err => {
-        expect(PROJECTION_ERRORS).to.include(err.errmsg);
-        done();
-      });
-    }
+  it('should reject promise with projection errors', async () => {
+    const db = client.db();
+    const c = db.collection('test_error_object_should_include_message');
+    const error = await c.findOne({}, { projection: { a: 1, b: 0 } }).catch(error => error);
+    expect(error).to.be.instanceOf(MongoServerError);
+    expect(PROJECTION_ERRORS).to.include(error.errmsg);
   });
 });

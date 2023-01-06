@@ -1,6 +1,6 @@
 import { assert as test, setupDatabase } from '../shared';
 
-describe('Collection Management and Db Management (promise tests)', function () {
+describe('Collection Management and Db Management', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });

@@ -107,37 +107,35 @@ describe('Bulk', function () {
     });
   });
 
-  context('promise tests', () => {
-    it('Should correctly execute unordered bulk operation in promise form', async function () {
-      const db = client.db();
-      const bulk = db
-        .collection('unordered_bulk_promise_form')
-        .initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
-      bulk.insert({ a: 1 });
+  it('Should correctly execute unordered bulk operation', async function () {
+    const db = client.db();
+    const bulk = db
+      .collection('unordered_bulk_promise_form')
+      .initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
+    bulk.insert({ a: 1 });
 
-      const r = await bulk.execute();
-      test.ok(r);
-      test.deepEqual({ w: 1 }, bulk.s.writeConcern);
-    });
+    const r = await bulk.execute();
+    test.ok(r);
+    test.deepEqual({ w: 1 }, bulk.s.writeConcern);
+  });
 
-    it('Should correctly execute ordered bulk operation in promise form', async function () {
-      const db = client.db();
-      const bulk = db
-        .collection('unordered_bulk_promise_form')
-        .initializeOrderedBulkOp({ writeConcern: { w: 1 } });
-      bulk.insert({ a: 1 });
+  it('Should correctly execute ordered bulk operation', async function () {
+    const db = client.db();
+    const bulk = db
+      .collection('unordered_bulk_promise_form')
+      .initializeOrderedBulkOp({ writeConcern: { w: 1 } });
+    bulk.insert({ a: 1 });
 
-      const r = await bulk.execute();
-      test.ok(r);
-      test.deepEqual({ w: 1 }, bulk.s.writeConcern);
-    });
+    const r = await bulk.execute();
+    test.ok(r);
+    test.deepEqual({ w: 1 }, bulk.s.writeConcern);
+  });
 
-    it('Should correctly handle bulkWrite with no options', async function () {
-      const db = client.db();
-      const col = db.collection('find_one_and_replace_with_promise_no_option');
-      const result = await col.bulkWrite([{ insertOne: { document: { a: 1 } } }]);
-      expect(result).to.exist;
-    });
+  it('Should correctly handle bulkWrite with no options', async function () {
+    const db = client.db();
+    const col = db.collection('find_one_and_replace_with_promise_no_option');
+    const result = await col.bulkWrite([{ insertOne: { document: { a: 1 } } }]);
+    expect(result).to.exist;
   });
 
   it('should correctly handle ordered single batch api write command error', function (done) {

@@ -578,31 +578,10 @@ describe('Collection', function () {
       });
     });
 
-    context('when no callback passed', function () {
-      it('returns a promise', function () {
-        const docsPromise = collection.countDocuments();
-        expect(docsPromise).to.exist.and.to.be.an.instanceof(Promise);
-        return docsPromise.then(result => expect(result).to.equal(1));
-      });
-    });
-
-    context('when a callback is passed', function () {
-      it('does not return a promise', function (done) {
-        const notPromise = collection.countDocuments({ a: 1 }, () => {
-          expect(notPromise).to.be.undefined;
-          done();
-        });
-      });
-
-      it('calls the callback', function (done) {
-        const docs = [{ a: 1 }, { a: 2 }];
-        collection.insertMany(docs).then(() =>
-          collection.countDocuments({ a: 1 }, (err, data) => {
-            expect(data).to.equal(1);
-            done(err);
-          })
-        );
-      });
+    it('returns a promise', function () {
+      const docsPromise = collection.countDocuments();
+      expect(docsPromise).to.exist.and.to.be.an.instanceof(Promise);
+      return docsPromise.then(result => expect(result).to.equal(1));
     });
   });
 

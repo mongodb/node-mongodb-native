@@ -71,47 +71,45 @@ describe('crud - insert', function () {
     await client.close();
   });
 
-  context('insert promise tests', () => {
-    it('Should correctly execute Collection.prototype.insertOne', function (done) {
-      const configuration = this.configuration;
-      let url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=100')
-          : f('%s?%s', url, 'maxPoolSize=100');
+  it('Should correctly execute Collection.prototype.insertOne', function (done) {
+    const configuration = this.configuration;
+    let url = configuration.url();
+    url =
+      url.indexOf('?') !== -1
+        ? f('%s&%s', url, 'maxPoolSize=100')
+        : f('%s?%s', url, 'maxPoolSize=100');
 
-      const client = configuration.newClient(url);
-      client.connect().then(function (client) {
-        const db = client.db(configuration.db);
+    const client = configuration.newClient(url);
+    client.connect().then(function (client) {
+      const db = client.db(configuration.db);
 
-        db.collection('insertOne')
-          .insertOne({ a: 1 })
-          .then(function (r) {
-            expect(r).property('insertedId').to.exist;
-            client.close(done);
-          });
-      });
+      db.collection('insertOne')
+        .insertOne({ a: 1 })
+        .then(function (r) {
+          expect(r).property('insertedId').to.exist;
+          client.close(done);
+        });
     });
+  });
 
-    it('Should correctly return failing Promise when no document array passed into insertMany', function (done) {
-      const configuration = this.configuration;
-      let url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=100')
-          : f('%s?%s', url, 'maxPoolSize=100');
+  it('Should correctly return failing Promise when no document array passed into insertMany', function (done) {
+    const configuration = this.configuration;
+    let url = configuration.url();
+    url =
+      url.indexOf('?') !== -1
+        ? f('%s&%s', url, 'maxPoolSize=100')
+        : f('%s?%s', url, 'maxPoolSize=100');
 
-      const client = configuration.newClient(url);
-      client.connect().then(() => {
-        this.defer(() => client.close());
+    const client = configuration.newClient(url);
+    client.connect().then(() => {
+      this.defer(() => client.close());
 
-        const db = client.db(configuration.db);
-        expect(() => {
-          db.collection('insertMany_Promise_error').insertMany({ a: 1 });
-        }).to.throw(/Argument "docs" must be an array of documents/);
+      const db = client.db(configuration.db);
+      expect(() => {
+        db.collection('insertMany_Promise_error').insertMany({ a: 1 });
+      }).to.throw(/Argument "docs" must be an array of documents/);
 
-        done();
-      });
+      done();
     });
   });
 
