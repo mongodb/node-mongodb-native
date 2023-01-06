@@ -25,6 +25,21 @@ to migrate code that uses `Collection.mapReduce` to use the aggregation pipeline
 If the `mapReduce` command must be used, the `Db.command()` helper can be used to run the raw
 `mapReduce` command.
 
+```typescript
+const command = {
+  mapReduce: 'my-collection',
+  map: 'function() { emit(this.user_id, 1); }',
+  reduce: 'function(k,vals) { return 1; }',
+  out: 'inline',
+  readConcern: 'majority'
+}
+
+await db.command(command);
+```
+
+**Note** When using the `Db.command()` helper, all `mapReduce` options should be specified
+on the raw command object and should not be passed through the options object.
+
 ### `AddUserOptions.digestPassword` removed
 
 The `digestPassword` option has been removed from the add user helper.

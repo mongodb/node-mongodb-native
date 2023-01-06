@@ -1007,7 +1007,7 @@ export function applySession(
     if (
       session.supports.causalConsistency &&
       session.operationTime &&
-      commandSupportsReadConcern(command)
+      commandSupportsReadConcern(command, options)
     ) {
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });

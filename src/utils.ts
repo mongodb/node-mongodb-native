@@ -1326,10 +1326,23 @@ export function shuffle<T>(sequence: Iterable<T>, limit = 0): Array<T> {
   return limit % items.length === 0 ? items : items.slice(lowerBound);
 }
 
-// TODO: this should be codified in command construction
+// TODO(NODE-4936): read concern eligibility for commands should be codified in command construction
 // @see https://github.com/mongodb/specifications/blob/master/source/read-write-concern/read-write-concern.rst#read-concern
-export function commandSupportsReadConcern(command: Document): boolean {
-  return command.aggregate || command.count || command.distinct || command.find || command.geoNear;
+export function commandSupportsReadConcern(command: Document, options?: Document): boolean {
+  if (command.aggregate || command.count || command.distinct || command.find || command.geoNear) {
+    return true;
+  }
+
+  if (
+    command.mapReduce &&
+    options &&
+    options.out &&
+    (options.out.inline === 1 || options.out === 'inline')
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
