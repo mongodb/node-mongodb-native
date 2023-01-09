@@ -2,13 +2,17 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { ServerType } from '../../../src/sdam/common';
-import { ServerHeartbeatFailedEvent, ServerHeartbeatStartedEvent } from '../../../src/sdam/events';
-import { Monitor, MonitorInterval } from '../../../src/sdam/monitor';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
-import { isHello } from '../../../src/utils';
+import {
+  isHello,
+  LEGACY_HELLO_COMMAND,
+  Monitor,
+  MonitorInterval,
+  ServerDescription,
+  ServerHeartbeatFailedEvent,
+  ServerHeartbeatStartedEvent,
+  ServerType,
+  Topology
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { createTimerSandbox } from '../timer_sandbox';
 

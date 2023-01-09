@@ -2,9 +2,7 @@ import { expect } from 'chai';
 import { on } from 'events';
 
 import { CommandStartedEvent } from '../../../src';
-import { Collection } from '../../../src/collection';
-import { MongoClient } from '../../../src/mongo_client';
-import { HostAddress } from '../../../src/utils';
+import { Collection, HostAddress, MongoClient } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 const failPoint = {

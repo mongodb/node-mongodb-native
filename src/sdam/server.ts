@@ -1,5 +1,5 @@
 import type { Document } from '../bson';
-import { CommandOptions, Connection, DestroyOptions, GetMoreOptions } from '../cmap/connection';
+import { CommandOptions, Connection, DestroyOptions } from '../cmap/connection';
 import {
   ConnectionPool,
   ConnectionPoolEvents,
@@ -38,6 +38,7 @@ import {
 import { Logger } from '../logger';
 import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
+import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
 import { isTransactionCommand } from '../transactions';
 import {
@@ -503,7 +504,7 @@ function makeOperationHandler(
       return callback(undefined, result);
     }
 
-    if (options?.noResponse === true) {
+    if (options != null && 'noResponse' in options && options.noResponse === true) {
       return callback(undefined, null);
     }
 

@@ -2,16 +2,16 @@
 
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { ObjectId } = require('../../../src/bson');
-const { ReadPreference } = require('../../../src/read_preference');
+const { ObjectId } = require('../../mongodb');
+const { ReadPreference } = require('../../mongodb');
 const {
   sameServerSelector,
   secondaryWritableServerSelector,
   MIN_SECONDARY_WRITE_WIRE_VERSION
-} = require('../../../src/sdam/server_selection');
-const { ServerDescription } = require('../../../src/sdam/server_description');
-const { TopologyDescription } = require('../../../src/sdam/topology_description');
-const { TopologyType } = require('../../../src/sdam/common');
+} = require('../../mongodb');
+const { ServerDescription } = require('../../mongodb');
+const { TopologyDescription } = require('../../mongodb');
+const { TopologyType } = require('../../mongodb');
 
 describe('server selection', function () {
   const primary = new ServerDescription('127.0.0.1:27017', {

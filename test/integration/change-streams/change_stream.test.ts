@@ -22,7 +22,7 @@ import {
   ReadPreference,
   ResumeToken
 } from '../../../src';
-import { isHello } from '../../../src/utils';
+import { isHello } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import {
   FailPoint,

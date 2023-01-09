@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { ListCollectionsOperation } = require('../../../src/operations/list_collections');
+const { ListCollectionsOperation } = require('../../mongodb');
 
 describe('ListCollectionsOperation', function () {
   const db = 'test';

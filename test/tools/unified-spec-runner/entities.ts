@@ -2,13 +2,14 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
 
-import { ChangeStream } from '../../../src/change_stream';
 import {
+  AbstractCursor,
+  ChangeStream,
+  ClientSession,
+  Collection,
   CommandFailedEvent,
   CommandStartedEvent,
-  CommandSucceededEvent
-} from '../../../src/cmap/command_monitoring_events';
-import {
+  CommandSucceededEvent,
   ConnectionCheckedInEvent,
   ConnectionCheckedOutEvent,
   ConnectionCheckOutFailedEvent,
@@ -19,24 +20,19 @@ import {
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
   ConnectionPoolReadyEvent,
-  ConnectionReadyEvent
-} from '../../../src/cmap/connection_pool_events';
-import {
-  AbstractCursor,
-  Collection,
+  ConnectionReadyEvent,
   Db,
   Document,
   GridFSBucket,
   HostAddress,
   MongoClient,
   MongoCredentials,
+  ReadConcern,
+  ReadPreference,
   ServerDescriptionChangedEvent,
-  TopologyDescription
-} from '../../../src/index';
-import { ReadConcern } from '../../../src/read_concern';
-import { ReadPreference } from '../../../src/read_preference';
-import { ClientSession } from '../../../src/sessions';
-import { WriteConcern } from '../../../src/write_concern';
+  TopologyDescription,
+  WriteConcern
+} from '../../mongodb';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { trace } from './runner';

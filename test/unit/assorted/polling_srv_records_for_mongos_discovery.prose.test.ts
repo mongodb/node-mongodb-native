@@ -3,10 +3,16 @@ import * as dns from 'dns';
 import * as sinon from 'sinon';
 
 import { MongoClient } from '../../../src';
-import { TopologyType } from '../../../src/sdam/common';
-import { SrvPoller, SrvPollerOptions, SrvPollingEvent } from '../../../src/sdam/srv_polling';
-import { Topology, TopologyOptions } from '../../../src/sdam/topology';
-import { HostAddress, isHello } from '../../../src/utils';
+import {
+  HostAddress,
+  isHello,
+  SrvPoller,
+  SrvPollerOptions,
+  SrvPollingEvent,
+  Topology,
+  TopologyOptions,
+  TopologyType
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import type { MockServer } from '../../tools/mongodb-mock/src/server';
 import { processTick } from '../../tools/utils';

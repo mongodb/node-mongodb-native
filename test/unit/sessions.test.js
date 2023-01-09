@@ -3,16 +3,11 @@
 const mock = require('../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const { genClusterTime } = require('../tools/common');
-const {
-  ServerSessionPool,
-  ServerSession,
-  ClientSession,
-  applySession
-} = require('../../src/sessions');
-const { now, isHello } = require('../../src/utils');
+const { ServerSessionPool, ServerSession, ClientSession, applySession } = require('../mongodb');
+const { now, isHello } = require('../mongodb');
 const { getSymbolFrom } = require('../tools/utils');
-const { Long } = require('../../src/bson');
-const { MongoRuntimeError } = require('../../src/error');
+const { Long } = require('../mongodb');
+const { MongoRuntimeError } = require('../mongodb');
 const sinon = require('sinon');
 const { MongoClient } = require('../../src');
 

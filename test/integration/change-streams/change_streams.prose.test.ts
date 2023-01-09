@@ -13,8 +13,7 @@ import {
   ObjectId,
   Timestamp
 } from '../../../src';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { isHello } from '../../../src/utils';
+import { isHello, LEGACY_HELLO_COMMAND } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 

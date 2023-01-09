@@ -7,8 +7,7 @@ import type {
   CommandSucceededEvent,
   MongoClient
 } from '../../../src';
-import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
-import { MongoCompatibilityError, MongoServerError } from '../../../src/error';
+import { LEGACY_HELLO_COMMAND, MongoCompatibilityError, MongoServerError } from '../../mongodb';
 import type { TestConfiguration } from '../../tools/runner/config';
 import { setupDatabase } from '../shared';
 

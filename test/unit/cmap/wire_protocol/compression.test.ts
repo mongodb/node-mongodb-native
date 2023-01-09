@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { compress, Compressor, decompress } from '../../../../src/cmap/wire_protocol/compression';
+import { compress, Compressor, decompress } from '../../../mongodb';
 
 describe('compression', function () {
   describe('.compress()', function () {

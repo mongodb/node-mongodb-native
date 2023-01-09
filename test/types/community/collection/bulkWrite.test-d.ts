@@ -1,6 +1,6 @@
 import { expectError } from 'tsd';
 
-import { MongoClient, ObjectId } from '../../../../src/index';
+import { MongoClient, ObjectId } from '../../../mongodb';
 
 // TODO(NODE-3347): Improve these tests to use more expect assertions
 

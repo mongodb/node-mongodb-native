@@ -30,7 +30,7 @@ const $jsonSchema = BSON.EJSON.parse(
 
 const kEvents = Symbol('events');
 const kClientsCreated = Symbol('clientsCreated');
-const CapturingMongoClient = class extends require('../../../src/index').MongoClient {
+const CapturingMongoClient = class extends require('../../mongodb').MongoClient {
   constructor(url, options) {
     options = { ...options, monitorCommands: true };
     if (process.env.MONGODB_API_VERSION) {

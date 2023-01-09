@@ -10,8 +10,7 @@ import {
   ProfilingLevel,
   TopologyType
 } from '../../../src';
-import { Topology } from '../../../src/sdam/topology';
-import { ClientSession } from '../../../src/sessions';
+import { ClientSession, Topology } from '../../mongodb';
 
 describe('When executing an operation for the first time', () => {
   let client: MongoClient;

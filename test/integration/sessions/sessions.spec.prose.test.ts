@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import type { Collection, CommandStartedEvent, MongoClient } from '../../../src/index';
+import type { Collection, CommandStartedEvent, MongoClient } from '../../mongodb';
 
 describe('ServerSession', () => {
   let client: MongoClient;

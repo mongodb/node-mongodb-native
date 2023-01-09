@@ -5,10 +5,7 @@ import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
-import { OP_MSG } from '../../src/cmap/wire_protocol/constants';
-import { Document } from '../../src/index';
-import { Logger } from '../../src/logger';
-import { deprecateOptions, DeprecateOptionsConfig } from '../../src/utils';
+import { deprecateOptions, DeprecateOptionsConfig, Document, Logger, OP_MSG } from '../mongodb';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   CollectionData,
@@ -513,7 +510,7 @@ export class UnifiedTestSuiteBuilder {
 /** Test whether the driver is using bson-ext */
 export function isBSONExtImported() {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const driverBSON = require('../../src/bson');
+  const driverBSON = require('../mongodb');
   return driverBSON.deserialize.toString().includes('[native code]');
 }
 

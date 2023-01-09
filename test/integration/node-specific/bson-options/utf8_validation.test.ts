@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import * as BSON from '../../../../src/bson';
+import { Connection } from '../../../mongodb';
 
 const EXPECTED_VALIDATION_DISABLED_ARGUMENT = {
   utf8: false
@@ -14,115 +14,98 @@ const EXPECTED_VALIDATION_ENABLED_ARGUMENT = {
 };
 
 describe('class BinMsg', () => {
-  let deserializeSpy: sinon.SinonSpy;
+  let onMessageSpy: sinon.SinonSpy;
 
   beforeEach(() => {
-    deserializeSpy = sinon.spy(BSON, 'deserialize');
+    onMessageSpy = sinon.spy(Connection.prototype, 'onMessage');
   });
 
   afterEach(() => {
-    deserializeSpy?.restore();
+    onMessageSpy?.restore();
     // @ts-expect-error: Allow this to be garbage collected
-    deserializeSpy = null;
+    onMessageSpy = null;
+  });
+
+  let client;
+  afterEach(async () => {
+    if (client) await client.close();
   });
 
   describe('enableUtf8Validation option set to false', () => {
-    let client;
     const option = { enableUtf8Validation: false };
 
     for (const passOptionTo of ['client', 'db', 'collection', 'operation']) {
       it(`should disable validation with option passed to ${passOptionTo}`, async function () {
-        try {
-          client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
-          await client.connect();
+        client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
 
-          const db = client.db(
-            'bson_utf8Validation_db',
-            passOptionTo === 'db' ? option : undefined
-          );
-          const collection = db.collection(
-            'bson_utf8Validation_coll',
-            passOptionTo === 'collection' ? option : undefined
-          );
+        const db = client.db('bson_utf8Validation_db', passOptionTo === 'db' ? option : undefined);
+        const collection = db.collection(
+          'bson_utf8Validation_coll',
+          passOptionTo === 'collection' ? option : undefined
+        );
 
-          await collection.insertOne(
-            { name: 'John Doe' },
-            passOptionTo === 'operation' ? option : {}
-          );
+        await collection.insertOne(
+          { name: 'John Doe' },
+          passOptionTo === 'operation' ? option : {}
+        );
 
-          expect(deserializeSpy.called).to.be.true;
-          const validationArgument = deserializeSpy.lastCall.lastArg.validation;
-          expect(validationArgument).to.deep.equal(EXPECTED_VALIDATION_DISABLED_ARGUMENT);
-        } finally {
-          await client.close();
-        }
+        expect(onMessageSpy).to.have.been.called;
+        const binMsg = onMessageSpy.lastCall.firstArg;
+        const result = binMsg.parseBsonSerializationOptions(option);
+        expect(result).to.deep.equal(EXPECTED_VALIDATION_DISABLED_ARGUMENT);
       });
     }
   });
 
   describe('enableUtf8Validation option set to true', () => {
     // define client and option for tests to use
-    let client;
     const option = { enableUtf8Validation: true };
     for (const passOptionTo of ['client', 'db', 'collection', 'operation']) {
       it(`should enable validation with option passed to ${passOptionTo}`, async function () {
-        try {
-          client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
-          await client.connect();
+        client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
+        await client.connect();
 
-          const db = client.db(
-            'bson_utf8Validation_db',
-            passOptionTo === 'db' ? option : undefined
-          );
-          const collection = db.collection(
-            'bson_utf8Validation_coll',
-            passOptionTo === 'collection' ? option : undefined
-          );
+        const db = client.db('bson_utf8Validation_db', passOptionTo === 'db' ? option : undefined);
+        const collection = db.collection(
+          'bson_utf8Validation_coll',
+          passOptionTo === 'collection' ? option : undefined
+        );
 
-          await collection.insertOne(
-            { name: 'John Doe' },
-            passOptionTo === 'operation' ? option : {}
-          );
+        await collection.insertOne(
+          { name: 'John Doe' },
+          passOptionTo === 'operation' ? option : {}
+        );
 
-          expect(deserializeSpy.called).to.be.true;
-          const validationArgument = deserializeSpy.lastCall.lastArg.validation;
-          expect(validationArgument).to.deep.equal(EXPECTED_VALIDATION_ENABLED_ARGUMENT);
-        } finally {
-          await client.close();
-        }
+        expect(onMessageSpy).to.have.been.called;
+        const binMsg = onMessageSpy.lastCall.firstArg;
+        const result = binMsg.parseBsonSerializationOptions(option);
+        expect(result).to.deep.equal(EXPECTED_VALIDATION_ENABLED_ARGUMENT);
       });
     }
   });
 
   describe('enableUtf8Validation option not set', () => {
-    let client;
-    const option = { enableUtf8Validation: true };
+    const option = {};
     for (const passOptionTo of ['client', 'db', 'collection', 'operation']) {
       it(`should default to enabled with option passed to ${passOptionTo}`, async function () {
-        try {
-          client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
-          await client.connect();
+        client = this.configuration.newClient(passOptionTo === 'client' ? option : undefined);
+        await client.connect();
 
-          const db = client.db(
-            'bson_utf8Validation_db',
-            passOptionTo === 'db' ? option : undefined
-          );
-          const collection = db.collection(
-            'bson_utf8Validation_coll',
-            passOptionTo === 'collection' ? option : undefined
-          );
+        const db = client.db('bson_utf8Validation_db', passOptionTo === 'db' ? option : undefined);
+        const collection = db.collection(
+          'bson_utf8Validation_coll',
+          passOptionTo === 'collection' ? option : undefined
+        );
 
-          await collection.insertOne(
-            { name: 'John Doe' },
-            passOptionTo === 'operation' ? option : {}
-          );
+        await collection.insertOne(
+          { name: 'John Doe' },
+          passOptionTo === 'operation' ? option : {}
+        );
 
-          expect(deserializeSpy.called).to.be.true;
-          const validationArgument = deserializeSpy.lastCall.lastArg.validation;
-          expect(validationArgument).to.deep.equal(EXPECTED_VALIDATION_ENABLED_ARGUMENT);
-        } finally {
-          await client.close();
-        }
+        expect(onMessageSpy).to.have.been.called;
+        const binMsg = onMessageSpy.lastCall.firstArg;
+        const result = binMsg.parseBsonSerializationOptions(option);
+        expect(result).to.deep.equal(EXPECTED_VALIDATION_ENABLED_ARGUMENT);
       });
     }
   });

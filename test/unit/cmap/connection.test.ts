@@ -5,12 +5,17 @@ import * as sinon from 'sinon';
 import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 
-import { BinMsg } from '../../../src/cmap/commands';
-import { connect } from '../../../src/cmap/connect';
-import { Connection, hasSessionSupport } from '../../../src/cmap/connection';
-import { MessageStream } from '../../../src/cmap/message_stream';
-import { MongoNetworkTimeoutError, MongoRuntimeError } from '../../../src/error';
-import { isHello, ns } from '../../../src/utils';
+import {
+  BinMsg,
+  connect,
+  Connection,
+  hasSessionSupport,
+  isHello,
+  MessageStream,
+  MongoNetworkTimeoutError,
+  MongoRuntimeError,
+  ns
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';

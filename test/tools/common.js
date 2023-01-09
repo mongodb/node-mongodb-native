@@ -1,9 +1,9 @@
 'use strict';
 
 const mock = require('./mongodb-mock/index');
-const BSON = require('../../src/bson');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
-const { isHello } = require('../../src/utils');
+const BSON = require('../mongodb');
+const { LEGACY_HELLO_COMMAND } = require('../mongodb');
+const { isHello } = require('../mongodb');
 
 class ReplSetFixture {
   constructor() {

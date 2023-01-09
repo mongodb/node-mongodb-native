@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { ReadPreference } from '../../../src/read_preference';
+import { ReadPreference } from '../../mongodb';
 import { filterForCommands, ignoreNsNotFound, setupDatabase } from '../shared';
 
 describe('Command Monitoring', function () {
