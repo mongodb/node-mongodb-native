@@ -124,29 +124,31 @@ cursor.closed // true
 
 Everywhere the driver sends a `hello` command (initial handshake and monitoring), it will now pass the command value as `1` instead of the
 previous `true` for spec compliance.
+
 ### Removed `Collection.insert`, `Collection.update`, and `Collection.remove`
 
-These legacy methods have been removed. `update` and `remove` invocations are identical to `updateMany` and `deleteMany` respectively.
-The `insert` method is equivalent to `insertMany` but the first argument **MUST** be an array.
+Three legacy operation helpers on the collection class have been removed:
+
+| Removed API                                    | API to migrate to                                  |
+|------------------------------------------------|----------------------------------------------------|
+| `insert(document)`                             | `insertOne(document)`                              |
+| `insert(arrayOfDocuments)`                     | `insertMany(arrayOfDocuments)`                     |
+| `update(filter)`                               | `updateMany(filter)`                               |
+| `remove(filter)`                               | `deleteMany(filter)`                               |
+
+The `insert` method could accept arrays or single documents, instead for single document inserts `insertOne` or an `insertMany` call with an array argument of one should be used.
 
 ```ts
 // Single document insert:
 await collection.insert({ name: 'spot' });
 // Migration:
-await collection.insertMany([{ name: 'spot' }]);
+await collection.insertOne({ name: 'spot' });
 
 // Multi-document insert:
 await collection.insert([{ name: 'fido' }, { name: 'luna' }])
 // Migration:
 await collection.insertMany([{ name: 'fido' }, { name: 'luna' }])
 ```
-
-| Removed API                                    | API Migration                                      |
-|------------------------------------------------|----------------------------------------------------|
-| `insert(document)`                             | `insertOne(document)`                              |
-| `insert(arrayOfDocuments)`                     | `insertMany(arrayOfDocuments)`                     |
-| `update(filter)`                               | `updateMany(filter)`                               |
-| `remove(filter)`                               | `deleteMany(filter)`                               |
 
 ### Removed `keepGoing` option from `BulkWriteOptions`
 
