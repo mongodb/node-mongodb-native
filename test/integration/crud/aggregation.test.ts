@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoInvalidArgumentError } from '../../../src/error';
+import { MongoInvalidArgumentError } from '../../mongodb';
 import { filterForCommands } from '../shared';
 
 describe('Aggregation', function () {

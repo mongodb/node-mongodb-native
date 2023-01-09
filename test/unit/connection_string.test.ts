@@ -2,17 +2,21 @@ import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
 
-import { MongoCredentials } from '../../src/cmap/auth/mongo_credentials';
-import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from '../../src/cmap/auth/providers';
-import { FEATURE_FLAGS, parseOptions, resolveSRVRecord } from '../../src/connection_string';
 import {
+  AUTH_MECHS_AUTH_SRC_EXTERNAL,
+  AuthMechanism,
+  FEATURE_FLAGS,
   MongoAPIError,
+  MongoClient,
+  MongoCredentials,
   MongoDriverError,
   MongoInvalidArgumentError,
+  MongoOptions,
   MongoParseError,
-  MongoRuntimeError
-} from '../../src/error';
-import { MongoClient, MongoOptions } from '../../src/mongo_client';
+  MongoRuntimeError,
+  parseOptions,
+  resolveSRVRecord
+} from '../mongodb';
 
 describe('Connection String', function () {
   it('should not support auth passed with user', function () {

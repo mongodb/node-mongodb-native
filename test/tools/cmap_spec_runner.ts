@@ -4,9 +4,13 @@ import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import { Connection, HostAddress, MongoClient, Server } from '../../src';
-import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
-import { CMAP_EVENTS } from '../../src/constants';
-import { makeClientMetadata, shuffle } from '../../src/utils';
+import {
+  CMAP_EVENTS,
+  ConnectionPool,
+  ConnectionPoolOptions,
+  makeClientMetadata,
+  shuffle
+} from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { FailPoint, sleep } from './utils';
 

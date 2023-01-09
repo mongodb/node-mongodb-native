@@ -4,10 +4,7 @@ import * as qs from 'querystring';
 import * as url from 'url';
 
 import { AuthMechanism, WriteConcernSettings } from '../../../src';
-import { MongoClient } from '../../../src/mongo_client';
-import { TopologyType } from '../../../src/sdam/common';
-import { Topology } from '../../../src/sdam/topology';
-import { HostAddress } from '../../../src/utils';
+import { HostAddress, MongoClient, Topology, TopologyType } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
 
 interface ProxyParams {

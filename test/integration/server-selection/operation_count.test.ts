@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import { AbstractCursor, Collection, MongoClient } from '../../../src';
-import { ConnectionPool } from '../../../src/cmap/connection_pool';
+import { ConnectionPool } from '../../mongodb';
 import { FailPoint, sleep } from '../../tools/utils';
 
 const testMetadata: MongoDBMetadataUI = {

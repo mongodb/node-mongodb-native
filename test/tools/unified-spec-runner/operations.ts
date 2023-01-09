@@ -14,11 +14,13 @@ import {
   TopologyDescription,
   TopologyType
 } from '../../../src';
-import { CommandStartedEvent } from '../../../src/cmap/command_monitoring_events';
-import { SERVER_DESCRIPTION_CHANGED } from '../../../src/constants';
-import { ReadConcern } from '../../../src/read_concern';
-import { ReadPreference } from '../../../src/read_preference';
-import { WriteConcern } from '../../../src/write_concern';
+import {
+  CommandStartedEvent,
+  ReadConcern,
+  ReadPreference,
+  SERVER_DESCRIPTION_CHANGED,
+  WriteConcern
+} from '../../mongodb';
 import { getSymbolFrom, sleep } from '../../tools/utils';
 import { TestConfiguration } from '../runner/config';
 import { EntitiesMap, UnifiedChangeStream } from './entities';

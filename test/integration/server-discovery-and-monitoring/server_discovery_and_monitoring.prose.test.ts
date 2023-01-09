@@ -7,7 +7,7 @@ import {
   CONNECTION_POOL_READY,
   SERVER_HEARTBEAT_FAILED,
   SERVER_HEARTBEAT_SUCCEEDED
-} from '../../../src/constants';
+} from '../../mongodb';
 
 describe('Server Discovery and Monitoring Prose Tests', function () {
   context('Monitors sleep at least minHeartbeatFrequencyMS between checks', function () {
@@ -89,7 +89,7 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
   });
 
   context('Connection Pool Management', function () {
-    /* 
+    /*
       This test will be used to ensure monitors properly create and unpause connection pools when they discover servers.
       This test requires failCommand appName support which is only available in MongoDB 4.2.9+.
       1. Create a client with directConnection=true, appName="SDAMPoolManagementTest", and heartbeatFrequencyMS=500 (or lower if possible).

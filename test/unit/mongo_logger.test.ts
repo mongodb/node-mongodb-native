@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Readable, Writable } from 'stream';
 
-import { MongoLogger, MongoLoggerOptions, SeverityLevel } from '../../src/mongo_logger';
+import { MongoLogger, MongoLoggerOptions, SeverityLevel } from '../mongodb';
 
 class BufferingStream extends Writable {
   buffer: string[] = [];

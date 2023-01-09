@@ -1,5 +1,5 @@
 'use strict';
-const { deprecateOptions } = require('../../../src/utils');
+const { deprecateOptions } = require('../../mongodb');
 const {
   ClassWithLogger,
   ClassWithoutLogger,

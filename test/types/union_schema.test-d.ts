@@ -1,8 +1,7 @@
 import { expectAssignable, expectError, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
-import { Document, ObjectId } from '../../src/bson';
-import type { Collection } from '../../src/collection';
-import type { WithId } from '../../src/mongo_types';
+import type { Collection, WithId } from '../mongodb';
+import { Document, ObjectId } from '../mongodb';
 
 type InsertOneFirstParam<Schema extends Document> = Parameters<Collection<Schema>['insertOne']>[0];
 

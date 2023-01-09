@@ -1,35 +1,34 @@
 import { expect } from 'chai';
 import { setTimeout } from 'timers';
 
+import * as importsFromErrorSrc from '../../src/error';
+import * as importsFromEntryPoint from '../../src/index';
 import {
-  PoolClosedError as MongoPoolClosedError,
-  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
-} from '../../src/cmap/errors';
-import {
+  isHello,
   isResumableError,
   isRetryableReadError,
   isSDAMUnrecoverableError,
   LEGACY_NOT_PRIMARY_OR_SECONDARY_ERROR_MESSAGE,
   LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
   MONGODB_ERROR_CODES,
-  MongoErrorLabel,
-  MongoNetworkTimeoutError,
-  MongoSystemError,
-  needsRetryableWriteLabel,
-  NODE_IS_RECOVERING_ERROR_MESSAGE
-} from '../../src/error';
-import * as importsFromErrorSrc from '../../src/error';
-import {
   MongoError,
+  MongoErrorLabel,
   MongoNetworkError,
+  MongoNetworkTimeoutError,
   MongoParseError,
   MongoServerError,
+  MongoSystemError,
   MongoWriteConcernError,
-  TopologyDescription
-} from '../../src/index';
-import * as importsFromEntryPoint from '../../src/index';
-import { Topology, TopologyOptions } from '../../src/sdam/topology';
-import { isHello, ns, setDifference } from '../../src/utils';
+  needsRetryableWriteLabel,
+  NODE_IS_RECOVERING_ERROR_MESSAGE,
+  ns,
+  PoolClosedError as MongoPoolClosedError,
+  setDifference,
+  Topology,
+  TopologyDescription,
+  TopologyOptions,
+  WaitQueueTimeoutError as MongoWaitQueueTimeoutError
+} from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
 import { getSymbolFrom } from '../tools/utils';

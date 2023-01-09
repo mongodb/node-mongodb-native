@@ -4,7 +4,7 @@ const {
   MAX_SUPPORTED_SERVER_VERSION,
   MIN_SUPPORTED_WIRE_VERSION,
   MAX_SUPPORTED_WIRE_VERSION
-} = require('../../../../src/cmap/wire_protocol/constants');
+} = require('../../../mongodb');
 
 describe('Wire Protocol Constants', function () {
   describe('MIN_SUPPORTED_SERVER_VERSION', function () {

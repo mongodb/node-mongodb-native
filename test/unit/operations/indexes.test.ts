@@ -1,11 +1,6 @@
 import { expect } from 'chai';
 
-import {
-  CreateIndexesOptions,
-  CreateIndexOperation,
-  IndexDirection
-} from '../../../src/operations/indexes';
-import { ns } from '../../../src/utils';
+import { CreateIndexesOptions, CreateIndexOperation, IndexDirection, ns } from '../../mongodb';
 
 describe('class CreateIndexOperation', () => {
   const testCases = [

@@ -2,16 +2,18 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { promisify } from 'util';
 
-import { Long } from '../../../src/bson';
-import { MongoRuntimeError } from '../../../src/error';
-import { GetMoreOperation } from '../../../src/operations/get_more';
-import { Aspect } from '../../../src/operations/operation';
-import { ReadPreference } from '../../../src/read_preference';
-import { Server } from '../../../src/sdam/server';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
-import { ClientSession } from '../../../src/sessions';
-import { ns } from '../../../src/utils';
+import {
+  Aspect,
+  ClientSession,
+  GetMoreOperation,
+  Long,
+  MongoRuntimeError,
+  ns,
+  ReadPreference,
+  Server,
+  ServerDescription,
+  Topology
+} from '../../mongodb';
 
 describe('GetMoreOperation', function () {
   const namespace = ns('db.coll');

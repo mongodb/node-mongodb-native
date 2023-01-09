@@ -1,6 +1,6 @@
 'use strict';
 const { MongoClient } = require('../../src');
-const { LEGACY_HELLO_COMMAND } = require('../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../mongodb');
 
 /**
  * ATLAS_CONNECTIVITY env variable is JSON

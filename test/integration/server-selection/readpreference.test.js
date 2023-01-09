@@ -1,7 +1,7 @@
 'use strict';
 
 const { ReadPreference } = require('../../../src');
-const { Topology } = require('../../../src/sdam/topology');
+const { Topology } = require('../../mongodb');
 const chai = require('chai');
 chai.use(require('chai-subset'));
 

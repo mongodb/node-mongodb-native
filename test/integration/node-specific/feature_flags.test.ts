@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { MongoClient } from '../../../src';
-import { MongoLoggableComponent, SeverityLevel } from '../../../src/mongo_logger';
+import { MongoLoggableComponent, SeverityLevel } from '../../mongodb';
 
 describe('Feature Flags', () => {
   describe('@@mdb.skipPingOnConnect', () => {

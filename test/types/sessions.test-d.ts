@@ -1,8 +1,7 @@
 import { expectError, expectType } from 'tsd';
 
-import { MongoClient } from '../../src/mongo_client';
-import { ReadConcern, ReadConcernLevel } from '../../src/read_concern';
-import type { ClientSession } from '../../src/sessions';
+import type { ClientSession } from '../mongodb';
+import { MongoClient, ReadConcern, ReadConcernLevel } from '../mongodb';
 
 // test mapped cursor types
 const client = new MongoClient('');

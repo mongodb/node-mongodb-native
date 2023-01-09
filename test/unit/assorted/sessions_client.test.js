@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const mock = require('../../tools/mongodb-mock/index');
 const { ReplSetFixture } = require('../../tools/common');
-const { isHello } = require('../../../src/utils');
+const { isHello } = require('../../mongodb');
 const { MongoClient } = require('../../../src');
 
 const test = {};

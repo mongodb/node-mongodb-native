@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 
 const mock = require('../../tools/mongodb-mock/index');
 const { MongoClient } = require('../../../src');

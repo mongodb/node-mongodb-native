@@ -1,8 +1,8 @@
 import { BSONError } from 'bson';
 import { expect } from 'chai';
 
-import * as BSON from '../../src/bson';
-import { BinMsg, MessageHeader } from '../../src/cmap/commands';
+import * as BSON from '../mongodb';
+import { BinMsg, MessageHeader } from '../mongodb';
 import { isBSONExtImported } from '../tools/utils';
 
 const msgHeader: MessageHeader = {

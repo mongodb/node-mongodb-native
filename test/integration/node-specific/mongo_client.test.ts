@@ -11,11 +11,7 @@ import {
   MongoServerSelectionError,
   ReadPreference
 } from '../../../src';
-import { Connection } from '../../../src/cmap/connection';
-import { Db } from '../../../src/db';
-import { ServerDescription } from '../../../src/sdam/server_description';
-import { Topology } from '../../../src/sdam/topology';
-import { getTopology, isHello } from '../../../src/utils';
+import { Connection, Db, getTopology, isHello, ServerDescription, Topology } from '../../mongodb';
 import { runLater } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 

@@ -5,15 +5,12 @@ const { expect } = require('chai');
 const EventEmitter = require('events');
 const { setTimeout } = require('timers');
 
-const {
-  connect,
-  prepareHandshakeDocument: prepareHandshakeDocumentCb
-} = require('../../../src/cmap/connect');
-const { MongoCredentials } = require('../../../src/cmap/auth/mongo_credentials');
+const { connect, prepareHandshakeDocument: prepareHandshakeDocumentCb } = require('../../mongodb');
+const { MongoCredentials } = require('../../mongodb');
 const { genClusterTime } = require('../../tools/common');
-const { MongoNetworkError } = require('../../../src/error');
-const { HostAddress, isHello } = require('../../../src/utils');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { MongoNetworkError } = require('../../mongodb');
+const { HostAddress, isHello } = require('../../mongodb');
+const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { promisify } = require('util');
 
 describe('Connect Tests', function () {

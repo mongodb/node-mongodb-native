@@ -2,10 +2,10 @@
 
 const sinon = require('sinon');
 const { expect } = require('chai');
-const { Connection } = require('../../../src/cmap/connection');
-const { ScramSHA256 } = require('../../../src/cmap/auth/scram');
+const { Connection } = require('../../mongodb');
+const { ScramSHA256 } = require('../../mongodb');
 const { setupDatabase } = require('../shared');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 
 // TODO(NODE-4338): withClient usage prevented these tests from running
 // the import has been removed since the function is being deleted, this is here to keep modifications minimal

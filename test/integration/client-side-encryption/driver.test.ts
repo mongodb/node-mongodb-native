@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import * as crypto from 'crypto';
 
 import { Collection, CommandStartedEvent, MongoClient } from '../../../src';
-import * as BSON from '../../../src/bson';
+import * as BSON from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { ClientEncryption } from '../../tools/unified-spec-runner/schema';
 import { getEncryptExtraOptions } from '../../tools/utils';

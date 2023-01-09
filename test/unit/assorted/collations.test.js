@@ -2,7 +2,7 @@
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const { Long, Code } = require('../../../src');
-const { isHello } = require('../../../src/utils');
+const { isHello } = require('../../mongodb');
 const { MongoClient } = require('../../../src');
 
 const testContext = {};

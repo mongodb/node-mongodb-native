@@ -1,9 +1,7 @@
 import { expect } from 'chai';
 
 import { Callback, ExecutionResult, MongoClient, Server } from '../../../src';
-import { AbstractCursor, AbstractCursorOptions } from '../../../src/cursor/abstract_cursor';
-import { ClientSession } from '../../../src/sessions';
-import { ns } from '../../../src/utils';
+import { AbstractCursor, AbstractCursorOptions, ClientSession, ns } from '../../mongodb';
 
 /** Minimal do nothing cursor to focus on testing the base cusor behavior */
 class ConcreteCursor extends AbstractCursor {

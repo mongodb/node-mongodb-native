@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const BSON = require('../../src/bson');
+const BSON = require('../mongodb');
 const { isBSONExtImported } = require('../tools/utils');
 
 describe('When importing BSON', function () {
