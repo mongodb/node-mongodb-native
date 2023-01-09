@@ -6,7 +6,7 @@
     "test/tools/runner/chai-addons.js",
     "test/tools/runner/hooks/configuration.js",
     "test/tools/runner/hooks/leak_checker.ts",
-    "test/tools/runner/hooks/legacy.ts"
+    "test/tools/runner/hooks/legacy_crud_shims.ts"
   ],
   "extension": [
     "js",

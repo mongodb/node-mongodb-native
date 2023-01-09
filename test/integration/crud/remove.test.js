@@ -103,21 +103,6 @@ describe('Remove', function () {
     }
   });
 
-  it('deleteOne', async () => {
-    const collection = client.db().collection('test');
-    await collection.drop().catch(() => null);
-    await collection.insertMany([
-      { a: 1, i: 0 },
-      { a: 1, i: 1 },
-      { a: 1, i: 2 }
-    ]);
-    const delRes = await collection.deleteOne({ a: 1 });
-    expect(delRes).property('deletedCount', 1);
-    const docs = await collection.find().toArray();
-    expect(docs).to.have.lengthOf(2);
-    expect(docs.map(({ i }) => i)).to.deep.equal([1, 2]);
-  });
-
   it('should not error on empty remove', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }

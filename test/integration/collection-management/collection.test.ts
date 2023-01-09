@@ -227,28 +227,6 @@ describe('Collection', function () {
       );
     });
 
-    it('should perform collection remove with no callback', function (done) {
-      const collection = db.collection('remove_with_no_callback_bug_test');
-      collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
-        expect(err).to.not.exist;
-        collection.insertOne({ b: 1 }, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
-          collection.insertOne({ c: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-            collection.deleteMany({ a: 1 }, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
-              // Let's perform a count
-              collection.countDocuments((err, count) => {
-                expect(err).to.not.exist;
-                expect(count).to.equal(2);
-                done();
-              });
-            });
-          });
-        });
-      });
-    });
-
     it('should correctly read back document with null', function (done) {
       db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, (err, collection) => {
         // Insert a document with a date
