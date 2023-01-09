@@ -141,6 +141,13 @@ await collection.insert([{ name: 'fido' }, { name: 'luna' }])
 await collection.insertMany([{ name: 'fido' }, { name: 'luna' }])
 ```
 
+| Removed API                                    | API Migration                                      |
+|------------------------------------------------|----------------------------------------------------|
+| `insert(document)`                             | `insertOne(document)`                              |
+| `insert(arrayOfDocuments)`                     | `insertMany(arrayOfDocuments)`                     |
+| `update(filter)`                               | `updateMany(filter)`                               |
+| `remove(filter)`                               | `deleteMany(filter)`                               |
+
 ### Removed `keepGoing` option from `BulkWriteOptions`
 
 The `keepGoing` option was a legacy name for setting `ordered` to `false` for bulk inserts.
