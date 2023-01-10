@@ -1846,8 +1846,6 @@ describe('Bulk', function () {
 
         let bulk = undefined;
 
-        let bulk = undefined;
-
         bulk = collection.initializeOrderedBulkOp({ session });
         bulk.insert({ answer: 42 });
         await bulk.execute();
