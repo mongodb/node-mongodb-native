@@ -515,24 +515,6 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#mapReduce()`, () => {
-      it('should connect the client', async () => {
-        const c = client.db().collection('test');
-        await c.mapReduce(
-          function () {
-            // @ts-expect-error: mapReduce is deprecated
-            emit(this.a, [0]);
-          },
-          function (a, b) {
-            // @ts-expect-error: mapReduce is deprecated
-            return Array.sum(b);
-          },
-          { out: 'inline' }
-        );
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-
     describe(`#options()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');

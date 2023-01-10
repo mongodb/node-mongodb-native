@@ -1,7 +1,7 @@
 'use strict';
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
-const { Long, Code } = require('../../../src');
+const { Long } = require('../../../src');
 const { isHello } = require('../../mongodb');
 const { MongoClient } = require('../../../src');
 
@@ -99,42 +99,6 @@ describe('Collation', function () {
       return db
         .collection('test')
         .distinct('a', {}, { collation: { caseLevel: true } })
-        .then(() => {
-          expect(commandResult).to.have.property('collation');
-          expect(commandResult.collation).to.eql({ caseLevel: true });
-          return client.close();
-        });
-    });
-  });
-
-  it('Successfully pass through collation to mapReduce command', () => {
-    const client = new MongoClient(`mongodb://${testContext.server.uri()}/test`);
-    const primary = [Object.assign({}, mock.HELLO)];
-
-    let commandResult;
-    testContext.server.setMessageHandler(request => {
-      var doc = request.document;
-      if (isHello(doc)) {
-        request.reply(primary[0]);
-      } else if (doc.mapReduce) {
-        commandResult = doc;
-        request.reply({ ok: 1, result: 'tempCollection' });
-      } else if (doc.endSessions) {
-        request.reply({ ok: 1 });
-      }
-    });
-
-    return client.connect().then(() => {
-      const db = client.db('collation_db');
-      const map = new Code('function() { emit(this.user_id, 1); }');
-      const reduce = new Code('function(k,vals) { return 1; }');
-
-      return db
-        .collection('test')
-        .mapReduce(map, reduce, {
-          out: { replace: 'tempCollection' },
-          collation: { caseLevel: true }
-        })
         .then(() => {
           expect(commandResult).to.have.property('collation');
           expect(commandResult.collation).to.eql({ caseLevel: true });

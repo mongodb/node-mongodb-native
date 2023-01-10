@@ -95,7 +95,6 @@ export * from '../src/operations/is_capped';
 export * from '../src/operations/kill_cursors';
 export * from '../src/operations/list_collections';
 export * from '../src/operations/list_databases';
-export * from '../src/operations/map_reduce';
 export * from '../src/operations/operation';
 export * from '../src/operations/options_operation';
 export * from '../src/operations/profiling_level';

@@ -1,7 +1,7 @@
 'use strict';
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
-const { ObjectId, Code, MongoClient } = require('../../../src');
+const { ObjectId, MongoClient } = require('../../../src');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { isHello } = require('../../mongodb');
 
@@ -101,9 +101,6 @@ function writeConcernTest(command, testFn) {
       case 'aggregate':
         t.decorateResponse({ cursor: { id: 0, firstBatch: [], ns: 'write_concern_db' } });
         break;
-      case 'mapReduce':
-        t.decorateResponse({ result: 'tempCollection' });
-        break;
     }
     await t.run(command, async (client, db) => {
       await testFn(db, Object.assign({}, TEST_OPTIONS));
@@ -159,19 +156,6 @@ describe('Command Write Concern', function () {
     writeConcernTest('dropIndexes', (db, writeConcernTestOptions) =>
       db.collection('test').dropIndexes(writeConcernTestOptions)
     ));
-
-  it('successfully pass through writeConcern to mapReduce command', () =>
-    writeConcernTest('mapReduce', function (db, writeConcernTestOptions) {
-      const map = new Code('function() { emit(this.user_id, 1); }');
-      const reduce = new Code('function(k,vals) { return 1; }');
-      return db
-        .collection('test')
-        .mapReduce(
-          map,
-          reduce,
-          Object.assign({ out: { replace: 'tempCollection' } }, writeConcernTestOptions)
-        );
-    }));
 
   it('successfully pass through writeConcern to createUser command', () =>
     writeConcernTest('createUser', (db, writeConcernTestOptions) =>
