@@ -136,7 +136,7 @@ Three legacy operation helpers on the collection class have been removed:
 | `update(filter)`                               | `updateMany(filter)`                               |
 | `remove(filter)`                               | `deleteMany(filter)`                               |
 
-The `insert` method could accept arrays or single documents, instead for single document inserts `insertOne` or an `insertMany` call with an array argument of one should be used.
+The `insert` method accepted an array of documents for multi-document inserts and a single document for single document inserts.  `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
 
 ```ts
 // Single document insert:
