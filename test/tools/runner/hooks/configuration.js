@@ -12,6 +12,7 @@ const { getEnvironmentalOptions } = require('../../utils');
 const mock = require('../../mongodb-mock/index');
 const { inspect } = require('util');
 const { setDefaultResultOrder } = require('dns');
+const { coerce, gte } = require('semver');
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -175,11 +176,7 @@ const beforeAllPluginImports = () => {
  * the default dns resolution order for CI
  */
 function installNodeDNSWorkaroundHooks() {
-  if (
-    process.version.startsWith('v18') ||
-    process.version.startsWith('v19') ||
-    process.version.startsWith('v20')
-  ) {
+  if (gte(coerce(process.version), coerce('18'))) {
     // We set before hooks because some tests connect in before hooks
     before(() => {
       setDefaultResultOrder('ipv4first');
