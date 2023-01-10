@@ -97,14 +97,6 @@ export declare abstract class AbstractCursor<TSchema = any, CursorEvents extends
     /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
     close(callback: Callback): void;
     /**
-     * @deprecated options argument is deprecated
-     */
-    close(options: CursorCloseOptions): Promise<void>;
-    /**
-     * @deprecated options argument is deprecated. Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance
-     */
-    close(options: CursorCloseOptions, callback: Callback): void;
-    /**
      * Returns an array of documents. The caller is responsible for making sure that there
      * is enough memory to store the results. Note that the array only contains partial
      * results when this cursor had been previously accessed. In that case,
@@ -268,8 +260,6 @@ export declare type AddToSetOperators<Type> = {
 
 /** @public */
 export declare interface AddUserOptions extends CommandOperationOptions {
-    /** @deprecated Please use db.command('createUser', ...) instead for this option */
-    digestPassword?: null;
     /** Roles associated with the created user */
     roles?: string | string[] | RoleSpecification | RoleSpecification[];
     /** Custom data associated with the user (only Mongodb 2.6 or higher) */
@@ -981,7 +971,6 @@ export declare interface BulkResult {
     nModified: number;
     nRemoved: number;
     upserted: Document[];
-    opTime?: Document;
 }
 
 /** @public */
@@ -999,8 +988,6 @@ export declare interface BulkWriteOptions extends CommandOperationOptions {
     bypassDocumentValidation?: boolean;
     /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
     ordered?: boolean;
-    /** @deprecated use `ordered` instead */
-    keepGoing?: boolean;
     /** Force server to assign _id values instead of driver. */
     forceServerObjectId?: boolean;
     /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
@@ -1061,12 +1048,6 @@ export declare class BulkWriteResult {
     getWriteErrorAt(index: number): WriteError | undefined;
     /** Retrieve all write errors */
     getWriteErrors(): WriteError[];
-    /**
-     * Retrieve lastOp if available
-     *
-     * @deprecated Will be removed in 5.0
-     */
-    getLastOp(): Document | undefined;
     /** Retrieve the write concern error if one exists */
     getWriteConcernError(): WriteConcernError | undefined;
     toJSON(): BulkResult;
@@ -2435,10 +2416,6 @@ export declare interface CollectionInfo extends Document {
 
 /** @public */
 export declare interface CollectionOptions extends BSONSerializeOptions, WriteConcernOptions, LoggerOptions {
-    /**
-     * @deprecated Use readPreference instead
-     */
-    slaveOk?: boolean;
     /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
     readConcern?: ReadConcernLike;
     /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
@@ -2527,8 +2504,6 @@ export declare class CommandFailedEvent {
 
 /** @public */
 export declare interface CommandOperationOptions extends OperationOptions, WriteConcernOptions, ExplainOptions {
-    /** @deprecated This option does nothing */
-    fullResponse?: boolean;
     /** Specify a read concern and level for the collection. (only MongoDB 3.2 or higher supported) */
     readConcern?: ReadConcernLike;
     /** Collation */
@@ -2919,14 +2894,6 @@ export declare interface CreateIndexesOptions extends CommandOperationOptions {
 /** @public */
 export declare const CURSOR_FLAGS: readonly ["tailable", "oplogReplay", "noCursorTimeout", "awaitData", "exhaust", "partial"];
 
-/** @public
- * @deprecated This interface is deprecated */
-export declare interface CursorCloseOptions {
-    /** Bypass calling killCursors when closing the cursor. */
-    /** @deprecated  the skipKillCursors option is deprecated */
-    skipKillCursors?: boolean;
-}
-
 /** @public */
 export declare type CursorFlag = typeof CURSOR_FLAGS[number];
 
@@ -2976,11 +2943,6 @@ export declare class Db {
     constructor(client: MongoClient, databaseName: string, options?: DbOptions);
     get databaseName(): string;
     get options(): DbOptions | undefined;
-    /**
-     * slaveOk specified
-     * @deprecated Use secondaryOk instead
-     */
-    get slaveOk(): boolean;
     /**
      * Check if a secondary can be used (because the read preference is *not* set to primary)
      */
@@ -3204,11 +3166,6 @@ export declare class Db {
     /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
     indexInformation(name: string, options: IndexInformationOptions, callback: Callback<Document>): void;
     /**
-     * Unref all sockets
-     * @deprecated This function is deprecated and will be removed in the next major version.
-     */
-    unref(): void;
-    /**
      * Create a new Change Stream, watching for new changes (insertions, updates,
      * replacements, deletions, and invalidations) in this database. Will ignore all
      * changes to system collections.
@@ -3288,8 +3245,6 @@ export declare interface DeleteOptions extends CommandOperationOptions, WriteCon
     hint?: string | Document;
     /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
     let?: Document;
-    /** @deprecated use `removeOne` or `removeMany` to implicitly specify the limit */
-    single?: boolean;
 }
 
 /** @public */
@@ -3774,8 +3729,6 @@ export declare type Flatten<Type> = Type extends ReadonlyArray<infer Item> ? Ite
 
 /** @public */
 export declare type GenericListener = (...args: any[]) => void;
-
-/* Excluded from this release type: GetMoreOptions */
 
 /**
  * Constructor for a streaming GridFS interface
@@ -4879,11 +4832,6 @@ export declare interface MongoClientOptions extends BSONSerializeOptions, Suppor
     forceServerObjectId?: boolean;
     /** A primary key factory function for generation of custom `_id` keys */
     pkFactory?: PkFactory;
-    /**
-     * A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
-     * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
-     */
-    promiseLibrary?: any;
     /** The logging level */
     loggerLevel?: LoggerLevel;
     /** Custom logger object */
@@ -5226,7 +5174,7 @@ export declare class MongoNotConnectedError extends MongoAPIError {
  * Mongo Client Options
  * @public
  */
-export declare interface MongoOptions extends Required<Pick<MongoClientOptions, 'autoEncryption' | 'connectTimeoutMS' | 'directConnection' | 'driverInfo' | 'forceServerObjectId' | 'minHeartbeatFrequencyMS' | 'heartbeatFrequencyMS' | 'keepAlive' | 'keepAliveInitialDelay' | 'localThresholdMS' | 'logger' | 'maxConnecting' | 'maxIdleTimeMS' | 'maxPoolSize' | 'minPoolSize' | 'monitorCommands' | 'noDelay' | 'pkFactory' | 'promiseLibrary' | 'raw' | 'replicaSet' | 'retryReads' | 'retryWrites' | 'serverSelectionTimeoutMS' | 'socketTimeoutMS' | 'srvMaxHosts' | 'srvServiceName' | 'tlsAllowInvalidCertificates' | 'tlsAllowInvalidHostnames' | 'tlsInsecure' | 'waitQueueTimeoutMS' | 'zlibCompressionLevel'>>, SupportedNodeConnectionOptions {
+export declare interface MongoOptions extends Required<Pick<MongoClientOptions, 'autoEncryption' | 'connectTimeoutMS' | 'directConnection' | 'driverInfo' | 'forceServerObjectId' | 'minHeartbeatFrequencyMS' | 'heartbeatFrequencyMS' | 'keepAlive' | 'keepAliveInitialDelay' | 'localThresholdMS' | 'logger' | 'maxConnecting' | 'maxIdleTimeMS' | 'maxPoolSize' | 'minPoolSize' | 'monitorCommands' | 'noDelay' | 'pkFactory' | 'raw' | 'replicaSet' | 'retryReads' | 'retryWrites' | 'serverSelectionTimeoutMS' | 'socketTimeoutMS' | 'srvMaxHosts' | 'srvServiceName' | 'tlsAllowInvalidCertificates' | 'tlsAllowInvalidHostnames' | 'tlsInsecure' | 'waitQueueTimeoutMS' | 'zlibCompressionLevel'>>, SupportedNodeConnectionOptions {
     hosts: HostAddress[];
     srvHost?: string;
     credentials?: MongoCredentials;
@@ -5554,14 +5502,6 @@ export declare class OrderedBulkOperation extends BulkOperationBase {
     addToOperationsList(batchType: BatchType, document: Document | UpdateStatement | DeleteStatement): this;
 }
 
-/**
- * @public
- * @deprecated This interface is unused and will be removed in the next major version of the driver.
- */
-export declare interface PipeOptions {
-    end?: boolean;
-}
-
 /** @public */
 export declare interface PkFactory {
     createPk(): any;
@@ -5581,43 +5521,6 @@ export declare type ProfilingLevel = typeof ProfilingLevel[keyof typeof Profilin
 
 /** @public */
 export declare type ProfilingLevelOptions = CommandOperationOptions;
-
-/**
- * @public
- * Projection is flexible to permit the wide array of aggregation operators
- * @deprecated since v4.1.0: Since projections support all aggregation operations we have no plans to narrow this type further
- */
-export declare type Projection<TSchema extends Document = Document> = Document;
-
-/**
- * @public
- * @deprecated since v4.1.0: Since projections support all aggregation operations we have no plans to narrow this type further
- */
-export declare type ProjectionOperators = Document;
-
-/**
- * Global promise store allowing user-provided promises
- * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
- * @public
- */
-declare class Promise_2 {
-    /**
-     * Validates the passed in promise library
-     * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
-     */
-    static validate(lib: unknown): lib is PromiseConstructor;
-    /**
-     * Sets the promise library
-     * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
-     */
-    static set(lib: PromiseConstructor | null): void;
-    /**
-     * Get the stored promise library, or resolves passed in
-     * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
-     */
-    static get(): PromiseConstructor | null;
-}
-export { Promise_2 as Promise }
 
 /** @public */
 export declare type PropertyType<Type, Property extends string> = string extends Property ? unknown : Property extends keyof Type ? Type[Property] : Property extends `${number}` ? Type extends ReadonlyArray<infer ArrayType> ? ArrayType : unknown : Property extends `${infer Key}.${infer Rest}` ? Key extends `${number}` ? Type extends ReadonlyArray<infer ArrayType> ? PropertyType<ArrayType, Rest> : unknown : Key extends keyof Type ? Type[Key] extends Map<string, infer MapType> ? MapType : PropertyType<Type[Key], Rest> : unknown : unknown;
@@ -5750,12 +5653,6 @@ export declare class ReadPreference {
      * @param mode - The string representing the read preference mode.
      */
     isValid(mode?: string): boolean;
-    /**
-     * Indicates that this readPreference needs the "secondaryOk" bit when sent over the wire
-     * @deprecated Use secondaryOk instead
-     * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
-     */
-    slaveOk(): boolean;
     /**
      * Indicates that this readPreference needs the "SecondaryOk" bit when sent over the wire
      * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
@@ -6116,8 +6013,7 @@ export declare class ServerOpeningEvent {
     /* Excluded from this release type: __constructor */
 }
 
-/** @public */
-export declare type ServerOptions = Omit<ConnectionPoolOptions, 'id' | 'generation' | 'hostAddress'> & MonitorOptions;
+/* Excluded from this release type: ServerOptions */
 
 /* Excluded from this release type: ServerPrivate */
 
@@ -6125,8 +6021,7 @@ export declare type ServerOptions = Omit<ConnectionPoolOptions, 'id' | 'generati
 
 /* Excluded from this release type: ServerSelectionRequest */
 
-/** @public */
-export declare type ServerSelector = (topologyDescription: TopologyDescription, servers: ServerDescription[]) => ServerDescription[];
+/* Excluded from this release type: ServerSelector */
 
 /**
  * Reflects the existence of a session on the server. Can be reused by the session pool.
@@ -6366,27 +6261,7 @@ export declare class TopologyOpeningEvent {
     /* Excluded from this release type: __constructor */
 }
 
-/** @public */
-export declare interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
-    srvMaxHosts: number;
-    srvServiceName: string;
-    hosts: HostAddress[];
-    retryWrites: boolean;
-    retryReads: boolean;
-    /** How long to block for server selection before throwing an error */
-    serverSelectionTimeoutMS: number;
-    /** The name of the replica set to connect to */
-    replicaSet?: string;
-    srvHost?: string;
-    /* Excluded from this release type: srvPoller */
-    /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
-    directConnection: boolean;
-    loadBalanced: boolean;
-    metadata: ClientMetadata;
-    /** MongoDB server API version */
-    serverApi?: ServerApi;
-    /* Excluded from this release type: __index */
-}
+/* Excluded from this release type: TopologyOptions */
 
 /* Excluded from this release type: TopologyPrivate */
 
@@ -6860,8 +6735,6 @@ export declare class WriteConcernError {
     get errmsg(): string | undefined;
     /** Write concern error info. */
     get errInfo(): Document | undefined;
-    /** @deprecated The `err` prop that contained a MongoServerError has been deprecated. */
-    get err(): WriteConcernErrorData;
     toJSON(): WriteConcernErrorData;
     toString(): string;
 }

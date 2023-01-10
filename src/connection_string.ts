@@ -964,6 +964,9 @@ export const OPTIONS = {
   promoteValues: {
     type: 'boolean'
   },
+  useBigInt64: {
+    type: 'boolean'
+  },
   proxyHost: {
     type: 'string'
   },
