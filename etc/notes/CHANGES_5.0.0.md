@@ -31,7 +31,7 @@ const collection = db.collection('my-collection');
 
 await collection.mapReduce(
   function() { emit(this.user_id, 1); },
-  function(, vals) { return 1 },
+  function(k, vals) { return 1 },
   {
     out: 'inline',
     readConcern: 'majority'
