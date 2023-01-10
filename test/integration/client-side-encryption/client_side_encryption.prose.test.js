@@ -12,6 +12,7 @@ const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { MongoNetworkError, MongoServerError } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
+const { coerce, gte } = require('semver');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -1412,7 +1413,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKey = {};
 
       it('should fail with no TLS', metadata, async function () {
-        if (process.version.includes('v19')) {
+        if (gte(coerce(process.version), coerce('19'))) {
           this.skip('TODO(NODE-4942): fix failing csfle kmip test on Node19+');
           return;
         }
