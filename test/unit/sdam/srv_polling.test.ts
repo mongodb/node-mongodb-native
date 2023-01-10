@@ -88,10 +88,9 @@ describe('Mongos SRV Polling', function () {
         expect(poller).to.have.property('haMode', true);
       });
 
-      it('should do something if dns API breaks', async function () {
+      it.skip('should do something if dns API breaks', async function () {
         const poller = new SrvPoller({
           srvHost: SRV_HOST,
-          loggerLevel: 'error',
           heartbeatFrequencyMS: 100
         });
 
@@ -110,7 +109,7 @@ describe('Mongos SRV Polling', function () {
         expect(loggerError).to.have.been.calledOnceWith(
           sinon.match(/Unexpected MongoRuntimeError/)
         );
-      });
+      }).skipReason = 'TODO(NODE-4817): determine whether or not to keep this here';
     });
 
     describe('poll', function () {

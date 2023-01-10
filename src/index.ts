@@ -12,7 +12,6 @@ import { Db } from './db';
 import { GridFSBucket } from './gridfs';
 import { GridFSBucketReadStream } from './gridfs/download';
 import { GridFSBucketWriteStream } from './gridfs/upload';
-import { Logger } from './logger';
 import { MongoClient } from './mongo_client';
 import { CancellationToken } from './mongo_types';
 import { ClientSession } from './sessions';
@@ -86,7 +85,6 @@ export {
   GridFSBucketWriteStream,
   ListCollectionsCursor,
   ListIndexesCursor,
-  Logger,
   MongoClient,
   OrderedBulkOperation,
   UnorderedBulkOperation
@@ -101,7 +99,6 @@ export { CURSOR_FLAGS } from './cursor/abstract_cursor';
 export { AutoEncryptionLoggerLevel } from './deps';
 export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
-export { LoggerLevel } from './logger';
 export { ServerApiVersion } from './mongo_client';
 export { BSONType } from './mongo_types';
 export { ReturnDocument } from './operations/find_and_modify';
@@ -270,7 +267,6 @@ export type {
 } from './gridfs/download';
 export type { GridFSBucketEvents, GridFSBucketOptions, GridFSBucketPrivate } from './gridfs/index';
 export type { GridFSBucketWriteStreamOptions, GridFSChunk } from './gridfs/upload';
-export type { LoggerFunction, LoggerOptions } from './logger';
 export type {
   Auth,
   DriverInfo,

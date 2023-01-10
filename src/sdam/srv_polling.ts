@@ -2,7 +2,6 @@ import * as dns from 'dns';
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoRuntimeError } from '../error';
-import { Logger, LoggerOptions } from '../logger';
 import { TypedEventEmitter } from '../mongo_types';
 import { HostAddress } from '../utils';
 
@@ -37,7 +36,7 @@ export class SrvPollingEvent {
 }
 
 /** @internal */
-export interface SrvPollerOptions extends LoggerOptions {
+export interface SrvPollerOptions {
   srvServiceName: string;
   srvMaxHosts: number;
   srvHost: string;
@@ -54,7 +53,6 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   srvHost: string;
   rescanSrvIntervalMS: number;
   heartbeatFrequencyMS: number;
-  logger: Logger;
   haMode: boolean;
   generation: number;
   srvMaxHosts: number;
@@ -76,7 +74,6 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     this.srvServiceName = options.srvServiceName ?? 'mongodb';
     this.rescanSrvIntervalMS = 60000;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 10000;
-    this.logger = new Logger('srvPoller', options);
 
     this.haMode = false;
     this.generation = 0;
@@ -112,9 +109,8 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
 
     this._timeout = setTimeout(() => {
-      this._poll().catch(unexpectedRuntimeError => {
-        this.logger.error(`Unexpected ${new MongoRuntimeError(unexpectedRuntimeError).stack}`);
-      });
+      // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+      this._poll().catch(_unexpectedRuntimeError => {});
     }, this.intervalMS);
   }
 
@@ -124,18 +120,14 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     this.emit(SrvPoller.SRV_RECORD_DISCOVERY, new SrvPollingEvent(srvRecords));
   }
 
-  failure(message: string, obj?: NodeJS.ErrnoException): void {
-    this.logger.warn(message, obj);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  failure(_message: string, _obj?: NodeJS.ErrnoException): void {
     this.haMode = true;
     this.schedule();
   }
 
-  parentDomainMismatch(srvRecord: dns.SrvRecord): void {
-    this.logger.warn(
-      `parent domain mismatch on SRV record (${srvRecord.name}:${srvRecord.port})`,
-      srvRecord
-    );
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  parentDomainMismatch(_srvRecord: dns.SrvRecord): void {}
 
   async _poll(): Promise<void> {
     const generation = this.generation;

@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
-import { deprecateOptions, DeprecateOptionsConfig, Document, Logger, OP_MSG } from '../mongodb';
+import { deprecateOptions, DeprecateOptionsConfig, Document, OP_MSG } from '../mongodb';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   CollectionData,
@@ -27,21 +27,6 @@ export function makeTestFunction(config: DeprecateOptionsConfig) {
 export function ensureCalledWith(stub: any, args: any[]) {
   args.forEach((m: any) => expect(stub).to.have.been.calledWith(m));
 }
-
-// creation of class with a logger
-export function ClassWithLogger() {
-  this.logger = new Logger('ClassWithLogger');
-}
-
-ClassWithLogger.prototype.f = makeTestFunction({
-  name: 'f',
-  deprecatedOptions: ['maxScan', 'snapshot', 'fields'],
-  optionsIndex: 0
-});
-
-ClassWithLogger.prototype.getLogger = function () {
-  return this.logger;
-};
 
 // creation of class without a logger
 export function ClassWithoutLogger() {

@@ -22,7 +22,6 @@ import {
   MongoRuntimeError,
   MongoServerError
 } from '../error';
-import { Logger } from '../logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Callback, eachAsync, List, makeCounter } from '../utils';
@@ -51,8 +50,6 @@ import { ConnectionPoolMetrics } from './metrics';
 
 /** @internal */
 const kServer = Symbol('server');
-/** @internal */
-const kLogger = Symbol('logger');
 /** @internal */
 const kConnections = Symbol('connections');
 /** @internal */
@@ -140,7 +137,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   options: Readonly<ConnectionPoolOptions>;
   [kPoolState]: typeof PoolState[keyof typeof PoolState];
   [kServer]: Server;
-  [kLogger]: Logger;
   [kConnections]: List<Connection>;
   [kPending]: number;
   [kCheckedOut]: Set<Connection>;
@@ -239,7 +235,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kPoolState] = PoolState.paused;
     this[kServer] = server;
-    this[kLogger] = new Logger('ConnectionPool');
     this[kConnections] = new List();
     this[kPending] = 0;
     this[kCheckedOut] = new Set();
@@ -642,7 +637,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     connect(connectOptions, (err, connection) => {
       if (err || !connection) {
-        this[kLogger].debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
         this[kPending]--;
         this.emit(
           ConnectionPool.CONNECTION_CLOSED,
