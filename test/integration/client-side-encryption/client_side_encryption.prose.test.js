@@ -1412,6 +1412,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       const masterKey = {};
 
       it('should fail with no TLS', metadata, async function () {
+        if (process.version.includes('v19')) {
+          this.skip('TODO(NODE-4942): fix failing csfle kmip test on Node19+');
+          return;
+        }
         try {
           await clientEncryptionNoTls.createDataKey('kmip', { masterKey });
           expect.fail('it must fail with no tls');
