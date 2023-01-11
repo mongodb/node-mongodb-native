@@ -161,3 +161,33 @@ cursor.closed // true
 
 Everywhere the driver sends a `hello` command (initial handshake and monitoring), it will now pass the command value as `1` instead of the
 previous `true` for spec compliance.
+
+### Removed `Collection.insert`, `Collection.update`, and `Collection.remove`
+
+Three legacy operation helpers on the collection class have been removed:
+
+| Removed API                                    | API to migrate to                                  |
+|------------------------------------------------|----------------------------------------------------|
+| `insert(document)`                             | `insertOne(document)`                              |
+| `insert(arrayOfDocuments)`                     | `insertMany(arrayOfDocuments)`                     |
+| `update(filter)`                               | `updateMany(filter)`                               |
+| `remove(filter)`                               | `deleteMany(filter)`                               |
+
+The `insert` method accepted an array of documents for multi-document inserts and a single document for single document inserts.  `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
+
+```ts
+// Single document insert:
+await collection.insert({ name: 'spot' });
+// Migration:
+await collection.insertOne({ name: 'spot' });
+
+// Multi-document insert:
+await collection.insert([{ name: 'fido' }, { name: 'luna' }])
+// Migration:
+await collection.insertMany([{ name: 'fido' }, { name: 'luna' }])
+```
+
+### Removed `keepGoing` option from `BulkWriteOptions`
+
+The `keepGoing` option was a legacy name for setting `ordered` to `false` for bulk inserts.
+It was only supported by the legacy `collection.insert()` method which is now removed as noted above.

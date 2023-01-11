@@ -482,15 +482,6 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#insert()`, () => {
-      it('should connect the client', async () => {
-        const c = client.db().collection('test');
-        // @ts-expect-error: deprecated API
-        await c.insert({ a: 1 });
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-
     describe(`#insertMany()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
@@ -523,15 +514,6 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#remove()`, () => {
-      it('should connect the client', async () => {
-        const c = client.db().collection('test');
-        // @ts-expect-error: deprecated API
-        await c.remove({ a: 1 });
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-
     describe(`#rename()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test0');
@@ -552,15 +534,6 @@ describe('When executing an operation for the first time', () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
         await c.stats();
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-
-    describe(`#update()`, () => {
-      it('should connect the client', async () => {
-        const c = client.db().collection('test');
-        // @ts-expect-error: deprecated API
-        await c.update({ a: 1 }, { $set: { a: 2 } });
         expect(client).to.have.property('topology').that.is.instanceOf(Topology);
       });
     });

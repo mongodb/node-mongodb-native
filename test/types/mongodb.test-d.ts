@@ -7,9 +7,6 @@ import type { AggregationCursor, ChangeStreamDocument } from '../mongodb';
 import { Collection, FindCursor, MongoClient } from '../mongodb';
 
 // We wish to keep these APIs but continue to ensure they are marked as deprecated.
-expectDeprecated(Collection.prototype.insert);
-expectDeprecated(Collection.prototype.update);
-expectDeprecated(Collection.prototype.remove);
 expectDeprecated(Collection.prototype.count);
 expectDeprecated(FindCursor.prototype.count);
 expectNotDeprecated(MongoDBDriver.ObjectId);

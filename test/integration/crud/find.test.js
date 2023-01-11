@@ -1,13 +1,18 @@
 'use strict';
-const { assert: test, setupDatabase } = require('../shared');
+const { assert: test } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { setTimeout } = require('timers');
 const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../../src');
 
 describe('Find', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
+  let client;
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
   });
 
   /**
@@ -786,83 +791,96 @@ describe('Find', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('test_find_and_modify_a_document_1', function (err, collection) {
-          // Test return new document on change
-          collection.insert({ a: 1, b: 2 }, configuration.writeConcernMax(), function (err) {
+      var db = client.db(configuration.db);
+      db.dropCollection('test_find_and_modify_a_document_1')
+        .catch(() => null)
+        .finally(() => {
+          db.createCollection('test_find_and_modify_a_document_1', function (err, collection) {
             expect(err).to.not.exist;
 
-            // Let's modify the document in place
-            collection.findOneAndUpdate(
-              { a: 1 },
-              { $set: { b: 3 } },
-              { returnDocument: ReturnDocument.AFTER },
-              function (err, updated_doc) {
-                test.equal(1, updated_doc.value.a);
-                test.equal(3, updated_doc.value.b);
+            // Test return new document on change
+            collection.insert({ a: 1, b: 2 }, configuration.writeConcernMax(), function (err) {
+              expect(err).to.not.exist;
 
-                // Test return old document on change
-                collection.insert({ a: 2, b: 2 }, configuration.writeConcernMax(), function (err) {
+              // Let's modify the document in place
+              collection.findOneAndUpdate(
+                { a: 1 },
+                { $set: { b: 3 } },
+                { returnDocument: ReturnDocument.AFTER },
+                function (err, updated_doc) {
                   expect(err).to.not.exist;
+                  test.equal(1, updated_doc.value.a);
+                  test.equal(3, updated_doc.value.b);
 
-                  // Let's modify the document in place
-                  collection.findOneAndUpdate(
-                    { a: 2 },
-                    { $set: { b: 3 } },
+                  // Test return old document on change
+                  collection.insert(
+                    { a: 2, b: 2 },
                     configuration.writeConcernMax(),
-                    function (err, result) {
-                      test.equal(2, result.value.a);
-                      test.equal(2, result.value.b);
+                    function (err) {
+                      expect(err).to.not.exist;
 
-                      // Test remove object on change
-                      collection.insert(
-                        { a: 3, b: 2 },
+                      // Let's modify the document in place
+                      collection.findOneAndUpdate(
+                        { a: 2 },
+                        { $set: { b: 3 } },
                         configuration.writeConcernMax(),
-                        function (err) {
+                        function (err, result) {
                           expect(err).to.not.exist;
-                          // Let's modify the document in place
-                          collection.findOneAndUpdate(
-                            { a: 3 },
-                            { $set: { b: 3 } },
-                            { remove: true },
-                            function (err, updated_doc) {
-                              test.equal(3, updated_doc.value.a);
-                              test.equal(2, updated_doc.value.b);
+                          test.equal(2, result.value.a);
+                          test.equal(2, result.value.b);
 
-                              // Let's upsert!
+                          // Test remove object on change
+                          collection.insert(
+                            { a: 3, b: 2 },
+                            configuration.writeConcernMax(),
+                            function (err) {
+                              expect(err).to.not.exist;
+                              // Let's modify the document in place
                               collection.findOneAndUpdate(
-                                { a: 4 },
+                                { a: 3 },
                                 { $set: { b: 3 } },
-                                { returnDocument: ReturnDocument.AFTER, upsert: true },
+                                { remove: true },
                                 function (err, updated_doc) {
-                                  test.equal(4, updated_doc.value.a);
-                                  test.equal(3, updated_doc.value.b);
+                                  expect(err).to.not.exist;
+                                  test.equal(3, updated_doc.value.a);
+                                  test.equal(2, updated_doc.value.b);
 
-                                  // Test selecting a subset of fields
-                                  collection.insert(
-                                    { a: 100, b: 101 },
-                                    configuration.writeConcernMax(),
-                                    function (err, r) {
+                                  // Let's upsert!
+                                  collection.findOneAndUpdate(
+                                    { a: 4 },
+                                    { $set: { b: 3 } },
+                                    { returnDocument: ReturnDocument.AFTER, upsert: true },
+                                    function (err, updated_doc) {
                                       expect(err).to.not.exist;
+                                      test.equal(4, updated_doc.value.a);
+                                      test.equal(3, updated_doc.value.b);
 
-                                      collection.findOneAndUpdate(
-                                        { a: 100 },
-                                        { $set: { b: 5 } },
-                                        {
-                                          returnDocument: ReturnDocument.AFTER,
-                                          projection: { b: 1 }
-                                        },
-                                        function (err, updated_doc) {
-                                          test.equal(2, Object.keys(updated_doc.value).length);
-                                          test.equal(
-                                            r.insertedIds[0].toHexString(),
-                                            updated_doc.value._id.toHexString()
+                                      // Test selecting a subset of fields
+                                      collection.insert(
+                                        { a: 100, b: 101 },
+                                        configuration.writeConcernMax(),
+                                        function (err, r) {
+                                          expect(err).to.not.exist;
+
+                                          collection.findOneAndUpdate(
+                                            { a: 100 },
+                                            { $set: { b: 5 } },
+                                            {
+                                              returnDocument: ReturnDocument.AFTER,
+                                              projection: { b: 1 }
+                                            },
+                                            function (err, updated_doc) {
+                                              expect(err).to.not.exist;
+                                              test.equal(2, Object.keys(updated_doc.value).length);
+                                              test.equal(
+                                                r.insertedIds[0].toHexString(),
+                                                updated_doc.value._id.toHexString()
+                                              );
+                                              test.equal(5, updated_doc.value.b);
+                                              test.equal('undefined', typeof updated_doc.value.a);
+                                              client.close(done);
+                                            }
                                           );
-                                          test.equal(5, updated_doc.value.b);
-                                          test.equal('undefined', typeof updated_doc.value.a);
-                                          client.close(done);
                                         }
                                       );
                                     }
@@ -875,12 +893,11 @@ describe('Find', function () {
                       );
                     }
                   );
-                });
-              }
-            );
+                }
+              );
+            });
           });
         });
-      });
     }
   });
 
@@ -926,44 +943,41 @@ describe('Find', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection(
-          'shouldCorrectlyExecuteFindOneWithAnInSearchTag',
-          function (err, collection) {
-            // Test return new document on change
-            collection.insert(
-              {
-                title: 'Tobi',
-                author: 'Brian',
-                newTitle: 'Woot',
-                meta: { visitors: 0 }
-              },
-              configuration.writeConcernMax(),
-              function (err, r) {
-                // Fetch the id
-                var id = r.insertedIds[0];
+      var db = client.db(configuration.db);
+      db.createCollection(
+        'shouldCorrectlyExecuteFindOneWithAnInSearchTag',
+        function (err, collection) {
+          // Test return new document on change
+          collection.insert(
+            {
+              title: 'Tobi',
+              author: 'Brian',
+              newTitle: 'Woot',
+              meta: { visitors: 0 }
+            },
+            configuration.writeConcernMax(),
+            function (err, r) {
+              // Fetch the id
+              var id = r.insertedIds[0];
 
-                collection.update(
-                  { _id: id },
-                  { $inc: { 'meta.visitors': 1 } },
-                  configuration.writeConcernMax(),
-                  function (err, r) {
-                    expect(r).property('matchedCount').to.equal(1);
-                    expect(err).to.not.exist;
+              collection.update(
+                { _id: id },
+                { $inc: { 'meta.visitors': 1 } },
+                configuration.writeConcernMax(),
+                function (err, r) {
+                  expect(r).property('matchedCount').to.equal(1);
+                  expect(err).to.not.exist;
 
-                    collection.findOne({ _id: id }, function (err, item) {
-                      test.equal(1, item.meta.visitors);
-                      client.close(done);
-                    });
-                  }
-                );
-              }
-            );
-          }
-        );
-      });
+                  collection.findOne({ _id: id }, function (err, item) {
+                    test.equal(1, item.meta.visitors);
+                    client.close(done);
+                  });
+                }
+              );
+            }
+          );
+        }
+      );
     }
   });
 
@@ -1458,58 +1472,55 @@ describe('Find', function () {
 
     test: function (done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var transaction = {};
-        transaction.document = {};
-        transaction.document.type = 'documentType';
-        transaction.document.id = new ObjectId();
-        transaction.transactionId = new ObjectId();
-        transaction.amount = 12.3333;
+      var db = client.db(configuration.db);
+      var transaction = {};
+      transaction.document = {};
+      transaction.document.type = 'documentType';
+      transaction.document.id = new ObjectId();
+      transaction.transactionId = new ObjectId();
+      transaction.amount = 12.3333;
 
-        var transactions = [];
-        transactions.push(transaction);
-        // Wrapping object
-        var wrapingObject = {
-          funds: {
-            remaining: 100.5
-          },
+      var transactions = [];
+      transactions.push(transaction);
+      // Wrapping object
+      var wrapingObject = {
+        funds: {
+          remaining: 100.5
+        },
 
-          transactions: transactions
-        };
+        transactions: transactions
+      };
 
-        db.createCollection('find_and_modify_generate_correct_bson', function (err, collection) {
+      db.createCollection('find_and_modify_generate_correct_bson', function (err, collection) {
+        expect(err).to.not.exist;
+
+        collection.insert(wrapingObject, configuration.writeConcernMax(), function (err, r) {
           expect(err).to.not.exist;
 
-          collection.insert(wrapingObject, configuration.writeConcernMax(), function (err, r) {
-            expect(err).to.not.exist;
+          collection.findOne(
+            {
+              _id: r.insertedIds[0],
+              'funds.remaining': { $gte: 3.0 },
+              'transactions.id': { $ne: transaction.transactionId }
+            },
+            function (err, item) {
+              test.ok(item != null);
 
-            collection.findOne(
-              {
-                _id: r.insertedIds[0],
-                'funds.remaining': { $gte: 3.0 },
-                'transactions.id': { $ne: transaction.transactionId }
-              },
-              function (err, item) {
-                test.ok(item != null);
-
-                collection.findOneAndUpdate(
-                  {
-                    _id: r.insertedIds[0],
-                    'funds.remaining': { $gte: 3.0 },
-                    'transactions.id': { $ne: transaction.transactionId }
-                  },
-                  { $push: { transactions: transaction } },
-                  { returnDocument: ReturnDocument.AFTER, safe: true },
-                  function (err) {
-                    expect(err).to.not.exist;
-                    client.close(done);
-                  }
-                );
-              }
-            );
-          });
+              collection.findOneAndUpdate(
+                {
+                  _id: r.insertedIds[0],
+                  'funds.remaining': { $gte: 3.0 },
+                  'transactions.id': { $ne: transaction.transactionId }
+                },
+                { $push: { transactions: transaction } },
+                { returnDocument: ReturnDocument.AFTER, safe: true },
+                function (err) {
+                  expect(err).to.not.exist;
+                  client.close(done);
+                }
+              );
+            }
+          );
         });
       });
     }
