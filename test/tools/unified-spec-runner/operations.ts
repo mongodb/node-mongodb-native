@@ -661,7 +661,7 @@ operations.set('rewrapManyDataKey', async ({ entities, operation }) => {
 
   const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey(filter, opts);
   if (rewrapManyDataKeyResult.bulkWriteResult != null) {
-    // TODO: Create DRIVERS ticket.
+    // TODO: Can be removed with DRIVERS-2523
     //
     // The unified spec runner match function will assert that documents have no extra
     // keys.  For `rewrapManyDataKey` operations, our unifed tests will fail because
