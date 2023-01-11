@@ -161,3 +161,21 @@ cursor.closed // true
 
 Everywhere the driver sends a `hello` command (initial handshake and monitoring), it will now pass the command value as `1` instead of the
 previous `true` for spec compliance.
+
+### `BulkWriteResult` no longer contains a publicly enumerable `result` property.
+
+To access the raw result, please use `bulkWriteResult.getRawResponse()`. 
+
+### `BulkWriteResult` now contains individual ressult properties.
+
+These can be accessed via:
+
+```ts
+  bulkWriteResult.insertedCount;
+  bulkWriteResult.matchedCount;
+  bulkWriteResult.modifiedCount;
+  bulkWriteResult.deletedCount;
+  bulkWriteResult.upsertedCount;
+  bulkWriteResult.upsertedIds;
+  bulkWriteResult.insertedIds;
+```
