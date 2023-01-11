@@ -65,13 +65,9 @@ export type EnhancedOmit<TRecordOrUnion, KeyUnion> = string extends keyof TRecor
 export type WithoutId<TSchema> = Omit<TSchema, '_id'>;
 
 /** A MongoDB filter can be some portion of the schema or a set of operators @public */
-export type Filter<TSchema> =
-  | Partial<TSchema>
-  | ({
-      [Property in Join<NestedPaths<WithId<TSchema>, []>, '.'>]?: Condition<
-        PropertyType<WithId<TSchema>, Property>
-      >;
-    } & RootFilterOperators<WithId<TSchema>>);
+export type Filter<TSchema> = {
+  [P in keyof WithId<TSchema>]?: Condition<WithId<TSchema>[P]>;
+} & RootFilterOperators<WithId<TSchema>>;
 
 /** @public */
 export type Condition<T> = AlternativeType<T> | FilterOperators<AlternativeType<T>>;
@@ -247,19 +243,7 @@ export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldTyp
 >;
 
 /** @public */
-export type MatchKeysAndValues<TSchema> = Readonly<
-  {
-    [Property in Join<NestedPaths<TSchema, []>, '.'>]?: PropertyType<TSchema, Property>;
-  } & {
-    [Property in `${NestedPathsOfType<TSchema, any[]>}.$${`[${string}]` | ''}`]?: ArrayElement<
-      PropertyType<TSchema, Property extends `${infer Key}.$${string}` ? Key : never>
-    >;
-  } & {
-    [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
-      | `[${string}]`
-      | ''}.${string}`]?: any; // Could be further narrowed
-  } & Document
->;
+export type MatchKeysAndValues<TSchema> = Readonly<Partial<TSchema>> & Record<string, any>;
 
 /** @public */
 export type AddToSetOperators<Type> = {
@@ -540,4 +524,61 @@ export type NestedPathsOfType<TSchema, Type> = KeysOfAType<
     [Property in Join<NestedPaths<TSchema, []>, '.'>]: PropertyType<TSchema, Property>;
   },
   Type
+>;
+
+/**
+ * @public
+ * @experimental
+ */
+export type DotNotationFilter<TSchema> =
+  | Partial<TSchema>
+  | ({
+      [Property in Join<NestedPaths<WithId<TSchema>, []>, '.'>]?: Condition<
+        PropertyType<WithId<TSchema>, Property>
+      >;
+    } & RootFilterOperators<WithId<TSchema>>);
+
+/**
+ * @public
+ * @experimental
+ */
+export type DotNotationUpdateFilter<TSchema> = {
+  $currentDate?: OnlyFieldsOfType<
+    TSchema,
+    Date | Timestamp,
+    true | { $type: 'date' | 'timestamp' }
+  >;
+  $inc?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
+  $min?: DotNotationMatchKeysAndValues<TSchema>;
+  $max?: DotNotationMatchKeysAndValues<TSchema>;
+  $mul?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
+  $rename?: Record<string, string>;
+  $set?: DotNotationMatchKeysAndValues<TSchema>;
+  $setOnInsert?: DotNotationMatchKeysAndValues<TSchema>;
+  $unset?: OnlyFieldsOfType<TSchema, any, '' | true | 1>;
+  $addToSet?: SetFields<TSchema>;
+  $pop?: OnlyFieldsOfType<TSchema, ReadonlyArray<any>, 1 | -1>;
+  $pull?: PullOperator<TSchema>;
+  $push?: PushOperator<TSchema>;
+  $pullAll?: PullAllOperator<TSchema>;
+  $bit?: OnlyFieldsOfType<
+    TSchema,
+    NumericType | undefined,
+    { and: IntegerType } | { or: IntegerType } | { xor: IntegerType }
+  >;
+} & Document;
+
+/** @public */
+export type DotNotationMatchKeysAndValues<TSchema> = Readonly<
+  {
+    [Property in Join<NestedPaths<TSchema, []>, '.'>]?: PropertyType<TSchema, Property>;
+  } & {
+    [Property in `${NestedPathsOfType<TSchema, any[]>}.$${`[${string}]` | ''}`]?: ArrayElement<
+      PropertyType<TSchema, Property extends `${infer Key}.$${string}` ? Key : never>
+    >;
+  } & {
+    [Property in `${NestedPathsOfType<TSchema, Record<string, any>[]>}.$${
+      | `[${string}]`
+      | ''}.${string}`]?: any; // Could be further narrowed
+  } & Document
 >;

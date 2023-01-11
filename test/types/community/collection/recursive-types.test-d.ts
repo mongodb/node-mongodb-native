@@ -1,6 +1,11 @@
 import { expectAssignable, expectError, expectNotAssignable, expectNotType } from 'tsd';
 
-import type { Collection, Filter, UpdateFilter } from '../../../../src';
+import type {
+  Collection,
+  DotNotationFilter,
+  DotNotationUpdateFilter,
+  UpdateFilter
+} from '../../../../src';
 
 /**
  * mutually recursive types are not supported and will not get type safety
@@ -15,7 +20,7 @@ interface Book {
   author: Author;
 }
 
-expectAssignable<Filter<Author>>({
+expectAssignable<DotNotationFilter<Author>>({
   bestBook: {
     title: 'book title',
     author: {
@@ -40,77 +45,77 @@ expectNotType<UpdateFilter<Author>>({
 
 //////////// Filter
 // Depth of 1 has type checking
-expectNotAssignable<Filter<Author>>({
+expectNotAssignable<DotNotationFilter<Author>>({
   'bestBook.title': 23
 });
 // Depth of 2 has type checking
-expectNotAssignable<Filter<Author>>({
+expectNotAssignable<DotNotationFilter<Author>>({
   'bestBook.author.name': 23
 });
 // Depth of 3 has type checking
-expectNotAssignable<Filter<Author>>({
+expectNotAssignable<DotNotationFilter<Author>>({
   'bestBook.author.bestBook.title': 23
 });
 // Depth of 4 has type checking
-expectNotAssignable<Filter<Author>>({
+expectNotAssignable<DotNotationFilter<Author>>({
   'bestBook.author.bestBook.author.name': 23
 });
 // Depth of 5 has type checking
-expectNotAssignable<Filter<Author>>({
+expectNotAssignable<DotNotationFilter<Author>>({
   'bestBook.author.bestBook.author.bestBook.title': 23
 });
 // Depth of 6 has type checking
-expectNotAssignable<Filter<Author>>({
+expectNotAssignable<DotNotationFilter<Author>>({
   'bestBook.author.bestBook.author.bestBook.author.name': 23
 });
 // Depth of 7 has type checking
-expectNotAssignable<Filter<Author>>({
+expectNotAssignable<DotNotationFilter<Author>>({
   'bestBook.author.bestBook.author.bestBook.author.bestBook.title': 23
 });
 // Depth of 8 does **not** have type checking
-expectAssignable<Filter<Author>>({
+expectAssignable<DotNotationFilter<Author>>({
   'bestBook.author.bestBook.author.bestBook.author.bestBook.author.name': 23
 });
 
 //////////// UpdateFilter
 // Depth of 1 has type checking
-expectNotAssignable<UpdateFilter<Author>>({
+expectNotAssignable<DotNotationUpdateFilter<Author>>({
   $set: {
     'bestBook.title': 23
   }
 });
 // Depth of 2 has type checking
-expectNotAssignable<UpdateFilter<Author>>({
+expectAssignable<UpdateFilter<Author>>({
   $set: {
     'bestBook.author.name': 23
   }
 });
 // Depth of 3 has type checking
-expectNotAssignable<UpdateFilter<Author>>({
+expectAssignable<UpdateFilter<Author>>({
   $set: {
     'bestBook.author.bestBook.title': 23
   }
 });
 // Depth of 4 has type checking
-expectNotAssignable<UpdateFilter<Author>>({
+expectAssignable<UpdateFilter<Author>>({
   $set: {
     'bestBook.author.bestBook.author.name': 23
   }
 });
 // Depth of 5 has type checking
-expectNotAssignable<UpdateFilter<Author>>({
+expectAssignable<UpdateFilter<Author>>({
   $set: {
     'bestBook.author.bestBook.author.bestBook.title': 23
   }
 });
 // Depth of 6 has type checking
-expectNotAssignable<UpdateFilter<Author>>({
+expectAssignable<UpdateFilter<Author>>({
   $set: {
     'bestBook.author.bestBook.author.bestBook.author.name': 23
   }
 });
 // Depth of 7 has type checking
-expectNotAssignable<UpdateFilter<Author>>({
+expectAssignable<UpdateFilter<Author>>({
   $set: {
     'bestBook.author.bestBook.author.bestBook.author.bestBook.title': 23
   }
@@ -132,11 +137,6 @@ interface RecursiveButNotReally {
 }
 
 declare const recursiveButNotReallyCollection: Collection<RecursiveButNotReally>;
-expectError(
-  recursiveButNotReallyCollection.find({
-    'a.a': 'asdf'
-  })
-);
 recursiveButNotReallyCollection.find({
   'a.a': 2
 });
@@ -237,17 +237,6 @@ interface Directory {
 }
 
 declare const recursiveSchemaWithArray: Collection<MongoStrings>;
-expectError(
-  recursiveSchemaWithArray.findOne({
-    'branches.0.id': 'hello'
-  })
-);
-
-expectError(
-  recursiveSchemaWithArray.findOne({
-    'branches.0.directories.0.id': 'hello'
-  })
-);
 
 // type safety breaks after the first
 //   level of nested types
@@ -297,12 +286,12 @@ type D = {
   a: A;
 };
 
-expectAssignable<Filter<A>>({
+expectAssignable<DotNotationFilter<A>>({
   'b.c.d.a.b.c.d.a.b.name': 'a'
 });
 
 // Beyond the depth supported, there is no type checking
-expectAssignable<Filter<A>>({
+expectAssignable<DotNotationFilter<A>>({
   'b.c.d.a.b.c.d.a.b.c.name': 3
 });
 
