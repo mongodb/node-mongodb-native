@@ -34,7 +34,7 @@ function printExports() {
  *
  * @param exportsToOverride - An object that is an import of the MongoDB driver to be modified by this function
  */
-function importMongoDBLegacy(exportsToOverride) {
+function importMongoDBLegacy(exportsToOverride: Record<string, unknown>) {
   const mongodbLegacyEntryPoint = require.resolve('mongodb-legacy');
   const mongodbLegacyLocation = path.dirname(mongodbLegacyEntryPoint);
   const mongodbLegacyIndex = fs.readFileSync(mongodbLegacyEntryPoint, {
