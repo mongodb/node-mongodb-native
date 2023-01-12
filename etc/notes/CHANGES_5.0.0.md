@@ -16,6 +16,53 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### Dot Notation Typescript Support Removed By Default
+
+**NOTE** This version only removes our **Typescript** compile-time support for dot notation in queries.
+
+Version 4.3.0 introduced Typescript support for dot notation in filter predicates.  For example:
+
+```typescript
+interface Schema {
+  user: {
+    name: string
+  }
+}
+
+declare const collection: Collection<Schema>;
+// compiles pre-v4.3.0, fails in v4.3.0+
+collection.find({ 'user.name': 4 })
+```
+
+This change caused many problems for users, including slow compilation times and compile errors for
+valid dot notation queries.
+
+Driver 5.0 removes type checking on filter predicates.  The preceding example compile will compile with
+driver v5.
+
+#### Dot Notation Helper Types Exported
+
+Although we removed support for type checking on dot notation filters by default, we now export these types.
+These helper types can be used for type checking.  We export the `DotNotationUpdateFilter` and the `DotNotationFilter`
+types for type safety in updates and finds.
+
+To use one of the new types, simply create a predicate that uses dot notation and assign it the type of `DotNotationFilter<your schema>`.
+```typescript
+interface Schema {
+  user: {
+    name: string
+  }
+}
+
+declare const collection: Collection<Schema>;
+
+// fails to compile, 4 is not assignable to type "string"
+const filterPredicate: DotNotationFilter<Schema> = { 'user.name': 4 };
+collection.find(filterPredicate);
+```
+
+**NOTE** These types are also now marked experimental and can be changed at any time.
+
 ### `Collection.mapReduce()` helper removed
 
 The `mapReduce` helper has been removed from the `Collection` class.  The `mapReduce` operation has been
