@@ -2,7 +2,6 @@ import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';
-import { deserialize, serialize } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';

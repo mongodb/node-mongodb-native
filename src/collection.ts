@@ -86,7 +86,6 @@ import {
   Callback,
   checkCollectionName,
   DEFAULT_PK_FACTORY,
-  emitWarningOnce,
   MongoDBNamespace,
   normalizeHintField,
   resolveOptions
