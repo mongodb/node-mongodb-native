@@ -15,7 +15,7 @@ interface RetryableWriteTestContext {
 }
 
 const ALLOWED_BULK_PROPERTIES = [
-  'ackknowledged',
+  'acknowledged',
   'insertedCount',
   'matchedCount',
   'modifiedCount',
