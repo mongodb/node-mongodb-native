@@ -37,7 +37,7 @@ collection.find({ 'user.name': 4 })
 This change caused many problems for users, including slow compilation times and compile errors for
 valid dot notation queries.
 
-Driver 5.0 removes type checking on filter predicates.  The preceding example compile will compile with
+Driver 5.0 removes type checking on filter predicates.  The preceding example will compile with
 driver v5.
 
 #### Dot Notation Helper Types Exported
