@@ -214,8 +214,6 @@ export interface AutoEncryptionTlsOptions {
 
 /** @public */
 export interface AutoEncryptionOptions {
-  /** @internal */
-  bson?: { serialize: typeof serialize; deserialize: typeof deserialize };
   /** @internal client for metadata lookups */
   metadataClient?: MongoClient;
   /** A `MongoClient` used to fetch keys from a key vault */
