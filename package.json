@@ -34,13 +34,17 @@
   },
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.201.0",
-    "snappy": "7.x.x"
+    "snappy": "7.x.x",
+    "mongodb-client-encryption": "2.x.x"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/credential-providers": {
       "optional": true
     },
     "snappy": {
+      "optional": true
+    },
+    "mongodb-client-encryption": {
       "optional": true
     }
   },
