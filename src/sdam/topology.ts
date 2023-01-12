@@ -222,16 +222,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @event */
   static readonly TIMEOUT = TIMEOUT;
 
-  /**
-   * @internal
-   *
-   * @privateRemarks
-   * mongodb-client-encryption's class ClientEncryption falls back to finding the bson lib
-   * defined on client.topology.bson, in order to maintain compatibility with any version
-   * of mongodb-client-encryption we keep a reference to serialize and deserialize here.
-   */
-  bson: { serialize: typeof serialize; deserialize: typeof deserialize };
-
   selectServerAsync: (
     selector: string | ReadPreference | ServerSelector,
     options: SelectServerOptions
@@ -250,12 +240,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         callback: (e: Error, r: Server) => void
       ) => this.selectServer(selector, options, callback as any)
     );
-
-    // Saving a reference to these BSON functions
-    // supports v2.2.0 and older versions of mongodb-client-encryption
-    this.bson = Object.create(null);
-    this.bson.serialize = serialize;
-    this.bson.deserialize = deserialize;
 
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
