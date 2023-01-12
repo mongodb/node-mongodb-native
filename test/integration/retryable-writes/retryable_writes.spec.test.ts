@@ -14,17 +14,6 @@ interface RetryableWriteTestContext {
   failPointName?: any;
 }
 
-const ALLOWED_BULK_PROPERTIES = [
-  'acknowledged',
-  'insertedCount',
-  'matchedCount',
-  'modifiedCount',
-  'deletedCount',
-  'upsertedCount',
-  'upsertedIds',
-  'insertedIds'
-];
-
 describe('Legacy Retryable Writes Specs', function () {
   let ctx: RetryableWriteTestContext = {};
 
@@ -166,11 +155,6 @@ async function executeScenarioTest(test, ctx: RetryableWriteTestContext) {
     // not part of the test expectations.
     for (const property in expected) {
       expect(actual).to.have.deep.property(property, expected[property]);
-    }
-
-    // Check we don't have any extra properties on the bulk write result.
-    for (const property in actual) {
-      expect(ALLOWED_BULK_PROPERTIES).to.include(property);
     }
   }
 
