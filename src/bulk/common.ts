@@ -163,33 +163,34 @@ export class Batch<T = Document> {
   }
 }
 
-function generateIdMap(ids: Document[]): { [key: number]: any } {
-  const idMap: { [index: number]: any } = {};
-  for (const doc of ids ?? []) {
-    idMap[doc.index] = doc._id;
-  }
-  return idMap;
-}
 /**
  * @public
  * The result of a bulk write.
  */
 export class BulkWriteResult {
-  private result: BulkResult;
+  private readonly result: BulkResult;
   /** Number of documents inserted. */
-  insertedCount: number;
+  readonly insertedCount: number;
   /** Number of documents matched for update. */
-  matchedCount: number;
+  readonly matchedCount: number;
   /** Number of documents modified. */
-  modifiedCount: number;
+  readonly modifiedCount: number;
   /** Number of documents deleted. */
-  deletedCount: number;
+  readonly deletedCount: number;
   /** Number of documents upserted. */
-  upsertedCount: number;
+  readonly upsertedCount: number;
   /** Upserted document generated Id's, hash key is the index of the originating operation */
-  upsertedIds: { [key: number]: any };
+  readonly upsertedIds: { [key: number]: any };
   /** Inserted document generated Id's, hash key is the index of the originating operation */
-  insertedIds: { [key: number]: any };
+  readonly insertedIds: { [key: number]: any };
+
+  private static generateIdMap(ids: Document[]): { [key: number]: any } {
+    const idMap: { [index: number]: any } = {};
+    for (const doc of ids) {
+      idMap[doc.index] = doc._id;
+    }
+    return idMap;
+  }
 
   /**
    * Create a new BulkWriteResult instance
@@ -202,8 +203,8 @@ export class BulkWriteResult {
     this.modifiedCount = this.result.nModified ?? 0;
     this.deletedCount = this.result.nRemoved ?? 0;
     this.upsertedCount = this.result.upserted.length ?? 0;
-    this.upsertedIds = generateIdMap(this.result.upserted);
-    this.insertedIds = generateIdMap(this.result.insertedIds);
+    this.upsertedIds = BulkWriteResult.generateIdMap(this.result.upserted);
+    this.insertedIds = BulkWriteResult.generateIdMap(this.result.insertedIds);
     Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
   }
 
@@ -530,12 +531,8 @@ function executeCommands(
     }
 
     // Merge the results together
-    const mergeResult = mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
+    mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
     const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult);
-    if (mergeResult != null) {
-      return callback(undefined, writeResult);
-    }
-
     if (bulkOperation.handleWriteError(callback, writeResult)) return;
 
     // Execute the next command in line
