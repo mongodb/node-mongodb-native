@@ -58,12 +58,6 @@ export class Encrypter {
       };
     }
 
-    options.autoEncryption.bson = Object.create(null);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    options.autoEncryption.bson!.serialize = serialize;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    options.autoEncryption.bson!.deserialize = deserialize;
-
     this.autoEncrypter = new AutoEncrypterClass(client, options.autoEncryption);
   }
 
