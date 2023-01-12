@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as process from 'node:process';
 import * as vm from 'node:vm';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -24,7 +25,16 @@ function printExports() {
   }
 }
 
-function importMongoDBLegacy() {
+/**
+ * Using node's require resolution logic this function will locate the entrypoint for the `'mongodb-legacy'` module.
+ * Then execute the `mongodb-legacy` module in a `vm` context that replaces the global require function with a custom
+ * implementation. The custom version of `require` will return the local instance of the driver import (magically compiled by ts-node) when
+ * the module specifier is 'mongodb' and otherwise defer to the normal require behavior to import relative files and stdlib modules.
+ * Each of the legacy module's patched classes are placed on the input object.
+ *
+ * @param exportsToOverride - An object that is an import of the MongoDB driver to be modified by this function
+ */
+function importMongoDBLegacy(exportsToOverride) {
   const mongodbLegacyEntryPoint = require.resolve('mongodb-legacy');
   const mongodbLegacyLocation = path.dirname(mongodbLegacyEntryPoint);
   const mongodbLegacyIndex = fs.readFileSync(mongodbLegacyEntryPoint, {
@@ -44,7 +54,44 @@ function importMongoDBLegacy() {
     }
   });
   vm.runInContext(mongodbLegacyIndex, ctx);
-  return ctx.module.exports;
+
+  const mongodbLegacy = ctx.module.exports;
+
+  Object.defineProperty(exportsToOverride, 'Admin', { get: () => mongodbLegacy.Admin });
+  Object.defineProperty(exportsToOverride, 'FindCursor', { get: () => mongodbLegacy.FindCursor });
+  Object.defineProperty(exportsToOverride, 'ListCollectionsCursor', {
+    get: () => mongodbLegacy.ListCollectionsCursor
+  });
+  Object.defineProperty(exportsToOverride, 'ListIndexesCursor', {
+    get: () => mongodbLegacy.ListIndexesCursor
+  });
+  Object.defineProperty(exportsToOverride, 'AggregationCursor', {
+    get: () => mongodbLegacy.AggregationCursor
+  });
+  Object.defineProperty(exportsToOverride, 'ChangeStream', {
+    get: () => mongodbLegacy.ChangeStream
+  });
+  Object.defineProperty(exportsToOverride, 'Collection', { get: () => mongodbLegacy.Collection });
+  Object.defineProperty(exportsToOverride, 'Db', { get: () => mongodbLegacy.Db });
+  Object.defineProperty(exportsToOverride, 'GridFSBucket', {
+    get: () => mongodbLegacy.GridFSBucket
+  });
+  Object.defineProperty(exportsToOverride, 'ClientSession', {
+    get: () => mongodbLegacy.ClientSession
+  });
+  Object.defineProperty(exportsToOverride, 'MongoClient', { get: () => mongodbLegacy.MongoClient });
+  Object.defineProperty(exportsToOverride, 'ClientSession', {
+    get: () => mongodbLegacy.ClientSession
+  });
+  Object.defineProperty(exportsToOverride, 'GridFSBucketWriteStream', {
+    get: () => mongodbLegacy.GridFSBucketWriteStream
+  });
+  Object.defineProperty(exportsToOverride, 'OrderedBulkOperation', {
+    get: () => mongodbLegacy.OrderedBulkOperation
+  });
+  Object.defineProperty(exportsToOverride, 'UnorderedBulkOperation', {
+    get: () => mongodbLegacy.UnorderedBulkOperation
+  });
 }
 
 export * from '../src/admin';
@@ -149,32 +196,8 @@ export * from '../src/write_concern';
 
 // Must be last for precedence
 export * from '../src/index';
-// Override our own exports with the legacy patched ones
-const mongodbLegacy = importMongoDBLegacy();
-Object.defineProperty(module.exports, 'Admin', { get: () => mongodbLegacy.Admin });
-Object.defineProperty(module.exports, 'FindCursor', { get: () => mongodbLegacy.FindCursor });
-Object.defineProperty(module.exports, 'ListCollectionsCursor', {
-  get: () => mongodbLegacy.ListCollectionsCursor
-});
-Object.defineProperty(module.exports, 'ListIndexesCursor', {
-  get: () => mongodbLegacy.ListIndexesCursor
-});
-Object.defineProperty(module.exports, 'AggregationCursor', {
-  get: () => mongodbLegacy.AggregationCursor
-});
-Object.defineProperty(module.exports, 'ChangeStream', { get: () => mongodbLegacy.ChangeStream });
-Object.defineProperty(module.exports, 'Collection', { get: () => mongodbLegacy.Collection });
-Object.defineProperty(module.exports, 'Db', { get: () => mongodbLegacy.Db });
-Object.defineProperty(module.exports, 'GridFSBucket', { get: () => mongodbLegacy.GridFSBucket });
-Object.defineProperty(module.exports, 'ClientSession', { get: () => mongodbLegacy.ClientSession });
-Object.defineProperty(module.exports, 'MongoClient', { get: () => mongodbLegacy.MongoClient });
-Object.defineProperty(module.exports, 'ClientSession', { get: () => mongodbLegacy.ClientSession });
-Object.defineProperty(module.exports, 'GridFSBucketWriteStream', {
-  get: () => mongodbLegacy.GridFSBucketWriteStream
-});
-Object.defineProperty(module.exports, 'OrderedBulkOperation', {
-  get: () => mongodbLegacy.OrderedBulkOperation
-});
-Object.defineProperty(module.exports, 'UnorderedBulkOperation', {
-  get: () => mongodbLegacy.UnorderedBulkOperation
-});
+
+if (process.env.DISABLE_MONGODB_LEGACY !== 'true') {
+  // Override our own exports with the legacy patched ones
+  importMongoDBLegacy(module.exports);
+}
