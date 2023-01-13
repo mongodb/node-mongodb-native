@@ -564,23 +564,26 @@ describe('Explain', function () {
     }
   });
 
-  it('should honor boolean explain with aggregate', function (done) {
+  it('should honor boolean explain with aggregate', async function () {
     const db = client.db('shouldHonorBooleanExplainWithAggregate');
     const collection = db.collection('test');
-    collection.insertOne({ a: 1 }, (err, res) => {
-      expect(err).to.not.exist;
-      expect(res).to.exist;
+    await collection.insertOne({ a: 1 });
+    const aggResult = await collection
+      .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], { explain: true })
+      .toArray();
 
-      collection
-        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], { explain: true })
-        .toArray((err, docs) => {
-          expect(err).to.not.exist;
-          const result = JSON.stringify(docs[0]);
-          expect(result).to.include('"queryPlanner"');
-          expect(result).to.include('"executionStats"');
-          done();
-        });
-    });
+    if (aggResult[0].stages) {
+      expect(aggResult[0].stages).to.have.length.gte(1);
+      expect(aggResult[0].stages[0]).to.have.property('$cursor');
+      expect(aggResult[0].stages[0].$cursor).to.have.property('queryPlanner');
+      expect(aggResult[0].stages[0].$cursor).to.have.property('executionStats');
+    } else if (aggResult[0].$cursor) {
+      expect(aggResult[0].$cursor).to.have.property('queryPlanner');
+      expect(aggResult[0].$cursor).to.have.property('executionStats');
+    } else {
+      expect(aggResult[0]).to.have.property('queryPlanner');
+      expect(aggResult[0]).to.have.property('executionStats');
+    }
   });
 
   it('should honor string explain with aggregate', {
@@ -589,47 +592,51 @@ describe('Explain', function () {
         mongodb: '>=3.6.0'
       }
     },
-    test: function (done) {
+    test: async function () {
       const db = client.db('shouldHonorStringExplainWithAggregate');
       const collection = db.collection('test');
 
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
-
-        collection
-          .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], {
-            explain: 'executionStats'
-          })
-          .toArray((err, docs) => {
-            expect(err).to.not.exist;
-            const result = JSON.stringify(docs[0]);
-            expect(result).to.include('"queryPlanner"');
-            expect(result).to.include('"executionStats"');
-            done();
-          });
-      });
+      await collection.insertOne({ a: 1 });
+      const aggResult = await collection
+        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], {
+          explain: 'executionStats'
+        })
+        .toArray();
+      if (aggResult[0].stages) {
+        expect(aggResult[0].stages).to.have.length.gte(1);
+        expect(aggResult[0].stages[0]).to.have.property('$cursor');
+        expect(aggResult[0].stages[0].$cursor).to.have.property('queryPlanner');
+        expect(aggResult[0].stages[0].$cursor).to.have.property('executionStats');
+      } else if (aggResult[0].$cursor) {
+        expect(aggResult[0].$cursor).to.have.property('queryPlanner');
+        expect(aggResult[0].$cursor).to.have.property('executionStats');
+      } else {
+        expect(aggResult[0]).to.have.property('queryPlanner');
+        expect(aggResult[0]).to.have.property('executionStats');
+      }
     }
   });
 
-  it('should honor boolean explain specified on cursor with aggregate', function (done) {
+  it('should honor boolean explain specified on cursor with aggregate', async function () {
     const db = client.db('shouldHonorBooleanExplainSpecifiedOnCursor');
     const collection = db.collection('test');
 
-    collection.insertOne({ a: 1 }, (err, res) => {
-      expect(err).to.not.exist;
-      expect(res).to.exist;
-
-      collection
-        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
-        .explain(false, (err, res) => {
-          expect(err).to.not.exist;
-          const result = JSON.stringify(res);
-          expect(result).to.include('"queryPlanner"');
-          expect(result).not.to.include('"executionStats"');
-          done();
-        });
-    });
+    await collection.insertOne({ a: 1 });
+    const aggResult = await collection
+      .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
+      .explain(false);
+    if (aggResult && aggResult.stages) {
+      expect(aggResult.stages).to.have.length.gte(1);
+      expect(aggResult.stages[0]).to.have.property('$cursor');
+      expect(aggResult.stages[0].$cursor).to.have.property('queryPlanner');
+      expect(aggResult.stages[0].$cursor).to.not.have.property('executionStats');
+    } else if (aggResult.$cursor) {
+      expect(aggResult.$cursor).to.have.property('queryPlanner');
+      expect(aggResult.$cursor).to.not.have.property('executionStats');
+    } else {
+      expect(aggResult).to.have.property('queryPlanner');
+      expect(aggResult).to.not.have.property('executionStats');
+    }
   });
 
   it('should honor string explain specified on cursor with aggregate', {
@@ -638,46 +645,44 @@ describe('Explain', function () {
         mongodb: '>=3.6'
       }
     },
-    test: function (done) {
+    test: async function () {
       const db = client.db('shouldHonorStringExplainSpecifiedOnCursor');
       const collection = db.collection('test');
 
-      collection.insertOne({ a: 1 }, (err, res) => {
-        expect(err).to.not.exist;
-        expect(res).to.exist;
+      await collection.insertOne({ a: 1 });
+      const aggResult = await collection
+        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
+        .explain('allPlansExecution');
 
-        collection
-          .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
-          .explain('allPlansExecution', (err, res) => {
-            expect(err).to.not.exist;
-            expect(res).to.exist;
-            const result = JSON.stringify(res);
-            expect(result).to.include('"queryPlanner"');
-            expect(result).to.include('"executionStats"');
-            done();
-          });
-      });
+      if (aggResult && aggResult.stages) {
+        expect(aggResult.stages).to.have.length.gte(1);
+        expect(aggResult.stages[0]).to.have.property('$cursor');
+        expect(aggResult.stages[0].$cursor).to.have.property('queryPlanner');
+        expect(aggResult.stages[0].$cursor).to.have.property('executionStats');
+      } else {
+        expect(aggResult).to.have.property('queryPlanner');
+        expect(aggResult).to.have.property('executionStats');
+      }
     }
   });
 
-  it('should honor legacy explain with aggregate', function (done) {
+  it('should honor legacy explain with aggregate', async function () {
     const db = client.db('shouldHonorLegacyExplainWithAggregate');
     const collection = db.collection('test');
 
-    collection.insertOne({ a: 1 }, (err, res) => {
-      expect(err).to.not.exist;
-      expect(res).to.exist;
-
-      collection
-        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
-        .explain((err, res) => {
-          expect(err).to.not.exist;
-          const result = JSON.stringify(res);
-          expect(result).to.include('"queryPlanner"');
-          expect(result).to.include('"executionStats"');
-          done();
-        });
-    });
+    await collection.insertOne({ a: 1 });
+    const aggResult = await collection
+      .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }])
+      .explain();
+    if (aggResult && aggResult.stages) {
+      expect(aggResult.stages).to.have.length.gte(1);
+      expect(aggResult.stages[0]).to.have.property('$cursor');
+      expect(aggResult.stages[0].$cursor).to.have.property('queryPlanner');
+      expect(aggResult.stages[0].$cursor).to.have.property('executionStats');
+    } else {
+      expect(aggResult).to.have.property('queryPlanner');
+      expect(aggResult).to.have.property('executionStats');
+    }
   });
 
   it('should throw a catchable error with invalid explain string', {
@@ -686,18 +691,16 @@ describe('Explain', function () {
         mongodb: '>=3.4'
       }
     },
-    test: function (done) {
+    test: async function () {
       const db = client.db('shouldThrowCatchableError');
       const collection = db.collection('test');
-      collection
-        .find({ a: 1 })
-        .explain('invalidExplain')
-        .then(() => done(new Error('expected explain to fail but it succeeded')))
-        .catch(err => {
-          expect(err).to.exist;
-          expect(err).to.be.instanceOf(MongoServerError);
-          done();
-        });
+      try {
+        await collection.find({ a: 1 }).explain('invalidExplain');
+        expect.fail(new Error('Expected explain to fail but it succeeded'));
+      } catch (e) {
+        expect(e).to.exist;
+        expect(e).to.be.instanceOf(MongoServerError);
+      }
     }
   });
 });

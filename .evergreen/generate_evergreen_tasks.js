@@ -28,7 +28,6 @@ const OPERATING_SYSTEMS = [
     name: 'windows-64-vs2019',
     display_name: 'Windows (VS2019)',
     run_on: 'windows-64-vs2019-large',
-    msvsVersion: 2019,
     clientEncryption: false // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
   }
 ].map(osConfig => ({
@@ -39,7 +38,7 @@ const OPERATING_SYSTEMS = [
 }));
 
 // TODO: NODE-3060: enable skipped tests on windows
-const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
+const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -202,6 +201,27 @@ TASKS.push(
         },
         { func: 'bootstrap kms servers' },
         { func: 'run socks5 tests' }
+      ]
+    },
+    {
+      name: 'test-socks5-csfle',
+      tags: ['socks5-csfle'],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: 'latest',
+            TOPOLOGY: 'replica_set'
+          }
+        },
+        { func: 'bootstrap kms servers' },
+        {
+          func: 'run socks5 tests',
+          vars: {
+            TEST_SOCKS5_CSFLE: 'true'
+          }
+        }
       ]
     },
     {
@@ -374,7 +394,6 @@ for (const
     run_on,
     nodeVersions = NODE_VERSIONS,
     clientEncryption,
-    msvsVersion
   } of OPERATING_SYSTEMS) {
   const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
   const os = osName.split('-')[0];
@@ -396,9 +415,6 @@ for (const
 
     if (clientEncryption) {
       expansions.CLIENT_ENCRYPTION = true;
-    }
-    if (msvsVersion) {
-      expansions.MSVS_VERSION = msvsVersion;
     }
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
@@ -578,8 +594,10 @@ BUILD_VARIANTS.push({
 
 const oneOffFuncAsTasks = []
 
+const FLE_PINNED_COMMIT = '77b51c00ab4ff58916dd39f55657e1ecc0af281c'
+
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of ['67bec571c0c21f4db8a96b6bd61cb24dfc87a223', 'master']) {
+  for (const ref of [FLE_PINNED_COMMIT, 'master']) {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests'],
@@ -667,9 +685,9 @@ for (const variant of BUILD_VARIANTS.filter(
   );
 }
 
-// TODO(NODE-4894): fix kerberos tests on Node18
+// TODO(NODE-5021): Drop support for Kerberos 1.x on in 6.0.0
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
+  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-auth-kerberos'].includes(name)

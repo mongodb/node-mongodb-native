@@ -307,7 +307,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     if (
       !clusterTime.signature ||
       clusterTime.signature.hash?._bsontype !== 'Binary' ||
-      (typeof clusterTime.signature.keyId !== 'number' &&
+      (typeof clusterTime.signature.keyId !== 'bigint' &&
+        typeof clusterTime.signature.keyId !== 'number' &&
         clusterTime.signature.keyId?._bsontype !== 'Long') // apparently we decode the key to number?
     ) {
       throw new MongoInvalidArgumentError(
@@ -971,7 +972,18 @@ export function applySession(
     serverSession.txnNumber += session[kTxnNumberIncrement];
     session[kTxnNumberIncrement] = 0;
     // TODO(NODE-2674): Preserve int64 sent from MongoDB
-    command.txnNumber = Long.fromNumber(serverSession.txnNumber);
+    let txnNumber: Long;
+    switch (typeof serverSession.txnNumber) {
+      case 'number':
+        txnNumber = Long.fromNumber(serverSession.txnNumber);
+        break;
+      case 'bigint':
+        txnNumber = Long.fromBigInt(serverSession.txnNumber);
+        break;
+      default:
+        throw new MongoServerError({ message: 'HELP' });
+    }
+    command.txnNumber = txnNumber;
   }
 
   if (!inTxnOrTxnCommand) {

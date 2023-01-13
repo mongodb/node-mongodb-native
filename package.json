@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "5.0.0-alpha.0",
+  "version": "5.0.1",
   "description": "The official MongoDB driver for Node.js",
   "main": "lib/index.js",
   "files": [
@@ -25,7 +25,7 @@
     "email": "dbx-node@mongodb.com"
   },
   "dependencies": {
-    "bson": "^5.0.0-alpha.3",
+    "bson": "^5.0.0",
     "mongodb-connection-string-url": "^2.6.0",
     "socks": "^2.7.1"
   },

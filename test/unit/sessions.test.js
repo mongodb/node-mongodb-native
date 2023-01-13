@@ -3,7 +3,13 @@
 const mock = require('../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const { genClusterTime } = require('../tools/common');
-const { ServerSessionPool, ServerSession, ClientSession, applySession } = require('../mongodb');
+const {
+  ServerSessionPool,
+  ServerSession,
+  ClientSession,
+  applySession,
+  BSON
+} = require('../mongodb');
 const { now, isHello } = require('../mongodb');
 const { getSymbolFrom } = require('../tools/utils');
 const { Long } = require('../mongodb');
@@ -108,6 +114,17 @@ describe('Sessions - unit', function () {
         expect(session).property('clusterTime').to.be.null;
         session.advanceClusterTime(alsoValidTime);
         expect(session).property('clusterTime').to.equal(alsoValidTime);
+      });
+
+      it('sets clusterTime to the one provided when the signature.keyId is a bigint', () => {
+        // NOTE: Prior to BigInt support, this would have thrown MongoInvalidArgumentError
+        const validClusterTime = {
+          clusterTime: new BSON.Timestamp(BSON.Long.fromNumber(1, true)),
+          signature: { hash: new BSON.Binary('test'), keyId: 100n }
+        };
+
+        session.advanceClusterTime(validClusterTime);
+        expect(session.clusterTime.signature.keyId).to.equal(100n);
       });
 
       it('should set the session clusterTime to the one provided if it is greater than the the existing session clusterTime', () => {

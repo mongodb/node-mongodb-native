@@ -41,6 +41,7 @@ export function applyCommonQueryOptions(
 ): CommandOptions {
   Object.assign(queryOptions, {
     raw: typeof options.raw === 'boolean' ? options.raw : false,
+    useBigInt64: typeof options.useBigInt64 === 'boolean' ? options.useBigInt64 : false,
     promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
     promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
     promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,

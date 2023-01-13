@@ -2,20 +2,20 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_4.0.0.md)!**
+**Upgrading to version 5? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md)!**
 
 ## Quick Links
 
-| what          | where                                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------- |
-| documentation | [www.mongodb.com/docs/drivers/node](https://www.mongodb.com/docs/drivers/node)                          |
-| api-doc       | [mongodb.github.io/node-mongodb-native](https://mongodb.github.io/node-mongodb-native)                  |
-| npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                  |
-| source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                |
-| mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                              |
-| changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                       |
-| upgrade to v4 | [etc/notes/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_4.0.0.md) |
-| contributing  | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)             |
+| what          | where                                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| documentation | [www.mongodb.com/docs/drivers/node](https://www.mongodb.com/docs/drivers/node)                                    |
+| api-doc       | [mongodb.github.io/node-mongodb-native](https://mongodb.github.io/node-mongodb-native)                            |
+| npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                            |
+| source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                          |
+| mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                                        |
+| changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                 |
+| upgrade to v5 | [etc/notes/CHANGES_5.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md) |
+| contributing  | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                       |
 
 ### Bugs / Feature Requests
 
@@ -53,7 +53,7 @@ If you run into any unexpected compiler failures against our supported TypeScrip
 
 ## Installation
 
-The recommended way to get started using the Node.js 4.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js 5.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
 After you've created your own project using `npm init`, you can run:
 
@@ -88,7 +88,6 @@ Third party:
 
 - Snappy network compression - [snappy](https://github.com/Brooooooklyn/snappy)
 - AWS authentication - [@aws-sdk/credential-providers](https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers)
-
 
 ## Quick Start
 
@@ -136,18 +135,14 @@ operations using the MongoDB driver.
 
 Add code to connect to the server and the database **myProject**:
 
-> **NOTE:** All the examples below use async/await syntax.
->
-> However, all async API calls support an optional callback as the final argument,
-> if a callback is provided a Promise will not be returned.
-
 > **NOTE:** Resolving DNS Connection issues
 >
 > Node.js 18 changed the default DNS resolution ordering from always prioritizing ipv4 to the ordering
-> returned by the DNS provider.  In some environments, this can result in `localhost` resolving to
+> returned by the DNS provider. In some environments, this can result in `localhost` resolving to
 > an ipv6 address instead of ipv4 and a consequent failure to connect to the server.
 >
 > This can be resolved by:
+>
 > - specifying the ip address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
 > - launching mongod or mongos with the ipv6 flag enabled ([--ipv6 mongod option documentation](https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6))
 > - using a host of `127.0.0.1` in place of localhost
@@ -267,7 +262,7 @@ It is our recommendation to use `instanceof` checks on errors and to avoid relyi
 We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
 
 Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
-This means `instanceof` will always be able to accurately capture the errors that our driver throws (or returns in a callback).
+This means `instanceof` will always be able to accurately capture the errors that our driver throws.
 
 ```typescript
 const client = new MongoClient(url);

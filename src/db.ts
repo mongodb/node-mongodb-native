@@ -57,6 +57,7 @@ const DB_OPTIONS_ALLOW_LIST = [
   'readConcern',
   'retryMiliSeconds',
   'numberOfRetries',
+  'useBigInt64',
   'promoteBuffers',
   'promoteLongs',
   'bsonRegExp',

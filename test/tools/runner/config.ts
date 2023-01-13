@@ -359,7 +359,7 @@ export class TestConfiguration {
   }
 
   // Accessors and methods Client-Side Encryption
-  get mongodbClientEncryption() {
+  get mongodbClientEncryption(): typeof import('mongodb-client-encryption') {
     return this.clientSideEncryption && this.clientSideEncryption.mongodbClientEncryption;
   }
 

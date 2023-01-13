@@ -20,7 +20,9 @@ describe('Client Side Encryption Prose Corpus Test', function () {
 
   const corpusDir = path.resolve(__dirname, '../../spec/client-side-encryption/corpus');
   function loadCorpusData(filename) {
-    return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename)), { relaxed: false });
+    return EJSON.parse(fs.readFileSync(path.resolve(corpusDir, filename)), {
+      relaxed: false
+    });
   }
 
   const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;

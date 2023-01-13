@@ -15,38 +15,28 @@ describe('Promote Values', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
+    test: async function () {
+      let configuration = this.configuration;
+      let client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         promoteValues: false
       });
-
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-
-        db.collection('shouldCorrectlyHonorPromoteValues').insert(
-          {
-            doc: Long.fromNumber(10),
-            int: 10,
-            double: 2.2222,
-            array: [[Long.fromNumber(10)]]
-          },
-          function (err) {
-            expect(err).to.not.exist;
-
-            db.collection('shouldCorrectlyHonorPromoteValues').findOne(function (err, doc) {
-              expect(err).to.not.exist;
-
-              test.deepEqual(Long.fromNumber(10), doc.doc);
-              test.deepEqual(new Int32(10), doc.int);
-              test.deepEqual(new Double(2.2222), doc.double);
-
-              client.close(done);
-            });
-          }
-        );
+      await client.connect();
+      this.defer(async () => {
+        await client.close();
       });
+      let db = client.db(configuration.db);
+
+      await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
+        doc: Long.fromNumber(10),
+        int: 10,
+        double: 2.2222,
+        array: [[Long.fromNumber(10)]]
+      });
+      let doc = await db.collection('shouldCorrectlyHonorPromoteValues').findOne();
+      expect(Long.fromNumber(10)).deep.equals(doc.doc);
+      expect(new Int32(10)).deep.equals(doc.int);
+      expect(new Double(2.2222)).deep.equals(doc.double);
     }
   });
 
@@ -57,33 +47,26 @@ describe('Promote Values', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
+    test: async function () {
       var configuration = this.configuration;
       const client = configuration.newClient({}, { promoteValues: false });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteValues').insert(
-          {
-            doc: Long.fromNumber(10),
-            int: 10,
-            double: 2.2222,
-            array: [[Long.fromNumber(10)]]
-          },
-          function (err) {
-            expect(err).to.not.exist;
-
-            db.collection('shouldCorrectlyHonorPromoteValues').findOne(function (err, doc) {
-              expect(err).to.not.exist;
-
-              test.deepEqual(Long.fromNumber(10), doc.doc);
-              test.deepEqual(new Int32(10), doc.int);
-              test.deepEqual(new Double(2.2222), doc.double);
-
-              client.close(done);
-            });
-          }
-        );
+      await client.connect();
+      this.defer(async () => {
+        await client.close();
       });
+      const db = client.db(configuration.db);
+
+      await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
+        doc: Long.fromNumber(10),
+        int: 10,
+        double: 2.2222,
+        array: [[Long.fromNumber(10)]]
+      });
+
+      const doc = await db.collection('shouldCorrectlyHonorPromoteValues').findOne();
+      expect(Long.fromNumber(10)).deep.equals(doc.doc);
+      expect(new Int32(10)).deep.equals(doc.int);
+      expect(new Double(2.2222)).deep.equals(doc.double);
     }
   });
 
@@ -94,35 +77,23 @@ describe('Promote Values', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
+    test: async function () {
+      const configuration = this.configuration;
       const client = configuration.newClient({}, { promoteValues: false });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteValues').insert(
-          {
-            doc: Long.fromNumber(10),
-            int: 10,
-            double: 2.2222,
-            array: [[Long.fromNumber(10)]]
-          },
-          function (err) {
-            expect(err).to.not.exist;
-
-            db.collection('shouldCorrectlyHonorPromoteValues')
-              .find()
-              .next(function (err, doc) {
-                expect(err).to.not.exist;
-
-                test.deepEqual(Long.fromNumber(10), doc.doc);
-                test.deepEqual(new Int32(10), doc.int);
-                test.deepEqual(new Double(2.2222), doc.double);
-
-                client.close(done);
-              });
-          }
-        );
+      await client.connect();
+      this.defer(async () => await client.close());
+      const db = client.db(configuration.db);
+      await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
+        doc: Long.fromNumber(10),
+        int: 10,
+        double: 2.2222,
+        array: [[Long.fromNumber(10)]]
       });
+
+      const doc = await db.collection('shouldCorrectlyHonorPromoteValues').find().next();
+      expect(doc.doc).to.deep.equal(Long.fromNumber(10));
+      expect(doc.int).to.deep.equal(new Int32(10));
+      expect(doc.double).to.deep.equal(new Double(2.2222));
     }
   });
 
@@ -133,35 +104,27 @@ describe('Promote Values', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
+    test: async function () {
+      const configuration = this.configuration;
       const client = configuration.newClient();
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteValues').insert(
-          {
-            doc: Long.fromNumber(10),
-            int: 10,
-            double: 2.2222,
-            array: [[Long.fromNumber(10)]]
-          },
-          function (err) {
-            expect(err).to.not.exist;
+      await client.connect();
+      this.defer(async () => await client.close());
+      const db = client.db(configuration.db);
 
-            db.collection('shouldCorrectlyHonorPromoteValues')
-              .find({}, { promoteValues: false })
-              .next(function (err, doc) {
-                expect(err).to.not.exist;
-
-                test.deepEqual(Long.fromNumber(10), doc.doc);
-                test.deepEqual(new Int32(10), doc.int);
-                test.deepEqual(new Double(2.2222), doc.double);
-
-                client.close(done);
-              });
-          }
-        );
+      await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
+        doc: Long.fromNumber(10),
+        int: 10,
+        double: 2.2222,
+        array: [[Long.fromNumber(10)]]
       });
+
+      const doc = await db
+        .collection('shouldCorrectlyHonorPromoteValues')
+        .find({}, { promoteValues: false })
+        .next();
+      expect(doc.doc).to.deep.equal(Long.fromNumber(10));
+      expect(doc.int).to.deep.equal(new Int32(10));
+      expect(doc.double).to.deep.equal(new Double(2.2222));
     }
   });
 
@@ -172,35 +135,27 @@ describe('Promote Values', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
+    test: async function () {
+      const configuration = this.configuration;
       const client = configuration.newClient();
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteValues2').insert(
-          {
-            doc: Long.fromNumber(10),
-            int: 10,
-            double: 2.2222,
-            array: [[Long.fromNumber(10)]]
-          },
-          function (err) {
-            expect(err).to.not.exist;
-
-            db.collection('shouldCorrectlyHonorPromoteValues2')
-              .aggregate([{ $match: {} }], { promoteValues: false })
-              .next(function (err, doc) {
-                expect(err).to.not.exist;
-
-                test.deepEqual(Long.fromNumber(10), doc.doc);
-                test.deepEqual(new Int32(10), doc.int);
-                test.deepEqual(new Double(2.2222), doc.double);
-
-                client.close(done);
-              });
-          }
-        );
+      await client.connect();
+      this.defer(async () => {
+        client.close();
       });
+      const db = client.db(configuration.db);
+      await db.collection('shouldCorrectlyHonorPromoteValues2').insertOne({
+        doc: Long.fromNumber(10),
+        int: 10,
+        double: 2.2222,
+        array: [[Long.fromNumber(10)]]
+      });
+      const doc = await db
+        .collection('shouldCorrectlyHonorPromoteValues2')
+        .aggregate([{ $match: {} }], { promoteValues: false })
+        .next();
+      expect(doc.doc, Long.fromNumber(10));
+      expect(doc.int, new Int32(10));
+      expect(doc.double, new Double(2.2222));
     }
   });
 

@@ -162,12 +162,14 @@ describe('Change Streams', function () {
   it('should close the listeners after the cursor is closed', {
     metadata: { requires: { topology: 'replicaset' } },
     async test() {
+      const collection = db.collection('closesListeners');
+      const changeStream = collection.watch(pipeline);
       const willBeChanges = on(changeStream, 'change');
       await once(changeStream.cursor, 'init');
       await collection.insertOne({ a: 1 });
 
       await willBeChanges.next();
-      expect(changeStream.cursorStream.listenerCount('data')).to.equal(1);
+      expect(changeStream.cursorStream?.listenerCount('data')).to.equal(1);
 
       await changeStream.close();
       expect(changeStream.cursorStream).to.not.exist;
@@ -1646,7 +1648,7 @@ describe('Change Streams', function () {
         it('does not convert Longs to numbers', {
           metadata: { requires: { topology: '!single' } },
           test: async function () {
-            cs = collection.watch([], { promoteLongs: true });
+            cs = collection.watch([], { promoteLongs: true, useBigInt64: false });
 
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');
@@ -1665,7 +1667,7 @@ describe('Change Streams', function () {
         it('converts Long values to native numbers', {
           metadata: { requires: { topology: '!single' } },
           test: async function () {
-            cs = collection.watch([], { promoteLongs: false });
+            cs = collection.watch([], { promoteLongs: false, useBigInt64: false });
 
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');
@@ -1683,7 +1685,7 @@ describe('Change Streams', function () {
         it('defaults to true', {
           metadata: { requires: { topology: '!single' } },
           test: async function () {
-            cs = collection.watch([]);
+            cs = collection.watch([], { useBigInt64: false });
 
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');

@@ -334,7 +334,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} MSVS_VERSION=${MSVS_VERSION} NPM_OPTIONS=${NPM_OPTIONS}\
+          NODE_LTS_NAME=${NODE_LTS_NAME} NPM_OPTIONS=${NPM_OPTIONS}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
     - command: expansions.update
       params:
@@ -398,6 +398,8 @@ functions:
 
           export MONGODB_URI="${MONGODB_URI}"
 
+          export TEST_SOCKS5_CSFLE="${TEST_SOCKS5_CSFLE}"
+
           export SSL="${SSL}"
 
 
@@ -419,6 +421,7 @@ functions:
         script: |
           export PROJECT_DIRECTORY="$(pwd)"
           export KRB5_KEYTAB='${gssapi_auth_keytab_base64}'
+          export KRB5_NEW_KEYTAB='${gssapi_auth_new_keytab_base64}'
           export KRB5_PRINCIPAL='${gssapi_auth_principal}'
           export MONGODB_URI='${gssapi_auth_mongodb_uri}'
           export NODE_LTS_NAME='${NODE_LTS_NAME}'
@@ -1303,6 +1306,19 @@ tasks:
           TOPOLOGY: replica_set
       - func: bootstrap kms servers
       - func: run socks5 tests
+  - name: test-socks5-csfle
+    tags:
+      - socks5-csfle
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: bootstrap kms servers
+      - func: run socks5 tests
+        vars:
+          TEST_SOCKS5_CSFLE: 'true'
   - name: test-socks5-tls
     tags: []
     commands:
@@ -2132,7 +2148,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 67bec571c0c21f4db8a96b6bd61cb24dfc87a223
+          CSFLE_GIT_REF: 77b51c00ab4ff58916dd39f55657e1ecc0af281c
   - name: run-custom-csfle-tests-5.0-master
     tags:
       - run-custom-dependency-tests
@@ -2162,7 +2178,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 67bec571c0c21f4db8a96b6bd61cb24dfc87a223
+          CSFLE_GIT_REF: 77b51c00ab4ff58916dd39f55657e1ecc0af281c
   - name: run-custom-csfle-tests-rapid-master
     tags:
       - run-custom-dependency-tests
@@ -2192,7 +2208,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 67bec571c0c21f4db8a96b6bd61cb24dfc87a223
+          CSFLE_GIT_REF: 77b51c00ab4ff58916dd39f55657e1ecc0af281c
   - name: run-custom-csfle-tests-latest-master
     tags:
       - run-custom-dependency-tests
@@ -2661,6 +2677,7 @@ buildvariants:
       - test-auth-kerberos
       - test-auth-ldap
       - test-socks5
+      - test-socks5-csfle
       - test-socks5-tls
       - test-zstd-compression
       - test-snappy-compression
@@ -2709,6 +2726,7 @@ buildvariants:
       - test-auth-kerberos
       - test-auth-ldap
       - test-socks5
+      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -2752,8 +2770,10 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
+      - test-auth-kerberos
       - test-auth-ldap
       - test-socks5
+      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -2798,6 +2818,7 @@ buildvariants:
       - test-6.0-load-balanced
       - test-latest-load-balanced
       - test-auth-ldap
+      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -2809,7 +2830,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: fermium
-      MSVS_VERSION: 2019
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -2851,7 +2871,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: gallium
-      MSVS_VERSION: 2019
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -2891,7 +2910,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: hydrogen
-      MSVS_VERSION: 2019
     tasks:
       - test-latest-server
       - test-latest-replica_set
