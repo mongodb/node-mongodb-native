@@ -3,7 +3,6 @@ import { expect } from 'chai';
 
 import * as BSON from '../mongodb';
 import { BinMsg, MessageHeader } from '../mongodb';
-import { isBSONExtImported } from '../tools/utils';
 
 const msgHeader: MessageHeader = {
   length: 735,
@@ -42,13 +41,6 @@ const nKeyWithInvalidUtf8 =
 const msgBodyNKeyWithInvalidUtf8 = Buffer.from(nKeyWithInvalidUtf8, 'hex');
 
 describe('BinMsg BSON utf8 validation', () => {
-  beforeEach(function () {
-    if (isBSONExtImported()) {
-      if (this.currentTest) this.currentTest.skipReason = 'tests require driver to be using bson';
-      this.skip();
-    }
-  });
-
   it('bson correctly deserializes data with replacement characters for invalid utf8 in writeErrors object', () => {
     // this is a sanity check to make sure nothing unexpected is happening in the deserialize method itself
 
