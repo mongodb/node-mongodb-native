@@ -67,7 +67,6 @@ export * from '../src/explain';
 export * from '../src/gridfs/download';
 export * from '../src/gridfs/index';
 export * from '../src/gridfs/upload';
-export * from '../src/logger';
 export * from '../src/mongo_client';
 export * from '../src/mongo_logger';
 export * from '../src/mongo_types';
