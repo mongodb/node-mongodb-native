@@ -81,7 +81,6 @@ describe('When importing BSON', function () {
 });
 
 describe('MongoDB export', () => {
-  const mongodb = require('../../src');
   it('should include ObjectId', () =>
-    expect(mongodb).to.have.property('ObjectId').that.is.a('function'));
+    expect(BSON).to.have.property('ObjectId').that.is.a('function'));
 });

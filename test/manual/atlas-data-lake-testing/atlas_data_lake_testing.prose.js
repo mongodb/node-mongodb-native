@@ -1,5 +1,5 @@
 'use strict';
-const { MongoClient } = require('../../../src');
+const { MongoClient } = require('../../mongodb');
 
 // TODO(NODE-3880): These tests are not fully implemented per the spec
 describe('Atlas Data Lake - prose', function () {

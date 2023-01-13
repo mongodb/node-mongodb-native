@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { MongoClient } from '../../../src';
 import {
   CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_READY,
+  MongoClient,
   SERVER_HEARTBEAT_FAILED,
   SERVER_HEARTBEAT_SUCCEEDED
 } from '../../mongodb';

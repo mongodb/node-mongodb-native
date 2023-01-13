@@ -1,4 +1,3 @@
-import { FindCursor, MongoClient, ServerApiVersion } from '../../../src';
 import type {
   Document,
   ObjectId,
@@ -7,6 +6,7 @@ import type {
   TagSet,
   W
 } from '../../mongodb';
+import { FindCursor, MongoClient, ServerApiVersion } from '../../mongodb';
 import { TestConfiguration } from '../runner/config';
 import { UnifiedThread } from './entities';
 

@@ -16,7 +16,7 @@ function* walk(root) {
 }
 
 describe('importing mongodb driver', () => {
-  const sourceFiles = walk(path.resolve(__dirname, '../../../src'));
+  const sourceFiles = walk(path.resolve(__dirname, '../../mongodb'));
 
   for (const sourceFile of sourceFiles) {
     if (!sourceFile.endsWith('.ts')) {

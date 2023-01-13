@@ -6,7 +6,7 @@ import type {
   CommandStartedEvent,
   CommandSucceededEvent,
   MongoClient
-} from '../../../src';
+} from '../../mongodb';
 import { LEGACY_HELLO_COMMAND, MongoCompatibilityError, MongoServerError } from '../../mongodb';
 import type { TestConfiguration } from '../../tools/runner/config';
 import { setupDatabase } from '../shared';

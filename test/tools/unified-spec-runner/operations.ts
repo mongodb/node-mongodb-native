@@ -5,20 +5,18 @@ import { expect } from 'chai';
 import {
   AbstractCursor,
   Collection,
+  CommandStartedEvent,
   Db,
   Document,
   GridFSFile,
   MongoClient,
   ObjectId,
-  ServerType,
-  TopologyDescription,
-  TopologyType
-} from '../../../src';
-import {
-  CommandStartedEvent,
   ReadConcern,
   ReadPreference,
   SERVER_DESCRIPTION_CHANGED,
+  ServerType,
+  TopologyDescription,
+  TopologyType,
   WriteConcern
 } from '../../mongodb';
 import { getSymbolFrom, sleep } from '../../tools/utils';

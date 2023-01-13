@@ -9,7 +9,7 @@ const { getSymbolFrom } = require('../tools/utils');
 const { Long } = require('../mongodb');
 const { MongoRuntimeError } = require('../mongodb');
 const sinon = require('sinon');
-const { MongoClient } = require('../../src');
+const { MongoClient } = require('../mongodb');
 
 describe('Sessions - unit', function () {
   let client;
