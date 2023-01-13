@@ -2,6 +2,7 @@ import type { DeserializeOptions, SerializeOptions } from 'bson';
 
 export {
   Binary,
+  BSON,
   BSONRegExp,
   BSONSymbol,
   calculateObjectSize,
@@ -20,13 +21,6 @@ export {
   serialize,
   Timestamp
 } from 'bson';
-
-// TODO(NODE-4867): fix with bson v5
-/** @internal */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const BSON = require('bson');
-
-export { BSON };
 
 /**
  * BSON Serialization options.
