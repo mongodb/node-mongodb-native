@@ -2,7 +2,6 @@
 
 const { expect } = require('chai');
 const BSON = require('../mongodb');
-const { isBSONExtImported } = require('../tools/utils');
 
 describe('When importing BSON', function () {
   const types = [
@@ -47,37 +46,7 @@ describe('When importing BSON', function () {
     });
   }
 
-  describe('bson-ext', function () {
-    before(function () {
-      if (!isBSONExtImported()) {
-        this.skip();
-      }
-    });
-
-    it('should be imported if it exists', function () {
-      expect(BSON.deserialize.toString()).to.include('[native code]');
-      expect(BSON.serialize.toString()).to.include('[native code]');
-      expect(BSON.calculateObjectSize.toString()).to.include('[native code]');
-    });
-
-    testTypes();
-  });
-
-  describe('js-bson', function () {
-    before(function () {
-      if (isBSONExtImported()) {
-        this.skip();
-      }
-    });
-
-    it('should be imported by default', function () {
-      expect(BSON.deserialize.toString()).to.not.include('[native code]');
-      expect(BSON.serialize.toString()).to.not.include('[native code]');
-      expect(BSON.calculateObjectSize.toString()).to.not.include('[native code]');
-    });
-
-    testTypes();
-  });
+  testTypes();
 });
 
 describe('MongoDB export', () => {

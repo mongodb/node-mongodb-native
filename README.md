@@ -73,12 +73,13 @@ npm install -D @types/node
 
 ## Troubleshooting
 
-The MongoDB driver depends on several other packages. These are:
+The MongoDB driver can optionally be enhanced by the following feature packages:
 
-- [bson](https://github.com/mongodb/js-bson)
-- [bson-ext](https://github.com/mongodb-js/bson-ext)
-- [kerberos](https://github.com/mongodb-js/kerberos)
-- [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
+- [Zstd network compression](https://github.com/mongodb-js/zstd)
+- [Snappy network compression](https://github.com/Brooooooklyn/snappy)
+- [GSSAPI / SSPI / Kerberos authentication](https://github.com/mongodb-js/kerberos)
+- [AWS authentication](https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers)
+- [MongoDB field level and queryable encryption](https://github.com/mongodb/libmongocrypt#readme)
 
 Some of these packages include native C++ extensions. Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/native-extensions.md) if you run into issues.
 

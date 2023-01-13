@@ -191,3 +191,7 @@ await collection.insertMany([{ name: 'fido' }, { name: 'luna' }])
 
 The `keepGoing` option was a legacy name for setting `ordered` to `false` for bulk inserts.
 It was only supported by the legacy `collection.insert()` method which is now removed as noted above.
+
+### `bson-ext` support removed
+
+The `bson-ext` package will no longer automatically import and supplant the `bson` dependency.

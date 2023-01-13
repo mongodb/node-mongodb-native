@@ -507,13 +507,6 @@ export class UnifiedTestSuiteBuilder {
   }
 }
 
-/** Test whether the driver is using bson-ext */
-export function isBSONExtImported() {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const driverBSON = require('../mongodb');
-  return driverBSON.deserialize.toString().includes('[native code]');
-}
-
 export const byStrings = (a: any, b: any) => {
   const res = `${a}`.localeCompare(`${b}`);
   return res < 0 ? -1 : res > 0 ? 1 : 0;

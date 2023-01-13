@@ -832,21 +832,6 @@ functions:
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-lambda-aws-tests.sh
 
-  "run bson-ext test":
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: "src"
-        timeout_secs: 60
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          TEST_NPM_SCRIPT: ${TEST_NPM_SCRIPT}
-        binary: bash
-        args:
-          - '${PROJECT_DIRECTORY}/.evergreen/run-bson-ext-test.sh'
-
-
   "upload test results":
     # Upload the xunit-format test results.
     - command: attach.xunit_results
