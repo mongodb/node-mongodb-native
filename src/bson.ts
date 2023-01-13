@@ -22,6 +22,7 @@ export {
 } from 'bson';
 
 // TODO(NODE-4867): fix with bson v5
+/** @internal */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const BSON = require('bson');
 
