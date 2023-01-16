@@ -191,3 +191,17 @@ await collection.insertMany([{ name: 'fido' }, { name: 'luna' }])
 
 The `keepGoing` option was a legacy name for setting `ordered` to `false` for bulk inserts.
 It was only supported by the legacy `collection.insert()` method which is now removed as noted above.
+
+### `withSession` and `withTransaction` now return the result of the provided callback.
+
+These two methods previously returned `Promise<void>` but now users can control what the return value
+in the promise is:
+
+```ts
+const value = await client.withSession(async (session) => {
+  return session.withTransaction(async () => {
+    await collection.insertOne({ a: 1 });
+    return true;
+  });
+}); // value is the boolean true;
+```
