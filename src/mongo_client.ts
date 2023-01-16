@@ -273,7 +273,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
 }
 
 /** @public */
-export type WithSessionCallback = (session: ClientSession) => Promise<any>;
+export type WithSessionCallback<T = any> = (session: ClientSession) => Promise<T>;
 
 /** @internal */
 export interface MongoClientPrivate {
@@ -643,12 +643,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @param options - Optional settings for the command
    * @param callback - An callback to execute with an implicitly created session
    */
-  withSession(callback: WithSessionCallback): Promise<void>;
-  withSession(options: ClientSessionOptions, callback: WithSessionCallback): Promise<void>;
-  withSession(
-    optionsOrOperation?: ClientSessionOptions | WithSessionCallback,
-    callback?: WithSessionCallback
-  ): Promise<void> {
+  withSession<T>(callback: WithSessionCallback<T>): Promise<T>;
+  withSession<T>(options: ClientSessionOptions, callback: WithSessionCallback<T>): Promise<T>;
+  withSession<T>(
+    optionsOrOperation?: ClientSessionOptions | WithSessionCallback<T>,
+    callback?: WithSessionCallback<T>
+  ): Promise<T> {
     const options = {
       // Always define an owner
       owner: Symbol(),
@@ -666,8 +666,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const session = this.startSession(options);
 
     return maybeCallback(async () => {
+      let value;
       try {
-        await withSessionCallback(session);
+        value = await withSessionCallback(session);
       } finally {
         try {
           await session.endSession();
@@ -675,6 +676,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
           // We are not concerned with errors from endSession()
         }
       }
+      return value;
     }, null);
   }
 

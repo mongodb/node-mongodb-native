@@ -873,3 +873,25 @@ describe('MongoOptions', function () {
     });
   });
 });
+
+describe('MongoClient', function () {
+  describe('#withSession', function () {
+    const client = new MongoClient('mongodb://localhost:27017');
+
+    context('when the callback returns a value', function () {
+      it('returns the value in the promise', async function () {
+        const value = await client.withSession(async () => {
+          return 'test';
+        });
+        expect(value).to.equal('test');
+      });
+    });
+
+    context('when the callback does not return a value', function () {
+      it('does not return a value in the promise', async function () {
+        const value = await client.withSession(async () => {});
+        expect(value).to.equal(undefined);
+      });
+    });
+  });
+});

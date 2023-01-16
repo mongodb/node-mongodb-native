@@ -90,19 +90,19 @@ describe('Transactions', function () {
           expect(withTransactionResult).to.be.undefined;
         });
 
-        it('should return raw command when transaction is successfully committed', async () => {
+        it('should return callback return value when transaction is successfully committed', async () => {
           const session = client.startSession();
 
           const withTransactionResult = await session
             .withTransaction(async session => {
               await collection.insertOne({ a: 1 }, { session });
-              await collection.findOne({ a: 1 }, { session });
+              return await collection.findOne({ a: 1 }, { session });
             })
             .finally(async () => await session.endSession());
 
           expect(withTransactionResult).to.exist;
           expect(withTransactionResult).to.be.an('object');
-          expect(withTransactionResult).to.have.property('ok', 1);
+          expect(withTransactionResult).to.have.property('a', 1);
         });
 
         it('should throw when transaction is aborted due to an error', async () => {

@@ -32,6 +32,24 @@ describe('Sessions - unit', function () {
       });
     });
 
+    describe('#withTransaction', function () {
+      context('when the callback returns a value', function () {
+        it('returns the value in the promise', async function () {
+          const value = await session.withTransaction(async () => {
+            return 'test';
+          });
+          expect(value).to.equal('test');
+        });
+      });
+
+      context('when the callback does not return a value', function () {
+        it('does not return a value in the promise', async function () {
+          const value = await session.withTransaction(async () => {});
+          expect(value).to.equal(undefined);
+        });
+      });
+    });
+
     describe('advanceClusterTime()', () => {
       it('should throw an error if the input cluster time is not an object', function () {
         const invalidInputs = [undefined, null, 3, 'a'];

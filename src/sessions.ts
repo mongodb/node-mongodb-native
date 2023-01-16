@@ -61,7 +61,7 @@ export interface ClientSessionOptions {
 }
 
 /** @public */
-export type WithTransactionCallback<T = void> = (session: ClientSession) => Promise<T>;
+export type WithTransactionCallback<T = any> = (session: ClientSession) => Promise<T>;
 
 /** @public */
 export type ClientSessionEvents = {
@@ -470,10 +470,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param options - optional settings for the transaction
    * @returns A raw command response or undefined
    */
-  withTransaction<T = void>(
-    fn: WithTransactionCallback<T>,
-    options?: TransactionOptions
-  ): Promise<Document | undefined> {
+  withTransaction<T>(fn: WithTransactionCallback<T>, options?: TransactionOptions): Promise<T> {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }
@@ -615,12 +612,14 @@ function attemptTransaction<TSchema>(
   }
 
   return promise.then(
-    () => {
+    value => {
       if (userExplicitlyEndedTransaction(session)) {
-        return;
+        return value;
       }
 
-      return attemptTransactionCommit(session, startTime, fn, options);
+      return attemptTransactionCommit(session, startTime, fn, options).then(() => {
+        return value;
+      });
     },
     err => {
       function maybeRetryOrThrow(err: MongoError): Promise<any> {
