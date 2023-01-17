@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { deserialize, Document, serialize } from './bson';
+import type { Document } from './bson';
 import type { AWSCredentials } from './cmap/auth/mongodb_aws';
 import type { ProxyOptions } from './cmap/connection';
 import { MongoMissingDependencyError } from './error';
@@ -214,8 +214,6 @@ export interface AutoEncryptionTlsOptions {
 
 /** @public */
 export interface AutoEncryptionOptions {
-  /** @internal */
-  bson?: { serialize: typeof serialize; deserialize: typeof deserialize };
   /** @internal client for metadata lookups */
   metadataClient?: MongoClient;
   /** A `MongoClient` used to fetch keys from a key vault */

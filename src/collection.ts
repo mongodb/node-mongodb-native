@@ -86,7 +86,6 @@ import {
   Callback,
   checkCollectionName,
   DEFAULT_PK_FACTORY,
-  emitWarningOnce,
   MongoDBNamespace,
   normalizeHintField,
   resolveOptions
@@ -281,12 +280,6 @@ export class Collection<TSchema extends Document = Document> {
     if (typeof options === 'function') {
       callback = options;
       options = {};
-    }
-
-    // versions of mongodb-client-encryption before v1.2.6 pass in hardcoded { w: 'majority' }
-    // specifically to an insertOne call in createDataKey, so we want to support this only here
-    if (options && Reflect.get(options, 'w')) {
-      options.writeConcern = WriteConcern.fromOptions(Reflect.get(options, 'w'));
     }
 
     return executeOperation(
