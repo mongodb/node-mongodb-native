@@ -500,7 +500,8 @@ function makeOperationHandler(
 ): Callback {
   const session = options?.session;
   return function handleOperationResult(error, result) {
-    if (result != null) {
+    // We should not swallow an error if it is present.
+    if (error == null && result != null) {
       return callback(undefined, result);
     }
 

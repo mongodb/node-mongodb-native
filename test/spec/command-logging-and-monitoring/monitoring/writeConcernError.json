@@ -1,6 +1,15 @@
 {
-  "description": "insertOne",
-  "schemaVersion": "1.0",
+  "description": "writeConcernError",
+  "schemaVersion": "1.13",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.0",
+      "topologies": [
+        "replicaset"
+      ],
+      "serverless": "forbid"
+    }
+  ],
   "createEntities": [
     {
       "client": {
@@ -41,8 +50,32 @@
   ],
   "tests": [
     {
-      "description": "A successful insertOne",
+      "description": "A retryable write with write concern errors publishes success event",
       "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "writeConcernError": {
+                  "code": 91,
+                  "errorLabels": [
+                    "RetryableWriteError"
+                  ]
+                }
+              }
+            }
+          }
+        },
         {
           "name": "insertOne",
           "object": "collection",
@@ -78,44 +111,25 @@
               "commandSucceededEvent": {
                 "reply": {
                   "ok": 1,
-                  "n": 1
+                  "n": 1,
+                  "writeConcernError": {
+                    "code": 91,
+                    "errorLabels": [
+                      "RetryableWriteError"
+                    ]
+                  }
                 },
                 "commandName": "insert"
               }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "description": "A successful insertOne with write errors",
-      "operations": [
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "document": {
-              "_id": 1,
-              "x": 11
-            }
-          },
-          "expectError": {
-            "isClientError": false
-          }
-        }
-      ],
-      "expectEvents": [
-        {
-          "client": "client",
-          "events": [
+            },
             {
               "commandStartedEvent": {
                 "command": {
                   "insert": "test",
                   "documents": [
                     {
-                      "_id": 1,
-                      "x": 11
+                      "_id": 2,
+                      "x": 22
                     }
                   ],
                   "ordered": true
@@ -128,10 +142,7 @@
               "commandSucceededEvent": {
                 "reply": {
                   "ok": 1,
-                  "n": 0,
-                  "writeErrors": {
-                    "$$type": "array"
-                  }
+                  "n": 1
                 },
                 "commandName": "insert"
               }
