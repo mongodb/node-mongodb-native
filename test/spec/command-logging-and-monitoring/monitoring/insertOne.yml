@@ -75,3 +75,41 @@ tests:
                 # so those assertions are not present here.
                 writeErrors: { $$type: array }
               commandName: insert
+
+  - description: "A failed insertOne with write concern errors publishes success event"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ insert ]
+              writeConcernError:
+                code: 91 # ShutdownInProgress
+                errorLabels: [RetryableWriteError]
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 3, x: 33 }
+        expectError:
+          isClientError: false
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 3, x: 33 }
+                ordered: true
+              commandName: insert
+              databaseName: *databaseName
+          - commandSucceededEvent:
+              reply:
+                ok: 1
+                n: 1
+                writeConcernError: { code: 91, errorLabels: [ "RetryableWriteError" ] }
+              commandName: insert
