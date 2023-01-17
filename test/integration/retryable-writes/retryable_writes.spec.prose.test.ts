@@ -230,11 +230,6 @@ describe('Retryable Writes Spec Prose', () => {
     });
 
     /**
-     * **NOTE:** Node emits a command failed event for writeConcern errors, making the commandSucceeded part of this test inconsistent see (DRIVERS-2468).
-     * Second our event emitters are called synchronously but operations are asynchronous, we don't have a way to make sure a fail point is set before a retry
-     * is attempted, if the server allowed us to specify an ordered list of fail points this would be possible, alas we can use sinon. Sinon will set an error
-     * to be thrown on the first and second call to Server.command(), this should enter the retry logic for the second error thrown.
-     *
      * This test MUST be implemented by any driver that implements the Command Monitoring specification,
      * only run against replica sets as mongos does not propagate the NoWritesPerformed label to the drivers.
      * Additionally, this test requires drivers to set a fail point after an insertOne operation but before the subsequent retry.
@@ -297,6 +292,55 @@ describe('Retryable Writes Spec Prose', () => {
 
         expect(insertResult).to.be.instanceOf(MongoServerError);
         expect(insertResult).to.have.property('code', 91);
+      }
+    );
+
+    // This is an extra test that is a complimentary test to prose test #3. We basically want to
+    // test that in the case of a write concern error with ok: 1 in the response, that
+    // a command succeeded event is emitted but that the driver still treats it as a failure
+    // and retries. So for the success, we check the error code if exists, and since the retry
+    // must succeed, we fail if any command failed event occurs on insert.
+    it(
+      'emits a command succeeded event for write concern errors with ok: 1',
+      { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
+      async () => {
+        const successListener = event => {
+          if (event.commandName === 'insert' && event.reply.writeConcernError) {
+            expect(event.reply.writeConcernError.code).to.equal(91);
+          }
+        };
+
+        const failureListener = event => {
+          if (event.commandName === 'insert') {
+            expect.fail('the insert must be retried after the first suceeded event');
+          }
+        };
+
+        // Generate a write concern error to assert that we get a command
+        // suceeded event but the operation will retry because it was an
+        // actual write concern error.
+        client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            writeConcernError: {
+              code: 91,
+              errorLabels: ['RetryableWriteError']
+            },
+            failCommands: ['insert']
+          }
+        });
+
+        client.addListener('commandSucceeded', successListener);
+        client.addListener('commandFailed', failureListener);
+
+        const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+
+        // sinon.restore();
+        client.removeListener('commandSucceeded', successListener);
+        client.removeListener('commandFailed', failureListener);
+
+        expect(insertResult).to.deep.equal({ acknowledged: true, insertedId: 1 });
       }
     );
   });
