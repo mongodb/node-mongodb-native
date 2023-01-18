@@ -96,6 +96,11 @@ describe('Client Side Encryption (Legacy)', function () {
 
       return !isSkippedTest;
     }
+
+    if (description.includes('FLE2 Range')) {
+      return false;
+    }
+
     return true;
   });
 });

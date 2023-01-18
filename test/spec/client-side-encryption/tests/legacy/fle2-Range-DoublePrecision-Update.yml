@@ -1,0 +1,344 @@
+# Requires libmongocrypt 1.7.0.
+runOn:
+  - minServerVersion: "6.2.0"
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topology: [ "replicaset", "sharded", "load-balanced" ]
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+data: []
+encrypted_fields: &encrypted_fields {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedDoublePrecision', 'bsonType': 'double', 'queries': {'queryType': 'rangePreview', 'contention': {'$numberLong': '0'}, 'sparsity': {'$numberLong': '1'}, 'min': {'$numberDouble': '0.0'}, 'max': {'$numberDouble': '200.0'}, 'precision': {'$numberInt': '2'}}}]}
+key_vault_data: [ {'_id': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'keyMaterial': {'$binary': {'base64': 'sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1648914851981'}}, 'updateDate': {'$date': {'$numberLong': '1648914851981'}}, 'status': {'$numberInt': '0'}, 'masterKey': {'provider': 'local'}} ]
+tests:
+  - description: "FLE2 Range DoublePrecision. Update."
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
+    operations:
+      - name: insertOne
+        arguments:
+          document: &doc0 { _id: 0, encryptedDoublePrecision: { $numberDouble: "0" } }
+      - name: insertOne
+        arguments:
+          document: &doc1 { _id: 1, encryptedDoublePrecision: { $numberDouble: "1" } }
+      - name: updateOne
+        arguments:
+          filter: { encryptedDoublePrecision: { $gt: { $numberDouble: "0" } } }
+          update: { "$set": { "encryptedDoublePrecision": { $numberDouble: "2" } }}
+        result:
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+    expectations:
+      - command_started_event:
+          command:
+            listCollections: 1
+            filter:
+              name: *collection_name
+          command_name: listCollections
+      - command_started_event:
+          command:
+            find: datakeys
+            filter: {
+                  "$or": [
+                      {
+                          "_id": {
+                              "$in": [
+                                {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}
+                              ]
+                          }
+                      },
+                      {
+                          "keyAltNames": {
+                              "$in": []
+                          }
+                      }
+                  ]
+              }
+            $db: keyvault
+            readConcern: { level: "majority" }
+          command_name: find
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - &doc0_encrypted { "_id": 0, "encryptedDoublePrecision": { $$type: "binData" } }
+            ordered: true
+            encryptionInformation:
+              type: 1
+              schema:
+                default.default: *encrypted_fields
+          command_name: insert
+      - command_started_event:
+          command:
+            insert: *collection_name
+            documents:
+              - &doc1_encrypted { "_id": 1, "encryptedDoublePrecision": { $$type: "binData" } }
+            ordered: true
+            encryptionInformation:
+              type: 1
+              schema:
+                default.default: *encrypted_fields
+          command_name: insert
+      - command_started_event:
+          command_name: update
+          command:
+            {
+                "update": "default",
+                "ordered": true,
+                "updates": [
+                    {
+                        "q": {
+                            "encryptedDoublePrecision": {
+                              "$gt": {
+                                  "$binary": {
+                                      "base64": "CvoJAAADcGF5bG9hZADKCQAABGcAjgkAAAMwAH0AAAAFZAAgAAAAAHdJ2Vnb4MMzqVYVssjSdDy8XU4GVzMTfGifGETgQ2mYBXMAIAAAAAD7cFfKJGIXo6PjyeX2ria02CckW7dWFDoY/3FyBdm1NQVjACAAAAAAqZO+/+gRWlPaMOvuiXizSmBe7lp1VWg1vJ4UmW8o3bQAAzEAfQAAAAVkACAAAAAAlmvfDrZoydUet4eCVMq7z6a58Ea+1HLJOWxN5lNcrWEFcwAgAAAAAEBo5AWZyC41b9ayjWNQSL4iYEAIwR/JG+ssN8bdoK9RBWMAIAAAAAD4FTKJ6CTzKBAyAwZCLUoDEfnZTRZmhF1q/2hnDzmG9gADMgB9AAAABWQAIAAAAABbiLaoxAA6rinMJw1hC8ZUiq6UU1AQaPFn/py/Y06WuQVzACAAAAAAhtDasFkvYE7SCNu1je/hxdE9TJtAvvH3NtdEbKzNbCUFYwAgAAAAAHHy019aPatHTST+0wGsmukUcsQNQj6KpoS9b7iGeThAAAMzAH0AAAAFZAAgAAAAALORWwSr+tYNxcil2KIGSbNhTHvcPbdj+rLVQNx21S/KBXMAIAAAAAD6diZBkPEJ1cQy06LAxdbNK8Nlxbb44fH4Wk3Y3260nQVjACAAAAAAvUc1q7pyhjU0ilgmwiKkHIY3V4/LxO+Y2uT7eSpBOs8AAzQAfQAAAAVkACAAAAAAG5XMK96PjClNlUvg82j4pMY1YxsznZfj4uNweD394FoFcwAgAAAAAKHgQLdGJHkrfFg9nB93Ac+3VgBw6aU44MTkKIQ91dZoBWMAIAAAAACtbNc1DCoUUyzlkrYmJi4NlwOqLYmb6au4pDc8clXVXwADNQB9AAAABWQAIAAAAAA6M++b9I0YFemmWBAWAE3glu2Ah3Ta1FBxAQEIWS0toAVzACAAAAAANXYTqPf1Y6X3Ns6YQIX0C3FKCyWUo+Kk+fNcQvc0WSoFYwAgAAAAAAaqju6Dv8wqXxcsIbP67V1QGaD5kNTFofZ9Zuf1LGnKAAM2AH0AAAAFZAAgAAAAAKl8bV1riH/uyJ+X0HHd3+18k2cJl2dQFXCdoagutFcaBXMAIAAAAABm8F2Ew9f0VOABdcF+lP0Bi+zWvEUPniWgrxPq/Sx3uwVjACAAAAAAQd2pWVqlmmLg8m8xbs7yLewmR0Z6UQgXofbCsMHaGSoAAzcAfQAAAAVkACAAAAAAsYZD8JEP6kYsPncFnNZwJxhu4YtUTKPNcjHtv67H+rYFcwAgAAAAAI4LqZcRkvbs/2F62Flu0pixNcor4WmBD0DHGaf039wLBWMAIAAAAAAqzpfyBpr4Ano+nFWJyyTuIJelJgiRDnMHQqdeqV8JaAADOAB9AAAABWQAIAAAAAC0vdAi+dmoIXvZ5LqUqvyKV9/tHqSI2SWiSJO5pTnA2wVzACAAAAAAS2qvf9fvfVUH5WtsVxjxmskpGjYTQV34LwvQQw1y9wIFYwAgAAAAAFhNY4qwNntyA+GIoNHZsTkIUbPgy4TBlvNnTPjp4bMFAAM5AH0AAAAFZAAgAAAAAH31lb/srBcrOXkzddCwAnclsR5/3QijEVgECs2JjOWBBXMAIAAAAABg7+prDT73YcCvLE5QbuIrqGcjLc5pQD2Miq0d29yrxgVjACAAAAAAFKqAqXG/ktejFQ7fM2aobO2VmEvZLXnRaJH97Jy/sJYAAzEwAH0AAAAFZAAgAAAAAOK8brUuc2onBNDRtfYMR736dHj4dQqXod8JG7tAMTsDBXMAIAAAAAAW6SrGAL6Bx0s7ZlsYULFfOAiYIGhEWu6md3r+Rk40awVjACAAAAAAfsofSP7nQHv8ic8ZW0aNlWxplS46Z+mywPR4rQk+wcgAAzExAH0AAAAFZAAgAAAAAFdthRhe2Q8CvxGIhjTJZv0Lk97GkHciTPxZ/mckLoNaBXMAIAAAAAAqOxsAr23LOVB0DIHbPf9UDJJRFXY2YoKbjhRqw5psbQVjACAAAAAA7ty+Nif6KjS3v1zWKaHX9n4Zj3XC4ajuCduKNIYr3l8AAzEyAH0AAAAFZAAgAAAAAMWymwwbvIeMqmnKWWifUqoCxOsdpnonM2qdLPyjqJO/BXMAIAAAAAB6IDmmpUhBD2zpRj8/y/kmOSXcjuIU14sNh6GKSsg2uwVjACAAAAAABSWO0Ii+NGcsHZQ9MR5EjPXVKeXlI4FQ1pcxeKDiuooAAzEzAH0AAAAFZAAgAAAAAPcLmtq+V1e+MRlZ7NHq1+mrRVBQje5zj685ZvdsfKvSBXMAIAAAAABdHz/3w2k5km97QN9m7oLFYJaVJneNlMboIlz5yUASQAVjACAAAAAAD51NYesiO4Fo7w7iWBfqAFxEqkaDVctpvzZ28nT4SE8AAzE0AH0AAAAFZAAgAAAAAJaRYmo8zqI2BEUzdSwp4tVRpPmVWsfydkYN3UHh6TMuBXMAIAAAAAAeD6mDnQeLlbC9i0sVgE8+RH6y+e94OJQ0tJ0PvblVSgVjACAAAAAAKUhYSt4nvvUfbNgPJ2E79SciVZ0ZzbzoZ2nKr4ewNLsAAzE1AH0AAAAFZAAgAAAAAAZZ538coNPwyRjhEwr5P8Xw32oWOJF+R+nfCGgy2qO3BXMAIAAAAACOPLnJlKwGNPDBReRKnHfteq0wFb3ezhrc7BVXs8RUHwVjACAAAAAAzCICkPZAkfTiD0MUt155dIPgLJ4/e0qFTM2FR0U261YAAzE2AH0AAAAFZAAgAAAAAFH9l9GGA1I52atJV5jNUf1lx8jBjoEoVoME97v5GFJiBXMAIAAAAAC1qH3Kd78Dr9NGbw7y9D/XYBwv5h1LLO8la5OU7g8UkQVjACAAAAAAn27H0Mpwatgc1R/4nXSRjsG2PzB0ol5YR9f3mCb2y/0AAzE3AH0AAAAFZAAgAAAAADtbVEI2tdkrowEMdkacD2w0Y3T3Ofi7PH6HmA6sP0c/BXMAIAAAAADuBSROnZHA+NgUPH8d0LnWFiDsM2bY8bzjC1+elSsIygVjACAAAAAAMinHEu4wkbeOpdZbXQ94q5o5pIEubqXUDrTRYOGmJC0AAzE4AH0AAAAFZAAgAAAAAAh3WpeMVlikPFYj9hLj+fmIqVt6omCSF75W3TPExyWpBXMAIAAAAAAsQkRmwqeVj2gGE03orb6PtrIzDt6dDU3hgSQi8E2wKgVjACAAAAAAvlZo8Qj3eAdxzZxN5sHKhxi+a9Npj7cZC5+pE6qrOawAAAVlACAAAAAA65pz95EthqQpfoHS9nWvdCh05AV+OokP7GUaI+7j8+wSY20AAAAAAAAAAAAAEHBheWxvYWRJZAAAAAAAEGZpcnN0T3BlcmF0b3IAAQAAAAA=",
+                                      "subType": "06"
+                                  }
+                              }
+                            }
+                        },
+                        "u": {
+                            "$set": {
+                                "encryptedDoublePrecision": { $$type: "binData" }
+                            }
+                        }
+                    }
+                ],
+                "encryptionInformation": {
+                    "type": 1,
+                    "schema": {
+                        "default.default": *encrypted_fields
+                    },
+                    "deleteTokens": {
+                        "default.default": {
+                            "encryptedDoublePrecision": {
+                                "e": {
+                                    "$binary": {
+                                        "base64": "65pz95EthqQpfoHS9nWvdCh05AV+OokP7GUaI+7j8+w=",
+                                        "subType": "00"
+                                    }
+                                },
+                                "o": {
+                                    "$binary": {
+                                        "base64": "noN+05JsuO1oDg59yypIGj45i+eFH6HOTXOPpeZ//Mk=",
+                                        "subType": "00"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "$db": "default"
+            }
+
+    outcome:
+      collection:
+        # Outcome is checked using a separate MongoClient without auto encryption.
+        data:
+        -
+          {
+              "_id": 0,
+              "encryptedDoublePrecision": { $$type: "binData" },
+              "__safeContent__": [
+                  {
+                      "$binary": {
+                          "base64": "5nRutVIyq7URVOVtbE4vM01APSIajAVnsShMwjBlzkM=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "Dri0CXmL78L2DOgk9w0DwxHOMGMzih7m6l59vgy+WWo=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "x7GR49EN0t3WXQDihkrbonK7qNIBYC87tpL/XEUyIYc=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "JfYUqWF+OoGjiYkRI4L5iPlF+T1Eleul7Fki22jp4Qc=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "q1RyGfIgsaQHoZFRw+DD28V26rN5hweApPLwExncvT8=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "L2PFeKGvLS6C+DLudR6fGlBq3ERPvjWvRyNRIA2HVb0=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "CWxaNqL3iP1yCixDkcmf9bmW3E5VeN8TJkg1jJe528s=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "+vC6araOEo+fpW7PSIP40/EnzBCj1d2N10Jr3rrXJJM=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "6SV63Mf51Z6A6p2X3rCnJKCu6ku3Oeb45mBYbz+IoAo=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "RjBYT2h3ZAoHxhf8DU6/dFbDkEBZp0IxREcsRTu2MXs=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "b7d8mRzD1kI1tdc7uNL+YAUonJ6pODLsRLkArfEKSkM=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "Xg8C1/A0KJaXOw4i+26Rv03/CydaaunOzXh0CIT+gn8=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "UoKUDw2wJYToUCcFaIs03YQSTksYR0MIOTJllwODqKc=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "c/5cwAT0C5jber2xlJnWD3a5tVDy0nRtr5HG02hoFOY=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "wSUrRXavAGaajNeqC5mEUH1K67oYl5Wy9RNIzKjwLAM=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "6vrp4wWDtHEgHWR99I70WVDzevg1Fk/Pw5U8gUDa0OU=",
+                          "subType": "00"
+                      }
+                  }
+              ]
+          }
+        -
+          {
+              "_id": 1,
+              "encryptedDoublePrecision": { $$type: "binData" },
+              "__safeContent__": [
+                  {
+                      "$binary": {
+                          "base64": "DLCAJs+W2PL2DV5YChCL6dYrQNr+j4p3L7xhVaub4ic=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "V6knyt7Zq2CG3++l75UtBx2m32iGAPjHiAe439Bf02w=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "F08nMDWDZc+DbWM7XCEJNNCEYyinRmrvGP7EWhmp4is=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "cXH4688amcDc8kZOJq4UP8cE3R58Zl7e+Qo/1jyspps=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "uURBxvTp3FBCVkd+LPqyuY7d6rMW6SGIJQEPY/wtkZI=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "jG3hax1L3RBp9t38vUt53FsBxgr/+Si/vVISpAylYpE=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "kwtIW8MhH9Ky5xNjBx8gFA/SHh2YVphie7g5FGBzals=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "FHflwFuEMu4xX0ZApHi+pdlBH+oevAtXckCUb5Wv0xU=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "0OKSXELxPP85SBVwDGf3LtMEQCJ8TTkFUl/+6jlkdb0=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "25j9sQXZCihCmHKvTHgaBsAVZFcGPn7JjHdrCGlwyyw=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "uEw0lpQtBppR3vqV9j9+NQRSBF1BzZukb8c9IhyWvxc=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "zVhZ7Q59O087ji49oMJvBIgeir2oqvUpnh4p53GcTow=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "dowrzKs+qJhRMZyKDbhjXbuX43FbmUKOaw9I8YlOZDw=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "ep5B6cska6THLIF7Mn3tn3RvV9EiwLSt0eZM/CLRUDc=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "URNp/YmmDh5wIZUfAzzgPyJeMNiVx9PMsz52DZRujGY=",
+                          "subType": "00"
+                      }
+                  },
+                  {
+                      "$binary": {
+                          "base64": "wlM4IAQhhKQEzoVqS8b1Ddd50GB95OFb9LnzOwyjCP4=",
+                          "subType": "00"
+                      }
+                  }
+              ]
+          }
