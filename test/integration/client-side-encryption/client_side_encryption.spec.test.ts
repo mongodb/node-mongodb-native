@@ -75,7 +75,7 @@ describe('Client Side Encryption (Legacy)', function () {
   const testSuites = gatherTestSuites(
     path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),
     testContext
-  );
+  ).filter(({ name }) => !name.includes('fle2-Range'));
 
   installNodeDNSWorkaroundHooks();
   after(() => testContext.teardown());
@@ -95,10 +95,6 @@ describe('Client Side Encryption (Legacy)', function () {
       ].includes(description);
 
       return !isSkippedTest;
-    }
-
-    if (description.includes('FLE2 Range')) {
-      return false;
     }
 
     return true;
