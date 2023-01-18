@@ -3,12 +3,12 @@ import { expectAssignable, expectError, expectNotAssignable, expectNotType } fro
 import type {
   AddToSetOperators,
   ArrayOperator,
-  StrictUpdateFilter,
   MatchKeysAndValues,
   PullAllOperator,
   PullOperator,
   PushOperator,
   SetFields,
+  StrictUpdateFilter,
   UpdateFilter
 } from '../../../mongodb';
 import {
@@ -106,9 +106,7 @@ interface TestModel {
 }
 const collectionTType = db.collection<TestModel>('test.update');
 
-function buildUpdateFilter(
-  updateQuery: UpdateFilter<TestModel>
-): StrictUpdateFilter<TestModel> {
+function buildUpdateFilter(updateQuery: UpdateFilter<TestModel>): StrictUpdateFilter<TestModel> {
   return updateQuery;
 }
 
