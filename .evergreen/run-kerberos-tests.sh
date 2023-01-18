@@ -8,6 +8,7 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 mkdir -p "$(pwd)/.evergreen"
 touch "$(pwd)/.evergreen/krb5.conf.empty"
 export KRB5_CONFIG="$(pwd)/.evergreen/krb5.conf.empty"
+export KRB5_TRACE="/dev/stderr"
 echo "Writing keytab"
 # DON'T PRINT KEYTAB TO STDOUT
 set +o verbose
