@@ -71,7 +71,7 @@ describe('Client Side Encryption (Legacy)', function () {
   const testSuites = gatherTestSuites(
     path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),
     testContext
-  );
+  ).filter(({ name }) => !name.includes('fle2-Range'));
 
   installNode18DNSHooks();
 
@@ -93,6 +93,7 @@ describe('Client Side Encryption (Legacy)', function () {
 
       return !isSkippedTest;
     }
+
     return true;
   });
 });

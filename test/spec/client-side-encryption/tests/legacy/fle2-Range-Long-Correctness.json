@@ -1,0 +1,1644 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "6.2.0",
+      "topology": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "database_name": "default",
+  "collection_name": "default",
+  "data": [],
+  "encrypted_fields": {
+    "escCollection": "enxcol_.default.esc",
+    "eccCollection": "enxcol_.default.ecc",
+    "ecocCollection": "enxcol_.default.ecoc",
+    "fields": [
+      {
+        "keyId": {
+          "$binary": {
+            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+            "subType": "04"
+          }
+        },
+        "path": "encryptedLong",
+        "bsonType": "long",
+        "queries": {
+          "queryType": "rangePreview",
+          "contention": {
+            "$numberLong": "0"
+          },
+          "sparsity": {
+            "$numberLong": "1"
+          },
+          "min": {
+            "$numberLong": "0"
+          },
+          "max": {
+            "$numberLong": "200"
+          }
+        }
+      }
+    ]
+  },
+  "key_vault_data": [
+    {
+      "_id": {
+        "$binary": {
+          "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+          "subType": "04"
+        }
+      },
+      "keyMaterial": {
+        "$binary": {
+          "base64": "sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==",
+          "subType": "00"
+        }
+      },
+      "creationDate": {
+        "$date": {
+          "$numberLong": "1648914851981"
+        }
+      },
+      "updateDate": {
+        "$date": {
+          "$numberLong": "1648914851981"
+        }
+      },
+      "status": {
+        "$numberInt": "0"
+      },
+      "masterKey": {
+        "provider": "local"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "Find with $gt",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$gt": {
+                  "$numberLong": "0"
+                }
+              }
+            }
+          },
+          "result": [
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find with $gte",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$gte": {
+                  "$numberLong": "0"
+                }
+              }
+            },
+            "sort": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            },
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find with $gt with no results",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$gt": {
+                  "$numberLong": "1"
+                }
+              }
+            }
+          },
+          "result": []
+        }
+      ]
+    },
+    {
+      "description": "Find with $lt",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$lt": {
+                  "$numberLong": "1"
+                }
+              }
+            }
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find with $lte",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$lte": {
+                  "$numberLong": "1"
+                }
+              }
+            },
+            "sort": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            },
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find with $lt below min",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$lt": {
+                  "$numberLong": "0"
+                }
+              }
+            }
+          },
+          "result": {
+            "errorContains": "must be greater than the range minimum"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Find with $gt above max",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$gt": {
+                  "$numberLong": "200"
+                }
+              }
+            }
+          },
+          "result": {
+            "errorContains": "must be less than the range maximum"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Find with $gt and $lt",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$gt": {
+                  "$numberLong": "0"
+                },
+                "$lt": {
+                  "$numberLong": "2"
+                }
+              }
+            }
+          },
+          "result": [
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find with equality",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          },
+          "result": [
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find with full range",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$gte": {
+                  "$numberLong": "0"
+                },
+                "$lte": {
+                  "$numberLong": "200"
+                }
+              }
+            },
+            "sort": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            },
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find with $in",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$in": [
+                  {
+                    "$numberLong": "0"
+                  }
+                ]
+              }
+            }
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Insert out of range",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "-1"
+              }
+            }
+          },
+          "result": {
+            "errorContains": "value must be greater than or equal to the minimum value"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Insert min and max",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 200,
+              "encryptedLong": {
+                "$numberLong": "200"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {},
+            "sort": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            },
+            {
+              "_id": 200,
+              "encryptedLong": {
+                "$numberLong": "200"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $gte",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$gte": {
+                      "$numberLong": "0"
+                    }
+                  }
+                }
+              },
+              {
+                "$sort": {
+                  "_id": 1
+                }
+              }
+            ]
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            },
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $gt with no results",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$gt": {
+                      "$numberLong": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "result": []
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $lt",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$lt": {
+                      "$numberLong": "1"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $lte",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$lte": {
+                      "$numberLong": "1"
+                    }
+                  }
+                }
+              },
+              {
+                "$sort": {
+                  "_id": 1
+                }
+              }
+            ]
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            },
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $lt below min",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$lt": {
+                      "$numberLong": "0"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "result": {
+            "errorContains": "must be greater than the range minimum"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $gt above max",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$gt": {
+                      "$numberLong": "200"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "result": {
+            "errorContains": "must be less than the range maximum"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $gt and $lt",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$gt": {
+                      "$numberLong": "0"
+                    },
+                    "$lt": {
+                      "$numberLong": "2"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "result": [
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with equality",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$numberLong": "0"
+                  }
+                }
+              }
+            ]
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          ]
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$numberLong": "1"
+                  }
+                }
+              }
+            ]
+          },
+          "result": [
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with full range",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$gte": {
+                      "$numberLong": "0"
+                    },
+                    "$lte": {
+                      "$numberLong": "200"
+                    }
+                  }
+                }
+              },
+              {
+                "$sort": {
+                  "_id": 1
+                }
+              }
+            ]
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            },
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Aggregate with $in",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$match": {
+                  "encryptedLong": {
+                    "$in": [
+                      {
+                        "$numberLong": "0"
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "result": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Wrong type: Insert Double",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberDouble": "0"
+              }
+            }
+          },
+          "result": {
+            "errorContains": "cannot encrypt element"
+          }
+        }
+      ]
+    },
+    {
+      "description": "Wrong type: Find Double",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$gte": {
+                  "$numberDouble": "0"
+                }
+              }
+            }
+          },
+          "result": {
+            "errorContains": "field type is not supported"
+          }
+        }
+      ]
+    }
+  ]
+}
