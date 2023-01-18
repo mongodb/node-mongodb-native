@@ -191,3 +191,21 @@ await collection.insertMany([{ name: 'fido' }, { name: 'luna' }])
 
 The `keepGoing` option was a legacy name for setting `ordered` to `false` for bulk inserts.
 It was only supported by the legacy `collection.insert()` method which is now removed as noted above.
+
+### `BulkWriteResult` no longer contains a publicly enumerable `result` property.
+
+To access the raw result, please use `bulkWriteResult.getRawResponse()`. 
+
+### `BulkWriteResult` now contains individual ressult properties.
+
+These can be accessed via:
+
+```ts
+  bulkWriteResult.insertedCount;
+  bulkWriteResult.matchedCount;
+  bulkWriteResult.modifiedCount;
+  bulkWriteResult.deletedCount;
+  bulkWriteResult.upsertedCount;
+  bulkWriteResult.upsertedIds;
+  bulkWriteResult.insertedIds;
+```

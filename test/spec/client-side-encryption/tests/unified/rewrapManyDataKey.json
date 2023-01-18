@@ -321,7 +321,10 @@
               "modifiedCount": 4,
               "deletedCount": 0,
               "upsertedCount": 0,
-              "upsertedIds": {}
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
             }
           }
         }
@@ -503,7 +506,10 @@
               "modifiedCount": 4,
               "deletedCount": 0,
               "upsertedCount": 0,
-              "upsertedIds": {}
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
             }
           }
         }
@@ -687,7 +693,10 @@
               "modifiedCount": 4,
               "deletedCount": 0,
               "upsertedCount": 0,
-              "upsertedIds": {}
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
             }
           }
         }
@@ -873,7 +882,10 @@
               "modifiedCount": 4,
               "deletedCount": 0,
               "upsertedCount": 0,
-              "upsertedIds": {}
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
             }
           }
         }
@@ -1055,7 +1067,10 @@
               "modifiedCount": 4,
               "deletedCount": 0,
               "upsertedCount": 0,
-              "upsertedIds": {}
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
             }
           }
         }
@@ -1218,7 +1233,10 @@
               "modifiedCount": 5,
               "deletedCount": 0,
               "upsertedCount": 0,
-              "upsertedIds": {}
+              "upsertedIds": {},
+              "insertedIds": {
+                "$$unsetOrMatches": {}
+              }
             }
           }
         },
