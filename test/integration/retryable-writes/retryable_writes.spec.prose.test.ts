@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { once } from 'node:events';
+
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
@@ -304,22 +306,10 @@ describe('Retryable Writes Spec Prose', () => {
       'emits a command succeeded event for write concern errors with ok: 1',
       { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
       async () => {
-        const successListener = event => {
-          if (event.commandName === 'insert' && event.reply.writeConcernError) {
-            expect(event.reply.writeConcernError.code).to.equal(91);
-          }
-        };
-
-        const failureListener = event => {
-          if (event.commandName === 'insert') {
-            expect.fail('the insert must be retried after the first suceeded event');
-          }
-        };
-
         // Generate a write concern error to assert that we get a command
         // suceeded event but the operation will retry because it was an
         // actual write concern error.
-        client.db('admin').command({
+        await client.db('admin').command({
           configureFailPoint: 'failCommand',
           mode: { times: 1 },
           data: {
@@ -331,15 +321,21 @@ describe('Retryable Writes Spec Prose', () => {
           }
         });
 
-        client.addListener('commandSucceeded', successListener);
-        client.addListener('commandFailed', failureListener);
+        const willBeCommandSucceeded = once(client, 'commandSucceeded').catch(error => error);
+        const willBeCommandFailed = once(client, 'commandFailed', {
+          signal: AbortSignal.timeout(1000)
+        }).catch(error => error);
 
         const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
 
-        // sinon.restore();
-        client.removeListener('commandSucceeded', successListener);
-        client.removeListener('commandFailed', failureListener);
-
+        const [commandSucceeded] = await willBeCommandSucceeded;
+        expect(commandSucceeded.commandName).to.equal('insert');
+        expect(commandSucceeded.reply).to.have.nested.property('writeConcernError.code', 91);
+        const noCommandFailedEvent = await willBeCommandFailed;
+        expect(
+          noCommandFailedEvent.message,
+          'expected timeout, since no failure event should emit'
+        ).to.include('operation was aborted');
         expect(insertResult).to.deep.equal({ acknowledged: true, insertedId: 1 });
       }
     );
