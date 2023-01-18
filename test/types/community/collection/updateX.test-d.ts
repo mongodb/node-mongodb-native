@@ -3,7 +3,7 @@ import { expectAssignable, expectError, expectNotAssignable, expectNotType } fro
 import type {
   AddToSetOperators,
   ArrayOperator,
-  DotNotationUpdateFilter,
+  StrictUpdateFilter,
   MatchKeysAndValues,
   PullAllOperator,
   PullOperator,
@@ -108,7 +108,7 @@ const collectionTType = db.collection<TestModel>('test.update');
 
 function buildUpdateFilter(
   updateQuery: UpdateFilter<TestModel>
-): DotNotationUpdateFilter<TestModel> {
+): StrictUpdateFilter<TestModel> {
   return updateQuery;
 }
 
@@ -217,10 +217,10 @@ expectAssignable<UpdateFilter<TestModel>>({ $set: { 'subInterfaceField.nestedObj
 expectAssignable<UpdateFilter<TestModel>>({
   $set: { 'subInterfaceField.nestedObject': { a: '1', b: '2' } }
 });
-expectError<DotNotationUpdateFilter<TestModel>>({
+expectError<StrictUpdateFilter<TestModel>>({
   $set: { 'subInterfaceField.nestedObject': { a: '1' } }
 });
-expectError<DotNotationUpdateFilter<TestModel>>({
+expectError<StrictUpdateFilter<TestModel>>({
   $set: { 'subInterfaceField.nestedObject': { a: 1, b: '2' } }
 });
 

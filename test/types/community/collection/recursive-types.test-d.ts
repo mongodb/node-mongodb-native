@@ -2,8 +2,8 @@ import { expectAssignable, expectError, expectNotAssignable, expectNotType } fro
 
 import type {
   Collection,
-  DotNotationFilter,
-  DotNotationUpdateFilter,
+  StrictFilter,
+  StrictUpdateFilter,
   UpdateFilter
 } from '../../../../src';
 
@@ -20,7 +20,7 @@ interface Book {
   author: Author;
 }
 
-expectAssignable<DotNotationFilter<Author>>({
+expectAssignable<StrictFilter<Author>>({
   bestBook: {
     title: 'book title',
     author: {
@@ -45,41 +45,41 @@ expectNotType<UpdateFilter<Author>>({
 
 //////////// Filter
 // Depth of 1 has type checking
-expectNotAssignable<DotNotationFilter<Author>>({
+expectNotAssignable<StrictFilter<Author>>({
   'bestBook.title': 23
 });
 // Depth of 2 has type checking
-expectNotAssignable<DotNotationFilter<Author>>({
+expectNotAssignable<StrictFilter<Author>>({
   'bestBook.author.name': 23
 });
 // Depth of 3 has type checking
-expectNotAssignable<DotNotationFilter<Author>>({
+expectNotAssignable<StrictFilter<Author>>({
   'bestBook.author.bestBook.title': 23
 });
 // Depth of 4 has type checking
-expectNotAssignable<DotNotationFilter<Author>>({
+expectNotAssignable<StrictFilter<Author>>({
   'bestBook.author.bestBook.author.name': 23
 });
 // Depth of 5 has type checking
-expectNotAssignable<DotNotationFilter<Author>>({
+expectNotAssignable<StrictFilter<Author>>({
   'bestBook.author.bestBook.author.bestBook.title': 23
 });
 // Depth of 6 has type checking
-expectNotAssignable<DotNotationFilter<Author>>({
+expectNotAssignable<StrictFilter<Author>>({
   'bestBook.author.bestBook.author.bestBook.author.name': 23
 });
 // Depth of 7 has type checking
-expectNotAssignable<DotNotationFilter<Author>>({
+expectNotAssignable<StrictFilter<Author>>({
   'bestBook.author.bestBook.author.bestBook.author.bestBook.title': 23
 });
 // Depth of 8 does **not** have type checking
-expectAssignable<DotNotationFilter<Author>>({
+expectAssignable<StrictFilter<Author>>({
   'bestBook.author.bestBook.author.bestBook.author.bestBook.author.name': 23
 });
 
 //////////// UpdateFilter
 // Depth of 1 has type checking
-expectNotAssignable<DotNotationUpdateFilter<Author>>({
+expectNotAssignable<StrictUpdateFilter<Author>>({
   $set: {
     'bestBook.title': 23
   }
@@ -286,12 +286,12 @@ type D = {
   a: A;
 };
 
-expectAssignable<DotNotationFilter<A>>({
+expectAssignable<StrictFilter<A>>({
   'b.c.d.a.b.c.d.a.b.name': 'a'
 });
 
 // Beyond the depth supported, there is no type checking
-expectAssignable<DotNotationFilter<A>>({
+expectAssignable<StrictFilter<A>>({
   'b.c.d.a.b.c.d.a.b.c.name': 3
 });
 

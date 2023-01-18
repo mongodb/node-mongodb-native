@@ -530,7 +530,7 @@ export type NestedPathsOfType<TSchema, Type> = KeysOfAType<
  * @public
  * @experimental
  */
-export type DotNotationFilter<TSchema> =
+export type StrictFilter<TSchema> =
   | Partial<TSchema>
   | ({
       [Property in Join<NestedPaths<WithId<TSchema>, []>, '.'>]?: Condition<
@@ -542,19 +542,19 @@ export type DotNotationFilter<TSchema> =
  * @public
  * @experimental
  */
-export type DotNotationUpdateFilter<TSchema> = {
+export type StrictUpdateFilter<TSchema> = {
   $currentDate?: OnlyFieldsOfType<
     TSchema,
     Date | Timestamp,
     true | { $type: 'date' | 'timestamp' }
   >;
   $inc?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
-  $min?: DotNotationMatchKeysAndValues<TSchema>;
-  $max?: DotNotationMatchKeysAndValues<TSchema>;
+  $min?: StrictMatchKeysAndValues<TSchema>;
+  $max?: StrictMatchKeysAndValues<TSchema>;
   $mul?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
   $rename?: Record<string, string>;
-  $set?: DotNotationMatchKeysAndValues<TSchema>;
-  $setOnInsert?: DotNotationMatchKeysAndValues<TSchema>;
+  $set?: StrictMatchKeysAndValues<TSchema>;
+  $setOnInsert?: StrictMatchKeysAndValues<TSchema>;
   $unset?: OnlyFieldsOfType<TSchema, any, '' | true | 1>;
   $addToSet?: SetFields<TSchema>;
   $pop?: OnlyFieldsOfType<TSchema, ReadonlyArray<any>, 1 | -1>;
@@ -568,8 +568,11 @@ export type DotNotationUpdateFilter<TSchema> = {
   >;
 } & Document;
 
-/** @public */
-export type DotNotationMatchKeysAndValues<TSchema> = Readonly<
+/**
+ * @public
+ * @experimental
+ */
+export type StrictMatchKeysAndValues<TSchema> = Readonly<
   {
     [Property in Join<NestedPaths<TSchema, []>, '.'>]?: PropertyType<TSchema, Property>;
   } & {
