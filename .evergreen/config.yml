@@ -2768,6 +2768,7 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
+      - test-auth-kerberos
       - test-auth-ldap
       - test-socks5
       - test-socks5-csfle
@@ -2814,6 +2815,7 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
+      - test-auth-kerberos
       - test-auth-ldap
       - test-socks5-csfle
       - test-socks5-tls
