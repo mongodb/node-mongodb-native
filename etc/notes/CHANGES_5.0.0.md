@@ -18,7 +18,7 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ### Dot Notation Typescript Support Removed By Default
 
-**NOTE** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB still work the same. 
+**NOTE** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same. 
 
 Version 4.3.0 introduced Typescript support for dot notation in filter predicates.  For example:
 
@@ -34,15 +34,17 @@ declare const collection: Collection<Schema>;
 collection.find({ 'user.name': 4 })
 ```
 
-This change caused many problems for users, including slow compilation times and compile errors for
-valid dot notation queries.
+This change caused a number of problems for users, including slow compilation times and compile errors for
+valid dot notation queries. While we have tried to mitigate this issue as much as possible
+in v4, ultimately we do not believe that this feature is fully production ready for all use cases.
 
 Driver 5.0 removes type checking on filter predicates.  The preceding example will compile with
 driver v5.
 
 #### Dot Notation Helper Types Exported
 
-Although we removed support for type checking on dot notation filters by default, we now export these types.
+Although we removed support for type checking on dot notation filters by default, we have preserved the
+corresponding types in an experimental capacity.
 These helper types can be used for type checking.  We export the `StrictUpdateFilter` and the `StrictFilter`
 types for type safety in updates and finds.
 
@@ -61,7 +63,7 @@ const filterPredicate: StrictFilter<Schema> = { 'user.name': 4 };
 collection.find(filterPredicate);
 ```
 
-**NOTE** These types are also now marked experimental and can be changed at any time.
+**NOTE** As an experimental feature, these types can change at any time and are not recommended for production settings.
 
 ### `Collection.mapReduce()` helper removed
 
