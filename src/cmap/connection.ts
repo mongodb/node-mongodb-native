@@ -681,7 +681,7 @@ function write(
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       // Command monitoring spec states that if ok is 1, then we must always emit
-      // a command suceeded event, even if there's and error. Write concern errors
+      // a command suceeded event, even if there's an error. Write concern errors
       // will have an ok: 1 in their reply.
       if (err && reply?.ok !== 1) {
         conn.emit(
