@@ -192,6 +192,7 @@ describe('Deprecation Warnings', function () {
     });
   });
 
+  // TODO(NODE-4817): Do we need these tests?
   describe('Deprecation Warnings - functional', function () {
     beforeEach(function () {
       this.sinon.stub(console, 'error');

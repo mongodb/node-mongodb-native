@@ -28,6 +28,9 @@ export function ensureCalledWith(stub: any, args: any[]) {
   args.forEach((m: any) => expect(stub).to.have.been.calledWith(m));
 }
 
+// TODO(NODE-4817): Dependent on whehter or not we need the tests that use these in 
+// test/unit/assorted/deprecate_warning_test.js, we may be able to delete these classes
+
 // creation of class without a logger
 export function ClassWithoutLogger() {
   // empty function for class
