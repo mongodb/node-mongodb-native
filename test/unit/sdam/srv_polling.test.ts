@@ -13,7 +13,6 @@ import {
   TopologyType
 } from '../../mongodb';
 import * as sdamEvents from '../../mongodb';
-import { sleep } from '../../tools/utils';
 
 describe('Mongos SRV Polling', function () {
   const SRV_HOST = 'darmok.tanagra.com';
@@ -87,29 +86,6 @@ describe('Mongos SRV Polling', function () {
         expect(poller.schedule).to.have.been.calledOnce;
         expect(poller).to.have.property('haMode', true);
       });
-
-      it.skip('should do something if dns API breaks', async function () {
-        const poller = new SrvPoller({
-          srvHost: SRV_HOST,
-          heartbeatFrequencyMS: 100
-        });
-
-        // set haMode to make the poller use the 100ms heartbeat, otherwise this test would take 60 secs
-        poller.haMode = true;
-
-        // @ts-expect-error: Testing what happens if node breaks DNS API
-        sinon.stub(dns.promises, 'resolveSrv').resolves(null);
-
-        const loggerError = sinon.stub(poller.logger, 'error').returns();
-
-        poller.schedule();
-        await sleep(130);
-        clearTimeout(poller._timeout);
-
-        expect(loggerError).to.have.been.calledOnceWith(
-          sinon.match(/Unexpected MongoRuntimeError/)
-        );
-      }).skipReason = 'TODO(NODE-4817): determine whether or not to keep this here';
     });
 
     describe('poll', function () {

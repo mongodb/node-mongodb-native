@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
-import { deprecateOptions, DeprecateOptionsConfig, Document, OP_MSG } from '../mongodb';
+import { Document, OP_MSG } from '../mongodb';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   CollectionData,
@@ -17,45 +17,9 @@ import {
   UnifiedSuite
 } from './unified-spec-runner/schema';
 
-export function makeTestFunction(config: DeprecateOptionsConfig) {
-  const fn = (options: any) => {
-    if (options) options = null;
-  };
-  return deprecateOptions(config, fn);
-}
-
 export function ensureCalledWith(stub: any, args: any[]) {
   args.forEach((m: any) => expect(stub).to.have.been.calledWith(m));
 }
-
-// TODO(NODE-4817): Dependent on whehter or not we need the tests that use these in 
-// test/unit/assorted/deprecate_warning_test.js, we may be able to delete these classes
-
-// creation of class without a logger
-export function ClassWithoutLogger() {
-  // empty function for class
-}
-
-ClassWithoutLogger.prototype.f = makeTestFunction({
-  name: 'f',
-  deprecatedOptions: ['maxScan', 'snapshot', 'fields'],
-  optionsIndex: 0
-});
-
-// creation of class where getLogger returns undefined
-export function ClassWithUndefinedLogger() {
-  // empty function for class
-}
-
-ClassWithUndefinedLogger.prototype.f = makeTestFunction({
-  name: 'f',
-  deprecatedOptions: ['maxScan', 'snapshot', 'fields'],
-  optionsIndex: 0
-});
-
-ClassWithUndefinedLogger.prototype.getLogger = function () {
-  return undefined;
-};
 
 export class EventCollector {
   private _events: Record<string, any[]>;
