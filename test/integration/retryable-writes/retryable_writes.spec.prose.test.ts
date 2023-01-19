@@ -4,8 +4,6 @@ import { once } from 'node:events';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { sleep } from '../../tools/utils';
-
 import {
   Collection,
   MongoClient,
@@ -14,6 +12,7 @@ import {
   MongoWriteConcernError,
   Server
 } from '../../mongodb';
+import { sleep } from '../../tools/utils';
 
 describe('Retryable Writes Spec Prose', () => {
   describe('1. Test that retryable writes raise an exception when using the MMAPv1 storage engine.', () => {
