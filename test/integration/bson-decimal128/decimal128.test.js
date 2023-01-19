@@ -2,7 +2,7 @@
 const { assert: test } = require('../shared');
 const { expect } = require('chai');
 const { setupDatabase } = require('../shared');
-const { Decimal128 } = require('../../../src');
+const { Decimal128 } = require('../../mongodb');
 
 describe('Decimal128', function () {
   before(function () {

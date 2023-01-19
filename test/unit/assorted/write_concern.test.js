@@ -1,7 +1,7 @@
 'use strict';
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
-const { ObjectId, MongoClient } = require('../../../src');
+const { ObjectId, MongoClient } = require('../../mongodb');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { isHello } = require('../../mongodb');
 

@@ -2,10 +2,10 @@ import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
 
-import { MongoClient } from '../../../src';
 import {
   HostAddress,
   isHello,
+  MongoClient,
   SrvPoller,
   SrvPollerOptions,
   SrvPollingEvent,

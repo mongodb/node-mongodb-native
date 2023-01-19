@@ -1,6 +1,6 @@
 'use strict';
 const { setupDatabase } = require('../shared');
-const { MongoServerError } = require('../../../src');
+const { MongoServerError } = require('../../mongodb');
 const chai = require('chai');
 
 const expect = chai.expect;

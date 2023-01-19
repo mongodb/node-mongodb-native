@@ -3,7 +3,7 @@ const fs = require('fs');
 const { format: f } = require('util');
 const { test, setupDatabase } = require('../shared');
 const { expect } = require('chai');
-const { MongoClient } = require('../../../src');
+const { MongoClient } = require('../../mongodb');
 
 describe('SSL (x509)', function () {
   before(function () {

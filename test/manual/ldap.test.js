@@ -1,5 +1,5 @@
 'use strict';
-const { MongoClient } = require('../../src');
+const { MongoClient } = require('../mongodb');
 const { expect } = require('chai');
 
 describe('LDAP', function () {

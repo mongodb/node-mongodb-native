@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoAPIError, MongoParseError, MongoRuntimeError } from '../../src';
-import { MongoClient } from '../mongodb';
+import { MongoAPIError, MongoClient, MongoParseError, MongoRuntimeError } from '../mongodb';
 
 type HostObject = {
   type: 'ipv4' | 'ip_literal' | 'hostname' | 'unix';

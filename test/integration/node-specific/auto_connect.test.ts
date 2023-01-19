@@ -4,13 +4,14 @@ import { once } from 'events';
 import {
   BSONType,
   ChangeStream,
+  ClientSession,
   Collection,
   MongoClient,
   MongoNotConnectedError,
   ProfilingLevel,
+  Topology,
   TopologyType
-} from '../../../src';
-import { ClientSession, Topology } from '../../mongodb';
+} from '../../mongodb';
 
 describe('When executing an operation for the first time', () => {
   let client: MongoClient;

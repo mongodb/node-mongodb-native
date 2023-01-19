@@ -1,5 +1,5 @@
 'use strict';
-const { MongoClient } = require('../../src');
+const { MongoClient } = require('../mongodb');
 const chai = require('chai');
 const sinon = require('sinon');
 const dns = require('dns');

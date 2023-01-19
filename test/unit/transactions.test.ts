@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
-import { ReadPreference } from '../../src';
-import { Transaction } from '../mongodb';
+import { ReadPreference, Transaction } from '../mongodb';
 
 describe('class Transaction', () => {
   describe('constructor()', () => {

@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 
-import { MongoRuntimeError } from '../../../src';
 import {
   compareTopologyVersion,
   Long,
+  MongoRuntimeError,
   ObjectId,
   ServerDescription,
   TopologyVersion
