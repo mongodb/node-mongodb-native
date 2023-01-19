@@ -197,7 +197,15 @@ export * from '../src/write_concern';
 // Must be last for precedence
 export * from '../src/index';
 
-if (process.env.DISABLE_MONGODB_LEGACY !== 'true') {
+/**
+ * TODO(NODE-4979): ENABLE_MONGODB_LEGACY is 'true' by default for now
+ */
+const ENABLE_MONGODB_LEGACY =
+  typeof process.env.ENABLE_MONGODB_LEGACY === 'string' && process.env.ENABLE_MONGODB_LEGACY !== ''
+    ? process.env.ENABLE_MONGODB_LEGACY
+    : 'true';
+
+if (ENABLE_MONGODB_LEGACY === 'true') {
   // Override our own exports with the legacy patched ones
   importMongoDBLegacy(module.exports);
 }
