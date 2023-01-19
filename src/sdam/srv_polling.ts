@@ -103,6 +103,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
   }
 
+  // TODO(NODE-4817): This method has been left to allow for refactoring with the new logger
   schedule(): void {
     if (this._timeout) {
       clearTimeout(this._timeout);
@@ -120,12 +121,16 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     this.emit(SrvPoller.SRV_RECORD_DISCOVERY, new SrvPollingEvent(srvRecords));
   }
 
+  // TODO(NODE-4817): This method has been left here to allow for refactoring with
+  // the new logger
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   failure(_message: string, _obj?: NodeJS.ErrnoException): void {
     this.haMode = true;
     this.schedule();
   }
 
+  // TODO(NODE-4817): This method has been left here to allow for refactoring with
+  // the new logger
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
   parentDomainMismatch(_srvRecord: dns.SrvRecord): void {}
 
