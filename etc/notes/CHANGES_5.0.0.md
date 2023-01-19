@@ -18,7 +18,7 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ### Dot Notation Typescript Support Removed By Default
 
-**NOTE** This version only removes our **Typescript** compile-time support for dot notation in queries.
+**NOTE** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB still work the same. 
 
 Version 4.3.0 introduced Typescript support for dot notation in filter predicates.  For example:
 
@@ -43,10 +43,10 @@ driver v5.
 #### Dot Notation Helper Types Exported
 
 Although we removed support for type checking on dot notation filters by default, we now export these types.
-These helper types can be used for type checking.  We export the `DotNotationUpdateFilter` and the `DotNotationFilter`
+These helper types can be used for type checking.  We export the `StrictUpdateFilter` and the `StrictFilter`
 types for type safety in updates and finds.
 
-To use one of the new types, simply create a predicate that uses dot notation and assign it the type of `DotNotationFilter<your schema>`.
+To use one of the new types, simply create a predicate that uses dot notation and assign it the type of `StrictFilter<your schema>`.
 ```typescript
 interface Schema {
   user: {
@@ -57,7 +57,7 @@ interface Schema {
 declare const collection: Collection<Schema>;
 
 // fails to compile, 4 is not assignable to type "string"
-const filterPredicate: DotNotationFilter<Schema> = { 'user.name': 4 };
+const filterPredicate: StrictFilter<Schema> = { 'user.name': 4 };
 collection.find(filterPredicate);
 ```
 
