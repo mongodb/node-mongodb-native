@@ -3,7 +3,7 @@ import * as net from 'net';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { ConnectionCreatedEvent, MongoClient, ReadPreference, TopologyType } from '../../../src';
+import { ConnectionCreatedEvent, MongoClient, ReadPreference, TopologyType } from '../../mongodb';
 
 describe('IPv6 Addresses', () => {
   let client: MongoClient;

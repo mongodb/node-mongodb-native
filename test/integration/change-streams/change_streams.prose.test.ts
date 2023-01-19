@@ -8,12 +8,13 @@ import {
   CommandStartedEvent,
   CommandSucceededEvent,
   Document,
+  isHello,
+  LEGACY_HELLO_COMMAND,
   Long,
   MongoNetworkError,
   ObjectId,
   Timestamp
-} from '../../../src';
-import { isHello, LEGACY_HELLO_COMMAND } from '../../mongodb';
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 

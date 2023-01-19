@@ -5,15 +5,6 @@ import { inspect } from 'util';
 import {
   Binary,
   BSONTypeAlias,
-  Document,
-  Long,
-  MongoError,
-  MongoServerError,
-  ObjectId,
-  OneOrMore,
-  ServerDescriptionChangedEvent
-} from '../../../src';
-import {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent,
@@ -27,7 +18,14 @@ import {
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
   ConnectionPoolReadyEvent,
-  ConnectionReadyEvent
+  ConnectionReadyEvent,
+  Document,
+  Long,
+  MongoError,
+  MongoServerError,
+  ObjectId,
+  OneOrMore,
+  ServerDescriptionChangedEvent
 } from '../../mongodb';
 import { ejson } from '../utils';
 import { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';

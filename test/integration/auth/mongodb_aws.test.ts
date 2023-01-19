@@ -3,7 +3,7 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
-import { MongoAWSError, MongoClient, MongoServerError } from '../../../src';
+import { MongoAWSError, MongoClient, MongoServerError } from '../../mongodb';
 import { removeAuthFromConnectionString } from '../../tools/utils';
 
 describe('MONGODB-AWS', function () {

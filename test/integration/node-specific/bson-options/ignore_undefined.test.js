@@ -1,7 +1,7 @@
 'use strict';
 const { expect } = require('chai');
 const { assert: test, setupDatabase } = require('../../shared');
-const { ObjectId } = require('../../../../src');
+const { ObjectId } = require('../../../mongodb');
 
 describe('Ignore Undefined', function () {
   before(function () {

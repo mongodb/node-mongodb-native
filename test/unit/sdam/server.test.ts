@@ -10,10 +10,12 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   ObjectId,
+  Server,
+  ServerDescription,
   ServerType,
+  Topology,
   TopologyType
-} from '../../../src';
-import { Server, ServerDescription, Topology } from '../../mongodb';
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 const handledErrors = [

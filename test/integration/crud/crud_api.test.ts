@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoClient, MongoError, ObjectId, ReturnDocument } from '../../../src';
+import { MongoClient, MongoError, ObjectId, ReturnDocument } from '../../mongodb';
 import { assert as test } from '../shared';
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new

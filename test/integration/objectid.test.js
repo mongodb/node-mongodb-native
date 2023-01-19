@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 const { expect } = require('chai');
-const { ObjectId } = require('../../src');
+const { ObjectId } = require('../mongodb');
 const { sleep } = require('../tools/utils');
 
 describe('ObjectId', function () {

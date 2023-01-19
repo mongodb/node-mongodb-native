@@ -8,7 +8,7 @@ import {
   MongoClient,
   MongoDriverError,
   MongoInvalidArgumentError
-} from '../../../src';
+} from '../../mongodb';
 import { assert as test, ignoreNsNotFound } from '../shared';
 
 const MAX_BSON_SIZE = 16777216;

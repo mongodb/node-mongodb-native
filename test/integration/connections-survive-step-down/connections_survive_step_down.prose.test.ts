@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import type { Collection, Db, MongoClient } from '../../../src';
+import type { Collection, Db, MongoClient } from '../../mongodb';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 
 function ignoreNsNotFound(err) {

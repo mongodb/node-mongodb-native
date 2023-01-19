@@ -14,6 +14,7 @@ import {
   Collection,
   CommandStartedEvent,
   Db,
+  isHello,
   Long,
   MongoAPIError,
   MongoChangeStreamError,
@@ -21,8 +22,7 @@ import {
   MongoServerError,
   ReadPreference,
   ResumeToken
-} from '../../../src';
-import { isHello } from '../../mongodb';
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import {
   FailPoint,

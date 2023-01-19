@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { type Db, type MongoClient, CommandStartedEvent, GridFSBucket } from '../../../src';
+import { type Db, type MongoClient, CommandStartedEvent, GridFSBucket } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('GridFS', () => {

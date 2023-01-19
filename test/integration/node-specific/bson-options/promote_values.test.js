@@ -1,6 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-const { Long, Int32, Double } = require('../../../../src');
+const { Long, Int32, Double } = require('../../../mongodb');
 const { assert: test, setupDatabase } = require('../../shared');
 
 describe('Promote Values', function () {

@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 
-import { Collection, MongoClient, ServerSessionPool } from '../../../src';
-import { ClientSession, MongoNetworkError } from '../../mongodb';
+import {
+  ClientSession,
+  Collection,
+  MongoClient,
+  MongoNetworkError,
+  ServerSessionPool
+} from '../../mongodb';
 
 describe('Transactions', function () {
   describe('withTransaction', function () {

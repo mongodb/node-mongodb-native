@@ -1,6 +1,6 @@
 'use strict';
 
-const MongoClient = require('../../src').MongoClient;
+const MongoClient = require('../mongodb').MongoClient;
 const expect = require('chai').expect;
 const { LEGACY_HELLO_COMMAND } = require('../mongodb');
 
