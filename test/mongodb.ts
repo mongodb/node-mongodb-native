@@ -26,8 +26,8 @@ function printExports() {
 }
 
 /**
- * Using node's require resolution logic this function will locate the entrypoint for the `'mongodb-legacy'` module.
- * Then execute the `mongodb-legacy` module in a `vm` context that replaces the global require function with a custom
+ * Using node's require resolution logic this function will locate the entrypoint for the `'mongodb-legacy'` module,
+ * then execute the `mongodb-legacy` module in a `vm` context that replaces the global require function with a custom
  * implementation. The custom version of `require` will return the local instance of the driver import (magically compiled by ts-node) when
  * the module specifier is 'mongodb' and otherwise defer to the normal require behavior to import relative files and stdlib modules.
  * Each of the legacy module's patched classes are placed on the input object.
