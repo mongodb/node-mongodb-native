@@ -38,7 +38,7 @@ This change caused a number of problems for users, including slow compilation ti
 valid dot notation queries. While we have tried to mitigate this issue as much as possible
 in v4, ultimately we do not believe that this feature is fully production ready for all use cases.
 
-Driver 5.0 removes type checking on filter predicates.  The preceding example will compile with
+Driver 5.0 removes type checking for dot notation on filter predicates.  The preceding example will compile with
 driver v5.
 
 #### Dot Notation Helper Types Exported
