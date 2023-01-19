@@ -123,11 +123,7 @@ export type AnyBulkWriteOperation<TSchema extends Document = Document> =
   | { deleteOne: DeleteOneModel<TSchema> }
   | { deleteMany: DeleteManyModel<TSchema> };
 
-/**
- * @public
- *
- * @deprecated Will be made internal in 5.0
- */
+/** @internal */
 export interface BulkResult {
   ok: number;
   writeErrors: WriteError[];
@@ -172,8 +168,29 @@ export class Batch<T = Document> {
  * The result of a bulk write.
  */
 export class BulkWriteResult {
-  /** @deprecated Will be removed in 5.0 */
-  result: BulkResult;
+  private readonly result: BulkResult;
+  /** Number of documents inserted. */
+  readonly insertedCount: number;
+  /** Number of documents matched for update. */
+  readonly matchedCount: number;
+  /** Number of documents modified. */
+  readonly modifiedCount: number;
+  /** Number of documents deleted. */
+  readonly deletedCount: number;
+  /** Number of documents upserted. */
+  readonly upsertedCount: number;
+  /** Upserted document generated Id's, hash key is the index of the originating operation */
+  readonly upsertedIds: { [key: number]: any };
+  /** Inserted document generated Id's, hash key is the index of the originating operation */
+  readonly insertedIds: { [key: number]: any };
+
+  private static generateIdMap(ids: Document[]): { [key: number]: any } {
+    const idMap: { [index: number]: any } = {};
+    for (const doc of ids) {
+      idMap[doc.index] = doc._id;
+    }
+    return idMap;
+  }
 
   /**
    * Create a new BulkWriteResult instance
@@ -181,45 +198,14 @@ export class BulkWriteResult {
    */
   constructor(bulkResult: BulkResult) {
     this.result = bulkResult;
-  }
-
-  /** Number of documents inserted. */
-  get insertedCount(): number {
-    return this.result.nInserted ?? 0;
-  }
-  /** Number of documents matched for update. */
-  get matchedCount(): number {
-    return this.result.nMatched ?? 0;
-  }
-  /** Number of documents modified. */
-  get modifiedCount(): number {
-    return this.result.nModified ?? 0;
-  }
-  /** Number of documents deleted. */
-  get deletedCount(): number {
-    return this.result.nRemoved ?? 0;
-  }
-  /** Number of documents upserted. */
-  get upsertedCount(): number {
-    return this.result.upserted.length ?? 0;
-  }
-
-  /** Upserted document generated Id's, hash key is the index of the originating operation */
-  get upsertedIds(): { [key: number]: any } {
-    const upserted: { [index: number]: any } = {};
-    for (const doc of this.result.upserted ?? []) {
-      upserted[doc.index] = doc._id;
-    }
-    return upserted;
-  }
-
-  /** Inserted document generated Id's, hash key is the index of the originating operation */
-  get insertedIds(): { [key: number]: any } {
-    const inserted: { [index: number]: any } = {};
-    for (const doc of this.result.insertedIds ?? []) {
-      inserted[doc.index] = doc._id;
-    }
-    return inserted;
+    this.insertedCount = this.result.nInserted ?? 0;
+    this.matchedCount = this.result.nMatched ?? 0;
+    this.modifiedCount = this.result.nModified ?? 0;
+    this.deletedCount = this.result.nRemoved ?? 0;
+    this.upsertedCount = this.result.upserted.length ?? 0;
+    this.upsertedIds = BulkWriteResult.generateIdMap(this.result.upserted);
+    this.insertedIds = BulkWriteResult.generateIdMap(this.result.insertedIds);
+    Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
   }
 
   /** Evaluates to true if the bulk operation correctly executes */
@@ -314,13 +300,8 @@ export class BulkWriteResult {
     }
   }
 
-  /* @deprecated Will be removed in 5.0 release */
-  toJSON(): BulkResult {
-    return this.result;
-  }
-
   toString(): string {
-    return `BulkWriteResult(${this.toJSON()})`;
+    return `BulkWriteResult(${this.result})`;
   }
 
   isOk(): boolean {
@@ -550,12 +531,8 @@ function executeCommands(
     }
 
     // Merge the results together
+    mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
     const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult);
-    const mergeResult = mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
-    if (mergeResult != null) {
-      return callback(undefined, writeResult);
-    }
-
     if (bulkOperation.handleWriteError(callback, writeResult)) return;
 
     // Execute the next command in line
@@ -1246,7 +1223,6 @@ export abstract class BulkOperationBase {
       this.s.executed = true;
       const finalOptions = { ...this.s.options, ...options };
       const operation = new BulkWriteShimOperation(this, finalOptions);
-
       return executeOperation(this.s.collection.s.db.s.client, operation);
     }, callback);
   }

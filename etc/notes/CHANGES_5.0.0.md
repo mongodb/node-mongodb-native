@@ -158,13 +158,13 @@ no longer normalizes the values. There is no new method or property to replace t
 When calling `close()` on a `Cursor`, no more options can be provided. This removes support for the
 `skipKillCursors` option that was unused.
 
-### Snappy v7.x.x or later and optional peerDependency
+### Snappy v7.2.2 or later and optional peerDependency
 
 `snappy` compression has been added to the package.json as a peerDependency that is **optional**.
 This means `npm` will let you know if the version of snappy you have installed is incompatible with the driver.
 
 ```sh
-npm install --save snappy@7
+npm install --save "snappy@^7.2.2"
 ```
 
 ### `.unref()` removed from `Db`
@@ -238,3 +238,21 @@ await collection.insertMany([{ name: 'fido' }, { name: 'luna' }])
 
 The `keepGoing` option was a legacy name for setting `ordered` to `false` for bulk inserts.
 It was only supported by the legacy `collection.insert()` method which is now removed as noted above.
+
+### `BulkWriteResult` no longer contains a publicly enumerable `result` property.
+
+To access the raw result, please use `bulkWriteResult.getRawResponse()`. 
+
+### `BulkWriteResult` now contains individual ressult properties.
+
+These can be accessed via:
+
+```ts
+  bulkWriteResult.insertedCount;
+  bulkWriteResult.matchedCount;
+  bulkWriteResult.modifiedCount;
+  bulkWriteResult.deletedCount;
+  bulkWriteResult.upsertedCount;
+  bulkWriteResult.upsertedIds;
+  bulkWriteResult.insertedIds;
+```
