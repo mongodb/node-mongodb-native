@@ -192,7 +192,18 @@
       "rules": {
         "no-console": "off",
         "no-restricted-syntax": "off",
-        "typescript-eslint/ban-ts-comment": "off"
+        "typescript-eslint/ban-ts-comment": "off",
+        "no-restricted-imports": "off",
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              "**/../lib/**",
+              "**/../src/**",
+              "mongodb-mock-server"
+            ]
+          }
+        ]
       }
     },
     {
@@ -227,7 +238,6 @@
           {
             "patterns": [
               "**/../lib/**",
-              "**/../src/**",
               "mongodb-mock-server"
             ]
           }

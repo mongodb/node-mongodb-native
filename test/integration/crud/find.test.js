@@ -3,7 +3,7 @@ const { assert: test } = require('../shared');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { setTimeout } = require('timers');
-const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../../src');
+const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../mongodb');
 
 describe('Find', function () {
   let client;

@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 
 const mock = require('../../tools/mongodb-mock/index');
-const { MongoClient } = require('../../../src');
+const { MongoClient } = require('../../mongodb');
 
 describe('Write Concern', function () {
   it('should respect writeConcern from uri', function (done) {

@@ -2,7 +2,7 @@
 
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
-const { Db, MongoClient } = require('../../../src');
+const { Db, MongoClient } = require('../../mongodb');
 
 describe('Db', function () {
   before(function () {

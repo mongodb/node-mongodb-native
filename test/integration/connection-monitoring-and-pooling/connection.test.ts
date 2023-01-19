@@ -1,12 +1,14 @@
 import { expect } from 'chai';
 
-import { MongoClient, MongoServerError, ServerHeartbeatStartedEvent } from '../../../src';
 import {
   connect,
   Connection,
   HostAddress,
   LEGACY_HELLO_COMMAND,
+  MongoClient,
+  MongoServerError,
   ns,
+  ServerHeartbeatStartedEvent,
   Topology
 } from '../../mongodb';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';

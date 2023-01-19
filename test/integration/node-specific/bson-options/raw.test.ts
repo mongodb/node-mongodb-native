@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, MongoClient, MongoCompatibilityError, ObjectId } from '../../../../src';
+import { Collection, MongoClient, MongoCompatibilityError, ObjectId } from '../../../mongodb';
 
 describe('raw bson support', () => {
   describe('raw', () => {
