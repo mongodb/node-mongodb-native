@@ -4,6 +4,8 @@ import { once } from 'node:events';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
+import { sleep } from '../../tools/utils';
+
 import {
   Collection,
   MongoClient,
@@ -322,9 +324,10 @@ describe('Retryable Writes Spec Prose', () => {
         });
 
         const willBeCommandSucceeded = once(client, 'commandSucceeded').catch(error => error);
-        const willBeCommandFailed = once(client, 'commandFailed', {
-          signal: AbortSignal.timeout(1000)
-        }).catch(error => error);
+        const willBeCommandFailed = Promise.race([
+          once(client, 'commandFailed'),
+          sleep(1000).then(() => Promise.reject(new Error('timeout')))
+        ]).catch(error => error);
 
         const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
 
@@ -335,7 +338,7 @@ describe('Retryable Writes Spec Prose', () => {
         expect(
           noCommandFailedEvent.message,
           'expected timeout, since no failure event should emit'
-        ).to.include('operation was aborted');
+        ).to.equal('timeout');
         expect(insertResult).to.deep.equal({ acknowledged: true, insertedId: 1 });
       }
     );
