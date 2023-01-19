@@ -444,7 +444,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param options - optional settings for the transaction
    * @returns A raw command response or undefined
    */
-  withTransaction<T = void>(
+  async withTransaction<T = void>(
     fn: WithTransactionCallback<T>,
     options?: TransactionOptions
   ): Promise<Document | undefined> {

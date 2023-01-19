@@ -77,7 +77,7 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** Execute the explain for the cursor */
-  explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
+  async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
     return executeOperation(
       this.client,
       new AggregateOperation(this.namespace, this[kPipeline], {
