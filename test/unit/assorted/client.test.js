@@ -40,7 +40,9 @@ describe('Client (unit)', function () {
       expect(handshake).to.have.nested.property('client.driver');
       expect(handshake)
         .nested.property('client.driver.name')
-        // TODO(NODE-4979): Our tests depend on mongodb-legacy
+        // TODO(NODE-4979): Currently the tests import the LegacyMongoClient which overrides the client metadata
+        // We still are confirming here that a third party wrapper can set the metadata, but when the tests
+        // no longer need LegacyMongoClient, this string should be reverted to 'nodejs|mongoose'
         .to.equal('nodejs|mongodb-legacy|mongoose');
       expect(handshake)
         .nested.property('client.driver.version')
