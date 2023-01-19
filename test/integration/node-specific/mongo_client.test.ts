@@ -6,12 +6,17 @@ import {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent,
+  Connection,
+  Db,
+  getTopology,
+  isHello,
   MongoClient,
   MongoNotConnectedError,
   MongoServerSelectionError,
-  ReadPreference
-} from '../../../src';
-import { Connection, Db, getTopology, isHello, ServerDescription, Topology } from '../../mongodb';
+  ReadPreference,
+  ServerDescription,
+  Topology
+} from '../../mongodb';
 import { runLater } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 

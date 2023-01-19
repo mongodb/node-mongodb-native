@@ -3,12 +3,15 @@ import { EventEmitter } from 'events';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
-import { Connection, HostAddress, MongoClient, Server } from '../../src';
 import {
   CMAP_EVENTS,
+  Connection,
   ConnectionPool,
   ConnectionPoolOptions,
+  HostAddress,
   makeClientMetadata,
+  MongoClient,
+  Server,
   shuffle
 } from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';

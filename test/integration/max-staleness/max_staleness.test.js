@@ -2,7 +2,7 @@
 const { Long } = require('bson');
 const { expect } = require('chai');
 const mock = require('../../tools/mongodb-mock/index');
-const { ReadPreference } = require('../../../src');
+const { ReadPreference } = require('../../mongodb');
 const { isHello } = require('../../mongodb');
 
 const test = {};

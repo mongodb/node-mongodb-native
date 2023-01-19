@@ -1,7 +1,15 @@
 import { expect } from 'chai';
 
-import { Callback, ExecutionResult, MongoClient, Server } from '../../../src';
-import { AbstractCursor, AbstractCursorOptions, ClientSession, ns } from '../../mongodb';
+import {
+  AbstractCursor,
+  AbstractCursorOptions,
+  Callback,
+  ClientSession,
+  ExecutionResult,
+  MongoClient,
+  ns,
+  Server
+} from '../../mongodb';
 
 /** Minimal do nothing cursor to focus on testing the base cusor behavior */
 class ConcreteCursor extends AbstractCursor {

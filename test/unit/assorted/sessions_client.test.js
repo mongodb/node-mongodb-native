@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const mock = require('../../tools/mongodb-mock/index');
 const { ReplSetFixture } = require('../../tools/common');
 const { isHello } = require('../../mongodb');
-const { MongoClient } = require('../../../src');
+const { MongoClient } = require('../../mongodb');
 
 const test = {};
 describe('Sessions - client/unit', function () {

@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { once } = require('events');
-const { MongoBulkWriteError, MongoServerError } = require('../../../src');
+const { MongoBulkWriteError, MongoServerError } = require('../../mongodb');
 
 describe('CRUD Prose Spec Tests', () => {
   let client;

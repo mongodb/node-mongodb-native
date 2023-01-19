@@ -1,6 +1,6 @@
 'use strict';
 
-const mongodb = require('../../../../src');
+const mongodb = require('../../../mongodb');
 
 /**
  * Filter for whether or not a test needs / doesn't need Client Side Encryption

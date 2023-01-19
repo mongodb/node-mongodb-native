@@ -6,7 +6,7 @@ require('source-map-support').install({
 
 const path = require('path');
 const fs = require('fs');
-const { MongoClient } = require('../../../../src');
+const { MongoClient } = require('../../../mongodb');
 const { TestConfiguration } = require('../config');
 const { getEnvironmentalOptions } = require('../../utils');
 const mock = require('../../mongodb-mock/index');

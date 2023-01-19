@@ -9,10 +9,10 @@ import {
   CollectionOptions,
   DbOptions,
   Document,
+  getMongoDBClientEncryption,
   MongoClient,
   MongoMissingDependencyError
-} from '../../../src';
-import { getMongoDBClientEncryption } from '../../mongodb';
+} from '../../mongodb';
 import { shouldRunServerlessTest } from '../../tools/utils';
 import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
 import { matchesEvents } from './match';

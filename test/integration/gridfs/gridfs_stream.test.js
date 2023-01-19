@@ -4,7 +4,7 @@ const { Double } = require('bson');
 const stream = require('stream');
 const fs = require('fs');
 const { expect } = require('chai');
-const { GridFSBucket, ObjectId } = require('../../../src');
+const { GridFSBucket, ObjectId } = require('../../mongodb');
 const sinon = require('sinon');
 const { sleep } = require('../../tools/utils');
 

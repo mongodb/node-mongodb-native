@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { AddUserOptions, MongoClient, MongoServerError } from '../../src';
+import { AddUserOptions, MongoClient, MongoServerError } from '../mongodb';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/utils';
 
 const metadata: MongoDBMetadataUI = {

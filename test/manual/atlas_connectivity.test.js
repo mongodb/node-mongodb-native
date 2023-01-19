@@ -1,5 +1,5 @@
 'use strict';
-const { MongoClient } = require('../../src');
+const { MongoClient } = require('../mongodb');
 const { LEGACY_HELLO_COMMAND } = require('../mongodb');
 
 /**

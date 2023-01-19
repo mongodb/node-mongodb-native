@@ -4,7 +4,7 @@ const chai = require('chai');
 
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
-const { MongoServerError } = require('../../../src');
+const { MongoServerError } = require('../../mongodb');
 
 chai.use(sinonChai);
 
