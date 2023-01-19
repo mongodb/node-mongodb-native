@@ -41,7 +41,7 @@ const nKeyWithInvalidUtf8 =
 const msgBodyNKeyWithInvalidUtf8 = Buffer.from(nKeyWithInvalidUtf8, 'hex');
 
 describe('BinMsg BSON utf8 validation', () => {
-  it('bson correctly deserializes data with replacement characters for invalid utf8 in writeErrors object', () => {
+  it('correctly deserializes data with replacement characters for invalid utf8 in writeErrors object', () => {
     // this is a sanity check to make sure nothing unexpected is happening in the deserialize method itself
 
     const options = { validation: { utf8: { writeErrors: false } as const } };
@@ -61,7 +61,7 @@ describe('BinMsg BSON utf8 validation', () => {
       expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
     });
 
-    it('should validate keys other than the writeErrors key', () => {
+    it('validates keys other than the writeErrors key', () => {
       const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
         Buffer.alloc(0),
         msgHeader,
@@ -86,7 +86,7 @@ describe('BinMsg BSON utf8 validation', () => {
       expect(() => binMsgInvalidUtf8ErrorMsg.parse(options)).to.not.throw();
     });
 
-    it('should not validate keys other than the writeErrors key', () => {
+    it('does not validate keys other than the writeErrors key', () => {
       const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
         Buffer.alloc(0),
         msgHeader,
@@ -99,7 +99,7 @@ describe('BinMsg BSON utf8 validation', () => {
     });
   });
 
-  it('should by default disable validation for writeErrors if no validation specified', () => {
+  it('disables validation by default for writeErrors if no validation specified', () => {
     const binMsgInvalidUtf8ErrorMsg = new BinMsg(
       Buffer.alloc(0),
       msgHeader,
@@ -117,7 +117,7 @@ describe('BinMsg BSON utf8 validation', () => {
 
   context('utf8 validation enabled', () => {
     const options = { enableUtf8Validation: true };
-    it('should not validate the writeErrors key', () => {
+    it('does not validate the writeErrors key', () => {
       const binMsgInvalidUtf8ErrorMsg = new BinMsg(
         Buffer.alloc(0),
         msgHeader,
@@ -130,7 +130,7 @@ describe('BinMsg BSON utf8 validation', () => {
       );
     });
 
-    it('should validate keys other than the writeErrors key', () => {
+    it('validates keys other than the writeErrors key', () => {
       const binMsgAnotherKeyWithInvalidUtf8 = new BinMsg(
         Buffer.alloc(0),
         msgHeader,
