@@ -38,7 +38,10 @@ describe('Client (unit)', function () {
 
     return client.connect().then(() => {
       expect(handshake).to.have.nested.property('client.driver');
-      expect(handshake).nested.property('client.driver.name').to.equal('nodejs|mongoose');
+      expect(handshake)
+        .nested.property('client.driver.name')
+        // TODO(NODE-4979): Our tests depend on mongodb-legacy
+        .to.equal('nodejs|mongodb-legacy|mongoose');
       expect(handshake)
         .nested.property('client.driver.version')
         .to.match(/|5.7.10/);
