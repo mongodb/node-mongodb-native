@@ -71,17 +71,24 @@ If you are a Typescript user, you will need the Node.js type definitions to use 
 npm install -D @types/node
 ```
 
-## Troubleshooting
+## Driver Extensions
 
 The MongoDB driver can optionally be enhanced by the following feature packages:
 
-- [Zstd network compression](https://github.com/mongodb-js/zstd)
-- [Snappy network compression](https://github.com/Brooooooklyn/snappy)
-- [GSSAPI / SSPI / Kerberos authentication](https://github.com/mongodb-js/kerberos)
-- [AWS authentication](https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers)
-- [MongoDB field level and queryable encryption](https://github.com/mongodb/libmongocrypt#readme)
+Maintained by MongoDB:
 
-Some of these packages include native C++ extensions. Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/native-extensions.md) if you run into issues.
+- Zstd network compression - [@mongodb-js/zstd](https://github.com/mongodb-js/zstd)
+- MongoDB field level and queryable encryption - [mongodb-client-encryption](https://github.com/mongodb/libmongocrypt#readme)
+- GSSAPI / SSPI / Kerberos authentication - [kerberos](https://github.com/mongodb-js/kerberos)
+
+Some of these packages include native C++ extensions.
+Consult the [trouble shooting guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/native-extensions.md) if you run into compilation issues.
+
+Third party:
+
+- Snappy network compression - [snappy](https://github.com/Brooooooklyn/snappy)
+- AWS authentication - [@aws-sdk/credential-providers](https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers)
+
 
 ## Quick Start
 
