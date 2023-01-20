@@ -95,7 +95,7 @@ describe('crud - insert', function () {
 
   it('rejects when insertMany is passed a non array object', async function () {
     const db = client.db();
-    const error = db
+    const error = await db
       .collection('insertMany_Promise_error')
       .insertMany({ a: 1 })
       .catch(error => error);
