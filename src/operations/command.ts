@@ -93,8 +93,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
 
-    // TODO(NODE-2056): make logger another "inheritable" property
-
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);
     } else if (options?.explain != null) {
