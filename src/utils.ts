@@ -40,24 +40,22 @@ export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 export type AnyOptions = Document;
 
 export const ByteUtils = {
-  equals(seqA: Uint8Array, seqB: Uint8Array) {
-    return (
-      Buffer.isBuffer(seqA) ? seqA : Buffer.from(seqA.buffer, seqA.byteOffset, seqA.byteLength)
-    ).equals(seqB);
+  toLocalBufferType(this: void, buffer: Buffer | Uint8Array): Buffer {
+    return Buffer.isBuffer(buffer)
+      ? buffer
+      : Buffer.from(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   },
 
-  compare(seqA: Uint8Array, seqB: Uint8Array) {
-    return (
-      Buffer.isBuffer(seqA) ? seqA : Buffer.from(seqA.buffer, seqA.byteOffset, seqA.byteLength)
-    ).compare(seqB);
+  equals(this: void, seqA: Uint8Array, seqB: Uint8Array) {
+    return ByteUtils.toLocalBufferType(seqA).equals(seqB);
   },
 
-  toBase64(uint8array: Uint8Array) {
-    return (
-      Buffer.isBuffer(uint8array)
-        ? uint8array
-        : Buffer.from(uint8array.buffer, uint8array.byteOffset, uint8array.byteLength)
-    ).toString('base64');
+  compare(this: void, seqA: Uint8Array, seqB: Uint8Array) {
+    return ByteUtils.toLocalBufferType(seqA).compare(seqB);
+  },
+
+  toBase64(this: void, uint8array: Uint8Array) {
+    return ByteUtils.toLocalBufferType(uint8array).toString('base64');
   }
 };
 

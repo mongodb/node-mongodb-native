@@ -36,6 +36,7 @@ export interface BSONSerializeOptions
       | 'allowObjectSmallerThanBufferSize'
       | 'index'
       | 'validation'
+      | 'useBigInt64'
     > {
   /**
    * Enabling the raw option will return a [Node.js Buffer](https://nodejs.org/api/buffer.html)

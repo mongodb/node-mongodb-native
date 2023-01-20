@@ -37,8 +37,8 @@ describe('When importing BSON', function () {
   }
 
   it('should correctly round trip Map', function () {
-    expect(BSON.Map).to.be.a('function');
-    const doc = { key: new BSON.Map([['2', 2]]) };
+    expect(Map).to.be.a('function');
+    const doc = { key: new Map([['2', 2]]) };
     const outputDoc = BSON.deserialize(BSON.serialize(doc));
     expect(outputDoc).to.have.nested.property('key.2', 2);
   });
