@@ -244,11 +244,11 @@ describe('Collection', function () {
     it('should throw error due to illegal update', async function () {
       const coll = await db.createCollection('shouldThrowErrorDueToIllegalUpdate', {});
 
-      const filterError = await coll.updateOne({}, null).catch(error => error);
-      expect(filterError.message).to.match(/Document must be a valid JavaScript object/);
+      const filterError = await coll.updateOne(null, {}).catch(error => error);
+      expect(filterError.message).to.match(/Selector must be a valid JavaScript object/);
 
       const updateError = await coll.updateOne({}, null).catch(error => error);
-      expect(updateError.message).to.match(/Selector must be a valid JavaScript object/);
+      expect(updateError.message).to.match(/Document must be a valid JavaScript object/);
     });
 
     const selectorTests = [
