@@ -579,7 +579,7 @@ BUILD_VARIANTS.push({
 const oneOffFuncAsTasks = []
 
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of ['ff9e095eaf72f9e442761f69080dae159a395d94', 'master']) {
+  for (const ref of ['3b3d0ebd2b180f4cb63adf937ecd985fce7e217b', 'master']) {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests'],
