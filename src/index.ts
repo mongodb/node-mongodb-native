@@ -334,6 +334,9 @@ export type {
   RootFilterOperators,
   SchemaMember,
   SetFields,
+  StrictFilter,
+  StrictMatchKeysAndValues,
+  StrictUpdateFilter,
   UpdateFilter,
   WithId,
   WithoutId

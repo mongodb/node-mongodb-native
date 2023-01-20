@@ -11,7 +11,7 @@ import {
   Server
 } from '../../mongodb';
 
-/** Minimal do nothing cursor to focus on testing the base cusor behavior */
+/** Minimal do nothing cursor to focus on testing the base cursor behavior */
 class ConcreteCursor extends AbstractCursor {
   constructor(client: MongoClient, options: AbstractCursorOptions = {}) {
     super(client, ns('test.test'), options);
