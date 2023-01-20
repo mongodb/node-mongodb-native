@@ -145,13 +145,11 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     for (const record of srvRecords) {
       if (matchesParentDomain(record.name, this.srvHost)) {
         finalAddresses.push(record);
-      } else {
-        this.parentDomainMismatch(record);
       }
     }
 
     if (!finalAddresses.length) {
-      this.failure('No valid addresses found at host');
+      this.failure();
       return;
     }
 
