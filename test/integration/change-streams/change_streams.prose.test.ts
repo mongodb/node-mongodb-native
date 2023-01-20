@@ -429,7 +429,7 @@ describe('Change Stream prose tests', function () {
 
       // Helpers
       timestamp() {
-        return new Timestamp(this._timestampCounter++, Date.now());
+        return new Timestamp({ i: this._timestampCounter++, t: this._timestampCounter });
       }
 
       applyOpTime(obj) {

@@ -18,7 +18,7 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ### Dot Notation Typescript Support Removed By Default
 
-**NOTE** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same. 
+**NOTE** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same.
 
 Version 4.3.0 introduced Typescript support for dot notation in filter predicates.  For example:
 
