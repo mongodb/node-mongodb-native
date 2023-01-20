@@ -1174,9 +1174,7 @@ export abstract class BulkOperationBase {
     return batches;
   }
 
-  async execute(options?: BulkWriteOptions): Promise<BulkWriteResult> {
-    options ??= {};
-
+  async execute(options: BulkWriteOptions = {}): Promise<BulkWriteResult> {
     if (this.s.executed) {
       throw new MongoBatchReExecutionError();
     }

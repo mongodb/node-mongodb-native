@@ -101,8 +101,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
 
       if (batchSize <= 0) {
-        // @ts-expect-error: TODO...
-        return this.close().finally(() => callback());
+        this.close().finally(() => callback());
+        return;
       }
     }
 

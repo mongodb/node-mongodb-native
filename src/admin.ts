@@ -104,21 +104,21 @@ export class Admin {
    * Add a user to the database
    *
    * @param username - The username for the new user
-   * @param password - An optional password for the new user
+   * @param passwordOrOptions - An optional password for the new user, or the options for the command
    * @param options - Optional settings for the command
    */
   async addUser(
     username: string,
-    password?: string | AddUserOptions,
+    passwordOrOptions?: string | AddUserOptions,
     options?: AddUserOptions
   ): Promise<Document> {
     options =
       options != null && typeof options === 'object'
         ? options
-        : password != null && typeof password === 'object'
-        ? password
+        : passwordOrOptions != null && typeof passwordOrOptions === 'object'
+        ? passwordOrOptions
         : undefined;
-    password = typeof password === 'string' ? password : undefined;
+    const password = typeof passwordOrOptions === 'string' ? passwordOrOptions : undefined;
     return executeOperation(
       this.s.db.s.client,
       new AddUserOperation(this.s.db, username, password, { dbName: 'admin', ...options })
@@ -146,7 +146,7 @@ export class Admin {
    */
   async validateCollection(
     collectionName: string,
-    options?: ValidateCollectionOptions
+    options: ValidateCollectionOptions = {}
   ): Promise<Document> {
     return executeOperation(
       this.s.db.s.client,
