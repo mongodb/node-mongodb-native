@@ -1,6 +1,6 @@
 import { expectType } from 'tsd';
 
-import { AnyError, Document, MongoClient } from '../../src';
+import { Document, MongoClient } from '../../src';
 
 const client = new MongoClient('');
 const db = client.db('test');
@@ -14,14 +14,3 @@ expectType<Promise<Document[]>>(collection.indexes({}));
 for (const index of await collection.indexes()) {
   expectType<Document>(index);
 }
-
-// Callback variant testing
-collection.indexes((err, indexes) => {
-  expectType<AnyError | undefined>(err);
-  expectType<Document[] | undefined>(indexes);
-});
-
-collection.indexes({}, (err, indexes) => {
-  expectType<AnyError | undefined>(err);
-  expectType<Document[] | undefined>(indexes);
-});

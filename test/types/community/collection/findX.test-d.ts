@@ -4,7 +4,6 @@ import type { Filter } from '../../../../src';
 import {
   Collection,
   Db,
-  Document,
   FindCursor,
   FindOptions,
   MongoClient,
@@ -19,13 +18,9 @@ const db = client.db('test');
 const collection = db.collection('test.find');
 
 // Locate all the entries using find
-collection.find({}).toArray((_err, fields) => {
-  expectType<WithId<Document>[] | undefined>(fields);
-  if (fields) {
-    expectType<ObjectId>(fields[0]._id);
-    expectNotType<ObjectId | undefined>(fields[0]._id);
-  }
-});
+const fields = await collection.find({}).toArray();
+expectType<ObjectId>(fields[0]._id);
+expectNotType<ObjectId | undefined>(fields[0]._id);
 
 // test with collection type
 interface TestModel {
@@ -85,21 +80,6 @@ interface Bag {
 }
 
 const collectionBag = db.collection<Bag>('bag');
-
-const cursor: FindCursor<WithId<Bag>> = collectionBag.find({ color: 'black' });
-
-cursor.toArray((_err, bags) => {
-  expectType<WithId<Bag>[] | undefined>(bags);
-});
-
-cursor.forEach(
-  bag => {
-    expectType<WithId<Bag>>(bag);
-  },
-  () => {
-    return null;
-  }
-);
 
 expectType<WithId<Bag> | null>(
   await collectionBag.findOne({ color: 'red' }, { projection: { cost: 1 } })
@@ -252,14 +232,6 @@ const typedDb = client.db('test2') as TypedDb;
 
 const person = typedDb.collection('people').findOne({});
 expectType<Promise<WithId<Person> | null>>(person);
-
-typedDb.collection('people').findOne({}, function (_err, person) {
-  expectType<WithId<Person> | null | undefined>(person); // null is if nothing is found, undefined is when there is an error defined
-});
-
-typedDb.collection('things').findOne({}, function (_err, thing) {
-  expectType<WithId<Thing> | null | undefined>(thing);
-});
 
 interface SchemaWithTypicalId {
   _id: ObjectId;

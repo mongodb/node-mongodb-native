@@ -1,13 +1,11 @@
 import { expectType } from 'tsd';
 
 import {
-  AnyError,
   Batch,
   BatchType,
   BulkOperationBase,
   BulkWriteOptions,
   BulkWriteResult,
-  Callback,
   DeleteStatement,
   Document,
   MongoClient,
@@ -51,32 +49,3 @@ function extendedPromiseBasedBulkExecute(
 }
 
 expectType<Promise<BulkWriteResult>>(extendedPromiseBasedBulkExecute());
-
-expectType<void>(
-  bulkOperation.execute((error, bulkWriteResult) => {
-    expectType<AnyError | undefined>(error);
-    expectType<BulkWriteResult | undefined>(bulkWriteResult);
-  })
-);
-
-expectType<void>(
-  bulkOperation.execute(options, (error, bulkWriteResult) => {
-    expectType<AnyError | undefined>(error);
-    expectType<BulkWriteResult | undefined>(bulkWriteResult);
-  })
-);
-
-// ensure we can use the bulk operation execute in a callback based wrapper function
-function extendedCallbackBasedBulkExecute(
-  callback: Callback<BulkWriteResult>,
-  optionalOptions?: BulkWriteOptions
-): void {
-  bulkOperation.execute(optionalOptions, callback);
-}
-
-expectType<void>(
-  extendedCallbackBasedBulkExecute((error, bulkWriteResult) => {
-    expectType<AnyError | undefined>(error);
-    expectType<BulkWriteResult | undefined>(bulkWriteResult);
-  })
-);

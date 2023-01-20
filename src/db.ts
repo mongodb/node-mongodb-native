@@ -40,12 +40,7 @@ import {
 import { DbStatsOperation, DbStatsOptions } from './operations/stats';
 import { ReadConcern } from './read_concern';
 import { ReadPreference, ReadPreferenceLike } from './read_preference';
-import {
-  DEFAULT_PK_FACTORY,
-  filterOptions,
-  MongoDBNamespace,
-  resolveOptions
-} from './utils';
+import { DEFAULT_PK_FACTORY, filterOptions, MongoDBNamespace, resolveOptions } from './utils';
 import { WriteConcern, WriteConcernOptions } from './write_concern';
 
 // Allowed parameters

@@ -1,13 +1,6 @@
 import { expectType } from 'tsd';
 
-import {
-  AnyError,
-  Callback,
-  Collection,
-  CreateCollectionOptions,
-  MongoClient,
-  ObjectId
-} from '../../../mongodb';
+import { Collection, CreateCollectionOptions, MongoClient, ObjectId } from '../../../mongodb';
 
 const client = new MongoClient('');
 const db = client.db('test');
@@ -50,33 +43,3 @@ function extendedPromiseBasedCreateCollection(
 }
 
 expectType<Promise<Collection<TestSchema>>>(extendedPromiseBasedCreateCollection('test'));
-
-expectType<void>(
-  db.createCollection<TestSchema>('test', (err, collection) => {
-    expectType<AnyError | undefined>(err);
-    expectType<Collection<TestSchema> | undefined>(collection);
-  })
-);
-
-expectType<void>(
-  db.createCollection<TestSchema>('test', options, (err, collection) => {
-    expectType<AnyError | undefined>(err);
-    expectType<Collection<TestSchema> | undefined>(collection);
-  })
-);
-
-// ensure we can use the create collection in a callback based wrapper function
-function extendedCallbackBasedCreateCollection(
-  name: string,
-  callback: Callback<Collection<TestSchema>>,
-  optionalOptions?: CreateCollectionOptions
-): void {
-  db.createCollection<TestSchema>(name, optionalOptions, callback);
-}
-
-expectType<void>(
-  extendedCallbackBasedCreateCollection('test', (err, collection) => {
-    expectType<AnyError | undefined>(err);
-    expectType<Collection<TestSchema> | undefined>(collection);
-  })
-);
