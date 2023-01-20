@@ -790,19 +790,6 @@ functions:
         script: |
           ${PREPARE_SHELL}
           ${PROJECT_DIRECTORY}/.evergreen/run-lambda-aws-tests.sh
-  run bson-ext test:
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: src
-        timeout_secs: 60
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          MONGODB_URI: ${MONGODB_URI}
-          TEST_NPM_SCRIPT: ${TEST_NPM_SCRIPT}
-        binary: bash
-        args:
-          - ${PROJECT_DIRECTORY}/.evergreen/run-bson-ext-test.sh
   upload test results:
     - command: attach.xunit_results
       params:
@@ -2131,40 +2118,6 @@ tasks:
         variant: '*'
         status: '*'
         patch_optional: true
-  - name: run-bson-ext-integration
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_NAME: fermium
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: server
-          AUTH: auth
-      - name: run-bson-ext-integration
-        func: run bson-ext test
-        vars:
-          NODE_LTS_NAME: fermium
-          TEST_NPM_SCRIPT: check:test
-  - name: run-bson-ext-unit
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_NAME: fermium
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: server
-          AUTH: auth
-      - name: run-bson-ext-unit
-        func: run bson-ext test
-        vars:
-          NODE_LTS_NAME: fermium
-          TEST_NPM_SCRIPT: check:unit
   - name: run-custom-csfle-tests-5.0-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -3060,8 +3013,6 @@ buildvariants:
     display_name: Custom Dependency Version Test
     run_on: rhel80-large
     tasks:
-      - run-bson-ext-integration
-      - run-bson-ext-unit
       - run-custom-csfle-tests-5.0-pinned-commit
       - run-custom-csfle-tests-5.0-master
       - run-custom-csfle-tests-rapid-pinned-commit

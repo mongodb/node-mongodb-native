@@ -8,12 +8,6 @@ let bsonType = 'js-bson';
 // TODO(NODE-4606): test against different driver configurations in CI
 
 const BSON = require('bson');
-// try {
-//   BSON = require('bson-ext');
-//   bsonType = 'bson-ext';
-// } catch (_) {
-//   // do not care
-// }
 
 const { inspect } = require('util');
 const { writeFile } = require('fs/promises');

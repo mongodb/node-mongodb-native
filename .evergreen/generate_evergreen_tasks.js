@@ -576,46 +576,7 @@ BUILD_VARIANTS.push({
   tasks: AWS_AUTH_TASKS
 });
 
-const oneOffFuncs = [
-  {
-    name: 'run-bson-ext-integration',
-    func: 'run bson-ext test',
-    vars: {
-      NODE_LTS_NAME: LOWEST_LTS,
-      TEST_NPM_SCRIPT: 'check:test'
-    }
-  },
-  {
-    name: 'run-bson-ext-unit',
-    func: 'run bson-ext test',
-    vars: {
-      NODE_LTS_NAME: LOWEST_LTS,
-      TEST_NPM_SCRIPT: 'check:unit'
-    }
-  }
-];
-
-const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
-  name: oneOffFunc.name,
-  tags: ['run-custom-dependency-tests'],
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: LOWEST_LTS
-      }
-    },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: '5.0',
-        TOPOLOGY: 'server',
-        AUTH: 'auth'
-      }
-    },
-    oneOffFunc
-  ]
-}));
+const oneOffFuncAsTasks = []
 
 for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of ['ddb19ae22dc4a5f8b9208096f69fc23e19bae6c9', 'master']) {
