@@ -176,9 +176,9 @@ describe.only('Range Explicit Encryption', function () {
         };
 
         encryptedZero = await clientEncryption.encrypt(factory(0), opts);
-        encryptedSix = await clientEncryption.encrypt(typeFactory(dataType, 6), opts);
-        encryptedThirty = await clientEncryption.encrypt(typeFactory(dataType, 30), opts);
-        encryptedTwoHundred = await clientEncryption.encrypt(typeFactory(dataType, 200), opts);
+        encryptedSix = await clientEncryption.encrypt(factory(6), opts);
+        encryptedThirty = await clientEncryption.encrypt(factory(30), opts);
+        encryptedTwoHundred = await clientEncryption.encrypt(factory(200), opts);
 
         const key = `encrypted${dataType}`;
         await encryptedClient
@@ -212,7 +212,7 @@ describe.only('Range Explicit Encryption', function () {
       });
 
       it('Case 1: can decrypt a payload', metaData, async function () {
-        const insertedPayload = await clientEncryption.encrypt(typeFactory(dataType, 6), {
+        const insertedPayload = await clientEncryption.encrypt(factory(6), {
           keyId,
           algorithm: 'RangePreview',
           contentionFactor: 0,
@@ -230,8 +230,8 @@ describe.only('Range Explicit Encryption', function () {
       it('Case 2: can find encrypted range and return the maximum', metaData, async function () {
         const query = {
           $and: [
-            { 'encrypted<Type>': { $gte: typeFactory(dataType, 6) } },
-            { 'encrypted<Type>': { $lte: typeFactory(dataType, 200) } }
+            { 'encrypted<Type>': { $gte: factory(6) } },
+            { 'encrypted<Type>': { $lte: factory(200) } }
           ]
         };
 
@@ -244,7 +244,7 @@ describe.only('Range Explicit Encryption', function () {
         });
 
         const key = `encrypted${dataType}`;
-        const result = (
+        let result = (
           await encryptedClient
             .db('db')
             .collection('explicit_encryption')
@@ -254,45 +254,30 @@ describe.only('Range Explicit Encryption', function () {
 
         result.sort(byId);
 
-        if (dataType !== 'Date') {
-          expect(result).to.deep.equal([
-            {
-              [key]: 6,
-              _id: 1
-            },
-            {
-              [key]: 30,
-              _id: 2
-            },
-            {
-              [key]: 200,
-              _id: 3
-            }
-          ]);
-        } else {
-          const dateResult = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
-          expect(dateResult).to.deep.equal([
-            {
-              [key]: 6,
-              _id: 1
-            },
-            {
-              [key]: 30,
-              _id: 2
-            },
-            {
-              [key]: 200,
-              _id: 3
-            }
-          ]);
+        if (dataType === 'Date') {
+          result = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
         }
+        expect(result).to.deep.equal([
+          {
+            [key]: 6,
+            _id: 1
+          },
+          {
+            [key]: 30,
+            _id: 2
+          },
+          {
+            [key]: 200,
+            _id: 3
+          }
+        ]);
       });
 
       it('Case 3: can find encrypted range and return the minimum', metaData, async function () {
         const query = {
           $and: [
-            { 'encrypted<Type>': { $gte: typeFactory(dataType, 0) } },
-            { 'encrypted<Type>': { $lte: typeFactory(dataType, 6) } }
+            { 'encrypted<Type>': { $gte: factory(0) } },
+            { 'encrypted<Type>': { $lte: factory(6) } }
           ]
         };
 
@@ -305,7 +290,7 @@ describe.only('Range Explicit Encryption', function () {
         });
 
         const key = `encrypted${dataType}`;
-        const result = (
+        let result = (
           await encryptedClient
             .db('db')
             .collection('explicit_encryption')
@@ -315,35 +300,25 @@ describe.only('Range Explicit Encryption', function () {
 
         result.sort(byId);
 
-        if (dataType !== 'Date') {
-          expect(result).to.deep.equal([
-            {
-              [key]: 0,
-              _id: 0
-            },
-            {
-              [key]: 6,
-              _id: 1
-            }
-          ]);
-        } else {
-          const dateResult = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
-          expect(dateResult).to.deep.equal([
-            {
-              [key]: 0,
-              _id: 0
-            },
-            {
-              [key]: 6,
-              _id: 1
-            }
-          ]);
+        if (dataType === 'Date') {
+          result = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
         }
+
+        expect(result).to.deep.equal([
+          {
+            [key]: 0,
+            _id: 0
+          },
+          {
+            [key]: 6,
+            _id: 1
+          }
+        ]);
       });
 
       it('Case 4: can find encrypted range with an open range query', metaData, async function () {
         const query = {
-          $and: [{ 'encrypted<Type>': { $gt: typeFactory(dataType, 30) } }]
+          $and: [{ 'encrypted<Type>': { $gt: factory(30) } }]
         };
 
         const findPayload = await clientEncryption.encryptExpression(query, {
@@ -355,7 +330,7 @@ describe.only('Range Explicit Encryption', function () {
         });
 
         const key = `encrypted${dataType}`;
-        const result = (
+        let result = (
           await encryptedClient
             .db('db')
             .collection('explicit_encryption')
@@ -365,26 +340,20 @@ describe.only('Range Explicit Encryption', function () {
 
         result.sort(byId);
 
-        if (dataType !== 'Date') {
-          expect(result).to.deep.equal([
-            {
-              [key]: 200,
-              _id: 3
-            }
-          ]);
-        } else {
-          const dateResult = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
-          expect(dateResult).to.deep.equal([
-            {
-              [key]: 200,
-              _id: 3
-            }
-          ]);
+        if (dataType === 'Date') {
+          result = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
         }
+
+        expect(result).to.deep.equal([
+          {
+            [key]: 200,
+            _id: 3
+          }
+        ]);
       });
 
       it('Case 5: can run an aggregation expression inside $expr', metaData, async function () {
-        const query = { $and: [{ $lt: ['$encrypted<Type>', typeFactory(dataType, 30)] }] };
+        const query = { $and: [{ $lt: ['$encrypted<Type>', factory(30)] }] };
 
         const findPayload = await clientEncryption.encryptExpression(query, {
           keyId,
@@ -395,7 +364,7 @@ describe.only('Range Explicit Encryption', function () {
         });
 
         const key = `encrypted${dataType}`;
-        const result = (
+        let result = (
           await encryptedClient
             .db('db')
             .collection('explicit_encryption')
@@ -405,30 +374,20 @@ describe.only('Range Explicit Encryption', function () {
 
         result.sort(byId);
 
-        if (dataType !== 'Date') {
-          expect(result).to.deep.equal([
-            {
-              [key]: 0,
-              _id: 0
-            },
-            {
-              [key]: 6,
-              _id: 1
-            }
-          ]);
-        } else {
-          const dateResult = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
-          expect(dateResult).to.deep.equal([
-            {
-              [key]: 0,
-              _id: 0
-            },
-            {
-              [key]: 6,
-              _id: 1
-            }
-          ]);
+        if (dataType === 'Date') {
+          result = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
         }
+
+        expect(result).to.deep.equal([
+          {
+            [key]: 0,
+            _id: 0
+          },
+          {
+            [key]: 6,
+            _id: 1
+          }
+        ]);
       });
 
       it(
@@ -440,7 +399,7 @@ describe.only('Range Explicit Encryption', function () {
             this.skip();
           }
           const resultOrError = await clientEncryption
-            .encrypt(typeFactory(dataType, 201), {
+            .encrypt(factory(201), {
               keyId,
               algorithm: 'RangePreview',
               contentionFactor: 0,
@@ -495,7 +454,7 @@ describe.only('Range Explicit Encryption', function () {
           };
 
           const resultOrError = await clientEncryption
-            .encrypt(typeFactory(dataType, 6), {
+            .encrypt(factory(6), {
               keyId,
               algorithm: 'RangePreview',
               contentionFactor: 0,
