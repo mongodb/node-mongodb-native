@@ -192,7 +192,10 @@ The new minimum supported Node.js version is now 14.20.1.
 The MongoClient option `promiseLibrary` along with the `Promise.set` export that allows specifying a custom promise library has been removed.
 This allows the driver to adopt async/await syntax which has [performance benefits](https://v8.dev/blog/fast-async) over manual promise construction.
 
+### Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`
+
 All cursor types have been changed to implement `AsyncGenerator` instead of `AsyncIterator`.
+This was done to make our typing more accurate.
 
 ### Cursor closes on exit of for await of loops
 
