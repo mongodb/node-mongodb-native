@@ -17,7 +17,7 @@ import { MongoClient } from './mongo_client';
 import { CancellationToken } from './mongo_types';
 import { ClientSession } from './sessions';
 
-/** @internal */
+/** @public */
 export { BSON } from './bson';
 export {
   Binary,
