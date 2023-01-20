@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { Collection, Db, MongoClient, ObjectId } from '../../src';
 import { sleep } from '../tools/utils';
 
+// TODO(NODE-4989): Improve these tests, likely can be made unit tests, or migrated to CRUD coverage (find oid range)
 describe('ObjectId', function () {
   let client: MongoClient;
   let collection: Collection<{ name: string }>;
@@ -46,7 +47,8 @@ describe('ObjectId', function () {
     expect(objectId.toJSON()).to.have.lengthOf(24);
   });
 
-  it('shouldCorrectlyCreateOIDNotUsingObjectId', async function () {
+  it('Date can be used as a primary key _id', async function () {
+    // This has nothing to do with ObjectId
     const configuration = this.configuration;
     const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
     const db: Db = client.db(configuration.db);
