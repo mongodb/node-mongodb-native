@@ -25,14 +25,7 @@ import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
-import {
-  ClientMetadata,
-  HostAddress,
-  maybeCallback,
-  MongoDBNamespace,
-  ns,
-  resolveOptions
-} from './utils';
+import { ClientMetadata, HostAddress, MongoDBNamespace, ns, resolveOptions } from './utils';
 import type { W, WriteConcern, WriteConcernSettings } from './write_concern';
 
 /** @public */
@@ -593,9 +586,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @param options - Optional settings for the command
    * @param callback - An callback to execute with an implicitly created session
    */
-  withSession(callback: WithSessionCallback): Promise<void>;
-  withSession(options: ClientSessionOptions, callback: WithSessionCallback): Promise<void>;
-  withSession(
+  async withSession(callback: WithSessionCallback): Promise<void>;
+  async withSession(options: ClientSessionOptions, callback: WithSessionCallback): Promise<void>;
+  async withSession(
     optionsOrOperation: ClientSessionOptions | WithSessionCallback,
     callback?: WithSessionCallback
   ): Promise<void> {
@@ -615,17 +608,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     const session = this.startSession(options);
 
-    return maybeCallback(async () => {
+    try {
+      await withSessionCallback(session);
+    } finally {
       try {
-        await withSessionCallback(session);
-      } finally {
-        try {
-          await session.endSession();
-        } catch {
-          // We are not concerned with errors from endSession()
-        }
+        await session.endSession();
+      } catch {
+        // We are not concerned with errors from endSession()
       }
-    }, null);
+    }
   }
 
   /**
