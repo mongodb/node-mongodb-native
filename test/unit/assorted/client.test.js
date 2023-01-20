@@ -7,6 +7,7 @@ const { isHello } = require('../../mongodb');
 
 describe('Client (unit)', function () {
   let server, client;
+  const isLegacyMongoClient = MongoClient.name === 'LegacyMongoClient';
 
   afterEach(async () => {
     await client.close();
@@ -41,9 +42,9 @@ describe('Client (unit)', function () {
       expect(handshake)
         .nested.property('client.driver.name')
         // TODO(NODE-4979): Currently the tests import the LegacyMongoClient which overrides the client metadata
-        // We still are confirming here that a third party wrapper can set the metadata, but when the tests
-        // no longer need LegacyMongoClient, this string should be reverted to 'nodejs|mongoose'
-        .to.equal('nodejs|mongodb-legacy|mongoose');
+        // We still are confirming here that a third party wrapper can set the metadata but it will change depending on the
+        // MongoClient constructor that is imported
+        .to.equal(isLegacyMongoClient ? 'nodejs|mongodb-legacy|mongoose' : 'nodejs|mongoose');
       expect(handshake)
         .nested.property('client.driver.version')
         .to.match(/|5.7.10/);
