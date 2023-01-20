@@ -16,6 +16,55 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### Dot Notation Typescript Support Removed By Default
+
+**NOTE** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same. 
+
+Version 4.3.0 introduced Typescript support for dot notation in filter predicates.  For example:
+
+```typescript
+interface Schema {
+  user: {
+    name: string
+  }
+}
+
+declare const collection: Collection<Schema>;
+// compiles pre-v4.3.0, fails in v4.3.0+
+collection.find({ 'user.name': 4 })
+```
+
+This change caused a number of problems for users, including slow compilation times and compile errors for
+valid dot notation queries. While we have tried to mitigate this issue as much as possible
+in v4, ultimately we do not believe that this feature is fully production ready for all use cases.
+
+Driver 5.0 removes type checking for dot notation in filter predicates.  The preceding example will compile with
+driver v5.
+
+#### Dot Notation Helper Types Exported
+
+Although we removed support for type checking on dot notation filters by default, we have preserved the
+corresponding types in an experimental capacity.
+These helper types can be used for type checking.  We export the `StrictUpdateFilter` and the `StrictFilter`
+types for type safety in updates and finds.
+
+To use one of the new types, simply create a predicate that uses dot notation and assign it the type of `StrictFilter<your schema>`.
+```typescript
+interface Schema {
+  user: {
+    name: string
+  }
+}
+
+declare const collection: Collection<Schema>;
+
+// fails to compile, 4 is not assignable to type "string"
+const filterPredicate: StrictFilter<Schema> = { 'user.name': 4 };
+collection.find(filterPredicate);
+```
+
+**NOTE** As an experimental feature, these types can change at any time and are not recommended for production settings.
+
 ### `Collection.mapReduce()` helper removed
 
 The `mapReduce` helper has been removed from the `Collection` class.  The `mapReduce` operation has been
