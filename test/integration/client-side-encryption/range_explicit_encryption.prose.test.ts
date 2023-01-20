@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
-import { Document, Double, Long, MongoClient } from '../../../src';
+import { Decimal128, Document, Double, Long, MongoClient } from '../../../src';
 
 const getKmsProviders = () => {
   const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
@@ -32,12 +32,58 @@ function byId(a, b) {
   return 0;
 }
 
+function compareNumericValues(
+  type: typeof dataTypes[number]['type'],
+  value: unknown,
+  expectedValue: number
+) {
+  if (type === 'Date') {
+    expect(value).to.be.instanceof(Date);
+    expect((value as Date).getUTCMilliseconds()).to.equal(expectedValue);
+  } else if (type.includes('Decimal')) {
+    expect(value).to.be.instanceof(Decimal128);
+    expect((value as Decimal128).bytes).to.deep.equal(
+      new Decimal128(expectedValue.toString()).bytes
+    );
+  } else {
+    expect(value).to.equal(expectedValue);
+  }
+}
+
 const prepareOptions = opts =>
   EJSON.parse(EJSON.stringify(opts, { relaxed: false }), {
     relaxed: false
-  });
+  }) as any as Document;
 
-const dataTypes = [
+const dataTypes: ReadonlyArray<{
+  type:
+    | 'DecimalNoPrecision'
+    | 'DecimalPrecision'
+    | 'DoubleNoPrecision'
+    | 'DoublePrecision'
+    | 'Long'
+    | 'Int'
+    | 'Date';
+  rangeOptions: Document;
+  factory: (number) => unknown;
+}> = [
+  {
+    type: 'DecimalNoPrecision',
+    rangeOptions: prepareOptions({
+      sparsity: { $numberLong: '1' }
+    }),
+    factory: value => new Decimal128(value.toString())
+  },
+  {
+    type: 'DecimalPrecision',
+    rangeOptions: prepareOptions({
+      min: { $numberDecimal: '0' },
+      max: { $numberDecimal: '200' },
+      sparsity: { $numberLong: '1' },
+      precision: 2
+    }),
+    factory: value => new Decimal128(value.toString())
+  },
   {
     type: 'DoubleNoPrecision',
     rangeOptions: prepareOptions({ sparsity: { $numberLong: '1' } }),
@@ -219,12 +265,8 @@ describe('Range Explicit Encryption', function () {
           rangeOptions
         });
 
-        if (dataType !== 'Date') {
-          expect(await clientEncryption.decrypt(insertedPayload)).to.equal(6);
-        } else {
-          const result = await clientEncryption.decrypt(insertedPayload);
-          expect(result.getUTCMilliseconds()).to.equal(6);
-        }
+        const result = await clientEncryption.decrypt(insertedPayload);
+        compareNumericValues(dataType, result, 6);
       });
 
       it('Case 2: can find encrypted range and return the maximum', metaData, async function () {
@@ -244,7 +286,7 @@ describe('Range Explicit Encryption', function () {
         });
 
         const key = `encrypted${dataType}`;
-        let result = (
+        const result = (
           await encryptedClient
             .db('db')
             .collection('explicit_encryption')
@@ -254,10 +296,7 @@ describe('Range Explicit Encryption', function () {
 
         result.sort(byId);
 
-        if (dataType === 'Date') {
-          result = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
-        }
-        expect(result).to.deep.equal([
+        const expected = [
           {
             [key]: 6,
             _id: 1
@@ -270,7 +309,16 @@ describe('Range Explicit Encryption', function () {
             [key]: 200,
             _id: 3
           }
-        ]);
+        ];
+
+        expect(result).to.have.lengthOf(expected.length);
+
+        for (let i = 0; i < expected.length; ++i) {
+          const doc = result[i];
+          const expectedDoc = expected[i];
+          expect(doc).to.have.property('_id', expectedDoc['_id']);
+          compareNumericValues(dataType, doc[key], expectedDoc[key]);
+        }
       });
 
       it('Case 3: can find encrypted range and return the minimum', metaData, async function () {
@@ -290,7 +338,7 @@ describe('Range Explicit Encryption', function () {
         });
 
         const key = `encrypted${dataType}`;
-        let result = (
+        const result = (
           await encryptedClient
             .db('db')
             .collection('explicit_encryption')
@@ -300,11 +348,7 @@ describe('Range Explicit Encryption', function () {
 
         result.sort(byId);
 
-        if (dataType === 'Date') {
-          result = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
-        }
-
-        expect(result).to.deep.equal([
+        const expected = [
           {
             [key]: 0,
             _id: 0
@@ -313,7 +357,16 @@ describe('Range Explicit Encryption', function () {
             [key]: 6,
             _id: 1
           }
-        ]);
+        ];
+
+        expect(result).to.have.lengthOf(expected.length);
+
+        for (let i = 0; i < expected.length; ++i) {
+          const doc = result[i];
+          const expectedDoc = expected[i];
+          expect(doc).to.have.property('_id', expectedDoc['_id']);
+          compareNumericValues(dataType, doc[key], expectedDoc[key]);
+        }
       });
 
       it('Case 4: can find encrypted range with an open range query', metaData, async function () {
@@ -330,7 +383,7 @@ describe('Range Explicit Encryption', function () {
         });
 
         const key = `encrypted${dataType}`;
-        let result = (
+        const result = (
           await encryptedClient
             .db('db')
             .collection('explicit_encryption')
@@ -340,16 +393,10 @@ describe('Range Explicit Encryption', function () {
 
         result.sort(byId);
 
-        if (dataType === 'Date') {
-          result = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
-        }
+        expect(result).to.have.lengthOf(1);
 
-        expect(result).to.deep.equal([
-          {
-            [key]: 200,
-            _id: 3
-          }
-        ]);
+        expect(result[0]).to.have.property('_id', 3);
+        compareNumericValues(dataType, result[0][key], 200);
       });
 
       it('Case 5: can run an aggregation expression inside $expr', metaData, async function () {
@@ -364,7 +411,7 @@ describe('Range Explicit Encryption', function () {
         });
 
         const key = `encrypted${dataType}`;
-        let result = (
+        const result = (
           await encryptedClient
             .db('db')
             .collection('explicit_encryption')
@@ -374,11 +421,7 @@ describe('Range Explicit Encryption', function () {
 
         result.sort(byId);
 
-        if (dataType === 'Date') {
-          result = result.map(doc => ({ ...doc, [key]: doc[key].getUTCMilliseconds() }));
-        }
-
-        expect(result).to.deep.equal([
+        const expected = [
           {
             [key]: 0,
             _id: 0
@@ -387,15 +430,25 @@ describe('Range Explicit Encryption', function () {
             [key]: 6,
             _id: 1
           }
-        ]);
+        ];
+
+        expect(result).to.have.lengthOf(expected.length);
+
+        for (let i = 0; i < expected.length; ++i) {
+          const doc = result[i];
+          const expectedDoc = expected[i];
+          expect(doc).to.have.property('_id', expectedDoc['_id']);
+          compareNumericValues(dataType, doc[key], expectedDoc[key]);
+        }
       });
 
       it(
         'Case 6: encrypting a document greater than the maximum errors',
         metaData,
         async function () {
-          if (dataType === 'DoubleNoPrecision') {
-            this.test.skipReason = 'Case 6 does not apply to DoubleNoPrecision';
+          if (dataType === 'DoubleNoPrecision' || dataType === 'DecimalNoPrecision') {
+            this.test.skipReason =
+              'Case 6 does not apply to DoubleNoPrecision or DecimalNoPrecision';
             this.skip();
           }
           const resultOrError = await clientEncryption
@@ -412,8 +465,8 @@ describe('Range Explicit Encryption', function () {
       );
 
       it('Case 7: encrypting a document of a different type errors', metaData, async function () {
-        if (dataType === 'DoubleNoPrecision') {
-          this.test.skipReason = 'Case 7 does not apply to DoubleNoPrecision';
+        if (dataType === 'DoubleNoPrecision' || dataType === 'DecimalNoPrecision') {
+          this.test.skipReason = 'Case 7 does not apply to DoubleNoPrecision or DecimalNoPrecision';
           this.skip();
         }
 
@@ -441,10 +494,25 @@ describe('Range Explicit Encryption', function () {
         'Case 8: setting precision errors if the type is not a double',
         metaData,
         async function () {
-          if (dataType === 'DoubleNoPrecision' || dataType === 'DoublePrecision') {
-            this.test.skipReason = 'Case 8 does not apply to DoubleNoPrecision or DoublePrecision';
-            this.skip();
-          }
+          if (
+            [
+              'DoubleNoPrecision',
+              'DecimalNoPrecision',
+              'DoublePrecision',
+              'DecimalNoPrecision'
+            ].includes(dataType)
+          )
+            if (dataType === 'DoubleNoPrecision' || dataType === 'DoublePrecision') {
+              this.test.skipReason =
+                'Case 8 does not apply to the following dataTypes: ' +
+                [
+                  'DoubleNoPrecision',
+                  'DecimalNoPrecision',
+                  'DoublePrecision',
+                  'DecimalNoPrecision'
+                ].join(', ');
+              this.skip();
+            }
 
           const options = {
             min: 0,
