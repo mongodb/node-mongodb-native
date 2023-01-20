@@ -241,15 +241,14 @@ describe('Collection', function () {
       });
     });
 
-    it('should throw error due to illegal update', function (done) {
-      db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, (err, coll) => {
-        expect(() => coll.update({}, null)).to.throw(/Document must be a valid JavaScript object/);
-        expect(() => coll.update(null, null)).to.throw(
-          /Selector must be a valid JavaScript object/
-        );
+    it('should throw error due to illegal update', async function () {
+      const coll = db.createCollection('shouldThrowErrorDueToIllegalUpdate', {});
 
-        done();
-      });
+      const filterError = await coll.updateOne({}, null).catch(error => error);
+      expect(filterError.message).to.match(/Document must be a valid JavaScript object/);
+
+      const updateError = await coll.updateOne({}, null).catch(error => error);
+      expect(updateError.message).to.match(/Selector must be a valid JavaScript object/);
     });
 
     const selectorTests = [

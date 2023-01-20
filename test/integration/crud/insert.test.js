@@ -18,7 +18,8 @@ const {
   MaxKey,
   Code,
   MongoBulkWriteError,
-  ReturnDocument
+  ReturnDocument,
+  MongoInvalidArgumentError
 } = require('../../mongodb');
 
 /**
@@ -92,25 +93,14 @@ describe('crud - insert', function () {
     });
   });
 
-  it('Should correctly return failing Promise when no document array passed into insertMany', function (done) {
-    const configuration = this.configuration;
-    let url = configuration.url();
-    url =
-      url.indexOf('?') !== -1
-        ? f('%s&%s', url, 'maxPoolSize=100')
-        : f('%s?%s', url, 'maxPoolSize=100');
-
-    const client = configuration.newClient(url);
-    client.connect().then(() => {
-      this.defer(() => client.close());
-
-      const db = client.db(configuration.db);
-      expect(() => {
-        db.collection('insertMany_Promise_error').insertMany({ a: 1 });
-      }).to.throw(/Argument "docs" must be an array of documents/);
-
-      done();
-    });
+  it('rejects when insertMany is passed a non array object', async function () {
+    const db = client.db();
+    const error = db
+      .collection('insertMany_Promise_error')
+      .insertMany({ a: 1 })
+      .catch(error => error);
+    expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+    expect(error.message).to.match(/must be an array/);
   });
 
   describe('collection.insert()', function () {
