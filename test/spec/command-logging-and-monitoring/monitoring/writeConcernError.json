@@ -1,0 +1,155 @@
+{
+  "description": "writeConcernError",
+  "schemaVersion": "1.13",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.0",
+      "topologies": [
+        "replicaset"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent",
+          "commandFailedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "command-monitoring-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "command-monitoring-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "A retryable write with write concern errors publishes success event",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "writeConcernError": {
+                  "code": 91,
+                  "errorLabels": [
+                    "RetryableWriteError"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "document": {
+              "_id": 2,
+              "x": 22
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2,
+                      "x": 22
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 1,
+                  "writeConcernError": {
+                    "code": 91,
+                    "errorLabels": [
+                      "RetryableWriteError"
+                    ]
+                  }
+                },
+                "commandName": "insert"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2,
+                      "x": 22
+                    }
+                  ],
+                  "ordered": true
+                },
+                "commandName": "insert",
+                "databaseName": "command-monitoring-tests"
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "reply": {
+                  "ok": 1,
+                  "n": 1
+                },
+                "commandName": "insert"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

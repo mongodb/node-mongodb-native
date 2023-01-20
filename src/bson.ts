@@ -1,34 +1,14 @@
-import type {
-  calculateObjectSize as calculateObjectSizeFn,
-  deserialize as deserializeFn,
-  DeserializeOptions,
-  serialize as serializeFn,
-  SerializeOptions
-} from 'bson';
-
-/** @internal */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-let BSON = require('bson');
-
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  BSON = require('bson-ext');
-} catch {} // eslint-disable-line
-
-/** @internal */
-export const deserialize = BSON.deserialize as typeof deserializeFn;
-/** @internal */
-export const serialize = BSON.serialize as typeof serializeFn;
-/** @internal */
-export const calculateObjectSize = BSON.calculateObjectSize as typeof calculateObjectSizeFn;
+import type { DeserializeOptions, SerializeOptions } from 'bson';
 
 export {
   Binary,
   BSONRegExp,
   BSONSymbol,
+  calculateObjectSize,
   Code,
   DBRef,
   Decimal128,
+  deserialize,
   Document,
   Double,
   Int32,
@@ -37,10 +17,15 @@ export {
   MaxKey,
   MinKey,
   ObjectId,
+  serialize,
   Timestamp
 } from 'bson';
 
+// TODO(NODE-4867): fix with bson v5
 /** @internal */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const BSON = require('bson');
+
 export { BSON };
 
 /**

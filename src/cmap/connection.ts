@@ -416,7 +416,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       if (operationDescription.command) {
         if (document.writeConcernError) {
-          callback(new MongoWriteConcernError(document.writeConcernError, document));
+          callback(new MongoWriteConcernError(document.writeConcernError, document), document);
           return;
         }
 
@@ -680,7 +680,10 @@ function write(
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
-      if (err) {
+      // Command monitoring spec states that if ok is 1, then we must always emit
+      // a command suceeded event, even if there's an error. Write concern errors
+      // will have an ok: 1 in their reply.
+      if (err && reply?.ok !== 1) {
         conn.emit(
           Connection.COMMAND_FAILED,
           new CommandFailedEvent(conn, command, err, operationDescription.started)
@@ -700,7 +703,11 @@ function write(
       }
 
       if (typeof callback === 'function') {
-        callback(err, reply);
+        // Since we're passing through the reply with the write concern error now, we
+        // need it not to be provided to the original callback in this case so
+        // retryability does not get tricked into thinking the command actually
+        // succeeded.
+        callback(err, err instanceof MongoWriteConcernError ? undefined : reply);
       }
     };
   }
