@@ -204,7 +204,7 @@ describe('Find Cursor', function () {
     });
   });
 
-  // TODO(NODE-XXXX): Need to fix cursor.clone in mongodb-legacy
+  // TODO(NODE-4988): Need to fix cursor.clone in mongodb-legacy
   context.skip('#clone', function () {
     it('should clone a find cursor', function (done) {
       const coll = client.db().collection('abstract_cursor');

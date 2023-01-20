@@ -1671,7 +1671,7 @@ describe('Cursor', function () {
     }
   });
 
-  // TODO(NODE-XXXX): Need to fix cursor.clone in mongodb-legacy
+  // TODO(NODE-4988): Need to fix cursor.clone in mongodb-legacy
   it.skip('removes session wheen cloning a find cursor', function (done) {
     const configuration = this.configuration;
     client.connect((err, client) => {
@@ -1699,7 +1699,7 @@ describe('Cursor', function () {
     });
   });
 
-  // TODO(NODE-XXXX): Need to fix cursor.clone in mongodb-legacy
+  // TODO(NODE-4988): Need to fix cursor.clone in mongodb-legacy
   it.skip('removes session wheen cloning an aggregation cursor', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
