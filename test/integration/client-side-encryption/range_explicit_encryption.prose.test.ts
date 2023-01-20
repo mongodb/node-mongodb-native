@@ -89,7 +89,7 @@ const readEncryptedFieldsFile = (dataType: string): Promise<string> =>
     encoding: 'utf8'
   });
 
-describe.only('Range Explicit Encryption', function () {
+describe('Range Explicit Encryption', function () {
   let clientEncryption;
   let keyId;
   let keyVaultClient;
