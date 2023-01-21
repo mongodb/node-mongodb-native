@@ -1572,32 +1572,18 @@ describe('Operations', function () {
    * example-class Collection
    * example-method remove
    */
-  it(
-    'deleteMany() deletes all documents in collection',
-    { requires: { topology: ['single'] } },
-    function () {
-      const db = client.db();
-      // Fetch a collection to insert document into
-      const collection = db.collection('remove_all_documents_no_safe_with_promise');
+  it('deleteMany() deletes all documents in collection', async function () {
+    const db = client.db();
+    // Fetch a collection to insert document into
+    const collection = db.collection('remove_all_documents_no_safe_with_promise');
 
-      // Insert a bunch of documents
-      return collection
-        .insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } })
-        .then(function (result) {
-          expect(result).to.exist;
-          // Remove all the document
-          return collection.deleteMany();
-        })
-        .then(function () {
-          // Fetch all results
-          return collection.find().toArray();
-        })
-        .then(function (items) {
-          expect(items.length).to.equal(0);
-          return client.close();
-        });
-    }
-  );
+    // Insert a bunch of documents
+    const result = await collection.insertMany([{ a: 1 }, { b: 2 }], { writeConcern: { w: 1 } });
+    expect(result).to.exist;
+    await collection.deleteMany();
+    const items = await collection.find().toArray();
+    expect(items).to.have.lengthOf(0);
+  });
 
   /**
    * An example removing a subset of documents using safe mode to ensure removal of documents using a Promise.
