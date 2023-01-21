@@ -308,16 +308,14 @@ describe('Find and Modify', function () {
     }
   });
 
-  it('should not allow atomic operators for findOneAndReplace', {
-    metadata: { requires: { topology: 'single' } },
-    test: async function () {
-      const client = this.configuration.newClient();
-      const db = client.db('fakeDb');
-      const collection = db.collection('test');
-      expect(() => {
-        collection.findOneAndReplace({ a: 1 }, { $set: { a: 14 } });
-      }).to.throw(/must not contain atomic operators/);
-      await client.close();
-    }
+  it('should not allow atomic operators for findOneAndReplace', async function () {
+    const client = this.configuration.newClient();
+    const db = client.db('fakeDb');
+    const collection = db.collection('test');
+    const error = await collection
+      .findOneAndReplace({ a: 1 }, { $set: { a: 14 } })
+      .catch(error => error);
+    expect(error.message).to.match(/must not contain atomic operators/);
+    await client.close();
   });
 });
