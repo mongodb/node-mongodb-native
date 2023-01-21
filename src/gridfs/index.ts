@@ -153,9 +153,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   }
 
   /** Convenience wrapper around find on the files collection */
-  find(filter?: Filter<GridFSFile>, options?: FindOptions): FindCursor<GridFSFile> {
-    filter ??= {};
-    options = options ?? {};
+  find(filter: Filter<GridFSFile> = {}, options: FindOptions = {}): FindCursor<GridFSFile> {
     return this.s._filesCollection.find(filter, options);
   }
 

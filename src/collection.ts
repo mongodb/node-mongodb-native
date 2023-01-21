@@ -725,8 +725,10 @@ export class Collection<TSchema extends Document = Document> {
    * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
    * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
-  async countDocuments(filter?: Document, options?: CountDocumentsOptions): Promise<number> {
-    filter ??= {};
+  async countDocuments(
+    filter: Document = {},
+    options: CountDocumentsOptions = {}
+  ): Promise<number> {
     return executeOperation(
       this.s.db.s.client,
       new CountDocumentsOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
@@ -760,17 +762,16 @@ export class Collection<TSchema extends Document = Document> {
 
   async distinct<Key extends keyof WithId<TSchema>>(
     key: Key,
-    filter?: Filter<TSchema>,
-    options?: DistinctOptions
+    filter: Filter<TSchema> = {},
+    options: DistinctOptions = {}
   ): Promise<any[]> {
-    filter ??= {};
     return executeOperation(
       this.s.db.s.client,
       new DistinctOperation(
         this as TODO_NODE_3286,
         key as TODO_NODE_3286,
         filter,
-        resolveOptions(this, options as DistinctOptions)
+        resolveOptions(this, options)
       )
     );
   }
@@ -985,8 +986,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter for the count.
    * @param options - Optional settings for the command
    */
-  async count(filter?: Filter<TSchema>, options?: CountOptions): Promise<number> {
-    filter ??= {};
+  async count(filter: Filter<TSchema> = {}, options: CountOptions = {}): Promise<number> {
     return executeOperation(
       this.s.db.s.client,
       new CountOperation(

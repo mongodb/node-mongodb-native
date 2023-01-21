@@ -42,12 +42,12 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
-    filter: Document | undefined,
+    filter: Document = {},
     options: FindOptions = {}
   ) {
     super(client, namespace, options);
 
-    this[kFilter] = filter || {};
+    this[kFilter] = filter;
     this[kBuiltOptions] = options;
 
     if (options.sort != null) {
