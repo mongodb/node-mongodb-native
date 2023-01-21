@@ -402,7 +402,10 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter used to select the document to remove
    * @param options - Optional settings for the command
    */
-  async deleteOne(filter: Filter<TSchema>, options?: DeleteOptions): Promise<DeleteResult> {
+  async deleteOne(
+    filter: Filter<TSchema> = {},
+    options: DeleteOptions = {}
+  ): Promise<DeleteResult> {
     return executeOperation(
       this.s.db.s.client,
       new DeleteOneOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
@@ -415,7 +418,10 @@ export class Collection<TSchema extends Document = Document> {
    * @param filter - The filter used to select the documents to remove
    * @param options - Optional settings for the command
    */
-  async deleteMany(filter: Filter<TSchema>, options?: DeleteOptions): Promise<DeleteResult> {
+  async deleteMany(
+    filter: Filter<TSchema> = {},
+    options: DeleteOptions = {}
+  ): Promise<DeleteResult> {
     return executeOperation(
       this.s.db.s.client,
       new DeleteManyOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
@@ -469,11 +475,11 @@ export class Collection<TSchema extends Document = Document> {
   async findOne<T = TSchema>(filter: Filter<TSchema>): Promise<T | null>;
   async findOne<T = TSchema>(filter: Filter<TSchema>, options?: FindOptions): Promise<T | null>;
 
-  async findOne(filter?: Filter<TSchema>, options?: FindOptions): Promise<WithId<TSchema> | null> {
-    return this.find(filter ?? {}, options ?? {})
-      .limit(-1)
-      .batchSize(1)
-      .next();
+  async findOne(
+    filter: Filter<TSchema> = {},
+    options: FindOptions = {}
+  ): Promise<WithId<TSchema> | null> {
+    return this.find(filter, options).limit(-1).batchSize(1).next();
   }
 
   /**
@@ -484,16 +490,7 @@ export class Collection<TSchema extends Document = Document> {
   find(): FindCursor<WithId<TSchema>>;
   find(filter: Filter<TSchema>, options?: FindOptions): FindCursor<WithId<TSchema>>;
   find<T extends Document>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
-  find(filter?: Filter<TSchema>, options?: FindOptions): FindCursor<WithId<TSchema>> {
-    if (arguments.length > 2) {
-      throw new MongoInvalidArgumentError(
-        'Method "collection.find()" accepts at most two arguments'
-      );
-    }
-    if (typeof options === 'function') {
-      throw new MongoInvalidArgumentError('Argument "options" must not be function');
-    }
-
+  find(filter: Filter<TSchema> = {}, options: FindOptions = {}): FindCursor<WithId<TSchema>> {
     return new FindCursor<WithId<TSchema>>(
       this.s.db.s.client,
       this.s.namespace,
