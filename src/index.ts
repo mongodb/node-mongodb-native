@@ -17,19 +17,19 @@ import { MongoClient } from './mongo_client';
 import { CancellationToken } from './mongo_types';
 import { ClientSession } from './sessions';
 
-/** @internal */
+/** @public */
 export { BSON } from './bson';
 export {
   Binary,
   BSONRegExp,
   BSONSymbol,
+  BSONType,
   Code,
   DBRef,
   Decimal128,
   Double,
   Int32,
   Long,
-  Map,
   MaxKey,
   MinKey,
   ObjectId,
@@ -103,7 +103,6 @@ export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { LoggerLevel } from './logger';
 export { ServerApiVersion } from './mongo_client';
-export { BSONType } from './mongo_types';
 export { ReturnDocument } from './operations/find_and_modify';
 export { ProfilingLevel } from './operations/set_profiling_level';
 export { ReadConcernLevel } from './read_concern';

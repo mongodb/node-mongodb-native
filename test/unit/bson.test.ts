@@ -1,14 +1,13 @@
-'use strict';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
-const BSON = require('../mongodb');
+import { BSON } from '../mongodb';
 
 describe('When importing BSON', function () {
   const types = [
     ['Long', 23],
     ['ObjectId', '123456789123456789123456'],
     ['Binary', Buffer.from('abc', 'ascii')],
-    ['Timestamp', 23],
+    ['Timestamp', 23n],
     ['Code', 'function(){}'],
     ['MinKey', undefined],
     ['MaxKey', undefined],
@@ -16,7 +15,7 @@ describe('When importing BSON', function () {
     ['Int32', 23],
     ['Double', 2.3],
     ['BSONRegExp', 'abc']
-  ];
+  ] as const;
   // Omitted types since they're deprecated:
   // BSONSymbol
   // DBRef
@@ -38,8 +37,8 @@ describe('When importing BSON', function () {
   }
 
   it('should correctly round trip Map', function () {
-    expect(BSON.Map).to.be.a('function');
-    const doc = { key: new BSON.Map([['2', 2]]) };
+    expect(Map).to.be.a('function');
+    const doc = { key: new Map([['2', 2]]) };
     const outputDoc = BSON.deserialize(BSON.serialize(doc));
     expect(outputDoc).to.have.nested.property('key.2', 2);
   });

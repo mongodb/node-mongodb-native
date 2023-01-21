@@ -2,8 +2,10 @@ import type { DeserializeOptions, SerializeOptions } from 'bson';
 
 export {
   Binary,
+  BSON,
   BSONRegExp,
   BSONSymbol,
+  BSONType,
   calculateObjectSize,
   Code,
   DBRef,
@@ -13,20 +15,12 @@ export {
   Double,
   Int32,
   Long,
-  Map,
   MaxKey,
   MinKey,
   ObjectId,
   serialize,
   Timestamp
 } from 'bson';
-
-// TODO(NODE-4867): fix with bson v5
-/** @internal */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const BSON = require('bson');
-
-export { BSON };
 
 /**
  * BSON Serialization options.
@@ -42,6 +36,7 @@ export interface BSONSerializeOptions
       | 'allowObjectSmallerThanBufferSize'
       | 'index'
       | 'validation'
+      | 'useBigInt64'
     > {
   /**
    * Enabling the raw option will return a [Node.js Buffer](https://nodejs.org/api/buffer.html)

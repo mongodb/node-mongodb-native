@@ -30,6 +30,7 @@ import { ReadPreference } from './read_preference';
 import { _advanceClusterTime, ClusterTime, TopologyType } from './sdam/common';
 import { isTransactionCommand, Transaction, TransactionOptions, TxnState } from './transactions';
 import {
+  ByteUtils,
   calculateDurationInMs,
   Callback,
   commandSupportsReadConcern,
@@ -331,7 +332,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       return false;
     }
 
-    return this.id.id.buffer.equals(session.id.id.buffer);
+    return ByteUtils.equals(this.id.id.buffer, session.id.id.buffer);
   }
 
   /**
