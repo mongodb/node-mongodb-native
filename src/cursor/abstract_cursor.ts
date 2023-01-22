@@ -866,11 +866,7 @@ class ReadableCursorStream extends Readable {
   }
 
   override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
-    // FIXME: how is this possible?
-    const res = this._cursor.close();
-    if (res != null) {
-      res.finally(() => callback(error));
-    }
+    this._cursor.close().finally(() => callback(error));
   }
 
   private _readNext() {
