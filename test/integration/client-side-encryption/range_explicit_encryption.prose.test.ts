@@ -13,13 +13,13 @@ const getKmsProviders = () => {
   return { local: result.local };
 };
 
-const metaData = {
+const metaData: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
 
     // The Range Explicit Encryption tests require MongoDB server 6.2+. The tests must not run against a standalone.
     mongodb: '>=6.2.0',
-    topology: !'standalone'
+    topology: '!single'
   }
 };
 
@@ -32,21 +32,21 @@ function byId(a, b) {
   return 0;
 }
 
-function compareNumericValues(
-  type: typeof dataTypes[number]['type'],
-  value: unknown,
-  expectedValue: number
-) {
+function compareNumericValuesFactory(
+  type: typeof dataTypes[number]['type']
+): (value: unknown, expected: number) => void {
   if (type === 'Date') {
-    expect(value).to.be.instanceof(Date);
-    expect((value as Date).getUTCMilliseconds()).to.equal(expectedValue);
+    return (value, expected) => {
+      expect(value).to.be.instanceof(Date);
+      expect((value as Date).getUTCMilliseconds()).to.equal(expected);
+    };
   } else if (type.includes('Decimal')) {
-    expect(value).to.be.instanceof(Decimal128);
-    expect((value as Decimal128).bytes).to.deep.equal(
-      new Decimal128(expectedValue.toString()).bytes
-    );
+    return (value, expected) => {
+      expect(value).to.be.instanceof(Decimal128);
+      expect((value as Decimal128).bytes).to.deep.equal(new Decimal128(expected.toString()).bytes);
+    };
   } else {
-    expect(value).to.equal(expectedValue);
+    return (value, expected) => expect(value).to.equal(expected);
   }
 }
 
@@ -144,6 +144,8 @@ describe('Range Explicit Encryption', function () {
   let encryptedSix;
   let encryptedThirty;
   let encryptedTwoHundred;
+  let compareNumericValues: ReturnType<typeof compareNumericValuesFactory>;
+
   for (const { type: dataType, rangeOptions, factory } of dataTypes) {
     context(`datatype ${dataType}`, async function () {
       beforeEach(async function () {
@@ -250,6 +252,8 @@ describe('Range Explicit Encryption', function () {
           ]);
 
         await utilClient.close();
+
+        compareNumericValues = compareNumericValuesFactory(dataType);
       });
 
       afterEach(async function () {
@@ -265,8 +269,8 @@ describe('Range Explicit Encryption', function () {
           rangeOptions
         });
 
-        const result = await clientEncryption.decrypt(insertedPayload);
-        compareNumericValues(dataType, result, 6);
+        const result = await clientEncryption.decrypt(insertedPayload, { promoteValues: false });
+        compareNumericValues(result, 6);
       });
 
       it('Case 2: can find encrypted range and return the maximum', metaData, async function () {
@@ -317,7 +321,7 @@ describe('Range Explicit Encryption', function () {
           const doc = result[i];
           const expectedDoc = expected[i];
           expect(doc).to.have.property('_id', expectedDoc['_id']);
-          compareNumericValues(dataType, doc[key], expectedDoc[key]);
+          compareNumericValues(doc[key], expectedDoc[key]);
         }
       });
 
@@ -365,7 +369,7 @@ describe('Range Explicit Encryption', function () {
           const doc = result[i];
           const expectedDoc = expected[i];
           expect(doc).to.have.property('_id', expectedDoc['_id']);
-          compareNumericValues(dataType, doc[key], expectedDoc[key]);
+          compareNumericValues(doc[key], expectedDoc[key]);
         }
       });
 
@@ -396,7 +400,7 @@ describe('Range Explicit Encryption', function () {
         expect(result).to.have.lengthOf(1);
 
         expect(result[0]).to.have.property('_id', 3);
-        compareNumericValues(dataType, result[0][key], 200);
+        compareNumericValues(result[0][key], 200);
       });
 
       it('Case 5: can run an aggregation expression inside $expr', metaData, async function () {
@@ -438,7 +442,7 @@ describe('Range Explicit Encryption', function () {
           const doc = result[i];
           const expectedDoc = expected[i];
           expect(doc).to.have.property('_id', expectedDoc['_id']);
-          compareNumericValues(dataType, doc[key], expectedDoc[key]);
+          compareNumericValues(doc[key], expectedDoc[key]);
         }
       });
 
