@@ -61,7 +61,6 @@ const EXPECTED_EXPORTS = [
   'ListCollectionsCursor',
   'ListIndexesCursor',
   'Long',
-  'Map',
   'MaxKey',
   'MinKey',
   'MongoAPIError',

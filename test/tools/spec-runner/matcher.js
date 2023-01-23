@@ -34,6 +34,16 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
       };
     }
 
+    if (actualObj._bsontype === 'Code' && key === 'scope') {
+      // HACK: Code always has a scope property, it can sometimes be null,
+      // the "does not exist" logic does not handle that
+      return {
+        match: actualObj.scope == null,
+        expected: expectedObj,
+        actual: actualObj
+      };
+    }
+
     const match = !Object.prototype.hasOwnProperty.call(actualObj, key);
     return {
       match,

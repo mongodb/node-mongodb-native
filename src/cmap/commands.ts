@@ -136,7 +136,7 @@ export class Query {
   }
 
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  toBin(): Buffer[] {
+  toBin(): Uint8Array[] {
     const buffers = [];
     let projection = null;
 
@@ -550,7 +550,7 @@ export class Msg {
     return buffers;
   }
 
-  makeDocumentSegment(buffers: Buffer[], document: Document): number {
+  makeDocumentSegment(buffers: Uint8Array[], document: Document): number {
     const payloadTypeBuffer = Buffer.alloc(1);
     payloadTypeBuffer[0] = 0;
 
@@ -561,7 +561,7 @@ export class Msg {
     return payloadTypeBuffer.length + documentBuffer.length;
   }
 
-  serializeBson(document: Document): Buffer {
+  serializeBson(document: Document): Uint8Array {
     return BSON.serialize(document, {
       checkKeys: this.checkKeys,
       serializeFunctions: this.serializeFunctions,

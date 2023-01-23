@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import {
   BufferPool,
+  ByteUtils,
   compareObjectId,
   eachAsync,
   HostAddress,
@@ -818,5 +819,84 @@ describe('driver utils', function () {
       // @ts-expect-error: not narrowed based on numeric result, but these values are correct
       it(title, () => expect(compareObjectId(oid1, oid2)).to.equal(result));
     }
+  });
+
+  context('const ByteUtils', () => {
+    context('toLocalBufferType()', () => {
+      it('returns identical Node.js buffer instance when input is Buffer', () => {
+        const buffer = Buffer.from([1, 2, 3]);
+        // Note: **Not** a deep.equal check
+        expect(ByteUtils.toLocalBufferType(buffer)).to.equal(buffer);
+      });
+
+      it('returns new Node.js buffer instance when input is Uint8Array', () => {
+        const uint8array = new Uint8Array([1, 2, 3]);
+        expect(Buffer.isBuffer(ByteUtils.toLocalBufferType(uint8array))).to.be.true;
+      });
+
+      it('does not clone ArrayBuffer when creating a new Node.js Buffer', () => {
+        const uint8array = new Uint8Array([1, 2, 3]);
+        // Note: **Not** a deep.equal check
+        expect(ByteUtils.toLocalBufferType(uint8array).buffer).to.equal(uint8array.buffer);
+      });
+    });
+
+    context('equals()', () => {
+      it('is a function', () => expect(ByteUtils).property('equals').is.a('function'));
+
+      it('returns true for equal Buffer or Uint8Array', () => {
+        const buffer = Buffer.from([1, 2, 3]);
+        const uint8array = new Uint8Array([1, 2, 3]);
+
+        expect(ByteUtils.equals(buffer, uint8array)).to.be.true;
+        expect(ByteUtils.equals(uint8array, buffer)).to.be.true;
+        expect(ByteUtils.equals(uint8array, uint8array)).to.be.true;
+        expect(ByteUtils.equals(buffer, buffer)).to.be.true;
+      });
+
+      it('returns false for nonequal Buffer or Uint8Array', () => {
+        const buffer = Buffer.from([1, 2, 3]);
+        const uint8array = new Uint8Array([1, 2, 4]);
+
+        expect(ByteUtils.equals(buffer, uint8array)).to.be.false;
+        expect(ByteUtils.equals(uint8array, buffer)).to.be.false;
+      });
+    });
+
+    context('compare()', () => {
+      it('is a function', () => expect(ByteUtils).property('compare').is.a('function'));
+
+      it('returns 0 for equal Buffer or Uint8Array', () => {
+        const buffer = Buffer.from([1, 2, 3]);
+        const uint8array = new Uint8Array([1, 2, 3]);
+
+        expect(ByteUtils.compare(buffer, uint8array)).to.equal(0);
+        expect(ByteUtils.compare(uint8array, buffer)).to.equal(0);
+        expect(ByteUtils.compare(uint8array, uint8array)).to.equal(0);
+        expect(ByteUtils.compare(buffer, buffer)).to.equal(0);
+      });
+
+      it('returns +/- 1 for Buffer or UInt8Array if one is greater or less than', () => {
+        const buffer = Buffer.from([1, 2, 3]);
+        const uint8array = new Uint8Array([1, 2, 4]);
+
+        expect(ByteUtils.compare(buffer, uint8array)).to.equal(-1);
+        expect(ByteUtils.compare(uint8array, buffer)).to.equal(1);
+      });
+    });
+
+    context('toBase64()', () => {
+      it('is a function', () => expect(ByteUtils).property('toBase64').is.a('function'));
+
+      const oneTwoThreeBase64 = 'AQID';
+
+      it('converts a Buffer to a base64 string', () => {
+        expect(ByteUtils.toBase64(Buffer.from([1, 2, 3]))).to.equal(oneTwoThreeBase64);
+      });
+
+      it('converts a Uint8Array to a base64 string', () => {
+        expect(ByteUtils.toBase64(new Uint8Array([1, 2, 3]))).to.equal(oneTwoThreeBase64);
+      });
+    });
   });
 });
