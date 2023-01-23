@@ -32,24 +32,6 @@ function byId(a, b) {
   return 0;
 }
 
-function compareNumericValuesFactory(
-  type: typeof dataTypes[number]['type']
-): (value: unknown, expected: number) => void {
-  if (type === 'Date') {
-    return (value, expected) => {
-      expect(value).to.be.instanceof(Date);
-      expect((value as Date).getUTCMilliseconds()).to.equal(expected);
-    };
-  } else if (type.includes('Decimal')) {
-    return (value, expected) => {
-      expect(value).to.be.instanceof(Decimal128);
-      expect((value as Decimal128).bytes).to.deep.equal(new Decimal128(expected.toString()).bytes);
-    };
-  } else {
-    return (value, expected) => expect(value).to.equal(expected);
-  }
-}
-
 const prepareOptions = opts =>
   EJSON.parse(EJSON.stringify(opts, { relaxed: false }), {
     relaxed: false
@@ -144,11 +126,19 @@ describe('Range Explicit Encryption', function () {
   let encryptedSix;
   let encryptedThirty;
   let encryptedTwoHundred;
-  let compareNumericValues: ReturnType<typeof compareNumericValuesFactory>;
-
+  let compareNumericValues;
   for (const { type: dataType, rangeOptions, factory } of dataTypes) {
     context(`datatype ${dataType}`, async function () {
       beforeEach(async function () {
+        compareNumericValues = function (value: unknown, expected: number): void {
+          if (dataType === 'DoubleNoPrecision' || dataType === 'DoublePrecision') {
+            expect(value).to.equal(expected);
+          } else if (dataType === 'Long') {
+            expect(value).to.equal(expected);
+          } else {
+            expect(value).to.deep.equal(factory(expected));
+          }
+        };
         const ClientEncryption = this.configuration.mongodbClientEncryption.ClientEncryption;
         const keyDocument1 = EJSON.parse(
           await readFile(join(__dirname, '../../../', basePath, 'keys', `key1-document.json`), {
@@ -198,7 +188,6 @@ describe('Range Explicit Encryption', function () {
           .insertOne(keyDocument1, { writeConcern: { w: 'majority' } });
 
         keyVaultClient = this.configuration.newClient();
-        await keyVaultClient.connect();
 
         const clientEncryptionOpts = {
           keyVaultNamespace: 'keyvault.datakeys',
@@ -212,9 +201,10 @@ describe('Range Explicit Encryption', function () {
           bypassQueryAnalysis: true
         };
 
-        encryptedClient = await this.configuration
-          .newClient({}, { autoEncryption: autoEncryptionOptions })
-          .connect();
+        encryptedClient = this.configuration.newClient(
+          {},
+          { autoEncryption: autoEncryptionOptions }
+        );
 
         const opts = {
           keyId,
@@ -252,8 +242,6 @@ describe('Range Explicit Encryption', function () {
           ]);
 
         await utilClient.close();
-
-        compareNumericValues = compareNumericValuesFactory(dataType);
       });
 
       afterEach(async function () {
@@ -464,7 +452,9 @@ describe('Range Explicit Encryption', function () {
             })
             .catch(e => e);
 
-          expect(resultOrError).to.be.instanceOf(Error);
+          expect(resultOrError).to.be.instanceOf(
+            this.configuration.mongodbClientEncryption.MongoCryptError
+          );
         }
       );
 
@@ -491,7 +481,9 @@ describe('Range Explicit Encryption', function () {
           })
           .catch(e => e);
 
-        expect(resultOrError).to.be.instanceOf(Error);
+        expect(resultOrError).to.be.instanceOf(
+          this.configuration.mongodbClientEncryption.MongoCryptError
+        );
       });
 
       it(
@@ -534,7 +526,7 @@ describe('Range Explicit Encryption', function () {
             })
             .catch(e => e);
 
-          expect(resultOrError).to.be.instanceOf(Error);
+          expect(resultOrError).to.be.instanceOf(TypeError);
         }
       );
     });
