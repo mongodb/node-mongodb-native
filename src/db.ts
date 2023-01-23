@@ -80,6 +80,7 @@ const DB_OPTIONS_ALLOW_LIST = [
 export interface DbPrivate {
   client: MongoClient;
   options?: DbOptions;
+  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   logger: Logger;
   readPreference?: ReadPreference;
   pkFactory: PkFactory;
@@ -774,11 +775,13 @@ export class Db {
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
 
-  /** Return the db logger */
+  /** Return the db logger
+   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   getLogger(): Logger {
     return this.s.logger;
   }
 
+  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   get logger(): Logger {
     return this.s.logger;
   }

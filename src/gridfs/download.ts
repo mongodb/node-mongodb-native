@@ -184,6 +184,8 @@ export class GridFSBucketReadStream extends Readable implements NodeJS.ReadableS
    * the 'close' event once the cursor is successfully killed.
    *
    * @param callback - called when the cursor is successfully closed or an error occurred.
+   *
+   * @deprecated GridFSBucketReadStream.abort is deprecated
    */
   abort(callback?: Callback<void>): void {
     this.push(null);
