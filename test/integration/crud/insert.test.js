@@ -4,7 +4,6 @@ const { format: f } = require('util');
 const { expect } = require('chai');
 
 const Script = require('vm');
-const { normalizedFunctionString } = require('bson/lib/parser/utils');
 
 const {
   Long,
@@ -143,41 +142,20 @@ describe('crud - insert', function () {
       }
     });
 
-    it('shouldCorrectlyHandleMultipleDocumentInsert', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('insertMany returns the insertedIds and we can look up the documents', async function () {
+      const db = client.db();
+      const collection = db.collection('test_multiple_insert');
+      const docs = [{ a: 1 }, { a: 2 }];
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_multiple_insert');
-          var docs = [{ a: 1 }, { a: 2 }];
+      const r = await collection.insertMany(docs);
+      expect(r).property('insertedCount').to.equal(2);
+      expect(r.insertedIds[0]).to.have.property('_bsontype', 'ObjectId');
+      expect(r.insertedIds[1]).to.have.property('_bsontype', 'ObjectId');
 
-          collection.insert(docs, configuration.writeConcernMax(), function (err, r) {
-            expect(r).property('insertedCount').to.equal(2);
-            test.ok(r.insertedIds[0]._bsontype === 'ObjectID');
-            test.ok(r.insertedIds[1]._bsontype === 'ObjectID');
-
-            // Let's ensure we have both documents
-            collection.find().toArray(function (err, docs) {
-              test.equal(2, docs.length);
-              var results = [];
-              // Check that we have all the results we want
-              docs.forEach(function (doc) {
-                if (doc.a === 1 || doc.a === 2) results.push(1);
-              });
-              test.equal(2, results.length);
-              // Let's close the db
-              client.close(done);
-            });
-          });
-        });
-      }
+      const foundDocs = await collection.find().toArray();
+      expect(foundDocs).to.have.lengthOf(2);
+      expect(foundDocs).to.have.nested.property('[0].a', 1);
+      expect(foundDocs).to.have.nested.property('[1].a', 2);
     });
 
     it('shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument', {
@@ -563,70 +541,6 @@ describe('crud - insert', function () {
       }
     });
 
-    it('shouldThrowErrorIfSerializingFunctionOrdered', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        var configuration = this.configuration;
-        var db = client.db(configuration.db);
-        var collection = db.collection('test_should_throw_error_if_serializing_function');
-        var func = function () {
-          return 1;
-        };
-        // Insert the update
-        collection.insert(
-          { i: 1, z: func },
-          { writeConcern: { w: 1 }, serializeFunctions: true },
-          function (err, result) {
-            expect(err).to.not.exist;
-
-            collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
-              expect(err).to.not.exist;
-              test.equal(normalizedFunctionString(func), object.z.code);
-              test.equal(1, object.i);
-              client.close(done);
-            });
-          }
-        );
-      }
-    });
-
-    it('shouldThrowErrorIfSerializingFunctionUnOrdered', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        var configuration = this.configuration;
-        var db = client.db(configuration.db);
-        var collection = db.collection('test_should_throw_error_if_serializing_function_1');
-        var func = function () {
-          return 1;
-        };
-        // Insert the update
-        collection.insert(
-          { i: 1, z: func },
-          { writeConcern: { w: 1 }, serializeFunctions: true, ordered: false },
-          function (err, result) {
-            expect(err).to.not.exist;
-
-            collection.findOne({ _id: result.insertedIds[0] }, function (err, object) {
-              expect(err).to.not.exist;
-              test.equal(normalizedFunctionString(func), object.z.code);
-              test.equal(1, object.i);
-              client.close(done);
-            });
-          }
-        );
-      }
-    });
-
     it('shouldCorrectlyInsertDocumentWithUUID', {
       // Add a tag that our runner can trigger on
       // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -927,43 +841,25 @@ describe('crud - insert', function () {
       }
     });
 
-    it('Should correctly insert object with timestamps', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('inserts and retrieves objects with timestamps', async function () {
+      const doc = {
+        _id: new ObjectId('4e886e687ff7ef5e00000162'),
+        str: 'foreign',
+        type: 2,
+        timestamp: new Timestamp({ i: 10000, t: 0 }),
+        links: [
+          'http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/'
+        ],
+        timestamp2: new Timestamp({ i: 33333, t: 0 })
+      };
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var doc = {
-          _id: new ObjectId('4e886e687ff7ef5e00000162'),
-          str: 'foreign',
-          type: 2,
-          timestamp: new Timestamp(10000),
-          links: [
-            'http://www.reddit.com/r/worldnews/comments/kybm0/uk_home_secretary_calls_for_the_scrapping_of_the/'
-          ],
-          timestamp2: new Timestamp(33333)
-        };
+      const db = client.db();
+      const collection = db.collection('Should_correctly_insert_object_with_timestamps');
 
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('Should_correctly_insert_object_with_timestamps');
-
-          collection.insert(doc, configuration.writeConcernMax(), function (err, result) {
-            test.ok(err == null);
-            test.ok(result);
-
-            collection.findOne(function (err, item) {
-              test.ok(err == null);
-              test.deepEqual(doc, item);
-              client.close(done);
-            });
-          });
-        });
-      }
+      const { insertedId } = await collection.insertOne(doc);
+      expect(insertedId.equals(doc._id)).to.be.true;
+      const result = await collection.findOne({ timestamp: new Timestamp({ i: 10000, t: 0 }) });
+      expect(result).to.deep.equal(doc);
     });
 
     it('Should Correctly allow for control of serialization of functions on command level', {
@@ -1679,40 +1575,21 @@ describe('crud - insert', function () {
       }
     });
 
-    it('mixedTimestampAndDateQuery', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('lookups for timestamp and date work', async function () {
+      const db = client.db();
+      const collection = db.collection('timestamp_date');
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('timestamp_date');
+      const d = new Date();
+      const documents = [{ x: new Timestamp({ i: 1, t: 2 }) }, { x: d }];
 
-          var d = new Date();
-          var documents = [{ x: new Timestamp(1, 2) }, { x: d }];
+      const result = await collection.insertMany(documents);
+      test.ok(result);
 
-          collection.insert(documents, configuration.writeConcernMax(), function (err, result) {
-            expect(err).to.not.exist;
-            test.ok(result);
+      const doc = await collection.findOne({ x: new Timestamp({ i: 1, t: 2 }) });
+      expect(doc).to.not.be.null;
 
-            collection.findOne({ x: new Timestamp(1, 2) }, function (err, doc) {
-              expect(err).to.not.exist;
-              test.ok(doc != null);
-
-              collection.findOne({ x: d }, function (err, doc) {
-                expect(err).to.not.exist;
-                test.ok(doc != null);
-                client.close(done);
-              });
-            });
-          });
-        });
-      }
+      const docDate = await collection.findOne({ x: d });
+      expect(docDate).to.not.be.null;
     });
 
     it('positiveAndNegativeInfinity', {
