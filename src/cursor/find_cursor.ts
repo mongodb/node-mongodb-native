@@ -42,12 +42,12 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   constructor(
     client: MongoClient,
     namespace: MongoDBNamespace,
-    filter: Document | undefined,
+    filter: Document = {},
     options: FindOptions = {}
   ) {
     super(client, namespace, options);
 
-    this[kFilter] = filter || {};
+    this[kFilter] = filter;
     this[kBuiltOptions] = options;
 
     if (options.sort != null) {
@@ -101,7 +101,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
 
       if (batchSize <= 0) {
-        return this.close(callback);
+        this.close().finally(() => callback());
+        return;
       }
     }
 
@@ -121,58 +122,32 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * Get the count of documents for this cursor
    * @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead
    */
-  count(): Promise<number>;
-  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead. */
-  count(options: CountOptions): Promise<number>;
-  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead. Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  count(callback: Callback<number>): void;
-  /** @deprecated Use `collection.estimatedDocumentCount` or `collection.countDocuments` instead. Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  count(options: CountOptions, callback: Callback<number>): void;
-  count(
-    options?: CountOptions | Callback<number>,
-    callback?: Callback<number>
-  ): Promise<number> | void {
+  async count(options?: CountOptions): Promise<number> {
     emitWarningOnce(
       'cursor.count is deprecated and will be removed in the next major version, please use `collection.estimatedDocumentCount` or `collection.countDocuments` instead '
     );
     if (typeof options === 'boolean') {
       throw new MongoInvalidArgumentError('Invalid first parameter to count');
     }
-
-    if (typeof options === 'function') (callback = options), (options = {});
-    options = options ?? {};
-
     return executeOperation(
       this.client,
       new CountOperation(this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
         ...options
-      }),
-      callback
+      })
     );
   }
 
   /** Execute the explain for the cursor */
-  explain(): Promise<Document>;
-  explain(verbosity?: ExplainVerbosityLike): Promise<Document>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  explain(callback: Callback): void;
-  explain(
-    verbosity?: ExplainVerbosityLike | Callback,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof verbosity === 'function') (callback = verbosity), (verbosity = true);
-    if (verbosity == null) verbosity = true;
-
+  async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
     return executeOperation(
       this.client,
       new FindOperation(undefined, this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
-        explain: verbosity
-      }),
-      callback
+        explain: verbosity ?? true
+      })
     );
   }
 

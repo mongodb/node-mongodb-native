@@ -4,6 +4,7 @@ import {
   ClientSession,
   Collection,
   MongoClient,
+  MongoInvalidArgumentError,
   MongoNetworkError,
   ServerSessionPool
 } from '../../mongodb';
@@ -24,23 +25,31 @@ describe('Transactions', function () {
       await client.close();
     });
 
-    it('should provide a useful error if a Promise is not returned', {
-      metadata: {
-        requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.1.5', serverless: 'forbid' }
+    it(
+      'should provide a useful error if a Promise is not returned',
+      {
+        requires: {
+          topology: ['replicaset', 'sharded'],
+          mongodb: '>=4.1.5',
+          serverless: 'forbid'
+        }
       },
-      test: function (done) {
-        function fnThatDoesntReturnPromise() {
+      async function () {
+        function fnThatDoesNotReturnPromise() {
           return false;
         }
 
-        // @ts-expect-error: Testing that a non promise returning function is handled correctly
-        expect(() => session.withTransaction(fnThatDoesntReturnPromise)).to.throw(
-          /must return a Promise/
-        );
+        const result = await session
+          // @ts-expect-error: testing a function that does not return a promise
+          .withTransaction(fnThatDoesNotReturnPromise)
+          .catch(error => error);
 
-        session.endSession(done);
+        expect(result).to.be.instanceOf(MongoInvalidArgumentError);
+        expect(result.message).to.match(/must return a Promise/);
+
+        await session.endSession();
       }
-    });
+    );
 
     it('should return readable error if promise rejected with no reason', {
       metadata: {

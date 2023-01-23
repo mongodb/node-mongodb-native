@@ -16,9 +16,56 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
+### Optional callback support migrated to `mongodb-legacy`
+
+If you are a callback user and you are not ready to use promises, support for your workflow has **not** been removed.
+We have migrated it to a new package:
+
+- [`mongodb-legacy` Github](https://github.com/mongodb-js/nodejs-mongodb-legacy#readme)
+- [`mongodb-legacy` npm](https://www.npmjs.com/package/mongodb-legacy)
+
+The package wraps all of the driver's asynchronous operations that previously supported both promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
+
+#### Example usage of equivalent callback and promise usage
+
+After installing the package and modifying imports the following example demonstrates equivalent usages of either `async`/`await` syntax, `.then`/`.catch` chaining, or callbacks:
+
+```ts
+// Just add '-legacy' to my mongodb import
+import { MongoClient } from 'mongodb-legacy';
+const client = new MongoClient();
+const db = client.db();
+const collection = db.collection('pets');
+
+// Legacy projects may have intermixed API usage:
+app.get('/endpoint_async_await', async (req, res) => {
+  try {
+    const result = await collection.findOne({})
+    res.end(JSON.stringify(result));
+  } catch (error) {
+    res.errorHandling(error)
+  }
+});
+
+app.get('/endpoint_promises', (req, res) => {
+  collection
+    .findOne({})
+    .then(result => res.end(JSON.stringify(result)))
+    .catch(error => res.errorHandling(error));
+});
+
+app.get('/endpoint_callbacks', (req, res) => {
+  collection.findOne({}, (error, result) => {
+    if (error) return res.errorHandling(error);
+    res.end(JSON.stringify(result));
+  });
+});
+```
+
+
 ### Dot Notation Typescript Support Removed By Default
 
-**NOTE** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same.
+**NOTE:** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same.
 
 Version 4.3.0 introduced Typescript support for dot notation in filter predicates.  For example:
 

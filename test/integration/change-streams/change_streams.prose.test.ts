@@ -37,7 +37,7 @@ function triggerResumableError(
   }
 
   const stub = sinon.stub(changeStream.cursor, 'close');
-  stub.callsFake(function () {
+  stub.callsFake(async function () {
     stub.wrappedMethod.call(this);
     stub.restore();
     onClose();
@@ -50,7 +50,7 @@ function triggerResumableError(
       return;
     }
 
-    const nextStub = sinon.stub(changeStream.cursor, 'next').callsFake(function (callback) {
+    const nextStub = sinon.stub(changeStream.cursor, 'next').callsFake(async function () {
       callback(new MongoNetworkError('error triggered from test'));
       nextStub.restore();
     });

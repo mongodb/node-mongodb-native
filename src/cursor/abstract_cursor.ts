@@ -21,7 +21,7 @@ import { ReadConcern, ReadConcernLike } from '../read_concern';
 import { ReadPreference, ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { Callback, List, maybeCallback, MongoDBNamespace, ns } from '../utils';
+import { Callback, List, MongoDBNamespace, ns } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
@@ -352,60 +352,43 @@ export abstract class AbstractCursor<
     return new ReadableCursorStream(this);
   }
 
-  hasNext(): Promise<boolean>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  hasNext(callback: Callback<boolean>): void;
-  hasNext(callback?: Callback<boolean>): Promise<boolean> | void {
-    return maybeCallback(async () => {
-      if (this[kId] === Long.ZERO) {
-        return false;
-      }
-
-      if (this[kDocuments].length !== 0) {
-        return true;
-      }
-
-      const doc = await nextAsync<TSchema>(this, true);
-
-      if (doc) {
-        this[kDocuments].unshift(doc);
-        return true;
-      }
-
+  async hasNext(): Promise<boolean> {
+    if (this[kId] === Long.ZERO) {
       return false;
-    }, callback);
+    }
+
+    if (this[kDocuments].length !== 0) {
+      return true;
+    }
+
+    const doc = await nextAsync<TSchema>(this, true);
+
+    if (doc) {
+      this[kDocuments].unshift(doc);
+      return true;
+    }
+
+    return false;
   }
 
   /** Get the next available document from the cursor, returns null if no more documents are available. */
-  next(): Promise<TSchema | null>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  next(callback: Callback<TSchema | null>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void;
-  next(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
-    return maybeCallback(async () => {
-      if (this[kId] === Long.ZERO) {
-        throw new MongoCursorExhaustedError();
-      }
+  async next(): Promise<TSchema | null> {
+    if (this[kId] === Long.ZERO) {
+      throw new MongoCursorExhaustedError();
+    }
 
-      return nextAsync(this, true);
-    }, callback);
+    return nextAsync(this, true);
   }
 
   /**
    * Try to get the next available document from the cursor or `null` if an empty batch is returned
    */
-  tryNext(): Promise<TSchema | null>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  tryNext(callback: Callback<TSchema | null>): void;
-  tryNext(callback?: Callback<TSchema | null>): Promise<TSchema | null> | void {
-    return maybeCallback(async () => {
-      if (this[kId] === Long.ZERO) {
-        throw new MongoCursorExhaustedError();
-      }
+  async tryNext(): Promise<TSchema | null> {
+    if (this[kId] === Long.ZERO) {
+      throw new MongoCursorExhaustedError();
+    }
 
-      return nextAsync(this, false);
-    }, callback);
+    return nextAsync(this, false);
   }
 
   /**
@@ -414,36 +397,23 @@ export abstract class AbstractCursor<
    * If the iterator returns `false`, iteration will stop.
    *
    * @param iterator - The iteration callback.
-   * @param callback - The end callback.
    */
-  forEach(iterator: (doc: TSchema) => boolean | void): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  forEach(iterator: (doc: TSchema) => boolean | void, callback: Callback<void>): void;
-  forEach(
-    iterator: (doc: TSchema) => boolean | void,
-    callback?: Callback<void>
-  ): Promise<void> | void {
+  async forEach(iterator: (doc: TSchema) => boolean | void): Promise<void> {
     if (typeof iterator !== 'function') {
       throw new MongoInvalidArgumentError('Argument "iterator" must be a function');
     }
-    return maybeCallback(async () => {
-      for await (const document of this) {
-        const result = iterator(document);
-        if (result === false) {
-          break;
-        }
+    for await (const document of this) {
+      const result = iterator(document);
+      if (result === false) {
+        break;
       }
-    }, callback);
+    }
   }
 
-  close(): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  close(callback: Callback): void;
-  close(callback?: Callback): Promise<void> | void {
+  async close(): Promise<void> {
     const needsToEmitClosed = !this[kClosed];
     this[kClosed] = true;
-
-    return maybeCallback(async () => cleanupCursorAsync(this, { needsToEmitClosed }), callback);
+    await cleanupCursorAsync(this, { needsToEmitClosed });
   }
 
   /**
@@ -451,20 +421,13 @@ export abstract class AbstractCursor<
    * is enough memory to store the results. Note that the array only contains partial
    * results when this cursor had been previously accessed. In that case,
    * cursor.rewind() can be used to reset the cursor.
-   *
-   * @param callback - The result callback.
    */
-  toArray(): Promise<TSchema[]>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  toArray(callback: Callback<TSchema[]>): void;
-  toArray(callback?: Callback<TSchema[]>): Promise<TSchema[]> | void {
-    return maybeCallback(async () => {
-      const array = [];
-      for await (const document of this) {
-        array.push(document);
-      }
-      return array;
-    }, callback);
+  async toArray(): Promise<TSchema[]> {
+    const array = [];
+    for await (const document of this) {
+      array.push(document);
+    }
+    return array;
   }
 
   /**
@@ -903,7 +866,10 @@ class ReadableCursorStream extends Readable {
   }
 
   override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
-    this._cursor.close(err => process.nextTick(callback, err || error));
+    this._cursor.close().then(
+      () => callback(error),
+      closeError => callback(closeError)
+    );
   }
 
   private _readNext() {

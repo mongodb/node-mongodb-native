@@ -77,25 +77,14 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** Execute the explain for the cursor */
-  explain(): Promise<Document>;
-  explain(verbosity: ExplainVerbosityLike): Promise<Document>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  explain(callback: Callback): void;
-  explain(
-    verbosity?: ExplainVerbosityLike | Callback,
-    callback?: Callback<Document>
-  ): Promise<Document> | void {
-    if (typeof verbosity === 'function') (callback = verbosity), (verbosity = true);
-    if (verbosity == null) verbosity = true;
-
+  async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
     return executeOperation(
       this.client,
       new AggregateOperation(this.namespace, this[kPipeline], {
         ...this[kOptions], // NOTE: order matters here, we may need to refine this
         ...this.cursorOptions,
-        explain: verbosity
-      }),
-      callback
+        explain: verbosity ?? true
+      })
     );
   }
 

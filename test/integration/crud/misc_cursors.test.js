@@ -1671,64 +1671,26 @@ describe('Cursor', function () {
     }
   });
 
-  it('removes session wheen cloning a find cursor', function (done) {
-    const configuration = this.configuration;
-    client.connect((err, client) => {
-      expect(err).to.not.exist;
+  it('removes session when cloning an find cursor', async function () {
+    const collection = await client.db().collection('test');
 
-      const db = client.db(configuration.db);
-      db.createCollection('clone_find_cursor_session', (err, collection) => {
-        expect(err).to.not.exist;
+    const cursor = collection.find({});
+    const clonedCursor = cursor.clone();
 
-        collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
-
-          const cursor = collection.find();
-          const clonedCursor = cursor.clone();
-          cursor.toArray(err => {
-            expect(err).to.not.exist;
-            clonedCursor.toArray(err => {
-              expect(err).to.not.exist;
-              client.close();
-              done();
-            });
-          });
-        });
-      });
-    });
+    expect(cursor).to.have.property('session');
+    expect(clonedCursor).to.have.property('session');
+    expect(cursor.session).to.not.equal(clonedCursor.session);
   });
 
-  it('removes session wheen cloning an aggregation cursor', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('removes session when cloning an aggregation cursor', async function () {
+    const collection = await client.db().collection('test');
 
-    test: function (done) {
-      const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
+    const cursor = collection.aggregate([{ $match: {} }]);
+    const clonedCursor = cursor.clone();
 
-        const db = client.db(configuration.db);
-        db.createCollection('clone_aggregation_cursor_session', (err, collection) => {
-          expect(err).to.not.exist;
-
-          collection.insertOne({ a: 1 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-
-            const cursor = collection.aggregate([{ $match: { a: 1 } }]);
-            const clonedCursor = cursor.clone();
-            cursor.toArray(err => {
-              expect(err).to.not.exist;
-              clonedCursor.toArray(err => {
-                expect(err).to.not.exist;
-                client.close();
-                done();
-              });
-            });
-          });
-        });
-      });
-    }
+    expect(cursor).to.have.property('session');
+    expect(clonedCursor).to.have.property('session');
+    expect(cursor.session).to.not.equal(clonedCursor.session);
   });
 
   it('destroying a stream stops it', {

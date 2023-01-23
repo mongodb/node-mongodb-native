@@ -24,15 +24,7 @@ import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
-import {
-  Callback,
-  ClientMetadata,
-  HostAddress,
-  maybeCallback,
-  MongoDBNamespace,
-  ns,
-  resolveOptions
-} from './utils';
+import { ClientMetadata, HostAddress, MongoDBNamespace, ns, resolveOptions } from './utils';
 import type { W, WriteConcern, WriteConcernSettings } from './write_concern';
 
 /** @public */
@@ -412,79 +404,60 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    *
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
-  connect(): Promise<this>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  connect(callback: Callback<this>): void;
-  connect(callback?: Callback<this>): Promise<this> | void {
-    if (callback && typeof callback !== 'function') {
-      throw new MongoInvalidArgumentError('Method `connect` only accepts a callback');
+  async connect(): Promise<this> {
+    if (this.topology && this.topology.isConnected()) {
+      return this;
     }
 
-    return maybeCallback(async () => {
-      if (this.topology && this.topology.isConnected()) {
-        return this;
+    const options = this[kOptions];
+
+    if (typeof options.srvHost === 'string') {
+      const hosts = await resolveSRVRecord(options);
+
+      for (const [index, host] of hosts.entries()) {
+        options.hosts[index] = host;
       }
+    }
 
-      const options = this[kOptions];
+    const topology = new Topology(options.hosts, options);
+    // Events can be emitted before initialization is complete so we have to
+    // save the reference to the topology on the client ASAP if the event handlers need to access it
+    this.topology = topology;
+    topology.client = this;
 
-      if (typeof options.srvHost === 'string') {
-        const hosts = await resolveSRVRecord(options);
+    topology.once(Topology.OPEN, () => this.emit('open', this));
 
-        for (const [index, host] of hosts.entries()) {
-          options.hosts[index] = host;
-        }
+    for (const event of MONGO_CLIENT_EVENTS) {
+      topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
+    }
+
+    const topologyConnect = async () => {
+      try {
+        await promisify(callback => topology.connect(options, callback))();
+      } catch (error) {
+        topology.close({ force: true });
+        throw error;
       }
+    };
 
-      const topology = new Topology(options.hosts, options);
-      // Events can be emitted before initialization is complete so we have to
-      // save the reference to the topology on the client ASAP if the event handlers need to access it
-      this.topology = topology;
-      topology.client = this;
+    if (this.autoEncrypter) {
+      const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
+      await initAutoEncrypter();
+      await topologyConnect();
+      await options.encrypter.connectInternalClient();
+    } else {
+      await topologyConnect();
+    }
 
-      topology.once(Topology.OPEN, () => this.emit('open', this));
-
-      for (const event of MONGO_CLIENT_EVENTS) {
-        topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
-      }
-
-      const topologyConnect = async () => {
-        try {
-          await promisify(callback => topology.connect(options, callback))();
-        } catch (error) {
-          topology.close({ force: true });
-          throw error;
-        }
-      };
-
-      if (this.autoEncrypter) {
-        const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
-        await initAutoEncrypter();
-        await topologyConnect();
-        await options.encrypter.connectInternalClient();
-      } else {
-        await topologyConnect();
-      }
-
-      return this;
-    }, callback);
+    return this;
   }
 
   /**
-   * Close the db and its underlying connections
+   * Close the client and its underlying connections
    *
    * @param force - Force close, emitting no events
-   * @param callback - An optional callback, a Promise will be returned if none is provided
    */
-  close(): Promise<void>;
-  close(force: boolean): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  close(callback: Callback<void>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  close(force: boolean, callback: Callback<void>): void;
-  close(
-    forceOrCallback?: boolean | Callback<void>,
-    callback?: Callback<void>
-  ): Promise<void> | void {
+  async close(force = false): Promise<void> {
     // There's no way to set hasBeenClosed back to false
     Object.defineProperty(this.s, 'hasBeenClosed', {
       value: true,
@@ -493,58 +466,50 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       writable: false
     });
 
-    if (typeof forceOrCallback === 'function') {
-      callback = forceOrCallback;
+    const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
+    this.s.activeSessions.clear();
+
+    await Promise.all(activeSessionEnds);
+
+    if (this.topology == null) {
+      return;
     }
 
-    const force = typeof forceOrCallback === 'boolean' ? forceOrCallback : false;
-
-    return maybeCallback(async () => {
-      const activeSessionEnds = Array.from(this.s.activeSessions, session => session.endSession());
-      this.s.activeSessions.clear();
-
-      await Promise.all(activeSessionEnds);
-
-      if (this.topology == null) {
-        return;
+    // If we would attempt to select a server and get nothing back we short circuit
+    // to avoid the server selection timeout.
+    const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
+    const topologyDescription = this.topology.description;
+    const serverDescriptions = Array.from(topologyDescription.servers.values());
+    const servers = selector(topologyDescription, serverDescriptions);
+    if (servers.length !== 0) {
+      const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
+      if (endSessions.length !== 0) {
+        await this.db('admin')
+          .command(
+            { endSessions },
+            { readPreference: ReadPreference.primaryPreferred, noResponse: true }
+          )
+          .catch(() => null); // outcome does not matter
       }
+    }
 
-      // If we would attempt to select a server and get nothing back we short circuit
-      // to avoid the server selection timeout.
-      const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
-      const topologyDescription = this.topology.description;
-      const serverDescriptions = Array.from(topologyDescription.servers.values());
-      const servers = selector(topologyDescription, serverDescriptions);
-      if (servers.length !== 0) {
-        const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
-        if (endSessions.length !== 0) {
-          await this.db('admin')
-            .command(
-              { endSessions },
-              { readPreference: ReadPreference.primaryPreferred, noResponse: true }
-            )
-            .catch(() => null); // outcome does not matter
+    // clear out references to old topology
+    const topology = this.topology;
+    this.topology = undefined;
+
+    await new Promise<void>((resolve, reject) => {
+      topology.close({ force }, error => {
+        if (error) return reject(error);
+        const { encrypter } = this[kOptions];
+        if (encrypter) {
+          return encrypter.close(this, force, error => {
+            if (error) return reject(error);
+            resolve();
+          });
         }
-      }
-
-      // clear out references to old topology
-      const topology = this.topology;
-      this.topology = undefined;
-
-      await new Promise<void>((resolve, reject) => {
-        topology.close({ force }, error => {
-          if (error) return reject(error);
-          const { encrypter } = this[kOptions];
-          if (encrypter) {
-            return encrypter.close(this, force, error => {
-              if (error) return reject(error);
-              resolve();
-            });
-          }
-          resolve();
-        });
+        resolve();
       });
-    }, callback);
+    });
   }
 
   /**
@@ -579,34 +544,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    *
    * @see https://docs.mongodb.org/manual/reference/connection-string/
    */
-  static connect(url: string): Promise<MongoClient>;
-  static connect(url: string, options: MongoClientOptions): Promise<MongoClient>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  static connect(url: string, callback: Callback<MongoClient>): void;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
-  static connect(url: string, options: MongoClientOptions, callback: Callback<MongoClient>): void;
-  static connect(
-    url: string,
-    options?: MongoClientOptions | Callback<MongoClient>,
-    callback?: Callback<MongoClient>
-  ): Promise<MongoClient> | void {
-    callback =
-      typeof callback === 'function'
-        ? callback
-        : typeof options === 'function'
-        ? options
-        : undefined;
-
-    return maybeCallback(async () => {
-      options = typeof options !== 'function' ? options : undefined;
-      const client = new this(url, options);
-      return client.connect();
-    }, callback);
+  static async connect(url: string, options?: MongoClientOptions): Promise<MongoClient> {
+    const client = new this(url, options);
+    return client.connect();
   }
 
   /** Starts a new session on the server */
-  startSession(): ClientSession;
-  startSession(options: ClientSessionOptions): ClientSession;
   startSession(options?: ClientSessionOptions): ClientSession {
     const session = new ClientSession(
       this,
@@ -630,10 +573,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @param options - Optional settings for the command
    * @param callback - An callback to execute with an implicitly created session
    */
-  withSession(callback: WithSessionCallback): Promise<void>;
-  withSession(options: ClientSessionOptions, callback: WithSessionCallback): Promise<void>;
-  withSession(
-    optionsOrOperation?: ClientSessionOptions | WithSessionCallback,
+  async withSession(callback: WithSessionCallback): Promise<void>;
+  async withSession(options: ClientSessionOptions, callback: WithSessionCallback): Promise<void>;
+  async withSession(
+    optionsOrOperation: ClientSessionOptions | WithSessionCallback,
     callback?: WithSessionCallback
   ): Promise<void> {
     const options = {
@@ -652,17 +595,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     const session = this.startSession(options);
 
-    return maybeCallback(async () => {
+    try {
+      await withSessionCallback(session);
+    } finally {
       try {
-        await withSessionCallback(session);
-      } finally {
-        try {
-          await session.endSession();
-        } catch {
-          // We are not concerned with errors from endSession()
-        }
+        await session.endSession();
+      } catch {
+        // We are not concerned with errors from endSession()
       }
-    }, null);
+    }
   }
 
   /**

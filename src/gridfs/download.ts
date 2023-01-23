@@ -182,30 +182,22 @@ export class GridFSBucketReadStream extends Readable implements NodeJS.ReadableS
    * Marks this stream as aborted (will never push another `data` event)
    * and kills the underlying cursor. Will emit the 'end' event, and then
    * the 'close' event once the cursor is successfully killed.
-   *
-   * @param callback - called when the cursor is successfully closed or an error occurred.
    */
-  abort(callback?: Callback<void>): void {
+  async abort(): Promise<void> {
     this.push(null);
     this.destroyed = true;
     if (this.s.cursor) {
-      this.s.cursor.close().then(
-        () => {
-          this.emit(GridFSBucketReadStream.CLOSE);
-          callback?.();
-        },
-        error => {
-          this.emit(GridFSBucketReadStream.CLOSE);
-          callback?.(error);
-        }
-      );
+      try {
+        await this.s.cursor.close();
+      } finally {
+        this.emit(GridFSBucketReadStream.CLOSE);
+      }
     } else {
       if (!this.s.init) {
         // If not initialized, fire close event because we will never
         // get a cursor
         this.emit(GridFSBucketReadStream.CLOSE);
       }
-      callback && callback();
     }
   }
 }

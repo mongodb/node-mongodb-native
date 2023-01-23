@@ -205,48 +205,32 @@ describe('Find Cursor', function () {
   });
 
   context('#clone', function () {
-    it('should clone a find cursor', function (done) {
+    it('should clone a find cursor', async function () {
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({});
-      this.defer(() => cursor.close());
 
-      cursor.toArray((err, docs) => {
-        expect(err).to.not.exist;
-        expect(docs).to.have.length(6);
-        expect(cursor).property('closed').to.be.true;
+      const docsFromOriginal = await cursor.toArray();
+      expect(docsFromOriginal).to.have.length(6);
+      expect(cursor).property('closed').to.be.true;
 
-        const clonedCursor = cursor.clone();
-        this.defer(() => clonedCursor.close());
-
-        clonedCursor.toArray((err, docs) => {
-          expect(err).to.not.exist;
-          expect(docs).to.have.length(6);
-          expect(clonedCursor).property('closed').to.be.true;
-          done();
-        });
-      });
+      const clonedCursor = cursor.clone();
+      const docsFromCloned = await clonedCursor.toArray();
+      expect(docsFromCloned).to.have.length(6);
+      expect(cursor).property('closed').to.be.true;
     });
 
-    it('should clone an aggregate cursor', function (done) {
+    it('should clone an aggregate cursor', async function () {
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.aggregate([{ $match: {} }]);
-      this.defer(() => cursor.close());
 
-      cursor.toArray((err, docs) => {
-        expect(err).to.not.exist;
-        expect(docs).to.have.length(6);
-        expect(cursor).property('closed').to.be.true;
+      const docsFromOriginal = await cursor.toArray();
+      expect(docsFromOriginal).to.have.length(6);
+      expect(cursor).property('closed').to.be.true;
 
-        const clonedCursor = cursor.clone();
-        this.defer(() => clonedCursor.close());
-
-        clonedCursor.toArray((err, docs) => {
-          expect(err).to.not.exist;
-          expect(docs).to.have.length(6);
-          expect(clonedCursor).property('closed').to.be.true;
-          done();
-        });
-      });
+      const clonedCursor = cursor.clone();
+      const docsFromCloned = await clonedCursor.toArray();
+      expect(docsFromCloned).to.have.length(6);
+      expect(cursor).property('closed').to.be.true;
     });
   });
 

@@ -749,16 +749,14 @@ describe('Change Streams', function () {
 
         const errRegex = /ChangeStream cannot be used as an iterator/;
 
-        // These all throw synchronously so it should be safe to not await the results
-        expect(() => {
-          changeStream.next();
-        }).to.throw(errRegex);
-        expect(() => {
-          changeStream.hasNext();
-        }).to.throw(errRegex);
-        expect(() => {
-          changeStream.tryNext();
-        }).to.throw(errRegex);
+        const nextError = await changeStream.next().catch(error => error);
+        expect(nextError.message).to.match(errRegex);
+
+        const hasNextError = await changeStream.hasNext().catch(error => error);
+        expect(hasNextError.message).to.match(errRegex);
+
+        const tryNextError = await changeStream.tryNext().catch(error => error);
+        expect(tryNextError.message).to.match(errRegex);
       }
     });
 
