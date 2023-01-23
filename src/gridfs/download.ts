@@ -186,8 +186,7 @@ export class GridFSBucketReadStream extends Readable implements NodeJS.ReadableS
    * @param callback - called when the cursor is successfully closed or an error occurred.
    */
   abort(): Promise<void>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance
-   */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   abort(callback: Callback<void>): void;
   abort(callback?: Callback<void>): Promise<void> | void {
     return maybeCallback(async () => {
