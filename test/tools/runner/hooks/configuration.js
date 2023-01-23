@@ -12,6 +12,7 @@ const { getEnvironmentalOptions } = require('../../utils');
 const mock = require('../../mongodb-mock/index');
 const { inspect } = require('util');
 const { setDefaultResultOrder } = require('dns');
+const { coerce, gte } = require('semver');
 
 // Default our tests to have auth enabled
 // A better solution will be tackled in NODE-3714
@@ -100,7 +101,10 @@ const skipBrokenAuthTestBeforeEachHook = function ({ skippedTests } = { skippedT
 
 const testConfigBeforeHook = async function () {
   const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
-    ...getEnvironmentalOptions()
+    ...getEnvironmentalOptions(),
+    // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set
+    // the default dns resolution order for CI
+    family: 4
   });
 
   await client.db('test').command({ ping: 1 });
@@ -167,12 +171,19 @@ const beforeAllPluginImports = () => {
   require('mocha-sinon');
 };
 
-function installNode18DNSHooks() {
-  if (
-    process.version.startsWith('v18') ||
-    process.version.startsWith('v19') ||
-    process.version.startsWith('v20')
-  ) {
+/**
+ * @remarks TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set
+ * the default dns resolution order for CI
+ */
+function installNodeDNSWorkaroundHooks() {
+  if (gte(coerce(process.version), coerce('18'))) {
+    // We set before hooks because some tests connect in before hooks
+    before(() => {
+      setDefaultResultOrder('ipv4first');
+    });
+
+    // We set beforeEach hooks to make this resilient to test ordering and
+    // ensure each affected test has the correct ip address resolution setting
     beforeEach(() => {
       setDefaultResultOrder('ipv4first');
     });
@@ -189,5 +200,5 @@ module.exports = {
     afterAll: [cleanUpMocksAfterHook]
   },
   skipBrokenAuthTestBeforeEachHook,
-  installNode18DNSHooks
+  installNodeDNSWorkaroundHooks
 };

@@ -2204,7 +2204,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 5745f374109346a2597405f2251a178d463a14e1
+          CSFLE_GIT_REF: ff9e095eaf72f9e442761f69080dae159a395d94
   - name: run-custom-csfle-tests-5.0-master
     tags:
       - run-custom-dependency-tests
@@ -2234,7 +2234,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 5745f374109346a2597405f2251a178d463a14e1
+          CSFLE_GIT_REF: ff9e095eaf72f9e442761f69080dae159a395d94
   - name: run-custom-csfle-tests-rapid-master
     tags:
       - run-custom-dependency-tests
@@ -2264,7 +2264,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 5745f374109346a2597405f2251a178d463a14e1
+          CSFLE_GIT_REF: ff9e095eaf72f9e442761f69080dae159a395d94
   - name: run-custom-csfle-tests-latest-master
     tags:
       - run-custom-dependency-tests
@@ -2868,10 +2868,13 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-connectivity
+      - test-atlas-data-lake
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
       - test-auth-ldap
+      - test-socks5
+      - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -2910,10 +2913,12 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-connectivity
+      - test-atlas-data-lake
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
       - test-auth-ldap
+      - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -3075,6 +3080,9 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
+      - test-atlas-data-lake
+      - test-socks5
+      - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
