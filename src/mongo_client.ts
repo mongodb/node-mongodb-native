@@ -436,7 +436,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   connect(): Promise<this>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version.*/
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   connect(callback: Callback<this>): void;
   connect(callback?: Callback<this>): Promise<this> | void {
     if (callback && typeof callback !== 'function') {
