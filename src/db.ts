@@ -775,12 +775,12 @@ export class Db {
   }
 
   /** Return the db logger
-   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
   getLogger(): Logger {
     return this.s.logger;
   }
 
-  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
   get logger(): Logger {
     return this.s.logger;
   }

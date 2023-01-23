@@ -234,11 +234,11 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    */
   promiseLibrary?: any;
   /** The logging level
-   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version
+   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
    * */
   loggerLevel?: LegacyLoggerLevel;
   /** Custom logger object
-   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version
+   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
    */
   logger?: LegacyLogger;
   /** Enable command monitoring for this client */
@@ -425,7 +425,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return this.s.bsonOptions;
   }
 
-  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
   get logger(): LegacyLogger {
     return this.s.logger;
   }
@@ -436,7 +436,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   connect(): Promise<this>;
-  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version.*/
   connect(callback: Callback<this>): void;
   connect(callback?: Callback<this>): Promise<this> | void {
     if (callback && typeof callback !== 'function') {
