@@ -103,6 +103,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
   }
 
+  // TODO(NODE-4994): implement new logging logic for SrvPoller failures
   schedule(): void {
     if (this._timeout) {
       clearTimeout(this._timeout);
