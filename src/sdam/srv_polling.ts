@@ -110,8 +110,8 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
 
     this._timeout = setTimeout(() => {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-      this._poll().catch(_unexpectedRuntimeError => {});
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      this._poll().catch(_unexpectedRuntimeError => null);
     }, this.intervalMS);
   }
 
