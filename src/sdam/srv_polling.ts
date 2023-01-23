@@ -103,7 +103,6 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
   }
 
-  // TODO(NODE-4817): This method has been left to allow for refactoring with the new logger
   schedule(): void {
     if (this._timeout) {
       clearTimeout(this._timeout);
