@@ -26,7 +26,7 @@ export interface OperationConstructor extends Function {
 /** @public */
 export interface OperationOptions extends BSONSerializeOptions {
   /** Specify ClientSession for this command */
-  session?: ClientSession;
+  session?: ClientSession | null;
   willRetryWrite?: boolean;
 
   /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
