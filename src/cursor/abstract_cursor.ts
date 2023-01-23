@@ -866,7 +866,10 @@ class ReadableCursorStream extends Readable {
   }
 
   override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
-    this._cursor.close().finally(() => callback(error));
+    this._cursor.close().then(
+      () => callback(error),
+      closeError => callback(closeError)
+    );
   }
 
   private _readNext() {
