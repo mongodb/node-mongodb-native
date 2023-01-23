@@ -299,18 +299,6 @@ export function getTopology(provider: TopologyProvider): Topology {
   throw new MongoNotConnectedError('MongoClient must be connected to perform this operation');
 }
 
-/**
- * Default message handler for generating deprecation warnings.
- * @internal
- *
- * @param name - function name
- * @param option - option name
- * @returns warning message
- */
-export function defaultMsgHandler(name: string, option: string): string {
-  return `${name} option [${option}] is deprecated and will be removed in a later version.`;
-}
-
 /** @internal */
 export function ns(ns: string): MongoDBNamespace {
   return MongoDBNamespace.fromString(ns);
