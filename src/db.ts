@@ -80,7 +80,6 @@ const DB_OPTIONS_ALLOW_LIST = [
 export interface DbPrivate {
   client: MongoClient;
   options?: DbOptions;
-  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
   logger: Logger;
   readPreference?: ReadPreference;
   pkFactory: PkFactory;

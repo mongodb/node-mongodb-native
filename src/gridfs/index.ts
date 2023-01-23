@@ -227,7 +227,7 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
   }
 
   /** Get the Db scoped logger.
-   * @deprecated Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance
+   * @deprecated Legacy Logger is deprecated and will be removed in the next major version.
    */
   getLogger(): Logger {
     return this.s.db.s.logger;
