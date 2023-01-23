@@ -35,7 +35,6 @@ import {
   MongoUnexpectedServerResponseError,
   needsRetryableWriteLabel
 } from '../error';
-import { Logger } from '../logger';
 import type { ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import type { GetMoreOptions } from '../operations/get_more';
@@ -86,8 +85,6 @@ export interface ServerPrivate {
   description: ServerDescription;
   /** A copy of the options used to construct this instance */
   options: ServerOptions;
-  /** A logger instance */
-  logger: Logger;
   /** The current state of the Server */
   state: string;
   /** The topology this server is a part of */
@@ -149,7 +146,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     this.s = {
       description,
       options,
-      logger: new Logger('Server'),
       state: STATE_CLOSED,
       topology,
       pool: new ConnectionPool(this, poolOptions),

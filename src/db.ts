@@ -6,7 +6,6 @@ import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { MongoAPIError, MongoInvalidArgumentError } from './error';
-import { Logger, LoggerOptions } from './logger';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
 import { AddUserOperation, AddUserOptions } from './operations/add_user';
@@ -58,8 +57,6 @@ const DB_OPTIONS_ALLOW_LIST = [
   'readConcern',
   'retryMiliSeconds',
   'numberOfRetries',
-  'loggerLevel',
-  'logger',
   'promoteBuffers',
   'promoteLongs',
   'bsonRegExp',
@@ -73,7 +70,6 @@ const DB_OPTIONS_ALLOW_LIST = [
 export interface DbPrivate {
   client: MongoClient;
   options?: DbOptions;
-  logger: Logger;
   readPreference?: ReadPreference;
   pkFactory: PkFactory;
   readConcern?: ReadConcern;
@@ -83,7 +79,7 @@ export interface DbPrivate {
 }
 
 /** @public */
-export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions, LoggerOptions {
+export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
   /** If the database authentication is dependent on another databaseName. */
   authSource?: string;
   /** Force server to assign _id values instead of driver. */
@@ -153,8 +149,6 @@ export class Db {
       client,
       // Options
       options,
-      // Logger instance
-      logger: new Logger('Db', options),
       // Unpack read preference
       readPreference: ReadPreference.fromOptions(options),
       // Merge bson options
@@ -509,15 +503,6 @@ export class Db {
     }
 
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
-  }
-
-  /** Return the db logger */
-  getLogger(): Logger {
-    return this.s.logger;
-  }
-
-  get logger(): Logger {
-    return this.s.logger;
   }
 }
 

@@ -60,8 +60,6 @@ const EXPECTED_EXPORTS = [
   'Int32',
   'ListCollectionsCursor',
   'ListIndexesCursor',
-  'Logger',
-  'LoggerLevel',
   'Long',
   'MaxKey',
   'MinKey',

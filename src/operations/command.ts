@@ -1,7 +1,6 @@
 import type { BSONSerializeOptions, Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
 import { Explain, ExplainOptions } from '../explain';
-import type { Logger } from '../logger';
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
@@ -65,7 +64,6 @@ export interface OperationParent {
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   readPreference?: ReadPreference;
-  logger?: Logger;
   bsonOptions?: BSONSerializeOptions;
 }
 
@@ -75,7 +73,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
   explain?: Explain;
-  logger?: Logger;
 
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
     super(options);
@@ -95,11 +92,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
 
     this.readConcern = ReadConcern.fromOptions(options);
     this.writeConcern = WriteConcern.fromOptions(options);
-
-    // TODO(NODE-2056): make logger another "inheritable" property
-    if (parent && parent.logger) {
-      this.logger = parent.logger;
-    }
 
     if (this.hasAspect(Aspect.EXPLAINABLE)) {
       this.explain = Explain.fromOptions(options);

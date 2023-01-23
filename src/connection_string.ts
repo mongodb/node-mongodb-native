@@ -14,7 +14,6 @@ import {
   MongoMissingCredentialsError,
   MongoParseError
 } from './error';
-import { Logger as LegacyLogger, LoggerLevel as LegacyLoggerLevel } from './logger';
 import {
   DriverInfo,
   MongoClient,
@@ -869,24 +868,6 @@ export const OPTIONS = {
   localThresholdMS: {
     default: 15,
     type: 'uint'
-  },
-  logger: {
-    default: new LegacyLogger('MongoClient'),
-    transform({ values: [value] }) {
-      if (value instanceof LegacyLogger) {
-        return value;
-      }
-      emitWarning('Alternative loggers might not be supported');
-      // TODO: make Logger an interface that others can implement, make usage consistent in driver
-      // DRIVERS-1204
-      return;
-    }
-  },
-  loggerLevel: {
-    target: 'logger',
-    transform({ values: [value] }) {
-      return new LegacyLogger('MongoClient', { loggerLevel: value as LegacyLoggerLevel });
-    }
   },
   maxConnecting: {
     default: 2,

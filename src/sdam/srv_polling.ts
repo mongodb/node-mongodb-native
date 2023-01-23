@@ -2,7 +2,6 @@ import * as dns from 'dns';
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoRuntimeError } from '../error';
-import { Logger, LoggerOptions } from '../logger';
 import { TypedEventEmitter } from '../mongo_types';
 import { HostAddress } from '../utils';
 
@@ -37,7 +36,7 @@ export class SrvPollingEvent {
 }
 
 /** @internal */
-export interface SrvPollerOptions extends LoggerOptions {
+export interface SrvPollerOptions {
   srvServiceName: string;
   srvMaxHosts: number;
   srvHost: string;
@@ -54,7 +53,6 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
   srvHost: string;
   rescanSrvIntervalMS: number;
   heartbeatFrequencyMS: number;
-  logger: Logger;
   haMode: boolean;
   generation: number;
   srvMaxHosts: number;
@@ -76,7 +74,6 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     this.srvServiceName = options.srvServiceName ?? 'mongodb';
     this.rescanSrvIntervalMS = 60000;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS ?? 10000;
-    this.logger = new Logger('srvPoller', options);
 
     this.haMode = false;
     this.generation = 0;
@@ -106,15 +103,14 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
   }
 
+  // TODO(NODE-4994): implement new logging logic for SrvPoller failures
   schedule(): void {
     if (this._timeout) {
       clearTimeout(this._timeout);
     }
 
     this._timeout = setTimeout(() => {
-      this._poll().catch(unexpectedRuntimeError => {
-        this.logger.error(`Unexpected ${new MongoRuntimeError(unexpectedRuntimeError).stack}`);
-      });
+      this._poll().catch(() => null);
     }, this.intervalMS);
   }
 
@@ -124,17 +120,9 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     this.emit(SrvPoller.SRV_RECORD_DISCOVERY, new SrvPollingEvent(srvRecords));
   }
 
-  failure(message: string, obj?: NodeJS.ErrnoException): void {
-    this.logger.warn(message, obj);
+  failure(): void {
     this.haMode = true;
     this.schedule();
-  }
-
-  parentDomainMismatch(srvRecord: dns.SrvRecord): void {
-    this.logger.warn(
-      `parent domain mismatch on SRV record (${srvRecord.name}:${srvRecord.port})`,
-      srvRecord
-    );
   }
 
   async _poll(): Promise<void> {
@@ -144,7 +132,7 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     try {
       srvRecords = await dns.promises.resolveSrv(this.srvAddress);
     } catch (dnsError) {
-      this.failure('DNS error', dnsError);
+      this.failure();
       return;
     }
 
@@ -156,13 +144,11 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     for (const record of srvRecords) {
       if (matchesParentDomain(record.name, this.srvHost)) {
         finalAddresses.push(record);
-      } else {
-        this.parentDomainMismatch(record);
       }
     }
 
     if (!finalAddresses.length) {
-      this.failure('No valid addresses found at host');
+      this.failure();
       return;
     }
 

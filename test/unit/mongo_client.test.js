@@ -7,7 +7,6 @@ const { parseOptions, resolveSRVRecord } = require('../mongodb');
 const { ReadConcern } = require('../mongodb');
 const { WriteConcern } = require('../mongodb');
 const { ReadPreference } = require('../mongodb');
-const { Logger } = require('../mongodb');
 const { MongoCredentials } = require('../mongodb');
 const { MongoClient, MongoParseError, ServerApiVersion } = require('../mongodb');
 const { MongoLogger } = require('../mongodb');
@@ -97,8 +96,6 @@ describe('MongoOptions', function () {
     keepAlive: true,
     keepAliveInitialDelay: 3,
     localThresholdMS: 3,
-    logger: new Logger('Testing!'),
-    loggerLevel: 'info',
     maxConnecting: 5,
     maxIdleTimeMS: 3,
     maxPoolSize: 2,
@@ -615,7 +612,6 @@ describe('MongoOptions', function () {
       ['keepalive', true],
       ['keepaliveinitialdelay', 120000],
       ['localthresholdms', 15],
-      ['logger', doNotCheckEq],
       ['maxidletimems', 0],
       ['maxpoolsize', 100],
       ['minpoolsize', 0],

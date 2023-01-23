@@ -2,13 +2,7 @@
 import type { PeerCertificate } from 'tls';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
-import {
-  LoggerLevel,
-  MongoClient,
-  MongoClientOptions,
-  ReadPreference,
-  ReadPreferenceMode
-} from '../../../src';
+import { MongoClient, MongoClientOptions, ReadPreference, ReadPreferenceMode } from '../../../src';
 import type { PropExists } from '../utility_types';
 
 type MongoDBImport = typeof import('../../../src');
@@ -57,7 +51,6 @@ expectType<PropExists<MongoClientOptions, 'useNewUrlParser'>>(false);
 expectType<PropExists<MongoClientOptions, 'useUnifiedTopology'>>(false);
 
 expectType<string | undefined>(options.authSource);
-expectType<LoggerLevel | undefined>(options.loggerLevel);
 expectType<ReadPreferenceMode | ReadPreference | undefined>(options.readPreference);
 expectType<boolean | undefined>(options.promoteValues);
 expectType<number | undefined>(options.family);

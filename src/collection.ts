@@ -8,7 +8,6 @@ import { FindCursor } from './cursor/find_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import type { Db } from './db';
 import { MongoInvalidArgumentError } from './error';
-import type { Logger, LoggerOptions } from './logger';
 import type { PkFactory } from './mongo_client';
 import type {
   Filter,
@@ -104,10 +103,7 @@ export interface ModifyResult<TSchema = Document> {
 }
 
 /** @public */
-export interface CollectionOptions
-  extends BSONSerializeOptions,
-    WriteConcernOptions,
-    LoggerOptions {
+export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOptions {
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
@@ -960,15 +956,6 @@ export class Collection<TSchema extends Document = Document> {
    */
   initializeOrderedBulkOp(options?: BulkWriteOptions): OrderedBulkOperation {
     return new OrderedBulkOperation(this as TODO_NODE_3286, resolveOptions(this, options));
-  }
-
-  /** Get the db scoped logger */
-  getLogger(): Logger {
-    return this.s.db.s.logger;
-  }
-
-  get logger(): Logger {
-    return this.s.db.s.logger;
   }
 
   /**
