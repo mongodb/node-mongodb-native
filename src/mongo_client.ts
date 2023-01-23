@@ -15,7 +15,6 @@ import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
-import type { Logger as LegacyLogger, LoggerLevel as LegacyLoggerLevel } from './logger';
 import { MongoLogger, MongoLoggerOptions } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
@@ -228,10 +227,6 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   forceServerObjectId?: boolean;
   /** A primary key factory function for generation of custom `_id` keys */
   pkFactory?: PkFactory;
-  /** The logging level */
-  loggerLevel?: LegacyLoggerLevel;
-  /** Custom logger object */
-  logger?: LegacyLogger;
   /** Enable command monitoring for this client */
   monitorCommands?: boolean;
   /** Server API version */
@@ -292,7 +287,6 @@ export interface MongoClientPrivate {
   readonly readConcern?: ReadConcern;
   readonly writeConcern?: WriteConcern;
   readonly readPreference: ReadPreference;
-  readonly logger: LegacyLogger;
   readonly isMongoClient: true;
 }
 
@@ -369,9 +363,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       get readPreference() {
         return client[kOptions].readPreference;
       },
-      get logger() {
-        return client[kOptions].logger;
-      },
       get isMongoClient(): true {
         return true;
       }
@@ -414,10 +405,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
   get bsonOptions(): BSONSerializeOptions {
     return this.s.bsonOptions;
-  }
-
-  get logger(): LegacyLogger {
-    return this.s.logger;
   }
 
   /**
@@ -705,11 +692,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
-
-  /** Return the mongo client logger */
-  getLogger(): LegacyLogger {
-    return this.s.logger;
-  }
 }
 
 /**
@@ -730,7 +712,6 @@ export interface MongoOptions
         | 'keepAlive'
         | 'keepAliveInitialDelay'
         | 'localThresholdMS'
-        | 'logger'
         | 'maxConnecting'
         | 'maxIdleTimeMS'
         | 'maxPoolSize'

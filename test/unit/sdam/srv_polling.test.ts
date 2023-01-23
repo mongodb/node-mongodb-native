@@ -13,7 +13,6 @@ import {
   TopologyType
 } from '../../mongodb';
 import * as sdamEvents from '../../mongodb';
-import { sleep } from '../../tools/utils';
 
 describe('Mongos SRV Polling', function () {
   const SRV_HOST = 'darmok.tanagra.com';
@@ -46,7 +45,6 @@ describe('Mongos SRV Polling', function () {
     function stubPoller(poller) {
       sinon.stub(poller, 'success');
       sinon.stub(poller, 'failure');
-      sinon.stub(poller, 'parentDomainMismatch');
     }
 
     it('should always return a valid value for `intervalMS`', function () {
@@ -87,30 +85,6 @@ describe('Mongos SRV Polling', function () {
         expect(poller.schedule).to.have.been.calledOnce;
         expect(poller).to.have.property('haMode', true);
       });
-
-      it('should do something if dns API breaks', async function () {
-        const poller = new SrvPoller({
-          srvHost: SRV_HOST,
-          loggerLevel: 'error',
-          heartbeatFrequencyMS: 100
-        });
-
-        // set haMode to make the poller use the 100ms heartbeat, otherwise this test would take 60 secs
-        poller.haMode = true;
-
-        // @ts-expect-error: Testing what happens if node breaks DNS API
-        sinon.stub(dns.promises, 'resolveSrv').resolves(null);
-
-        const loggerError = sinon.stub(poller.logger, 'error').returns();
-
-        poller.schedule();
-        await sleep(130);
-        clearTimeout(poller._timeout);
-
-        expect(loggerError).to.have.been.calledOnceWith(
-          sinon.match(/Unexpected MongoRuntimeError/)
-        );
-      });
     });
 
     describe('poll', function () {
@@ -145,7 +119,6 @@ describe('Mongos SRV Polling', function () {
 
         expect(poller.success).to.not.have.been.called;
         expect(poller.failure).to.not.have.been.called;
-        expect(poller.parentDomainMismatch).to.not.have.been.called;
       });
 
       it('should fail if dns returns error', async () => {
@@ -157,8 +130,7 @@ describe('Mongos SRV Polling', function () {
         await poller._poll();
 
         expect(poller.success).to.not.have.been.called;
-        expect(poller.failure).to.have.been.calledOnce.and.calledWith('DNS error');
-        expect(poller.parentDomainMismatch).to.not.have.been.called;
+        expect(poller.failure).to.have.been.calledOnce;
       });
 
       it('should fail if dns returns no records', async () => {
@@ -170,10 +142,7 @@ describe('Mongos SRV Polling', function () {
         await poller._poll();
 
         expect(poller.success).to.not.have.been.called;
-        expect(poller.failure).to.have.been.calledOnce.and.calledWith(
-          'No valid addresses found at host'
-        );
-        expect(poller.parentDomainMismatch).to.not.have.been.called;
+        expect(poller.failure).to.have.been.calledOnce;
       });
 
       it('should fail if dns returns no records that match parent domain', async () => {
@@ -186,12 +155,7 @@ describe('Mongos SRV Polling', function () {
         await poller._poll();
 
         expect(poller.success).to.not.have.been.called;
-        expect(poller.failure).to.have.been.calledOnce.and.calledWith(
-          'No valid addresses found at host'
-        );
-        expect(poller.parentDomainMismatch)
-          .to.have.been.calledTwice.and.calledWith(records[0])
-          .and.calledWith(records[1]);
+        expect(poller.failure).to.have.been.calledOnce;
       });
 
       it('should succeed when valid records are returned by dns', async () => {
@@ -205,7 +169,6 @@ describe('Mongos SRV Polling', function () {
 
         expect(poller.success).to.have.been.calledOnce.and.calledWithMatch(records);
         expect(poller.failure).to.not.have.been.called;
-        expect(poller.parentDomainMismatch).to.not.have.been.called;
       });
 
       it('should succeed when some valid records are returned and some do not match parent domain', async () => {
@@ -219,7 +182,6 @@ describe('Mongos SRV Polling', function () {
 
         expect(poller.success).to.have.been.calledOnce.and.calledWithMatch([records[0]]);
         expect(poller.failure).to.not.have.been.called;
-        expect(poller.parentDomainMismatch).to.have.been.calledOnce.and.calledWith(records[1]);
       });
     });
   });

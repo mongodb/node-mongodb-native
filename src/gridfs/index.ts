@@ -3,7 +3,6 @@ import type { Collection } from '../collection';
 import type { FindCursor } from '../cursor/find_cursor';
 import type { Db } from '../db';
 import { MongoRuntimeError } from '../error';
-import type { Logger } from '../logger';
 import { Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
@@ -224,10 +223,5 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
       await this.s._filesCollection.drop();
       await this.s._chunksCollection.drop();
     }, callback);
-  }
-
-  /** Get the Db scoped logger. */
-  getLogger(): Logger {
-    return this.s.db.s.logger;
   }
 }
