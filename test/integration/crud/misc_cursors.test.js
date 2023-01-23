@@ -1672,7 +1672,6 @@ describe('Cursor', function () {
   });
 
   it('removes session when cloning an find cursor', async function () {
-    // TODO(NODE-4988): Need to fix cursor.clone in mongodb-legacy, callbacks do not work on cloned cursor
     const collection = await client.db().collection('test');
 
     const cursor = collection.find({});
@@ -1684,7 +1683,6 @@ describe('Cursor', function () {
   });
 
   it('removes session when cloning an aggregation cursor', async function () {
-    // TODO(NODE-4988): Need to fix cursor.clone in mongodb-legacy, callbacks do not work on cloned cursor
     const collection = await client.db().collection('test');
 
     const cursor = collection.aggregate([{ $match: {} }]);

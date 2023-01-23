@@ -206,7 +206,6 @@ describe('Find Cursor', function () {
 
   context('#clone', function () {
     it('should clone a find cursor', async function () {
-      // TODO(NODE-4988): Need to fix cursor.clone in mongodb-legacy, callbacks do not work on cloned cursor
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({});
 
@@ -221,7 +220,6 @@ describe('Find Cursor', function () {
     });
 
     it('should clone an aggregate cursor', async function () {
-      // TODO(NODE-4988): Need to fix cursor.clone in mongodb-legacy, callbacks do not work on cloned cursor
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.aggregate([{ $match: {} }]);
 
