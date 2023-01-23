@@ -717,7 +717,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   }
 
   /** Return the mongo client logger
-   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance*/
+   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
   getLogger(): LegacyLogger {
     return this.s.logger;
   }
