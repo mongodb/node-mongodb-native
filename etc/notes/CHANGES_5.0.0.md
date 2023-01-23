@@ -16,15 +16,15 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ## Changes
 
-### Callback support migrated to `mongodb-legacy`
+### Optional callback support migrated to `mongodb-legacy`
 
-If you are a callback user and you are not ready to use promises support for your workflow has **not** been removed.
+If you are a callback user and you are not ready to use promises, support for your workflow has **not** been removed.
 We have migrated it to a new package:
 
 - [`mongodb-legacy` Github](https://github.com/mongodb-js/nodejs-mongodb-legacy#readme)
 - [`mongodb-legacy` npm](https://www.npmjs.com/package/mongodb-legacy)
 
-The package wraps all of the driver's asynchronous operations and provides the _optional_ callback support. All the wrapped APIs offer an optional callback argument or a Promise return value so projects with mixed usage will continue to work.
+The package wraps all of the driver's asynchronous operations that previously supported both promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
 
 #### Example usage of equivalent callback and promise usage
 
