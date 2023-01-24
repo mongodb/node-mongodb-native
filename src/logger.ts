@@ -17,7 +17,8 @@ let currentLogger: LoggerFunction = console.warn;
 
 /**
  * @public
- * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
+ * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+ */
 export const LoggerLevel = Object.freeze({
   ERROR: 'error',
   WARN: 'warn',
