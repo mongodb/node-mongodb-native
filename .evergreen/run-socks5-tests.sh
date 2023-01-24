@@ -18,9 +18,9 @@ fi
 
 # Grab a connection string that only refers to *one* of the hosts in MONGODB_URI
 FIRST_HOST=$(node -p 'new (require("mongodb-connection-string-url").default)(process.env.MONGODB_URI).hosts[0]')
-# Use localhost:12345 as the URL for the single host that we connect to,
+# Use 127.0.0.1:12345 as the URL for the single host that we connect to,
 # we configure the Socks5 proxy server script to redirect from this to FIRST_HOST
-export MONGODB_URI_SINGLEHOST="mongodb://localhost:12345/"
+export MONGODB_URI_SINGLEHOST="mongodb://127.0.0.1:12345/"
 
 # Compute path to socks5 fake server script in a way that works on Windows
 SOCKS5_SERVER_SCRIPT="$DRIVERS_TOOLS/.evergreen/socks5srv.py"
@@ -29,20 +29,20 @@ if [ "Windows_NT" = "$OS" ]; then
 fi
 
 # First, test with Socks5 + authentication required
-"$PYTHON_BINARY" "$SOCKS5_SERVER_SCRIPT" --port 1080 --auth username:p4ssw0rd --map "localhost:12345 to $FIRST_HOST" &
+"$PYTHON_BINARY" "$SOCKS5_SERVER_SCRIPT" --port 1080 --auth username:p4ssw0rd --map "127.0.0.1:12345 to $FIRST_HOST" &
 PID=$!
-env SOCKS5_CONFIG='["localhost",1080,"username","p4ssw0rd"]' npm run check:socks5
+env SOCKS5_CONFIG='["127.0.0.1",1080,"username","p4ssw0rd"]' npm run check:socks5
 [ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
-  env MONGODB_URI='mongodb://localhost:12345/?proxyHost=localhost&proxyUsername=username&proxyPassword=p4ssw0rd' \
+  env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyUsername=username&proxyPassword=p4ssw0rd' \
   bash "${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh"
 kill $PID
 
 # Second, test with Socks5 + no authentication
-"$PYTHON_BINARY" "$SOCKS5_SERVER_SCRIPT" --port 1081 --map "localhost:12345 to $FIRST_HOST" &
+"$PYTHON_BINARY" "$SOCKS5_SERVER_SCRIPT" --port 1081 --map "127.0.0.1:12345 to $FIRST_HOST" &
 PID=$!
-env SOCKS5_CONFIG='["localhost",1081]' npm run check:socks5
+env SOCKS5_CONFIG='["127.0.0.1",1081]' npm run check:socks5
 [ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
-  env MONGODB_URI='mongodb://localhost:12345/?proxyHost=localhost&proxyPort=1081' \
+  env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyPort=1081' \
   bash "${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh"
 kill $PID
 
