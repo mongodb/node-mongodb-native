@@ -718,7 +718,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
 
-  /** 
+  /**
    * Return the mongo client logger
    * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
    */
