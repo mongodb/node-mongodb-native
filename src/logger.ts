@@ -29,15 +29,18 @@ export const LoggerLevel = Object.freeze({
 } as const);
 
 /** @public
- * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
+ *  @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+ */
 export type LoggerLevel = typeof LoggerLevel[keyof typeof LoggerLevel];
 
 /** @public
- * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
+ *  @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+ */
 export type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 
 /** @public
- * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
+ *  @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+ */
 export interface LoggerOptions {
   logger?: LoggerFunction;
   loggerLevel?: LoggerLevel;
