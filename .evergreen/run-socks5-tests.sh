@@ -32,7 +32,7 @@ fi
 "$PYTHON_BINARY" "$SOCKS5_SERVER_SCRIPT" --port 1080 --auth username:p4ssw0rd --map "127.0.0.1:12345 to $FIRST_HOST" &
 PID=$!
 env SOCKS5_CONFIG='["127.0.0.1",1080,"username","p4ssw0rd"]' npm run check:socks5
-[ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
+[[ $TEST_SOCKS5_CSFLE == "true" ]] && [ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
   env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyUsername=username&proxyPassword=p4ssw0rd' \
   bash "${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh"
 kill $PID
@@ -41,7 +41,7 @@ kill $PID
 "$PYTHON_BINARY" "$SOCKS5_SERVER_SCRIPT" --port 1081 --map "127.0.0.1:12345 to $FIRST_HOST" &
 PID=$!
 env SOCKS5_CONFIG='["127.0.0.1",1081]' npm run check:socks5
-[ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
+[[ $TEST_SOCKS5_CSFLE == "true" ]] && [ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
   env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyPort=1081' \
   bash "${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh"
 kill $PID
