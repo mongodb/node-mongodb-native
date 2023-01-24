@@ -15,7 +15,8 @@ const pid = process.pid;
 // eslint-disable-next-line no-console
 let currentLogger: LoggerFunction = console.warn;
 
-/** @public
+/**
+ * @public
  * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
 export const LoggerLevel = Object.freeze({
   ERROR: 'error',
@@ -28,18 +29,21 @@ export const LoggerLevel = Object.freeze({
   debug: 'debug'
 } as const);
 
-/** @public
- *  @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+/**
+ * @public
+ * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
  */
 export type LoggerLevel = typeof LoggerLevel[keyof typeof LoggerLevel];
 
-/** @public
- *  @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+/**
+ * @public
+ * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
  */
 export type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 
-/** @public
- *  @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+/**
+ * @public
+ * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
  */
 export interface LoggerOptions {
   logger?: LoggerFunction;

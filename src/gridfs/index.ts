@@ -226,7 +226,9 @@ export class GridFSBucket extends TypedEventEmitter<GridFSBucketEvents> {
     }, callback);
   }
 
-  /** Get the Db scoped logger.
+  /**
+   * Get the Db scoped logger.
+   *
    * @deprecated Legacy Logger is deprecated and will be removed in the next major version.
    */
   getLogger(): Logger {

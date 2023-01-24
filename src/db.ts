@@ -775,12 +775,13 @@ export class Db {
   }
 
   /** Return the db logger
-   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
+   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+   */
   getLogger(): Logger {
     return this.s.logger;
   }
 
-  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
+  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version. */
   get logger(): Logger {
     return this.s.logger;
   }
