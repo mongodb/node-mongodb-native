@@ -233,11 +233,13 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * @deprecated Setting a custom promise library is deprecated the next major version will use the global Promise constructor only.
    */
   promiseLibrary?: any;
-  /** The logging level
+  /**
+   * The logging level
    * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
-   * */
+   */
   loggerLevel?: LegacyLoggerLevel;
-  /** Custom logger object
+  /**
+   * Custom logger object
    * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
    */
   logger?: LegacyLogger;
@@ -425,7 +427,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return this.s.bsonOptions;
   }
 
-  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
+  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version. */
   get logger(): LegacyLogger {
     return this.s.logger;
   }
@@ -716,8 +718,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
 
-  /** Return the mongo client logger
-   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.*/
+  /** 
+   * Return the mongo client logger
+   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+   */
   getLogger(): LegacyLogger {
     return this.s.logger;
   }
