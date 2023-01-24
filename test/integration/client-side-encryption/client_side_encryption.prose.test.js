@@ -827,7 +827,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
   describe('Corpus Test', function () {
     it('runs in a separate suite', () => {
       expect(() =>
-        fs.statSync(path.resolve(__dirname, './client_side_encryption.prose.corpus.test.js'))
+        fs.statSync(path.resolve(__dirname, './client_side_encryption.prose.06.corpus.test.js'))
       ).not.to.throw();
     });
   });

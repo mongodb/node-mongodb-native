@@ -1,0 +1,21 @@
+{
+    "fields": [
+      {
+        "keyId": {
+          "$binary": {
+            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+            "subType": "04"
+          }
+        },
+        "path": "encryptedDecimalNoPrecision",
+        "bsonType": "decimal",
+        "queries": {
+          "queryType": "rangePreview",
+          "sparsity": {
+            "$numberInt": "1"
+          }
+        }
+      }
+    ]
+  }
+  
