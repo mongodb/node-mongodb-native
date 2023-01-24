@@ -1,0 +1,30 @@
+{
+    "fields": [
+      {
+        "keyId": {
+          "$binary": {
+            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+            "subType": "04"
+          }
+        },
+        "path": "encryptedDate",
+        "bsonType": "date",
+        "queries": {
+          "queryType": "rangePreview",
+          "sparsity": {
+            "$numberLong": "1"
+          },
+          "min": {
+            "$date": {
+              "$numberLong": "0"
+          }
+          },
+          "max": {
+            "$date": {
+              "$numberLong": "200"
+          }
+          }
+        }
+      }
+    ]
+}
