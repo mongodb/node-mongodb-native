@@ -1,6 +1,6 @@
 stepback: true
 command_type: system
-exec_timeout_secs: 1200
+exec_timeout_secs: 2100
 timeout:
   - command: subprocess.exec
     params:
