@@ -4,6 +4,7 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 
 import { Decimal128, Document, Double, Long, MongoClient } from '../../../src';
+import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
 const getKmsProviders = () => {
   const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
@@ -118,6 +119,8 @@ const readEncryptedFieldsFile = (dataType: string): Promise<string> =>
   });
 
 describe('Range Explicit Encryption', function () {
+  installNodeDNSWorkaroundHooks();
+
   let clientEncryption;
   let keyId;
   let keyVaultClient;
