@@ -21,10 +21,15 @@ The following is a detailed collection of the changes in the major v5 release of
 Node v5 drops support for callbacks in favor of a pure async-await API.  Below are some strategies for
 callback users to adopt driver v5 in recommendation order.
 
-### Migrate to promise based api (recommended!)
+The Node driver team understands that a callback to promise migration can be a non-trivial refactor.  To help inform your migration strategy, we've outlined three different approaches below.
 
-The Node team strongly encourages anyone who is able to migrate from callbacks to promises to do so.  The
-promise-based API is identical to the callback API except:
+#### Migrate to promise based api (recommended!)
+
+The Node team strongly encourages anyone who is able to migrate from callbacks to promises to do so.  Adopting the
+regular driver API will streamline the adoption of future driver updates, as well as provide better Typescript support
+than the other options outlined in this document.
+
+The promise-based API is identical to the callback API except:
 
 - no callback is accepted as the last argument
 - a promise is always returned
@@ -57,7 +62,7 @@ try {
 }
 ```
 
-### Use the promise-based API and `util.callbackify`
+#### Use the promise-based API and `util.callbackify`
 
 If you only have a few callback instances where you are currently unable to adopt the promise API, we recommend using the promise API and Nodejs's `callbackify`
 utility to adapt the promise-based API to use callbacks.
@@ -89,7 +94,7 @@ callbackFindOne({ name: 'john snow' }, {}, (error, result) => {
 })
 ```
 
-### Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`
+#### Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`
 
 If you are a callback user and you are not ready to use promises, support for your workflow has **not** been removed.
 We have migrated it to a new package:
@@ -103,7 +108,7 @@ The package wraps all of the driver's asynchronous operations that previously su
 driver v4 and v5.  However, new features will **only** only support a promise-based
 API in both the driver **and** the legacy driver.
 
-#### Example usage of equivalent callback and promise usage
+##### Example usage of equivalent callback and promise usage
 
 After installing the package and modifying imports the following example demonstrates equivalent usages of either `async`/`await` syntax, `.then`/`.catch` chaining, or callbacks:
 
