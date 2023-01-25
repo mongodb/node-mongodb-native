@@ -59,7 +59,7 @@ try {
 
 ### Use the promise-based API and `util.callbackify`
 
-If you are unable to adopt the promise API fully, we recommend using the promise API and Nodejs's `callbackify`
+If you only have a few callback instances where you are currently unable to adopt the promise API, we recommend using the promise API and Nodejs's `callbackify`
 utility to adapt the promise-based API to use callbacks.
 
 **Note** Manually converting a promise-based api to a callback-based API is error prone.  We strongly encourage the user of `callbackify`.
@@ -99,7 +99,7 @@ We have migrated it to a new package:
 
 The package wraps all of the driver's asynchronous operations that previously supported both promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
 
-`mongodb-legacy` is intended to preserve driver v4 behavior to enable an smoother transition between
+`mongodb-legacy` is intended to preserve driver v4 behavior to enable a smoother transition between
 driver v4 and v5.  However, new features will **only** only support a promise-based
 API in both the driver **and** the legacy driver.
 
