@@ -136,11 +136,6 @@ operations using the MongoDB driver.
 
 Add code to connect to the server and the database **myProject**:
 
-> **NOTE:** All the examples below use async/await syntax.
->
-> However, all async API calls support an optional callback as the final argument,
-> if a callback is provided a Promise will not be returned.
-
 > **NOTE:** Resolving DNS Connection issues
 >
 > Node.js 18 changed the default DNS resolution ordering from always prioritizing ipv4 to the ordering
@@ -267,7 +262,7 @@ It is our recommendation to use `instanceof` checks on errors and to avoid relyi
 We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
 
 Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
-This means `instanceof` will always be able to accurately capture the errors that our driver throws (or returns in a callback).
+This means `instanceof` will always be able to accurately capture the errors that our driver throws.
 
 ```typescript
 const client = new MongoClient(url);
