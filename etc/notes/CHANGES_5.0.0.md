@@ -14,9 +14,80 @@ The following is a detailed collection of the changes in the major v5 release of
 3. if applicable, an example of suggested syntax change (can be included in (1) )
 -->
 
-## Changes
+## Migrating from Callback-based APIs
 
-### Optional callback support migrated to `mongodb-legacy`
+Node v5 drops support for callbacks in favor of a pure async-await API.  Below are some strategies for
+callback users to adopt driver v5 in recommendation order.
+
+### Migrate to promise based api (recommended!)
+
+The Node team strongly encourages anyone who is able to migrate from callbacks to promises to do so.  The
+promise-based API is identical to the callback API except:
+
+- no callback is accepted as the last argument
+- a promise is always returned
+
+For example, with a findOne query:
+
+```typescript
+// callback-based API
+collection.findOne({ name: 'john snow'}, (error, result) => {
+  if (error) {
+    doSomethingWithError(error);
+    return;
+  }
+
+  doSomethingWithResult(result);
+})
+
+// promise-based API
+collection.findOne({ name: 'john snow'}).then(
+  (result) => doSomethingWithResult(result),
+  (error) => doSomethingWithError(error)
+);
+
+// promise-based API with async/await
+try {
+  const result = await collection.findOne({ name: 'john snow'});
+  doSomethingWithResult(result);
+} catch (error) {
+  doSomethingWithError(error);
+}
+```
+
+### Use the promise-based API and `util.callbackify`
+
+If you are unable to adopt the promise API fully, we recommend using the promise API and Nodejs's `callbackify`
+utility to adapt the promise-based API to use callbacks.
+
+**Note** Manually converting a promise-based api to a callback-based API is error prone.  We strongly encourage the user of `callbackify`.
+
+There are two approaches to using `callbackify` with a driver api.
+
+First, the driver method can be callbackified.  If this approach is used, care must be taken to bind the
+`this` parameter of the method to the object that the method exists on (see the example below).  This
+may also interfere with the Typescript definitions for the method being callbackified.
+
+```typescript
+const callbackFindOne = callbackify(collection.findOne.bind(collection));
+
+callbackFindOne({ name: 'john snow' }, {}, (error, result) => {
+  // handle error or result
+})
+```
+
+Another approach is to callbackify an anonymous function that has the same signature as the collection
+method.  This approach does not require a call to `bind`.
+
+```typescript
+const callbackFindOne = callbackify((query, options) => collection.findOne(query, options))
+
+callbackFindOne({ name: 'john snow' }, {}, (error, result) => {
+  // handle error or result
+})
+```
+
+### Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`
 
 If you are a callback user and you are not ready to use promises, support for your workflow has **not** been removed.
 We have migrated it to a new package:
@@ -25,6 +96,10 @@ We have migrated it to a new package:
 - [`mongodb-legacy` npm](https://www.npmjs.com/package/mongodb-legacy)
 
 The package wraps all of the driver's asynchronous operations that previously supported both promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
+
+`mongodb-legacy` is intended to preserve driver v4 behavior to enable an smoother transition between
+driver v4 and v5.  However, new features will **only** only support a promise-based
+API in both the driver **and** the legacy driver.
 
 #### Example usage of equivalent callback and promise usage
 
@@ -62,6 +137,17 @@ app.get('/endpoint_callbacks', (req, res) => {
 });
 ```
 
+## Changes
+
+### Optional callback support migrated to `mongodb-legacy`
+
+If you are a callback user and you are not ready to use promises, support for your workflow has **not** been removed.
+We have migrated it to a new package:
+
+- [`mongodb-legacy` Github](https://github.com/mongodb-js/nodejs-mongodb-legacy#readme)
+- [`mongodb-legacy` npm](https://www.npmjs.com/package/mongodb-legacy)
+
+The package wraps all of the driver's asynchronous operations that previously supported both promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
 
 ### Dot Notation Typescript Support Removed By Default
 
