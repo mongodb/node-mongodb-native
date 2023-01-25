@@ -67,7 +67,7 @@ try {
 If you only have a few callback instances where you are currently unable to adopt the promise API, we recommend using the promise API and Nodejs's `callbackify`
 utility to adapt the promise-based API to use callbacks.
 
-**Note** Manually converting a promise-based api to a callback-based API is error prone.  We strongly encourage the user of `callbackify`.
+**Note** Manually converting a promise-based api to a callback-based API is error prone.  We strongly encourage the use of `callbackify`.
 
 There are two approaches to using `callbackify` with a driver api.
 
