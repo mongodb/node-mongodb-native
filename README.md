@@ -2,6 +2,8 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
+**Upgrading to version 5? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md)!**
+
 **Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_4.0.0.md)!**
 
 ## Quick Links
@@ -15,6 +17,7 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                              |
 | changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                       |
 | upgrade to v4 | [etc/notes/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_4.0.0.md) |
+| upgrade to v5 | [etc/notes/CHANGES_5.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md) |
 | contributing  | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)             |
 
 ### Bugs / Feature Requests
@@ -53,7 +56,7 @@ If you run into any unexpected compiler failures against our supported TypeScrip
 
 ## Installation
 
-The recommended way to get started using the Node.js 4.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js 5.x driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
 After you've created your own project using `npm init`, you can run:
 
