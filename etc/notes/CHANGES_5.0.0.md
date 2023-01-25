@@ -14,7 +14,9 @@ The following is a detailed collection of the changes in the major v5 release of
 3. if applicable, an example of suggested syntax change (can be included in (1) )
 -->
 
-## Migrating from Callback-based APIs
+## Changes
+
+### Optional callback support migrated to `mongodb-legacy`
 
 Node v5 drops support for callbacks in favor of a pure async-await API.  Below are some strategies for
 callback users to adopt driver v5 in recommendation order.
@@ -136,18 +138,6 @@ app.get('/endpoint_callbacks', (req, res) => {
   });
 });
 ```
-
-## Changes
-
-### Optional callback support migrated to `mongodb-legacy`
-
-If you are a callback user and you are not ready to use promises, support for your workflow has **not** been removed.
-We have migrated it to a new package:
-
-- [`mongodb-legacy` Github](https://github.com/mongodb-js/nodejs-mongodb-legacy#readme)
-- [`mongodb-legacy` npm](https://www.npmjs.com/package/mongodb-legacy)
-
-The package wraps all of the driver's asynchronous operations that previously supported both promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
 
 ### Dot Notation Typescript Support Removed By Default
 
