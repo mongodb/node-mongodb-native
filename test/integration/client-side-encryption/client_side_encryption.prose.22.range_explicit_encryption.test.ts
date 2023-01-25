@@ -1,10 +1,12 @@
 import { EJSON } from 'bson';
 import { expect } from 'chai';
-import { readFile } from 'fs/promises';
+import * as fs from 'fs';
 import { join } from 'path';
 
 import { Decimal128, Document, Double, Long, MongoClient } from '../../../src';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
+
+const { readFile } = fs.promises;
 
 const getKmsProviders = () => {
   const result = EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}') as unknown as {
