@@ -12,7 +12,7 @@ import {
 import type { FindOptions } from '../operations/find';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import type { Callback } from '../utils';
+import { Callback, maybeCallback } from '../utils';
 import type { GridFSChunk } from './upload';
 
 /** @public */
@@ -185,22 +185,26 @@ export class GridFSBucketReadStream extends Readable implements NodeJS.ReadableS
    *
    * @param callback - called when the cursor is successfully closed or an error occurred.
    */
-  abort(callback?: Callback<void>): void {
-    this.push(null);
-    this.destroyed = true;
-    if (this.s.cursor) {
-      this.s.cursor.close(error => {
-        this.emit(GridFSBucketReadStream.CLOSE);
-        callback && callback(error);
-      });
-    } else {
-      if (!this.s.init) {
-        // If not initialized, fire close event because we will never
-        // get a cursor
-        this.emit(GridFSBucketReadStream.CLOSE);
+  abort(): Promise<void>;
+  /** @deprecated Callbacks are deprecated and will be removed in the next major version. See [mongodb-legacy](https://github.com/mongodb-js/nodejs-mongodb-legacy) for migration assistance */
+  abort(callback: Callback<void>): void;
+  abort(callback?: Callback<void>): Promise<void> | void {
+    return maybeCallback(async () => {
+      this.push(null);
+      this.destroyed = true;
+      if (this.s.cursor) {
+        await this.s.cursor.close().catch(error => {
+          this.emit(GridFSBucketReadStream.CLOSE);
+          throw error;
+        });
+      } else {
+        if (!this.s.init) {
+          // If not initialized, fire close event because we will never
+          // get a cursor
+          this.emit(GridFSBucketReadStream.CLOSE);
+        }
       }
-      callback && callback();
-    }
+    }, callback);
   }
 }
 
