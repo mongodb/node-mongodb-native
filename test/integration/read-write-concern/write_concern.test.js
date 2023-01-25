@@ -1,10 +1,8 @@
-'use strict';
-
 const { expect } = require('chai');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 
-const mock = require('../../tools/mongodb-mock/index');
 const { MongoClient } = require('../../../src');
+const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
+const mock = require('../../tools/mongodb-mock/index');
 
 describe('Write Concern', function () {
   it('should respect writeConcern from uri', function (done) {
@@ -70,6 +68,44 @@ describe('Write Concern', function () {
         .then(() => {
           return client.close();
         });
+    });
+  });
+
+  describe('must not affect read operations', function () {
+    let client;
+    let db;
+    let col;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ writeConcern: { w: 0 } });
+      await client.connect();
+      db = client.db('test');
+      await db.dropCollection('writeConcernTest').catch(() => null);
+      col = db.collection('writeConcernTest');
+
+      const docs = [];
+      for (let i = 0; i < 1028; i++) {
+        docs.push({ a: i });
+      }
+
+      await col.insertMany(docs);
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    describe('when writeConcern=0', function () {
+      it('does not throw an error when getMore is called on cursor', async function () {
+        const findResult = col.find({});
+        let err;
+
+        await findResult.toArray().catch(e => {
+          throw e;
+        });
+
+        expect(err).to.not.exist;
+      });
     });
   });
 });
