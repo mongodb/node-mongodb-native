@@ -6,16 +6,16 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
 ## Quick Links
 
-| what          | where                                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------- |
-| documentation | [www.mongodb.com/docs/drivers/node](https://www.mongodb.com/docs/drivers/node)                          |
-| api-doc       | [mongodb.github.io/node-mongodb-native](https://mongodb.github.io/node-mongodb-native)                  |
-| npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                  |
-| source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                |
-| mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                              |
-| changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                       |
+| what          | where                                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| documentation | [www.mongodb.com/docs/drivers/node](https://www.mongodb.com/docs/drivers/node)                                    |
+| api-doc       | [mongodb.github.io/node-mongodb-native](https://mongodb.github.io/node-mongodb-native)                            |
+| npm package   | [www.npmjs.com/package/mongodb](https://www.npmjs.com/package/mongodb)                                            |
+| source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                          |
+| mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                                        |
+| changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                 |
 | upgrade to v5 | [etc/notes/CHANGES_5.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md) |
-| contributing  | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)             |
+| contributing  | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                       |
 
 ### Bugs / Feature Requests
 
@@ -89,7 +89,6 @@ Third party:
 - Snappy network compression - [snappy](https://github.com/Brooooooklyn/snappy)
 - AWS authentication - [@aws-sdk/credential-providers](https://github.com/aws/aws-sdk-js-v3/tree/main/packages/credential-providers)
 
-
 ## Quick Start
 
 This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [official documentation](https://docs.mongodb.com/drivers/node/).
@@ -139,10 +138,11 @@ Add code to connect to the server and the database **myProject**:
 > **NOTE:** Resolving DNS Connection issues
 >
 > Node.js 18 changed the default DNS resolution ordering from always prioritizing ipv4 to the ordering
-> returned by the DNS provider.  In some environments, this can result in `localhost` resolving to
+> returned by the DNS provider. In some environments, this can result in `localhost` resolving to
 > an ipv6 address instead of ipv4 and a consequent failure to connect to the server.
 >
 > This can be resolved by:
+>
 > - specifying the ip address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
 > - launching mongod or mongos with the ipv6 flag enabled ([--ipv6 mongod option documentation](https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6))
 > - using a host of `127.0.0.1` in place of localhost

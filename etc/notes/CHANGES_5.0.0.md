@@ -18,14 +18,14 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ### Optional callback support migrated to `mongodb-legacy`
 
-Node v5 drops support for callbacks in favor of a promise-only API.  Below are some strategies for
+Node v5 drops support for callbacks in favor of a promise-only API. Below are some strategies for
 callback users to adopt driver v5 in order of most recommended to least recommended.
 
-The Node driver team understands that a callback to promise migration can be a non-trivial refactor.  To help inform your migration strategy, we've outlined three different approaches below.
+The Node driver team understands that a callback to promise migration can be a non-trivial refactor. To help inform your migration strategy, we've outlined three different approaches below.
 
 #### Migrate to promise based api (recommended!)
 
-The Node team strongly encourages anyone who is able to migrate from callbacks to promises to do so.  Adopting the
+The Node team strongly encourages anyone who is able to migrate from callbacks to promises to do so. Adopting the
 regular driver API will streamline the adoption of future driver updates, as well as provide better Typescript support
 than the other options outlined in this document.
 
@@ -38,24 +38,24 @@ For example, with a findOne query:
 
 ```typescript
 // callback-based API
-collection.findOne({ name: 'john snow'}, (error, result) => {
+collection.findOne({ name: 'john snow' }, (error, result) => {
   if (error) {
     doSomethingWithError(error);
     return;
   }
 
   doSomethingWithResult(result);
-})
+});
 
 // promise-based API
-collection.findOne({ name: 'john snow'}).then(
-  (result) => doSomethingWithResult(result),
-  (error) => doSomethingWithError(error)
+collection.findOne({ name: 'john snow' }).then(
+  result => doSomethingWithResult(result),
+  error => doSomethingWithError(error)
 );
 
 // promise-based API with async/await
 try {
-  const result = await collection.findOne({ name: 'john snow'});
+  const result = await collection.findOne({ name: 'john snow' });
   doSomethingWithResult(result);
 } catch (error) {
   doSomethingWithError(error);
@@ -67,12 +67,12 @@ try {
 If you only have a few callback instances where you are currently unable to adopt the promise API, we recommend using the promise API and Nodejs's `callbackify`
 utility to adapt the promise-based API to use callbacks.
 
-**Note** Manually converting a promise-based api to a callback-based API is error prone.  We strongly encourage the use of `callbackify`.
+**Note** Manually converting a promise-based api to a callback-based API is error prone. We strongly encourage the use of `callbackify`.
 
 There are two approaches to using `callbackify` with a driver api.
 
-First, the driver method can be callbackified.  If this approach is used, care must be taken to bind the
-`this` parameter of the method to the object that the method exists on (see the example below).  This
+First, the driver method can be callbackified. If this approach is used, care must be taken to bind the
+`this` parameter of the method to the object that the method exists on (see the example below). This
 may also interfere with the Typescript definitions for the method being callbackified.
 
 ```typescript
@@ -80,18 +80,18 @@ const callbackFindOne = callbackify(collection.findOne.bind(collection));
 
 callbackFindOne({ name: 'john snow' }, {}, (error, result) => {
   // handle error or result
-})
+});
 ```
 
 Another approach is to callbackify an anonymous function that has the same signature as the collection
-method.  This approach does not require a call to `bind`.
+method. This approach does not require a call to `bind`.
 
 ```typescript
-const callbackFindOne = callbackify((query, options) => collection.findOne(query, options))
+const callbackFindOne = callbackify((query, options) => collection.findOne(query, options));
 
 callbackFindOne({ name: 'john snow' }, {}, (error, result) => {
   // handle error or result
-})
+});
 ```
 
 #### Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`
@@ -105,7 +105,7 @@ We have migrated it to a new package:
 The package wraps all of the driver's asynchronous operations that previously supported both promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
 
 `mongodb-legacy` is intended to preserve driver v4 behavior to enable a smoother transition between
-driver v4 and v5.  However, new features will **only** only support a promise-based
+driver v4 and v5. However, new features will **only** only support a promise-based
 API in both the driver **and** the legacy driver.
 
 ##### Example usage of equivalent callback and promise usage
@@ -122,10 +122,10 @@ const collection = db.collection('pets');
 // Legacy projects may have intermixed API usage:
 app.get('/endpoint_async_await', async (req, res) => {
   try {
-    const result = await collection.findOne({})
+    const result = await collection.findOne({});
     res.end(JSON.stringify(result));
   } catch (error) {
-    res.errorHandling(error)
+    res.errorHandling(error);
   }
 });
 
@@ -148,40 +148,41 @@ app.get('/endpoint_callbacks', (req, res) => {
 
 **NOTE:** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same.
 
-Version 4.3.0 introduced Typescript support for dot notation in filter predicates.  For example:
+Version 4.3.0 introduced Typescript support for dot notation in filter predicates. For example:
 
 ```typescript
 interface Schema {
   user: {
-    name: string
-  }
+    name: string;
+  };
 }
 
 declare const collection: Collection<Schema>;
 // compiles pre-v4.3.0, fails in v4.3.0+
-collection.find({ 'user.name': 4 })
+collection.find({ 'user.name': 4 });
 ```
 
 This change caused a number of problems for users, including slow compilation times and compile errors for
 valid dot notation queries. While we have tried to mitigate this issue as much as possible
 in v4, ultimately we do not believe that this feature is fully production ready for all use cases.
 
-Driver 5.0 removes type checking for dot notation in filter predicates.  The preceding example will compile with
+Driver 5.0 removes type checking for dot notation in filter predicates. The preceding example will compile with
 driver v5.
 
 #### Dot Notation Helper Types Exported
 
 Although we removed support for type checking on dot notation filters by default, we have preserved the
 corresponding types in an experimental capacity.
-These helper types can be used for type checking.  We export the `StrictUpdateFilter` and the `StrictFilter`
+These helper types can be used for type checking. We export the `StrictUpdateFilter` and the `StrictFilter`
 types for type safety in updates and finds.
 
 To use one of the new types, simply create a predicate that uses dot notation and assign it the type of `StrictFilter<your schema>`.
+
 ```typescript
 interface Schema {
   user: {
-    name: string
-  }
+    name: string;
+  };
 }
 
 declare const collection: Collection<Schema>;
@@ -195,8 +196,8 @@ collection.find(filterPredicate);
 
 ### `Collection.mapReduce()` helper removed
 
-The `mapReduce` helper has been removed from the `Collection` class.  The `mapReduce` operation has been
-deprecated in favor of the aggregation pipeline since MongoDB server version 5.0.  It is recommended
+The `mapReduce` helper has been removed from the `Collection` class. The `mapReduce` operation has been
+deprecated in favor of the aggregation pipeline since MongoDB server version 5.0. It is recommended
 to migrate code that uses `Collection.mapReduce` to use the aggregation pipeline (see [Map-Reduce to Aggregation Pipeline](https://www.mongodb.com/docs/manual/reference/map-reduce-to-aggregation-pipeline/)).
 
 If the `mapReduce` command must be used, the `Db.command()` helper can be used to run the raw
@@ -207,13 +208,17 @@ If the `mapReduce` command must be used, the `Db.command()` helper can be used t
 const collection = db.collection('my-collection');
 
 await collection.mapReduce(
-  function() { emit(this.user_id, 1); },
-  function(k, vals) { return 1 },
+  function () {
+    emit(this.user_id, 1);
+  },
+  function (k, vals) {
+    return 1;
+  },
   {
     out: 'inline',
     readConcern: 'majority'
   }
-)
+);
 
 // manually running the command using `db.command()`
 const command = {
@@ -222,7 +227,7 @@ const command = {
   reduce: 'function(k,vals) { return 1; }',
   out: 'inline',
   readConcern: 'majority'
-}
+};
 
 await db.command(command);
 ```
@@ -236,7 +241,7 @@ The `digestPassword` option has been removed from the add user helper.
 
 ### Removal of Internal Types from Public API
 
-The following types are used internally the driver but were accidentally exported.  They have now been
+The following types are used internally the driver but were accidentally exported. They have now been
 marked internal and are no longer exported.
 
 - ServerSelector
@@ -257,7 +262,7 @@ For clarity the deprecated and duplicate export ObjectID has been removed. Objec
 
 ### `Projection` and `ProjectionOperations` Types Removed
 
-Both of these types were unused but exported.  These types have been removed.  Please
+Both of these types were unused but exported. These types have been removed. Please
 use `Document` instead.
 
 ### `CommandOperationOptions.fullResponse` Option Removed
@@ -266,11 +271,11 @@ The `fullResponse` option on the `CommandOperationOptions` as unused in the driv
 
 ### `BulkWriteOptions.keepGoing` Option Removed
 
-The `keepGoing` option on the `BulkWriteOptions` has been removed.  Please use the `ordered` option instead.
+The `keepGoing` option on the `BulkWriteOptions` has been removed. Please use the `ordered` option instead.
 
 ### `WriteConcernError.err()` Removed
 
-The `err()` getter on the WriteConcernError class has been removed.  The `toJSON()` method can be in place
+The `err()` getter on the WriteConcernError class has been removed. The `toJSON()` method can be in place
 of `err()`.
 
 ### slaveOk options removed
@@ -300,7 +305,6 @@ npm install --save "snappy@^7.2.2"
 ### `.unref()` removed from `Db`
 
 The `.unref()` method was a no-op and has now been removed from the Db class.
-
 
 ### @aws-sdk/credential-providers v3.201.0 or later and optional peerDependency
 
@@ -336,7 +340,7 @@ for await (const doc of cursor) {
   break;
 }
 
-cursor.closed // true
+cursor.closed; // true
 ```
 
 ### Driver now sends `1` instead of `true` for hello commands
@@ -348,14 +352,14 @@ previous `true` for spec compliance.
 
 Three legacy operation helpers on the collection class have been removed:
 
-| Removed API                                    | API to migrate to                                  |
-|------------------------------------------------|----------------------------------------------------|
-| `insert(document)`                             | `insertOne(document)`                              |
-| `insert(arrayOfDocuments)`                     | `insertMany(arrayOfDocuments)`                     |
-| `update(filter)`                               | `updateMany(filter)`                               |
-| `remove(filter)`                               | `deleteMany(filter)`                               |
+| Removed API                | API to migrate to              |
+| -------------------------- | ------------------------------ |
+| `insert(document)`         | `insertOne(document)`          |
+| `insert(arrayOfDocuments)` | `insertMany(arrayOfDocuments)` |
+| `update(filter)`           | `updateMany(filter)`           |
+| `remove(filter)`           | `deleteMany(filter)`           |
 
-The `insert` method accepted an array of documents for multi-document inserts and a single document for single document inserts.  `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
+The `insert` method accepted an array of documents for multi-document inserts and a single document for single document inserts. `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
 
 ```ts
 // Single document insert:
@@ -364,9 +368,9 @@ await collection.insert({ name: 'spot' });
 await collection.insertOne({ name: 'spot' });
 
 // Multi-document insert:
-await collection.insert([{ name: 'fido' }, { name: 'luna' }])
+await collection.insert([{ name: 'fido' }, { name: 'luna' }]);
 // Migration:
-await collection.insertMany([{ name: 'fido' }, { name: 'luna' }])
+await collection.insertMany([{ name: 'fido' }, { name: 'luna' }]);
 ```
 
 ### Removed `keepGoing` option from `BulkWriteOptions`
@@ -387,11 +391,11 @@ To access the raw result, please use `bulkWriteResult.getRawResponse()`.
 These can be accessed via:
 
 ```ts
-  bulkWriteResult.insertedCount;
-  bulkWriteResult.matchedCount;
-  bulkWriteResult.modifiedCount;
-  bulkWriteResult.deletedCount;
-  bulkWriteResult.upsertedCount;
-  bulkWriteResult.upsertedIds;
-  bulkWriteResult.insertedIds;
+bulkWriteResult.insertedCount;
+bulkWriteResult.matchedCount;
+bulkWriteResult.modifiedCount;
+bulkWriteResult.deletedCount;
+bulkWriteResult.upsertedCount;
+bulkWriteResult.upsertedIds;
+bulkWriteResult.insertedIds;
 ```
