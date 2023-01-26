@@ -434,6 +434,7 @@ functions:
           export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
           export NODE_LTS_NAME='${NODE_LTS_NAME}'
           export MONGODB_URI="${MONGODB_URI}"
+          export TEST_SOCKS5_CSFLE="${TEST_SOCKS5_CSFLE}"
           export SSL="${SSL}"
 
           # Disable xtrace (just in case it was accidentally set).
