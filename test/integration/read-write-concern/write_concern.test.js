@@ -72,39 +72,81 @@ describe('Write Concern', function () {
   });
 
   describe('must not affect read operations', function () {
-    let client;
-    let db;
-    let col;
+    describe('when writeConcern = 0', function () {
+      describe('does not throw an error when getMore is called on cursor', function () {
+        let client;
+        let db;
+        let col;
 
-    beforeEach(async function () {
-      client = this.configuration.newClient({ writeConcern: { w: 0 } });
-      await client.connect();
-      db = client.db('test');
-      await db.dropCollection('writeConcernTest').catch(() => null);
-      col = db.collection('writeConcernTest');
+        beforeEach(async function () {
+          client = this.configuration.newClient({ writeConcern: { w: 0 } });
+          await client.connect();
+          db = client.db('writeConcernTest');
+          col = db.collection('writeConcernTest');
 
-      const docs = [];
-      for (let i = 0; i < 1028; i++) {
-        docs.push({ a: i });
-      }
+          const docs = [];
+          for (let i = 0; i < 10; i++) {
+            docs.push({ a: i, b: i + 1 });
+          }
 
-      await col.insertMany(docs);
-    });
-
-    afterEach(async function () {
-      await client.close();
-    });
-
-    describe('when writeConcern=0', function () {
-      it('does not throw an error when getMore is called on cursor', async function () {
-        const findResult = col.find({});
-        let err;
-
-        await findResult.toArray().catch(e => {
-          throw e;
+          await col.insertMany(docs);
         });
 
-        expect(err).to.not.exist;
+        afterEach(async function () {
+          await db.dropDatabase();
+          await client.close();
+        });
+
+        it('find', async function () {
+          const findResult = col.find({}, { batchSize: 2 });
+          const err = await findResult.toArray().catch(e => e);
+
+          expect(err).to.not.be.instanceOf(Error);
+        });
+
+        it('listCollections', async function () {
+          let collections = [];
+          for (let i = 0; i < 10; i++) {
+            collections.push(`writeConcernTestCol${i + 1}`);
+          }
+
+          for (const colName of collections) {
+            await db.createCollection(colName).catch(() => null);
+          }
+
+          const cols = db.listCollections({}, { batchSize: 2 });
+
+          const err = await cols.toArray().catch(e => e);
+
+          expect(err).to.not.be.instanceOf(Error);
+        });
+
+        it('aggregate', async function () {
+          const aggResult = col.aggregate([{ $match: { a: { $gte: 0 } } }], { batchSize: 2 });
+          const err = await aggResult.toArray().catch(e => e);
+
+          expect(err).to.not.be.instanceOf(Error);
+        });
+
+        it('listIndexes', async function () {
+          await col.createIndex({ a: 1 });
+          await col.createIndex({ b: -1 });
+          await col.createIndex({ a: 1, b: -1 });
+
+          const listIndexesResult = col.listIndexes({ batchSize: 2 });
+          const err = await listIndexesResult.toArray().catch(e => e);
+
+          expect(err).to.not.be.instanceOf(Error);
+        });
+
+        it('changeStream', async function () {
+          let changeStream = col.watch(undefined, { batchSize: 2 });
+          col.updateMany({}, [{ $addFields: { A: 1 } }]);
+
+          const err = await changeStream.next().catch(e => e);
+
+          expect(err).to.not.be.instanceOf(Error);
+        });
       });
     });
   });
