@@ -1,0 +1,481 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "6.2.0",
+      "topology": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "database_name": "default",
+  "collection_name": "default",
+  "data": [],
+  "encrypted_fields": {
+    "escCollection": "enxcol_.default.esc",
+    "eccCollection": "enxcol_.default.ecc",
+    "ecocCollection": "enxcol_.default.ecoc",
+    "fields": [
+      {
+        "keyId": {
+          "$binary": {
+            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+            "subType": "04"
+          }
+        },
+        "path": "encryptedLong",
+        "bsonType": "long",
+        "queries": {
+          "queryType": "rangePreview",
+          "contention": {
+            "$numberLong": "0"
+          },
+          "sparsity": {
+            "$numberLong": "1"
+          },
+          "min": {
+            "$numberLong": "0"
+          },
+          "max": {
+            "$numberLong": "200"
+          }
+        }
+      }
+    ]
+  },
+  "key_vault_data": [
+    {
+      "_id": {
+        "$binary": {
+          "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+          "subType": "04"
+        }
+      },
+      "keyMaterial": {
+        "$binary": {
+          "base64": "sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==",
+          "subType": "00"
+        }
+      },
+      "creationDate": {
+        "$date": {
+          "$numberLong": "1648914851981"
+        }
+      },
+      "updateDate": {
+        "$date": {
+          "$numberLong": "1648914851981"
+        }
+      },
+      "status": {
+        "$numberInt": "0"
+      },
+      "masterKey": {
+        "provider": "local"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "FLE2 Range Long. Insert and Find.",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "local": {
+              "key": {
+                "$binary": {
+                  "base64": "Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk",
+                  "subType": "00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 0,
+              "encryptedLong": {
+                "$numberLong": "0"
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "encryptedLong": {
+                "$gt": {
+                  "$numberLong": "0"
+                }
+              }
+            }
+          },
+          "result": [
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$numberLong": "1"
+              }
+            }
+          ]
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "listCollections": 1,
+              "filter": {
+                "name": "default"
+              }
+            },
+            "command_name": "listCollections"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "find": "datakeys",
+              "filter": {
+                "$or": [
+                  {
+                    "_id": {
+                      "$in": [
+                        {
+                          "$binary": {
+                            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                            "subType": "04"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "keyAltNames": {
+                      "$in": []
+                    }
+                  }
+                ]
+              },
+              "$db": "keyvault",
+              "readConcern": {
+                "level": "majority"
+              }
+            },
+            "command_name": "find"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default",
+              "documents": [
+                {
+                  "_id": 0,
+                  "encryptedLong": {
+                    "$$type": "binData"
+                  }
+                }
+              ],
+              "ordered": true,
+              "encryptionInformation": {
+                "type": 1,
+                "schema": {
+                  "default.default": {
+                    "escCollection": "enxcol_.default.esc",
+                    "eccCollection": "enxcol_.default.ecc",
+                    "ecocCollection": "enxcol_.default.ecoc",
+                    "fields": [
+                      {
+                        "keyId": {
+                          "$binary": {
+                            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                            "subType": "04"
+                          }
+                        },
+                        "path": "encryptedLong",
+                        "bsonType": "long",
+                        "queries": {
+                          "queryType": "rangePreview",
+                          "contention": {
+                            "$numberLong": "0"
+                          },
+                          "sparsity": {
+                            "$numberLong": "1"
+                          },
+                          "min": {
+                            "$numberLong": "0"
+                          },
+                          "max": {
+                            "$numberLong": "200"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "command_name": "insert"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "default",
+              "documents": [
+                {
+                  "_id": 1,
+                  "encryptedLong": {
+                    "$$type": "binData"
+                  }
+                }
+              ],
+              "ordered": true,
+              "encryptionInformation": {
+                "type": 1,
+                "schema": {
+                  "default.default": {
+                    "escCollection": "enxcol_.default.esc",
+                    "eccCollection": "enxcol_.default.ecc",
+                    "ecocCollection": "enxcol_.default.ecoc",
+                    "fields": [
+                      {
+                        "keyId": {
+                          "$binary": {
+                            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                            "subType": "04"
+                          }
+                        },
+                        "path": "encryptedLong",
+                        "bsonType": "long",
+                        "queries": {
+                          "queryType": "rangePreview",
+                          "contention": {
+                            "$numberLong": "0"
+                          },
+                          "sparsity": {
+                            "$numberLong": "1"
+                          },
+                          "min": {
+                            "$numberLong": "0"
+                          },
+                          "max": {
+                            "$numberLong": "200"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "command_name": "insert"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "find": "default",
+              "filter": {
+                "encryptedLong": {
+                  "$gt": {
+                    "$binary": {
+                      "base64": "CnEFAAADcGF5bG9hZABBBQAABGcABQUAAAMwAH0AAAAFZAAgAAAAALGGQ/CRD+pGLD53BZzWcCcYbuGLVEyjzXIx7b+ux/q2BXMAIAAAAACOC6mXEZL27P9hethZbtKYsTXKK+FpgQ9Axxmn9N/cCwVjACAAAAAAKs6X8gaa+AJ6PpxVicsk7iCXpSYIkQ5zB0KnXqlfCWgAAzEAfQAAAAVkACAAAAAAtL3QIvnZqCF72eS6lKr8ilff7R6kiNklokiTuaU5wNsFcwAgAAAAAEtqr3/X731VB+VrbFcY8ZrJKRo2E0Fd+C8L0EMNcvcCBWMAIAAAAABYTWOKsDZ7cgPhiKDR2bE5CFGz4MuEwZbzZ0z46eGzBQADMgB9AAAABWQAIAAAAAB99ZW/7KwXKzl5M3XQsAJ3JbEef90IoxFYBArNiYzlgQVzACAAAAAAYO/qaw0+92HAryxOUG7iK6hnIy3OaUA9jIqtHdvcq8YFYwAgAAAAABSqgKlxv5LXoxUO3zNmqGztlZhL2S150WiR/eycv7CWAAMzAH0AAAAFZAAgAAAAAOK8brUuc2onBNDRtfYMR736dHj4dQqXod8JG7tAMTsDBXMAIAAAAAAW6SrGAL6Bx0s7ZlsYULFfOAiYIGhEWu6md3r+Rk40awVjACAAAAAAfsofSP7nQHv8ic8ZW0aNlWxplS46Z+mywPR4rQk+wcgAAzQAfQAAAAVkACAAAAAAV22FGF7ZDwK/EYiGNMlm/QuT3saQdyJM/Fn+ZyQug1oFcwAgAAAAACo7GwCvbcs5UHQMgds9/1QMklEVdjZigpuOFGrDmmxtBWMAIAAAAADu3L42J/oqNLe/XNYpodf2fhmPdcLhqO4J24o0hiveXwADNQB9AAAABWQAIAAAAADFspsMG7yHjKppyllon1KqAsTrHaZ6JzNqnSz8o6iTvwVzACAAAAAAeiA5pqVIQQ9s6UY/P8v5Jjkl3I7iFNeLDYehikrINrsFYwAgAAAAAAUljtCIvjRnLB2UPTEeRIz11Snl5SOBUNaXMXig4rqKAAM2AH0AAAAFZAAgAAAAAPcLmtq+V1e+MRlZ7NHq1+mrRVBQje5zj685ZvdsfKvSBXMAIAAAAABdHz/3w2k5km97QN9m7oLFYJaVJneNlMboIlz5yUASQAVjACAAAAAAD51NYesiO4Fo7w7iWBfqAFxEqkaDVctpvzZ28nT4SE8AAzcAfQAAAAVkACAAAAAAYfLwnoxK6XAGQrJFy8+TIJoq38ldBaO75h4zA4ZX5tQFcwAgAAAAAC2wk8UcJH5X5XGnDBYmel6srpBkzBhHtt3Jw1u5TSJ1BWMAIAAAAABJDtFhJ2tPbowp1UUmOCN/rqSqHRL1dtMu0c47vIlK4wADOAB9AAAABWQAIAAAAADGvyrtKkIcaV17ynZA7b2k5Pz6OhvxdWNkDvDWJIja8wVzACAAAAAAOLypVKNxf/wR1G8OZjUUsTQzDYeNNhhITxGMSp7euS4FYwAgAAAAAE6kvmXPqTnYIH4EJmNhy8OLVJZFOmdiBXLMorhELjKWAAM5AH0AAAAFZAAgAAAAAEocREw1L0g+roFUchJI2Yd0M0ME2bnErNUYnpyJP1SqBXMAIAAAAAAcE2/JK/8MoSeOchIuAkKh1X3ImoA7p8ujAZIfvIDo6QVjACAAAAAA85AiE+bNFAYQTXQAFexgeczdVhf8FUnf16WzJlI/kmsAAAVlACAAAAAA65pz95EthqQpfoHS9nWvdCh05AV+OokP7GUaI+7j8+wSY20AAAAAAAAAAAAAEHBheWxvYWRJZAAAAAAAEGZpcnN0T3BlcmF0b3IAAQAAAAA=",
+                      "subType": "06"
+                    }
+                  }
+                }
+              },
+              "encryptionInformation": {
+                "type": 1,
+                "schema": {
+                  "default.default": {
+                    "escCollection": "enxcol_.default.esc",
+                    "eccCollection": "enxcol_.default.ecc",
+                    "ecocCollection": "enxcol_.default.ecoc",
+                    "fields": [
+                      {
+                        "keyId": {
+                          "$binary": {
+                            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+                            "subType": "04"
+                          }
+                        },
+                        "path": "encryptedLong",
+                        "bsonType": "long",
+                        "queries": {
+                          "queryType": "rangePreview",
+                          "contention": {
+                            "$numberLong": "0"
+                          },
+                          "sparsity": {
+                            "$numberLong": "1"
+                          },
+                          "min": {
+                            "$numberLong": "0"
+                          },
+                          "max": {
+                            "$numberLong": "200"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "command_name": "find"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 0,
+              "encryptedLong": {
+                "$$type": "binData"
+              },
+              "__safeContent__": [
+                {
+                  "$binary": {
+                    "base64": "5nRutVIyq7URVOVtbE4vM01APSIajAVnsShMwjBlzkM=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "RjBYT2h3ZAoHxhf8DU6/dFbDkEBZp0IxREcsRTu2MXs=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "x7GR49EN0t3WXQDihkrbonK7qNIBYC87tpL/XEUyIYc=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "JfYUqWF+OoGjiYkRI4L5iPlF+T1Eleul7Fki22jp4Qc=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "q1RyGfIgsaQHoZFRw+DD28V26rN5hweApPLwExncvT8=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "L2PFeKGvLS6C+DLudR6fGlBq3ERPvjWvRyNRIA2HVb0=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "CWxaNqL3iP1yCixDkcmf9bmW3E5VeN8TJkg1jJe528s=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "+vC6araOEo+fpW7PSIP40/EnzBCj1d2N10Jr3rrXJJM=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "6SV63Mf51Z6A6p2X3rCnJKCu6ku3Oeb45mBYbz+IoAo=",
+                    "subType": "00"
+                  }
+                }
+              ]
+            },
+            {
+              "_id": 1,
+              "encryptedLong": {
+                "$$type": "binData"
+              },
+              "__safeContent__": [
+                {
+                  "$binary": {
+                    "base64": "bE1vqWj3KNyM7cCYUv/cnYm8BPaUL3eMp5syTHq6NF4=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "25j9sQXZCihCmHKvTHgaBsAVZFcGPn7JjHdrCGlwyyw=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "FA74j21GUEJb1DJBOpR9nVnjaDZnd8yAQNuaW9Qi26g=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "kJv//KVkbrobIBf+QeWC5jxn20mx/P0R1N6aCSMgKM8=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "zB+Whi9IUUGxfLEe+lGuIzLX4LFbIhaIAm5lRk65QTc=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "ybO1QU3CgvhO8JgRXH+HxKszWcpl5aGDYYVa75fHa1g=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "X3Y3eSAbbMg//JgiHHiFpYOpV61t8kkDexI+CQyitH4=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "SlNHXyqVFGDPrX/2ppwog6l4pwj3PKda2TkZbqgfSfA=",
+                    "subType": "00"
+                  }
+                },
+                {
+                  "$binary": {
+                    "base64": "McjV8xwTF3xI7863DYOBdyvIv6UpzThl6v9vBRk05bI=",
+                    "subType": "00"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

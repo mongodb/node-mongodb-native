@@ -92,6 +92,7 @@ describe('Client Side Encryption (Legacy)', function () {
 
       return !isSkippedTest;
     }
+
     return true;
   });
 });

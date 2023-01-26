@@ -623,7 +623,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
 }));
 
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of ['ff9e095eaf72f9e442761f69080dae159a395d94', 'master']) {
+  for (const ref of ['67bec571c0c21f4db8a96b6bd61cb24dfc87a223', 'master']) {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests'],

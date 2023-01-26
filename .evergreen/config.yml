@@ -1,6 +1,6 @@
 stepback: true
 command_type: system
-exec_timeout_secs: 1200
+exec_timeout_secs: 2100
 timeout:
   - command: subprocess.exec
     params:
@@ -2204,7 +2204,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: ff9e095eaf72f9e442761f69080dae159a395d94
+          CSFLE_GIT_REF: 67bec571c0c21f4db8a96b6bd61cb24dfc87a223
   - name: run-custom-csfle-tests-5.0-master
     tags:
       - run-custom-dependency-tests
@@ -2234,7 +2234,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: ff9e095eaf72f9e442761f69080dae159a395d94
+          CSFLE_GIT_REF: 67bec571c0c21f4db8a96b6bd61cb24dfc87a223
   - name: run-custom-csfle-tests-rapid-master
     tags:
       - run-custom-dependency-tests
@@ -2264,7 +2264,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: ff9e095eaf72f9e442761f69080dae159a395d94
+          CSFLE_GIT_REF: 67bec571c0c21f4db8a96b6bd61cb24dfc87a223
   - name: run-custom-csfle-tests-latest-master
     tags:
       - run-custom-dependency-tests
