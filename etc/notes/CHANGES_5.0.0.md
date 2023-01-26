@@ -69,22 +69,8 @@ utility to adapt the promise-based API to use callbacks.
 
 **Note** Manually converting a promise-based api to a callback-based API is error prone. We strongly encourage the use of `callbackify`.
 
-There are two approaches to using `callbackify` with a driver api.
-
-First, the driver method can be callbackified. If this approach is used, care must be taken to bind the
-`this` parameter of the method to the object that the method exists on (see the example below). This
-may also interfere with the Typescript definitions for the method being callbackified.
-
-```typescript
-const callbackFindOne = callbackify(collection.findOne.bind(collection));
-
-callbackFindOne({ name: 'john snow' }, {}, (error, result) => {
-  // handle error or result
-});
-```
-
-Another approach is to callbackify an anonymous function that has the same signature as the collection
-method. This approach does not require a call to `bind`.
+We recommend using callbackify with an anonymous function that has the same signature as the collection
+method.
 
 ```typescript
 const callbackFindOne = callbackify((query, options) => collection.findOne(query, options));
