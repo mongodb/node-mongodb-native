@@ -205,6 +205,27 @@ TASKS.push(
       ]
     },
     {
+      name: 'test-socks5-csfle',
+      tags: [],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: 'latest',
+            TOPOLOGY: 'replica_set'
+          }
+        },
+        { func: 'bootstrap kms servers' },
+        {
+          func: 'run socks5 tests',
+          vars: {
+            TEST_SOCKS5_CSFLE: 'true'
+          }
+        }
+      ]
+    },
+    {
       name: 'test-socks5-tls',
       tags: [],
       commands: [
