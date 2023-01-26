@@ -7,7 +7,7 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface ListCollectionsOptions extends CommandOperationOptions {
+export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
   /** Since 4.0: If true and nameOnly is true, allows a user without the required privilege (i.e. listCollections action on the database) to run the command when access control is enforced. */

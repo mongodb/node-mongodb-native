@@ -14,7 +14,8 @@ import { Aspect, defineAspects, Hint } from './operation';
  * @typeParam TSchema - Unused schema definition, deprecated usage, only specify `FindOptions` with no generic
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface FindOptions<TSchema extends Document = Document> extends CommandOperationOptions {
+export interface FindOptions<TSchema extends Document = Document>
+  extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
