@@ -40,25 +40,29 @@ For example, with a findOne query:
 // callback-based API
 collection.findOne({ name: 'john snow' }, (error, result) => {
   if (error) {
-    doSomethingWithError(error);
+    /* do something with error */
     return;
   }
 
-  doSomethingWithResult(result);
+  /* do something with result */
 });
 
 // promise-based API
-collection.findOne({ name: 'john snow' }).then(
-  result => doSomethingWithResult(result),
-  error => doSomethingWithError(error)
-);
+collection
+  .findOne({ name: 'john snow' })
+  .then(() => {
+    /* do something with result */
+  })
+  .catch(error => {
+    /* do something with error */
+  });
 
 // promise-based API with async/await
 try {
   const result = await collection.findOne({ name: 'john snow' });
-  doSomethingWithResult(result);
+  /* do something with result */
 } catch (error) {
-  doSomethingWithError(error);
+  /* do something with error */
 }
 ```
 
