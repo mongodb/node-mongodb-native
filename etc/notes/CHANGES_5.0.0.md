@@ -18,8 +18,8 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ### Optional callback support migrated to `mongodb-legacy`
 
-Node v5 drops support for callbacks in favor of a pure async-await API.  Below are some strategies for
-callback users to adopt driver v5 in recommendation order.
+Node v5 drops support for callbacks in favor of a promise-only API.  Below are some strategies for
+callback users to adopt driver v5 in order of most recommended to least recommended.
 
 The Node driver team understands that a callback to promise migration can be a non-trivial refactor.  To help inform your migration strategy, we've outlined three different approaches below.
 

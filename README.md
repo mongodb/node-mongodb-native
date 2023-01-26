@@ -4,8 +4,6 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
 **Upgrading to version 5? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md)!**
 
-**Upgrading to version 4? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_4.0.0.md)!**
-
 ## Quick Links
 
 | what          | where                                                                                                   |
@@ -16,7 +14,6 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | source        | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                |
 | mongodb       | [www.mongodb.com](https://www.mongodb.com)                                                              |
 | changelog     | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                       |
-| upgrade to v4 | [etc/notes/CHANGES_4.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_4.0.0.md) |
 | upgrade to v5 | [etc/notes/CHANGES_5.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md) |
 | contributing  | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)             |
 
