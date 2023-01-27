@@ -4,6 +4,7 @@ import ConnectionString from 'mongodb-connection-string-url';
 import { MongoClient } from '../../src';
 import { LEGACY_HELLO_COMMAND } from '../../src/constants';
 import { MongoParseError } from '../../src/error';
+import { installNodeDNSWorkaroundHooks } from '../tools/runner/hooks/configuration';
 
 /**
  * The SOCKS5_CONFIG environment variable is either a JSON 4-tuple
@@ -33,6 +34,8 @@ describe('Socks5 Connectivity', function () {
   }
   rsConnectionString.searchParams.set('serverSelectionTimeoutMS', '2000');
   singleConnectionString.searchParams.set('serverSelectionTimeoutMS', '2000');
+
+  installNodeDNSWorkaroundHooks();
 
   context((proxyUsername ? 'with' : 'without') + ' Socks5 auth required', function () {
     context('with missing required Socks5 auth configuration', function () {
@@ -302,9 +305,12 @@ async function testConnection(connectionString, clientOptions) {
   let topologyType;
   client.on('topologyDescriptionChanged', ev => (topologyType = ev.newDescription.type));
 
-  await client.connect();
-  await client.db('admin').command({ hello: 1 });
-  await client.db('test').collection('test').findOne({});
-  await client.close();
+  try {
+    await client.connect();
+    await client.db('admin').command({ hello: 1 });
+    await client.db('test').collection('test').findOne({});
+  } finally {
+    await client.close();
+  }
   return topologyType;
 }

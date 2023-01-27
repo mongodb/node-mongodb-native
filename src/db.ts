@@ -774,11 +774,15 @@ export class Db {
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
   }
 
-  /** Return the db logger */
+  /**
+   * Return the db logger
+   * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
+   */
   getLogger(): Logger {
     return this.s.logger;
   }
 
+  /** @deprecated The Legacy Logger is deprecated and will be removed in the next major version. */
   get logger(): Logger {
     return this.s.logger;
   }

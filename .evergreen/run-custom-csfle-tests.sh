@@ -53,7 +53,6 @@ popd # mongo-c-driver
 pushd libmongocrypt/bindings/node
 
 npm install --production --ignore-scripts
-source ./.evergreen/find_cmake.sh
 bash ./etc/build-static.sh
 
 popd # libmongocrypt/bindings/node
