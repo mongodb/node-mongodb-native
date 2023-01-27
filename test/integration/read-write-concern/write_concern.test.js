@@ -141,8 +141,8 @@ describe('Write Concern', function () {
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        if (client.options.replicaset) {
-          it('changeStream', async function () {
+        it('changeStream', async function () {
+          if (this.configuration.options.replicaSet) {
             let changeStream = col.watch(undefined, { batchSize: 2 });
 
             setTimeout(() => {
@@ -152,8 +152,10 @@ describe('Write Concern', function () {
             const err = await changeStream.next().catch(e => e);
 
             expect(err).to.not.be.instanceOf(Error);
-          });
-        }
+          } else {
+            this.skip();
+          }
+        });
       });
     });
   });
