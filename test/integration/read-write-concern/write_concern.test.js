@@ -141,17 +141,19 @@ describe('Write Concern', function () {
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('changeStream', async function () {
-          let changeStream = col.watch(undefined, { batchSize: 2 });
+        if (client.options.replicaset) {
+          it('changeStream', async function () {
+            let changeStream = col.watch(undefined, { batchSize: 2 });
 
-          setTimeout(() => {
-            col.updateMany({}, [{ $addFields: { A: 1 } }]);
-          }, 500);
+            setTimeout(() => {
+              col.updateMany({}, [{ $addFields: { A: 1 } }]);
+            }, 500);
 
-          const err = await changeStream.next().catch(e => e);
+            const err = await changeStream.next().catch(e => e);
 
-          expect(err).to.not.be.instanceOf(Error);
-        });
+            expect(err).to.not.be.instanceOf(Error);
+          });
+        }
       });
     });
   });
