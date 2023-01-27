@@ -4,7 +4,7 @@ const { MongoClient } = require('../../../src');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const mock = require('../../tools/mongodb-mock/index');
 
-const { setTimeout } = require('node:timers');
+const { setTimeout } = require('timers');
 
 describe('Write Concern', function () {
   it('should respect writeConcern from uri', function (done) {
@@ -146,7 +146,7 @@ describe('Write Concern', function () {
 
           setTimeout(() => {
             col.updateMany({}, [{ $addFields: { A: 1 } }]);
-          });
+          }, 500);
 
           const err = await changeStream.next().catch(e => e);
 
