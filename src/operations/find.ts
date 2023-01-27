@@ -14,8 +14,7 @@ import { Aspect, defineAspects, Hint } from './operation';
  * @typeParam TSchema - Unused schema definition, deprecated usage, only specify `FindOptions` with no generic
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface FindOptions<TSchema extends Document = Document>
-  extends Omit<CommandOperationOptions, 'writeConcern'> {
+export interface FindOptions<TSchema extends Document = Document> extends CommandOperationOptions {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
@@ -143,9 +142,9 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
     if (projection && Array.isArray(projection)) {
       projection = projection.length
         ? projection.reduce((result, field) => {
-          result[field] = 1;
-          return result;
-        }, {})
+            result[field] = 1;
+            return result;
+          }, {})
         : { _id: 1 };
     }
 
