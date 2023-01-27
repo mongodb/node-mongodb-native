@@ -65,6 +65,8 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
 
     if (this.hasWriteStage) {
       this.trySecondaryWrite = true;
+    } else {
+      this.options.writeConcern = undefined;
     }
 
     if (this.explain && this.writeConcern) {
@@ -101,8 +103,6 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
 
     if (this.hasWriteStage && this.writeConcern) {
       Object.assign(command, { writeConcern: this.writeConcern });
-    } else {
-      Object.assign(this.options, { writeConcern: undefined });
     }
 
     if (options.bypassDocumentValidation === true) {

@@ -594,7 +594,7 @@ export class ChangeStream<
     super();
 
     this.pipeline = pipeline;
-    this.options = options;
+    this.options = { ...options, writeConcern: undefined };
 
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;

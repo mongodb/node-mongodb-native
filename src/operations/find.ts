@@ -77,7 +77,7 @@ export class FindOperation extends CommandOperation<Document> {
   ) {
     super(collection, options);
 
-    this.options = options;
+    this.options = { ...options, writeConcern: undefined };
     this.ns = ns;
 
     if (typeof filter !== 'object' || Array.isArray(filter)) {
@@ -118,7 +118,6 @@ export class FindOperation extends CommandOperation<Document> {
       {
         ...this.options,
         ...this.bsonOptions,
-        writeConcern: undefined,
         documentsReturnedIn: 'firstBatch',
         session
       },
