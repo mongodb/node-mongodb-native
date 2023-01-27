@@ -1,0 +1,30 @@
+{
+    "fields": [
+      {
+        "keyId": {
+          "$binary": {
+            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+            "subType": "04"
+          }
+        },
+        "path": "encryptedDoublePrecision",
+        "bsonType": "double",
+        "queries": {
+          "queryType": "rangePreview",
+          "sparsity": {
+            "$numberLong": "1"
+          },
+          "min": {
+            "$numberDouble": "0.0"
+          },
+          "max": {
+            "$numberDouble": "200.0"
+          },
+          "precision": {
+            "$numberInt": "2"
+          }
+        }
+      }
+    ]
+  }
+  

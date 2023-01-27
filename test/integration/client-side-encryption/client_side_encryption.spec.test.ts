@@ -1,7 +1,7 @@
 import * as path from 'path';
 
 import { loadSpecTests } from '../../spec';
-import { installNode18DNSHooks } from '../../tools/runner/hooks/configuration';
+import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import {
   gatherTestSuites,
   generateTopologyTests,
@@ -73,8 +73,7 @@ describe('Client Side Encryption (Legacy)', function () {
     testContext
   );
 
-  installNode18DNSHooks();
-
+  installNodeDNSWorkaroundHooks();
   after(() => testContext.teardown());
   before(function () {
     return testContext.setup(this.configuration);
@@ -93,12 +92,13 @@ describe('Client Side Encryption (Legacy)', function () {
 
       return !isSkippedTest;
     }
+
     return true;
   });
 });
 
 describe('Client Side Encryption (Unified)', function () {
-  installNode18DNSHooks();
+  installNodeDNSWorkaroundHooks();
   runUnifiedSuite(loadSpecTests(path.join('client-side-encryption', 'tests', 'unified')), () =>
     isServerless ? 'Unified CSFLE tests to not run on serverless' : false
   );
