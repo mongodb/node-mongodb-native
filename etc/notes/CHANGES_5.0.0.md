@@ -1,12 +1,44 @@
-# Changes in v5
+# Changes in the MongoDB Node.js Driver v5
 
-## TOC
-
-- TODO
+* [About](#about)
+* [Changes](#changes)
+  + [Optional callback support migrated to `mongodb-legacy`](#optional-callback-support-migrated-to--mongodb-legacy-)
+    - [Migrate to Promise-based API (recommended!)](#migrate-to-promise-based-api--recommended--)
+    - [Use the Promise-based API and `util.callbackify`](#use-the-promise-based-api-and--utilcallbackify-)
+    - [Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`](#add--mongodb-legacy--as-a-dependency-and-update-imports-to-use--mongodb-legacy-)
+      * [Example usage of equivalent callback and Promise usage](#example-usage-of-equivalent-callback-and-promise-usage)
+  + [Dot Notation TypeScript Support Removed By Default](#dot-notation-typescript-support-removed-by-default)
+    - [Dot Notation Helper Types Exported](#dot-notation-helper-types-exported)
+  + [`Collection.mapReduce()` helper removed](#-collectionmapreduce----helper-removed)
+  + [`AddUserOptions.digestPassword` removed](#-adduseroptionsdigestpassword--removed)
+  + [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
+  + [`DeleteOptions.single` Option Removed](#-deleteoptionssingle--option-removed)
+  + [Remove of `ObjectID` Type in Favor Of `ObjectId`](#remove-of--objectid--type-in-favor-of--objectid-)
+  + [Kerberos Option `gssapiCanonicalizeHostName` Removed](#kerberos-option--gssapicanonicalizehostname--removed)
+  + [`Projection` and `ProjectionOperations` Types Removed](#-projection--and--projectionoperations--types-removed)
+  + [`CommandOperationOptions.fullResponse` Option Removed](#-commandoperationoptionsfullresponse--option-removed)
+  + [`BulkWriteOptions.keepGoing` Option Removed](#-bulkwriteoptionskeepgoing--option-removed)
+  + [`WriteConcernError.err()` Removed](#-writeconcernerrorerr----removed)
+  + [slaveOk options removed](#slaveok-options-removed)
+  + [Bulk results no longer contain `lastOp()` and `opTime`](#bulk-results-no-longer-contain--lastop----and--optime-)
+  + [`CursorCloseOptions` removed](#-cursorcloseoptions--removed)
+  + [Snappy v7.2.2 or later and optional `peerDependency`](#snappy-v722-or-later-and-optional--peerdependency-)
+  + [`.unref()` removed from `Db`](#-unref----removed-from--db-)
+  + [`@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`](#--aws-sdk-credential-providers--v32010-or-later-and-optional--peerdependency-)
+  + [Minimum supported Node version](#minimum-supported-node-version)
+  + [Custom Promise library support removed](#custom-promise-library-support-removed)
+  + [Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`](#cursors-now-implement--asyncgenerator--interface-instead-of--asynciterator-)
+  + [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of--for-await--of--loops)
+  + [Driver now sends `1` instead of `true` for hello commands](#driver-now-sends--1--instead-of--true--for-hello-commands)
+  + [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed--collectioninsert----collectionupdate---and--collectionremove-)
+  + [Removed `keepGoing` option from `BulkWriteOptions`](#removed--keepgoing--option-from--bulkwriteoptions-)
+  + [`bson-ext` support removed](#-bson-ext--support-removed)
+  + [`BulkWriteResult` no longer contains a publicly enumerable `result` property.](#-bulkwriteresult--no-longer-contains-a-publicly-enumerable--result--property)
+  + [`BulkWriteResult` now contains individual ressult properties.](#-bulkwriteresult--now-contains-individual-ressult-properties)
 
 ## About
 
-The following is a detailed collection of the changes in the major v5 release of the mongodb package for Node.js.
+The following is a detailed collection of the changes in the major v5 release of the `mongodb` package for Node.js.
 
 <!--
 1. a brief statement of what is breaking (brief as in "x will now return y instead of z", or "x is no longer supported, use y instead", etc
@@ -18,23 +50,23 @@ The following is a detailed collection of the changes in the major v5 release of
 
 ### Optional callback support migrated to `mongodb-legacy`
 
-Node v5 drops support for callbacks in favor of a promise-only API. Below are some strategies for
-callback users to adopt driver v5 in order of most recommended to least recommended.
+Node.js driver v5 drops support for callbacks in favor of a Promise-only API. Below are some strategies for
+callback users to adopt v5 of the driver in order of most recommended to least recommended.
 
-The Node driver team understands that a callback to promise migration can be a non-trivial refactor. To help inform your migration strategy, we've outlined three different approaches below.
+The Node.js driver team understands that a callback to Promise migration can be a non-trivial refactor. To help inform your migration strategy, we've outlined three different approaches below.
 
-#### Migrate to promise based api (recommended!)
+#### Migrate to Promise-based API (recommended!)
 
-The Node team strongly encourages anyone who is able to migrate from callbacks to promises to do so. Adopting the
-regular driver API will streamline the adoption of future driver updates, as well as provide better Typescript support
+The Node team strongly encourages anyone who is able to migrate from callbacks to Promises to do so. Migrating to
+the driver's Promise-based API will streamline the adoption of future driver updates, as well as provide better TypeScript support
 than the other options outlined in this document.
 
-The promise-based API is identical to the callback API except:
+The Promise-based API is identical to the callback API except:
 
 - no callback is accepted as the last argument
-- a promise is always returned
+- a Promise is always returned
 
-For example, with a findOne query:
+For example, with a `findOne` query:
 
 ```typescript
 // callback-based API
@@ -47,7 +79,7 @@ collection.findOne({ name: 'john snow' }, (error, result) => {
   /* do something with result */
 });
 
-// promise-based API
+// Promise-based API
 collection
   .findOne({ name: 'john snow' })
   .then(() => {
@@ -57,7 +89,7 @@ collection
     /* do something with error */
   });
 
-// promise-based API with async/await
+// Promise-based API with async/await
 try {
   const result = await collection.findOne({ name: 'john snow' });
   /* do something with result */
@@ -66,15 +98,14 @@ try {
 }
 ```
 
-#### Use the promise-based API and `util.callbackify`
+#### Use the Promise-based API and `util.callbackify`
 
-If you only have a few callback instances where you are currently unable to adopt the promise API, we recommend using the promise API and Nodejs's `callbackify`
-utility to adapt the promise-based API to use callbacks.
+If you only have a few callback instances where you are currently unable to adopt the Promise API, we recommend using the promise API and [Node.js' `callbackify`](https://nodejs.org/api/util.html#utilcallbackifyoriginal)
+utility to adapt the Promise-based API to use callbacks.
 
-**Note** Manually converting a promise-based api to a callback-based API is error prone. We strongly encourage the use of `callbackify`.
+**Note** Manually converting a Promise-based API to a callback-based API is error prone. We strongly encourage the use of `callbackify`.
 
-We recommend using callbackify with an anonymous function that has the same signature as the collection
-method.
+We recommend using `callbackify` with an anonymous function that has the same signature as the collection method.
 
 ```typescript
 const callbackFindOne = callbackify((query, options) => collection.findOne(query, options));
@@ -86,23 +117,23 @@ callbackFindOne({ name: 'john snow' }, {}, (error, result) => {
 
 #### Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`
 
-If you are a callback user and you are not ready to use promises, support for your workflow has **not** been removed.
-We have migrated it to a new package:
+If your application uses callbacks and you are not ready to use Promises, support for your workflow has **not** been removed.
+We have migrated callback support to a new package:
 
-- [`mongodb-legacy` Github](https://github.com/mongodb-js/nodejs-mongodb-legacy#readme)
+- [`mongodb-legacy` GitHub](https://github.com/mongodb-js/nodejs-mongodb-legacy#readme)
 - [`mongodb-legacy` npm](https://www.npmjs.com/package/mongodb-legacy)
 
-The package wraps all of the driver's asynchronous operations that previously supported both promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
+The package wraps all of the driver's asynchronous operations that previously supported both Promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
 
 `mongodb-legacy` is intended to preserve driver v4 behavior to enable a smoother transition between
-driver v4 and v5. However, new features will **only** only support a promise-based
-API in both the driver **and** the legacy driver.
+driver v4 and v5. However, new features will **only** support a Promise-based API in both the driver 
+**and** the legacy driver.
 
-##### Example usage of equivalent callback and promise usage
+##### Example usage of equivalent callback and Promise usage
 
 After installing the package and modifying imports the following example demonstrates equivalent usages of either `async`/`await` syntax, `.then`/`.catch` chaining, or callbacks:
 
-```ts
+```typescript
 // Just add '-legacy' to my mongodb import
 import { MongoClient } from 'mongodb-legacy';
 const client = new MongoClient();
@@ -134,11 +165,11 @@ app.get('/endpoint_callbacks', (req, res) => {
 });
 ```
 
-### Dot Notation Typescript Support Removed By Default
+### Dot Notation TypeScript Support Removed By Default
 
-**NOTE:** This is a **Typescript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same.
+**NOTE:** This is a **TypeScript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same.
 
-Version 4.3.0 introduced Typescript support for dot notation in filter predicates. For example:
+MongoDB Node.js Driver v4.3.0 introduced TypeScript support for dot notation in filter predicates. For example:
 
 ```typescript
 interface Schema {
@@ -163,6 +194,7 @@ driver v5.
 
 Although we removed support for type checking on dot notation filters by default, we have preserved the
 corresponding types in an experimental capacity.
+
 These helper types can be used for type checking. We export the `StrictUpdateFilter` and the `StrictFilter`
 types for type safety in updates and finds.
 
@@ -190,11 +222,10 @@ The `mapReduce` helper has been removed from the `Collection` class. The `mapRed
 deprecated in favor of the aggregation pipeline since MongoDB server version 5.0. It is recommended
 to migrate code that uses `Collection.mapReduce` to use the aggregation pipeline (see [Map-Reduce to Aggregation Pipeline](https://www.mongodb.com/docs/manual/reference/map-reduce-to-aggregation-pipeline/)).
 
-If the `mapReduce` command must be used, the `Db.command()` helper can be used to run the raw
-`mapReduce` command.
+If the `mapReduce` command must be used, the `Db.command()` helper can be used to run the raw `mapReduce` command.
 
 ```typescript
-// using the Collection.mapReduce helper in <4.x drivers
+// using the Collection.mapReduce helper in < 4.x drivers
 const collection = db.collection('my-collection');
 
 await collection.mapReduce(
@@ -231,12 +262,12 @@ The `digestPassword` option has been removed from the add user helper.
 
 ### Removal of Internal Types from Public API
 
-The following types are used internally the driver but were accidentally exported. They have now been
+The following types are used internally by the driver but were accidentally exported. They have now been
 marked internal and are no longer exported.
 
-- ServerSelector
-- PipeOptions
-- ServerOptions
+- `ServerSelector`
+- `PipeOptions`
+- `ServerOptions`
 
 ### `DeleteOptions.single` Option Removed
 
@@ -244,7 +275,7 @@ TODO - merge in Neal's removal of `collection.remove` and combine notes
 
 ### Remove of `ObjectID` Type in Favor Of `ObjectId`
 
-For clarity the deprecated and duplicate export ObjectID has been removed. ObjectId matches the class name and is equal in every way to the capital "D" export.
+For clarity the deprecated and duplicate export `ObjectID` has been removed. `ObjectId` matches the class name and is equal in every way to the capital "D" export.
 
 ### Kerberos Option `gssapiCanonicalizeHostName` Removed
 
@@ -252,8 +283,7 @@ For clarity the deprecated and duplicate export ObjectID has been removed. Objec
 
 ### `Projection` and `ProjectionOperations` Types Removed
 
-Both of these types were unused but exported. These types have been removed. Please
-use `Document` instead.
+Both of these types were unused but exported. These types have been removed. Please use `Document` instead.
 
 ### `CommandOperationOptions.fullResponse` Option Removed
 
@@ -265,8 +295,7 @@ The `keepGoing` option on the `BulkWriteOptions` has been removed. Please use th
 
 ### `WriteConcernError.err()` Removed
 
-The `err()` getter on the WriteConcernError class has been removed. The `toJSON()` method can be in place
-of `err()`.
+The `err()` getter on the WriteConcernError class has been removed. The `toJSON()` method can be in place of `err()`.
 
 ### slaveOk options removed
 
@@ -283,10 +312,10 @@ no longer normalizes the values. There is no new method or property to replace t
 When calling `close()` on a `Cursor`, no more options can be provided. This removes support for the
 `skipKillCursors` option that was unused.
 
-### Snappy v7.2.2 or later and optional peerDependency
+### Snappy v7.2.2 or later and optional `peerDependency`
 
-`snappy` compression has been added to the package.json as a peerDependency that is **optional**.
-This means `npm` will let you know if the version of snappy you have installed is incompatible with the driver.
+`snappy` compression has been added to the `package.json` as a `peerDependency` that is **optional**.
+This means `npm` will let you know if the version of `snappy` you have installed is incompatible with the driver.
 
 ```sh
 npm install --save "snappy@^7.2.2"
@@ -294,12 +323,12 @@ npm install --save "snappy@^7.2.2"
 
 ### `.unref()` removed from `Db`
 
-The `.unref()` method was a no-op and has now been removed from the Db class.
+The `.unref()` method was a no-op and has now been removed from the `Db` class.
 
-### @aws-sdk/credential-providers v3.201.0 or later and optional peerDependency
+### `@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`
 
-`@aws-sdk/credential-providers` has been added to the package.json as a peerDependency that is **optional**.
-This means `npm` will let you know if the version of the sdk you have installed is incompatible with the driver.
+`@aws-sdk/credential-providers` has been added to the `package.json` as a `peerDependency` that is **optional**.
+This means `npm` will let you know if the version of the SDK you have installed is incompatible with the driver.
 
 ```sh
 npm install --save @aws-sdk/credential-providers@3.186.0
@@ -311,17 +340,19 @@ The new minimum supported Node.js version is now 14.20.1.
 
 ### Custom Promise library support removed
 
-The MongoClient option `promiseLibrary` along with the `Promise.set` export that allows specifying a custom promise library has been removed.
-This allows the driver to adopt async/await syntax which has [performance benefits](https://v8.dev/blog/fast-async) over manual promise construction.
+The `MongoClient` option `promiseLibrary` along with the `Promise.set` export that allows specifying a custom Promise library has been removed.
+
+This allows the driver to adopt `async`/`await` syntax which has [performance benefits](https://v8.dev/blog/fast-async) over manual Promise construction.
 
 ### Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`
 
 All cursor types have been changed to implement `AsyncGenerator` instead of `AsyncIterator`.
+
 This was done to make our typing more accurate.
 
-### Cursor closes on exit of for await of loops
+### Cursor closes on exit of `for await ... of` loops
 
-Cursors will now automatically close when exiting a for await of loop on the cursor itself.
+Cursors will now automatically close when exiting a `for await ... of` loop on the cursor itself.
 
 ```js
 const cursor = collection.find({});
@@ -336,7 +367,7 @@ cursor.closed; // true
 ### Driver now sends `1` instead of `true` for hello commands
 
 Everywhere the driver sends a `hello` command (initial handshake and monitoring), it will now pass the command value as `1` instead of the
-previous `true` for spec compliance.
+previous `true`. This change was made for specification compliance reasons.
 
 ### Removed `Collection.insert`, `Collection.update`, and `Collection.remove`
 
@@ -351,7 +382,7 @@ Three legacy operation helpers on the collection class have been removed:
 
 The `insert` method accepted an array of documents for multi-document inserts and a single document for single document inserts. `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
 
-```ts
+```typescript
 // Single document insert:
 await collection.insert({ name: 'spot' });
 // Migration:
@@ -366,6 +397,7 @@ await collection.insertMany([{ name: 'fido' }, { name: 'luna' }]);
 ### Removed `keepGoing` option from `BulkWriteOptions`
 
 The `keepGoing` option was a legacy name for setting `ordered` to `false` for bulk inserts.
+
 It was only supported by the legacy `collection.insert()` method which is now removed as noted above.
 
 ### `bson-ext` support removed
@@ -380,7 +412,7 @@ To access the raw result, please use `bulkWriteResult.getRawResponse()`.
 
 These can be accessed via:
 
-```ts
+```typescript
 bulkWriteResult.insertedCount;
 bulkWriteResult.matchedCount;
 bulkWriteResult.modifiedCount;
