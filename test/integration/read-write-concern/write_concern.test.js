@@ -4,8 +4,8 @@ const { MongoClient } = require('../../../src');
 const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
 const mock = require('../../tools/mongodb-mock/index');
 
-describe('Write Concern', function () {
-  it('should respect writeConcern from uri', function (done) {
+describe('Write Concern', function() {
+  it('should respect writeConcern from uri', function(done) {
     const client = this.configuration.newClient(
       `${this.configuration.url()}&w=0&monitorCommands=true`
     );
@@ -45,7 +45,7 @@ describe('Write Concern', function () {
     after(() => mock.cleanup());
 
     // TODO: NODE-3816
-    it.skip('should pipe writeConcern from client down to API call', function () {
+    it.skip('should pipe writeConcern from client down to API call', function() {
       server.setMessageHandler(request => {
         if (request.document && request.document[LEGACY_HELLO_COMMAND]) {
           return request.reply(mock.HELLO);
@@ -71,40 +71,40 @@ describe('Write Concern', function () {
     });
   });
 
-  describe('must not affect read operations', function () {
-    describe('when writeConcern = 0', function () {
-      describe('does not throw an error when getMore is called on cursor', function () {
+  describe('must not affect read operations', function() {
+    describe('when writeConcern = 0', function() {
+      describe('does not throw an error when getMore is called on cursor', function() {
         let client;
         let db;
         let col;
 
-        beforeEach(async function () {
+        beforeEach(async function() {
           client = this.configuration.newClient({ writeConcern: { w: 0 } });
           await client.connect();
           db = client.db('writeConcernTest');
           col = db.collection('writeConcernTest');
 
           const docs = [];
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 100; i++) {
             docs.push({ a: i, b: i + 1 });
           }
 
           await col.insertMany(docs);
         });
 
-        afterEach(async function () {
+        afterEach(async function() {
           await db.dropDatabase();
           await client.close();
         });
 
-        it('find', async function () {
+        it('find', async function() {
           const findResult = col.find({}, { batchSize: 2 });
           const err = await findResult.toArray().catch(e => e);
 
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('listCollections', async function () {
+        it('listCollections', async function() {
           let collections = [];
           for (let i = 0; i < 10; i++) {
             collections.push(`writeConcernTestCol${i + 1}`);
@@ -121,14 +121,14 @@ describe('Write Concern', function () {
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('aggregate', async function () {
+        it('aggregate', async function() {
           const aggResult = col.aggregate([{ $match: { a: { $gte: 0 } } }], { batchSize: 2 });
           const err = await aggResult.toArray().catch(e => e);
 
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('listIndexes', async function () {
+        it('listIndexes', async function() {
           await col.createIndex({ a: 1 });
           await col.createIndex({ b: -1 });
           await col.createIndex({ a: 1, b: -1 });
@@ -139,11 +139,15 @@ describe('Write Concern', function () {
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('changeStream', async function () {
+        it('changeStream', async function() {
           let changeStream = col.watch(undefined, { batchSize: 2 });
-          col.updateMany({}, [{ $addFields: { A: 1 } }]);
+
+          setTimeout(() => {
+            col.updateMany({}, [{ $addFields: { A: 1 } }]);
+          });
 
           const err = await changeStream.next().catch(e => e);
+
 
           expect(err).to.not.be.instanceOf(Error);
         });

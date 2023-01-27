@@ -143,6 +143,7 @@ export class ChangeStreamCursor<
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
       ...this.options,
+      writeConcern: undefined,
       session
     });
 

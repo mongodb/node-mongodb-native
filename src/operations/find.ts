@@ -119,6 +119,7 @@ export class FindOperation extends CommandOperation<Document> {
       {
         ...this.options,
         ...this.bsonOptions,
+        writeConcern: undefined,
         documentsReturnedIn: 'firstBatch',
         session
       },
@@ -142,9 +143,9 @@ function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOp
     if (projection && Array.isArray(projection)) {
       projection = projection.length
         ? projection.reduce((result, field) => {
-            result[field] = 1;
-            return result;
-          }, {})
+          result[field] = 1;
+          return result;
+        }, {})
         : { _id: 1 };
     }
 

@@ -1524,6 +1524,7 @@ export class Collection<TSchema extends Document = Document> {
       options = pipeline;
       pipeline = [];
     }
+    options.writeConcern = undefined;
 
     return new ChangeStream<TLocal, TChange>(this, pipeline, resolveOptions(this, options));
   }

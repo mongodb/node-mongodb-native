@@ -7,7 +7,7 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
+export interface ListCollectionsOptions extends CommandOperationOptions {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
   /** Since 4.0: If true and nameOnly is true, allows a user without the required privilege (i.e. listCollections action on the database) to run the command when access control is enforced. */
@@ -28,7 +28,7 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
   constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
     super(db, options);
 
-    this.options = options ?? {};
+    this.options = { ...options, writeConcern: undefined } ?? {};
     this.db = db;
     this.filter = filter;
     this.nameOnly = !!this.options.nameOnly;

@@ -394,7 +394,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
   constructor(collection: Collection, options?: ListIndexesOptions) {
     super(collection, options);
 
-    this.options = options ?? {};
+    this.options = {...options, writeConcern: undefined} ?? {};
     this.collectionNamespace = collection.s.namespace;
   }
 
