@@ -12,7 +12,6 @@
   + [`Collection.mapReduce()` helper removed](#-collectionmapreduce----helper-removed)
   + [`AddUserOptions.digestPassword` removed](#-adduseroptionsdigestpassword--removed)
   + [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
-  + [`DeleteOptions.single` Option Removed](#-deleteoptionssingle--option-removed)
   + [Remove of `ObjectID` Type in Favor Of `ObjectId`](#remove-of--objectid--type-in-favor-of--objectid-)
   + [Kerberos Option `gssapiCanonicalizeHostName` Removed](#kerberos-option--gssapicanonicalizehostname--removed)
   + [`Projection` and `ProjectionOperations` Types Removed](#-projection--and--projectionoperations--types-removed)
@@ -268,10 +267,6 @@ marked internal and are no longer exported.
 - `ServerSelector`
 - `PipeOptions`
 - `ServerOptions`
-
-### `DeleteOptions.single` Option Removed
-
-TODO - merge in Neal's removal of `collection.remove` and combine notes
 
 ### Remove of `ObjectID` Type in Favor Of `ObjectId`
 
