@@ -688,6 +688,15 @@ for (const variant of BUILD_VARIANTS.filter(
   );
 }
 
+// TODO(NODE-4894): fix kerberos tests on Node18
+for (const variant of BUILD_VARIANTS.filter(
+  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
+)) {
+  variant.tasks = variant.tasks.filter(
+    name => !['test-auth-kerberos'].includes(name)
+  );
+}
+
 // TODO(NODE-4897): Debug socks5 tests on node latest
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
