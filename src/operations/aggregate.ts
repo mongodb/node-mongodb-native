@@ -44,7 +44,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
   constructor(ns: MongoDBNamespace, pipeline: Document[], options?: AggregateOptions) {
     super(undefined, { ...options, dbName: ns.db });
 
-    this.options = options ?? {};
+    this.options = { ...options };
 
     // Covers when ns.collection is null, undefined or the empty string, use DB_AGGREGATE_COLLECTION
     this.target = ns.collection || DB_AGGREGATE_COLLECTION;
