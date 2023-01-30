@@ -66,7 +66,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     if (this.hasWriteStage) {
       this.trySecondaryWrite = true;
     } else {
-      this.options.writeConcern = undefined;
+      delete this.options.writeConcern;
     }
 
     if (this.explain && this.writeConcern) {
