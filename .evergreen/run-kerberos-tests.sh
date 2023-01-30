@@ -8,7 +8,6 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 mkdir -p "$(pwd)/.evergreen"
 export KRB5_CONFIG="$(pwd)/.evergreen/krb5.conf.empty"
 echo "Writing keytab"
-echo "${KRB5_NEW_KEYTAB}"
 # DON'T PRINT KEYTAB TO STDOUT
 set +o verbose
 if [[ "$OSTYPE" == "darwin"* ]]; then
