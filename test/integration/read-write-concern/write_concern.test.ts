@@ -1,17 +1,18 @@
-const { expect } = require('chai');
+import { expect } from 'chai';
+import { setTimeout } from 'timers';
 
-const { MongoClient } = require('../../../src');
-const { LEGACY_HELLO_COMMAND } = require('../../../src/constants');
-const mock = require('../../tools/mongodb-mock/index');
-
-const { setTimeout } = require('timers');
+import { Collection } from '../../../src/collection';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { Db } from '../../../src/db';
+import { MongoClient } from '../../../src/mongo_client';
+import mock from '../../tools/mongodb-mock/index';
 
 describe('Write Concern', function () {
   it('should respect writeConcern from uri', function (done) {
     const client = this.configuration.newClient(
       `${this.configuration.url()}&w=0&monitorCommands=true`
     );
-    const events = [];
+    const events: any[] = [];
     client.on('commandStarted', event => {
       if (event.commandName === 'insert') {
         events.push(event);
@@ -58,7 +59,7 @@ describe('Write Concern', function () {
       });
 
       const uri = `mongodb://${server.uri()}`;
-      const client = new MongoClient(uri, { writeConcern: 'majority' });
+      const client = new MongoClient(uri, { writeConcern: { w: 'majority' } });
       return client
         .connect()
         .then(() => {
@@ -76,9 +77,9 @@ describe('Write Concern', function () {
   describe('must not affect read operations', function () {
     describe('when writeConcern = 0', function () {
       describe('does not throw an error when getMore is called on cursor', function () {
-        let client;
-        let db;
-        let col;
+        let client: MongoClient;
+        let db: Db;
+        let col: Collection;
 
         beforeEach(async function () {
           client = this.configuration.newClient({ writeConcern: { w: 0 } });
@@ -86,7 +87,7 @@ describe('Write Concern', function () {
           db = client.db('writeConcernTest');
           col = db.collection('writeConcernTest');
 
-          const docs = [];
+          const docs: any[] = [];
           for (let i = 0; i < 100; i++) {
             docs.push({ a: i, b: i + 1 });
           }
@@ -107,7 +108,7 @@ describe('Write Concern', function () {
         });
 
         it('listCollections', async function () {
-          let collections = [];
+          const collections: any[] = [];
           for (let i = 0; i < 10; i++) {
             collections.push(`writeConcernTestCol${i + 1}`);
           }
@@ -143,7 +144,7 @@ describe('Write Concern', function () {
 
         it('changeStream', async function () {
           if (this.configuration.options.replicaSet) {
-            let changeStream = col.watch(undefined, { batchSize: 2 });
+            const changeStream = col.watch(undefined, { batchSize: 2 });
 
             setTimeout(() => {
               col.updateMany({}, [{ $addFields: { A: 1 } }]);
