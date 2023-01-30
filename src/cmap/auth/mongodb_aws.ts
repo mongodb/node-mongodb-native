@@ -109,7 +109,9 @@ export class MongoDBAWS extends AuthProvider {
         }
 
         if (!ByteUtils.equals(serverNonce.subarray(0, nonce.byteLength), nonce)) {
-          // The serverNonce's leading 32 bytes must equal the client nonce's 32 bytes
+          // throw because the serverNonce's leading 32 bytes must equal the client nonce's 32 bytes
+          // https://github.com/mongodb/specifications/blob/875446db44aade414011731840831f38a6c668df/source/auth/auth.rst#id11
+
           // TODO(NODE-3483)
           callback(new MongoRuntimeError('Server nonce does not begin with client nonce'));
           return;
