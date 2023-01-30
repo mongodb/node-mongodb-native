@@ -1,12 +1,24 @@
 # Changes in the MongoDB Node.js Driver v5
 
+## About
+
+The following is a detailed collection of the changes in the major v5 release of the `mongodb` package for Node.js.
+
+<!--
+1. a brief statement of what is breaking (brief as in "x will now return y instead of z", or "x is no longer supported, use y instead", etc
+2. a brief statement of why we are breaking it (bug, not useful, inconsistent behavior, better alternative, etc)
+3. if applicable, an example of suggested syntax change (can be included in (1) )
+-->
+
+## Contents
+
 - [Optional callback support migrated to `mongodb-legacy`](#optional-callback-support-migrated-to-mongodb-legacy)
-    - [Migrate to Promise-based API (recommended!)](#migrate-to-promise-based-api-recommended)
-    - [Use the Promise-based API and `util.callbackify`](#use-the-promise-based-api-and-utilcallbackify)
-    - [Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`](#add-mongodb-legacy-as-a-dependency-and-update-imports-to-use-mongodb-legacy)
-    - [Example usage of equivalent callback and Promise usage](#example-usage-of-equivalent-callback-and-promise-usage)
+  - [Migrate to Promise-based API (recommended!)](#migrate-to-promise-based-api-recommended)
+  - [Use the Promise-based API and `util.callbackify`](#use-the-promise-based-api-and-utilcallbackify)
+  - [Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`](#add-mongodb-legacy-as-a-dependency-and-update-imports-to-use-mongodb-legacy)
+  - [Example usage of equivalent callback and Promise usage](#example-usage-of-equivalent-callback-and-promise-usage)
 - [Dot Notation TypeScript Support Removed By Default](#dot-notation-typescript-support-removed-by-default)
-    - [Dot Notation Helper Types Exported](#dot-notation-helper-types-exported)
+  - [Dot Notation Helper Types Exported](#dot-notation-helper-types-exported)
 - [`Collection.mapReduce()` helper removed](#collectionmapreduce-helper-removed)
 - [`AddUserOptions.digestPassword` removed](#adduseroptionsdigestpassword-removed)
 - [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
@@ -33,15 +45,6 @@
 - [`BulkWriteResult` no longer contains a publicly enumerable `result` property.](#bulkwriteresult-no-longer-contains-a-publicly-enumerable-result-property)
 - [`BulkWriteResult` now contains individual result properties.](#bulkwriteresult-now-contains-individual-result-properties)
 
-## About
-
-The following is a detailed collection of the changes in the major v5 release of the `mongodb` package for Node.js.
-
-<!--
-1. a brief statement of what is breaking (brief as in "x will now return y instead of z", or "x is no longer supported, use y instead", etc
-2. a brief statement of why we are breaking it (bug, not useful, inconsistent behavior, better alternative, etc)
-3. if applicable, an example of suggested syntax change (can be included in (1) )
--->
 
 ## Changes
 
