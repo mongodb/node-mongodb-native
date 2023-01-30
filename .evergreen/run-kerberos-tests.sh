@@ -6,7 +6,6 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
 # set up keytab
 mkdir -p "$(pwd)/.evergreen"
-export KRB5_TRACE="/dev/stderr"
 export KRB5_CONFIG="$(pwd)/.evergreen/krb5.conf.empty"
 echo "Writing keytab"
 echo "${KRB5_NEW_KEYTAB}"
@@ -21,8 +20,6 @@ echo "Running kdestroy"
 kdestroy -A
 echo "Running kinit"
 kinit -k -t "$(pwd)/.evergreen/drivers.keytab" -p ${KRB5_PRINCIPAL}
-klist -ef
-kvno -S ldap domain | echo "finished kvno"
 
 set -o xtrace
 npm install kerberos@">=2.0.0-beta.0"
