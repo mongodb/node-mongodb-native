@@ -1,39 +1,37 @@
 # Changes in the MongoDB Node.js Driver v5
 
-* [About](#about)
-* [Changes](#changes)
-  + [Optional callback support migrated to `mongodb-legacy`](#optional-callback-support-migrated-to--mongodb-legacy-)
-    - [Migrate to Promise-based API (recommended!)](#migrate-to-promise-based-api--recommended--)
-    - [Use the Promise-based API and `util.callbackify`](#use-the-promise-based-api-and--utilcallbackify-)
-    - [Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`](#add--mongodb-legacy--as-a-dependency-and-update-imports-to-use--mongodb-legacy-)
-      * [Example usage of equivalent callback and Promise usage](#example-usage-of-equivalent-callback-and-promise-usage)
-  + [Dot Notation TypeScript Support Removed By Default](#dot-notation-typescript-support-removed-by-default)
+- [Optional callback support migrated to `mongodb-legacy`](#optional-callback-support-migrated-to-mongodb-legacy)
+    - [Migrate to Promise-based API (recommended!)](#migrate-to-promise-based-api-recommended)
+    - [Use the Promise-based API and `util.callbackify`](#use-the-promise-based-api-and-utilcallbackify)
+    - [Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`](#add-mongodb-legacy-as-a-dependency-and-update-imports-to-use-mongodb-legacy)
+    - [Example usage of equivalent callback and Promise usage](#example-usage-of-equivalent-callback-and-promise-usage)
+- [Dot Notation TypeScript Support Removed By Default](#dot-notation-typescript-support-removed-by-default)
     - [Dot Notation Helper Types Exported](#dot-notation-helper-types-exported)
-  + [`Collection.mapReduce()` helper removed](#-collectionmapreduce----helper-removed)
-  + [`AddUserOptions.digestPassword` removed](#-adduseroptionsdigestpassword--removed)
-  + [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
-  + [Remove of `ObjectID` Type in Favor Of `ObjectId`](#remove-of--objectid--type-in-favor-of--objectid-)
-  + [Kerberos Option `gssapiCanonicalizeHostName` Removed](#kerberos-option--gssapicanonicalizehostname--removed)
-  + [`Projection` and `ProjectionOperations` Types Removed](#-projection--and--projectionoperations--types-removed)
-  + [`CommandOperationOptions.fullResponse` Option Removed](#-commandoperationoptionsfullresponse--option-removed)
-  + [`BulkWriteOptions.keepGoing` Option Removed](#-bulkwriteoptionskeepgoing--option-removed)
-  + [`WriteConcernError.err()` Removed](#-writeconcernerrorerr----removed)
-  + [slaveOk options removed](#slaveok-options-removed)
-  + [Bulk results no longer contain `lastOp()` and `opTime`](#bulk-results-no-longer-contain--lastop----and--optime-)
-  + [`CursorCloseOptions` removed](#-cursorcloseoptions--removed)
-  + [Snappy v7.2.2 or later and optional `peerDependency`](#snappy-v722-or-later-and-optional--peerdependency-)
-  + [`.unref()` removed from `Db`](#-unref----removed-from--db-)
-  + [`@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`](#--aws-sdk-credential-providers--v32010-or-later-and-optional--peerdependency-)
-  + [Minimum supported Node version](#minimum-supported-node-version)
-  + [Custom Promise library support removed](#custom-promise-library-support-removed)
-  + [Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`](#cursors-now-implement--asyncgenerator--interface-instead-of--asynciterator-)
-  + [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of--for-await--of--loops)
-  + [Driver now sends `1` instead of `true` for hello commands](#driver-now-sends--1--instead-of--true--for-hello-commands)
-  + [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed--collectioninsert----collectionupdate---and--collectionremove-)
-  + [Removed `keepGoing` option from `BulkWriteOptions`](#removed--keepgoing--option-from--bulkwriteoptions-)
-  + [`bson-ext` support removed](#-bson-ext--support-removed)
-  + [`BulkWriteResult` no longer contains a publicly enumerable `result` property.](#-bulkwriteresult--no-longer-contains-a-publicly-enumerable--result--property)
-  + [`BulkWriteResult` now contains individual ressult properties.](#-bulkwriteresult--now-contains-individual-ressult-properties)
+- [`Collection.mapReduce()` helper removed](#collectionmapreduce-helper-removed)
+- [`AddUserOptions.digestPassword` removed](#adduseroptionsdigestpassword-removed)
+- [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
+- [Remove of `ObjectID` Type in Favor Of `ObjectId`](#remove-of-objectid-type-in-favor-of-objectid)
+- [Kerberos Option `gssapiCanonicalizeHostName` Removed](#kerberos-option-gssapicanonicalizehostname-removed)
+- [`Projection` and `ProjectionOperations` Types Removed](#projection-and-projectionoperations-types-removed)
+- [`CommandOperationOptions.fullResponse` Option Removed](#commandoperationoptionsfullresponse-option-removed)
+- [`BulkWriteOptions.keepGoing` Option Removed](#bulkwriteoptionskeepgoing-option-removed)
+- [`WriteConcernError.err()` Removed](#writeconcernerrorerr-removed)
+- [slaveOk options removed](#slaveok-options-removed)
+- [Bulk results no longer contain `lastOp()` and `opTime`](#bulk-results-no-longer-contain-lastop-and-optime)
+- [`CursorCloseOptions` removed](#cursorcloseoptions-removed)
+- [Snappy v7.2.2 or later and optional `peerDependency`](#snappy-v722-or-later-and-optional-peerdependency)
+- [`.unref()` removed from `Db`](#unref-removed-from-db)
+- [`@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`](#aws-sdkcredential-providers-v32010-or-later-and-optional-peerdependency)
+- [Minimum supported Node version](#minimum-supported-node-version)
+- [Custom Promise library support removed](#custom-promise-library-support-removed)
+- [Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`](#cursors-now-implement-asyncgenerator-interface-instead-of-asynciterator)
+- [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of-for-await--of-loops)
+- [Driver now sends `1` instead of `true` for hello commands](#driver-now-sends-1-instead-of-true-for-hello-commands)
+- [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed-collectioninsert-collectionupdate-and-collectionremove)
+- [Removed `keepGoing` option from `BulkWriteOptions`](#removed-keepgoing-option-from-bulkwriteoptions)
+- [`bson-ext` support removed](#bson-ext-support-removed)
+- [`BulkWriteResult` no longer contains a publicly enumerable `result` property.](#bulkwriteresult-no-longer-contains-a-publicly-enumerable-result-property)
+- [`BulkWriteResult` now contains individual result properties.](#bulkwriteresult-now-contains-individual-result-properties)
 
 ## About
 
@@ -125,7 +123,7 @@ We have migrated callback support to a new package:
 The package wraps all of the driver's asynchronous operations that previously supported both Promises and callbacks. All the wrapped APIs offer callback support via an optional callback argument alongside a Promise return value so projects with mixed usage will continue to work.
 
 `mongodb-legacy` is intended to preserve driver v4 behavior to enable a smoother transition between
-driver v4 and v5. However, new features will **only** support a Promise-based API in both the driver 
+driver v4 and v5. However, new features will **only** support a Promise-based API in both the driver
 **and** the legacy driver.
 
 ##### Example usage of equivalent callback and Promise usage
@@ -403,7 +401,7 @@ The `bson-ext` package will no longer automatically import and supplant the `bso
 
 To access the raw result, please use `bulkWriteResult.getRawResponse()`.
 
-### `BulkWriteResult` now contains individual ressult properties.
+### `BulkWriteResult` now contains individual result properties.
 
 These can be accessed via:
 
