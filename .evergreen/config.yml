@@ -2124,13 +2124,6 @@ tasks:
         vars:
           NODE_LTS_NAME: gallium
       - func: run mongosh integration tests
-  - name: test-auth-kerberos-ubuntu
-    tags:
-      - auth
-      - kerberos
-    commands:
-      - func: install dependencies
-      - func: run kerberos tests
   - name: download-and-merge-coverage
     tags: []
     commands:
@@ -2985,11 +2978,6 @@ buildvariants:
     run_on: ubuntu1804-large
     tasks:
       - run-mongosh-integration-tests
-  - name: run_kerberos_tests_ubuntu
-    display_name: kerberos tests ubuntu
-    run_on: ubuntu1804-large
-    tasks:
-      - test-auth-kerberos-ubuntu
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-large

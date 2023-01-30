@@ -579,24 +579,11 @@ SINGLETON_TASKS.push({
   ]
 });
 
-SINGLETON_TASKS.push({
-  name: 'test-auth-kerberos-ubuntu',
-  tags: ['auth', 'kerberos'],
-  commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
-});
-
 BUILD_VARIANTS.push({
   name: 'mongosh_integration_tests',
   display_name: 'mongosh integration tests',
   run_on: 'ubuntu1804-large',
   tasks: ['run-mongosh-integration-tests']
-});
-
-BUILD_VARIANTS.push({
-  name: 'run_kerberos_tests_ubuntu',
-  display_name: 'kerberos tests ubuntu',
-  run_on: 'ubuntu1804-large',
-  tasks: ['test-auth-kerberos-ubuntu']
 });
 
 // special case for MONGODB-AWS authentication
