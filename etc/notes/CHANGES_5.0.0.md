@@ -99,7 +99,7 @@ try {
 
 #### Use the Promise-based API and `util.callbackify`
 
-If you only have a few callback instances where you are currently unable to adopt the Promise API, we recommend using the promise API and [Node.js' `callbackify`](https://nodejs.org/api/util.html#utilcallbackifyoriginal)
+If you only have a few callback instances where you are currently unable to adopt the Promise API, we recommend using the Promise API and [Node.js' `callbackify`](https://nodejs.org/api/util.html#utilcallbackifyoriginal)
 utility to adapt the Promise-based API to use callbacks.
 
 **Note** Manually converting a Promise-based API to a callback-based API is error prone. We strongly encourage the use of `callbackify`.
