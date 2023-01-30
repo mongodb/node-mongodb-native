@@ -5,7 +5,7 @@ import { Collection } from '../../../src/collection';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { Db } from '../../../src/db';
 import { MongoClient } from '../../../src/mongo_client';
-import mock from '../../tools/mongodb-mock/index';
+import * as mock from '../../tools/mongodb-mock/index';
 
 describe('Write Concern', function () {
   it('should respect writeConcern from uri', function (done) {
@@ -148,7 +148,7 @@ describe('Write Concern', function () {
 
             setTimeout(() => {
               col.updateMany({}, [{ $addFields: { A: 1 } }]);
-            }, 500);
+            }, 1000);
 
             const err = await changeStream.next().catch(e => e);
 

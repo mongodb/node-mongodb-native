@@ -29,7 +29,7 @@ describe('FindOperation', function () {
     });
 
     it('sets options', function () {
-      expect(operation.options).to.equal(options);
+      expect(operation.options).to.deep.equal(options);
     });
 
     it('sets filter', function () {
