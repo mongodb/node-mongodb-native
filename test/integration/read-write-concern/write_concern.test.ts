@@ -74,9 +74,9 @@ describe('Write Concern', function () {
     });
   });
 
-  describe('must not affect read operations', function () {
-    describe('when writeConcern = 0', function () {
-      describe('does not throw an error when getMore is called on cursor', function () {
+  context('when performing read operations', function () {
+    context('when writeConcern = 0', function () {
+      describe('cursor creating operations with a getMore', function () {
         let client: MongoClient;
         let db: Db;
         let col: Collection;
@@ -100,14 +100,14 @@ describe('Write Concern', function () {
           await client.close();
         });
 
-        it('find', async function () {
+        it('succeeds on find', async function () {
           const findResult = col.find({}, { batchSize: 2 });
           const err = await findResult.toArray().catch(e => e);
 
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('listCollections', async function () {
+        it('succeeds on listCollections', async function () {
           const collections: any[] = [];
           for (let i = 0; i < 10; i++) {
             collections.push(`writeConcernTestCol${i + 1}`);
@@ -124,14 +124,14 @@ describe('Write Concern', function () {
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('aggregate', async function () {
+        it('succeeds on aggregate', async function () {
           const aggResult = col.aggregate([{ $match: { a: { $gte: 0 } } }], { batchSize: 2 });
           const err = await aggResult.toArray().catch(e => e);
 
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('listIndexes', async function () {
+        it('succeeds on listIndexes', async function () {
           await col.createIndex({ a: 1 });
           await col.createIndex({ b: -1 });
           await col.createIndex({ a: 1, b: -1 });
@@ -142,7 +142,7 @@ describe('Write Concern', function () {
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('changeStream', async function () {
+        it('succeeds on changeStream', async function () {
           if (this.configuration.options.replicaSet) {
             const changeStream = col.watch(undefined, { batchSize: 2 });
 
