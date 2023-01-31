@@ -19,6 +19,10 @@ The following is a detailed collection of the changes in the major v5 release of
   - [Example usage of equivalent callback and Promise usage](#example-usage-of-equivalent-callback-and-promise-usage)
 - [Dot Notation TypeScript Support Removed By Default](#dot-notation-typescript-support-removed-by-default)
   - [Dot Notation Helper Types Exported](#dot-notation-helper-types-exported)
+- [`bson-ext` support removed](#bson-ext-support-removed)
+- [Minimum supported Node version](#minimum-supported-node-version)
+- [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of-for-await--of-loops)
+- [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed-collectioninsert-collectionupdate-and-collectionremove)
 - [`Collection.mapReduce()` helper removed](#collectionmapreduce-helper-removed)
 - [`AddUserOptions.digestPassword` removed](#adduseroptionsdigestpassword-removed)
 - [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
@@ -34,17 +38,12 @@ The following is a detailed collection of the changes in the major v5 release of
 - [Snappy v7.2.2 or later and optional `peerDependency`](#snappy-v722-or-later-and-optional-peerdependency)
 - [`.unref()` removed from `Db`](#unref-removed-from-db)
 - [`@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`](#aws-sdkcredential-providers-v32010-or-later-and-optional-peerdependency)
-- [Minimum supported Node version](#minimum-supported-node-version)
 - [Custom Promise library support removed](#custom-promise-library-support-removed)
 - [Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`](#cursors-now-implement-asyncgenerator-interface-instead-of-asynciterator)
-- [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of-for-await--of-loops)
 - [Driver now sends `1` instead of `true` for hello commands](#driver-now-sends-1-instead-of-true-for-hello-commands)
-- [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed-collectioninsert-collectionupdate-and-collectionremove)
 - [Removed `keepGoing` option from `BulkWriteOptions`](#removed-keepgoing-option-from-bulkwriteoptions)
-- [`bson-ext` support removed](#bson-ext-support-removed)
 - [`BulkWriteResult` no longer contains a publicly enumerable `result` property.](#bulkwriteresult-no-longer-contains-a-publicly-enumerable-result-property)
 - [`BulkWriteResult` now contains individual result properties.](#bulkwriteresult-now-contains-individual-result-properties)
-
 
 ## Changes
 
@@ -216,6 +215,53 @@ collection.find(filterPredicate);
 
 **NOTE** As an experimental feature, these types can change at any time and are not recommended for production settings.
 
+### `bson-ext` support removed
+
+The `bson-ext` package will no longer automatically import and supplant the `bson` dependency.
+
+### Minimum supported Node version
+
+The new minimum supported Node.js version is now 14.20.1.
+
+### Cursor closes on exit of `for await ... of` loops
+
+Cursors will now automatically close when exiting a `for await ... of` loop on the cursor itself.
+
+```js
+const cursor = collection.find({});
+for await (const doc of cursor) {
+  console.log(doc);
+  break;
+}
+
+cursor.closed; // true
+```
+
+### Removed `Collection.insert`, `Collection.update`, and `Collection.remove`
+
+Three legacy operation helpers on the collection class have been removed:
+
+| Removed API                | API to migrate to              |
+| -------------------------- | ------------------------------ |
+| `insert(document)`         | `insertOne(document)`          |
+| `insert(arrayOfDocuments)` | `insertMany(arrayOfDocuments)` |
+| `update(filter)`           | `updateMany(filter)`           |
+| `remove(filter)`           | `deleteMany(filter)`           |
+
+The `insert` method accepted an array of documents for multi-document inserts and a single document for single document inserts. `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
+
+```typescript
+// Single document insert:
+await collection.insert({ name: 'spot' });
+// Migration:
+await collection.insertOne({ name: 'spot' });
+
+// Multi-document insert:
+await collection.insert([{ name: 'fido' }, { name: 'luna' }]);
+// Migration:
+await collection.insertMany([{ name: 'fido' }, { name: 'luna' }]);
+```
+
 ### `Collection.mapReduce()` helper removed
 
 The `mapReduce` helper has been removed from the `Collection` class. The `mapReduce` operation has been
@@ -330,10 +376,6 @@ This means `npm` will let you know if the version of the SDK you have installed 
 npm install --save @aws-sdk/credential-providers@3.186.0
 ```
 
-### Minimum supported Node version
-
-The new minimum supported Node.js version is now 14.20.1.
-
 ### Custom Promise library support removed
 
 The `MongoClient` option `promiseLibrary` along with the `Promise.set` export that allows specifying a custom Promise library has been removed.
@@ -346,59 +388,16 @@ All cursor types have been changed to implement `AsyncGenerator` instead of `Asy
 
 This was done to make our typing more accurate.
 
-### Cursor closes on exit of `for await ... of` loops
-
-Cursors will now automatically close when exiting a `for await ... of` loop on the cursor itself.
-
-```js
-const cursor = collection.find({});
-for await (const doc of cursor) {
-  console.log(doc);
-  break;
-}
-
-cursor.closed; // true
-```
-
 ### Driver now sends `1` instead of `true` for hello commands
 
 Everywhere the driver sends a `hello` command (initial handshake and monitoring), it will now pass the command value as `1` instead of the
 previous `true`. This change was made for specification compliance reasons.
-
-### Removed `Collection.insert`, `Collection.update`, and `Collection.remove`
-
-Three legacy operation helpers on the collection class have been removed:
-
-| Removed API                | API to migrate to              |
-| -------------------------- | ------------------------------ |
-| `insert(document)`         | `insertOne(document)`          |
-| `insert(arrayOfDocuments)` | `insertMany(arrayOfDocuments)` |
-| `update(filter)`           | `updateMany(filter)`           |
-| `remove(filter)`           | `deleteMany(filter)`           |
-
-The `insert` method accepted an array of documents for multi-document inserts and a single document for single document inserts. `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
-
-```typescript
-// Single document insert:
-await collection.insert({ name: 'spot' });
-// Migration:
-await collection.insertOne({ name: 'spot' });
-
-// Multi-document insert:
-await collection.insert([{ name: 'fido' }, { name: 'luna' }]);
-// Migration:
-await collection.insertMany([{ name: 'fido' }, { name: 'luna' }]);
-```
 
 ### Removed `keepGoing` option from `BulkWriteOptions`
 
 The `keepGoing` option was a legacy name for setting `ordered` to `false` for bulk inserts.
 
 It was only supported by the legacy `collection.insert()` method which is now removed as noted above.
-
-### `bson-ext` support removed
-
-The `bson-ext` package will no longer automatically import and supplant the `bson` dependency.
 
 ### `BulkWriteResult` no longer contains a publicly enumerable `result` property.
 
