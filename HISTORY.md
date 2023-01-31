@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0](https://github.com/mongodb/node-mongodb-native/compare/v5.0.0-alpha.0...v5.0.0) (2023-01-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-5016:** compile ts with target es2020 (#3545)
+
+### Features
+
+* **NODE-5016:** compile ts with target es2020 ([#3545](https://github.com/mongodb/node-mongodb-native/issues/3545)) ([def266a](https://github.com/mongodb/node-mongodb-native/commit/def266a63d3b6f4a2996e6e437fe8895a05666d8))
+
+
+### Bug Fixes
+
+* **NODE-4998:** use ipv4 in socks5 tests for node 18 ([#3538](https://github.com/mongodb/node-mongodb-native/issues/3538)) ([425dbe0](https://github.com/mongodb/node-mongodb-native/commit/425dbe05d7bd1ebc1f77303332b67181aa5ab135))
+
 ## [5.0.0-alpha.0](https://github.com/mongodb/node-mongodb-native/compare/v4.13.0...v5.0.0-alpha.0) (2023-01-24)
 
 
