@@ -4,46 +4,38 @@
 
 The following is a detailed collection of the changes in the major v5 release of the `mongodb` package for Node.js.
 
-<!--
-1. a brief statement of what is breaking (brief as in "x will now return y instead of z", or "x is no longer supported, use y instead", etc
-2. a brief statement of why we are breaking it (bug, not useful, inconsistent behavior, better alternative, etc)
-3. if applicable, an example of suggested syntax change (can be included in (1) )
--->
-
 ## Contents
-
-- [Optional callback support migrated to `mongodb-legacy`](#optional-callback-support-migrated-to-mongodb-legacy)
-  - [Migrate to Promise-based API (recommended!)](#migrate-to-promise-based-api-recommended)
-  - [Use the Promise-based API and `util.callbackify`](#use-the-promise-based-api-and-utilcallbackify)
-  - [Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`](#add-mongodb-legacy-as-a-dependency-and-update-imports-to-use-mongodb-legacy)
-  - [Example usage of equivalent callback and Promise usage](#example-usage-of-equivalent-callback-and-promise-usage)
-- [Dot Notation TypeScript Support Removed By Default](#dot-notation-typescript-support-removed-by-default)
-  - [Dot Notation Helper Types Exported](#dot-notation-helper-types-exported)
-- [`bson-ext` support removed](#bson-ext-support-removed)
-- [Minimum supported Node version](#minimum-supported-node-version)
-- [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of-for-await--of-loops)
-- [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed-collectioninsert-collectionupdate-and-collectionremove)
-- [`Collection.mapReduce()` helper removed](#collectionmapreduce-helper-removed)
-- [`AddUserOptions.digestPassword` removed](#adduseroptionsdigestpassword-removed)
-- [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
-- [Remove of `ObjectID` Type in Favor Of `ObjectId`](#remove-of-objectid-type-in-favor-of-objectid)
-- [Kerberos Option `gssapiCanonicalizeHostName` Removed](#kerberos-option-gssapicanonicalizehostname-removed)
-- [`Projection` and `ProjectionOperations` Types Removed](#projection-and-projectionoperations-types-removed)
-- [`CommandOperationOptions.fullResponse` Option Removed](#commandoperationoptionsfullresponse-option-removed)
-- [`BulkWriteOptions.keepGoing` Option Removed](#bulkwriteoptionskeepgoing-option-removed)
-- [`WriteConcernError.err()` Removed](#writeconcernerrorerr-removed)
-- [slaveOk options removed](#slaveok-options-removed)
-- [Bulk results no longer contain `lastOp()` and `opTime`](#bulk-results-no-longer-contain-lastop-and-optime)
-- [`CursorCloseOptions` removed](#cursorcloseoptions-removed)
-- [Snappy v7.2.2 or later and optional `peerDependency`](#snappy-v722-or-later-and-optional-peerdependency)
-- [`.unref()` removed from `Db`](#unref-removed-from-db)
-- [`@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`](#aws-sdkcredential-providers-v32010-or-later-and-optional-peerdependency)
-- [Custom Promise library support removed](#custom-promise-library-support-removed)
-- [Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`](#cursors-now-implement-asyncgenerator-interface-instead-of-asynciterator)
-- [Driver now sends `1` instead of `true` for hello commands](#driver-now-sends-1-instead-of-true-for-hello-commands)
-- [Removed `keepGoing` option from `BulkWriteOptions`](#removed-keepgoing-option-from-bulkwriteoptions)
-- [`BulkWriteResult` no longer contains a publicly enumerable `result` property.](#bulkwriteresult-no-longer-contains-a-publicly-enumerable-result-property)
-- [`BulkWriteResult` now contains individual result properties.](#bulkwriteresult-now-contains-individual-result-properties)
+- [Changes](#changes)
+  - [Optional callback support migrated to `mongodb-legacy`](#optional-callback-support-migrated-to-mongodb-legacy)
+  - [Dot Notation TypeScript Support Removed By Default](#dot-notation-typescript-support-removed-by-default)
+- [Build-Related Changes](#build-related-changes)
+  - [`bson-ext` support removed](#bson-ext-support-removed)
+  - [Minimum supported Node version](#minimum-supported-node-version)
+  - [Snappy v7.2.2 or later and optional `peerDependency`](#snappy-v722-or-later-and-optional-peerdependency)
+  - [`@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`](#aws-sdkcredential-providers-v32010-or-later-and-optional-peerdependency)
+- [API Changes](#api-changes)
+  - [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed-collectioninsert-collectionupdate-and-collectionremove)
+  - [`Collection.mapReduce()` helper removed](#collectionmapreduce-helper-removed)
+  - [`AddUserOptions.digestPassword` removed](#adduseroptionsdigestpassword-removed)
+  - [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
+  - [Remove of `ObjectID` Type in Favor Of `ObjectId`](#remove-of-objectid-type-in-favor-of-objectid)
+  - [Kerberos Option `gssapiCanonicalizeHostName` Removed](#kerberos-option-gssapicanonicalizehostname-removed)
+  - [`Projection` and `ProjectionOperations` Types Removed](#projection-and-projectionoperations-types-removed)
+  - [`CommandOperationOptions.fullResponse` Option Removed](#commandoperationoptionsfullresponse-option-removed)
+  - [`BulkWriteOptions.keepGoing` Option Removed](#bulkwriteoptionskeepgoing-option-removed)
+  - [`WriteConcernError.err()` Removed](#writeconcernerrorerr-removed)
+  - [slaveOk options removed](#slaveok-options-removed)
+  - [`CursorCloseOptions` removed](#cursorcloseoptions-removed)
+  - [`.unref()` removed from `Db`](#unref-removed-from-db)
+  - [Custom Promise library support removed](#custom-promise-library-support-removed)
+  - [Bulk results no longer contain `lastOp()` and `opTime`](#bulk-results-no-longer-contain-lastop-and-optime)
+  - [Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`](#cursors-now-implement-asyncgenerator-interface-instead-of-asynciterator)
+  - [Removed `keepGoing` option from `BulkWriteOptions`](#removed-keepgoing-option-from-bulkwriteoptions)
+  - [`BulkWriteResult` no longer contains a publicly enumerable `result` property.](#bulkwriteresult-no-longer-contains-a-publicly-enumerable-result-property)
+  - [`BulkWriteResult` now contains individual result properties.](#bulkwriteresult-now-contains-individual-result-properties)
+- [Behavioral Changes](#behavioral-changes)
+  - [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of-for-await--of-loops)
+  - [Driver now sends `1` instead of `true` for hello commands](#driver-now-sends-1-instead-of-true-for-hello-commands)
 
 ## Changes
 
@@ -215,6 +207,8 @@ collection.find(filterPredicate);
 
 **NOTE** As an experimental feature, these types can change at any time and are not recommended for production settings.
 
+## Build-Related Changes
+
 ### `bson-ext` support removed
 
 The `bson-ext` package will no longer automatically import and supplant the `bson` dependency.
@@ -223,19 +217,25 @@ The `bson-ext` package will no longer automatically import and supplant the `bso
 
 The new minimum supported Node.js version is now 14.20.1.
 
-### Cursor closes on exit of `for await ... of` loops
+### Snappy v7.2.2 or later and optional `peerDependency`
 
-Cursors will now automatically close when exiting a `for await ... of` loop on the cursor itself.
+`snappy` compression has been added to the `package.json` as a `peerDependency` that is **optional**.
+This means `npm` will let you know if the version of `snappy` you have installed is incompatible with the driver.
 
-```js
-const cursor = collection.find({});
-for await (const doc of cursor) {
-  console.log(doc);
-  break;
-}
-
-cursor.closed; // true
+```sh
+npm install --save "snappy@^7.2.2"
 ```
+
+### `@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`
+
+`@aws-sdk/credential-providers` has been added to the `package.json` as a `peerDependency` that is **optional**.
+This means `npm` will let you know if the version of the SDK you have installed is incompatible with the driver.
+
+```sh
+npm install --save @aws-sdk/credential-providers@3.186.0
+```
+
+## API Changes
 
 ### Removed `Collection.insert`, `Collection.update`, and `Collection.remove`
 
@@ -344,37 +344,16 @@ The `err()` getter on the WriteConcernError class has been removed. The `toJSON(
 The deprecated `slaveOk` option and `slaveOk()` method on the `Collection` class have been removed. Please
 now use `secondaryOk` as the replacement for the option and the method.
 
-### Bulk results no longer contain `lastOp()` and `opTime`
-
-The `lastOp()` method and `opTime` property on the `BulkResult` have been removed. Merging of bulk results
-no longer normalizes the values. There is no new method or property to replace them.
-
 ### `CursorCloseOptions` removed
 
 When calling `close()` on a `Cursor`, no more options can be provided. This removes support for the
 `skipKillCursors` option that was unused.
 
-### Snappy v7.2.2 or later and optional `peerDependency`
 
-`snappy` compression has been added to the `package.json` as a `peerDependency` that is **optional**.
-This means `npm` will let you know if the version of `snappy` you have installed is incompatible with the driver.
-
-```sh
-npm install --save "snappy@^7.2.2"
-```
 
 ### `.unref()` removed from `Db`
 
 The `.unref()` method was a no-op and has now been removed from the `Db` class.
-
-### `@aws-sdk/credential-providers` v3.201.0 or later and optional `peerDependency`
-
-`@aws-sdk/credential-providers` has been added to the `package.json` as a `peerDependency` that is **optional**.
-This means `npm` will let you know if the version of the SDK you have installed is incompatible with the driver.
-
-```sh
-npm install --save @aws-sdk/credential-providers@3.186.0
-```
 
 ### Custom Promise library support removed
 
@@ -382,16 +361,16 @@ The `MongoClient` option `promiseLibrary` along with the `Promise.set` export th
 
 This allows the driver to adopt `async`/`await` syntax which has [performance benefits](https://v8.dev/blog/fast-async) over manual Promise construction.
 
+### Bulk results no longer contain `lastOp()` and `opTime`
+
+The `lastOp()` method and `opTime` property on the `BulkResult` have been removed. Merging of bulk results
+no longer normalizes the values. There is no new method or property to replace them.
+
 ### Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`
 
 All cursor types have been changed to implement `AsyncGenerator` instead of `AsyncIterator`.
 
 This was done to make our typing more accurate.
-
-### Driver now sends `1` instead of `true` for hello commands
-
-Everywhere the driver sends a `hello` command (initial handshake and monitoring), it will now pass the command value as `1` instead of the
-previous `true`. This change was made for specification compliance reasons.
 
 ### Removed `keepGoing` option from `BulkWriteOptions`
 
@@ -416,3 +395,23 @@ bulkWriteResult.upsertedCount;
 bulkWriteResult.upsertedIds;
 bulkWriteResult.insertedIds;
 ```
+
+## Behavioral Changes
+### Cursor closes on exit of `for await ... of` loops
+
+Cursors will now automatically close when exiting a `for await ... of` loop on the cursor itself.
+
+```js
+const cursor = collection.find({});
+for await (const doc of cursor) {
+  console.log(doc);
+  break;
+}
+
+cursor.closed; // true
+```
+
+### Driver now sends `1` instead of `true` for hello commands
+
+Everywhere the driver sends a `hello` command (initial handshake and monitoring), it will now pass the command value as `1` instead of the
+previous `true`. This change was made for specification compliance reasons.
