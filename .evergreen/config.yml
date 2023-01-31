@@ -2146,7 +2146,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 7a79475622d95332c1c39b49f2d49b1bdb08bd2c
+          CSFLE_GIT_REF: b97cf97ff4cc6ffde3b512d3b41514e9106c8ae2
   - name: run-custom-csfle-tests-5.0-master
     tags:
       - run-custom-dependency-tests
@@ -2176,7 +2176,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 7a79475622d95332c1c39b49f2d49b1bdb08bd2c
+          CSFLE_GIT_REF: b97cf97ff4cc6ffde3b512d3b41514e9106c8ae2
   - name: run-custom-csfle-tests-rapid-master
     tags:
       - run-custom-dependency-tests
@@ -2206,7 +2206,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: 7a79475622d95332c1c39b49f2d49b1bdb08bd2c
+          CSFLE_GIT_REF: b97cf97ff4cc6ffde3b512d3b41514e9106c8ae2
   - name: run-custom-csfle-tests-latest-master
     tags:
       - run-custom-dependency-tests
