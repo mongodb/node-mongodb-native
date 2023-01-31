@@ -4,17 +4,15 @@
 
 The following is a detailed collection of the changes in the major v5 release of the `mongodb` package for Node.js.
 
-<!--
-1. a brief statement of what is breaking (brief as in "x will now return y instead of z", or "x is no longer supported, use y instead", etc
-2. a brief statement of why we are breaking it (bug, not useful, inconsistent behavior, better alternative, etc)
-3. if applicable, an example of suggested syntax change (can be included in (1) )
--->
-
 ## Contents
 
 - [Changes](#changes)
   - [Optional callback support migrated to `mongodb-legacy`](#optional-callback-support-migrated-to-mongodb-legacy)
-  - [Dot Notation TypeScript Support Removed By Default](#dot-notation-typescript-support-removed-by-default)
+    - [Migrate to Promise-based API (recommended!)](#migrate-to-promise-based-api-recommended)
+    - [Use the Promise-based API and `util.callbackify`](#use-the-promise-based-api-and-utilcallbackify)
+    - [Add `mongodb-legacy` as a dependency and update imports to use `mongodb-legacy`](#add-mongodb-legacy-as-a-dependency-and-update-imports-to-use-mongodb-legacy)
+  - [Dot notation TypeScript support removed by default](#dot-notation-typescript-support-removed-by-default)
+    - [Dot notation helper types exported](#dot-notation-helper-types-exported)
 - [Build and Dependency Changes](#build-and-dependency-changes)
   - [Minimum supported Node version](#minimum-supported-node-version)
   - [`bson-ext` support removed](#bson-ext-support-removed)
@@ -22,28 +20,28 @@ The following is a detailed collection of the changes in the major v5 release of
   - [Snappy v7.2.2 or later and optional `peerDependency`](#snappy-v722-or-later-and-optional-peerdependency)
 - [API Changes](#api-changes)
   - [Custom Promise library support removed](#custom-promise-library-support-removed)
-  - [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed-collectioninsert-collectionupdate-and-collectionremove)
+  - [`Collection.insert`, `Collection.update`, and `Collection.remove` removed](#collectioninsert-collectionupdate-and-collectionremove-removed)
   - [`Collection.mapReduce()` helper removed](#collectionmapreduce-helper-removed)
   - [`BulkWriteResult` no longer contains a publicly enumerable `result` property](#bulkwriteresult-no-longer-contains-a-publicly-enumerable-result-property)
   - [`BulkWriteResult` now contains individual result properties](#bulkwriteresult-now-contains-individual-result-properties)
   - [Bulk results no longer contain `lastOp()` and `opTime`](#bulk-results-no-longer-contain-lastop-and-optime)
-  - [`BulkWriteOptions.keepGoing` Option Removed](#bulkwriteoptionskeepgoing-option-removed)
-  - [`WriteConcernError.err()` Removed](#writeconcernerrorerr-removed)
+  - [`BulkWriteOptions.keepGoing` option removed](#bulkwriteoptionskeepgoing-option-removed)
+  - [`WriteConcernError.err()` removed](#writeconcernerrorerr-removed)
   - [`AddUserOptions.digestPassword` removed](#adduseroptionsdigestpassword-removed)
-  - [Kerberos Option `gssapiCanonicalizeHostName` Removed](#kerberos-option-gssapicanonicalizehostname-removed)
-  - [Remove of `ObjectID` Type in Favor Of `ObjectId`](#remove-of-objectid-type-in-favor-of-objectid)
-  - [slaveOk options removed](#slaveok-options-removed)
+  - [Kerberos option `gssapiCanonicalizeHostName` removed](#kerberos-option-gssapicanonicalizehostname-removed)
+  - [`ObjectID` type removed in favor of `ObjectId`](#objectid-type-removed-in-favor-of-objectid)
+  - [`slaveOk` options removed](#slaveok-options-removed)
   - [Cursors now implement `AsyncGenerator` interface instead of `AsyncIterator`](#cursors-now-implement-asyncgenerator-interface-instead-of-asynciterator)
 - [Runtime Changes](#runtime-changes)
   - [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of-for-await--of-loops)
   - [Driver now sends `1` instead of `true` for hello commands](#driver-now-sends-1-instead-of-true-for-hello-commands)
 - [Dead Code Cleanup](#dead-code-cleanup)
-  - [`MongoClientOptions.logger` and `MongoClientOptions.logLevel` Removed](#mongoclientoptionslogger-and-mongoclientoptionsloglevel-removed)
+  - [`MongoClientOptions.logger` and `MongoClientOptions.logLevel` removed](#mongoclientoptionslogger-and-mongoclientoptionsloglevel-removed)
   - [`CursorCloseOptions` removed](#cursorcloseoptions-removed)
   - [`.unref()` removed from `Db`](#unref-removed-from-db)
-  - [`CommandOperationOptions.fullResponse` Option Removed](#commandoperationoptionsfullresponse-option-removed)
-  - [`Projection` and `ProjectionOperations` Types Removed](#projection-and-projectionoperations-types-removed)
-  - [Internal Types Removed from Public API](#internal-types-removed-from-public-api)
+  - [`CommandOperationOptions.fullResponse` option removed](#commandoperationoptionsfullresponse-option-removed)
+  - [`Projection` and `ProjectionOperations` types removed](#projection-and-projectionoperations-types-removed)
+  - [Internal types removed from public API](#internal-types-removed-from-public-api)
 
 ## Changes
 
@@ -164,7 +162,7 @@ app.get('/endpoint_callbacks', (req, res) => {
 });
 ```
 
-### Dot Notation TypeScript Support Removed By Default
+### Dot notation TypeScript support removed by default
 
 **NOTE:** This is a **TypeScript compile-time only** change. Dot notation in filters sent to MongoDB will still work the same.
 
@@ -189,7 +187,7 @@ in v4, ultimately we do not believe that this feature is fully production ready 
 Driver 5.0 removes type checking for dot notation in filter predicates. The preceding example will compile with
 driver v5.
 
-#### Dot Notation Helper Types Exported
+#### Dot notation helper types exported
 
 Although we removed support for type checking on dot notation filters by default, we have preserved the
 corresponding types in an experimental capacity.
@@ -251,7 +249,7 @@ The `MongoClient` option `promiseLibrary` along with the `Promise.set` export th
 
 This allows the driver to adopt `async`/`await` syntax which has [performance benefits](https://v8.dev/blog/fast-async) over manual Promise construction.
 
-### Removed `Collection.insert`, `Collection.update`, and `Collection.remove`
+### `Collection.insert`, `Collection.update`, and `Collection.remove` removed
 
 Three legacy operation helpers on the collection class have been removed:
 
@@ -339,11 +337,11 @@ bulkWriteResult.insertedIds;
 The `lastOp()` method and `opTime` property on the `BulkResult` have been removed. Merging of bulk results
 no longer normalizes the values. There is no new method or property to replace them.
 
-### `BulkWriteOptions.keepGoing` Option Removed
+### `BulkWriteOptions.keepGoing` option removed
 
 The `keepGoing` option on the `BulkWriteOptions` has been removed. Please use the `ordered` option instead.
 
-### `WriteConcernError.err()` Removed
+### `WriteConcernError.err()` removed
 
 The `err()` getter on the WriteConcernError class has been removed. The `toJSON()` method can be used in place of `err()`.
 
@@ -351,15 +349,15 @@ The `err()` getter on the WriteConcernError class has been removed. The `toJSON(
 
 The `digestPassword` option has been removed from the add user helper.
 
-### Kerberos Option `gssapiCanonicalizeHostName` Removed
+### Kerberos option `gssapiCanonicalizeHostName` removed
 
 `gssapiCanonicalizeHostName` has been removed in favor of the `CANONICALIZE_HOST_NAME` value.
 
-### Remove of `ObjectID` Type in Favor Of `ObjectId`
+### `ObjectID` type removed in favor of `ObjectId`
 
 For clarity the deprecated and duplicate export `ObjectID` has been removed. `ObjectId` matches the class name and is equal in every way to the capital "D" export.
 
-### slaveOk options removed
+### `slaveOk` options removed
 
 The deprecated `slaveOk` option and `slaveOk()` method on the `Collection` class have been removed. Please
 now use `secondaryOk` as the replacement for the option and the method.
@@ -393,7 +391,7 @@ previous `true`. This change was made for specification compliance reasons.
 
 ## Dead Code Cleanup
 
-### `MongoClientOptions.logger` and `MongoClientOptions.logLevel` Removed
+### `MongoClientOptions.logger` and `MongoClientOptions.logLevel` removed
 
 Both the `logger` and the `logLevel` options had no effect and have been removed.
 
@@ -405,15 +403,15 @@ Options can no longer be provided to `Cursor.close()`. This removes support for 
 
 The `.unref()` method was a no-op and has now been removed from the `Db` class.
 
-### `CommandOperationOptions.fullResponse` Option Removed
+### `CommandOperationOptions.fullResponse` option removed
 
 The `fullResponse` option on the `CommandOperationOptions` was unused in the driver and has been removed.
 
-### `Projection` and `ProjectionOperations` Types Removed
+### `Projection` and `ProjectionOperations` types removed
 
 Both of these types were unused but exported. These types have been removed. Please use `Document` instead.
 
-### Internal Types Removed from Public API
+### Internal types removed from public API
 
 The following types are used internally by the driver but were accidentally exported. They have now been
 marked internal and are no longer exported.
