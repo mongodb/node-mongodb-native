@@ -4,11 +4,13 @@
     "checkJs": false,
     "strict": true,
     "alwaysStrict": true,
-    "target": "ES2019",
+    "target": "ES2020",
     "module": "commonJS",
     "moduleResolution": "node",
     "skipLibCheck": true,
-    "lib": ["es2020"],
+    "lib": [
+      "es2020"
+    ],
     // We don't make use of tslib helpers, all syntax used is supported by target engine
     "importHelpers": false,
     "noEmitHelpers": true,
@@ -25,7 +27,9 @@
     // we include sources in the release
     "inlineSources": false,
     // Prevents web types from being suggested by vscode.
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "forceConsistentCasingInFileNames": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -36,5 +40,7 @@
     "transpileOnly": true,
     "compiler": "typescript-cached-transpile"
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }
