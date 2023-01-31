@@ -19,13 +19,13 @@ const LOCAL_KEY = Buffer.from(
   'base64'
 );
 
-describe.only('21. Automatic Data Encryption Keys', metadata, () => {
+describe('21. Automatic Data Encryption Keys', metadata, () => {
   installNodeDNSWorkaroundHooks();
 
   let db: Db;
   let clientEncryption;
   let client;
-  let MongoCryptError;
+  let MongoCryptCreateEncryptedCollectionError;
 
   beforeEach(async function () {
     if (this.configuration.clientSideEncryption == null) {
@@ -33,9 +33,11 @@ describe.only('21. Automatic Data Encryption Keys', metadata, () => {
     }
 
     client = this.configuration.newClient();
-    const { ClientEncryption, MongoCryptError: MongoCryptErrorCtor } =
-      this.configuration.mongodbClientEncryption;
-    MongoCryptError = MongoCryptErrorCtor;
+    const {
+      ClientEncryption,
+      MongoCryptCreateEncryptedCollectionError: MongoCryptCreateEncryptedCollectionErrorCtor
+    } = this.configuration.mongodbClientEncryption;
+    MongoCryptCreateEncryptedCollectionError = MongoCryptCreateEncryptedCollectionErrorCtor;
 
     clientEncryption = new ClientEncryption(client, {
       keyVaultClient: client,
@@ -90,8 +92,7 @@ describe.only('21. Automatic Data Encryption Keys', metadata, () => {
       })
       .catch(error => error);
 
-    expect(result).to.be.instanceOf(MongoCryptError);
-    expect(result.message).to.include('encryptedFields');
+    expect(result).to.be.instanceOf(TypeError);
   });
 
   it('Case 3: Invalid keyId', async () => {
@@ -107,8 +108,8 @@ describe.only('21. Automatic Data Encryption Keys', metadata, () => {
       })
       .catch(error => error);
 
-    expect(result).to.be.instanceOf(MongoServerError);
-    expect(result).property('code', typeMismatchCode);
+    expect(result).to.be.instanceOf(MongoCryptCreateEncryptedCollectionError);
+    expect(result).nested.property('cause.code', typeMismatchCode);
   });
 
   it('Case 4: Insert encrypted value', async () => {
