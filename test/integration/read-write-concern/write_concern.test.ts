@@ -146,9 +146,9 @@ describe('Write Concern', function () {
           if (this.configuration.options.replicaSet) {
             const changeStream = col.watch(undefined, { batchSize: 2 });
 
-            setTimeout(() => {
+            setImmediate(() => {
               col.updateMany({}, [{ $addFields: { A: 1 } }]);
-            }, 1000);
+            });
 
             const err = await changeStream.next().catch(e => e);
 
