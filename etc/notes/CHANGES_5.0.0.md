@@ -24,8 +24,8 @@ The following is a detailed collection of the changes in the major v5 release of
   - [Custom Promise library support removed](#custom-promise-library-support-removed)
   - [Removed `Collection.insert`, `Collection.update`, and `Collection.remove`](#removed-collectioninsert-collectionupdate-and-collectionremove)
   - [`Collection.mapReduce()` helper removed](#collectionmapreduce-helper-removed)
-  - [`BulkWriteResult` no longer contains a publicly enumerable `result` property.](#bulkwriteresult-no-longer-contains-a-publicly-enumerable-result-property)
-  - [`BulkWriteResult` now contains individual result properties.](#bulkwriteresult-now-contains-individual-result-properties)
+  - [`BulkWriteResult` no longer contains a publicly enumerable `result` property](#bulkwriteresult-no-longer-contains-a-publicly-enumerable-result-property)
+  - [`BulkWriteResult` now contains individual result properties](#bulkwriteresult-now-contains-individual-result-properties)
   - [Bulk results no longer contain `lastOp()` and `opTime`](#bulk-results-no-longer-contain-lastop-and-optime)
   - [`BulkWriteOptions.keepGoing` Option Removed](#bulkwriteoptionskeepgoing-option-removed)
   - [`WriteConcernError.err()` Removed](#writeconcernerrorerr-removed)
@@ -38,11 +38,12 @@ The following is a detailed collection of the changes in the major v5 release of
   - [Cursor closes on exit of `for await ... of` loops](#cursor-closes-on-exit-of-for-await--of-loops)
   - [Driver now sends `1` instead of `true` for hello commands](#driver-now-sends-1-instead-of-true-for-hello-commands)
 - [Dead Code Cleanup](#dead-code-cleanup)
+  - [`MongoClientOptions.logger` and `MongoClientOptions.logLevel` Removed](#mongoclientoptionslogger-and-mongoclientoptionsloglevel-removed)
   - [`CursorCloseOptions` removed](#cursorcloseoptions-removed)
   - [`.unref()` removed from `Db`](#unref-removed-from-db)
   - [`CommandOperationOptions.fullResponse` Option Removed](#commandoperationoptionsfullresponse-option-removed)
   - [`Projection` and `ProjectionOperations` Types Removed](#projection-and-projectionoperations-types-removed)
-  - [Removal of Internal Types from Public API](#removal-of-internal-types-from-public-api)
+  - [Internal Types Removed from Public API](#internal-types-removed-from-public-api)
 
 ## Changes
 
@@ -315,11 +316,11 @@ await db.command(command);
 **Note** When using the `Db.command()` helper, all `mapReduce` options should be specified
 on the raw command object and should not be passed through the options object.
 
-### `BulkWriteResult` no longer contains a publicly enumerable `result` property.
+### `BulkWriteResult` no longer contains a publicly enumerable `result` property
 
 To access the raw result, please use `bulkWriteResult.getRawResponse()`.
 
-### `BulkWriteResult` now contains individual result properties.
+### `BulkWriteResult` now contains individual result properties
 
 These can be accessed via:
 
@@ -344,7 +345,7 @@ The `keepGoing` option on the `BulkWriteOptions` has been removed. Please use th
 
 ### `WriteConcernError.err()` Removed
 
-The `err()` getter on the WriteConcernError class has been removed. The `toJSON()` method can be in place of `err()`.
+The `err()` getter on the WriteConcernError class has been removed. The `toJSON()` method can be used in place of `err()`.
 
 ### `AddUserOptions.digestPassword` removed
 
@@ -392,10 +393,13 @@ previous `true`. This change was made for specification compliance reasons.
 
 ## Dead Code Cleanup
 
+### `MongoClientOptions.logger` and `MongoClientOptions.logLevel` Removed
+
+Both the `logger` and the `logLevel` options had no effect and have been removed.
+
 ### `CursorCloseOptions` removed
 
-When calling `close()` on a `Cursor`, no more options can be provided. This removes support for the
-`skipKillCursors` option that was unused.
+Options can no longer be provided to `Cursor.close()`. This removes support for the `skipKillCursors` option that was unused.
 
 ### `.unref()` removed from `Db`
 
@@ -403,13 +407,13 @@ The `.unref()` method was a no-op and has now been removed from the `Db` class.
 
 ### `CommandOperationOptions.fullResponse` Option Removed
 
-The `fullResponse` option on the `CommandOperationOptions` as unused in the driver and has been removed.
+The `fullResponse` option on the `CommandOperationOptions` was unused in the driver and has been removed.
 
 ### `Projection` and `ProjectionOperations` Types Removed
 
 Both of these types were unused but exported. These types have been removed. Please use `Document` instead.
 
-### Removal of Internal Types from Public API
+### Internal Types Removed from Public API
 
 The following types are used internally by the driver but were accidentally exported. They have now been
 marked internal and are no longer exported.
