@@ -3,6 +3,7 @@ import { inspect } from 'util';
 
 import { Collection, Db, MongoServerError } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
+import { getKmsProviders } from '../../tools/utils';
 
 const metadata = {
   requires: {
@@ -28,7 +29,14 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
   let client;
   let MongoCryptCreateEncryptedCollectionError;
 
-  const runProseTestsFor = ({ masterKey }) => {
+  const runProseTestsFor = provider => {
+    const masterKey = {
+      aws: {
+        region: 'us-east-1',
+        key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
+      },
+      local: null
+    }[provider];
     beforeEach(async function () {
       client = this.configuration.newClient();
       const {
@@ -40,7 +48,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
       clientEncryption = new ClientEncryption(client, {
         keyVaultClient: client,
         keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: { local: { key: LOCAL_KEY } }
+        kmsProviders: getKmsProviders(LOCAL_KEY)
       });
 
       if (typeof clientEncryption.createEncryptedCollection !== 'function') {
@@ -66,7 +74,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
       };
 
       const { collection } = await clientEncryption.createEncryptedCollection(db, 'testing1', {
-        provider: 'local',
+        provider,
         createCollectionOptions,
         masterKey
       });
@@ -84,7 +92,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
 
       const result = await clientEncryption
         .createEncryptedCollection(db, 'testing1', {
-          provider: 'local',
+          provider,
           createCollectionOptions,
           masterKey
         })
@@ -100,7 +108,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
 
       const result = await clientEncryption
         .createEncryptedCollection(db, 'testing1', {
-          provider: 'local',
+          provider,
           createCollectionOptions,
           masterKey
         })
@@ -124,7 +132,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
         db,
         'testing1',
         {
-          provider: 'local',
+          provider,
           createCollectionOptions,
           masterKey
         }
@@ -144,17 +152,9 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
     });
   };
 
-  for (const kmsProviderOptions of [
-    { masterKey: null },
-    {
-      masterKey: {
-        region: 'us-east-1',
-        key: 'arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0'
-      }
-    }
-  ]) {
-    context(`provider options ${inspect(kmsProviderOptions)}`, () => {
-      runProseTestsFor(kmsProviderOptions);
+  for (const provider of ['local', 'aws']) {
+    context(`${provider}`, () => {
+      runProseTestsFor(provider);
     });
   }
 });

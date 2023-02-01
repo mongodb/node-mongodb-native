@@ -10,29 +10,9 @@ const { dropCollection, APMEventCollector } = require('../shared');
 const { EJSON, Binary } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { MongoNetworkError, MongoServerError } = require('../../mongodb');
-const { getEncryptExtraOptions } = require('../../tools/utils');
+const { getEncryptExtraOptions, getKmsProviders } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 const { coerce, gte } = require('semver');
-
-const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
-  const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
-  if (localKey) {
-    result.local = { key: localKey };
-  }
-  result.kmip = {
-    endpoint: kmipEndpoint || 'localhost:5698'
-  };
-
-  if (result.azure && azureEndpoint) {
-    result.azure.identityPlatformEndpoint = azureEndpoint;
-  }
-
-  if (result.gcp && gcpEndpoint) {
-    result.gcp.endpoint = gcpEndpoint;
-  }
-
-  return result;
-};
 
 const noop = () => {};
 const metadata = {

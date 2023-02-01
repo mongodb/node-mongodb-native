@@ -100,6 +100,31 @@ export function getEncryptExtraOptions() {
   return {};
 }
 
+export function getKmsProviders(
+  localKey?: Buffer,
+  kmipEndpoint?: any,
+  azureEndpoint?: any,
+  gcpEndpoint?: any
+) {
+  const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
+  if (localKey) {
+    result.local = { key: localKey };
+  }
+  result.kmip = {
+    endpoint: kmipEndpoint || 'localhost:5698'
+  };
+
+  if (result.azure && azureEndpoint) {
+    result.azure.identityPlatformEndpoint = azureEndpoint;
+  }
+
+  if (result.gcp && gcpEndpoint) {
+    result.gcp.endpoint = gcpEndpoint;
+  }
+
+  return result;
+}
+
 export function getSymbolFrom(target: any, symbolName: any, assertExists = true) {
   const symbol = Object.getOwnPropertySymbols(target).filter(
     s => s.toString() === `Symbol(${symbolName})`
