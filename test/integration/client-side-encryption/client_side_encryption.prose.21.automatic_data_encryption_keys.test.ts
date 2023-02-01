@@ -20,7 +20,7 @@ const LOCAL_KEY = Buffer.from(
   'base64'
 );
 
-describe.only('21. Automatic Data Encryption Keys', metadata, () => {
+describe('21. Automatic Data Encryption Keys', metadata, () => {
   installNodeDNSWorkaroundHooks();
 
   let db: Db;
