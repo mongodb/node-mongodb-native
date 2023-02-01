@@ -28,10 +28,6 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
   let MongoCryptCreateEncryptedCollectionError;
 
   beforeEach(async function () {
-    if (this.configuration.clientSideEncryption == null) {
-      return;
-    }
-
     client = this.configuration.newClient();
     const {
       ClientEncryption,
@@ -110,6 +106,11 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
 
     expect(result).to.be.instanceOf(MongoCryptCreateEncryptedCollectionError);
     expect(result).nested.property('cause.code', typeMismatchCode);
+    // BSON field 'create.encryptedFields.fields.keyId' is the wrong type 'bool', expected type 'binData'
+    expect(result.cause.message)
+      .to.match(/bool/i)
+      .and.match(/binData/i)
+      .and.match(/keyId/i);
   });
 
   it('Case 4: Insert encrypted value', async () => {
