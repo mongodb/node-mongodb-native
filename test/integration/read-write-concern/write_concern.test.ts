@@ -142,19 +142,18 @@ describe('Write Concern', function () {
           expect(err).to.not.be.instanceOf(Error);
         });
 
-        it('succeeds on changeStream', async function () {
-          if (this.configuration.options.replicaSet) {
+        it('succeeds on changeStream', {
+          metadata: { requires: { topology: 'replicaset' } },
+          async test() {
             const changeStream = col.watch(undefined, { batchSize: 2 });
 
-            setImmediate(() => {
+            setTimeout(() => {
               col.updateMany({}, [{ $addFields: { A: 1 } }]);
-            });
+            }, 1000);
 
             const err = await changeStream.next().catch(e => e);
 
             expect(err).to.not.be.instanceOf(Error);
-          } else {
-            this.skip();
           }
         });
       });
