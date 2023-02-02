@@ -12,7 +12,6 @@ const expectedMongoshScopes = [
   'connectivity-tests',
   '@mongosh/editor',
   '@mongosh/errors',
-  'foo',
   '@mongosh/history',
   '@mongosh/i18n',
   '@mongosh/java-shell',
