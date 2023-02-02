@@ -31,7 +31,6 @@ const connectionOptionsDefaults = {
 
 /** The absolute minimum socket API needed by Connection as of writing this test */
 class FakeSocket extends EventEmitter {
-  writableEnded: boolean;
   address() {
     // is never called
   }
@@ -40,34 +39,12 @@ class FakeSocket extends EventEmitter {
   }
   destroy() {
     // is called, has no side effects
-    this.writableEnded = true;
-  }
-  end(cb) {
-    this.writableEnded = true;
-    // nextTick to simulate I/O delay
-    if (typeof cb === 'function') {
-      process.nextTick(cb);
-    }
   }
   get remoteAddress() {
     return 'iLoveJavaScript';
   }
   get remotePort() {
     return 123;
-  }
-}
-
-class InputStream extends Readable {
-  writableEnded: boolean;
-  constructor(options?) {
-    super(options);
-  }
-
-  end(cb) {
-    this.writableEnded = true;
-    if (typeof cb === 'function') {
-      process.nextTick(cb);
-    }
   }
 }
 
@@ -129,7 +106,7 @@ describe('new Connection()', function () {
         expect(err).to.be.instanceOf(MongoNetworkTimeoutError);
         expect(result).to.not.exist;
 
-        expect(conn).property('stream').property('writableEnded', true);
+        expect(conn).property('stream').property('destroyed', true);
 
         done();
       });
@@ -198,7 +175,7 @@ describe('new Connection()', function () {
 
       context('when multiple hellos exist on the stream', function () {
         let callbackSpy;
-        const inputStream = new InputStream();
+        const inputStream = new Readable();
         const document = { ok: 1 };
         const last = { isWritablePrimary: true };
 
@@ -417,7 +394,7 @@ describe('new Connection()', function () {
       connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
       const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
       kDelayedTimeoutId = getSymbolFrom(connection, 'delayedTimeoutId');
-      messageStream = sinon.spy(connection[messageStreamSymbol]);
+      messageStream = connection[messageStreamSymbol];
     });
 
     afterEach(() => {
@@ -430,15 +407,13 @@ describe('new Connection()', function () {
 
       driverSocket.emit('timeout');
       expect(connection.onTimeout).to.have.been.calledOnce;
-      expect(connection.destroy).to.not.have.been.called;
       expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
       expect(connection).to.have.property('closed', false);
-      expect(driverSocket.end).to.not.have.been.called;
+      expect(driverSocket.destroy).to.not.have.been.called;
 
       clock.tick(1);
 
-      expect(driverSocket.end).to.have.been.calledOnce;
-      expect(connection.destroy).to.have.been.calledOnce;
+      expect(driverSocket.destroy).to.have.been.calledOnce;
       expect(connection).to.have.property('closed', true);
     });
 
@@ -462,88 +437,6 @@ describe('new Connection()', function () {
       expect(driverSocket.destroy).to.not.have.been.called;
       expect(connection).to.have.property('closed', false);
       expect(connection).to.have.property(kDelayedTimeoutId, null);
-    });
-
-    it('destroys the message stream and socket', () => {
-      expect(connection).to.have.property(kDelayedTimeoutId, null);
-
-      driverSocket.emit('timeout');
-
-      clock.tick(1);
-
-      expect(connection.onTimeout).to.have.been.calledOnce;
-      expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
-
-      expect(messageStream.destroy).to.have.been.calledOnce;
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(driverSocket.end).to.have.been.calledOnce;
-    });
-  });
-
-  describe('onError()', () => {
-    let connection: sinon.SinonSpiedInstance<Connection>;
-    let clock: sinon.SinonFakeTimers;
-    let timerSandbox: sinon.SinonFakeTimers;
-    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
-    let messageStream: MessageStream;
-    beforeEach(() => {
-      timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-      driverSocket = sinon.spy(new FakeSocket());
-      // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
-      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
-      const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
-      messageStream = sinon.spy(connection[messageStreamSymbol]);
-    });
-
-    afterEach(() => {
-      timerSandbox.restore();
-      clock.restore();
-    });
-
-    it('destroys the message stream and socket', () => {
-      messageStream.emit('error');
-      clock.tick(1);
-      expect(connection.onError).to.have.been.calledOnce;
-      connection.destroy({ force: false });
-      clock.tick(1);
-      expect(messageStream.destroy).to.have.been.called;
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(driverSocket.end).to.have.been.calledOnce;
-    });
-  });
-
-  describe('onClose()', () => {
-    let connection: sinon.SinonSpiedInstance<Connection>;
-    let clock: sinon.SinonFakeTimers;
-    let timerSandbox: sinon.SinonFakeTimers;
-    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
-    let messageStream: MessageStream;
-    beforeEach(() => {
-      timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-
-      driverSocket = sinon.spy(new FakeSocket());
-      // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
-      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
-      const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
-      messageStream = sinon.spy(connection[messageStreamSymbol]);
-    });
-
-    afterEach(() => {
-      timerSandbox.restore();
-      clock.restore();
-    });
-
-    it('destroys the message stream and socket', () => {
-      driverSocket.emit('close');
-      clock.tick(1);
-      expect(connection.onClose).to.have.been.calledOnce;
-      connection.destroy({ force: false });
-      clock.tick(1);
-      expect(messageStream.destroy).to.have.been.called;
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(driverSocket.end).to.have.been.calledOnce;
     });
   });
 
@@ -595,98 +488,6 @@ describe('new Connection()', function () {
         it('returns false', function () {
           expect(hasSessionSupport(connection)).to.be.false;
         });
-      });
-    });
-  });
-
-  describe('destroy()', () => {
-    let connection: sinon.SinonSpiedInstance<Connection>;
-    let clock: sinon.SinonFakeTimers;
-    let timerSandbox: sinon.SinonFakeTimers;
-    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
-    let messageStream: MessageStream;
-    beforeEach(() => {
-      timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-
-      driverSocket = sinon.spy(new FakeSocket());
-      // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
-      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
-      const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
-      messageStream = sinon.spy(connection[messageStreamSymbol]);
-    });
-
-    afterEach(() => {
-      timerSandbox.restore();
-      clock.restore();
-    });
-
-    context('when options.force == true', function () {
-      it('calls stream.destroy', () => {
-        connection.destroy({ force: true });
-        clock.tick(1);
-        expect(driverSocket.destroy).to.have.been.calledOnce;
-      });
-
-      it('does not call stream.end', () => {
-        connection.destroy({ force: true });
-        clock.tick(1);
-        expect(driverSocket.end).to.not.have.been.called;
-      });
-
-      it('destroys the tcp socket', () => {
-        connection.destroy({ force: true });
-        clock.tick(1);
-        expect(driverSocket.destroy).to.have.been.calledOnce;
-      });
-
-      it('destroys the messageStream', () => {
-        connection.destroy({ force: true });
-        clock.tick(1);
-        expect(messageStream.destroy).to.have.been.calledOnce;
-      });
-
-      it('calls stream.destroy whenever destroy is called ', () => {
-        connection.destroy({ force: true });
-        connection.destroy({ force: true });
-        connection.destroy({ force: true });
-        clock.tick(1);
-        expect(driverSocket.destroy).to.have.been.calledThrice;
-      });
-    });
-
-    context('when options.force == false', function () {
-      it('calls stream.end', () => {
-        connection.destroy({ force: false });
-        clock.tick(1);
-        expect(driverSocket.end).to.have.been.calledOnce;
-      });
-
-      it('does not call stream.destroy', () => {
-        connection.destroy({ force: false });
-        clock.tick(1);
-        expect(driverSocket.destroy).to.not.have.been.called;
-      });
-
-      it('ends the tcp socket', () => {
-        connection.destroy({ force: false });
-        clock.tick(1);
-        expect(driverSocket.end).to.have.been.calledOnce;
-      });
-
-      it('destroys the messageStream', () => {
-        connection.destroy({ force: false });
-        clock.tick(1);
-        expect(messageStream.destroy).to.have.been.calledOnce;
-      });
-
-      it('calls stream.end exactly once when destroy is called multiple times', () => {
-        connection.destroy({ force: false });
-        connection.destroy({ force: false });
-        connection.destroy({ force: false });
-        connection.destroy({ force: false });
-        clock.tick(1);
-        expect(driverSocket.end).to.have.been.calledOnce;
       });
     });
   });
