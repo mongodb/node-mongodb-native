@@ -329,7 +329,7 @@ functions:
           TASK_ID: ${task_id}
         binary: bash
         args:
-          - "${PROJECT_DIRECTORY}/.evergreen/install-and-bootstrap-mongosh.sh"
+          - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh"
 
   "run mongosh tests for package":
     - command: subprocess.exec
@@ -341,7 +341,7 @@ functions:
           MONGOSH_RUN_ONLY_IN_PACKAGE: ${mongosh_package}
         binary: bash
         args:
-          - "${PROJECT_DIRECTORY}/.evergreen/install-and-bootstrap-mongosh.sh"
+          - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh"
 
   "run mongosh package scope test":
     - command: subprocess.exec
