@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { setTimeout } from 'timers';
+import { on, once } from 'events';
 
 import { Collection } from '../../../src/collection';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
@@ -146,13 +146,28 @@ describe('Write Concern', function () {
           metadata: { requires: { topology: 'replicaset' } },
           async test() {
             const changeStream = col.watch(undefined, { batchSize: 2 });
+            const changes = on(changeStream, 'change');
+            await once(changeStream.cursor, 'init');
 
-            setTimeout(() => {
-              col.updateMany({}, [{ $addFields: { A: 1 } }]);
-            }, 1000);
+            await col.insertMany(
+              [
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 },
+                { a: 10 }
+              ],
+              { writeConcern: { w: 'majority' } }
+            );
 
-            const err = await changeStream.next().catch(e => e);
-
+            const err = await changes.next().catch(e => e);
             expect(err).to.not.be.instanceOf(Error);
           }
         });
