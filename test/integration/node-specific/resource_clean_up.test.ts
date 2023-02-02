@@ -9,14 +9,14 @@ import { parseSnapshot } from 'v8-heapsnapshot';
 const HEAPSNAPSHOT_BEFORE = './before.heapsnapshot.json';
 const HEAPSNAPSHOT_AFTER = './after.heapsnapshot.json';
 
-const REPRO_SCRIPT = uri => `
-const { MongoClient } = require('${path.resolve(__dirname, '../../../lib')}');
+const REPRO_SCRIPT = (uri: string) => `
+const { MongoClient } = require(${JSON.stringify(path.resolve(__dirname, '../../../lib'))}');
 const process = require('node:process');
 const v8 = require('node:v8');
 
 async function run(i) {
   const mongoClient = new MongoClient(
-    '${uri}',
+    ${JSON.stringify(uri)},
     { maxPoolSize: 3 }
   );
   await mongoClient.connect();
@@ -35,7 +35,7 @@ async function run(i) {
 }
 
 async function main() {
-  // v8.writeHeapSnapshot('${HEAPSNAPSHOT_BEFORE}');
+  // v8.writeHeapSnapshot(${JSON.stringify(HEAPSNAPSHOT_BEFORE)});
   const startingMemoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
   process.send({ startingMemoryUsed });
   for (let i = 0; i < 100; i++) {
@@ -46,7 +46,7 @@ async function main() {
   }
   const endingMemoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
   process.send({ endingMemoryUsed });
-  v8.writeHeapSnapshot('${HEAPSNAPSHOT_AFTER}');
+  v8.writeHeapSnapshot(${JSON.stringify(HEAPSNAPSHOT_AFTER)});
 }
 
 main()
