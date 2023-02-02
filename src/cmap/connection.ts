@@ -146,7 +146,7 @@ export interface ConnectionOptions
   metadata: ClientMetadata;
 }
 
-/** @public */
+/** @internal */
 export interface DestroyOptions {
   /** Force the destruction. */
   force?: boolean;
