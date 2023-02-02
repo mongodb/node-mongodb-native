@@ -77,7 +77,8 @@ export class FindOperation extends CommandOperation<Document> {
   ) {
     super(collection, options);
 
-    this.options = options;
+    this.options = { ...options };
+    delete this.options.writeConcern;
     this.ns = ns;
 
     if (typeof filter !== 'object' || Array.isArray(filter)) {
