@@ -123,7 +123,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
         .and.match(/keyId/i);
     });
 
-    it.only('Case 4: Insert encrypted value', async () => {
+    it('Case 4: Insert encrypted value', async () => {
       const createCollectionOptions = {
         encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
       };
