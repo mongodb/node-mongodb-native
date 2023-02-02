@@ -39,7 +39,7 @@ const OPERATING_SYSTEMS = [
 }));
 
 // TODO: NODE-3060: enable skipped tests on windows
-const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
+const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -206,7 +206,7 @@ TASKS.push(
     },
     {
       name: 'test-socks5-csfle',
-      tags: [],
+      tags: ['socks5-csfle'],
       commands: [
         { func: 'install dependencies' },
         {

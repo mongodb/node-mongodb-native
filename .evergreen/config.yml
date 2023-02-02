@@ -1307,7 +1307,8 @@ tasks:
       - func: bootstrap kms servers
       - func: run socks5 tests
   - name: test-socks5-csfle
-    tags: []
+    tags:
+      - socks5-csfle
     commands:
       - func: install dependencies
       - func: bootstrap mongo-orchestration
@@ -2858,7 +2859,6 @@ buildvariants:
       - test-latest-server-v1-api
       - test-atlas-data-lake
       - test-socks5
-      - test-socks5-csfle
       - test-socks5-tls
       - test-zstd-compression
       - test-snappy-compression
@@ -2901,7 +2901,6 @@ buildvariants:
       - test-latest-server-v1-api
       - test-atlas-data-lake
       - test-socks5
-      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -2942,7 +2941,6 @@ buildvariants:
       - test-latest-server-v1-api
       - test-atlas-data-lake
       - test-socks5
-      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
