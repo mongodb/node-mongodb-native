@@ -99,22 +99,12 @@ EOT
   which node || echo "node not found, PATH=$PATH"
   which npm || echo "npm not found, PATH=$PATH"
   npm cache clear --force # Fixes: Cannot read properties of null (reading 'pickAlgorithm') error on windows
-  npm config set msvs_version ${MSVS_VERSION}
-  npm config set scripts-prepend-node-path true
 
 # install Node.js on Linux/MacOS
 else
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && source "${NVM_DIR}/nvm.sh"
   nvm install --no-progress "$NODE_VERSION"
-
-  # setup npm cache in a local directory
-  cat <<EOT > .npmrc
-devdir=${NPM_CACHE_DIR}/.node-gyp
-init-module=${NPM_CACHE_DIR}/.npm-init.js
-cache=${NPM_CACHE_DIR}
-tmp=${NPM_TMP_DIR}
-EOT
 fi
 
 npm install ${NPM_OPTIONS}
