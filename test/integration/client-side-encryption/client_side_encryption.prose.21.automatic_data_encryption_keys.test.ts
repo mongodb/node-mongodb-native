@@ -123,7 +123,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
         .and.match(/keyId/i);
     });
 
-    it('Case 4: Insert encrypted value', async () => {
+    it.only('Case 4: Insert encrypted value', async () => {
       const createCollectionOptions = {
         encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
       };
@@ -149,6 +149,10 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
       const result = await collection.insertOne({ ssn }).catch(error => error);
       expect(result).to.be.instanceOf(MongoServerError);
       expect(result).to.have.property('code', documentValidationFailureCode);
+      expect(result).to.have.nested.property(
+        'errInfo.details.schemaRulesNotSatisfied[0].propertiesNotSatisfied[0].propertyName',
+        'ssn'
+      );
     });
   };
 
