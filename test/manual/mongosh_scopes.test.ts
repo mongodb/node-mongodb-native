@@ -1,21 +1,42 @@
 import { expect } from 'chai';
 
 const expectedMongoshScopes = [
-  'service-provider-server',
-  'browser-runtime-electron',
-  'cli-repl',
-  'node-runtime-worker-thread',
+  '@mongosh/arg-parser',
+  '@mongosh/async-rewriter2',
+  '@mongosh/autocomplete',
+  '@mongosh/browser-repl',
+  '@mongosh/browser-runtime-core',
+  '@mongosh/browser-runtime-electron',
+  '@mongosh/build',
+  '@mongosh/cli-repl',
+  'connectivity-tests',
+  '@mongosh/editor',
+  '@mongosh/errors',
+  'foo',
+  '@mongosh/history',
+  '@mongosh/i18n',
+  '@mongosh/java-shell',
+  '@mongosh/js-multiline-to-singleline',
+  '@mongosh/logging',
   'mongosh',
-  'browser-repl'
+  '@mongosh/node-runtime-worker-thread',
+  '@mongosh/service-provider-core',
+  '@mongosh/service-provider-server',
+  '@mongosh/shell-api',
+  '@mongosh/shell-evaluator',
+  '@mongosh/snippet-manager',
+  '@mongosh/types',
+  '@mongosh/docker-build-scripts'
 ];
 
 describe('mongosh scopes', function () {
   let scopes: Array<string>;
 
   before(async function () {
-    scopes = process.env.SCOPES.trim()
-      .split('\n')
-      .map(scope => scope.replace(/@mongosh\//, ''));
+    if (typeof process.env.SCOPES !== 'string') {
+      throw new Error('mongosh scopes must be set in the SCOPES environment variable');
+    }
+    scopes = JSON.parse(process.env.SCOPES).map(({ name }) => name);
   });
 
   it('there are no new mongosh scopes', function () {

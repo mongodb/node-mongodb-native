@@ -9,7 +9,7 @@ git clone --depth=10 -b misc-changes-for-node-driver-ci https://github.com/baile
 
 cd $MONGOSH_DIRECTORY
 npm i lerna
-export SCOPES=$(./node_modules/lerna/cli.js ls --scope @mongosh/service-provider-server --scope @mongosh/connectivity-tests --include-dependents)
+export SCOPES=$(./node_modules/lerna/cli.js ls --all --json)
 
 cd -
 
