@@ -10,15 +10,30 @@ const HEAPSNAPSHOT_BEFORE = './before.heapsnapshot.json';
 const HEAPSNAPSHOT_AFTER = './after.heapsnapshot.json';
 
 const REPRO_SCRIPT = (uri: string) => `
-const { MongoClient } = require(${JSON.stringify(path.resolve(__dirname, '../../../lib'))}');
+const { MongoClient } = require(${JSON.stringify(path.resolve(__dirname, '../../../lib'))});
 const process = require('node:process');
+const async_hooks = require('node:async_hooks');
 const v8 = require('node:v8');
+const util = require('node:util');
+const timers = require('node:timers');
+
+const resources = new Set();
+const hook = async_hooks.createHook({
+  init: (asyncId, type, triggerAsyncId, resource) => {
+    if (type !== 'MongoClient') return;
+    resources.add(asyncId)
+  },
+  destroy: (asyncId) => {
+    resources.delete(asyncId)
+  }
+}).enable();
 
 async function run(i) {
   const mongoClient = new MongoClient(
     ${JSON.stringify(uri)},
     { maxPoolSize: 3 }
   );
+  mongoClient.asyncResource = new async_hooks.AsyncResource('MongoClient');
   await mongoClient.connect();
   const db = mongoClient.db();
   await Promise.all([
@@ -38,14 +53,19 @@ async function main() {
   // v8.writeHeapSnapshot(${JSON.stringify(HEAPSNAPSHOT_BEFORE)});
   const startingMemoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
   process.send({ startingMemoryUsed });
+
   for (let i = 0; i < 100; i++) {
     await run(i);
-    if (global.gc) {
-      global.gc();
-    }
+    global.gc();
   }
+
+  global.gc();
+  await util.promisify(timers.setTimeout)(100); // Sleep b/c maybe gc will run
+  global.gc();
+
   const endingMemoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
   process.send({ endingMemoryUsed });
+  process.send({ resourcesSize: resources.size });
   v8.writeHeapSnapshot(${JSON.stringify(HEAPSNAPSHOT_AFTER)});
 }
 
@@ -64,6 +84,7 @@ const SCRIPT_NAME = './memScript.js';
 describe('Driver Resources', () => {
   let startingMemoryUsed;
   let endingMemoryUsed;
+  let asyncResourcesCount;
 
   let heapAfter;
 
@@ -76,9 +97,11 @@ describe('Driver Resources', () => {
 
     const starting = await messages.next();
     const ending = await messages.next();
+    const asyncResources = await messages.next();
 
     startingMemoryUsed = starting.value[0].startingMemoryUsed;
     endingMemoryUsed = ending.value[0].endingMemoryUsed;
+    asyncResourcesCount = asyncResources.value[0].resourcesSize;
 
     // process exit
     const [exitCode] = await willClose;
@@ -98,11 +121,16 @@ describe('Driver Resources', () => {
     expect(endingMemoryUsed).to.be.within(startingMemoryUsed - 3, startingMemoryUsed + 3);
   });
 
+  it('all MongoClient async resources should be destroyed', async () => {
+    expect(asyncResourcesCount).to.equal(0);
+  });
+
   it('should not have MongoClients residing in memory', async () => {
     const heap = await parseSnapshot(heapAfter);
     const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
     // lengthOf crashes chai b/c it tries to print out a gig
     // Allow GC to miss a few
-    expect(clients.length).to.be.within(0, 2);
+    expect(clients.length).to.equal(0);
+    expect(clients.length).to.equal(asyncResourcesCount);
   });
 });
