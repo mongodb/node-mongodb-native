@@ -47,7 +47,7 @@ describe('Write Concern', function () {
 
     after(() => mock.cleanup());
 
-    // TODO: NODE-3816
+    // TODO(NODE-3816): the mock server response is looking for writeConcern on all messages, but endSessions doesn't have it
     it.skip('should pipe writeConcern from client down to API call', function () {
       server.setMessageHandler(request => {
         if (request.document && request.document[LEGACY_HELLO_COMMAND]) {
