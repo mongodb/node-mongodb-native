@@ -2655,7 +2655,7 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run lambda handler example tests with aws auth
-  - name: run-mongosh-service-provider-server
+  - name: run-mongosh-browser-repl
     tags:
       - run-mongosh-integration-tests
     depends_on: compile-mongosh
@@ -2665,7 +2665,7 @@ tasks:
           NODE_LTS_NAME: gallium
       - func: run mongosh tests for package
         vars:
-          mongosh_package: service-provider-server
+          mongosh_package: browser-repl
   - name: run-mongosh-browser-runtime-electron
     tags:
       - run-mongosh-integration-tests
@@ -2688,7 +2688,7 @@ tasks:
       - func: run mongosh tests for package
         vars:
           mongosh_package: cli-repl
-  - name: run-mongosh-node-runtime-worker-thread
+  - name: run-mongosh-connectivity-tests
     tags:
       - run-mongosh-integration-tests
     depends_on: compile-mongosh
@@ -2698,7 +2698,7 @@ tasks:
           NODE_LTS_NAME: gallium
       - func: run mongosh tests for package
         vars:
-          mongosh_package: node-runtime-worker-thread
+          mongosh_package: connectivity-tests
   - name: run-mongosh-mongosh
     tags:
       - run-mongosh-integration-tests
@@ -2710,7 +2710,7 @@ tasks:
       - func: run mongosh tests for package
         vars:
           mongosh_package: mongosh
-  - name: run-mongosh-browser-repl
+  - name: run-mongosh-node-runtime-worker-thread
     tags:
       - run-mongosh-integration-tests
     depends_on: compile-mongosh
@@ -2720,7 +2720,18 @@ tasks:
           NODE_LTS_NAME: gallium
       - func: run mongosh tests for package
         vars:
-          mongosh_package: browser-repl
+          mongosh_package: node-runtime-worker-thread
+  - name: run-mongosh-service-provider-server
+    tags:
+      - run-mongosh-integration-tests
+    depends_on: compile-mongosh
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh tests for package
+        vars:
+          mongosh_package: service-provider-server
   - name: compile-mongosh
     tags:
       - run-mongosh-integration-tests
@@ -3210,12 +3221,13 @@ buildvariants:
     display_name: mongosh integration tests
     run_on: ubuntu1804-large
     tasks:
-      - run-mongosh-service-provider-server
+      - run-mongosh-browser-repl
       - run-mongosh-browser-runtime-electron
       - run-mongosh-cli-repl
-      - run-mongosh-node-runtime-worker-thread
+      - run-mongosh-connectivity-tests
       - run-mongosh-mongosh
-      - run-mongosh-browser-repl
+      - run-mongosh-node-runtime-worker-thread
+      - run-mongosh-service-provider-server
       - compile-mongosh
       - verify-mongosh-scopes
   - name: ubuntu1804-test-mongodb-aws

@@ -1,10 +1,11 @@
 const scopes = [
-  'service-provider-server',
+  'browser-repl',
   'browser-runtime-electron',
   'cli-repl',
-  'node-runtime-worker-thread',
+  'connectivity-tests',
   'mongosh',
-  'browser-repl'
+  'node-runtime-worker-thread',
+  'service-provider-server'
 ];
 
 const mongoshTestTasks = scopes.map(packageName => {
