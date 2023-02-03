@@ -27,7 +27,7 @@ const metaData: MongoDBMetadataUI = {
 };
 
 /**
- * a comparitor function to sort two documents by their _id
+ * a comparator function to sort two documents by their _id
  */
 function byId(a, b) {
   if (a._id > b._id) return 1;
