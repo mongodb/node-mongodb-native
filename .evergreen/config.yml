@@ -648,8 +648,8 @@ functions:
           cd -
           cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
             export AWS_WEB_IDENTITY_TOKEN_FILE=${iam_web_identity_token_file}
-            export AWS_ROLE_ARN=${iam_auth_assume_web_role_name}
-            export AWS_ROLE_SESSION_NAME='test'
+            export AWS_IAM_ROLE_ARN=${iam_auth_assume_web_role_name}
+            export AWS_IAM_ROLE_SESSION_NAME='test'
             export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
           EOF
     - command: shell.exec
@@ -667,11 +667,12 @@ functions:
         silent: true
         script: |
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
           ${MONGODB_BINARIES}/mongo --verbose aws_e2e_web_identity.js
           cd -
           cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
             export AWS_WEB_IDENTITY_TOKEN_FILE=${iam_web_identity_token_file}
-            export AWS_ROLE_ARN=${iam_auth_assume_web_role_name}
+            export AWS_IAM_ROLE_ARN=${iam_auth_assume_web_role_name}
             export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
           EOF
     - command: shell.exec
