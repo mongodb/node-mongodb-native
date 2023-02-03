@@ -1,9 +1,7 @@
 import { expect } from 'chai';
-import { inspect } from 'util';
 
-import { Collection, Db, MongoServerError } from '../../mongodb';
+import { BSON, Collection, Db, MongoServerError } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
-import { getKmsProviders } from '../../tools/utils';
 
 const metadata = {
   requires: {
@@ -15,11 +13,6 @@ const metadata = {
 
 const documentValidationFailureCode = 121;
 const typeMismatchCode = 14;
-
-const LOCAL_KEY = Buffer.from(
-  'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
-  'base64'
-);
 
 describe('21. Automatic Data Encryption Keys', metadata, () => {
   installNodeDNSWorkaroundHooks();
@@ -45,10 +38,19 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
       } = this.configuration.mongodbClientEncryption;
       MongoCryptCreateEncryptedCollectionError = MongoCryptCreateEncryptedCollectionErrorCtor;
 
+      if (typeof process.env.CSFLE_KMS_PROVIDERS !== 'string') {
+        if (this.currentTest) {
+          this.currentTest.skipReason = 'This test requires env CSFLE_KMS_PROVIDERS to be set';
+        }
+        return this.currentTest?.skip();
+      }
+
+      const { aws, local } = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS);
+
       clientEncryption = new ClientEncryption(client, {
         keyVaultClient: client,
         keyVaultNamespace: 'keyvault.datakeys',
-        kmsProviders: getKmsProviders(LOCAL_KEY)
+        kmsProviders: { aws, local }
       });
 
       if (typeof clientEncryption.createEncryptedCollection !== 'function') {
