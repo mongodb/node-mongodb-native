@@ -445,7 +445,7 @@ Once the environment variable is set, run replace package in mongosh with `npm r
 ##### Run specific package tests
 
 mongosh's readme documents how to run its tests.  Most likely, it isn't necessary to run all of mongosh's
-tests.  The mongosh readme also documents how to run tests for a particular scope.  The scopes that are
+tests.  The mongosh readme also documents how to run tests for a particular scope.  The scopes are
 listed in the `generate_mongosh_tasks.js` evergreen generation script.
 
 For example, to run the `service-provider-server` package, run the following command in mongosh:
