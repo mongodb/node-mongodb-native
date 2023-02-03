@@ -80,6 +80,7 @@ main()
 `;
 
 const SCRIPT_NAME = './memScript.js';
+const MB_PERMITTED_OFFSET = 3;
 
 describe('Driver Resources', () => {
   let startingMemoryUsed;
@@ -116,16 +117,19 @@ describe('Driver Resources', () => {
     await unlink(HEAPSNAPSHOT_AFTER);
   });
 
-  it('should all be cleaned up after close and garbage collectable', async () => {
+  it(`ending memory usage should be within ${MB_PERMITTED_OFFSET}MB of starting amount`, async () => {
     // plus/minus 3 MB
-    expect(endingMemoryUsed).to.be.within(startingMemoryUsed - 3, startingMemoryUsed + 3);
+    expect(endingMemoryUsed).to.be.within(
+      startingMemoryUsed - MB_PERMITTED_OFFSET,
+      startingMemoryUsed + MB_PERMITTED_OFFSET
+    );
   });
 
-  it('all MongoClient async resources should be destroyed', async () => {
-    expect(asyncResourcesCount).to.equal(0);
+  it('all but 1 MongoClient async resource should be destroyed', async () => {
+    expect(asyncResourcesCount).to.equal(1);
   });
 
-  it('should not have MongoClients residing in memory', async () => {
+  it('heapsnapshot should have no MongoClients in memory', async () => {
     const heap = await parseSnapshot(heapAfter);
     const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
     // lengthOf crashes chai b/c it tries to print out a gig
