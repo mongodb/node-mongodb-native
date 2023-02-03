@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { BSON, Collection, Db, MongoServerError } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
-const metadata = {
+const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
     mongodb: '>=6.0.0',
@@ -14,7 +14,7 @@ const metadata = {
 const documentValidationFailureCode = 121;
 const typeMismatchCode = 14;
 
-describe('21. Automatic Data Encryption Keys', metadata, () => {
+describe('21. Automatic Data Encryption Keys', () => {
   installNodeDNSWorkaroundHooks();
 
   let db: Db;
@@ -70,7 +70,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
       await client?.close();
     });
 
-    it('Case 1: Simple Creation and Validation', async () => {
+    it('Case 1: Simple Creation and Validation', metadata, async () => {
       const createCollectionOptions = {
         encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
       };
@@ -89,7 +89,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
       expect(result).to.have.property('code', documentValidationFailureCode);
     });
 
-    it('Case 2: Missing encryptedFields', async () => {
+    it('Case 2: Missing encryptedFields', metadata, async () => {
       const createCollectionOptions = {};
 
       const result = await clientEncryption
@@ -103,7 +103,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
       expect(result).to.be.instanceOf(TypeError);
     });
 
-    it('Case 3: Invalid keyId', async () => {
+    it('Case 3: Invalid keyId', metadata, async () => {
       const createCollectionOptions = {
         encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: false }] }
       };
@@ -125,7 +125,7 @@ describe('21. Automatic Data Encryption Keys', metadata, () => {
         .and.match(/keyId/i);
     });
 
-    it('Case 4: Insert encrypted value', async () => {
+    it('Case 4: Insert encrypted value', metadata, async () => {
       const createCollectionOptions = {
         encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
       };
