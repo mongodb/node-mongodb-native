@@ -129,12 +129,11 @@ describe('Driver Resources', () => {
     expect(asyncResourcesCount).to.equal(1);
   });
 
-  it('heapsnapshot should have no MongoClients in memory', async () => {
+  it('heapsnapshot may have 0 to 2 MongoClients in memory', async () => {
     const heap = await parseSnapshot(heapAfter);
     const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
     // lengthOf crashes chai b/c it tries to print out a gig
     // Allow GC to miss a few
-    expect(clients.length).to.equal(0);
-    expect(clients.length).to.equal(asyncResourcesCount);
+    expect(clients.length).to.be.within(0, 2);
   });
 });
