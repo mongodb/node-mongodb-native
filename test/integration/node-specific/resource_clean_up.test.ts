@@ -134,6 +134,9 @@ describe('Driver Resources', () => {
     const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
     // lengthOf crashes chai b/c it tries to print out a gig
     // Allow GC to miss a few
-    expect(clients.length).to.be.within(0, 2);
+    expect(
+      clients.length,
+      `expected no MongoClients in the heapdump found ${clients.length}`
+    ).to.equal(0);
   });
 });
