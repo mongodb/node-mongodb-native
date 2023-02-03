@@ -688,9 +688,9 @@ for (const variant of BUILD_VARIANTS.filter(
   );
 }
 
-// TODO(NODE-4894): fix kerberos tests on Node18
+// TODO(NODE-5021): Drop support for Kerberos 1.x on in 6.0.0
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
+  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-auth-kerberos'].includes(name)
