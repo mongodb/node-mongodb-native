@@ -28,7 +28,6 @@ const OPERATING_SYSTEMS = [
     name: 'windows-64-vs2019',
     display_name: 'Windows (VS2019)',
     run_on: 'windows-64-vs2019-large',
-    msvsVersion: 2019,
     clientEncryption: false // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
   }
 ].map(osConfig => ({
@@ -395,7 +394,6 @@ for (const
     run_on,
     nodeVersions = NODE_VERSIONS,
     clientEncryption,
-    msvsVersion
   } of OPERATING_SYSTEMS) {
   const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
   const os = osName.split('-')[0];
@@ -417,9 +415,6 @@ for (const
 
     if (clientEncryption) {
       expansions.CLIENT_ENCRYPTION = true;
-    }
-    if (msvsVersion) {
-      expansions.MSVS_VERSION = msvsVersion;
     }
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
