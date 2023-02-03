@@ -437,7 +437,7 @@ all occurrences of `mongodb` with the local path of your driver.
 
 An alternative, which can be useful for
 testing a release, is to first run `npm pack` on the driver.  This generates a tarball containing all the code
-would be uploaded to npm if it were released.  Then set the environment variable `REPLACE_PACKAGE`
+that would be uploaded to npm if it were released.  Then set the environment variable `REPLACE_PACKAGE`
 with the pull path to the file.
 
 Once the environment variable is set, run replace package in mongosh with `npm run replace:package`.
