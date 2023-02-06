@@ -5,19 +5,14 @@ NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.
 NVM_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh"
 
 NODE_LTS_NAME=${NODE_LTS_NAME:-fermium}
-MSVS_VERSION=${MSVS_VERSION:-2019}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
-NPM_CACHE_DIR="${NODE_ARTIFACTS_PATH}/npm"
-NPM_TMP_DIR="${NODE_ARTIFACTS_PATH}/tmp"
 
 # this needs to be explicitly exported for the nvm install below
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 export XDG_CONFIG_HOME=${NODE_ARTIFACTS_PATH}
 
 # create node artifacts path if needed
-mkdir -p ${NODE_ARTIFACTS_PATH}
-mkdir -p ${NPM_CACHE_DIR}
-mkdir -p "${NPM_TMP_DIR}"
+mkdir -p "${NODE_ARTIFACTS_PATH}"
 
 function node_lts_to_version() {
   case $1 in
@@ -99,22 +94,12 @@ EOT
   which node || echo "node not found, PATH=$PATH"
   which npm || echo "npm not found, PATH=$PATH"
   npm cache clear --force # Fixes: Cannot read properties of null (reading 'pickAlgorithm') error on windows
-  npm config set msvs_version ${MSVS_VERSION}
-  npm config set scripts-prepend-node-path true
 
 # install Node.js on Linux/MacOS
 else
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && source "${NVM_DIR}/nvm.sh"
   nvm install --no-progress "$NODE_VERSION"
-
-  # setup npm cache in a local directory
-  cat <<EOT > .npmrc
-devdir=${NPM_CACHE_DIR}/.node-gyp
-init-module=${NPM_CACHE_DIR}/.npm-init.js
-cache=${NPM_CACHE_DIR}
-tmp=${NPM_TMP_DIR}
-EOT
 fi
 
 npm install ${NPM_OPTIONS}
