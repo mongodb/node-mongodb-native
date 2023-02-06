@@ -386,6 +386,7 @@ export function parseOptions(
     const isGssapi = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_GSSAPI;
     const isX509 = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_X509;
     const isAws = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_AWS;
+    const isOidc = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_OIDC;
     if (
       (isGssapi || isX509) &&
       allOptions.has('authSource') &&
@@ -397,7 +398,7 @@ export function parseOptions(
       );
     }
 
-    if (!(isGssapi || isX509 || isAws) && mongoOptions.dbName && !allOptions.has('authSource')) {
+    if (!(isGssapi || isX509 || isAws || isOidc) && mongoOptions.dbName && !allOptions.has('authSource')) {
       // inherit the dbName unless GSSAPI or X509, then silently ignore dbName
       // and there was no specific authSource given
       mongoOptions.credentials = MongoCredentials.merge(mongoOptions.credentials, {
@@ -678,26 +679,31 @@ export const OPTIONS = {
   },
   authMechanismProperties: {
     target: 'credentials',
-    transform({ options, values: [optionValue] }): MongoCredentials {
-      if (typeof optionValue === 'string') {
-        const mechanismProperties = Object.create(null);
+    transform({ options, values }): MongoCredentials {
+      // We can have a combination of options passed in the URI and options passed
+      // as an object to the MongoClient. So we must transform the string options
+      // as well as merge them together with a potentially provided object.
+      let mechanismProperties = Object.create(null);
 
-        for (const [key, value] of entriesFromString(optionValue)) {
-          try {
-            mechanismProperties[key] = getBoolean(key, value);
-          } catch {
-            mechanismProperties[key] = value;
+      for (const optionValue of values) {
+        if (typeof optionValue === 'string') {
+          for (const [key, value] of entriesFromString(optionValue)) {
+            try {
+              mechanismProperties[key] = getBoolean(key, value);
+            } catch {
+              mechanismProperties[key] = value;
+            }
           }
+        } else {
+          if (!isRecord(optionValue)) {
+            throw new MongoParseError('AuthMechanismProperties must be an object');
+          }
+          mechanismProperties = { ...optionValue };
         }
-
-        return MongoCredentials.merge(options.credentials, {
-          mechanismProperties
-        });
       }
-      if (!isRecord(optionValue)) {
-        throw new MongoParseError('AuthMechanismProperties must be an object');
-      }
-      return MongoCredentials.merge(options.credentials, { mechanismProperties: optionValue });
+      return MongoCredentials.merge(options.credentials, {
+        mechanismProperties
+      });
     }
   },
   authSource: {

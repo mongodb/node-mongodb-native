@@ -4,6 +4,7 @@ export const AuthMechanism = Object.freeze({
   MONGODB_CR: 'MONGODB-CR',
   MONGODB_DEFAULT: 'DEFAULT',
   MONGODB_GSSAPI: 'GSSAPI',
+  MONGODB_OIDC: 'MONGODB-OIDC',
   MONGODB_PLAIN: 'PLAIN',
   MONGODB_SCRAM_SHA1: 'SCRAM-SHA-1',
   MONGODB_SCRAM_SHA256: 'SCRAM-SHA-256',
@@ -17,5 +18,6 @@ export type AuthMechanism = typeof AuthMechanism[keyof typeof AuthMechanism];
 export const AUTH_MECHS_AUTH_SRC_EXTERNAL = new Set<AuthMechanism>([
   AuthMechanism.MONGODB_GSSAPI,
   AuthMechanism.MONGODB_AWS,
+  AuthMechanism.MONGODB_OIDC,
   AuthMechanism.MONGODB_X509
 ]);
