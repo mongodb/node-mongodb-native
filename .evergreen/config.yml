@@ -3035,7 +3035,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: erbium
-      MSVS_VERSION: 2019
     tasks:
       - test-latest-server
       - test-latest-replica_set
