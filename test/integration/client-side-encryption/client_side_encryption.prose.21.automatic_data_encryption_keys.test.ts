@@ -53,14 +53,6 @@ describe('21. Automatic Data Encryption Keys', () => {
         kmsProviders: { aws, local }
       });
 
-      if (typeof clientEncryption.createEncryptedCollection !== 'function') {
-        if (this.currentTest)
-          this.currentTest.skipReason =
-            'TODO I SHOULD NOT BE SKIPPED, INSTALL FLE VERSION WITH THIS API ' + '-'.repeat(400);
-        this.test?.skip();
-        return;
-      }
-
       db = client.db('automatic_data_encryption_keys');
       await db.dropDatabase().catch(() => null);
     });
