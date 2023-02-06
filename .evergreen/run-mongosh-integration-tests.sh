@@ -29,7 +29,7 @@ npm i -g npm@8.x || true
 TARBALL_FILENAME="$(tail -n1 npm-pack.log)"
 
 MONGOSH_DIRECTORY="/tmp/$TASK_ID"
-git clone --depth=10 -b misc-changes-for-node-driver-ci https://github.com/baileympearson/mongosh.git $MONGOSH_DIRECTORY
+git clone --depth=10 https://github.com/mongodb-js/mongosh.git $MONGOSH_DIRECTORY
 
 cd $MONGOSH_DIRECTORY
 
