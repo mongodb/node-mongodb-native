@@ -356,7 +356,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} MSVS_VERSION=${MSVS_VERSION} NPM_OPTIONS=${NPM_OPTIONS}\
+          NODE_LTS_NAME=${NODE_LTS_NAME} NPM_OPTIONS=${NPM_OPTIONS}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
     - command: expansions.update
       params:
@@ -3077,7 +3077,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: fermium
-      MSVS_VERSION: 2019
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -3119,7 +3118,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: gallium
-      MSVS_VERSION: 2019
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -3159,7 +3157,6 @@ buildvariants:
     run_on: windows-64-vs2019-large
     expansions:
       NODE_LTS_NAME: hydrogen
-      MSVS_VERSION: 2019
     tasks:
       - test-latest-server
       - test-latest-replica_set
