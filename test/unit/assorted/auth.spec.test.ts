@@ -1,7 +1,7 @@
 import { loadSpecTests } from '../../spec';
 import { executeUriValidationTest } from '../../tools/uri_spec_runner';
 
-describe.only('Auth option spec tests (legacy)', function () {
+describe('Auth option spec tests (legacy)', function () {
   const suites = loadSpecTests('auth', 'legacy');
 
   for (const suite of suites) {

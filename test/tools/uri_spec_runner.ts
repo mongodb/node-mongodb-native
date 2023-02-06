@@ -89,8 +89,12 @@ export function executeUriValidationTest(
   // in the actual options provided to the MongoClient. This is because OIDC does not allow
   // functions for callbacks in the URI itself but needs to validate they are passed.
   const CALLBACKS = {
-    oidcRequest: () => {},
-    oidcRefresh: () => {}
+    oidcRequest: async () => {
+      return { accessToken: '<test>' };
+    },
+    oidcRefresh: async () => {
+      return { accessToken: '<test>' };
+    }
   };
 
   const CALLBACK_MAPPINGS = {
@@ -223,8 +227,10 @@ export function executeUriValidationTest(
             expectedMechProp === 'REQUEST_TOKEN_CALLBACK' ||
             expectedMechProp === 'REFRESH_TOKEN_CALLBACK'
           ) {
-            expect(options, `${errorMessage} credentials.mechanismProperties.${expectedMechProp}`)
-              .to.have.nested.property(`credentials.mechanismProperties.${expectedMechProp}`);
+            expect(
+              options,
+              `${errorMessage} credentials.mechanismProperties.${expectedMechProp}`
+            ).to.have.nested.property(`credentials.mechanismProperties.${expectedMechProp}`);
           } else {
             expect(options, `${errorMessage} credentials.mechanismProperties.${expectedMechProp}`)
               .to.have.nested.property(`credentials.mechanismProperties.${expectedMechProp}`)

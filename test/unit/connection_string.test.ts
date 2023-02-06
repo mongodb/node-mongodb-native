@@ -401,7 +401,7 @@ describe('Connection String', function () {
     it('should validate authMechanism', function () {
       expect(() => parseOptions('mongodb://localhost/?authMechanism=DOGS')).to.throw(
         MongoParseError,
-        'authMechanism one of MONGODB-AWS,MONGODB-CR,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509, got DOGS'
+        'authMechanism one of MONGODB-AWS,MONGODB-CR,DEFAULT,GSSAPI,MONGODB-OIDC,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509, got DOGS'
       );
     });
 
@@ -452,13 +452,19 @@ describe('Connection String', function () {
     for (const mechanism of AUTH_MECHS_AUTH_SRC_EXTERNAL) {
       it(`should set authSource to $external for ${mechanism} external mechanism`, async function () {
         makeStub('authSource=thisShouldNotBeAuthSource');
+        const mechanismProperties = {};
+        if (mechanism === AuthMechanism.MONGODB_OIDC) {
+          mechanismProperties.DEVICE_NAME = 'aws';
+        }
+
         const credentials = new MongoCredentials({
           source: '$external',
           mechanism,
-          username: 'username',
+          username: mechanism === AuthMechanism.MONGODB_OIDC ? undefined : 'username',
           password: mechanism === AuthMechanism.MONGODB_X509 ? undefined : 'password',
-          mechanismProperties: {}
+          mechanismProperties: mechanismProperties
         });
+
         credentials.validate();
 
         const options = {
