@@ -89,7 +89,7 @@ functions:
         working_dir: src
         binary: bash
         args:
-          - ./evergreen/run-oidc-tests.sh
+          - .evergreen/run-oidc-tests.sh
         env:
           AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/tokens/test1
   run tests:
