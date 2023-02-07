@@ -26,7 +26,7 @@ describe('Topology (unit)', function () {
     }
 
     if (topology) {
-      topology.close({});
+      topology.close();
     }
   });
 
@@ -107,7 +107,7 @@ describe('Topology (unit)', function () {
 
       topology.connect(() => {
         expect(topology.shouldCheckForSessionSupport()).to.be.true;
-        topology.close({}, done);
+        topology.close(done);
       });
     });
 
@@ -127,7 +127,7 @@ describe('Topology (unit)', function () {
 
       topology.connect(() => {
         expect(topology.shouldCheckForSessionSupport()).to.be.false;
-        topology.close({}, done);
+        topology.close(done);
       });
     });
 
@@ -147,7 +147,7 @@ describe('Topology (unit)', function () {
 
       topology.connect(() => {
         expect(topology.shouldCheckForSessionSupport()).to.be.false;
-        topology.close({}, done);
+        topology.close(done);
       });
     });
   });
@@ -182,7 +182,7 @@ describe('Topology (unit)', function () {
             expect(err).to.exist;
             expect(err).to.match(/timed out/);
 
-            topology.close({}, done);
+            topology.close(done);
           });
         });
       });
@@ -325,7 +325,7 @@ describe('Topology (unit)', function () {
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
             expect(poolCleared).to.be.false;
-            topology.close({}, done);
+            topology.close(done);
           });
         });
       });
@@ -467,7 +467,7 @@ describe('Topology (unit)', function () {
 
         it('should clean up listeners on close', function (done) {
           topology.s.state = 'connected'; // fake state to test clean up logic
-          topology.close({}, e => {
+          topology.close(e => {
             const srvPollerListeners = topology.s.srvPoller.listeners(
               SrvPoller.SRV_RECORD_DISCOVERY
             );
@@ -547,7 +547,7 @@ describe('Topology (unit)', function () {
           // occurs `requestCheck` will be called for an immediate check.
           expect(requestCheck).property('callCount').to.equal(1);
 
-          topology.close({}, done);
+          topology.close(done);
         });
       });
     });
@@ -559,7 +559,7 @@ describe('Topology (unit)', function () {
         this.emit('connect');
       });
 
-      topology.close({}, () => {
+      topology.close(() => {
         topology.selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 }, err => {
           expect(err).to.exist;
           expect(err).to.match(/Topology is closed/);

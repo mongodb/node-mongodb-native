@@ -515,7 +515,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CLOSED,
           new ConnectionClosedEvent(this, conn, 'poolClosed')
         );
-        conn.destroy({ force: !!options.force }, cb);
+        conn.destroy(options, cb);
       },
       err => {
         this[kConnections].clear();
@@ -591,7 +591,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionClosedEvent(this, connection, reason)
     );
     // destroy the connection
-    process.nextTick(() => connection.destroy({ force: false }));
+    process.nextTick(() => connection.destroy());
   }
 
   private connectionIsStale(connection: Connection) {
