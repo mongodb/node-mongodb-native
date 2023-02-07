@@ -1390,13 +1390,13 @@ tasks:
       - oidc
     commands:
       - func: install dependencies
+      - func: bootstrap oidc
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
           AUTH: auth
           ORCHESTRATION_FILE: auth-oidc.json
-      - func: bootstrap oidc
       - func: run oidc tests aws
   - name: test-socks5
     tags: []

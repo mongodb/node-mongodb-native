@@ -192,6 +192,7 @@ TASKS.push(
       tags: ['latest', 'replica_set', 'oidc'],
       commands: [
         { func: 'install dependencies' },
+        { func: 'bootstrap oidc' },
         {
           func: 'bootstrap mongo-orchestration',
           vars: {
@@ -201,7 +202,6 @@ TASKS.push(
             ORCHESTRATION_FILE: 'auth-oidc.json'
           }
         },
-        { func: 'bootstrap oidc' },
         { func: 'run oidc tests aws' }
       ]
     },
