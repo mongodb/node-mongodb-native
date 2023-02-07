@@ -343,6 +343,7 @@ functions:
     - command: shell.exec
       type: setup
       params:
+        shell: bash
         working_dir: src
         script: |
           ${PREPARE_SHELL}
