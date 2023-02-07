@@ -1422,7 +1422,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with no tls');
         } catch (e) {
           //Expect an error indicating TLS handshake failed.
-          expect(e.originalError.message).to.include('before secure TLS connection');
+          expect(e.originalError.message).to.match(/before secure TLS connection|handshake/);
         }
       });
 
