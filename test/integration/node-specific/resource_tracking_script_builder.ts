@@ -9,14 +9,12 @@ import { parseSnapshot } from 'v8-heapsnapshot';
 import { MongoClient } from '../../mongodb';
 import { TestConfiguration } from '../../tools/runner/config';
 
-export type ResourceTestFunction = (
-  this: {
-    MongoClient: typeof MongoClient;
-    async_hooks: typeof import('node:async_hooks');
-    uri: string;
-  },
-  iteration: number
-) => Promise<void>;
+export type ResourceTestFunction = (options: {
+  MongoClient: typeof MongoClient;
+  async_hooks: typeof import('node:async_hooks');
+  uri: string;
+  iteration: number;
+}) => Promise<void>;
 
 export const testScriptFactory = (
   name: string,
@@ -46,17 +44,15 @@ const hook = async_hooks
   })
   .enable();
 
-const run = (${func.toString()}).bind({
-  MongoClient, async_hooks, uri: ${JSON.stringify(uri)}
-});
+const run = (${func.toString()});
 
 const MB = (2 ** 10) ** 2;
 async function main() {
   const startingMemoryUsed = process.memoryUsage().heapUsed / MB;
   process.send({ startingMemoryUsed });
 
-  for (let i = 0; i < ${iterations}; i++) {
-    await run(i);
+  for (let iteration = 0; iteration < ${iterations}; iteration++) {
+    await run({ MongoClient, async_hooks, uri: ${JSON.stringify(uri)}, iteration });
     global.gc();
   }
 

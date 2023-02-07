@@ -14,10 +14,10 @@ describe('Driver Resources', () => {
     const res = await runScript(
       'no_resource_leak_connect_close',
       this.configuration,
-      async function run() {
-        const mongoClient = new this.MongoClient(this.uri);
+      async function run({ MongoClient, async_hooks, uri }) {
+        const mongoClient = new MongoClient(uri);
         // @ts-expect-error: Adding asyncResource property dynamically
-        mongoClient.asyncResource = new this.async_hooks.AsyncResource('MongoClient');
+        mongoClient.asyncResource = new async_hooks.AsyncResource('MongoClient');
         await mongoClient.connect();
         const db = mongoClient.db();
         await Promise.all([
