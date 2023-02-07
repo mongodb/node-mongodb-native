@@ -71,7 +71,7 @@ functions:
   bootstrap oidc:
     - command: ec2.assume_role
       params:
-        role_arn: ${aws_test_secrets_role}
+        role_arn: ${iam_auth_ec2_instance_profile}
     - command: subprocess.exec
       params:
         working_dir: src
