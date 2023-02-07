@@ -1,120 +1,43 @@
-import { fork } from 'node:child_process';
-import { on, once } from 'node:events';
-import { readFile, unlink, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
-
 import { expect } from 'chai';
-import { parseSnapshot } from 'v8-heapsnapshot';
 
-const HEAPSNAPSHOT_AFTER = './memScript.after.heapsnapshot.json';
-const SCRIPT_NAME = './memScript.js';
+import { runScript } from './resource_tracking_script_builder';
+
 const MB_PERMITTED_OFFSET = 3;
-
-const REPRO_SCRIPT = (uri: string) => `'use strict';
-
-const { MongoClient } = require(${JSON.stringify(path.resolve(__dirname, '../../../lib'))});
-const process = require('node:process');
-const async_hooks = require('node:async_hooks');
-const v8 = require('node:v8');
-const util = require('node:util');
-const timers = require('node:timers');
-
-const resources = new Set();
-const hook = async_hooks
-  .createHook({
-    init: (asyncId, type) => {
-      if (type !== 'MongoClient') return;
-      resources.add(asyncId);
-    },
-    destroy: asyncId => {
-      resources.delete(asyncId);
-    }
-  })
-  .enable();
-
-async function run(i) {
-  const mongoClient = new MongoClient(
-    ${JSON.stringify(uri)},
-    { maxPoolSize: 3 }
-  );
-  mongoClient.asyncResource = new async_hooks.AsyncResource('MongoClient');
-  await mongoClient.connect();
-  const db = mongoClient.db();
-  await Promise.all([
-    db.collections(),
-    db.collections(),
-    db.collections(),
-    db.collections(),
-    db.collections(),
-    db.collections(),
-    db.collections(),
-    db.collections()
-  ]);
-  await mongoClient.close();
-}
-
-const MB = (2 ** 10) ** 2;
-async function main() {
-  const startingMemoryUsed = process.memoryUsage().heapUsed / MB;
-  process.send({ startingMemoryUsed });
-
-  for (let i = 0; i < 100; i++) {
-    await run(i);
-    global.gc();
-  }
-
-  global.gc();
-  await util.promisify(timers.setTimeout)(100); // Sleep b/c maybe gc will run
-  global.gc();
-
-  const endingMemoryUsed = process.memoryUsage().heapUsed / MB;
-  process.send({ endingMemoryUsed });
-  process.send({ resourcesSize: resources.size });
-  v8.writeHeapSnapshot(${JSON.stringify(HEAPSNAPSHOT_AFTER)});
-}
-
-main()
-  .then(result => {
-    process.exit(0);
-  })
-  .catch(error => {
-    process.exit(1);
-  });
-`;
 
 describe('Driver Resources', () => {
   let startingMemoryUsed;
   let endingMemoryUsed;
   let asyncResourcesCount;
-
-  let heapAfter;
+  let heap;
 
   before('create leak reproduction script', async function () {
-    await writeFile(SCRIPT_NAME, REPRO_SCRIPT(this.configuration.url()), { encoding: 'utf8' });
+    const res = await runScript(
+      'no_resource_leak_connect_close',
+      this.configuration,
+      async function run() {
+        const mongoClient = new this.MongoClient(this.uri);
+        // @ts-expect-error: Adding asyncResource property dynamically
+        mongoClient.asyncResource = new this.async_hooks.AsyncResource('MongoClient');
+        await mongoClient.connect();
+        const db = mongoClient.db();
+        await Promise.all([
+          db.collections(),
+          db.collections(),
+          db.collections(),
+          db.collections(),
+          db.collections(),
+          db.collections(),
+          db.collections(),
+          db.collections()
+        ]);
+        await mongoClient.close();
+      }
+    );
 
-    const script = fork(SCRIPT_NAME, { execArgv: ['--expose-gc'] });
-    const messages = on(script, 'message');
-    const willClose = once(script, 'close');
-
-    const starting = await messages.next();
-    const ending = await messages.next();
-    const asyncResources = await messages.next();
-
-    startingMemoryUsed = starting.value[0].startingMemoryUsed;
-    endingMemoryUsed = ending.value[0].endingMemoryUsed;
-    asyncResourcesCount = asyncResources.value[0].resourcesSize;
-
-    // process exit
-    const [exitCode] = await willClose;
-    expect(exitCode).to.equal(0);
-
-    heapAfter = await readFile(HEAPSNAPSHOT_AFTER, { encoding: 'utf8' }).then(c => JSON.parse(c));
-  });
-
-  after('cleanup leak reproduction script', async function () {
-    await unlink(SCRIPT_NAME);
-    // await unlink(HEAPSNAPSHOT_BEFORE);
-    await unlink(HEAPSNAPSHOT_AFTER);
+    startingMemoryUsed = res.startingMemoryUsed;
+    endingMemoryUsed = res.endingMemoryUsed;
+    asyncResourcesCount = res.asyncResourcesCount;
+    heap = res.heap;
   });
 
   it(`ending memory usage should be within ${MB_PERMITTED_OFFSET}MB of starting amount`, async () => {
@@ -135,7 +58,6 @@ describe('Driver Resources', () => {
   });
 
   it('heapsnapshot has 0 MongoClients in memory', async () => {
-    const heap = await parseSnapshot(heapAfter);
     const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
     // lengthOf crashes chai b/c it tries to print out a gig
     // Allow GC to miss a few
