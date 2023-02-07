@@ -1,6 +1,5 @@
 const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
 const versions = [
-  { codeName: 'erbium', versionNumber: 12 },
   { codeName: 'fermium', versionNumber: 14 },
   { codeName: 'gallium', versionNumber: 16 },
   { codeName: 'hydrogen', versionNumber: 18 }
