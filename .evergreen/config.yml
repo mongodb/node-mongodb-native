@@ -68,6 +68,31 @@ functions:
           - .evergreen/run-kms-servers.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+  bootstrap oidc:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${aws_test_secrets_role}
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/bootstrap-oidc.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+          AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+          AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+          AWS_TOKEN_DIR: /tmp/tokens
+  run oidc tests aws:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        args:
+          - ./evergreen/run-oidc-tests.sh
+        env:
+          AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/tokens/test1
   run tests:
     - command: shell.exec
       type: test
@@ -1358,6 +1383,21 @@ tasks:
     commands:
       - func: install dependencies
       - func: run ldap tests
+  - name: test-auth-oidc
+    tags:
+      - latest
+      - replica_set
+      - oidc
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-oidc.json
+      - func: bootstrap oidc
+      - func: run oidc tests aws
   - name: test-socks5
     tags: []
     commands:
@@ -2899,6 +2939,7 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
+      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -2948,6 +2989,7 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
+      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -2995,6 +3037,7 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
+      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3041,6 +3084,7 @@ buildvariants:
       - test-6.0-load-balanced
       - test-latest-load-balanced
       - test-auth-ldap
+      - test-auth-oidc
       - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
@@ -3080,6 +3124,7 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
+      - test-auth-oidc
       - test-socks5
       - test-socks5-tls
       - test-zstd-compression
@@ -3121,6 +3166,7 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
+      - test-auth-oidc
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
@@ -3160,6 +3206,7 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
+      - test-auth-oidc
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest

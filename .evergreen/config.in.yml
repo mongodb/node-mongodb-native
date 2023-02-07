@@ -94,6 +94,34 @@ functions:
           - .evergreen/run-kms-servers.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+
+  "bootstrap oidc":
+    - command: ec2.assume_role
+      params:
+        role_arn: ${aws_test_secrets_role}
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/bootstrap-oidc.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+          AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+          AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+          AWS_TOKEN_DIR: /tmp/tokens
+
+  "run oidc tests aws":
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        args:
+          - ./evergreen/run-oidc-tests.sh
+        env:
+          AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/tokens/test1
+
   "run tests":
     - command: shell.exec
       type: test

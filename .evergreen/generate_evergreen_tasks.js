@@ -188,6 +188,24 @@ TASKS.push(
       commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
     },
     {
+      name: 'test-auth-oidc',
+      tags: ['latest', 'replica_set', 'oidc'],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: 'latest',
+            TOPOLOGY: 'replica_set',
+            AUTH: 'auth',
+            ORCHESTRATION_FILE: 'auth-oidc.json'
+          }
+        },
+        { func: 'bootstrap oidc' },
+        { func: 'run oidc tests aws' }
+      ]
+    },
+    {
       name: 'test-socks5',
       tags: [],
       commands: [
