@@ -202,6 +202,7 @@ TASKS.push(
             ORCHESTRATION_FILE: 'auth-oidc.json'
           }
         },
+        { func: 'setup oidc roles' },
         { func: 'run oidc tests aws' }
       ]
     },

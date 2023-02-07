@@ -111,6 +111,16 @@ functions:
           AWS_SECRET_ACCESS_KEY: ${OIDC_AWS_SECRET_ACCESS_KEY}
           AWS_TOKEN_DIR: /tmp/tokens
 
+  "setup oidc roles":
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/setup-oidc-roles.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+
   "run oidc tests aws":
     - command: subprocess.exec
       params:
