@@ -16,11 +16,12 @@ export interface OIDCRequestTokenResult {
 }
 
 /** @public */
-export interface OIDCRequestFunction {
-  (idl: OIDCMechanismServerStep1): Promise<OIDCRequestTokenResult>;
-}
+export type OIDCRequestFunction = (
+  idl: OIDCMechanismServerStep1
+) => Promise<OIDCRequestTokenResult>;
 
 /** @public */
-export interface OIDCRefreshFunction {
-  (idl: OIDCMechanismServerStep1, result: OIDCRequestTokenResult): Promise<OIDCRequestTokenResult>;
-}
+export type OIDCRefreshFunction = (
+  idl: OIDCMechanismServerStep1,
+  result: OIDCRequestTokenResult
+) => Promise<OIDCRequestTokenResult>;

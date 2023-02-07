@@ -1,6 +1,10 @@
 // Resolves the default auth mechanism according to
 import type { Document } from '../../bson';
-import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
+import {
+  MongoAPIError,
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError
+} from '../../error';
 import { GSSAPICanonicalizationValue } from './gssapi';
 import type { OIDCRefreshFunction, OIDCRequestFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
@@ -33,9 +37,13 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
-  DEVICE_NAME?: string;
+  /** Name for the OIDC device workflow */
+  DEVICE_NAME?: 'aws' | 'azure' | 'gcp';
+  /** Similar to a username, is require by OIDC when more than one IDP is configured. */
   PRINCIPAL_NAME?: string;
+  /** User provided callback to get OIDC auth credentials */
   REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
+  /** User provided callback to refresh OIDC auth credentials */
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
 }
 
@@ -144,19 +152,19 @@ export class MongoCredentials {
 
     if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
       if (this.username) {
-        throw new MongoAPIError(
+        throw new MongoInvalidArgumentError(
           `Username not permitted for mechanism '${this.mechanism}'. Use PRINCIPAL_NAME instead.`
         );
       }
 
       if (this.mechanismProperties.PRINCIPAL_NAME && this.mechanismProperties.DEVICE_NAME) {
-        throw new MongoAPIError(
+        throw new MongoInvalidArgumentError(
           `PRINCIPAL_NAME and DEVICE_NAME may not be used together for mechanism '${this.mechanism}'.`
         );
       }
 
       if (this.mechanismProperties.DEVICE_NAME && this.mechanismProperties.DEVICE_NAME !== 'aws') {
-        throw new MongoAPIError(
+        throw new MongoInvalidArgumentError(
           `Currently only a DEVICE_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
         );
       }
@@ -165,7 +173,7 @@ export class MongoCredentials {
         this.mechanismProperties.REFRESH_TOKEN_CALLBACK &&
         !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
       ) {
-        throw new MongoAPIError(
+        throw new MongoInvalidArgumentError(
           `A REQUEST_TOKEN_CALLBACK must be provided when using a REFRESH_TOKEN_CALLBACK for mechanism '${this.mechanism}'`
         );
       }
@@ -174,7 +182,7 @@ export class MongoCredentials {
         !this.mechanismProperties.DEVICE_NAME &&
         !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
       ) {
-        throw new MongoAPIError(
+        throw new MongoInvalidArgumentError(
           `Either a DEVICE_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
         );
       }
