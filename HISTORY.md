@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.0.1](https://github.com/mongodb/node-mongodb-native/compare/v5.0.0...v5.0.1) (2023-02-07)
+
+
+### Bug Fixes
+
+* **NODE-5027:** revert "ensure that MessageStream is destroyed when connections are destroyed" ([#3552](https://github.com/mongodb/node-mongodb-native/issues/3552)) ([2d178d0](https://github.com/mongodb/node-mongodb-native/commit/2d178d072ddc95740ccea35088312fa57cf6c0b2))
+
 ## [5.0.0](https://github.com/mongodb/node-mongodb-native/compare/v5.0.0-alpha.0...v5.0.0) (2023-01-31)
 
 
