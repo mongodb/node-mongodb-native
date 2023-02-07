@@ -71,7 +71,7 @@ functions:
   bootstrap oidc:
     - command: ec2.assume_role
       params:
-        role_arn: ${iam_auth_ec2_instance_profile}
+        role_arn: ${OIDC_AWS_ROLE_ARN}
     - command: subprocess.exec
       params:
         working_dir: src
@@ -80,9 +80,8 @@ functions:
           - .evergreen/bootstrap-oidc.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-          AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-          AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+          AWS_ACCESS_KEY_ID: ${OIDC_AWS_ACCESS_KEY_ID}
+          AWS_SECRET_ACCESS_KEY: ${OIDC_AWS_SECRET_ACCESS_KEY}
           AWS_TOKEN_DIR: /tmp/tokens
   run oidc tests aws:
     - command: subprocess.exec
