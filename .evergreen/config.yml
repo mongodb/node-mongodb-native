@@ -339,6 +339,15 @@ functions:
     - command: expansions.update
       params:
         file: src/deps-expansion.yml
+  install aws-credential-providers:
+    - command: shell.exec
+      type: setup
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+          npm install @aws-sdk/credential-providers
   run atlas tests:
     - command: shell.exec
       type: test
@@ -1467,6 +1476,7 @@ tasks:
   - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1479,6 +1489,7 @@ tasks:
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1491,6 +1502,7 @@ tasks:
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1503,6 +1515,7 @@ tasks:
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1515,6 +1528,7 @@ tasks:
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1527,6 +1541,7 @@ tasks:
   - name: aws-latest-auth-test-run-aws-ECS-auth-test
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1539,6 +1554,7 @@ tasks:
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1551,6 +1567,7 @@ tasks:
   - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1560,11 +1577,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+  - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1574,11 +1589,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with regular aws credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+  - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1588,11 +1601,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with assume role credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1602,11 +1613,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws EC2 credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1616,11 +1625,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws credentials as environment variables
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+  - name: >-
+      aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1630,11 +1638,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-optional
+  - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1644,11 +1650,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws ECS auth test
-  - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-optional
+  - name: >-
+      aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1658,11 +1663,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-optional
+  - name: >-
+      aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1675,6 +1679,7 @@ tasks:
   - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1687,6 +1692,7 @@ tasks:
   - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1699,6 +1705,7 @@ tasks:
   - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1711,6 +1718,7 @@ tasks:
   - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1723,6 +1731,7 @@ tasks:
   - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1735,6 +1744,7 @@ tasks:
   - name: aws-6.0-auth-test-run-aws-ECS-auth-test
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1747,6 +1757,7 @@ tasks:
   - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1759,6 +1770,7 @@ tasks:
   - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1768,11 +1780,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1782,11 +1792,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with regular aws credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1796,11 +1804,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with assume role credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1810,11 +1816,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws EC2 credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1824,11 +1828,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws credentials as environment variables
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+  - name: >-
+      aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1838,11 +1841,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-6.0-auth-test-run-aws-ECS-auth-test-no-optional
+  - name: aws-6.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1852,11 +1853,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws ECS auth test
-  - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-optional
+  - name: >-
+      aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1866,11 +1866,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-optional
+  - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1883,6 +1881,7 @@ tasks:
   - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1895,6 +1894,7 @@ tasks:
   - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1907,6 +1907,7 @@ tasks:
   - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1919,6 +1920,7 @@ tasks:
   - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1931,6 +1933,7 @@ tasks:
   - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1943,6 +1946,7 @@ tasks:
   - name: aws-5.0-auth-test-run-aws-ECS-auth-test
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1955,6 +1959,7 @@ tasks:
   - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1967,6 +1972,7 @@ tasks:
   - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1976,11 +1982,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1990,11 +1994,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with regular aws credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2004,11 +2006,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with assume role credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2018,11 +2018,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws EC2 credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2032,11 +2030,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws credentials as environment variables
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+  - name: >-
+      aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2046,11 +2043,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-5.0-auth-test-run-aws-ECS-auth-test-no-optional
+  - name: aws-5.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2060,11 +2055,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws ECS auth test
-  - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-optional
+  - name: >-
+      aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2074,11 +2068,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-optional
+  - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2091,6 +2083,7 @@ tasks:
   - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2103,6 +2096,7 @@ tasks:
   - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2115,6 +2109,7 @@ tasks:
   - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2127,6 +2122,7 @@ tasks:
   - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2139,6 +2135,7 @@ tasks:
   - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2151,6 +2148,7 @@ tasks:
   - name: aws-4.4-auth-test-run-aws-ECS-auth-test
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2163,6 +2161,7 @@ tasks:
   - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2175,6 +2174,7 @@ tasks:
   - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
     commands:
       - func: install dependencies
+      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2184,11 +2184,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2198,11 +2196,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with regular aws credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2212,11 +2208,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with assume role credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2226,11 +2220,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws EC2 credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2240,11 +2232,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws credentials as environment variables
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
+  - name: >-
+      aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2254,11 +2245,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-4.4-auth-test-run-aws-ECS-auth-test-no-optional
+  - name: aws-4.4-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2268,11 +2257,10 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws ECS auth test
-  - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-optional
+  - name: >-
+      aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2282,11 +2270,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-optional
+  - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
     commands:
       - func: install dependencies
-        vars:
-          NPM_OPTIONS: '--no-optional'
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -3222,15 +3208,17 @@ buildvariants:
       - aws-latest-auth-test-run-aws-ECS-auth-test
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
-      - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
+      - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
+      - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
+      - aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
+      - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
       - >-
-        aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
-      - aws-latest-auth-test-run-aws-ECS-auth-test-no-optional
-      - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-optional
-      - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-optional
+        aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
+      - aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
+      - >-
+        aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
+      - >-
+        aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
       - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
@@ -3239,14 +3227,17 @@ buildvariants:
       - aws-6.0-auth-test-run-aws-ECS-auth-test
       - aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
-      - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
-      - aws-6.0-auth-test-run-aws-ECS-auth-test-no-optional
-      - aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-optional
-      - aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-optional
+      - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
+      - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
+      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
+      - >-
+        aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
+      - aws-6.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
+      - >-
+        aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
+      - >-
+        aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
       - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
@@ -3255,14 +3246,17 @@ buildvariants:
       - aws-5.0-auth-test-run-aws-ECS-auth-test
       - aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
-      - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
-      - aws-5.0-auth-test-run-aws-ECS-auth-test-no-optional
-      - aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-optional
-      - aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-optional
+      - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
+      - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
+      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
+      - >-
+        aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
+      - aws-5.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
+      - >-
+        aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
+      - >-
+        aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
       - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
@@ -3271,14 +3265,17 @@ buildvariants:
       - aws-4.4-auth-test-run-aws-ECS-auth-test
       - aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
       - aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-optional
-      - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-optional
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-optional
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-optional
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-optional
-      - aws-4.4-auth-test-run-aws-ECS-auth-test-no-optional
-      - aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-optional
-      - aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-optional
+      - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
+      - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
+      - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
+      - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
+      - >-
+        aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
+      - aws-4.4-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
+      - >-
+        aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
+      - >-
+        aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
   - name: rhel8-custom-dependency-tests
     display_name: Custom Dependency Version Test
     run_on: rhel80-large

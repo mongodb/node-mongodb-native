@@ -342,6 +342,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     name: name(fn.func),
     commands: [
       { func: 'install dependencies' },
+      { func: 'install aws-credential-providers' },
       {
         func: 'bootstrap mongo-orchestration',
         vars: {
@@ -357,15 +358,10 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     ]
   }));
 
-  const awsNoOptionalTasks = awsFuncs.map(fn => ({
-    name: `${name(fn.func)}-no-optional`,
+  const awsNoPeerDependenciesTasks = awsFuncs.map(fn => ({
+    name: `${name(fn.func)}-no-peer-dependencies`,
     commands: [
-      {
-        func: 'install dependencies',
-        vars: {
-          NPM_OPTIONS: '--no-optional'
-        }
-      },
+      { func: 'install dependencies' },
       {
         func: 'bootstrap mongo-orchestration',
         vars: {
@@ -381,7 +377,7 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
     ]
   }));
 
-  const allAwsTasks = awsTasks.concat(awsNoOptionalTasks);
+  const allAwsTasks = awsTasks.concat(awsNoPeerDependenciesTasks);
 
   TASKS.push(...allAwsTasks);
   AWS_AUTH_TASKS.push(...allAwsTasks.map(t => t.name));

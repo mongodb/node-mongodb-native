@@ -381,6 +381,16 @@ functions:
       params:
         file: src/deps-expansion.yml
 
+  "install aws-credential-providers":
+    - command: shell.exec
+      type: setup
+      params:
+        working_dir: "src"
+        script: |
+          ${PREPARE_SHELL}
+          source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+          npm install @aws-sdk/credential-providers
+
   "run atlas tests":
     - command: shell.exec
       type: test
