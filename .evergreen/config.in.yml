@@ -317,15 +317,42 @@ functions:
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
 
-  "run mongosh integration tests":
-    - command: shell.exec
-      type: test
+  ###########################################
+  #       mongosh functions
+  ###########################################
+  "compile mongosh":
+    - command: subprocess.exec
       params:
-        working_dir: "src"
-        script: |
-          ${PREPARE_SHELL}
-          export DISTRO_ID=${distro_id}
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh
+        working_dir: src
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TASK_ID: ${task_id}
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh"
+
+  "run mongosh tests for package":
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TASK_ID: ${task_id}
+          MONGOSH_RUN_ONLY_IN_PACKAGE: ${mongosh_package}
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh"
+
+  "run mongosh package scope test":
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TASK_ID: ${task_id}
+        binary: bash
+        args:
+          - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-scope-test.sh"
 
   "cleanup":
     - command: shell.exec
@@ -375,7 +402,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} MSVS_VERSION=${MSVS_VERSION} NPM_OPTIONS=${NPM_OPTIONS}\
+          NODE_LTS_NAME=${NODE_LTS_NAME} NPM_OPTIONS=${NPM_OPTIONS}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
     - command: expansions.update
       params:

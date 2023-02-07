@@ -1,23 +1,18 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const { mongoshTasks } = require('./generate_mongosh_tasks');
 
-const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const versions = [
-  { codeName: 'erbium', versionNumber: 12 },
-  { codeName: 'fermium', versionNumber: 14 },
-  { codeName: 'gallium', versionNumber: 16 },
-  { codeName: 'hydrogen', versionNumber: 18 }
-];
-const NODE_VERSIONS = versions.map(({ codeName }) => codeName)
-NODE_VERSIONS.sort();
-const LOWEST_LTS = NODE_VERSIONS[0];
-const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
-
-const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
-const AWS_AUTH_VERSIONS = ['latest', '6.0', '5.0', '4.4'];
-const TLS_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2'];
-
-const DEFAULT_OS = 'rhel80-large';
+const {
+  MONGODB_VERSIONS,
+  versions,
+  NODE_VERSIONS,
+  LOWEST_LTS,
+  LATEST_LTS,
+  TOPOLOGIES,
+  AWS_AUTH_VERSIONS,
+  TLS_VERSIONS,
+  DEFAULT_OS
+} = require('./ci_matrix_constants');
 
 const OPERATING_SYSTEMS = [
   {
@@ -29,7 +24,6 @@ const OPERATING_SYSTEMS = [
     name: 'windows-64-vs2019',
     display_name: 'Windows (VS2019)',
     run_on: 'windows-64-vs2019-large',
-    msvsVersion: 2019,
     clientEncryption: false // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
   }
 ].map(osConfig => ({
@@ -368,28 +362,31 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
 
 const BUILD_VARIANTS = [];
 
-for (const
-  {
-    name: osName,
-    display_name: osDisplayName,
-    run_on,
-    nodeVersions = NODE_VERSIONS,
-    clientEncryption,
-    msvsVersion
-  } of OPERATING_SYSTEMS) {
+for (const {
+  name: osName,
+  display_name: osDisplayName,
+  run_on,
+  nodeVersions = NODE_VERSIONS,
+  clientEncryption
+} of OPERATING_SYSTEMS) {
   const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
   const os = osName.split('-')[0];
-  const tasks = BASE_TASKS.concat(TASKS)
-    .filter(task => {
-      const isAWSTask = task.name.match(/^aws/);
-      const isSkippedTaskOnWindows = task.tags && os.match(/^windows/) && task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length
+  const tasks = BASE_TASKS.concat(TASKS).filter(task => {
+    const isAWSTask = task.name.match(/^aws/);
+    const isSkippedTaskOnWindows =
+      task.tags &&
+      os.match(/^windows/) &&
+      task.tags.filter(tag => WINDOWS_SKIP_TAGS.has(tag)).length;
 
-      return !isAWSTask && !isSkippedTaskOnWindows;
-    });
+    return !isAWSTask && !isSkippedTaskOnWindows;
+  });
 
   for (const NODE_LTS_NAME of testedNodeVersions) {
-    const nodeVersionNumber = versions.find(({ codeName }) => codeName === NODE_LTS_NAME).versionNumber;
-    const nodeLtsDisplayName = nodeVersionNumber === undefined ? `Node Latest` : `Node${nodeVersionNumber}`;
+    const nodeVersionNumber = versions.find(
+      ({ codeName }) => codeName === NODE_LTS_NAME
+    ).versionNumber;
+    const nodeLtsDisplayName =
+      nodeVersionNumber === undefined ? `Node Latest` : `Node${nodeVersionNumber}`;
     const name = `${osName}-${NODE_LTS_NAME}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_NAME };
@@ -398,12 +395,9 @@ for (const
     if (clientEncryption) {
       expansions.CLIENT_ENCRYPTION = true;
     }
-    if (msvsVersion) {
-      expansions.MSVS_VERSION = msvsVersion;
-    }
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
-  };
+  }
 
   const configureLatestNodeSmokeTest = os.match(/^rhel/);
   if (configureLatestNodeSmokeTest) {
@@ -413,18 +407,20 @@ for (const
       run_on,
       expansions: { NODE_LTS_NAME: 'latest' },
       tasks: tasks.map(({ name }) => name)
-    }
+    };
     if (clientEncryption) {
       buildVariantData.expansions.CLIENT_ENCRYPTION = true;
     }
 
-    BUILD_VARIANTS.push(buildVariantData)
+    BUILD_VARIANTS.push(buildVariantData);
   }
 }
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node${versions.find(version => version.codeName === LATEST_LTS).versionNumber}`,
+  display_name: `MacOS 11 Node${
+    versions.find(version => version.codeName === LATEST_LTS).versionNumber
+  }`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_NAME: LATEST_LTS,
@@ -467,28 +463,27 @@ SINGLETON_TASKS.push(
 );
 
 function* makeTypescriptTasks() {
-  for (const TS_VERSION of ["next", "current", "4.1.6"]) {
+  for (const TS_VERSION of ['next', 'current', '4.1.6']) {
     // 4.1.6 can consume the public API but not compile the driver
-    if (TS_VERSION !== '4.1.6'
-      && TS_VERSION !== 'next')  {
+    if (TS_VERSION !== '4.1.6' && TS_VERSION !== 'next') {
       yield {
-          name: `compile-driver-typescript-${TS_VERSION}`,
-          tags: [`compile-driver-typescript-${TS_VERSION}`],
-          commands: [
-            {
-              func: 'install dependencies',
-              vars: {
-                NODE_LTS_NAME: LOWEST_LTS
-              }
-            },
-            {
-              func: 'compile driver',
-              vars: {
-                TS_VERSION
-              }
+        name: `compile-driver-typescript-${TS_VERSION}`,
+        tags: [`compile-driver-typescript-${TS_VERSION}`],
+        commands: [
+          {
+            func: 'install dependencies',
+            vars: {
+              NODE_LTS_NAME: LOWEST_LTS
             }
-          ]
-      }
+          },
+          {
+            func: 'compile driver',
+            vars: {
+              TS_VERSION
+            }
+          }
+        ]
+      };
     }
 
     yield {
@@ -508,7 +503,7 @@ function* makeTypescriptTasks() {
           }
         }
       ]
-  }
+    };
   }
   return {
     name: 'run-typescript-next',
@@ -522,7 +517,7 @@ function* makeTypescriptTasks() {
       },
       { func: 'run typescript next' }
     ]
-  }
+  };
 }
 
 BUILD_VARIANTS.push({
@@ -543,27 +538,11 @@ BUILD_VARIANTS.push({
   tasks: ['download-and-merge-coverage']
 });
 
-// singleton build variant for mongosh integration tests
-SINGLETON_TASKS.push({
-  name: 'run-mongosh-integration-tests',
-  tags: ['run-mongosh-integration-tests'],
-  exec_timeout_secs: 3600,
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: 'gallium'
-      }
-    },
-    { func: 'run mongosh integration tests' }
-  ]
-});
-
 BUILD_VARIANTS.push({
   name: 'mongosh_integration_tests',
   display_name: 'mongosh integration tests',
   run_on: 'ubuntu1804-large',
-  tasks: ['run-mongosh-integration-tests']
+  tasks: mongoshTasks.map(({ name }) => name)
 });
 
 // special case for MONGODB-AWS authentication
@@ -706,7 +685,9 @@ BUILD_VARIANTS.push({
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['gallium', 'hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
+  variant =>
+    variant.expansions &&
+    ['gallium', 'hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
@@ -717,18 +698,14 @@ for (const variant of BUILD_VARIANTS.filter(
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && ['hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
 )) {
-  variant.tasks = variant.tasks.filter(
-    name => !['test-auth-kerberos'].includes(name)
-  );
+  variant.tasks = variant.tasks.filter(name => !['test-auth-kerberos'].includes(name));
 }
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
 for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
 )) {
-  variant.tasks = variant.tasks.filter(
-    name => !['test-socks5'].includes(name)
-  );
+  variant.tasks = variant.tasks.filter(name => !['test-socks5'].includes(name));
 }
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.in.yml`, 'utf8'));
@@ -737,7 +714,9 @@ fileData.tasks = (fileData.tasks || [])
   .concat(TASKS)
   .concat(SINGLETON_TASKS)
   .concat(AUTH_DISABLED_TASKS)
-  .concat(AWS_LAMBDA_HANDLER_TASKS);
+  .concat(AWS_LAMBDA_HANDLER_TASKS)
+  .concat(mongoshTasks);
+
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(`${__dirname}/config.yml`, yaml.dump(fileData, { lineWidth: 120 }), 'utf8');

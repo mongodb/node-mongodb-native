@@ -419,6 +419,41 @@ The following steps will walk you through how to run the tests for CSFLE.
 
   To run the functional tests using the crypt shared library instead of mongocryptd, download the appropriate version of the crypt shared library for the enterprise server version [here](https://www.mongodb.com/download-center/enterprise/releases) and then set the location of it in the environment variable `CRYPT_SHARED_LIB_PATH`.
 
+#### Testing driver changes with mongosh
+
+These steps require mongosh to be available locally.  Clone it from Github.
+
+Mongosh uses a lerna monorepo.  As a result, mongosh contains multiple references to the `mongodb` package
+in their `package.json`s.
+
+Set up mongosh by following the steps in the mongosh readme.
+
+##### Point mongosh to the driver
+
+mongosh contains a script that does this.  To use the script, create an environment
+ variable `REPLACE_PACKAGE` that contains a string in the form
+`mongodb:<path to your local instance of the driver>`.  The package replacement script will replace
+all occurrences of `mongodb` with the local path of your driver.
+
+An alternative, which can be useful for
+testing a release, is to first run `npm pack` on the driver.  This generates a tarball containing all the code
+that would be uploaded to npm if it were released.  Then set the environment variable `REPLACE_PACKAGE`
+with the pull path to the file.
+
+Once the environment variable is set, run replace package in mongosh with `npm run replace:package`.
+
+##### Run specific package tests
+
+mongosh's readme documents how to run its tests.  Most likely, it isn't necessary to run all of mongosh's
+tests.  The mongosh readme also documents how to run tests for a particular scope.  The scopes are
+listed in the `generate_mongosh_tasks.js` evergreen generation script.
+
+For example, to run the `service-provider-server` package, run the following command in mongosh:
+
+```shell
+lerna run test --scope @mongosh/service-provider-server
+```
+
 #### KMIP FLE support tests
 
 1. Install virtualenv: `pip install virtualenv`
