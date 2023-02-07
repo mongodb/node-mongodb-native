@@ -622,8 +622,10 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
+const FLE_PINNED_COMMIT = '77b51c00ab4ff58916dd39f55657e1ecc0af281c'
+
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of ['67bec571c0c21f4db8a96b6bd61cb24dfc87a223', 'master']) {
+  for (const ref of [FLE_PINNED_COMMIT, 'master']) {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
       tags: ['run-custom-dependency-tests'],
