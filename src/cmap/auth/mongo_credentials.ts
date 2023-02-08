@@ -37,13 +37,13 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
-  /** Name for the OIDC device workflow */
+  /** @internal Name for the OIDC device workflow */
   DEVICE_NAME?: 'aws' | 'azure' | 'gcp';
-  /** Similar to a username, is require by OIDC when more than one IDP is configured. */
+  /** @internal Similar to a username, is require by OIDC when more than one IDP is configured. */
   PRINCIPAL_NAME?: string;
-  /** User provided callback to get OIDC auth credentials */
+  /** @internal User provided callback to get OIDC auth credentials */
   REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
-  /** User provided callback to refresh OIDC auth credentials */
+  /** @internal User provided callback to refresh OIDC auth credentials */
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
 }
 

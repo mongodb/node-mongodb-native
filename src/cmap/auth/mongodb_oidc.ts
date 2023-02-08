@@ -1,4 +1,4 @@
-/** @public */
+/** @internal */
 export interface OIDCMechanismServerStep1 {
   authorizeEndpoint?: string;
   tokenEndpoint?: string;
@@ -8,19 +8,19 @@ export interface OIDCMechanismServerStep1 {
   requestScopes?: string[];
 }
 
-/** @public */
+/** @internal */
 export interface OIDCRequestTokenResult {
   accessToken: string;
   expiresInSeconds?: number;
   refreshToken?: string;
 }
 
-/** @public */
+/** @internal */
 export type OIDCRequestFunction = (
   idl: OIDCMechanismServerStep1
 ) => Promise<OIDCRequestTokenResult>;
 
-/** @public */
+/** @internal */
 export type OIDCRefreshFunction = (
   idl: OIDCMechanismServerStep1,
   result: OIDCRequestTokenResult
