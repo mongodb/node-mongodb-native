@@ -16,7 +16,17 @@ describe('Driver Resources', () => {
   let endingMemoryUsed;
   let heap;
 
+  beforeEach(function () {
+    if (globalThis.AbortController == null) {
+      if (this.currentTest) this.currentTest.skipReason = 'Need AbortController to run this test';
+      this.currentTest?.skip();
+    }
+  });
+
   before('create leak reproduction script', async function () {
+    if (globalThis.AbortController == null) {
+      return;
+    }
     const res = await runScript(
       'no_resource_leak_connect_close',
       this.configuration,
@@ -36,7 +46,13 @@ describe('Driver Resources', () => {
         ]);
         await mongoClient.close();
       }
-    );
+    ).catch(error => error);
+
+    if (res instanceof Error) {
+      console.log(res);
+      console.log(res.message);
+      console.log(res.cause);
+    }
 
     startingMemoryUsed = res.startingMemoryUsed;
     endingMemoryUsed = res.endingMemoryUsed;
