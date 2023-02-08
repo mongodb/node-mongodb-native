@@ -52,6 +52,7 @@ describe('Driver Resources', () => {
       console.log(res);
       console.log(res.message);
       console.log(res.cause);
+      throw res;
     }
 
     startingMemoryUsed = res.startingMemoryUsed;
