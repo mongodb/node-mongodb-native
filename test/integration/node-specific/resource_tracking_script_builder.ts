@@ -11,7 +11,6 @@ import { TestConfiguration } from '../../tools/runner/config';
 
 export type ResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
-  async_hooks: typeof import('node:async_hooks');
   uri: string;
   iteration: number;
 }) => Promise<void>;
@@ -25,24 +24,10 @@ export const testScriptFactory = (
 
 const { MongoClient } = require(${JSON.stringify(path.resolve(__dirname, '../../../lib'))});
 const process = require('node:process');
-const async_hooks = require('node:async_hooks');
 const v8 = require('node:v8');
 const util = require('node:util');
 const timers = require('node:timers');
-
-const mongoClients = new Set();
-const hook = async_hooks
-  .createHook({
-    init: (asyncId, type) => {
-      if (type === 'MongoClient'){
-        mongoClients.add(asyncId);
-      }
-    },
-    destroy: asyncId => {
-      mongoClients.delete(asyncId);
-    }
-  })
-  .enable();
+const sleep = util.promisify(timers.setTimeout)
 
 const run = (${func.toString()});
 
@@ -52,17 +37,17 @@ async function main() {
   process.send({ startingMemoryUsed });
 
   for (let iteration = 0; iteration < ${iterations}; iteration++) {
-    await run({ MongoClient, async_hooks, uri: ${JSON.stringify(uri)}, iteration });
+    await run({ MongoClient, uri: ${JSON.stringify(uri)}, iteration });
     global.gc();
   }
 
   global.gc();
-  await util.promisify(timers.setTimeout)(100); // Sleep b/c maybe gc will run
+  // Sleep b/c maybe gc will run
+  await sleep(100);
   global.gc();
 
   const endingMemoryUsed = process.memoryUsage().heapUsed / MB;
   process.send({ endingMemoryUsed });
-  process.send({ resourcesSize: mongoClients.size });
   v8.writeHeapSnapshot(${JSON.stringify(`${name}.heapsnapshot.json`)});
 }
 
@@ -108,19 +93,25 @@ export async function runScript(
     encoding: 'utf8'
   });
 
+  const processDiedController = new AbortController();
   const script = fork(scriptName, { execArgv: ['--expose-gc'] });
-  const messages = on(script, 'message');
+  // Interrupt our awaiting of messages if the process crashed
+  script.once('close', exitCode => {
+    if (exitCode !== 0) {
+      processDiedController.abort(new Error(`process exited with: ${exitCode}`));
+    }
+  });
+
+  const messages = on(script, 'message', { signal: processDiedController.signal });
   const willClose = once(script, 'close');
 
   const starting = await messages.next();
   const ending = await messages.next();
-  const asyncResources = await messages.next();
 
   const startingMemoryUsed = starting.value[0].startingMemoryUsed;
   const endingMemoryUsed = ending.value[0].endingMemoryUsed;
-  const asyncResourcesCount = asyncResources.value[0].resourcesSize;
 
-  // process exit
+  // make sure the process ended
   const [exitCode] = await willClose;
   expect(exitCode).to.equal(0);
 
@@ -134,7 +125,6 @@ export async function runScript(
   return {
     startingMemoryUsed,
     endingMemoryUsed,
-    asyncResourcesCount,
     heap
   };
 }
