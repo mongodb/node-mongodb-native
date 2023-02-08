@@ -9,4 +9,13 @@ ls -la
 
 sudo yum -y install mongosh.rpm
 
-mongosh setup_oidc.js
+cat <<EOF > setup_oidc_mongosh.js
+(function() {
+  const admin = Mongo().getDB("admin");
+  admin.auth("bob", "pwd123");
+  admin.runCommand({createRole: 'test1/readWrite', roles:[{role: 'readWrite', db: "test"}], privileges: []});
+  admin.runCommand({createRole: 'test2/read', roles:[{role: 'read', db: "test"}], privileges: []});
+}());
+EOF
+
+mongosh setup_oidc_mongosh.js
