@@ -30,7 +30,11 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
-/** @public */
+/**
+ * TODO: NODE-5035: Make OIDC properties public.
+ *
+ * @public
+ * */
 export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
