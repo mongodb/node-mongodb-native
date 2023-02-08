@@ -69,6 +69,7 @@ export class TestConfiguration {
     auth?: { username: string; password: string; authSource?: string };
     proxyURIParams?: ProxyParams;
   };
+  serverApi: string;
 
   constructor(uri: string, context: Record<string, any>) {
     const url = new ConnectionString(uri);
@@ -82,6 +83,7 @@ export class TestConfiguration {
     this.isServerless = !!process.env.SERVERLESS;
     this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.buildInfo = context.buildInfo;
+    this.serverApi = context.serverApi;
     this.options = {
       hosts,
       hostAddresses,
@@ -356,7 +358,7 @@ export class TestConfiguration {
   }
 
   // Accessors and methods Client-Side Encryption
-  get mongodbClientEncryption() {
+  get mongodbClientEncryption(): typeof import('mongodb-client-encryption') {
     return this.clientSideEncryption && this.clientSideEncryption.mongodbClientEncryption;
   }
 
