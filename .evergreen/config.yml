@@ -102,6 +102,7 @@ functions:
           - .evergreen/run-oidc-tests.sh
         env:
           AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/tokens/test1
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
   run tests:
     - command: shell.exec
       type: test
