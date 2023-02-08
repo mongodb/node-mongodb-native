@@ -381,6 +381,17 @@ functions:
       params:
         file: src/deps-expansion.yml
 
+  "install aws-credential-providers":
+    - command: shell.exec
+      type: setup
+      params:
+        shell: bash
+        working_dir: "src"
+        script: |
+          ${PREPARE_SHELL}
+          source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+          npm install @aws-sdk/credential-providers
+
   "run atlas tests":
     - command: shell.exec
       type: test
@@ -520,7 +531,12 @@ functions:
               "iam_auth_assume_role_name" : "${iam_auth_assume_role_name}",
               "iam_auth_ec2_instance_account" : "${iam_auth_ec2_instance_account}",
               "iam_auth_ec2_instance_secret_access_key" : "${iam_auth_ec2_instance_secret_access_key}",
-              "iam_auth_ec2_instance_profile" : "${iam_auth_ec2_instance_profile}"
+              "iam_auth_ec2_instance_profile" : "${iam_auth_ec2_instance_profile}",
+              "iam_auth_assume_web_role_name": "${iam_auth_assume_web_role_name}",
+              "iam_web_identity_issuer": "${iam_web_identity_issuer}",
+              "iam_web_identity_rsa_key": "${iam_web_identity_rsa_key}",
+              "iam_web_identity_jwks_uri": "${iam_web_identity_jwks_uri}",
+              "iam_web_identity_token_file": "${iam_web_identity_token_file}"
           }
           EOF
 
@@ -662,6 +678,55 @@ functions:
             export AWS_ACCESS_KEY_ID=$(jq -r '.AccessKeyId' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
             export AWS_SECRET_ACCESS_KEY=$(jq -r '.SecretAccessKey' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
             export AWS_SESSION_TOKEN=$(jq -r '.SessionToken' ${DRIVERS_TOOLS}/.evergreen/auth_aws/creds.json)
+            export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
+          EOF
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          ${PREPARE_SHELL}
+          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
+
+  "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        silent: true
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
+          ${MONGODB_BINARIES}/mongo --verbose aws_e2e_web_identity.js
+          cd -
+          cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
+            export AWS_WEB_IDENTITY_TOKEN_FILE=${iam_web_identity_token_file}
+            export AWS_ROLE_ARN=${iam_auth_assume_web_role_name}
+            export AWS_ROLE_SESSION_NAME='test'
+            export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
+          EOF
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          ${PREPARE_SHELL}
+          ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
+
+  "run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        silent: true
+        script: |
+          cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+          . ./activate_venv.sh
+          ${MONGODB_BINARIES}/mongo --verbose aws_e2e_web_identity.js
+          cd -
+          cat <<'EOF' > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
+            export AWS_WEB_IDENTITY_TOKEN_FILE=${iam_web_identity_token_file}
+            export AWS_ROLE_ARN=${iam_auth_assume_web_role_name}
             export MONGODB_URI="mongodb://localhost:27017/aws?authMechanism=MONGODB-AWS"
           EOF
     - command: shell.exec
