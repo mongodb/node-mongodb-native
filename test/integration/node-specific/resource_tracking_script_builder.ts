@@ -1,9 +1,8 @@
-import { fork } from 'node:child_process';
-import { on, once } from 'node:events';
-import { readFile, unlink, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
-
 import { expect } from 'chai';
+import { fork } from 'child_process';
+import { on, once } from 'events';
+import { readFile, unlink, writeFile } from 'fs/promises';
+import * as path from 'path';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { MongoClient } from '../../../src';
@@ -23,10 +22,10 @@ export const testScriptFactory = (
 ) => `'use strict';
 
 const { MongoClient } = require(${JSON.stringify(path.resolve(__dirname, '../../../lib'))});
-const process = require('node:process');
-const v8 = require('node:v8');
-const util = require('node:util');
-const timers = require('node:timers');
+const process = require('process');
+const v8 = require('v8');
+const util = require('util');
+const timers = require('timers');
 const sleep = util.promisify(timers.setTimeout)
 
 const run = (${func.toString()});
