@@ -57,7 +57,7 @@ describe('Driver Resources', () => {
 
   it('heapsnapshot has 0 MongoClients in memory', async () => {
     const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
-    // lengthOf crashes chai b/c it tries to print out a gig
+    // lengthOf crashes chai b/c it tries to print out a gigantic diff
     // Allow GC to miss a few
     expect(
       clients.length,
