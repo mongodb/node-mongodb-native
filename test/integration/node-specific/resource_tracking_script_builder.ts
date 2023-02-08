@@ -63,6 +63,8 @@ main()
 /**
  * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script
  *
+ * **The provided function is run in an isolated Node.js process**
+ *
  * A user of this function will likely need to familiarize themselves with the surrounding scripting, but briefly:
  * - Every MongoClient you construct should have an asyncResource attached to it like so:
  * ```js
