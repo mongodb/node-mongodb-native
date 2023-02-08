@@ -876,11 +876,11 @@ function cleanupCursor(
 
   cursor[kKilled] = true;
 
-  return executeOperation(
+  executeOperation(
     cursor[kClient],
-    new KillCursorsOperation(cursorId, cursorNs, server, { session }),
-    completeCleanup
-  );
+    new KillCursorsOperation(cursorId, cursorNs, server, { session })
+  ).finally(() => completeCleanup());
+  return;
 }
 
 /** @internal */

@@ -18,6 +18,7 @@ import {
   MongoAPIError,
   MongoChangeStreamError,
   MongoClient,
+  MongoExpiredSessionError,
   MongoServerError,
   ReadPreference,
   ResumeToken
@@ -51,7 +52,12 @@ const pipeline = [
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
 
-describe('Change Streams', function () {
+process.on('unhandledRejection', e => {
+  if (e instanceof MongoExpiredSessionError) {
+    console.error('CAUGHT', e);
+  }
+});
+describe.only('Change Streams', function () {
   let client: MongoClient;
   let collection: Collection;
   let changeStream: ChangeStream;
