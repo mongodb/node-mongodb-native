@@ -21,10 +21,16 @@ describe('Driver Resources', () => {
       if (this.currentTest) this.currentTest.skipReason = 'Need AbortController to run this test';
       this.currentTest?.skip();
     }
+    if (typeof this.configuration.serverApi === 'string') {
+      if (this.currentTest) {
+        this.currentTest.skipReason = 'runScript does not support serverApi settings';
+      }
+      this.currentTest?.skip();
+    }
   });
 
   before('create leak reproduction script', async function () {
-    if (globalThis.AbortController == null) {
+    if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
       return;
     }
     const res = await runScript(
