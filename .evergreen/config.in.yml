@@ -133,7 +133,7 @@ functions:
           ${PREPARE_SHELL}
 
           MONGODB_URI="${MONGODB_URI}" \
-          AWS_WEB_IDENTITY_TOKEN_FILE= "/tmp/tokens/test1" \
+          AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test1" \
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
 
