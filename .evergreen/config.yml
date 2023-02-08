@@ -82,6 +82,7 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           AWS_ACCESS_KEY_ID: ${OIDC_AWS_ACCESS_KEY_ID}
           AWS_SECRET_ACCESS_KEY: ${OIDC_AWS_SECRET_ACCESS_KEY}
+          AWS_ROLE_ARN: ${OIDC_AWS_ROLE_ARN}
           AWS_TOKEN_DIR: /tmp/tokens
   setup oidc roles:
     - command: subprocess.exec
