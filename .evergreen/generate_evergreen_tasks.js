@@ -599,8 +599,6 @@ const oneOffFuncAsTasks = [];
 
 const FLE_PINNED_COMMIT = '77b51c00ab4ff58916dd39f55657e1ecc0af281c'
 
-const FLE_PINNED_COMMIT = '77b51c00ab4ff58916dd39f55657e1ecc0af281c'
-
 for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of [FLE_PINNED_COMMIT, 'master']) {
     oneOffFuncAsTasks.push({
