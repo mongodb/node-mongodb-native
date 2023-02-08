@@ -94,15 +94,19 @@ functions:
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
   run oidc tests aws:
-    - command: subprocess.exec
+    - command: shell.exec
+      type: test
       params:
         working_dir: src
-        binary: bash
-        args:
-          - .evergreen/run-oidc-tests.sh
-        env:
-          AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/tokens/test1
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        timeout_secs: 300
+        shell: bash
+        script: |
+          ${PREPARE_SHELL}
+
+          MONGODB_URI="${MONGODB_URI}" \
+          AWS_WEB_IDENTITY_TOKEN_FILE= "/tmp/tokens/test1" \
+          PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
   run tests:
     - command: shell.exec
       type: test
