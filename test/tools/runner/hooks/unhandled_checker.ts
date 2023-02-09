@@ -8,29 +8,25 @@ const unhandled: {
   exceptions: []
 };
 
-const uncaughtExceptionListener = (error, origin) => {
+const uncaughtExceptionListener: NodeJS.UncaughtExceptionListener = (error, origin) => {
   if (origin === 'uncaughtException') {
     unhandled.exceptions.push(error);
+  } else if (origin === 'unhandledRejection') {
+    unhandled.rejections.push(error);
   }
-};
-
-const uncaughtRejectionListener = error => {
-  unhandled.exceptions.push(error as Error);
 };
 
 function beforeEachUnhandled() {
   unhandled.rejections = [];
   unhandled.exceptions = [];
-  process.addListener('uncaughtException', uncaughtExceptionListener);
-  process.addListener('unhandledRejection', uncaughtRejectionListener);
+  process.addListener('uncaughtExceptionMonitor', uncaughtExceptionListener);
 }
 
 function afterEachUnhandled() {
-  process.removeListener('uncaughtException', uncaughtExceptionListener);
-  process.removeListener('unhandledRejection', uncaughtRejectionListener);
+  process.removeListener('uncaughtExceptionMonitor', uncaughtExceptionListener);
   try {
-    expect(unhandled.rejections).to.have.lengthOf(0);
-    expect(unhandled.exceptions).to.have.lengthOf(0);
+    expect(unhandled).property('rejections').to.have.lengthOf(0);
+    expect(unhandled).property('exceptions').to.have.lengthOf(0);
   } catch (error) {
     this.test.error(error);
   }
