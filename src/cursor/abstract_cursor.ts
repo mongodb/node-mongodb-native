@@ -782,7 +782,12 @@ function cleanupCursor(
     if (needsToEmitClosed) {
       cursor.emit(AbstractCursor.CLOSE);
     }
-    return;
+    cursor.removeAllListeners();
+    if (session.owner === cursor && !session.hasEnded) {
+      session.endSession({ error }).finally(callback);
+      return;
+    }
+    return process.nextTick(callback);
   }
 
   if (error) {
