@@ -8,6 +8,7 @@ const { expect } = require('chai');
 const BSON = require('bson');
 const sinon = require('sinon');
 const { Writable } = require('stream');
+const { once, on } = require('events');
 const { setTimeout } = require('timers');
 const { ReadPreference } = require('../../mongodb');
 const { ServerType } = require('../../mongodb');
@@ -1692,62 +1693,40 @@ describe('Cursor', function () {
     expect(cursor.session).to.not.equal(clonedCursor.session);
   });
 
-  it('destroying a stream stops it', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  it('destroying a stream stops it', async function () {
+    const db = client.db();
+    await db.dropCollection('destroying_a_stream_stops_it').catch(() => null);
+    const collection = await db.createCollection('destroying_a_stream_stops_it');
 
-    test: function (done) {
-      const configuration = this.configuration;
-      client.connect((err, client) => {
-        expect(err).to.not.exist;
-        this.defer(() => client.close());
+    const docs = Array.from({ length: 10 }, (_, i) => ({ b: i + 1 }));
 
-        const db = client.db(configuration.db);
-        db.createCollection('destroying_a_stream_stops_it', (err, collection) => {
-          expect(err).to.not.exist;
+    await collection.insertMany(docs);
 
-          var docs = [];
-          for (var ii = 0; ii < 10; ++ii) docs.push({ b: ii + 1 });
+    const cursor = collection.find();
+    const stream = cursor.stream();
 
-          // insert all docs
-          collection.insert(docs, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
+    expect(cursor).property('closed', false);
 
-            var finished = 0,
-              i = 0;
+    const willClose = once(cursor, 'close');
+    const willEnd = once(stream, 'end');
 
-            const cursor = collection.find();
-            const stream = cursor.stream();
+    const dataEvents = on(stream, 'data');
 
-            test.strictEqual(false, cursor.closed);
-
-            stream.on('data', function () {
-              if (++i === 5) {
-                stream.destroy();
-              }
-            });
-
-            cursor.once('close', testDone);
-            stream.once('error', testDone);
-            stream.once('end', testDone);
-
-            function testDone(err) {
-              ++finished;
-              if (finished === 2) {
-                test.strictEqual(undefined, err);
-                test.strictEqual(5, i);
-                test.strictEqual(2, finished);
-                test.strictEqual(true, cursor.closed);
-                done();
-              }
-            }
-          });
-        });
-      });
+    for (let i = 0; i < 5; i++) {
+      let {
+        value: [doc]
+      } = await dataEvents.next();
+      expect(doc).property('b', i + 1);
     }
+
+    // After 5 successful data events, destroy stream
+    stream.destroy();
+
+    // We should get an end event on the stream and a close event on the cursor
+    // We should **not** get an 'error' event,
+    // the following will throw if either stream or cursor emitted an 'error' event
+    await willEnd;
+    await willClose;
   });
 
   // NOTE: skipped for use of topology manager
