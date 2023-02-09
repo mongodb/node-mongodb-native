@@ -37,8 +37,8 @@ const OPERATING_SYSTEMS = [
   ...osConfig
 }));
 
-// TODO: NODE-3060: enable skipped tests on windows
-const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle']);
+// TODO: NODE-3060: enable skipped tests on windows except oidc (not supported)
+const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle', 'oidc']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];

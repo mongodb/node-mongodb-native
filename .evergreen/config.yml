@@ -3148,7 +3148,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
-      - test-auth-oidc
       - test-socks5
       - test-socks5-tls
       - test-zstd-compression
@@ -3190,7 +3189,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
-      - test-auth-oidc
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
@@ -3230,7 +3228,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-data-lake
-      - test-auth-oidc
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
