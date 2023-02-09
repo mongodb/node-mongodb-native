@@ -4,9 +4,8 @@ set -o xtrace   # Write all commands first to stderr
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
-echo $MONGODB_URI
-
-MONGODB_URI_SINGLE="${MONGODB_URI}&authMechanism=MONGODB-OIDC"
+MONGODB_URI=${MONGODB_URI:-"mongodb://127.0.0.1:27017"}
+MONGODB_URI_SINGLE="${MONGODB_URI}/?authMechanism=MONGODB-OIDC"
 
 echo $MONGODB_URI_SINGLE
 
