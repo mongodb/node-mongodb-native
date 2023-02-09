@@ -39,6 +39,8 @@ function afterEachUnhandled() {
   } catch (error) {
     this.test.error(error);
   }
+  unhandled.rejections = [];
+  unhandled.exceptions = [];
 }
 
 module.exports = { mochaHooks: { beforeEach: beforeEachUnhandled, afterEach: afterEachUnhandled } };
