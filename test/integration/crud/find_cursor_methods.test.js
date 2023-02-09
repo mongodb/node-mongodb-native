@@ -109,20 +109,27 @@ describe('Find Cursor', function () {
   });
 
   context('#close', function () {
-    it('should send a killCursors command when closed before completely iterated', function (done) {
+    beforeEach(async function () {
+      await client
+        .db()
+        .collection('abstract_cursor')
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }]);
+    });
+    afterEach(async function () {
+      await client.db().collection('abstract_cursor').deleteMany();
+    });
+
+    it('should send a killCursors command when closed before completely iterated', async function () {
       const commands = [];
       client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
       const coll = client.db().collection('abstract_cursor');
       const cursor = coll.find({}, { batchSize: 2 });
-      cursor.next(err => {
-        expect(err).to.not.exist;
-        cursor.close(err => {
-          expect(err).to.not.exist;
-          expect(commands).to.have.length(1);
-          done();
-        });
-      });
+
+      const doc = await cursor.next();
+      expect(doc).property('a', 1);
+      await cursor.close();
+      expect(commands).to.have.length(1);
     });
 
     it('should not send a killCursors command when closed after completely iterated', function (done) {

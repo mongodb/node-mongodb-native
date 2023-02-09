@@ -412,8 +412,8 @@ export abstract class AbstractCursor<
 
   async close(): Promise<void> {
     const needsToEmitClosed = !this[kClosed];
-    this[kClosed] = true;
     await cleanupCursorAsync(this, { needsToEmitClosed });
+    this[kClosed] = true;
   }
 
   /**
@@ -780,6 +780,8 @@ function cleanupCursor(
 
   if (cursor[kClosed]) {
     if (needsToEmitClosed) {
+      cursor[kClosed] = true;
+      cursor[kId] = Long.ZERO;
       cursor.emit(AbstractCursor.CLOSE);
     }
     cursor.removeAllListeners();
