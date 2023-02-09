@@ -744,6 +744,10 @@ export class ChangeStream<
 
   /** Close the Change Stream */
   async close(): Promise<void> {
+    if (this[kClosed]) {
+      return;
+    }
+
     this[kClosed] = true;
 
     const cursor = this.cursor;

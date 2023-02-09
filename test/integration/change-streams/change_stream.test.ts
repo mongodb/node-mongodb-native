@@ -2699,4 +2699,47 @@ describe('ChangeStream resumability', function () {
       expect(changeStream.cursor.maxWireVersion).equal(maxWireVersion);
     }
   );
+
+  it(
+    'should not have the bug from NODE-5052',
+    { requires: { topology: '!single' } },
+    async function () {
+      if (globalThis.AbortSignal?.timeout == null) {
+        this.skipReason = 'test requires AbortSignal.timeout';
+        this.skip();
+      }
+
+      const unhandledRejections: AsyncIterableIterator<[reason: Error, promise: Promise<any>]> = on(
+        process,
+        'unhandledRejection',
+        { signal: AbortSignal.timeout(2000) }
+      );
+
+      changeStream = collection.watch();
+
+      const shouldErrorLoop = (async function () {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          for await (const _change of changeStream) {
+            // ignore
+          }
+          return null;
+        } catch (error) {
+          return error;
+        }
+      })();
+
+      await sleep(200);
+      const closeResult = changeStream.close().catch(error => error);
+      expect(closeResult).to.not.be.instanceOf(Error);
+
+      const result = await shouldErrorLoop;
+      expect(result).to.be.instanceOf(MongoAPIError);
+      expect(result.message).to.match(/ChangeStream is closed/i);
+
+      const noUnhandledPromiseRejections = await unhandledRejections.next().catch(error => error);
+      expect(noUnhandledPromiseRejections).to.be.instanceOf(Error);
+      expect(noUnhandledPromiseRejections).to.have.nested.property('cause.name', 'TimeoutError');
+    }
+  );
 });
