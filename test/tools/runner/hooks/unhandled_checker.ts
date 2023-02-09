@@ -28,8 +28,12 @@ function beforeEachUnhandled() {
 function afterEachUnhandled() {
   process.removeListener('uncaughtException', uncaughtExceptionListener);
   process.removeListener('unhandledRejection', uncaughtRejectionListener);
-  expect(unhandled.rejections).to.have.lengthOf(0);
-  expect(unhandled.exceptions).to.have.lengthOf(0);
+  try {
+    expect(unhandled.rejections).to.have.lengthOf(0);
+    expect(unhandled.exceptions).to.have.lengthOf(0);
+  } catch (error) {
+    this.test.error(error);
+  }
 }
 
 module.exports = { mochaHooks: { beforeEach: beforeEachUnhandled, afterEach: afterEachUnhandled } };
