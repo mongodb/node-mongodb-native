@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import * as os from 'os';
 import { URL } from 'url';
+import { inspect } from 'util';
 
 import { Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
@@ -1484,4 +1485,9 @@ export function commandSupportsReadConcern(command: Document, options?: Document
   }
 
   return false;
+}
+
+export function debugLog(args) {
+  const timestamp = now();
+  console.error(inspect({ timestamp, ...args }, { depth: Infinity, numericSeparator: true }));
 }

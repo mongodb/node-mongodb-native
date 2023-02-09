@@ -20,6 +20,7 @@ import {
   Callback,
   CallbackWithType,
   ClientMetadata,
+  debugLog,
   HostAddress,
   makeClientMetadata,
   ns
@@ -58,6 +59,7 @@ const FAKE_MONGODB_SERVICE_ID =
 export type Stream = Socket | TLSSocket;
 
 export function connect(options: ConnectionOptions, callback: Callback<Connection>): void {
+  debugLog({ message: 'connect called', host: options.hostAddress.toString() });
   makeConnection({ ...options, existingSocket: undefined }, (err, socket) => {
     if (err || !socket) {
       return callback(err);
@@ -135,12 +137,15 @@ function performInitialHandshake(
       handshakeOptions.socketTimeoutMS = options.connectTimeoutMS;
     }
 
+    debugLog({ message: 'handshake started', host: options.hostAddress.toString() });
     const start = new Date().getTime();
     conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
       if (err) {
         callback(err);
         return;
       }
+
+      debugLog({ message: 'handshake finished', host: options.hostAddress.toString() });
 
       if (response?.ok === 0) {
         callback(new MongoServerError(response));
@@ -414,6 +419,7 @@ function makeConnection(
   }
 
   function connectHandler() {
+    debugLog({ message: 'socket connect finished', host: options.hostAddress.toString() });
     SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
     if (cancellationHandler && options.cancellationToken) {
       options.cancellationToken.removeListener('cancel', cancellationHandler);

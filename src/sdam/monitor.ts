@@ -4,10 +4,12 @@ import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { AnyError, MongoNetworkError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { Callback, InterruptibleAsyncInterval } from '../utils';
 import {
   calculateDurationInMs,
+  Callback,
+  debugLog,
   EventEmitterWithState,
+  InterruptibleAsyncInterval,
   makeInterruptibleAsyncInterval,
   makeStateMachine,
   now,
@@ -141,6 +143,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       return;
     }
 
+    debugLog({ message: `connecting monitor`, host: this.address });
     // start
     const heartbeatFrequencyMS = this.options.heartbeatFrequencyMS;
     const minHeartbeatFrequencyMS = this.options.minHeartbeatFrequencyMS;

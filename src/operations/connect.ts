@@ -3,7 +3,7 @@ import { MONGO_CLIENT_EVENTS } from '../constants';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import type { MongoClient, MongoOptions } from '../mongo_client';
 import { Topology } from '../sdam/topology';
-import type { Callback } from '../utils';
+import { Callback, debugLog } from '../utils';
 
 export function connect(
   mongoClient: MongoClient,
@@ -39,11 +39,14 @@ export function connect(
   };
 
   if (typeof options.srvHost === 'string') {
+    debugLog({ message: 'beginning srv lookup' });
     return resolveSRVRecord(options, (err, hosts) => {
       if (err || !hosts) return callback(err);
       for (const [index, host] of hosts.entries()) {
         options.hosts[index] = host;
       }
+
+      debugLog({ message: 'srv lookup completed' });
 
       return createTopology(mongoClient, options, connectCallback);
     });

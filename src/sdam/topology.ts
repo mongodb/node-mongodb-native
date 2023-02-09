@@ -40,6 +40,7 @@ import type { Transaction } from '../transactions';
 import {
   Callback,
   ClientMetadata,
+  debugLog,
   eachAsync,
   emitWarning,
   EventEmitterWithState,
@@ -432,6 +433,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         this.s.description
       )
     );
+
+    debugLog({ message: 'connecting servers' });
 
     // connect all known servers, then attempt server selection to connect
     const serverDescriptions = Array.from(this.s.description.servers.values());
