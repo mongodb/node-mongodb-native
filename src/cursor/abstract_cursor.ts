@@ -804,6 +804,7 @@ function cleanupCursor(
       cursor[kId] = Long.ZERO;
       cursor.emit(AbstractCursor.CLOSE);
     }
+    cursor.removeAllListeners();
 
     if (session) {
       if (session.owner === cursor) {
@@ -826,6 +827,7 @@ function cleanupCursor(
       if (session.owner === cursor) {
         session.endSession({ error }).finally(() => {
           cursor.emit(AbstractCursor.CLOSE);
+          cursor.removeAllListeners();
           callback();
         });
         return;
@@ -837,6 +839,7 @@ function cleanupCursor(
     }
 
     cursor.emit(AbstractCursor.CLOSE);
+    cursor.removeAllListeners();
     return callback();
   }
 
