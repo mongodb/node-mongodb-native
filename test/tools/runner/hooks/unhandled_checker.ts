@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { writeSync } from 'fs';
 
 const unhandled: {
   rejections: Error[];
@@ -13,6 +14,14 @@ const uncaughtExceptionListener: NodeJS.UncaughtExceptionListener = (error, orig
     unhandled.exceptions.push(error);
   } else if (origin === 'unhandledRejection') {
     unhandled.rejections.push(error);
+  } else {
+    writeSync(
+      2,
+      Buffer.from(
+        `\n\nWARNING!! uncaughtExceptionMonitor reporting error from unknown origin: ${origin}\n\n`,
+        'utf8'
+      )
+    );
   }
 };
 
