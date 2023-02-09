@@ -100,7 +100,7 @@ const skipBrokenAuthTestBeforeEachHook = function ({ skippedTests } = { skippedT
 };
 
 const testConfigBeforeHook = async function () {
-  // TODO: NODE-5035: Implement OIDC support. Creating the MongoClient will fail
+  // TODO(NODE-5035): Implement OIDC support. Creating the MongoClient will fail
   // with "MongoInvalidArgumentError: AuthMechanism 'MONGODB-OIDC' not supported"
   // as is expected until that ticket goes in. Then this condition gets removed.
   if (MONGODB_URI && MONGODB_URI.indexOf('MONGODB-OIDC') >= 0) {
