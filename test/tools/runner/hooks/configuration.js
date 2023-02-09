@@ -103,7 +103,7 @@ const testConfigBeforeHook = async function () {
   // TODO: NODE-5035: Implement OIDC support. Creating the MongoClient will fail
   // with "MongoInvalidArgumentError: AuthMechanism 'MONGODB-OIDC' not supported"
   // as is expected until that ticket goes in. Then this condition gets removed.
-  if (process.env.AWS_WEB_IDENTITY_TOKEN_FILE) {
+  if (MONGODB_URI && MONGODB_URI.indexOf('MONGODB-OIDC') >= 0) {
     this.configuration = new TestConfiguration(MONGODB_URI, {});
     return;
   }
