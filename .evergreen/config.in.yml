@@ -99,15 +99,23 @@ functions:
     - command: ec2.assume_role
       params:
         role_arn: ${OIDC_AWS_ROLE_ARN}
-    - command: subprocess.exec
+    - command: shell.exec
+      type: test
       params:
-        working_dir: src
-        binary: bash
-        args:
-          - .evergreen/bootstrap-oidc.sh
-        env:
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          AWS_TOKEN_DIR: /tmp/tokens
+        working_dir: "src"
+        shell: bash
+        script: |
+          ${PREPARE_SHELL}
+          cd ${DRIVERS_TOOLS}/.evergreen/auth_oidc
+
+          export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+          export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+          export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+          export AWS_TOKEN_DIR=/tmp/tokens
+
+          . ./activate_venv.sh
+          python oidc_write_orchestration.py
+          python oidc_get_tokens.py
 
   "setup oidc roles":
     - command: subprocess.exec
