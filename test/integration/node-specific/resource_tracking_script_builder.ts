@@ -1,8 +1,9 @@
+import { fork } from 'node:child_process';
+import { on, once } from 'node:events';
+import { readFile, unlink, writeFile } from 'node:fs/promises';
+import * as path from 'node:path';
+
 import { expect } from 'chai';
-import { fork } from 'child_process';
-import { on, once } from 'events';
-import { readFile, unlink, writeFile } from 'fs/promises';
-import * as path from 'path';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { MongoClient } from '../../../src';
@@ -14,50 +15,29 @@ export type ResourceTestFunction = (options: {
   iteration: number;
 }) => Promise<void>;
 
-export const testScriptFactory = (
+const RESOURCE_SCRIPT_PATH = path.resolve(__dirname, '../../tools/fixtures/resource_script.in.js');
+const DRIVER_SRC_PATH = JSON.stringify(path.resolve(__dirname, '../../../lib'));
+
+export async function testScriptFactory(
   name: string,
   uri: string,
   iterations: number,
   func: ResourceTestFunction
-) => `'use strict';
+) {
+  let resourceScript = await readFile(RESOURCE_SCRIPT_PATH, { encoding: 'utf8' });
 
-const { MongoClient } = require(${JSON.stringify(path.resolve(__dirname, '../../../lib'))});
-const process = require('process');
-const v8 = require('v8');
-const util = require('util');
-const timers = require('timers');
-const sleep = util.promisify(timers.setTimeout)
-
-const run = (${func.toString()});
-
-const MB = (2 ** 10) ** 2;
-async function main() {
-  const startingMemoryUsed = process.memoryUsage().heapUsed / MB;
-  process.send({ startingMemoryUsed });
-
-  for (let iteration = 0; iteration < ${iterations}; iteration++) {
-    await run({ MongoClient, uri: ${JSON.stringify(uri)}, iteration });
-    global.gc();
+  if (uri.includes('localhost')) {
+    uri = uri.split('localhost').join('127.0.0.1');
   }
 
-  global.gc();
-  // Sleep b/c maybe gc will run
-  await sleep(100);
-  global.gc();
+  resourceScript = resourceScript.replace('DRIVER_SOURCE_PATH', DRIVER_SRC_PATH);
+  resourceScript = resourceScript.replace('FUNCTION_STRING', `(${func.toString()})`);
+  resourceScript = resourceScript.replace('NAME_STRING', JSON.stringify(name));
+  resourceScript = resourceScript.replace('URI_STRING', JSON.stringify(uri));
+  resourceScript = resourceScript.replace('ITERATIONS_STRING', `${iterations}`);
 
-  const endingMemoryUsed = process.memoryUsage().heapUsed / MB;
-  process.send({ endingMemoryUsed });
-  v8.writeHeapSnapshot(${JSON.stringify(`${name}.heapsnapshot.json`)});
+  return resourceScript;
 }
-
-main()
-  .then(result => {
-    process.exit(0);
-  })
-  .catch(error => {
-    process.exit(1);
-  });
-`;
 
 /**
  * A helper for running arbitrary MongoDB Driver scripting code in a resource information collecting script
@@ -90,9 +70,8 @@ export async function runScript(
   const scriptName = `${name}.cjs`;
   const heapsnapshotFile = `${name}.heapsnapshot.json`;
 
-  await writeFile(scriptName, testScriptFactory(name, config.url(), iterations, func), {
-    encoding: 'utf8'
-  });
+  const scriptContent = await testScriptFactory(name, config.url(), iterations, func);
+  await writeFile(scriptName, scriptContent, { encoding: 'utf8' });
 
   const processDiedController = new AbortController();
   const script = fork(scriptName, { execArgv: ['--expose-gc'] });
@@ -114,12 +93,14 @@ export async function runScript(
 
   // make sure the process ended
   const [exitCode] = await willClose;
-  expect(exitCode).to.equal(0);
+  expect(exitCode, 'process should have exited with zero').to.equal(0);
 
   const heap = await readFile(heapsnapshotFile, { encoding: 'utf8' }).then(c =>
     parseSnapshot(JSON.parse(c))
   );
 
+  // If any of the above throws we won't reach these unlinks that clean up the created files.
+  // This is intentional so that when debugging the file will still be present to check it for errors
   await unlink(scriptName);
   await unlink(heapsnapshotFile);
 
