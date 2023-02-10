@@ -2,12 +2,13 @@ import { expect } from 'chai';
 import { fork } from 'child_process';
 import { on, once } from 'events';
 import { promises } from 'fs';
-const { readFile, unlink, writeFile } = promises;
 import * as path from 'path';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { MongoClient } from '../../../src';
 import { TestConfiguration } from '../../tools/runner/config';
+
+const { readFile, unlink, writeFile } = promises;
 
 export type ResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;
