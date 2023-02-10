@@ -87,54 +87,60 @@ describe('CRUD API', function () {
         .sort({ a: 1 });
     };
 
-    describe('#count(), () => {
+    describe('#count()', () => {
       it('returns the number of documents', async () => {
-      const cursor = makeCursor();
-      const res = await cursor.count();
-      expect(res).to.equal(2);
+        const cursor = makeCursor();
+        const res = await cursor.count();
+        expect(res).to.equal(2);
+      });
     });
 
     describe('#forEach()', () => {
       it('iterates all the documents', async () => {
-      const cursor = makeCursor();
-      let count = 0;
-      await cursor.forEach(() => {
-        count += 1;
+        const cursor = makeCursor();
+        let count = 0;
+        await cursor.forEach(() => {
+          count += 1;
+        });
+        expect(count).to.equal(2);
       });
-      expect(count).to.equal(2);
     });
 
     describe('#toArray()', () => {
       it('returns an array with all documents', async () => {
-      const cursor = makeCursor();
-      const res = await cursor.toArray();
-      expect(res).to.have.lengthOf(2);
+        const cursor = makeCursor();
+        const res = await cursor.toArray();
+        expect(res).to.have.lengthOf(2);
+      });
     });
 
     describe('#next()', () => {
       it('is callable without blocking', async () => {
-      const cursor = makeCursor();
-      const doc0 = await cursor.next();
-      expect(doc0).to.exist;
-      const doc1 = await cursor.next();
-      expect(doc1).to.exist;
-      const doc2 = await cursor.next();
-      expect(doc2).to.not.exist;
+        const cursor = makeCursor();
+        const doc0 = await cursor.next();
+        expect(doc0).to.exist;
+        const doc1 = await cursor.next();
+        expect(doc1).to.exist;
+        const doc2 = await cursor.next();
+        expect(doc2).to.not.exist;
+      });
     });
 
     describe('#stream()', () => {
       it('creates a node stream that emits data events', async () => {
-      const count = 0;
-      const cursor = makeCursor();
-      const stream = cursor.stream();
-      on(stream, 'data'),
+        const count = 0;
+        const cursor = makeCursor();
+        const stream = cursor.stream();
+        on(stream, 'data');
         cursor.once('close', function () {
           expect(count).to.equal(2);
         });
+      });
     });
+  });
 
-    describe('#explain()', () => {
-      it('returns an explain document', async () => {
+  describe('#explain()', () => {
+    it('returns an explain document', async () => {
       const cursor = makeCursor();
       const result = await cursor.explain();
       expect(result).to.exist;

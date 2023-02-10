@@ -121,16 +121,17 @@ describe('Find Cursor', function () {
 
     context('when closed before completely iterated', function () {
       it('sends a killCursors command', async function () {
-      const commands = [];
-      client.on('commandStarted', filterForCommands(['killCursors'], commands));
+        const commands = [];
+        client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
-      const coll = client.db().collection('abstract_cursor');
-      const cursor = coll.find({}, { batchSize: 2 });
+        const coll = client.db().collection('abstract_cursor');
+        const cursor = coll.find({}, { batchSize: 2 });
 
-      const doc = await cursor.next();
-      expect(doc).property('a', 1);
-      await cursor.close();
-      expect(commands).to.have.length(1);
+        const doc = await cursor.next();
+        expect(doc).property('a', 1);
+        await cursor.close();
+        expect(commands).to.have.length(1);
+      });
     });
 
     it('should not send a killCursors command when closed after completely iterated', function (done) {
