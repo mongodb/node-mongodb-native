@@ -29,7 +29,7 @@ describe('Driver Resources', () => {
     }
   });
 
-  describe('MongoClient.close() should not leak resources', () => {
+  context('on MongoClient.close()', () => {
     before('create leak reproduction script', async function () {
       if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
         return;
@@ -62,7 +62,7 @@ describe('Driver Resources', () => {
     });
 
     describe('ending memory usage', () => {
-      it(`must within ${MB_PERMITTED_OFFSET}MB of starting amount`, async () => {
+      it(`is within ${MB_PERMITTED_OFFSET}MB of starting amount`, async () => {
         // Why check the lower bound? No reason, but it would be very surprising if we managed to free MB_PERMITTED_OFFSET MB of memory
         // I expect us to **never** be below the lower bound, but I'd want to know if it happened
         expect(
@@ -75,8 +75,8 @@ describe('Driver Resources', () => {
       });
     });
 
-    describe('heap snapshot', () => {
-      it('heapsnapshot has 0 MongoClients in memory', async () => {
+    describe('ending heap snapshot', () => {
+      it('has 0 MongoClients in memory', async () => {
         const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
         // lengthOf crashes chai b/c it tries to print out a gigantic diff
         expect(
