@@ -1,12 +1,13 @@
 import { expect } from 'chai';
-import { writeSync } from 'fs';
 
 const unhandled: {
   rejections: Error[];
   exceptions: Error[];
+  unknown: unknown[];
 } = {
   rejections: [],
-  exceptions: []
+  exceptions: [],
+  unknown: []
 };
 
 const uncaughtExceptionListener: NodeJS.UncaughtExceptionListener = (error, origin) => {
@@ -15,19 +16,14 @@ const uncaughtExceptionListener: NodeJS.UncaughtExceptionListener = (error, orig
   } else if (origin === 'unhandledRejection') {
     unhandled.rejections.push(error);
   } else {
-    writeSync(
-      2,
-      Buffer.from(
-        `\n\nWARNING!! uncaughtExceptionMonitor reporting error from unknown origin: ${origin}\n\n`,
-        'utf8'
-      )
-    );
+    unhandled.unknown.push(error);
   }
 };
 
 function beforeEachUnhandled() {
   unhandled.rejections = [];
   unhandled.exceptions = [];
+  unhandled.unknown = [];
   process.addListener('uncaughtExceptionMonitor', uncaughtExceptionListener);
 }
 
@@ -36,11 +32,13 @@ function afterEachUnhandled() {
   try {
     expect(unhandled).property('rejections').to.have.lengthOf(0);
     expect(unhandled).property('exceptions').to.have.lengthOf(0);
+    expect(unhandled).property('unknown').to.have.lengthOf(0);
   } catch (error) {
     this.test.error(error);
   }
   unhandled.rejections = [];
   unhandled.exceptions = [];
+  unhandled.unknown = [];
 }
 
 module.exports = { mochaHooks: { beforeEach: beforeEachUnhandled, afterEach: afterEachUnhandled } };
