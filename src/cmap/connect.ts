@@ -96,7 +96,7 @@ function performInitialHandshake(
 ) {
   const callback: Callback<Document> = function (err, ret) {
     if (err && conn) {
-      conn.destroy();
+      conn.destroy({ force: false });
     }
     _callback(err, ret);
   };

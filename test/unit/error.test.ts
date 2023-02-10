@@ -381,7 +381,7 @@ describe('MongoErrors', () => {
 
       makeAndConnectReplSet((err, topology) => {
         // cleanup the server before calling done
-        const cleanup = err => topology.close(err2 => done(err || err2));
+        const cleanup = err => topology.close({}, err2 => done(err || err2));
 
         if (err) {
           return cleanup(err);

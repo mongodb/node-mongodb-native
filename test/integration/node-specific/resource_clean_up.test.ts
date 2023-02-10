@@ -11,7 +11,7 @@ import { runScript } from './resource_tracking_script_builder';
  */
 const MB_PERMITTED_OFFSET = 5;
 
-describe('Driver Resources', () => {
+describe.only('Driver Resources', () => {
   let startingMemoryUsed;
   let endingMemoryUsed;
   let heap;
