@@ -838,7 +838,7 @@ function cleanupCursor(
     : executeOperation(
         cursor[kClient],
         new KillCursorsOperation(cursorId, cursorNs, server, { session })
-      );
+      ).catch(() => null);
 
   maybeKilledCursor.finally(completeCleanup);
   return;
