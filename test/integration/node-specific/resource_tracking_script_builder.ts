@@ -97,7 +97,7 @@ export async function runScript(
 
   // If any of the above throws we won't reach these unlinks that clean up the created files.
   // This is intentional so that when debugging the file will still be present to check it for errors
-  // await unlink(scriptName);
+  await unlink(scriptName);
   await unlink(heapsnapshotFile);
 
   return {
