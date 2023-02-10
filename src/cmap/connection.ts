@@ -130,10 +130,10 @@ export interface ConnectionOptions
   metadata: ClientMetadata;
 }
 
-/** @internal */
+/** @public */
 export interface DestroyOptions {
   /** Force the destruction. */
-  force?: boolean;
+  force: boolean;
 }
 
 /** @public */
@@ -154,8 +154,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   address: string;
   socketTimeoutMS: number;
   monitorCommands: boolean;
+  /** Indicates that the connection (including underlying TCP socket) has been closed. */
   closed: boolean;
-  destroyed: boolean;
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
@@ -204,7 +204,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
     this.closed = false;
-    this.destroyed = false;
     this[kHello] = null;
     this[kClusterTime] = null;
 
@@ -297,10 +296,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (this.closed) {
       return;
     }
-
-    this[kStream].destroy(error);
-
-    this.closed = true;
+    this.destroy({ force: false });
 
     for (const op of this[kQueue].values()) {
       op.cb(error);
@@ -314,8 +310,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (this.closed) {
       return;
     }
-
-    this.closed = true;
+    this.destroy({ force: false });
 
     const message = `connection ${this.id} to ${this.address} closed`;
     for (const op of this[kQueue].values()) {
@@ -332,9 +327,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     this[kDelayedTimeoutId] = setTimeout(() => {
-      this[kStream].destroy();
-
-      this.closed = true;
+      this.destroy({ force: false });
 
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
@@ -443,41 +436,27 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback(undefined, message.documents[0]);
   }
 
-  destroy(options?: DestroyOptions, callback?: Callback): void {
-    if (typeof options === 'function') {
-      callback = options;
-      options = { force: false };
-    }
-
+  destroy(options: DestroyOptions, callback?: Callback): void {
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
 
-    options = Object.assign({ force: false }, options);
-    if (this[kStream] == null || this.destroyed) {
-      this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
-      }
-
-      return;
-    }
+    this[kMessageStream].destroy();
+    this.closed = true;
 
     if (options.force) {
       this[kStream].destroy();
-      this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
+      if (callback) {
+        return process.nextTick(callback);
       }
-
-      return;
     }
 
-    this[kStream].end(() => {
-      this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
+    if (!this[kStream].writableEnded) {
+      this[kStream].end(callback);
+    } else {
+      if (callback) {
+        return process.nextTick(callback);
       }
-    });
+    }
   }
 
   command(
