@@ -412,8 +412,8 @@ export abstract class AbstractCursor<
 
   async close(): Promise<void> {
     const needsToEmitClosed = !this[kClosed];
-    await cleanupCursorAsync(this, { needsToEmitClosed });
     this[kClosed] = true;
+    await cleanupCursorAsync(this, { needsToEmitClosed });
   }
 
   /**
@@ -778,35 +778,6 @@ function cleanupCursor(
   const error = options?.error;
   const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
 
-  const cleanupListeners = () => {
-    if (needsToEmitClosed) {
-      cursor[kClosed] = true;
-      cursor[kId] = Long.ZERO;
-      cursor.emit(AbstractCursor.CLOSE);
-    }
-    cursor.removeAllListeners();
-  };
-
-  const cleanupSession = () => {
-    if (session?.owner === cursor && !session?.hasEnded) {
-      session.endSession({ error }).finally(callback);
-      return;
-    }
-    if (!session?.inTransaction()) {
-      maybeClearPinnedConnection(session, { error });
-    }
-    process.nextTick(callback);
-  };
-
-  const completeCleanup = () => {
-    cleanupListeners();
-    return cleanupSession();
-  };
-
-  if (cursor[kClosed]) {
-    return completeCleanup();
-  }
-
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {
       return completeCleanup();
@@ -814,7 +785,45 @@ function cleanupCursor(
   }
 
   if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
-    return completeCleanup();
+    if (needsToEmitClosed) {
+      cursor[kClosed] = true;
+      cursor[kId] = Long.ZERO;
+      cursor.emit(AbstractCursor.CLOSE);
+    }
+
+    if (session) {
+      if (session.owner === cursor) {
+        session.endSession({ error }).finally(() => {
+          callback();
+        });
+        return;
+      }
+
+      if (!session.inTransaction()) {
+        maybeClearPinnedConnection(session, { error });
+      }
+    }
+
+    return callback();
+  }
+
+  function completeCleanup() {
+    if (session) {
+      if (session.owner === cursor) {
+        session.endSession({ error }).finally(() => {
+          cursor.emit(AbstractCursor.CLOSE);
+          callback();
+        });
+        return;
+      }
+
+      if (!session.inTransaction()) {
+        maybeClearPinnedConnection(session, { error });
+      }
+    }
+
+    cursor.emit(AbstractCursor.CLOSE);
+    return callback();
   }
 
   cursor[kKilled] = true;
@@ -822,7 +831,9 @@ function cleanupCursor(
   executeOperation(
     cursor[kClient],
     new KillCursorsOperation(cursorId, cursorNs, server, { session })
-  ).finally(completeCleanup);
+  ).finally(() => {
+    completeCleanup();
+  });
   return;
 }
 
